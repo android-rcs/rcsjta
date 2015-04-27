@@ -26,7 +26,6 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
@@ -41,7 +40,6 @@ import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.service.api.ExceptionUtil;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.video.IVideoPlayer;
@@ -62,8 +60,7 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
     /**
      * The logger
      */
-    private static final Logger sLogger = Logger.getLogger(OriginatingVideoStreamingSession.class
-            .getSimpleName());
+    private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
 
     /**
      * Constructor
@@ -93,8 +90,8 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
      */
     public void run() {
         try {
-            if (sLogger.isActivated()) {
-                sLogger.info("Initiate a new live video sharing session as originating");
+            if (mLogger.isActivated()) {
+                mLogger.info("Initiate a new live video sharing session as originating");
             }
 
             SipDialogPath dialogPath = getDialogPath();
@@ -109,8 +106,8 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
             dialogPath.setLocalContent(sdp);
 
             // Create an INVITE request
-            if (sLogger.isActivated()) {
-                sLogger.info("Send INVITE");
+            if (mLogger.isActivated()) {
+                mLogger.info("Send INVITE");
             }
             SipRequest invite = SipMessageFactory.createInvite(dialogPath,
                     RichcallService.FEATURE_TAGS_VIDEO_SHARE, sdp);
@@ -124,16 +121,20 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
             // Send INVITE request
             sendInvite(invite);
         } catch (SipException e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            mLogger.error("Failed to send invite!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         } catch (InvalidArgumentException e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            mLogger.error("Failed to send invite!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         } catch (RemoteException e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            mLogger.error("Failed initiate a new live video sharing session as originating!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         } catch (RuntimeException e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            /**
+             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
+             * eventually bring the whole system down, which is not intended.
+             */
+            mLogger.error("Failed initiate a new live video sharing session as originating!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         }
     }
@@ -161,8 +162,8 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
                     player.getSupportedCodecs(), proposedCodecs);
 
             if (selectedVideoCodec == null) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Proposed codecs are not supported");
+                if (mLogger.isActivated()) {
+                    mLogger.debug("Proposed codecs are not supported");
                 }
 
                 closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
@@ -207,8 +208,8 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
 
     @Override
     public void handle180Ringing(SipResponse response) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("handle180Ringing");
+        if (mLogger.isActivated()) {
+            mLogger.debug("handle180Ringing");
         }
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {

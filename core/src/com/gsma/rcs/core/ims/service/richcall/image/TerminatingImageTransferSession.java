@@ -29,6 +29,7 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpConstants;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
@@ -36,6 +37,7 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
+import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -72,8 +74,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
     /**
      * The logger
      */
-    private static final Logger logger = Logger.getLogger(TerminatingImageTransferSession.class
-            .getName());
+    private final Logger mLogger = Logger.getLogger(getClass().getName());
 
     /**
      * Constructor
@@ -100,16 +101,16 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
      */
     public void run() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Initiate a new sharing session as terminating");
+            if (mLogger.isActivated()) {
+                mLogger.info("Initiate a new sharing session as terminating");
             }
 
             send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
             // Check if the MIME type is supported
             if (getContent() == null) {
-                if (logger.isActivated()) {
-                    logger.debug("MIME type is not supported");
+                if (mLogger.isActivated()) {
+                    mLogger.debug("MIME type is not supported");
                 }
 
                 // Send a 415 Unsupported media type response
@@ -132,8 +133,8 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
             InvitationStatus answer = waitInvitationAnswer();
             switch (answer) {
                 case INVITATION_REJECTED:
-                    if (logger.isActivated()) {
-                        logger.debug("Session has been rejected by user");
+                    if (mLogger.isActivated()) {
+                        mLogger.debug("Session has been rejected by user");
                     }
 
                     removeSession();
@@ -145,8 +146,8 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                     return;
 
                 case INVITATION_TIMEOUT:
-                    if (logger.isActivated()) {
-                        logger.debug("Session has been rejected on timeout");
+                    if (mLogger.isActivated()) {
+                        mLogger.debug("Session has been rejected on timeout");
                     }
 
                     // Ringing period timeout
@@ -161,15 +162,15 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                     return;
 
                 case INVITATION_REJECTED_BY_SYSTEM:
-                    if (logger.isActivated()) {
-                        logger.debug("Session has been aborted by system");
+                    if (mLogger.isActivated()) {
+                        mLogger.debug("Session has been aborted by system");
                     }
                     removeSession();
                     return;
 
                 case INVITATION_CANCELED:
-                    if (logger.isActivated()) {
-                        logger.debug("Session has been rejected by remote");
+                    if (mLogger.isActivated()) {
+                        mLogger.debug("Session has been rejected by remote");
                     }
 
                     removeSession();
@@ -189,15 +190,15 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                     break;
 
                 case INVITATION_DELETED:
-                    if (logger.isActivated()) {
-                        logger.debug("Session has been deleted");
+                    if (mLogger.isActivated()) {
+                        mLogger.debug("Session has been deleted");
                     }
                     removeSession();
                     return;
 
                 default:
-                    if (logger.isActivated()) {
-                        logger.debug("Unknown invitation answer in run; answer=".concat(String
+                    if (mLogger.isActivated()) {
+                        mLogger.debug("Unknown invitation answer in run; answer=".concat(String
                                 .valueOf(answer)));
                     }
                     return;
@@ -231,14 +232,14 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
             if (attr4 != null) {
                 remoteSetup = attr4.getValue();
             }
-            if (logger.isActivated()) {
-                logger.debug("Remote setup attribute is " + remoteSetup);
+            if (mLogger.isActivated()) {
+                mLogger.debug("Remote setup attribute is " + remoteSetup);
             }
 
             // Set setup mode
             String localSetup = createSetupAnswer(remoteSetup);
-            if (logger.isActivated()) {
-                logger.debug("Local setup attribute is " + localSetup);
+            if (mLogger.isActivated()) {
+                mLogger.debug("Local setup attribute is " + localSetup);
             }
 
             // Set local port
@@ -268,8 +269,8 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 
             // Test if the session should be interrupted
             if (isInterrupted()) {
-                if (logger.isActivated()) {
-                    logger.debug("Session has been interrupted: end of processing");
+                if (mLogger.isActivated()) {
+                    mLogger.debug("Session has been interrupted: end of processing");
                 }
                 return;
             }
@@ -282,28 +283,16 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                 // Do not use right now the mapping to do not increase memory and cpu consumption
                 session.setMapMsgIdFromTransationId(false);
 
-                // Open the connection
-                Thread thread = new Thread() {
-                    public void run() {
-                        try {
-                            // Open the MSRP session
-                            msrpMgr.openMsrpSession(ImageTransferSession.DEFAULT_SO_TIMEOUT);
+                /* Open the MSRP session */
+                msrpMgr.openMsrpSession(ImageTransferSession.DEFAULT_SO_TIMEOUT);
 
-                            // Send an empty packet
-                            sendEmptyDataChunk();
-                        } catch (IOException e) {
-                            if (logger.isActivated()) {
-                                logger.error("Can't create the MSRP server session", e);
-                            }
-                        }
-                    }
-                };
-                thread.start();
+                /* Send an empty packet */
+                sendEmptyDataChunk();
             }
 
             // Create a 200 OK response
-            if (logger.isActivated()) {
-                logger.info("Send 200 OK");
+            if (mLogger.isActivated()) {
+                mLogger.info("Send 200 OK");
             }
             SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
                     RichcallService.FEATURE_TAGS_IMAGE_SHARE, sdp);
@@ -318,8 +307,8 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
             // Analyze the received response
             if (ctx.isSipAck()) {
                 // ACK received
-                if (logger.isActivated()) {
-                    logger.info("ACK request received");
+                if (mLogger.isActivated()) {
+                    mLogger.info("ACK request received");
                 }
 
                 // Create the MSRP client session
@@ -329,23 +318,11 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                     MsrpSession session = msrpMgr.createMsrpClientSession(remoteHost, remotePort,
                             remotePath, this, fingerprint);
                     session.setMapMsgIdFromTransationId(false);
-                    // Open the connection
-                    Thread thread = new Thread() {
-                        public void run() {
-                            try {
-                                // Open the MSRP session
-                                msrpMgr.openMsrpSession(ImageTransferSession.DEFAULT_SO_TIMEOUT);
+                    /* Open the MSRP session */
+                    msrpMgr.openMsrpSession(ImageTransferSession.DEFAULT_SO_TIMEOUT);
 
-                                // Send an empty packet
-                                sendEmptyDataChunk();
-                            } catch (IOException e) {
-                                if (logger.isActivated()) {
-                                    logger.error("Can't create the MSRP server session", e);
-                                }
-                            }
-                        }
-                    };
-                    thread.start();
+                    /* Send an empty packet */
+                    sendEmptyDataChunk();
                 }
 
                 // The session is established
@@ -361,39 +338,37 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                             getDialogPath().getSessionExpireTime());
                 }
             } else {
-                if (logger.isActivated()) {
-                    logger.debug("No ACK received for INVITE");
+                if (mLogger.isActivated()) {
+                    mLogger.debug("No ACK received for INVITE");
                 }
 
                 // No response received: timeout
-                handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED));
+                handleError(new ContentSharingError(ContentSharingError.SEND_RESPONSE_FAILED));
             }
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Session initiation has failed", e);
-            }
-
-            // Unexpected error
-            handleError(new ContentSharingError(ContentSharingError.UNEXPECTED_EXCEPTION,
-                    e.getMessage()));
+        } catch (MsrpException e) {
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (SipException e) {
+            mLogger.error("Failed to send 200OK response!", e);
+            handleError(new ContentSharingError(ContentSharingError.SEND_RESPONSE_FAILED, e));
+        } catch (IOException e) {
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (RuntimeException e) {
+            mLogger.error("Failed to initiate a new sharing session as terminating!", e);
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         }
 
-        if (logger.isActivated()) {
-            logger.debug("End of thread");
+        if (mLogger.isActivated()) {
+            mLogger.debug("End of thread");
         }
     }
 
     /**
      * Send an empty data chunk
+     * 
+     * @throws MsrpException
      */
-    public void sendEmptyDataChunk() {
-        try {
-            msrpMgr.sendEmptyChunk();
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Problem while sending empty data chunk", e);
-            }
-        }
+    public void sendEmptyDataChunk() throws MsrpException {
+        msrpMgr.sendEmptyChunk();
     }
 
     /**
@@ -413,8 +388,8 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
      * @param mimeType Data mime-type
      */
     public void msrpDataReceived(String msgId, byte[] data, String mimeType) {
-        if (logger.isActivated()) {
-            logger.info("Data received");
+        if (mLogger.isActivated()) {
+            mLogger.info("Data received");
         }
 
         // Image has been transfered
@@ -431,7 +406,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                 ((ImageTransferSessionListener) getListeners().get(j)).handleContentTransfered(
                         contact, image);
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             // Delete the temp file
             deleteFile();
 
@@ -471,7 +446,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                 ((ImageTransferSessionListener) getListeners().get(j)).handleSharingProgress(
                         contact, currentSize, totalSize);
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             // Delete the temp file
             deleteFile();
 
@@ -488,8 +463,8 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
      * Data transfer has been aborted
      */
     public void msrpTransferAborted() {
-        if (logger.isActivated()) {
-            logger.info("Data transfer aborted");
+        if (mLogger.isActivated()) {
+            mLogger.info("Data transfer aborted");
         }
 
         if (!isImageTransfered()) {
@@ -510,19 +485,13 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
             return;
         }
 
-        if (logger.isActivated()) {
-            logger.info("Data transfer error " + error);
+        if (mLogger.isActivated()) {
+            mLogger.info("Data transfer error " + error);
         }
 
-        try {
-            closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
-            // Close the media session
-            closeMediaSession();
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't close correctly the image sharing session", e);
-            }
-        }
+        closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
+        // Close the media session
+        closeMediaSession();
 
         ContactId contact = getRemoteContact();
         // Request capabilities to the remote
@@ -538,7 +507,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
         if (!isSessionInterrupted() && !isSessionTerminatedByRemote()) {
             for (ImsSessionListener listener : getListeners()) {
                 ((ImageTransferSessionListener) listener).handleSharingError(contact,
-                        new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED, error));
+                        new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
             }
         }
     }
@@ -565,8 +534,8 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
         if (msrpMgr != null) {
             msrpMgr.closeSession();
         }
-        if (logger.isActivated()) {
-            logger.debug("MSRP session has been closed");
+        if (mLogger.isActivated()) {
+            mLogger.debug("MSRP session has been closed");
         }
         if (!isImageTransfered()) {
             // Delete the temp file
@@ -578,14 +547,14 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
      * Delete file
      */
     private void deleteFile() {
-        if (logger.isActivated()) {
-            logger.debug("Delete incomplete received image");
+        if (mLogger.isActivated()) {
+            mLogger.debug("Delete incomplete received image");
         }
         try {
             getContent().deleteFile();
         } catch (IOException e) {
-            if (logger.isActivated()) {
-                logger.error("Can't delete received image", e);
+            if (mLogger.isActivated()) {
+                mLogger.error("Can't delete received image", e);
             }
         }
     }

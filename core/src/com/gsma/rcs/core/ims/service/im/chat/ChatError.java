@@ -55,15 +55,9 @@ public class ChatError extends ImsSessionBasedServiceError {
     public final static int MEDIA_SESSION_BROKEN = CHAT_ERROR_CODES + 5;
 
     /**
-     * Sending response to an accepted chat session failed (e.g. Failed sending empty packet or
-     * 200OK/ACK responses)
-     */
-    public final static int SEND_RESPONSE_FAILED = CHAT_ERROR_CODES + 6;
-
-    /**
      * Group chat rejoin has failed
      */
-    public final static int SESSION_REJOIN_FAILED = CHAT_ERROR_CODES + 7;
+    public final static int SESSION_REJOIN_FAILED = CHAT_ERROR_CODES + 6;
 
     /**
      * Constructor
@@ -71,7 +65,7 @@ public class ChatError extends ImsSessionBasedServiceError {
      * @param error Error code
      */
     public ChatError(ImsServiceError error) {
-        super(error.getErrorCode(), error.getMessage());
+        super(error.getErrorCode(), error);
     }
 
     /**

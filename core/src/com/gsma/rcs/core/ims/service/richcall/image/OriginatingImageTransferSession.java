@@ -33,10 +33,10 @@ import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
+import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
-import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.platform.AndroidFactory;
@@ -53,6 +53,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax2.sip.InvalidArgumentException;
 import javax2.sip.header.ContentDispositionHeader;
 import javax2.sip.header.ContentLengthHeader;
 import javax2.sip.header.ContentTypeHeader;
@@ -77,8 +78,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
     /**
      * The logger
      */
-    private static final Logger logger = Logger.getLogger(OriginatingImageTransferSession.class
-            .getSimpleName());
+    private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
 
     /**
      * Constructor
@@ -105,14 +105,14 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
      */
     public void run() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Initiate a new sharing session as originating");
+            if (mLogger.isActivated()) {
+                mLogger.info("Initiate a new sharing session as originating");
             }
 
             // Set setup mode
             String localSetup = createMobileToMobileSetupOffer();
-            if (logger.isActivated()) {
-                logger.debug("Local setup attribute is " + localSetup);
+            if (mLogger.isActivated()) {
+                mLogger.debug("Local setup attribute is " + localSetup);
             }
 
             // Set local port
@@ -181,8 +181,8 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
             }
 
             // Create an INVITE request
-            if (logger.isActivated()) {
-                logger.info("Send INVITE");
+            if (mLogger.isActivated()) {
+                mLogger.info("Send INVITE");
             }
             SipRequest invite = createInvite();
 
@@ -194,18 +194,23 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
 
             // Send INVITE request
             sendInvite(invite);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Session initiation has failed", e);
-            }
-
-            // Unexpected error
-            handleError(new ContentSharingError(ContentSharingError.UNEXPECTED_EXCEPTION,
-                    e.getMessage()));
+        } catch (SipException e) {
+            mLogger.error("Failed to send invite!", e);
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (InvalidArgumentException e) {
+            mLogger.error("Failed to send invite!", e);
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (RuntimeException e) {
+            /**
+             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
+             * eventually bring the whole system down, which is not intended.
+             */
+            mLogger.error("Failed to initiate a new sharing session as originating!", e);
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         }
 
-        if (logger.isActivated()) {
-            logger.debug("End of thread");
+        if (mLogger.isActivated()) {
+            mLogger.debug("End of thread");
         }
     }
 
@@ -238,34 +243,20 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
     public void startMediaSession() throws IOException {
         // Open the MSRP session
         msrpMgr.openMsrpSession();
+        // Start sending data chunks
+        byte[] data = getContent().getData();
+        InputStream stream;
+        if (data == null) {
+            // Load data from Uri
+            stream = AndroidFactory.getApplicationContext().getContentResolver()
+                    .openInputStream(getContent().getUri());
+        } else {
+            // Load data from memory
+            stream = new ByteArrayInputStream(data);
+        }
 
-        new Thread() {
-            public void run() {
-                try {
-                    // Start sending data chunks
-                    byte[] data = getContent().getData();
-                    InputStream stream;
-                    if (data == null) {
-                        // Load data from Uri
-                        stream = AndroidFactory.getApplicationContext().getContentResolver()
-                                .openInputStream(getContent().getUri());
-                    } else {
-                        // Load data from memory
-                        stream = new ByteArrayInputStream(data);
-                    }
-
-                    msrpMgr.sendChunks(stream, getFileTransferId(), getContent().getEncoding(),
-                            getContent().getSize(), TypeMsrpChunk.FileSharing);
-                } catch (Exception e) {
-                    // Unexpected error
-                    if (logger.isActivated()) {
-                        logger.error("Session initiation has failed", e);
-                    }
-                    handleError(new ImsServiceError(ImsServiceError.UNEXPECTED_EXCEPTION,
-                            e.getMessage()));
-                }
-            }
-        }.start();
+        msrpMgr.sendChunks(stream, getFileTransferId(), getContent().getEncoding(), getContent()
+                .getSize(), TypeMsrpChunk.FileSharing);
     }
 
     /**
@@ -276,8 +267,8 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
         if (msrpMgr != null) {
             msrpMgr.closeSession();
         }
-        if (logger.isActivated()) {
-            logger.debug("MSRP session has been closed");
+        if (mLogger.isActivated()) {
+            mLogger.debug("MSRP session has been closed");
         }
     }
 
@@ -287,8 +278,8 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
      * @param msgId Message ID
      */
     public void msrpDataTransfered(String msgId) {
-        if (logger.isActivated()) {
-            logger.info("Data transfered");
+        if (mLogger.isActivated()) {
+            mLogger.info("Data transfered");
         }
 
         // Image has been transfered
@@ -351,8 +342,8 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
      * Data transfer has been aborted
      */
     public void msrpTransferAborted() {
-        if (logger.isActivated()) {
-            logger.info("Data transfer aborted");
+        if (mLogger.isActivated()) {
+            mLogger.info("Data transfer aborted");
         }
     }
 
@@ -368,8 +359,8 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
             return;
         }
 
-        if (logger.isActivated()) {
-            logger.info("Data transfer error " + error);
+        if (mLogger.isActivated()) {
+            mLogger.info("Data transfer error " + error);
         }
 
         closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
@@ -388,7 +379,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
         if (!isSessionInterrupted() && !isSessionTerminatedByRemote()) {
             for (ImsSessionListener listener : getListeners()) {
                 ((ImageTransferSessionListener) listener).handleSharingError(contact,
-                        new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED, error));
+                        new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
             }
         }
     }
@@ -400,8 +391,8 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
 
     @Override
     public void handle180Ringing(SipResponse response) {
-        if (logger.isActivated()) {
-            logger.debug("handle180Ringing");
+        if (mLogger.isActivated()) {
+            mLogger.debug("handle180Ringing");
         }
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {

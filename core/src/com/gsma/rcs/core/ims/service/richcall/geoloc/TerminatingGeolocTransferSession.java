@@ -28,12 +28,14 @@ import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
+import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -69,8 +71,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
     /**
      * The logger
      */
-    private final static Logger logger = Logger.getLogger(TerminatingGeolocTransferSession.class
-            .getSimpleName());
+    private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
 
     /**
      * Constructor
@@ -97,16 +98,16 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
      */
     public void run() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Initiate a new sharing session as terminating");
+            if (mLogger.isActivated()) {
+                mLogger.info("Initiate a new sharing session as terminating");
             }
 
             send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
             // Check if the MIME type is supported
             if (getContent() == null) {
-                if (logger.isActivated()) {
-                    logger.debug("MIME type is not supported");
+                if (mLogger.isActivated()) {
+                    mLogger.debug("MIME type is not supported");
                 }
 
                 // Send a 415 Unsupported media type response
@@ -127,8 +128,8 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
             InvitationStatus answer = waitInvitationAnswer();
             switch (answer) {
                 case INVITATION_REJECTED:
-                    if (logger.isActivated()) {
-                        logger.debug("Session has been rejected by user");
+                    if (mLogger.isActivated()) {
+                        mLogger.debug("Session has been rejected by user");
                     }
 
                     removeSession();
@@ -140,8 +141,8 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                     return;
 
                 case INVITATION_TIMEOUT:
-                    if (logger.isActivated()) {
-                        logger.debug("Session has been rejected on timeout");
+                    if (mLogger.isActivated()) {
+                        mLogger.debug("Session has been rejected on timeout");
                     }
 
                     // Ringing period timeout
@@ -156,15 +157,15 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                     return;
 
                 case INVITATION_REJECTED_BY_SYSTEM:
-                    if (logger.isActivated()) {
-                        logger.debug("Session has been aborted by system");
+                    if (mLogger.isActivated()) {
+                        mLogger.debug("Session has been aborted by system");
                     }
                     removeSession();
                     return;
 
                 case INVITATION_CANCELED:
-                    if (logger.isActivated()) {
-                        logger.debug("Session has been rejected by remote");
+                    if (mLogger.isActivated()) {
+                        mLogger.debug("Session has been rejected by remote");
                     }
 
                     removeSession();
@@ -183,15 +184,15 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                     break;
 
                 case INVITATION_DELETED:
-                    if (logger.isActivated()) {
-                        logger.debug("Session has been deleted");
+                    if (mLogger.isActivated()) {
+                        mLogger.debug("Session has been deleted");
                     }
                     removeSession();
                     return;
 
                 default:
-                    if (logger.isActivated()) {
-                        logger.debug("Unknown invitation answer in run; answer=".concat(String
+                    if (mLogger.isActivated()) {
+                        mLogger.debug("Unknown invitation answer in run; answer=".concat(String
                                 .valueOf(answer)));
                     }
                     return;
@@ -217,14 +218,14 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
             if (attr4 != null) {
                 remoteSetup = attr4.getValue();
             }
-            if (logger.isActivated()) {
-                logger.debug("Remote setup attribute is " + remoteSetup);
+            if (mLogger.isActivated()) {
+                mLogger.debug("Remote setup attribute is " + remoteSetup);
             }
 
             // Set setup mode
             String localSetup = createSetupAnswer(remoteSetup);
-            if (logger.isActivated()) {
-                logger.debug("Local setup attribute is " + localSetup);
+            if (mLogger.isActivated()) {
+                mLogger.debug("Local setup attribute is " + localSetup);
             }
 
             // Set local port
@@ -257,8 +258,8 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
 
             // Test if the session should be interrupted
             if (isInterrupted()) {
-                if (logger.isActivated()) {
-                    logger.debug("Session has been interrupted: end of processing");
+                if (mLogger.isActivated()) {
+                    mLogger.debug("Session has been interrupted: end of processing");
                 }
                 return;
             }
@@ -268,28 +269,16 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                 // Passive mode: client wait a connection
                 msrpMgr.createMsrpServerSession(remotePath, this);
 
-                // Open the connection
-                Thread thread = new Thread() {
-                    public void run() {
-                        try {
-                            // Open the MSRP session
-                            msrpMgr.openMsrpSession(GeolocTransferSession.DEFAULT_SO_TIMEOUT);
+                /* Open the MSRP session */
+                msrpMgr.openMsrpSession(GeolocTransferSession.DEFAULT_SO_TIMEOUT);
 
-                            // Send an empty packet
-                            sendEmptyDataChunk();
-                        } catch (IOException e) {
-                            if (logger.isActivated()) {
-                                logger.error("Can't create the MSRP server session", e);
-                            }
-                        }
-                    }
-                };
-                thread.start();
+                /* Send an empty packet */
+                sendEmptyDataChunk();
             }
 
             // Create a 200 OK response
-            if (logger.isActivated()) {
-                logger.info("Send 200 OK");
+            if (mLogger.isActivated()) {
+                mLogger.info("Send 200 OK");
             }
             SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
                     RichcallService.FEATURE_TAGS_GEOLOC_SHARE, sdp);
@@ -304,8 +293,8 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
             // Analyze the received response
             if (ctx.isSipAck()) {
                 // ACK received
-                if (logger.isActivated()) {
-                    logger.info("ACK request received");
+                if (mLogger.isActivated()) {
+                    mLogger.info("ACK request received");
                 }
 
                 // Create the MSRP client session
@@ -334,39 +323,37 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                             getDialogPath().getSessionExpireTime());
                 }
             } else {
-                if (logger.isActivated()) {
-                    logger.debug("No ACK received for INVITE");
+                if (mLogger.isActivated()) {
+                    mLogger.debug("No ACK received for INVITE");
                 }
 
                 // No response received: timeout
-                handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED));
+                handleError(new ContentSharingError(ContentSharingError.SEND_RESPONSE_FAILED));
             }
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Session initiation has failed", e);
-            }
-
-            // Unexpected error
-            handleError(new ContentSharingError(ContentSharingError.UNEXPECTED_EXCEPTION,
-                    e.getMessage()));
+        } catch (MsrpException e) {
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (IOException e) {
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (SipException e) {
+            mLogger.error("Failed to send 200OK response!", e);
+            handleError(new ContentSharingError(ContentSharingError.SEND_RESPONSE_FAILED, e));
+        } catch (RuntimeException e) {
+            mLogger.error("Failed to initiate a new geoloc sharing session as terminating!", e);
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         }
 
-        if (logger.isActivated()) {
-            logger.debug("End of thread");
+        if (mLogger.isActivated()) {
+            mLogger.debug("End of thread");
         }
     }
 
     /**
      * Send an empty data chunk
+     * 
+     * @throws MsrpException
      */
-    public void sendEmptyDataChunk() {
-        try {
-            msrpMgr.sendEmptyChunk();
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Problem while sending empty data chunk", e);
-            }
-        }
+    public void sendEmptyDataChunk() throws MsrpException {
+        msrpMgr.sendEmptyChunk();
     }
 
     /**
@@ -386,8 +373,8 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
      * @param mimeType Data mime-type
      */
     public void msrpDataReceived(String msgId, byte[] data, String mimeType) {
-        if (logger.isActivated()) {
-            logger.info("Data received");
+        if (mLogger.isActivated()) {
+            mLogger.info("Data received");
         }
         ContactId contact = getRemoteContact();
         try {
@@ -406,7 +393,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                 ((GeolocTransferSessionListener) getListeners().get(j)).handleContentTransfered(
                         contact, geoloc, initiatedByRemote);
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             // Notify listeners
             for (int j = 0; j < getListeners().size(); j++) {
                 ((GeolocTransferSessionListener) getListeners().get(j)).handleSharingError(contact,
@@ -442,8 +429,8 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
      * Data transfer has been aborted
      */
     public void msrpTransferAborted() {
-        if (logger.isActivated()) {
-            logger.info("Data transfer aborted");
+        if (mLogger.isActivated()) {
+            mLogger.info("Data transfer aborted");
         }
     }
 
@@ -458,10 +445,10 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
         if (isSessionInterrupted()) {
             return;
         }
-        boolean logActivated = logger.isActivated();
+        boolean logActivated = mLogger.isActivated();
 
         if (logActivated) {
-            logger.info("Data transfer error " + error);
+            mLogger.info("Data transfer error " + error);
         }
 
         // Close the media session
@@ -478,7 +465,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
 
         for (ImsSessionListener listener : getListeners()) {
             ((GeolocTransferSessionListener) listener).handleSharingError(contact,
-                    new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED, error));
+                    new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
         }
     }
 
@@ -504,8 +491,8 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
         if (msrpMgr != null) {
             msrpMgr.closeSession();
         }
-        if (logger.isActivated()) {
-            logger.debug("MSRP session has been closed");
+        if (mLogger.isActivated()) {
+            mLogger.debug("MSRP session has been closed");
         }
     }
 

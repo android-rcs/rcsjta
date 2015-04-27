@@ -70,7 +70,7 @@ public class ContentSharingError extends ImsSessionBasedServiceError {
      * @param error Error
      */
     public ContentSharingError(ImsServiceError error) {
-        super(error.getErrorCode(), error.getMessage());
+        super(error.getErrorCode(), error);
     }
 
     /**

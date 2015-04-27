@@ -67,12 +67,18 @@ public class ImsSessionBasedServiceError extends ImsServiceError {
     public final static int SESSION_INITIATION_CANCELLED = SESSION_ERROR_CODES + 3;
 
     /**
+     * Sending response to an accepted chat session failed (e.g. Failed sending empty packet or
+     * 200OK/ACK responses)
+     */
+    public final static int SEND_RESPONSE_FAILED = SESSION_ERROR_CODES + 4;
+
+    /**
      * Constructor
      * 
      * @param error Error
      */
     public ImsSessionBasedServiceError(ImsServiceError error) {
-        super(error.getErrorCode(), error.getMessage());
+        super(error.getErrorCode(), error);
     }
 
     /**

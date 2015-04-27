@@ -399,6 +399,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
         int contentSharingError = error.getErrorCode();
         switch (contentSharingError) {
             case ContentSharingError.SESSION_INITIATION_FAILED:
+            case ContentSharingError.SEND_RESPONSE_FAILED:
                 return new GeolocSharingStateAndReasonCode(State.FAILED,
                         ReasonCode.FAILED_INITIATION);
             case ContentSharingError.SESSION_INITIATION_CANCELLED:

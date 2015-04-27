@@ -99,6 +99,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
         int contentSharingError = error.getErrorCode();
         switch (contentSharingError) {
             case ContentSharingError.SESSION_INITIATION_FAILED:
+            case ContentSharingError.SEND_RESPONSE_FAILED:
                 return new ImageSharingStateAndReasonCode(ImageSharing.State.FAILED,
                         ReasonCode.FAILED_INITIATION);
             case ContentSharingError.SESSION_INITIATION_CANCELLED:

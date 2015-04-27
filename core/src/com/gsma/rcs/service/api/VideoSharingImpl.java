@@ -102,6 +102,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         int code = error.getErrorCode();
         switch (code) {
             case ContentSharingError.SESSION_INITIATION_FAILED:
+            case ContentSharingError.SEND_RESPONSE_FAILED:
                 return new VideoSharingStateAndReasonCode(VideoSharing.State.FAILED,
                         ReasonCode.FAILED_INITIATION);
             case ContentSharingError.SESSION_INITIATION_CANCELLED:

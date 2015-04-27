@@ -31,6 +31,7 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
+import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -46,6 +47,8 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.video.IVideoPlayer;
 import com.gsma.services.rcs.sharing.video.VideoCodec;
 
+import android.os.RemoteException;
+
 import java.util.Collection;
 import java.util.Vector;
 
@@ -59,8 +62,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
     /**
      * The logger
      */
-    private final static Logger logger = Logger.getLogger(TerminatingVideoStreamingSession.class
-            .getSimpleName());
+    private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
 
     /**
      * Constructor
@@ -87,8 +89,8 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
      */
     public void run() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Initiate a new live video sharing session as terminating");
+            if (mLogger.isActivated()) {
+                mLogger.info("Initiate a new live video sharing session as terminating");
             }
             SipDialogPath dialogPath = getDialogPath();
             // Send a 180 Ringing response
@@ -118,8 +120,8 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             InvitationStatus answer = waitInvitationAnswer();
             switch (answer) {
                 case INVITATION_REJECTED:
-                    if (logger.isActivated()) {
-                        logger.debug("Session has been rejected by user");
+                    if (mLogger.isActivated()) {
+                        mLogger.debug("Session has been rejected by user");
                     }
 
                     removeSession();
@@ -131,8 +133,8 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                     return;
 
                 case INVITATION_TIMEOUT:
-                    if (logger.isActivated()) {
-                        logger.debug("Session has been rejected on timeout");
+                    if (mLogger.isActivated()) {
+                        mLogger.debug("Session has been rejected on timeout");
                     }
 
                     // Ringing period timeout
@@ -147,15 +149,15 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                     return;
 
                 case INVITATION_REJECTED_BY_SYSTEM:
-                    if (logger.isActivated()) {
-                        logger.debug("Session has been aborted by system");
+                    if (mLogger.isActivated()) {
+                        mLogger.debug("Session has been aborted by system");
                     }
                     removeSession();
                     return;
 
                 case INVITATION_CANCELED:
-                    if (logger.isActivated()) {
-                        logger.debug("Session has been rejected by remote");
+                    if (mLogger.isActivated()) {
+                        mLogger.debug("Session has been rejected by remote");
                     }
 
                     removeSession();
@@ -175,15 +177,15 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                     break;
 
                 case INVITATION_DELETED:
-                    if (logger.isActivated()) {
-                        logger.debug("Session has been deleted");
+                    if (mLogger.isActivated()) {
+                        mLogger.debug("Session has been deleted");
                     }
                     removeSession();
                     return;
 
                 default:
-                    if (logger.isActivated()) {
-                        logger.debug("Unknown invitation answer in run; answer=".concat(String
+                    if (mLogger.isActivated()) {
+                        mLogger.debug("Unknown invitation answer in run; answer=".concat(String
                                 .valueOf(answer)));
                     }
                     return;
@@ -201,8 +203,8 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             VideoCodec selectedVideoCodec = VideoCodecManager.negociateVideoCodec(
                     player.getSupportedCodecs(), proposedCodecs);
             if (selectedVideoCodec == null) {
-                if (logger.isActivated()) {
-                    logger.debug("Proposed codecs are not supported");
+                if (mLogger.isActivated()) {
+                    mLogger.debug("Proposed codecs are not supported");
                 }
 
                 // Send a 415 Unsupported media type response
@@ -234,15 +236,15 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
 
             // Test if the session should be interrupted
             if (isInterrupted()) {
-                if (logger.isActivated()) {
-                    logger.debug("Session has been interrupted: end of processing");
+                if (mLogger.isActivated()) {
+                    mLogger.debug("Session has been interrupted: end of processing");
                 }
                 return;
             }
 
             // Create a 200 OK response
-            if (logger.isActivated()) {
-                logger.info("Send 200 OK");
+            if (mLogger.isActivated()) {
+                mLogger.info("Send 200 OK");
             }
             SipResponse resp = SipMessageFactory.create200OkInviteResponse(dialogPath,
                     RichcallService.FEATURE_TAGS_VIDEO_SHARE, sdp);
@@ -257,8 +259,8 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             // Analyze the received response
             if (ctx.isSipAck()) {
                 // ACK received
-                if (logger.isActivated()) {
-                    logger.info("ACK request received");
+                if (mLogger.isActivated()) {
+                    mLogger.info("ACK request received");
                 }
 
                 // The session is established
@@ -277,21 +279,22 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                     listener.handleSessionStarted(contact);
                 }
             } else {
-                if (logger.isActivated()) {
-                    logger.debug("No ACK received for INVITE");
+                if (mLogger.isActivated()) {
+                    mLogger.debug("No ACK received for INVITE");
                 }
 
                 // No response received: timeout
-                handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED));
+                handleError(new ContentSharingError(ContentSharingError.SEND_RESPONSE_FAILED));
             }
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Session initiation has failed", e);
-            }
-
-            // Unexpected error
-            handleError(new ContentSharingError(ContentSharingError.UNEXPECTED_EXCEPTION,
-                    e.getMessage()));
+        } catch (RemoteException e) {
+            mLogger.error("Failed to set remote info!", e);
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (SipException e) {
+            mLogger.error("Failed to send 200OK response!", e);
+            handleError(new ContentSharingError(ContentSharingError.SEND_RESPONSE_FAILED, e));
+        } catch (RuntimeException e) {
+            mLogger.error("Failed initiate a new live video sharing session as terminating!", e);
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         }
     }
 
@@ -306,8 +309,8 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
         }
 
         // Error
-        if (logger.isActivated()) {
-            logger.info(new StringBuilder("Session error: ")
+        if (mLogger.isActivated()) {
+            mLogger.info(new StringBuilder("Session error: ")
                     .append(String.valueOf(error.getErrorCode())).append(", reason=")
                     .append(error.getMessage()).toString());
         }
