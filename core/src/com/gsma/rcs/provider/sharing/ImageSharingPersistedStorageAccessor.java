@@ -17,6 +17,8 @@
 package com.gsma.rcs.provider.sharing;
 
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.provider.CursorUtil;
+import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
@@ -74,7 +76,10 @@ public class ImageSharingPersistedStorageAccessor {
         Cursor cursor = null;
         try {
             cursor = mRichCallLog.getImageTransferData(mSharingId);
-            /* TODO: Handle cursor when null. */
+            if (!cursor.moveToNext()) {
+                throw new ServerApiPersistentStorageException(
+                        "Data not found for image sharing ".concat(mSharingId));
+            }
             String contact = cursor.getString(cursor
                     .getColumnIndexOrThrow(ImageSharingData.KEY_CONTACT));
             if (contact != null) {
@@ -92,9 +97,7 @@ public class ImageSharingPersistedStorageAccessor {
             mTimestamp = cursor.getLong(cursor
                     .getColumnIndexOrThrow(ImageSharingData.KEY_TIMESTAMP));
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -154,11 +157,21 @@ public class ImageSharingPersistedStorageAccessor {
     }
 
     public State getState() {
-        return mRichCallLog.getImageSharingState(mSharingId);
+        State state = mRichCallLog.getImageSharingState(mSharingId);
+        if (state == null) {
+            throw new ServerApiPersistentStorageException(
+                    "State not found for image sharing ".concat(mSharingId));
+        }
+        return state;
     }
 
     public ReasonCode getReasonCode() {
-        return mRichCallLog.getImageSharingReasonCode(mSharingId);
+        ReasonCode reasonCode = mRichCallLog.getImageSharingReasonCode(mSharingId);
+        if (reasonCode == null) {
+            throw new ServerApiPersistentStorageException(
+                    "Reason code not found for image sharing ".concat(mSharingId));
+        }
+        return reasonCode;
     }
 
     public Direction getDirection() {

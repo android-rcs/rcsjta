@@ -17,7 +17,9 @@
 package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.fthttp.FtHttpResume;
+import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
@@ -41,7 +43,7 @@ public class FileTransferPersistedStorageAccessor {
 
     private ContactId mContact;
 
-    private boolean mRead;
+    private Boolean mRead;
 
     private Direction mDirection;
 
@@ -59,13 +61,13 @@ public class FileTransferPersistedStorageAccessor {
 
     private String mFileIconMimeType;
 
-    private long mTimestampDelivered;
+    private Long mTimestampDelivered;
 
-    private long mTimestampDisplayed;
+    private Long mTimestampDisplayed;
 
-    private long mFileExpiration = FileTransferData.UNKNOWN_EXPIRATION;
+    private Long mFileExpiration = FileTransferData.UNKNOWN_EXPIRATION;
 
-    private long mFileIconExpiration = FileTransferData.UNKNOWN_EXPIRATION;
+    private Long mFileIconExpiration = FileTransferData.UNKNOWN_EXPIRATION;
 
     /**
      * Constructor
@@ -109,7 +111,11 @@ public class FileTransferPersistedStorageAccessor {
         Cursor cursor = null;
         try {
             cursor = mMessagingLog.getFileTransferData(mFileTransferId);
-            /* TODO: Handle cursor when null. */
+            if (!cursor.moveToNext()) {
+                throw new ServerApiPersistentStorageException(
+                        "Data not found for file transfer ".concat(mFileTransferId));
+            }
+
             String contact = cursor.getString(cursor
                     .getColumnIndexOrThrow(FileTransferData.KEY_CONTACT));
             if (contact != null) {
@@ -129,18 +135,18 @@ public class FileTransferPersistedStorageAccessor {
             if (fileIcon != null) {
                 mFileIcon = Uri.parse(fileIcon);
             }
-            if (!mRead) {
+            if (!Boolean.TRUE.equals(mRead)) {
                 mRead = ReadStatus.READ.toInt() == cursor.getInt(cursor
                         .getColumnIndexOrThrow(FileTransferData.KEY_READ_STATUS));
             }
             mFileSize = cursor.getLong(cursor.getColumnIndexOrThrow(FileTransferData.KEY_FILESIZE));
             mFileIconMimeType = cursor.getString(cursor
                     .getColumnIndexOrThrow(FileTransferData.KEY_FILEICON_MIME_TYPE));
-            if (mTimestampDelivered <= 0) {
+            if (mTimestampDelivered == null || mTimestampDelivered == 0) {
                 mTimestampDelivered = cursor.getLong(cursor
                         .getColumnIndexOrThrow(FileTransferData.KEY_TIMESTAMP_DELIVERED));
             }
-            if (mTimestampDisplayed <= 0) {
+            if (mTimestampDisplayed == null || mTimestampDisplayed == 0) {
                 mTimestampDisplayed = cursor.getLong(cursor
                         .getColumnIndexOrThrow(FileTransferData.KEY_TIMESTAMP_DISPLAYED));
             }
@@ -153,9 +159,7 @@ public class FileTransferPersistedStorageAccessor {
                         .getColumnIndexOrThrow(FileTransferData.KEY_FILEICON_EXPIRATION));
             }
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -203,7 +207,7 @@ public class FileTransferPersistedStorageAccessor {
         return mFileName;
     }
 
-    public long getFileSize() {
+    public Long getFileSize() {
         /*
          * Utilizing cache here as file size can't be changed in persistent storage after entry
          * insertion anyway so no need to query for it multiple times.
@@ -248,11 +252,21 @@ public class FileTransferPersistedStorageAccessor {
     }
 
     public long getTimestamp() {
-        return mMessagingLog.getFileTransferTimestamp(mFileTransferId);
+        Long timestamp = mMessagingLog.getFileTransferTimestamp(mFileTransferId);
+        if (timestamp == null) {
+            throw new ServerApiPersistentStorageException(
+                    "Timestamp not found for file transfer ".concat(mFileTransferId));
+        }
+        return timestamp;
     }
 
     public long getTimestampSent() {
-        return mMessagingLog.getFileTransferSentTimestamp(mFileTransferId);
+        Long timestamp = mMessagingLog.getFileTransferSentTimestamp(mFileTransferId);
+        if (timestamp == null) {
+            throw new ServerApiPersistentStorageException(
+                    "TimestampSent not found for file transfer ".concat(mFileTransferId));
+        }
+        return timestamp;
     }
 
     public long getTimestampDelivered() {
@@ -261,30 +275,40 @@ public class FileTransferPersistedStorageAccessor {
          * it has been set to some value bigger than zero, so no need to query for it multiple
          * times.
          */
-        if (mTimestampDelivered == 0) {
+        if (mTimestampDelivered == null || mTimestampDelivered == 0) {
             cacheData();
         }
         return mTimestampDelivered;
     }
 
-    public long getTimestampDisplayed() {
+    public Long getTimestampDisplayed() {
         /*
          * Utilizing cache here as Timestamp displayed can't be changed in persistent storage after
          * it has been set to some value bigger than zero, so no need to query for it multiple
          * times.
          */
-        if (mTimestampDisplayed == 0) {
+        if (mTimestampDisplayed == null || mTimestampDisplayed == 0) {
             cacheData();
         }
         return mTimestampDisplayed;
     }
 
     public State getState() {
-        return mMessagingLog.getFileTransferState(mFileTransferId);
+        State state = mMessagingLog.getFileTransferState(mFileTransferId);
+        if (state == null) {
+            throw new ServerApiPersistentStorageException(
+                    "State not found for file transfer ".concat(mFileTransferId));
+        }
+        return state;
     }
 
     public ReasonCode getReasonCode() {
-        return mMessagingLog.getFileTransferReasonCode(mFileTransferId);
+        ReasonCode reasonCode = mMessagingLog.getFileTransferReasonCode(mFileTransferId);
+        if (reasonCode == null) {
+            throw new ServerApiPersistentStorageException(
+                    "Reason code not found for file transfer ".concat(mFileTransferId));
+        }
+        return reasonCode;
     }
 
     public Direction getDirection() {
@@ -298,11 +322,11 @@ public class FileTransferPersistedStorageAccessor {
         return mDirection;
     }
 
-    public boolean isRead() {
+    public Boolean isRead() {
         /*
          * No need to read from provider unless incoming and not already marked as read.
          */
-        if (Direction.INCOMING == mDirection && !mRead) {
+        if (Direction.INCOMING == mDirection && !Boolean.TRUE.equals(mRead)) {
             cacheData();
         }
         return mRead;
@@ -383,6 +407,11 @@ public class FileTransferPersistedStorageAccessor {
      * @return deliveryExpiration
      */
     public boolean isExpiredDelivery() {
-        return mMessagingLog.isFileTransferExpiredDelivery(mFileTransferId);
+        Boolean expiredDelivery = mMessagingLog.isFileTransferExpiredDelivery(mFileTransferId);
+        if (expiredDelivery == null) {
+            throw new ServerApiPersistentStorageException(
+                    "Expired Delivery not found for file transfer ".concat(mFileTransferId));
+        }
+        return expiredDelivery;
     }
 }

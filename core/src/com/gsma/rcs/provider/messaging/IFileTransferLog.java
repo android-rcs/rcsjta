@@ -112,8 +112,9 @@ public interface IFileTransferLog {
      * @param fileTransferId File transfer ID
      * @param state File transfer state (see restriction above)
      * @param reasonCode File transfer state reason code
+     * @return the number of updated rows
      */
-    public void setFileTransferStateAndReasonCode(String fileTransferId, State state,
+    public int setFileTransferStateAndReasonCode(String fileTransferId, State state,
             ReasonCode reasonCode);
 
     /**
@@ -124,8 +125,9 @@ public interface IFileTransferLog {
      * @param reasonCode New file transfer reason code
      * @param timestamp New local timestamp for the file transfer
      * @param timestampSent New timestamp sent in payload for the file transfer
+     * @return the number of updated rows
      */
-    public void setFileTransferStateAndTimestamps(String fileTransferId, State state,
+    public int setFileTransferStateAndTimestamps(String fileTransferId, State state,
             ReasonCode reasonCode, long timestamp, long timestampSent);
 
     /**
@@ -140,8 +142,9 @@ public interface IFileTransferLog {
      * 
      * @param fileTransferId File transfer ID
      * @param currentSize Current size
+     * @return the number of updated rows
      */
-    public void setFileTransferProgress(String fileTransferId, long currentSize);
+    public int setFileTransferProgress(String fileTransferId, long currentSize);
 
     /**
      * Set file transfer URI
@@ -151,9 +154,10 @@ public interface IFileTransferLog {
      * @param fileExpiration the time when file on the content server is no longer valid to download
      * @param fileIconExpiration the time when file icon on the content server is no longer valid to
      *            download
-     * @param deliveryExpiration TODO
+     * @param deliveryExpiration delivery expiration
+     * @return the number of updated rows
      */
-    public void setFileTransferred(String fileTransferId, MmContent content, long fileExpiration,
+    public int setFileTransferred(String fileTransferId, MmContent content, long fileExpiration,
             long fileIconExpiration, long deliveryExpiration);
 
     /**
@@ -177,16 +181,18 @@ public interface IFileTransferLog {
      * 
      * @param fileTransferId File transfer ID
      * @param tId TID
+     * @return the number of updated rows
      */
-    public void setFileUploadTId(String fileTransferId, String tId);
+    public int setFileUploadTId(String fileTransferId, String tId);
 
     /**
      * Set file download server uri
      * 
      * @param fileTransferId File transfer ID
      * @param downloadAddress Download Address
+     * @return the number of updated rows
      */
-    public void setFileDownloadAddress(String fileTransferId, Uri downloadAddress);
+    public int setFileDownloadAddress(String fileTransferId, Uri downloadAddress);
 
     /**
      * Retrieve file transfers paused by SYSTEM on connection loss
@@ -249,7 +255,7 @@ public interface IFileTransferLog {
      * @param fileTransferId
      * @return timestamp
      */
-    public long getFileTransferTimestamp(String fileTransferId);
+    public Long getFileTransferTimestamp(String fileTransferId);
 
     /**
      * Get file transfer sent timestamp from file transfer Id
@@ -257,7 +263,7 @@ public interface IFileTransferLog {
      * @param fileTransferId
      * @return sent timestamp
      */
-    public long getFileTransferSentTimestamp(String fileTransferId);
+    public Long getFileTransferSentTimestamp(String fileTransferId);
 
     /**
      * Get file transfer resume info from its corresponding filetransferId
@@ -320,24 +326,27 @@ public interface IFileTransferLog {
      * 
      * @param fileTransferId
      * @param remoteInstanceId
+     * @return the number of updated rows
      */
-    public void setRemoteSipId(String fileTransferId, String remoteInstanceId);
+    public int setRemoteSipId(String fileTransferId, String remoteInstanceId);
 
     /**
      * Set file transfer delivered
      * 
      * @param fileTransferId File transfer ID
      * @param timestampDelivered Time delivered
+     * @return the number of updated rows
      */
-    void setFileTransferDelivered(String fileTransferId, long timestampDelivered);
+    public int setFileTransferDelivered(String fileTransferId, long timestampDelivered);
 
     /**
      * Set file transfer displayed
      * 
      * @param fileTransferId File transfer ID
      * @param timestampDisplayed Time displayed
+     * @return the number of updated rows
      */
-    void setFileTransferDisplayed(String fileTransferId, long timestampDisplayed);
+    public int setFileTransferDisplayed(String fileTransferId, long timestampDisplayed);
 
     /**
      * Marks undelivered file transfers to indicate that transfers have been processed.
@@ -350,13 +359,14 @@ public interface IFileTransferLog {
      * Set file transfer delivery expired for specified file transfer id.
      * 
      * @param fileTransferId
+     * @return the number of updated rows
      */
-    public void setFileTransferDeliveryExpired(String fileTransferId);
+    public int setFileTransferDeliveryExpired(String fileTransferId);
 
     /**
      * Get one-one file transfers with unexpired delivery
      * 
-     * @param currentTime
+     * @return Cursor
      */
     public Cursor getUnDeliveredOneToOneFileTransfers();
 
@@ -369,5 +379,5 @@ public interface IFileTransferLog {
      * @param fileTransferId
      * @return boolean
      */
-    public boolean isFileTransferExpiredDelivery(String fileTransferId);
+    public Boolean isFileTransferExpiredDelivery(String fileTransferId);
 }

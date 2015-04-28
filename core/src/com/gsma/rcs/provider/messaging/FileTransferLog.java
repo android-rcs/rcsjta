@@ -24,11 +24,11 @@ package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
-import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService.Direction;
@@ -42,10 +42,10 @@ import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.net.Uri;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -309,7 +309,7 @@ public class FileTransferLog implements IFileTransferLog {
      * @param reasonCode File transfer state reason code
      */
     @Override
-    public void setFileTransferStateAndReasonCode(String fileTransferId, State state,
+    public int setFileTransferStateAndReasonCode(String fileTransferId, State state,
             ReasonCode reasonCode) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("updateFileTransferStatus: fileTransferId=")
@@ -329,7 +329,7 @@ public class FileTransferLog implements IFileTransferLog {
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_STATE, state.toInt());
         values.put(FileTransferData.KEY_REASON_CODE, reasonCode.toInt());
-        mLocalContentResolver.update(
+        return mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
                 null);
     }
@@ -354,16 +354,16 @@ public class FileTransferLog implements IFileTransferLog {
     }
 
     @Override
-    public void setFileTransferProgress(String fileTransferId, long currentSize) {
+    public int setFileTransferProgress(String fileTransferId, long currentSize) {
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_TRANSFERRED, currentSize);
-        mLocalContentResolver.update(
+        return mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
                 null);
     }
 
     @Override
-    public void setFileTransferred(String fileTransferId, MmContent content, long fileExpiration,
+    public int setFileTransferred(String fileTransferId, MmContent content, long fileExpiration,
             long fileIconExpiration, long deliveryExpiration) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("setFileTransferred (Id=").append(fileTransferId)
@@ -376,7 +376,7 @@ public class FileTransferLog implements IFileTransferLog {
         values.put(FileTransferData.KEY_FILE_EXPIRATION, fileExpiration);
         values.put(FileTransferData.KEY_FILEICON_EXPIRATION, fileIconExpiration);
         values.put(FileTransferData.KEY_DELIVERY_EXPIRATION, deliveryExpiration);
-        mLocalContentResolver.update(
+        return mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
                 null);
     }
@@ -385,60 +385,31 @@ public class FileTransferLog implements IFileTransferLog {
     public boolean isFileTransfer(String fileTransferId) {
         Cursor cursor = null;
         try {
-            cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId),
-                    SELECTION_FILE_TRANSFER_ID, null, null, null);
-            // TODO check if cursor is null CR37
-            return cursor.moveToFirst();
+            Uri contentUri = Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId);
+            cursor = mLocalContentResolver.query(contentUri, SELECTION_FILE_TRANSFER_ID, null,
+                    null, null);
+            CursorUtil.assertCursorIsNotNull(cursor, contentUri);
+            return cursor.moveToNext();
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
     @Override
-    /*
-     * TODO: Rewrite to use getDataAsString(getFileTransferData(FileTransferData.KEY_FILEICON,
-     * filetransferId)) but then behavior will slightly change for this method and then callers to
-     * this will also be affected.
-     */
-    public String getFileTransferIcon(String fileTransferId) {
-        Cursor cursor = null;
-        try {
-            cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId),
-                    new String[] {
-                        FileTransferData.KEY_FILEICON
-                    }, null, null, null);
-            if (cursor.moveToNext()) {
-                return cursor
-                        .getString(cursor.getColumnIndexOrThrow(FileTransferData.KEY_FILEICON));
-            }
-            return null;
-
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-    }
-
-    @Override
-    public void setFileUploadTId(String fileTransferId, String tId) {
+    public int setFileUploadTId(String fileTransferId, String tId) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("setFileUploadTId (tId=").append(tId)
                     .append(") (fileTransferId=").append(fileTransferId).append(")").toString());
         }
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_UPLOAD_TID, tId);
-        mLocalContentResolver.update(
+        return mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
                 null);
     }
 
     @Override
-    public void setFileDownloadAddress(String fileTransferId, Uri downloadAddress) {
+    public int setFileDownloadAddress(String fileTransferId, Uri downloadAddress) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("setFileDownloadAddress (address=")
                     .append(downloadAddress).append(") (fileTransferId=").append(fileTransferId)
@@ -446,20 +417,20 @@ public class FileTransferLog implements IFileTransferLog {
         }
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_DOWNLOAD_URI, downloadAddress.toString());
-        mLocalContentResolver.update(
+        return mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
                 null);
     }
 
     @Override
-    public void setRemoteSipId(String fileTransferId, String remoteInstanceId) {
+    public int setRemoteSipId(String fileTransferId, String remoteInstanceId) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("setRemoteSipId (sip ID=").append(fileTransferId)
                     .append(") (fileTransferId=").append(fileTransferId).append(")").toString());
         }
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_REMOTE_SIP_ID, remoteInstanceId);
-        mLocalContentResolver.update(
+        return mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
                 null);
     }
@@ -470,13 +441,11 @@ public class FileTransferLog implements IFileTransferLog {
         try {
             cursor = mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
                     SELECTION_BY_PAUSED_BY_SYSTEM, null, ORDER_BY_TIMESTAMP_ASC);
-            if (cursor == null) {
-                throw new ServerApiPersistentStorageException(
-                        "No row returned while querying for resumable file transfers!");
+            CursorUtil.assertCursorIsNotNull(cursor, FileTransferData.CONTENT_URI);
+            if (!cursor.moveToNext()) {
+                return Collections.emptyList();
             }
-            if (!cursor.moveToFirst()) {
-                return new ArrayList<FtHttpResume>();
-            }
+
             int sizeColumnIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FILESIZE);
             int mimeTypeColumnIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_MIME_TYPE);
             int contactColumnIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_CONTACT);
@@ -541,9 +510,7 @@ public class FileTransferLog implements IFileTransferLog {
             return fileTransfers;
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -555,9 +522,8 @@ public class FileTransferLog implements IFileTransferLog {
                     SELECTION_FILE_BY_T_ID, new String[] {
                         tId
                     }, null);
-
-            /* TODO: Handle cursor when null. */
-            if (!cursor.moveToFirst()) {
+            CursorUtil.assertCursorIsNotNull(cursor, FileTransferData.CONTENT_URI);
+            if (!cursor.moveToNext()) {
                 return null;
             }
             String fileName = cursor.getString(cursor
@@ -588,55 +554,45 @@ public class FileTransferLog implements IFileTransferLog {
             return new FtHttpResumeUpload(content, fileIconUri, tId, contact, chatId,
                     fileTransferId, isGroup, timestamp, timestampSent);
 
-        } catch (SQLException e) {
-            if (logger.isActivated()) {
-                logger.error(e.getMessage(), e);
-            }
-            return null;
-
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
-    private Cursor getFileTransferData(String columnName, String fileTransferId)
-            throws SQLException {
+    private Cursor getFileTransferData(String columnName, String fileTransferId) {
         String[] projection = {
             columnName
         };
-        Cursor cursor = mLocalContentResolver.query(
-                Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), projection,
-                null, null, null);
-        /* TODO: Handle cursor when null. */
-        if (cursor.moveToFirst()) {
-            return cursor;
+        Uri contentUri = Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId);
+        Cursor cursor = mLocalContentResolver.query(contentUri, projection, null, null, null);
+        CursorUtil.assertCursorIsNotNull(cursor, contentUri);
+        if (!cursor.moveToNext()) {
+            return null;
         }
-        throw new SQLException(new StringBuilder(
-                "No row returned while querying for file transfer data with fileTransferId '")
-                .append(fileTransferId).append("'!").toString());
+        return cursor;
     }
 
-    private int getDataAsInt(Cursor cursor) {
+    private Integer getDataAsInteger(Cursor cursor) {
         try {
+            if (cursor.isNull(FIRST_COLUMN_IDX)) {
+                return null;
+            }
             return cursor.getInt(FIRST_COLUMN_IDX);
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
-    private long getDataAsLong(Cursor cursor) {
+    private Long getDataAsLong(Cursor cursor) {
         try {
+            if (cursor.isNull(FIRST_COLUMN_IDX)) {
+                return null;
+            }
             return cursor.getLong(FIRST_COLUMN_IDX);
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -645,21 +601,37 @@ public class FileTransferLog implements IFileTransferLog {
             return cursor.getString(FIRST_COLUMN_IDX);
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
-    private boolean getDataAsBoolean(Cursor cursor) {
+    private Boolean getDataAsBoolean(Cursor cursor) {
         try {
+            if (cursor.isNull(FIRST_COLUMN_IDX)) {
+                return null;
+            }
             return cursor.getInt(FIRST_COLUMN_IDX) == 1;
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
+    }
+
+    @Override
+    public Cursor getFileTransferData(String fileTransferId) {
+        Uri contentUri = Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId);
+        Cursor cursor = mLocalContentResolver.query(contentUri, null, null, null, null);
+        CursorUtil.assertCursorIsNotNull(cursor, contentUri);
+        return cursor;
+    }
+
+    @Override
+    public String getFileTransferIcon(String fileTransferId) {
+        Cursor cursor = getFileTransferData(FileTransferData.KEY_FILEICON, fileTransferId);
+        if (cursor == null) {
+            return null;
+        }
+        return getDataAsString(cursor);
     }
 
     @Override
@@ -667,8 +639,11 @@ public class FileTransferLog implements IFileTransferLog {
         if (logger.isActivated()) {
             logger.debug("Get file transfer state for ".concat(fileTransferId));
         }
-        return State.valueOf(getDataAsInt(getFileTransferData(FileTransferData.KEY_STATE,
-                fileTransferId)));
+        Cursor cursor = getFileTransferData(FileTransferData.KEY_STATE, fileTransferId);
+        if (cursor == null) {
+            return null;
+        }
+        return State.valueOf(getDataAsInteger(cursor));
     }
 
     @Override
@@ -676,97 +651,89 @@ public class FileTransferLog implements IFileTransferLog {
         if (logger.isActivated()) {
             logger.debug("Get file transfer reason code for ".concat(fileTransferId));
         }
-        return ReasonCode.valueOf(getDataAsInt(getFileTransferData(
-                FileTransferData.KEY_REASON_CODE, fileTransferId)));
+        Cursor cursor = getFileTransferData(FileTransferData.KEY_REASON_CODE, fileTransferId);
+        if (cursor == null) {
+            return null;
+        }
+        return ReasonCode.valueOf(getDataAsInteger(cursor));
     }
 
     @Override
-    public long getFileTransferTimestamp(String fileTransferId) {
+    public Long getFileTransferTimestamp(String fileTransferId) {
         if (logger.isActivated()) {
             logger.debug("Get file transfer timestamp for ".concat(fileTransferId));
         }
-        return getDataAsLong(getFileTransferData(FileTransferData.KEY_TIMESTAMP, fileTransferId));
+        Cursor cursor = getFileTransferData(FileTransferData.KEY_TIMESTAMP, fileTransferId);
+        if (cursor == null) {
+            return null;
+        }
+        return getDataAsLong(cursor);
     }
 
     @Override
-    public long getFileTransferSentTimestamp(String fileTransferId) {
+    public Long getFileTransferSentTimestamp(String fileTransferId) {
         if (logger.isActivated()) {
             logger.debug("Get file transfer sent timestamp for ".concat(fileTransferId));
         }
-        return getDataAsLong(getFileTransferData(FileTransferData.KEY_TIMESTAMP_SENT,
-                fileTransferId));
+        Cursor cursor = getFileTransferData(FileTransferData.KEY_TIMESTAMP_SENT, fileTransferId);
+        if (cursor == null) {
+            return null;
+        }
+        return getDataAsLong(cursor);
     }
 
     @Override
-    // TODO: This function should be replaced to use getDataAsString(getMessageData))
-    // as soon as that method handles exceptions correctly (i.e. doesn't throw exception
-    // when no row is found).
     public String getFileTransferChatId(String fileTransferId) {
-        Cursor cursor = null;
-        try {
-            cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId),
-                    new String[] {
-                        FileTransferData.KEY_CHAT_ID
-                    }, null, null, null);
-            if (cursor.moveToNext()) {
-                return cursor.getString(cursor.getColumnIndexOrThrow(FileTransferData.KEY_CHAT_ID));
-            }
+        Cursor cursor = getFileTransferData(FileTransferData.KEY_CHAT_ID, fileTransferId);
+        if (cursor == null) {
             return null;
-
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
         }
+        return getDataAsString(cursor);
+    }
+
+    @Override
+    public String getFileTransferUploadTid(String fileTransferId) {
+        Cursor cursor = getFileTransferData(FileTransferData.KEY_UPLOAD_TID, fileTransferId);
+        if (cursor == null) {
+            return null;
+        }
+        return getDataAsString(cursor);
+    }
+
+    @Override
+    public Boolean isFileTransferExpiredDelivery(String fileTransferId) {
+        Cursor cursor = getFileTransferData(FileTransferData.KEY_EXPIRED_DELIVERY, fileTransferId);
+        if (cursor == null) {
+            return null;
+        }
+        return getDataAsBoolean(cursor);
     }
 
     @Override
     public boolean isGroupFileTransfer(String fileTransferId) {
         Cursor cursor = null;
         try {
-            cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId),
-                    SELECTION_FILE_TRANSFER_ID, SELECTION_BY_EQUAL_CHAT_ID_AND_CONTACT, null, null);
-            // TODO check if cursor is null CR037
+            Uri contentUri = Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId);
+            cursor = mLocalContentResolver.query(contentUri, SELECTION_FILE_TRANSFER_ID,
+                    SELECTION_BY_EQUAL_CHAT_ID_AND_CONTACT, null, null);
+            CursorUtil.assertCursorIsNotNull(cursor, contentUri);
             /*
              * For a one-to-one file transfer, value of chatID is equal to the value of contact
              */
-            return !cursor.moveToFirst();
+            return !cursor.moveToNext();
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
-    }
-
-    @Override
-    public Cursor getFileTransferData(String fileTransferId) throws SQLException {
-        Cursor cursor = mLocalContentResolver.query(
-                Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), null, null,
-                null, null);
-        /* TODO: Handle cursor when null. */
-        if (cursor.moveToFirst()) {
-            return cursor;
-        }
-        throw new SQLException(new StringBuilder(
-                "No row returned while querying for file transfer data with fileTransferId '")
-                .append(fileTransferId).append("'!").toString());
     }
 
     @Override
     public FtHttpResume getFileTransferResumeInfo(String fileTransferId) {
         Cursor cursor = null;
         try {
-            cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), null, null,
-                    null, null);
-            /* TODO: Handle cursor when null. */
-            if (!cursor.moveToFirst()) {
-                if (logger.isActivated()) {
-                    logger.warn("getFileTransferResumeInfo no data for fileTransferId: "
-                            .concat(fileTransferId));
-                }
+            Uri contentUri = Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId);
+            cursor = mLocalContentResolver.query(contentUri, null, null, null, null);
+            CursorUtil.assertCursorIsNotNull(cursor, contentUri);
+            if (!cursor.moveToNext()) {
                 return null;
             }
             String phoneNumber = cursor.getString(cursor
@@ -821,16 +788,16 @@ public class FileTransferLog implements IFileTransferLog {
                         fileTransferId, isGroup, timestamp, timestampSent);
             }
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
     @Override
     public Cursor getQueuedFileTransfers() {
-        return mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
+        Cursor cursor = mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
                 SELECTION_BY_QUEUED_FILE_TRANSFERS, null, ORDER_BY_TIMESTAMP_ASC);
+        CursorUtil.assertCursorIsNotNull(cursor, FileTransferData.CONTENT_URI);
+        return cursor;
     }
 
     @Override
@@ -851,8 +818,10 @@ public class FileTransferLog implements IFileTransferLog {
         String[] selectionArgs = new String[] {
             chatId
         };
-        return mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
+        Cursor cursor = mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
                 SELECTION_BY_QUEUED_GROUP_FILE_TRANSFERS, selectionArgs, ORDER_BY_TIMESTAMP_ASC);
+        CursorUtil.assertCursorIsNotNull(cursor, FileTransferData.CONTENT_URI);
+        return cursor;
     }
 
     @Override
@@ -860,22 +829,21 @@ public class FileTransferLog implements IFileTransferLog {
         String[] selectionArgs = new String[] {
             contact.toString()
         };
-        return mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
+        Cursor cursor = mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
                 SELECTION_BY_QUEUED_ONETOONE_FILE_TRANSFERS, selectionArgs, ORDER_BY_TIMESTAMP_ASC);
-    }
-
-    @Override
-    public String getFileTransferUploadTid(String fileTransferId) {
-        return getDataAsString(getFileTransferData(FileTransferData.KEY_UPLOAD_TID, fileTransferId));
+        CursorUtil.assertCursorIsNotNull(cursor, FileTransferData.CONTENT_URI);
+        return cursor;
     }
 
     @Override
     public Cursor getInterruptedFileTransfers() {
-        return mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
+        Cursor cursor = mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
                 SELECTION_BY_INTERRUPTED_FILE_TRANSFERS, null, ORDER_BY_TIMESTAMP_ASC);
+        CursorUtil.assertCursorIsNotNull(cursor, FileTransferData.CONTENT_URI);
+        return cursor;
     }
 
-    public void setFileTransferStateAndTimestamps(String fileTransferId, State state,
+    public int setFileTransferStateAndTimestamps(String fileTransferId, State state,
             ReasonCode reasonCode, long timestamp, long timestampSent) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("updateFileTransfer: fileTransferId=")
@@ -889,12 +857,12 @@ public class FileTransferLog implements IFileTransferLog {
         values.put(FileTransferData.KEY_REASON_CODE, reasonCode.toInt());
         values.put(FileTransferData.KEY_TIMESTAMP, timestamp);
         values.put(FileTransferData.KEY_TIMESTAMP_SENT, timestampSent);
-        mLocalContentResolver.update(
+        return mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
                 null);
     }
 
-    public void setFileTransferDelivered(String fileTransferId, long timestampDelivered) {
+    public int setFileTransferDelivered(String fileTransferId, long timestampDelivered) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("setFileTransferDelivered fileTransferId=")
                     .append(fileTransferId).append(", timestampDelivered=")
@@ -907,12 +875,12 @@ public class FileTransferLog implements IFileTransferLog {
         values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, timestampDelivered);
         values.put(FileTransferData.KEY_EXPIRED_DELIVERY, 0);
 
-        mLocalContentResolver.update(
+        return mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
                 null);
     }
 
-    public void setFileTransferDisplayed(String fileTransferId, long timestampDisplayed) {
+    public int setFileTransferDisplayed(String fileTransferId, long timestampDisplayed) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("setFileTransferDisplayed fileTransferId=")
                     .append(fileTransferId).append(", timestampDisplayed=")
@@ -926,7 +894,7 @@ public class FileTransferLog implements IFileTransferLog {
         values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, timestampDisplayed);
         values.put(FileTransferData.KEY_EXPIRED_DELIVERY, 0);
 
-        mLocalContentResolver.update(
+        return mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
                 null);
     }
@@ -943,23 +911,20 @@ public class FileTransferLog implements IFileTransferLog {
     }
 
     @Override
-    public void setFileTransferDeliveryExpired(String fileTransferId) {
+    public int setFileTransferDeliveryExpired(String fileTransferId) {
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_EXPIRED_DELIVERY, 1);
-        mLocalContentResolver.update(
+        return mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
                 null);
     }
 
     @Override
     public Cursor getUnDeliveredOneToOneFileTransfers() {
-        return mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
+        Cursor cursor = mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
                 SELECTION_BY_UNDELIVERED_ONETOONE_FILE_TRANSFERS, null, ORDER_BY_TIMESTAMP_ASC);
+        CursorUtil.assertCursorIsNotNull(cursor, FileTransferData.CONTENT_URI);
+        return cursor;
     }
 
-    @Override
-    public boolean isFileTransferExpiredDelivery(String fileTransferId) {
-        return getDataAsBoolean(getFileTransferData(FileTransferData.KEY_EXPIRED_DELIVERY,
-                fileTransferId));
-    }
 }

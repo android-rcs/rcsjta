@@ -48,14 +48,12 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.service.broadcaster.IOneToOneFileTransferBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 import com.gsma.services.rcs.filetransfer.IFileTransfer;
 
-import android.database.SQLException;
 import android.net.Uri;
 import android.os.RemoteException;
 
@@ -661,7 +659,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                             .append("': wrong direction").toString());
 
                 }
-                switch (mPersistentStorage.getState()) {
+                State state = mPersistentStorage.getState();
+                switch (state) {
                     case INVITED:
                         handleSessionRejected(ReasonCode.REJECTED_BY_USER,
                                 mPersistentStorage.getRemoteContact());
@@ -874,17 +873,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             if (session != null) {
                 reasonCode = getRcsReasonCode(session);
             } else {
-                try {
-                    reasonCode = mPersistentStorage.getReasonCode();
-                } catch (SQLException e) {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug(new StringBuilder(
-                                "Cannot resume transfer with file transfer Id '")
-                                .append(mFileTransferId).append("' as it does not exist in DB.")
-                                .toString());
-                    }
-                    return false;
-                }
+                reasonCode = mPersistentStorage.getReasonCode();
             }
             if (ReasonCode.PAUSED_BY_USER != reasonCode) {
                 if (sLogger.isActivated()) {
@@ -1009,8 +998,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             ReasonCode rcsReasonCode = mPersistentStorage.getReasonCode();
             /*
              * According to Blackbird PDD v3.0, "When a File Transfer is interrupted by sender
-             * interaction (or fails), then ‘resend button’ shall be offered to allow the user
-             * to re-send the file without selecting a new receiver or selecting the file again."
+             * interaction (or fails), then ‘resend button’ shall be offered to allow the user to
+             * re-send the file without selecting a new receiver or selecting the file again."
              */
             switch (rcsState) {
                 case FAILED:
@@ -1488,6 +1477,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
     public boolean isExpiredDelivery() throws RemoteException {
         try {
             return mPersistentStorage.isExpiredDelivery();
+
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
                 sLogger.error(ExceptionUtil.getFullStackTrace(e));

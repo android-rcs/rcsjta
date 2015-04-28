@@ -24,9 +24,9 @@ package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
+import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
@@ -45,6 +45,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -380,15 +381,15 @@ public class MessageLog implements IMessageLog {
      * @param msgId Message ID
      * @param status Message status (See restriction above)
      * @param reasonCode Message status reason code
+     * @return the number of updated rows
      */
     @Override
-    public void setChatMessageStatusAndReasonCode(String msgId, Status status, ReasonCode reasonCode) {
+    public int setChatMessageStatusAndReasonCode(String msgId, Status status, ReasonCode reasonCode) {
         if (sLogger.isActivated()) {
             sLogger.debug(new StringBuilder("Update chat message: msgId=").append(msgId)
                     .append(", status=").append(status).append(", reasonCode=").append(reasonCode)
                     .toString());
         }
-
         switch (status) {
             case DELIVERED:
             case DISPLAYED:
@@ -397,19 +398,11 @@ public class MessageLog implements IMessageLog {
                         .append(" to set status ").append(status.toString()).toString());
             default:
         }
-
         ContentValues values = new ContentValues();
         values.put(MessageData.KEY_STATUS, status.toInt());
         values.put(MessageData.KEY_REASON_CODE, reasonCode.toInt());
-
-        if (mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
-                values, null, null) < 1) {
-            /* TODO: Throw exception */
-            if (sLogger.isActivated()) {
-                sLogger.warn("There was no message with msgId '" + msgId
-                        + "' to update status for.");
-            }
-        }
+        return mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
+                values, null, null);
     }
 
     @Override
@@ -425,16 +418,14 @@ public class MessageLog implements IMessageLog {
     @Override
     public boolean isMessagePersisted(String msgId) {
         Cursor cursor = null;
+        Uri contentUri = Uri.withAppendedPath(MessageData.CONTENT_URI, msgId);
         try {
-            cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), PROJECTION_MESSAGE_ID,
-                    null, null, null);
-            // TODO check null cursor CR037
-            return cursor.moveToFirst();
+            cursor = mLocalContentResolver.query(contentUri, PROJECTION_MESSAGE_ID, null, null,
+                    null);
+            CursorUtil.assertCursorIsNotNull(cursor, contentUri);
+            return cursor.moveToNext();
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -442,35 +433,36 @@ public class MessageLog implements IMessageLog {
         String[] projection = new String[] {
             columnName
         };
-        Cursor cursor = mLocalContentResolver.query(
-                Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), projection, null, null, null);
-        // TODO check null cursor CR037
-        if (cursor.moveToFirst()) {
-            return cursor;
+        Uri contentUri = Uri.withAppendedPath(MessageData.CONTENT_URI, msgId);
+        Cursor cursor = mLocalContentResolver.query(contentUri, projection, null, null, null);
+        CursorUtil.assertCursorIsNotNull(cursor, contentUri);
+        if (!cursor.moveToNext()) {
+            return null;
         }
-        throw new SQLException("No row returned while querying for message data with msgId : "
-                + msgId);
+        return cursor;
     }
 
-    private int getDataAsInt(Cursor cursor) {
+    private Integer getDataAsInteger(Cursor cursor) {
         try {
+            if (cursor.isNull(FIRST_COLUMN_IDX)) {
+                return null;
+            }
             return cursor.getInt(FIRST_COLUMN_IDX);
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
-    private long getDataAsLong(Cursor cursor) {
+    private Long getDataAsLong(Cursor cursor) {
         try {
+            if (cursor.isNull(FIRST_COLUMN_IDX)) {
+                return null;
+            }
             return cursor.getLong(FIRST_COLUMN_IDX);
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -479,94 +471,109 @@ public class MessageLog implements IMessageLog {
             return cursor.getString(FIRST_COLUMN_IDX);
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
-    private boolean getDataAsBoolean(Cursor cursor) {
+    private Boolean getDataAsBoolean(Cursor cursor) {
         try {
+            if (cursor.isNull(FIRST_COLUMN_IDX)) {
+                return null;
+            }
             return cursor.getInt(FIRST_COLUMN_IDX) == 1;
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
     @Override
-    public boolean isMessageRead(String msgId) {
-        return (getDataAsInt(getMessageData(MessageData.KEY_READ_STATUS, msgId)) == ReadStatus.READ
-                .toInt());
+    public Boolean isMessageRead(String msgId) {
+        Cursor cursor = getMessageData(MessageData.KEY_READ_STATUS, msgId);
+        if (cursor == null) {
+            return null;
+        }
+        return (getDataAsInteger(cursor) == ReadStatus.READ.toInt());
     }
 
     @Override
-    public long getMessageSentTimestamp(String msgId) {
-        return getDataAsLong(getMessageData(MessageData.KEY_TIMESTAMP_SENT, msgId));
+    public Long getMessageSentTimestamp(String msgId) {
+        Cursor cursor = getMessageData(MessageData.KEY_TIMESTAMP_SENT, msgId);
+        if (cursor == null) {
+            return null;
+        }
+        return getDataAsLong(cursor);
     }
 
     @Override
-    public long getMessageTimestamp(String msgId) {
-        return getDataAsLong(getMessageData(MessageData.KEY_TIMESTAMP, msgId));
+    public Long getMessageTimestamp(String msgId) {
+        Cursor cursor = getMessageData(MessageData.KEY_TIMESTAMP, msgId);
+        if (cursor == null) {
+            return null;
+        }
+        return getDataAsLong(cursor);
     }
 
     @Override
     public Status getMessageStatus(String msgId) {
-        return Status.valueOf(getDataAsInt(getMessageData(MessageData.KEY_STATUS, msgId)));
+        Cursor cursor = getMessageData(MessageData.KEY_STATUS, msgId);
+        if (cursor == null) {
+            return null;
+        }
+        return Status.valueOf(getDataAsInteger(cursor));
     }
 
     @Override
     public ReasonCode getMessageReasonCode(String msgId) {
-        return ReasonCode.valueOf(getDataAsInt(getMessageData(MessageData.KEY_REASON_CODE, msgId)));
+        Cursor cursor = getMessageData(MessageData.KEY_REASON_CODE, msgId);
+        if (cursor == null) {
+            return null;
+        }
+        return ReasonCode.valueOf(getDataAsInteger(cursor));
     }
 
     @Override
     public String getMessageMimeType(String msgId) {
-        return getDataAsString(getMessageData(MessageData.KEY_MIME_TYPE, msgId));
-    }
-
-    @Override
-    // TODO: This function should be replaced to use getDataAsString(getMessageData))
-    // as soon as that method handles exceptions correctly (i.e. doesn't throw exception
-    // when no row is found).
-    public String getMessageChatId(String msgId) {
-        Cursor cursor = null;
-        try {
-            cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), new String[] {
-                        MessageData.KEY_CHAT_ID
-                    }, null, null, null);
-            /* TODO: Handle cursor when null. */
-            if (cursor.moveToNext()) {
-                return cursor.getString(cursor.getColumnIndexOrThrow(MessageData.KEY_CHAT_ID));
-            }
+        Cursor cursor = getMessageData(MessageData.KEY_MIME_TYPE, msgId);
+        if (cursor == null) {
             return null;
-
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
         }
+        return getDataAsString(cursor);
     }
 
     @Override
-    public Cursor getChatMessageData(String msgId) {
-        Cursor cursor = mLocalContentResolver.query(
-                Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), null, null, null, null);
-        /* TODO: Handle cursor when null. */
-        if (cursor.moveToFirst()) {
-            return cursor;
+    public String getMessageChatId(String msgId) {
+        Cursor cursor = getMessageData(MessageData.KEY_CHAT_ID, msgId);
+        if (cursor == null) {
+            return null;
         }
-
-        throw new ServerApiPersistentStorageException(
-                "No row returned while querying for chat message data with msgId : ".concat(msgId));
+        return getDataAsString(cursor);
     }
 
     @Override
     public String getChatMessageContent(String msgId) {
-        return getDataAsString(getMessageData(MessageData.KEY_CONTENT, msgId));
+        Cursor cursor = getMessageData(MessageData.KEY_CONTENT, msgId);
+        if (cursor == null) {
+            return null;
+        }
+        return getDataAsString(cursor);
+    }
+
+    @Override
+    public Boolean isChatMessageExpiredDelivery(String msgId) {
+        Cursor cursor = getMessageData(MessageData.KEY_EXPIRED_DELIVERY, msgId);
+        if (cursor == null) {
+            return null;
+        }
+        return getDataAsBoolean(cursor);
+    }
+
+    @Override
+    public Cursor getChatMessageData(String msgId) {
+        Uri contentUri = Uri.withAppendedPath(MessageData.CONTENT_URI, msgId);
+        Cursor cursor = mLocalContentResolver.query(contentUri, null, null, null, null);
+        CursorUtil.assertCursorIsNotNull(cursor, contentUri);
+        return cursor;
     }
 
     @Override
@@ -574,8 +581,10 @@ public class MessageLog implements IMessageLog {
         String[] selectionArgs = new String[] {
             contact.toString()
         };
-        return mLocalContentResolver.query(MessageData.CONTENT_URI, null,
+        Cursor cursor = mLocalContentResolver.query(MessageData.CONTENT_URI, null,
                 SELECTION_QUEUED_ONETOONE_CHAT_MESSAGES, selectionArgs, ORDER_BY_TIMESTAMP_ASC);
+        CursorUtil.assertCursorIsNotNull(cursor, MessageData.CONTENT_URI);
+        return cursor;
     }
 
     @Override
@@ -596,12 +605,14 @@ public class MessageLog implements IMessageLog {
         String[] selectionArgs = new String[] {
             chatId
         };
-        return mLocalContentResolver.query(MessageData.CONTENT_URI, null,
+        Cursor cursor = mLocalContentResolver.query(MessageData.CONTENT_URI, null,
                 SELECTION_QUEUED_GROUP_CHAT_MESSAGES, selectionArgs, ORDER_BY_TIMESTAMP_ASC);
+        CursorUtil.assertCursorIsNotNull(cursor, MessageData.CONTENT_URI);
+        return cursor;
     }
 
     @Override
-    public void setChatMessageTimestamp(String msgId, long timestamp, long timestampSent) {
+    public int setChatMessageTimestamp(String msgId, long timestamp, long timestampSent) {
         if (sLogger.isActivated()) {
             sLogger.debug(new StringBuilder("Set chat message timestamp msgId=").append(msgId)
                     .append(", timestamp=").append(timestamp).append(", timestampSent=")
@@ -610,9 +621,8 @@ public class MessageLog implements IMessageLog {
         ContentValues values = new ContentValues();
         values.put(MessageData.KEY_TIMESTAMP, timestamp);
         values.put(MessageData.KEY_TIMESTAMP_SENT, timestampSent);
-
-        mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), values,
-                null, null);
+        return mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
+                values, null, null);
     }
 
     @Override
@@ -625,9 +635,9 @@ public class MessageLog implements IMessageLog {
             cursor = mLocalContentResolver.query(MessageData.CONTENT_URI,
                     PROJECTION_GROUP_CHAT_EVENTS, SELECTION_GROUP_CHAT_EVENTS, selectionArgs,
                     ORDER_BY_TIMESTAMP_ASC);
-            // TODO check null cursor CR037
-            if (!cursor.moveToFirst()) {
-                return null;
+            CursorUtil.assertCursorIsNotNull(cursor, MessageData.CONTENT_URI);
+            if (!cursor.moveToNext()) {
+                return Collections.emptyMap();
             }
             Map<ContactId, GroupChatEvent.Status> groupChatEvents = new HashMap<ContactId, GroupChatEvent.Status>();
             int columnIdxStatus = cursor.getColumnIndexOrThrow(MessageData.KEY_STATUS);
@@ -642,9 +652,7 @@ public class MessageLog implements IMessageLog {
             return groupChatEvents;
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -652,11 +660,11 @@ public class MessageLog implements IMessageLog {
     public boolean isOneToOneChatMessage(String msgId) {
         Cursor cursor = null;
         try {
-            cursor = mLocalContentResolver.query(
-                    MessageData.CONTENT_URI.buildUpon().appendPath(msgId).build(), new String[] {
-                            MessageData.KEY_CONTACT, MessageData.KEY_CHAT_ID
-                    }, null, null, null);
-            /* TODO: Handle cursor when null. */
+            Uri contentUri = Uri.withAppendedPath(MessageData.CONTENT_URI, msgId);
+            cursor = mLocalContentResolver.query(contentUri, new String[] {
+                    MessageData.KEY_CONTACT, MessageData.KEY_CHAT_ID
+            }, null, null, null);
+            CursorUtil.assertCursorIsNotNull(cursor, contentUri);
             if (!cursor.moveToNext()) {
                 return false;
             }
@@ -666,14 +674,12 @@ public class MessageLog implements IMessageLog {
             return chatId.equals(contactId);
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
     @Override
-    public void setChatMessageStatusDelivered(String msgId, long timestampDelivered) {
+    public int setChatMessageStatusDelivered(String msgId, long timestampDelivered) {
         if (sLogger.isActivated()) {
             sLogger.debug(new StringBuilder("setChatMessageStatusDelivered msgId=").append(msgId)
                     .append(", timestampDelivered=").append(timestampDelivered).toString());
@@ -683,15 +689,12 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_REASON_CODE, ReasonCode.UNSPECIFIED.toInt());
         values.put(MessageData.KEY_TIMESTAMP_DELIVERED, timestampDelivered);
         values.put(MessageData.KEY_EXPIRED_DELIVERY, 0);
-
-        if (mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
-                values, null, null) < 1) {
-            sLogger.warn("There was no message with msgId '" + msgId + "' to set to delivered.");
-        }
+        return mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
+                values, null, null);
     }
 
     @Override
-    public void setChatMessageStatusDisplayed(String msgId, long timestampDisplayed) {
+    public int setChatMessageStatusDisplayed(String msgId, long timestampDisplayed) {
         if (sLogger.isActivated()) {
             sLogger.debug(new StringBuilder("setChatMessageStatusDisplayed msgId=").append(msgId)
                     .append(", timestampDisplayed=").append(timestampDisplayed).toString());
@@ -701,11 +704,8 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_REASON_CODE, ReasonCode.UNSPECIFIED.toInt());
         values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, timestampDisplayed);
         values.put(MessageData.KEY_EXPIRED_DELIVERY, 0);
-
-        if (mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
-                values, null, null) < 1) {
-            sLogger.warn("There was no message with msgId '" + msgId + "' to set to displayed.");
-        }
+        return mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
+                values, null, null);
     }
 
     @Override
@@ -720,21 +720,19 @@ public class MessageLog implements IMessageLog {
     }
 
     @Override
-    public void setChatMessageDeliveryExpired(String msgId) {
+    public int setChatMessageDeliveryExpired(String msgId) {
         ContentValues values = new ContentValues();
         values.put(MessageData.KEY_EXPIRED_DELIVERY, 1);
-        mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), values,
-                null, null);
+        return mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
+                values, null, null);
     }
 
     @Override
     public Cursor getUndeliveredOneToOneChatMessages() {
-        return mLocalContentResolver.query(MessageData.CONTENT_URI, null,
+        Cursor cursor = mLocalContentResolver.query(MessageData.CONTENT_URI, null,
                 SELECTION_BY_UNDELIVERED_ONETOONE_CHAT_MESSAGES, null, ORDER_BY_TIMESTAMP_ASC);
+        CursorUtil.assertCursorIsNotNull(cursor, MessageData.CONTENT_URI);
+        return cursor;
     }
 
-    @Override
-    public boolean isChatMessageExpiredDelivery(String msgId) {
-        return getDataAsBoolean(getMessageData(MessageData.KEY_EXPIRED_DELIVERY, msgId));
-    }
 }

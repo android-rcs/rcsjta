@@ -16,6 +16,8 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.rcs.provider.CursorUtil;
+import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
@@ -44,13 +46,13 @@ public class ChatMessagePersistedStorageAccessor {
 
     private String mChatId;
 
-    private boolean mRead;
+    private Boolean mRead;
 
     private Direction mDirection;
 
-    private long mTimestampDelivered;
+    private Long mTimestampDelivered;
 
-    private long mTimestampDisplayed;
+    private Long mTimestampDisplayed;
 
     /**
      * Constructor for outgoing message
@@ -90,7 +92,11 @@ public class ChatMessagePersistedStorageAccessor {
         Cursor cursor = null;
         try {
             cursor = mMessagingLog.getChatMessageData(mId);
-            /* TODO: Handle cursor when null */
+            if (!cursor.moveToNext()) {
+                throw new ServerApiPersistentStorageException(
+                        "Data not found for message ".concat(mId));
+            }
+
             String contact = cursor
                     .getString(cursor.getColumnIndexOrThrow(MessageData.KEY_CONTACT));
             if (contact != null) {
@@ -102,22 +108,20 @@ public class ChatMessagePersistedStorageAccessor {
             mContent = cursor.getString(cursor.getColumnIndexOrThrow(MessageData.KEY_CONTENT));
             mChatId = cursor.getString(cursor.getColumnIndexOrThrow(MessageData.KEY_CHAT_ID));
             mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(MessageData.KEY_MIME_TYPE));
-            if (!mRead) {
+            if (!Boolean.TRUE.equals(mRead)) {
                 mRead = ReadStatus.READ.toInt() == cursor.getInt(cursor
                         .getColumnIndexOrThrow(MessageData.KEY_READ_STATUS));
             }
-            if (mTimestampDelivered <= 0) {
+            if (mTimestampDelivered == null || mTimestampDelivered == 0) {
                 mTimestampDelivered = cursor.getLong(cursor
                         .getColumnIndexOrThrow(MessageData.KEY_TIMESTAMP_DELIVERED));
             }
-            if (mTimestampDisplayed <= 0) {
+            if (mTimestampDisplayed == null || mTimestampDisplayed == 0) {
                 mTimestampDisplayed = cursor.getLong(cursor
                         .getColumnIndexOrThrow(MessageData.KEY_TIMESTAMP_DISPLAYED));
             }
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -154,11 +158,21 @@ public class ChatMessagePersistedStorageAccessor {
     }
 
     public long getTimestamp() {
-        return mMessagingLog.getMessageTimestamp(mId);
+        Long timestamp = mMessagingLog.getMessageTimestamp(mId);
+        if (timestamp == null) {
+            throw new ServerApiPersistentStorageException(
+                    "Timestamp not found for message ".concat(mId));
+        }
+        return timestamp;
     }
 
     public long getTimestampSent() {
-        return mMessagingLog.getMessageSentTimestamp(mId);
+        Long timestamp = mMessagingLog.getMessageSentTimestamp(mId);
+        if (timestamp == null) {
+            throw new ServerApiPersistentStorageException(
+                    "TimestampSent not found for message ".concat(mId));
+        }
+        return timestamp;
     }
 
     public long getTimestampDelivered() {
@@ -167,7 +181,7 @@ public class ChatMessagePersistedStorageAccessor {
          * it has been set to some value bigger than zero, so no need to query for it multiple
          * times.
          */
-        if (mTimestampDelivered == 0) {
+        if (mTimestampDelivered == null || mTimestampDelivered == 0) {
             cacheData();
         }
         return mTimestampDelivered;
@@ -179,18 +193,28 @@ public class ChatMessagePersistedStorageAccessor {
          * it has been set to some value bigger than zero, so no need to query for it multiple
          * times.
          */
-        if (mTimestampDisplayed == 0) {
+        if (mTimestampDisplayed == null || mTimestampDisplayed == 0) {
             cacheData();
         }
         return mTimestampDisplayed;
     }
 
     public Status getStatus() {
-        return mMessagingLog.getMessageStatus(mId);
+        Status status = mMessagingLog.getMessageStatus(mId);
+        if (status == null) {
+            throw new ServerApiPersistentStorageException(
+                    "Status not found for message ".concat(mId));
+        }
+        return status;
     }
 
     public ReasonCode getReasonCode() {
-        return mMessagingLog.getMessageReasonCode(mId);
+        ReasonCode reasonCode = mMessagingLog.getMessageReasonCode(mId);
+        if (reasonCode == null) {
+            throw new ServerApiPersistentStorageException(
+                    "Reason code not found for message ".concat(mId));
+        }
+        return reasonCode;
     }
 
     public String getChatId() {
@@ -204,13 +228,18 @@ public class ChatMessagePersistedStorageAccessor {
         /*
          * No need to read from provider unless incoming and not already marked as read.
          */
-        if (Direction.INCOMING == mDirection && !mRead) {
+        if (Direction.INCOMING == mDirection && !Boolean.TRUE.equals(mRead)) {
             cacheData();
         }
         return mRead;
     }
 
     public boolean isExpiredDelivery() {
-        return mMessagingLog.isChatMessageExpiredDelivery(mId);
+        Boolean expiredDelivery = mMessagingLog.isChatMessageExpiredDelivery(mId);
+        if (expiredDelivery == null) {
+            throw new ServerApiPersistentStorageException(
+                    "Expired Delivery not found for message ".concat(mId));
+        }
+        return expiredDelivery;
     }
 }

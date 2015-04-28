@@ -24,6 +24,7 @@ package com.gsma.rcs.provider.sharing;
 
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.content.VideoContent;
+import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Geoloc;
@@ -92,28 +93,13 @@ public class RichCallHistory {
         String[] projection = new String[] {
             columnName
         };
-        Cursor cursor = null;
-        try {
-            cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(ImageSharingData.CONTENT_URI, sharingId), projection,
-                    null, null, null);
-            /* TODO: Handle cursor when null. */
-            if (cursor.moveToFirst()) {
-                return cursor;
-            }
-            throw new SQLException(new StringBuilder(
-                    "No row returned while querying for image transfer data with sharingId '")
-                    .append(sharingId).append("'!").toString());
-        } /*
-           * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
-           * exception.
-           */
-        catch (RuntimeException e) {
-            if (cursor != null) {
-                cursor.close();
-            }
-            throw e;
+        Uri contentUri = Uri.withAppendedPath(ImageSharingData.CONTENT_URI, sharingId);
+        Cursor cursor = mLocalContentResolver.query(contentUri, projection, null, null, null);
+        CursorUtil.assertCursorIsNotNull(cursor, contentUri);
+        if (!cursor.moveToNext()) {
+            return null;
         }
+        return cursor;
     }
 
     /**
@@ -127,49 +113,56 @@ public class RichCallHistory {
         String[] projection = new String[] {
             columnName
         };
-        Cursor cursor = null;
-        try {
-            cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId), projection,
-                    null, null, null);
-            /* TODO: Handle cursor when null. */
-            if (cursor.moveToFirst()) {
-                return cursor;
-            }
-            throw new SQLException(new StringBuilder(
-                    "No row returned while querying for video sharing data with sharingId '")
-                    .append(sharingId).append("'!").toString());
-        } /*
-           * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
-           * exception.
-           */
-        catch (RuntimeException e) {
-            if (cursor != null) {
-                cursor.close();
-            }
-            throw e;
+        Uri contentUri = Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId);
+        Cursor cursor = mLocalContentResolver.query(contentUri, projection, null, null, null);
+        CursorUtil.assertCursorIsNotNull(cursor, contentUri);
+        if (!cursor.moveToNext()) {
+            return null;
         }
+        return cursor;
     }
 
-    private int getDataAsInt(Cursor cursor) {
+    /**
+     * Get geoloc sharing data
+     * 
+     * @param columnName Column name
+     * @param sharingId Sharing ID
+     * @return Cursor
+     */
+    private Cursor getGeolocSharingData(String columnName, String sharingId) throws SQLException {
+        String[] projection = new String[] {
+            columnName
+        };
+        Uri contentUri = Uri.withAppendedPath(GeolocSharingData.CONTENT_URI, sharingId);
+        Cursor cursor = mLocalContentResolver.query(contentUri, projection, null, null, null);
+        CursorUtil.assertCursorIsNotNull(cursor, contentUri);
+        if (!cursor.moveToNext()) {
+            return null;
+        }
+        return cursor;
+    }
+
+    private Integer getDataAsInteger(Cursor cursor) {
         try {
+            if (cursor.isNull(FIRST_COLUMN_IDX)) {
+                return null;
+            }
             return cursor.getInt(FIRST_COLUMN_IDX);
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
-    private long getDataAsLong(Cursor cursor) {
+    private Long getDataAsLong(Cursor cursor) {
         try {
+            if (cursor.isNull(FIRST_COLUMN_IDX)) {
+                return null;
+            }
             return cursor.getLong(FIRST_COLUMN_IDX);
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -204,40 +197,20 @@ public class RichCallHistory {
     }
 
     /**
-     * Get geoloc sharing data
+     * Read the total size of transferred image
      * 
-     * @param columnName Column name
-     * @param sharingId Sharing ID
+     * @param sharingId
+     * @return the total size
      */
-    private Cursor getGeolocSharingData(String columnName, String sharingId) throws SQLException {
-        String[] projection = new String[] {
-            columnName
-        };
-        Cursor cursor = null;
-        try {
-            cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(GeolocSharingData.CONTENT_URI, sharingId), projection,
-                    null, null, null);
-            /* TODO: Handle cursor when null. */
-            if (cursor.moveToFirst()) {
-                return cursor;
-            }
-            throw new SQLException(new StringBuilder(
-                    "No row returned while querying for geoloc sharing data with sharingId '")
-                    .append(sharingId).append("'!").toString());
-        } /*
-           * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
-           * exception.
-           */
-        catch (RuntimeException e) {
-            if (cursor != null) {
-                cursor.close();
-            }
-            throw e;
+    private Long getImageSharingTotalSize(String sharingId) {
+        Cursor cursor = getImageTransferData(ImageSharingData.KEY_FILESIZE, sharingId);
+        if (cursor == null) {
+            return null;
         }
+        return getDataAsLong(cursor);
     }
 
-    /*--------------------- Video sharing methods ----------------------*/
+    /*--------------------- Video sharing update/add methods ----------------------*/
 
     /**
      * Add a new video sharing in the call history
@@ -281,8 +254,9 @@ public class RichCallHistory {
      * @param state New state
      * @param reasonCode Reason Code
      * @param duration
+     * @return number of updated rows
      */
-    public void setVideoSharingStateReasonCodeAndDuration(String sharingId,
+    public int setVideoSharingStateReasonCodeAndDuration(String sharingId,
             VideoSharing.State state, VideoSharing.ReasonCode reasonCode, long duration) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("Update video sharing state of sharing ")
@@ -293,9 +267,8 @@ public class RichCallHistory {
         values.put(VideoSharingData.KEY_STATE, state.toInt());
         values.put(VideoSharingData.KEY_REASON_CODE, reasonCode.toInt());
         values.put(VideoSharingData.KEY_DURATION, duration);
-
-        mLocalContentResolver.update(Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId),
-                values, null, null);
+        return mLocalContentResolver.update(
+                Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId), values, null, null);
     }
 
     /**
@@ -304,8 +277,9 @@ public class RichCallHistory {
      * @param sharingId sharing ID of the entry
      * @param state New state
      * @param reasonCode Reason Code
+     * @return number of updated rows
      */
-    public void setVideoSharingStateReasonCode(String sharingId, VideoSharing.State state,
+    public int setVideoSharingStateReasonCode(String sharingId, VideoSharing.State state,
             VideoSharing.ReasonCode reasonCode) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("Update video sharing state of sharing ")
@@ -315,9 +289,8 @@ public class RichCallHistory {
         ContentValues values = new ContentValues();
         values.put(VideoSharingData.KEY_STATE, state.toInt());
         values.put(VideoSharingData.KEY_REASON_CODE, reasonCode.toInt());
-
-        mLocalContentResolver.update(Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId),
-                values, null, null);
+        return mLocalContentResolver.update(
+                Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId), values, null, null);
     }
 
     /**
@@ -325,20 +298,20 @@ public class RichCallHistory {
      * 
      * @param sharingId
      * @param duration Duration
+     * @return number of updated rows
      */
-    /* TODO: Check if really dead code or somebody is missing calling this method. */
-    public void setVideoSharingDuration(String sharingId, long duration) {
+    public int setVideoSharingDuration(String sharingId, long duration) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("Update duration of sharing ").append(sharingId)
                     .append(" to ").append(duration).toString());
         }
         ContentValues values = new ContentValues();
         values.put(VideoSharingData.KEY_DURATION, duration);
-        mLocalContentResolver.update(Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId),
-                values, null, null);
+        return mLocalContentResolver.update(
+                Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId), values, null, null);
     }
 
-    /*--------------------- Image sharing methods ----------------------*/
+    /*--------------------- Image sharing update / add methods ----------------------*/
 
     /**
      * Add a new image sharing in the call history
@@ -381,8 +354,9 @@ public class RichCallHistory {
      * @param sharingId
      * @param state New state
      * @param reasonCode Reason Code
+     * @return number of updated rows
      */
-    public void setImageSharingStateAndReasonCode(String sharingId, ImageSharing.State state,
+    public int setImageSharingStateAndReasonCode(String sharingId, ImageSharing.State state,
             ImageSharing.ReasonCode reasonCode) {
         if (logger.isActivated()) {
             logger.debug("Update status of image sharing " + sharingId + " to " + state);
@@ -392,44 +366,13 @@ public class RichCallHistory {
         values.put(ImageSharingData.KEY_REASON_CODE, reasonCode.toInt());
         if (state == ImageSharing.State.TRANSFERRED) {
             // Update the size of bytes if fully transferred
-            long total = getImageSharingTotalSize(sharingId);
-            if (total != 0) {
+            Long total = getImageSharingTotalSize(sharingId);
+            if (total != null && total != 0) {
                 values.put(ImageSharingData.KEY_TRANSFERRED, total);
             }
         }
-        mLocalContentResolver.update(Uri.withAppendedPath(ImageSharingData.CONTENT_URI, sharingId),
-                values, null, null);
-    }
-
-    /**
-     * Read the total size of transferred image
-     * 
-     * @param sharingId
-     * @return the total size (or 0 if failed)
-     */
-    /*
-     * TODO: Rewrite this to use getDataAsLong(getImageSharingData(ImageSharingData.KEY_FILESIZE,
-     * sharingId) and align calling methods with changed behavior.
-     */
-    public long getImageSharingTotalSize(String sharingId) {
-        Cursor c = null;
-        try {
-            String[] projection = new String[] {
-                ImageSharingData.KEY_FILESIZE
-            };
-            c = mLocalContentResolver.query(
-                    Uri.withAppendedPath(ImageSharingData.CONTENT_URI, sharingId), projection,
-                    null, null, null);
-            if (c.moveToFirst()) {
-                return c.getLong(0);
-            }
-        } catch (Exception e) {
-        } finally {
-            if (c != null) {
-                c.close();
-            }
-        }
-        return 0L;
+        return mLocalContentResolver.update(
+                Uri.withAppendedPath(ImageSharingData.CONTENT_URI, sharingId), values, null, null);
     }
 
     /**
@@ -438,14 +381,14 @@ public class RichCallHistory {
      * @param sharingId Session ID of the entry
      * @param currentSize Current size
      */
-    public void setImageSharingProgress(String sharingId, long currentSize) {
+    public int setImageSharingProgress(String sharingId, long currentSize) {
         ContentValues values = new ContentValues();
         values.put(ImageSharingData.KEY_TRANSFERRED, currentSize);
-        mLocalContentResolver.update(Uri.withAppendedPath(ImageSharingData.CONTENT_URI, sharingId),
-                values, null, null);
+        return mLocalContentResolver.update(
+                Uri.withAppendedPath(ImageSharingData.CONTENT_URI, sharingId), values, null, null);
     }
 
-    /*--------------------- Geoloc sharing methods ----------------------*/
+    /*--------------------- Geoloc sharing update / add methods ----------------------*/
 
     /**
      * Add an incoming geoloc sharing
@@ -501,19 +444,13 @@ public class RichCallHistory {
      * @param sharingId Sharing ID
      * @param geoloc Geolococation
      */
-    public void setGeolocSharingTransferred(String sharingId, Geoloc geoloc) {
+    public int setGeolocSharingTransferred(String sharingId, Geoloc geoloc) {
         ContentValues values = new ContentValues();
         values.put(GeolocSharingData.KEY_CONTENT, geoloc.toString());
         values.put(GeolocSharingData.KEY_STATE, GeolocSharing.State.TRANSFERRED.toInt());
         values.put(GeolocSharingData.KEY_REASON_CODE, GeolocSharing.ReasonCode.UNSPECIFIED.toInt());
-        if (mLocalContentResolver.update(
-                Uri.withAppendedPath(GeolocSharingData.CONTENT_URI, sharingId), values, null, null) < 1) {
-            /* TODO: Exception throwing should be implemented here in CR037 */
-            if (logger.isActivated()) {
-                logger.warn(new StringBuilder("There was no geoloc sharing for sharingId '")
-                        .append(sharingId).append("' to update!").toString());
-            }
-        }
+        return mLocalContentResolver.update(
+                Uri.withAppendedPath(GeolocSharingData.CONTENT_URI, sharingId), values, null, null);
     }
 
     /**
@@ -523,19 +460,13 @@ public class RichCallHistory {
      * @param state Geoloc sharing state
      * @param reasonCode Reason code of the state
      */
-    public void setGeolocSharingStateAndReasonCode(String sharingId, GeolocSharing.State state,
+    public int setGeolocSharingStateAndReasonCode(String sharingId, GeolocSharing.State state,
             GeolocSharing.ReasonCode reasonCode) {
         ContentValues values = new ContentValues();
         values.put(GeolocSharingData.KEY_STATE, state.toInt());
         values.put(GeolocSharingData.KEY_REASON_CODE, reasonCode.toInt());
-        if (mLocalContentResolver.update(
-                Uri.withAppendedPath(GeolocSharingData.CONTENT_URI, sharingId), values, null, null) < 1) {
-            /* TODO: Exception throwing should be implemented here in CR037 */
-            if (logger.isActivated()) {
-                logger.warn(new StringBuilder("There was no geoloc sharing for sharingId '")
-                        .append(sharingId).append("' to update!").toString());
-            }
-        }
+        return mLocalContentResolver.update(
+                Uri.withAppendedPath(GeolocSharingData.CONTENT_URI, sharingId), values, null, null);
     }
 
     /**
@@ -545,12 +476,11 @@ public class RichCallHistory {
      * @return state
      */
     public GeolocSharing.State getGeolocSharingState(String sharingId) {
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Get geoloc sharing state for ").append(sharingId)
-                    .append(".").toString());
+        Cursor cursor = getGeolocSharingData(GeolocSharingData.KEY_STATE, sharingId);
+        if (cursor == null) {
+            return null;
         }
-        return GeolocSharing.State.valueOf(getDataAsInt(getGeolocSharingData(
-                GeolocSharingData.KEY_STATE, sharingId)));
+        return GeolocSharing.State.valueOf(getDataAsInteger(cursor));
     }
 
     /**
@@ -560,12 +490,11 @@ public class RichCallHistory {
      * @return reason code
      */
     public GeolocSharing.ReasonCode getGeolocSharingReasonCode(String sharingId) {
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Get geoloc sharing reason code for ").append(sharingId)
-                    .append(".").toString());
+        Cursor cursor = getGeolocSharingData(GeolocSharingData.KEY_REASON_CODE, sharingId);
+        if (cursor == null) {
+            return null;
         }
-        return GeolocSharing.ReasonCode.valueOf(getDataAsInt(getGeolocSharingData(
-                GeolocSharingData.KEY_REASON_CODE, sharingId)));
+        return GeolocSharing.ReasonCode.valueOf(getDataAsInteger(cursor));
     }
 
     public Cursor getInterruptedGeolocSharings() {
@@ -581,37 +510,6 @@ public class RichCallHistory {
     public Cursor getInterruptedVideoSharings() {
         return mLocalContentResolver.query(VideoSharingData.CONTENT_URI, null,
                 SELECTION_BY_INTERRUPTED_VIDEO_SHARINGS, null, ORDER_BY_TIMESTAMP_ASC);
-    }
-
-    /**
-     * Get geolocation sharing info from its unique Id
-     * 
-     * @param sharingId
-     * @return Cursor the caller of this method has to close the cursor if a cursor is returned
-     */
-    public Cursor getGeolocSharingData(String sharingId) {
-        Cursor cursor = null;
-        try {
-            cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(GeolocSharingData.CONTENT_URI, sharingId), null, null,
-                    null, null);
-            /* TODO: Handle cursor when null. */
-            if (cursor.moveToFirst()) {
-                return cursor;
-            }
-            throw new SQLException(new StringBuilder(
-                    "No row returned while querying for geoloc sharing data with sharingId '")
-                    .append(sharingId).append("'!").toString());
-        } /*
-           * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
-           * exception.
-           */
-        catch (RuntimeException e) {
-            if (cursor != null) {
-                cursor.close();
-            }
-            throw e;
-        }
     }
 
     /**
@@ -633,8 +531,11 @@ public class RichCallHistory {
         if (logger.isActivated()) {
             logger.debug("Get image transfer state for sharingId ".concat(sharingId));
         }
-        return ImageSharing.State.valueOf(getDataAsInt(getImageTransferData(
-                ImageSharingData.KEY_STATE, sharingId)));
+        Cursor cursor = getImageTransferData(ImageSharingData.KEY_STATE, sharingId);
+        if (cursor == null) {
+            return null;
+        }
+        return ImageSharing.State.valueOf(getDataAsInteger(cursor));
     }
 
     /**
@@ -647,8 +548,11 @@ public class RichCallHistory {
         if (logger.isActivated()) {
             logger.debug("Get image transfer reason code for sharingId ".concat(sharingId));
         }
-        return ImageSharing.ReasonCode.valueOf(getDataAsInt(getImageTransferData(
-                ImageSharingData.KEY_REASON_CODE, sharingId)));
+        Cursor cursor = getImageTransferData(ImageSharingData.KEY_REASON_CODE, sharingId);
+        if (cursor == null) {
+            return null;
+        }
+        return ImageSharing.ReasonCode.valueOf(getDataAsInteger(cursor));
     }
 
     /**
@@ -661,8 +565,11 @@ public class RichCallHistory {
         if (logger.isActivated()) {
             logger.debug("Get video share state for sharingId ".concat(sharingId));
         }
-        return VideoSharing.State.valueOf(getDataAsInt(getVideoSharingData(
-                VideoSharingData.KEY_STATE, sharingId)));
+        Cursor cursor = getVideoSharingData(VideoSharingData.KEY_STATE, sharingId);
+        if (cursor == null) {
+            return null;
+        }
+        return VideoSharing.State.valueOf(getDataAsInteger(cursor));
     }
 
     /**
@@ -675,8 +582,38 @@ public class RichCallHistory {
         if (logger.isActivated()) {
             logger.debug("Get video share reason code for sharingId ".concat(sharingId));
         }
-        return VideoSharing.ReasonCode.valueOf(getDataAsInt(getVideoSharingData(
-                VideoSharingData.KEY_REASON_CODE, sharingId)));
+        Cursor cursor = getVideoSharingData(VideoSharingData.KEY_REASON_CODE, sharingId);
+        if (cursor == null) {
+            return null;
+        }
+        return VideoSharing.ReasonCode.valueOf(getDataAsInteger(cursor));
+    }
+
+    /**
+     * Returns video sharing duration
+     * 
+     * @param sharingId
+     * @return duration
+     */
+    public Long getVideoSharingDuration(String sharingId) {
+        Cursor cursor = getVideoSharingData(VideoSharingData.KEY_DURATION, sharingId);
+        if (cursor == null) {
+            return null;
+        }
+        return getDataAsLong(cursor);
+    }
+
+    /**
+     * Get geolocation sharing info from its unique Id
+     * 
+     * @param sharingId
+     * @return Cursor the caller of this method has to close the cursor if a cursor is returned
+     */
+    public Cursor getGeolocSharingData(String sharingId) {
+        Uri contentUri = Uri.withAppendedPath(GeolocSharingData.CONTENT_URI, sharingId);
+        Cursor cursor = mLocalContentResolver.query(contentUri, null, null, null, null);
+        CursorUtil.assertCursorIsNotNull(cursor, contentUri);
+        return cursor;
     }
 
     /**
@@ -686,28 +623,10 @@ public class RichCallHistory {
      * @return Cursor the caller of this method has to close the cursor if a cursor is returned
      */
     public Cursor getImageTransferData(String sharingId) {
-        Cursor cursor = null;
-        try {
-            cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(ImageSharingData.CONTENT_URI, sharingId), null, null,
-                    null, null);
-            /* TODO: Handle cursor when null. */
-            if (cursor.moveToFirst()) {
-                return cursor;
-            }
-            throw new SQLException(new StringBuilder(
-                    "No row returned while querying for image transfer data with sharingId '")
-                    .append(sharingId).append("'!").toString());
-        } /*
-           * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
-           * exception.
-           */
-        catch (RuntimeException e) {
-            if (cursor != null) {
-                cursor.close();
-            }
-            throw e;
-        }
+        Uri contentUri = Uri.withAppendedPath(ImageSharingData.CONTENT_URI, sharingId);
+        Cursor cursor = mLocalContentResolver.query(contentUri, null, null, null, null);
+        CursorUtil.assertCursorIsNotNull(cursor, contentUri);
+        return cursor;
     }
 
     /**
@@ -717,37 +636,10 @@ public class RichCallHistory {
      * @return Cursor the caller of this method has to close the cursor if a cursor is returned
      */
     public Cursor getVideoSharingData(String sharingId) {
-        Cursor cursor = null;
-        try {
-            cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId), null, null,
-                    null, null);
-            /* TODO: Handle cursor when null. */
-            if (cursor.moveToFirst()) {
-                return cursor;
-            }
-            throw new SQLException(new StringBuilder(
-                    "No row returned while querying for video sharing data with sharingId '")
-                    .append(sharingId).append("'!").toString());
-        } /*
-           * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
-           * exception.
-           */
-        catch (RuntimeException e) {
-            if (cursor != null) {
-                cursor.close();
-            }
-            throw e;
-        }
+        Uri contentUri = Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId);
+        Cursor cursor = mLocalContentResolver.query(contentUri, null, null, null, null);
+        CursorUtil.assertCursorIsNotNull(cursor, contentUri);
+        return cursor;
     }
 
-    /**
-     * Returns video sharing duration
-     * 
-     * @param sharingId
-     * @return duration
-     */
-    public long getVideoSharingDuration(String sharingId) {
-        return getDataAsLong(getVideoSharingData(VideoSharingData.KEY_DURATION, sharingId));
-    }
 }

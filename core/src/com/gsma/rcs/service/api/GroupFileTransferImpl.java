@@ -45,7 +45,6 @@ import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 import com.gsma.services.rcs.filetransfer.IFileTransfer;
 
-import android.database.SQLException;
 import android.net.Uri;
 import android.os.RemoteException;
 
@@ -834,17 +833,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             if (session != null) {
                 reasonCode = getRcsReasonCode(session);
             } else {
-                try {
-                    reasonCode = mPersistentStorage.getReasonCode();
-                } catch (SQLException e) {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug(new StringBuilder(
-                                "Cannot resume transfer with file transfer Id '")
-                                .append(mFileTransferId).append("' as it does not exist in DB.")
-                                .toString());
-                    }
-                    return false;
-                }
+                reasonCode = mPersistentStorage.getReasonCode();
             }
             if (ReasonCode.PAUSED_BY_USER != reasonCode) {
                 if (sLogger.isActivated()) {

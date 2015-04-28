@@ -23,7 +23,6 @@
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import com.gsma.rcs.core.content.MmContent;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
@@ -38,7 +37,6 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.filetransfer.FileTransfer;
 
 /**
  * Abstract file transfer HTTP session
@@ -171,41 +169,28 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
 
     @Override
     public void terminateSession(TerminationReason reason) {
-        /* If reason is TERMINATION_BY_SYSTEM and session already started, then it's a pause */
-        String fileTransferId = getFileTransferId();
-        FileTransfer.State state = mMessagingLog.getFileTransferState(fileTransferId);
-        /* If reason is TERMINATION_BY_SYSTEM and session already started, then it's a pause */
-        boolean logActivated = sLogger.isActivated();
-        if (logActivated) {
-            sLogger.error("terminateSession reason=".concat(reason.toString()));
+        if (sLogger.isActivated()) {
+            sLogger.debug("terminateSession reason=".concat(reason.toString()));
         }
 
+        /* If reason is TERMINATION_BY_SYSTEM and session already started, then it's a pause */
         if (TerminationReason.TERMINATION_BY_SYSTEM == reason) {
-            switch (state) {
-                case INVITED:
-                    closeHttpSession(reason);
-                    return;
-                case STARTED:
-                    if (!isInitiatedByRemote()
-                            && mMessagingLog.getFileTransferUploadTid(fileTransferId) == null) {
-                        break;
-                    }
-                    closeHttpSession(reason);
-                    if (logActivated) {
-                        sLogger.info("Pause the session (session terminated, but can be resumed)");
-                    }
-
+            if (getDialogPath() != null && getDialogPath().isSigEstablished()) {
+                closeHttpSession(reason);
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Pause the session (session terminated, but can be resumed)");
+                }
+                if (isSessionAccepted()) {
                     ContactId contact = getRemoteContact();
                     for (ImsSessionListener listener : getListeners()) {
                         ((FileSharingSessionListener) listener)
                                 .handleFileTransferPausedBySystem(contact);
                     }
-                    return;
-                case PAUSED:
-                    closeHttpSession(reason);
-                    return;
-                default:
-                    break;
+                }
+                return;
+            }
+            if (isInitiatedByRemote() || isFileTransferPaused()) {
+                closeHttpSession(reason);
             }
         }
         super.terminateSession(reason);

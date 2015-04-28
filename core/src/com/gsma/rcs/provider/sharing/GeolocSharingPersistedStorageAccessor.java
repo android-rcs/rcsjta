@@ -16,6 +16,8 @@
 
 package com.gsma.rcs.provider.sharing;
 
+import com.gsma.rcs.provider.CursorUtil;
+import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsService.Direction;
@@ -64,7 +66,10 @@ public class GeolocSharingPersistedStorageAccessor {
         Cursor cursor = null;
         try {
             cursor = mRichCallLog.getGeolocSharingData(mSharingId);
-            /* TODO: Handle cursor when null. */
+            if (!cursor.moveToNext()) {
+                throw new ServerApiPersistentStorageException(
+                        "Data not found for video sharing ".concat(mSharingId));
+            }
             String contact = cursor.getString(cursor
                     .getColumnIndexOrThrow(GeolocSharingData.KEY_CONTACT));
             if (contact != null) {
@@ -80,9 +85,7 @@ public class GeolocSharingPersistedStorageAccessor {
             mTimestamp = cursor.getLong(cursor
                     .getColumnIndexOrThrow(GeolocSharingData.KEY_TIMESTAMP));
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -113,11 +116,21 @@ public class GeolocSharingPersistedStorageAccessor {
     }
 
     public State getState() {
-        return mRichCallLog.getGeolocSharingState(mSharingId);
+        State state = mRichCallLog.getGeolocSharingState(mSharingId);
+        if (state == null) {
+            throw new ServerApiPersistentStorageException(
+                    "State not found for geoloc sharing ".concat(mSharingId));
+        }
+        return state;
     }
 
     public ReasonCode getReasonCode() {
-        return mRichCallLog.getGeolocSharingReasonCode(mSharingId);
+        ReasonCode reasonCode = mRichCallLog.getGeolocSharingReasonCode(mSharingId);
+        if (reasonCode == null) {
+            throw new ServerApiPersistentStorageException(
+                    "Reason code not found for geoloc sharing ".concat(mSharingId));
+        }
+        return reasonCode;
     }
 
     public Direction getDirection() {

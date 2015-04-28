@@ -17,6 +17,8 @@
 package com.gsma.rcs.provider.sharing;
 
 import com.gsma.rcs.core.content.VideoContent;
+import com.gsma.rcs.provider.CursorUtil;
+import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
@@ -87,7 +89,10 @@ public class VideoSharingPersistedStorageAccessor {
         Cursor cursor = null;
         try {
             cursor = mRichCallLog.getVideoSharingData(mSharingId);
-            /* TODO: Handle cursor when null. */
+            if (!cursor.moveToNext()) {
+                throw new ServerApiPersistentStorageException(
+                        "Data not found for video sharing ".concat(mSharingId));
+            }
             String contact = cursor.getString(cursor
                     .getColumnIndexOrThrow(VideoSharingData.KEY_CONTACT));
             if (contact != null) {
@@ -103,9 +108,7 @@ public class VideoSharingPersistedStorageAccessor {
             mTimestamp = cursor.getLong(cursor
                     .getColumnIndexOrThrow(VideoSharingData.KEY_TIMESTAMP));
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -131,7 +134,12 @@ public class VideoSharingPersistedStorageAccessor {
      * @return state
      */
     public State getState() {
-        return mRichCallLog.getVideoSharingState(mSharingId);
+        State state = mRichCallLog.getVideoSharingState(mSharingId);
+        if (state == null) {
+            throw new ServerApiPersistentStorageException(
+                    "State not found for video sharing ".concat(mSharingId));
+        }
+        return state;
     }
 
     /**
@@ -140,7 +148,12 @@ public class VideoSharingPersistedStorageAccessor {
      * @return reason code
      */
     public ReasonCode getReasonCode() {
-        return mRichCallLog.getVideoSharingReasonCode(mSharingId);
+        ReasonCode reasonCode = mRichCallLog.getVideoSharingReasonCode(mSharingId);
+        if (reasonCode == null) {
+            throw new ServerApiPersistentStorageException(
+                    "Reason code not found for video sharing ".concat(mSharingId));
+        }
+        return reasonCode;
     }
 
     /**
@@ -247,6 +260,11 @@ public class VideoSharingPersistedStorageAccessor {
      * @return duration
      */
     public long getDuration() {
-        return mRichCallLog.getVideoSharingDuration(mSharingId);
+        Long duration = mRichCallLog.getVideoSharingDuration(mSharingId);
+        if (duration == null) {
+            throw new ServerApiPersistentStorageException(
+                    "Duration not found for video sharing ".concat(mSharingId));
+        }
+        return duration;
     }
 }
