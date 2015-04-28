@@ -49,8 +49,6 @@ public class ChatServiceConfiguration {
      * Does the UX should alert the user that messages are handled differently when the Store and
      * Forward functionality is involved. It returns True if user should be informed when sending
      * message to offline user.
-     * <p>
-     * This should be used with isChatSf.
      * 
      * @return Boolean
      * @throws RcsServiceException
