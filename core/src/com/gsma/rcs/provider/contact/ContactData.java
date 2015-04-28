@@ -49,6 +49,47 @@ import android.net.Uri;
     /* package private */static final String KEY_CONTACT = CapabilitiesLog.CONTACT;
 
     /**
+     * Image sharing capability. Values: 1 (true), 0 (false)
+     */
+    /* package private */static final String KEY_CAPABILITY_IMAGE_SHARE = CapabilitiesLog.CAPABILITY_IMAGE_SHARE;
+
+    /**
+     * Video sharing capability. Values: 1 (true), 0 (false)
+     */
+    /* package private */static final String KEY_CAPABILITY_VIDEO_SHARE = CapabilitiesLog.CAPABILITY_VIDEO_SHARE;
+
+    /**
+     * File transfer capability. Values: 1 (true), 0 (false)
+     */
+    /* package private */static final String KEY_CAPABILITY_FILE_TRANSFER = CapabilitiesLog.CAPABILITY_FILE_TRANSFER;
+
+    /**
+     * IM/Chat capability. Values: 1 (true), 0 (false)
+     */
+    /* package private */static final String KEY_CAPABILITY_IM_SESSION = CapabilitiesLog.CAPABILITY_IM_SESSION;
+
+    /**
+     * Geolocation push capability. Values: 1 (true), 0 (false)
+     */
+    /* package private */static final String KEY_CAPABILITY_GEOLOC_PUSH = CapabilitiesLog.CAPABILITY_GEOLOC_PUSH;
+
+    /**
+     * Supported RCS extensions. List of features tags semicolon separated (e.g. <TAG1>;<TAG2>;
+     * ;TAGn)
+     */
+    /* package private */static final String KEY_CAPABILITY_EXTENSIONS = CapabilitiesLog.CAPABILITY_EXTENSIONS;
+
+    /**
+     * Is an automata. Values: 1 (true), 0 (false).
+     */
+    /* package private */static final String KEY_AUTOMATA = CapabilitiesLog.AUTOMATA;
+
+    /**
+     * Timestamp of the last capability response
+     */
+    /* package private */static final String KEY_CAPABILITY_TIMESTAMP_LAST_RESPONSE = CapabilitiesLog.TIMESTAMP;
+
+    /**
      * Column Name
      */
     /* package private */static final String KEY_DISPLAY_NAME = "display_name";
@@ -144,26 +185,6 @@ import android.net.Uri;
     /* package private */static final String KEY_CAPABILITY_CS_VIDEO = "capability_cs_video";
 
     /**
-     * Image sharing capability. Values: 1 (true), 0 (false)
-     */
-    /* package private */static final String KEY_CAPABILITY_IMAGE_SHARE = CapabilitiesLog.CAPABILITY_IMAGE_SHARE;
-
-    /**
-     * Video sharing capability. Values: 1 (true), 0 (false)
-     */
-    /* package private */static final String KEY_CAPABILITY_VIDEO_SHARE = CapabilitiesLog.CAPABILITY_VIDEO_SHARE;
-
-    /**
-     * IM/Chat capability. Values: 1 (true), 0 (false)
-     */
-    /* package private */static final String KEY_CAPABILITY_IM_SESSION = CapabilitiesLog.CAPABILITY_IM_SESSION;
-
-    /**
-     * File transfer capability. Values: 1 (true), 0 (false)
-     */
-    /* package private */static final String KEY_CAPABILITY_FILE_TRANSFER = CapabilitiesLog.CAPABILITY_FILE_TRANSFER;
-
-    /**
      * Column name
      */
     /* package private */static final String KEY_CAPABILITY_PRESENCE_DISCOVERY = "capability_presence_discovery";
@@ -174,11 +195,6 @@ import android.net.Uri;
     /* package private */static final String KEY_CAPABILITY_SOCIAL_PRESENCE = "capability_social_presence";
 
     /**
-     * Geolocation push capability. Values: 1 (true), 0 (false)
-     */
-    /* package private */static final String KEY_CAPABILITY_GEOLOC_PUSH = CapabilitiesLog.CAPABILITY_GEOLOC_PUSH;
-
-    /**
      * Column name
      */
     /* package private */static final String KEY_CAPABILITY_FILE_TRANSFER_HTTP = "capability_file_transfer_http";
@@ -187,12 +203,6 @@ import android.net.Uri;
      * Column name
      */
     /* package private */static final String KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL = "capability_file_transfer_thumbnail";
-
-    /**
-     * Supported RCS extensions. List of features tags semicolon separated (e.g. <TAG1>;<TAG2>;
-     * ;TAGn)
-     */
-    /* package private */static final String KEY_CAPABILITY_EXTENSIONS = CapabilitiesLog.CAPABILITY_EXTENSIONS;
 
     /**
      * Column name
@@ -221,14 +231,14 @@ import android.net.Uri;
     /* package private */static final String KEY_CAPABILITY_FILE_TRANSFER_SF = "capability_file_transfer_sf";
 
     /**
-     * Is an automata. Values: 1 (true), 0 (false).
+     * Column name
      */
-    /* package private */static final String KEY_AUTOMATA = CapabilitiesLog.AUTOMATA;
+    /* package private */static final String KEY_BLOCKING_TIMESTAMP = "blocking_timestamp";
 
     /**
-     * Timestamp of the last capability response
+     * Column name
      */
-    /* package private */static final String KEY_CAPABILITY_TIMESTAMP_LAST_RESPONSE = CapabilitiesLog.TIMESTAMP;
+    /* package private */static final String KEY_BLOCKED = "blocked";
 
     /**
      * TRUE value
@@ -239,16 +249,6 @@ import android.net.Uri;
      * FALSE value
      */
     /* package private */static final String FALSE_VALUE = Boolean.toString(false);
-
-    /**
-     * Column name
-     */
-    /* package private */static final String KEY_BLOCKING_TIMESTAMP = "blocking_timestamp";
-
-    /**
-     * Column name
-     */
-    /* package private */static final String KEY_BLOCKED = "blocked";
 
     /**
      * BLOCKED value is not set

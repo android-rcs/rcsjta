@@ -153,16 +153,6 @@ public class FileTransferData {
     /* package private */static final String KEY_FILEICON_MIME_TYPE = FileTransferLog.FILEICON_MIME_TYPE;
 
     /**
-     * The upload transaction ID (hidden field from client applications)
-     */
-    /* package private */static final String KEY_UPLOAD_TID = "upload_tid";
-
-    /**
-     * The download server address (hidden field from client applications)
-     */
-    /* package private */static final String KEY_DOWNLOAD_URI = "download_uri";
-
-    /**
      * The time for when file on the content server is no longer valid to download.
      */
     /* package private */static final String KEY_FILE_EXPIRATION = FileTransferLog.FILE_EXPIRATION;
@@ -173,9 +163,14 @@ public class FileTransferData {
     /* package private */static final String KEY_FILEICON_EXPIRATION = FileTransferLog.FILEICON_EXPIRATION;
 
     /**
-     * @see FileTransferLog#UNKNOWN_EXPIRATION
+     * The upload transaction ID (hidden field from client applications)
      */
-    public static final long UNKNOWN_EXPIRATION = FileTransferLog.UNKNOWN_EXPIRATION;
+    /* package private */static final String KEY_UPLOAD_TID = "upload_tid";
+
+    /**
+     * The download server address (hidden field from client applications)
+     */
+    /* package private */static final String KEY_DOWNLOAD_URI = "download_uri";
 
     /**
      * The remote SIP instance ID to fill the accept contact header of the SIP delivery
@@ -189,4 +184,9 @@ public class FileTransferData {
      * expiration.
      */
     /* package private */static final String KEY_DELIVERY_EXPIRATION = "delivery_expiration";
+
+    /**
+     * @see FileTransferLog#UNKNOWN_EXPIRATION
+     */
+    public static final long UNKNOWN_EXPIRATION = FileTransferLog.UNKNOWN_EXPIRATION;
 }

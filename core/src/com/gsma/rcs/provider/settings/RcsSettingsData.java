@@ -44,17 +44,18 @@ public class RcsSettingsData {
     /**
      * Content provider URI
      */
-    public static final Uri CONTENT_URI = Uri.parse("content://com.gsma.rcs.setting/setting");
+    /* package private */static final Uri CONTENT_URI = Uri
+            .parse("content://com.gsma.rcs.setting/setting");
 
     /**
      * Key of the Rcs configuration parameter
      */
-    static final String KEY_KEY = "key";
+    /* package private */static final String KEY_KEY = "key";
 
     /**
      * Value of the Rcs configuration parameter
      */
-    static final String KEY_VALUE = "value";
+    /* package private */static final String KEY_VALUE = "value";
 
     /**
      * Default group chat conference URI

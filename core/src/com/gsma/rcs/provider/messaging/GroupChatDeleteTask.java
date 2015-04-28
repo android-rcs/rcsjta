@@ -21,7 +21,6 @@ import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.provider.DeleteTask;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.service.api.ChatServiceImpl;
-import com.gsma.services.rcs.chat.ChatLog;
 
 import java.util.Set;
 

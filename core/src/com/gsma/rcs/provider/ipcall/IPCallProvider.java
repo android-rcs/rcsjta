@@ -88,7 +88,7 @@ public class IPCallProvider extends ContentProvider {
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 6;
+        private static final int DATABASE_VERSION = 7;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -104,6 +104,7 @@ public class IPCallProvider extends ContentProvider {
                     .append(IPCallData.KEY_REASON_CODE).append(" INTEGER NOT NULL,")
                     .append(IPCallData.KEY_DIRECTION).append(" INTEGER NOT NULL,")
                     .append(IPCallData.KEY_TIMESTAMP).append(" INTEGER NOT NULL,")
+                    .append(IPCallData.KEY_DURATION).append(" INTEGER NOT NULL,")
                     .append(IPCallData.KEY_VIDEO_ENCODING).append(" TEXT,")
                     .append(IPCallData.KEY_AUDIO_ENCODING).append(" TEXT,")
                     .append(IPCallData.KEY_WIDTH).append(" INTEGER NOT NULL,")

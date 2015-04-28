@@ -154,12 +154,16 @@ public class IPCallHistory {
         values.put(IPCallData.KEY_CONTACT, contact.toString());
         values.put(IPCallData.KEY_DIRECTION, direction.toInt());
         values.put(IPCallData.KEY_TIMESTAMP, timestamp);
+        values.put(IPCallData.KEY_DURATION, 0);
         values.put(IPCallData.KEY_STATE, state.toInt());
         values.put(IPCallData.KEY_REASON_CODE, reasonCode.toInt());
         if (videocontent != null) {
             values.put(IPCallData.KEY_VIDEO_ENCODING, videocontent.getEncoding());
             values.put(IPCallData.KEY_WIDTH, videocontent.getWidth());
             values.put(IPCallData.KEY_HEIGHT, videocontent.getHeight());
+        } else {
+            values.put(IPCallData.KEY_WIDTH, 0);
+            values.put(IPCallData.KEY_HEIGHT, 0);
         }
         if (audiocontent != null) {
             values.put(IPCallData.KEY_AUDIO_ENCODING, audiocontent.getEncoding());

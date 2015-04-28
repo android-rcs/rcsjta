@@ -62,6 +62,11 @@ import android.net.Uri;
     /**
      * Column name
      */
+    /* package private */static final String KEY_DURATION = IPCallLog.DURATION;
+
+    /**
+     * Column name
+     */
     /* package private */static final String KEY_STATE = IPCallLog.STATE;
 
     /**

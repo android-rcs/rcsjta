@@ -94,24 +94,32 @@ public class ChatProvider extends ContentProvider {
     public static final String DATABASE_NAME = "chat.db";
 
     /**
-     * String to restrict projection for exposed URI to a set of columns
+     * String to allow projection for exposed group chat URI to a set of columns.
      */
-    private static final String[] RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS = new String[] {
+    private static final String[] GROUP_CHAT_COLUMNS_ALLOWED_FOR_EXTERNAL_ACCESS = new String[] {
             GroupChatData.KEY_BASECOLUMN_ID, GroupChatData.KEY_CHAT_ID, GroupChatData.KEY_CONTACT,
             GroupChatData.KEY_STATE, GroupChatData.KEY_SUBJECT, GroupChatData.KEY_DIRECTION,
             GroupChatData.KEY_TIMESTAMP, GroupChatData.KEY_REASON_CODE,
             GroupChatData.KEY_PARTICIPANTS
     };
 
+    private static final Set<String> GROUP_CHAT_COLUMNS_SET_ALLOWED_FOR_EXTERNAL_ACCESS = new HashSet<String>(
+            Arrays.asList(GROUP_CHAT_COLUMNS_ALLOWED_FOR_EXTERNAL_ACCESS));
+
     /**
-     * Columns that are not exposed through external URI
+     * String to allow projection for exposed message URI to a set of columns.
      */
-    private static final String[] COLUMNS_HIDDEN_FOR_EXTERNAL_ACCESS = new String[] {
-            GroupChatData.KEY_REJOIN_ID, GroupChatData.KEY_USER_ABORTION
+    private static final String[] MESSAGE_COLUMNS_ALLOWED_FOR_EXTERNAL_ACCESS = new String[] {
+            MessageData.KEY_BASECOLUMN_ID, MessageData.KEY_CHAT_ID, MessageData.KEY_CONTACT,
+            MessageData.KEY_CONTENT, MessageData.KEY_DIRECTION, MessageData.KEY_EXPIRED_DELIVERY,
+            MessageData.KEY_MESSAGE_ID, MessageData.KEY_MIME_TYPE, MessageData.KEY_READ_STATUS,
+            MessageData.KEY_REASON_CODE, MessageData.KEY_STATUS, MessageData.KEY_TIMESTAMP,
+            MessageData.KEY_TIMESTAMP_DELIVERED, MessageData.KEY_TIMESTAMP_DISPLAYED,
+            MessageData.KEY_TIMESTAMP_SENT
     };
 
-    private static final Set<String> COLUMN_SET_HIDDEN_FOR_EXTERNAL_ACCESS = new HashSet<String>(
-            Arrays.asList(COLUMNS_HIDDEN_FOR_EXTERNAL_ACCESS));
+    private static final Set<String> MESSAGE_COLUMNS_SET_ALLOWED_FOR_EXTERNAL_ACCESS = new HashSet<String>(
+            Arrays.asList(MESSAGE_COLUMNS_ALLOWED_FOR_EXTERNAL_ACCESS));
 
     private static final class UriType {
 
@@ -271,13 +279,28 @@ public class ChatProvider extends ContentProvider {
         return DatabaseUtils.appendSelectionArgs(messageSelectionArg, selectionArgs);
     }
 
-    private String[] restrictProjectionToExternallyDefinedColumns(String[] projection)
+    private String[] restrictGroupChatProjectionToExternallyDefinedColumns(String[] projection)
             throws UnsupportedOperationException {
         if (projection == null || projection.length == 0) {
-            return RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS;
+            return GROUP_CHAT_COLUMNS_ALLOWED_FOR_EXTERNAL_ACCESS;
         }
         for (String projectedColumn : projection) {
-            if (COLUMN_SET_HIDDEN_FOR_EXTERNAL_ACCESS.contains(projectedColumn)) {
+            if (!GROUP_CHAT_COLUMNS_SET_ALLOWED_FOR_EXTERNAL_ACCESS.contains(projectedColumn)) {
+                throw new UnsupportedOperationException(new StringBuilder(
+                        "No visibility to the accessed column ").append(projectedColumn)
+                        .append("!").toString());
+            }
+        }
+        return projection;
+    }
+
+    private String[] restrictMessageProjectionToExternallyDefinedColumns(String[] projection)
+            throws UnsupportedOperationException {
+        if (projection == null || projection.length == 0) {
+            return MESSAGE_COLUMNS_ALLOWED_FOR_EXTERNAL_ACCESS;
+        }
+        for (String projectedColumn : projection) {
+            if (!MESSAGE_COLUMNS_SET_ALLOWED_FOR_EXTERNAL_ACCESS.contains(projectedColumn)) {
                 throw new UnsupportedOperationException(new StringBuilder(
                         "No visibility to the accessed column ").append(projectedColumn)
                         .append("!").toString());
@@ -354,8 +377,8 @@ public class ChatProvider extends ContentProvider {
                 case UriType.Chat.CHAT:
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db.query(TABLE_GROUP_CHAT,
-                            restrictProjectionToExternallyDefinedColumns(projection), selection,
-                            selectionArgs, null, null, sort);
+                            restrictGroupChatProjectionToExternallyDefinedColumns(projection),
+                            selection, selectionArgs, null, null, sort);
                     cursor.setNotificationUri(getContext().getContentResolver(), uri);
                     return cursor;
 
@@ -386,8 +409,9 @@ public class ChatProvider extends ContentProvider {
                     /* Intentional fall through */
                 case UriType.Message.MESSAGE:
                     db = mOpenHelper.getReadableDatabase();
-                    cursor = db.query(TABLE_MESSAGE, projection, selection, selectionArgs, null,
-                            null, sort);
+                    cursor = db.query(TABLE_MESSAGE,
+                            restrictMessageProjectionToExternallyDefinedColumns(projection),
+                            selection, selectionArgs, null, null, sort);
                     cursor.setNotificationUri(getContext().getContentResolver(), uri);
                     return cursor;
 

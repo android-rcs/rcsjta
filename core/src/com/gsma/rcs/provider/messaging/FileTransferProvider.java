@@ -91,9 +91,9 @@ public class FileTransferProvider extends ContentProvider {
     }
 
     /**
-     * Strings to restrict projection for exposed URI to a set of columns
+     * Strings to allow projection for exposed URI to a set of columns.
      */
-    private static final String[] RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS = new String[] {
+    private static final String[] COLUMNS_ALLOWED_FOR_EXTERNAL_ACCESS = new String[] {
             FileTransferData.KEY_BASECOLUMN_ID, FileTransferData.KEY_FT_ID,
             FileTransferData.KEY_CHAT_ID, FileTransferData.KEY_CONTACT, FileTransferData.KEY_FILE,
             FileTransferData.KEY_FILENAME, FileTransferData.KEY_MIME_TYPE,
@@ -103,19 +103,12 @@ public class FileTransferProvider extends ContentProvider {
             FileTransferData.KEY_TIMESTAMP_SENT, FileTransferData.KEY_TIMESTAMP_DELIVERED,
             FileTransferData.KEY_TIMESTAMP_DISPLAYED, FileTransferData.KEY_STATE,
             FileTransferData.KEY_REASON_CODE, FileTransferData.KEY_READ_STATUS,
-            FileTransferData.KEY_FILE_EXPIRATION, FileTransferData.KEY_FILEICON_EXPIRATION
+            FileTransferData.KEY_FILE_EXPIRATION, FileTransferData.KEY_FILEICON_EXPIRATION,
+            FileTransferData.KEY_EXPIRED_DELIVERY
     };
 
-    /**
-     * Columns that are not exposed through external URI
-     */
-    private static final String[] COLUMNS_HIDDEN_FOR_EXTERNAL_ACCESS = new String[] {
-            FileTransferData.KEY_UPLOAD_TID, FileTransferData.KEY_DOWNLOAD_URI,
-            FileTransferData.KEY_REMOTE_SIP_ID
-    };
-
-    private static final Set<String> COLUMN_SET_HIDDEN_FOR_EXTERNAL_ACCESS = new HashSet<String>(
-            Arrays.asList(COLUMNS_HIDDEN_FOR_EXTERNAL_ACCESS));
+    private static final Set<String> COLUMNS_SET_ALLOWED_FOR_EXTERNAL_ACCESS = new HashSet<String>(
+            Arrays.asList(COLUMNS_ALLOWED_FOR_EXTERNAL_ACCESS));
 
     /**
      * Table name
@@ -209,10 +202,10 @@ public class FileTransferProvider extends ContentProvider {
     private String[] restrictProjectionToExternallyDefinedColumns(String[] projection)
             throws UnsupportedOperationException {
         if (projection == null || projection.length == 0) {
-            return RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS;
+            return COLUMNS_ALLOWED_FOR_EXTERNAL_ACCESS;
         }
         for (String projectedColumn : projection) {
-            if (COLUMN_SET_HIDDEN_FOR_EXTERNAL_ACCESS.contains(projectedColumn)) {
+            if (!COLUMNS_SET_ALLOWED_FOR_EXTERNAL_ACCESS.contains(projectedColumn)) {
                 throw new UnsupportedOperationException(new StringBuilder(
                         "No visibility to the accessed column ").append(projectedColumn)
                         .append("!").toString());

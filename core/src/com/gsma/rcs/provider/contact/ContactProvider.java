@@ -22,7 +22,6 @@
 
 package com.gsma.rcs.provider.contact;
 
-import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.provider.ContentProviderBaseIdCreator;
 import com.gsma.rcs.provider.contact.ContactData.AggregationData;
 import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
@@ -100,9 +99,9 @@ public class ContactProvider extends ContentProvider {
     }
 
     /**
-     * String to restrict projection for exposed URI to a set of columns
+     * String to allow projection for exposed URI to a set of columns
      */
-    private static final String[] RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS = new String[] {
+    private static final String[] COLUMNS_ALLOWED_FOR_EXTERNAL_ACCESS = new String[] {
             ContactData.KEY_BASECOLUMN_ID, ContactData.KEY_CONTACT,
             ContactData.KEY_CAPABILITY_IMAGE_SHARE, ContactData.KEY_CAPABILITY_VIDEO_SHARE,
             ContactData.KEY_CAPABILITY_IM_SESSION, ContactData.KEY_CAPABILITY_FILE_TRANSFER,
@@ -110,35 +109,8 @@ public class ContactProvider extends ContentProvider {
             ContactData.KEY_AUTOMATA, ContactData.KEY_CAPABILITY_TIMESTAMP_LAST_RESPONSE
     };
 
-    /**
-     * Columns that are not exposed through external URI
-     */
-    private static final String[] COLUMNS_HIDDEN_FOR_EXTERNAL_ACCESS = new String[] {
-            ContactData.KEY_DISPLAY_NAME, ContactData.KEY_PRESENCE_SHARING_STATUS,
-            ContactData.KEY_TIMESTAMP_CONTACT_UPDATED, ContactData.KEY_RCS_STATUS,
-            ContactData.KEY_REGISTRATION_STATE, ContactData.KEY_RCS_STATUS_TIMESTAMP,
-            ContactData.KEY_PRESENCE_FREE_TEXT, ContactData.KEY_PRESENCE_WEBLINK_NAME,
-            ContactData.KEY_PRESENCE_WEBLINK_URL, ContactData.KEY_PRESENCE_PHOTO_EXIST_FLAG,
-            ContactData.KEY_PRESENCE_PHOTO_ETAG, ContactData.KEY_PRESENCE_PHOTO_DATA,
-            ContactData.KEY_PRESENCE_GEOLOC_EXIST_FLAG, ContactData.KEY_PRESENCE_GEOLOC_LATITUDE,
-            ContactData.KEY_PRESENCE_GEOLOC_LONGITUDE, ContactData.KEY_PRESENCE_GEOLOC_ALTITUDE,
-            ContactData.KEY_PRESENCE_TIMESTAMP, ContactData.KEY_CAPABILITY_TIMESTAMP_LAST_REQUEST,
-            ContactData.KEY_CAPABILITY_CS_VIDEO, ContactData.KEY_CAPABILITY_PRESENCE_DISCOVERY,
-            ContactData.KEY_CAPABILITY_SOCIAL_PRESENCE,
-            ContactData.KEY_CAPABILITY_FILE_TRANSFER_HTTP,
-            ContactData.KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL,
-            ContactData.KEY_CAPABILITY_GROUP_CHAT_SF, ContactData.KEY_CAPABILITY_FILE_TRANSFER_SF,
-            ContactData.KEY_BLOCKING_TIMESTAMP, ContactData.KEY_BLOCKED,
-            ContactData.KEY_CAPABILITY_IP_VOICE_CALL, ContactData.KEY_CAPABILITY_IP_VIDEO_CALL
-    };
-
-    private static final Set<String> COLUMN_SET_HIDDEN_FOR_EXTERNAL_ACCESS = new HashSet<String>(
-            Arrays.asList(COLUMNS_HIDDEN_FOR_EXTERNAL_ACCESS));
-
-    private static final String RESTRICTED_SELECTION_QUERY_FOR_EXTERNALLY_DEFINED_COLUMNS = new StringBuilder(
-            "(").append(ContactData.KEY_RCS_STATUS).append("<>").append(RcsStatus.NO_INFO.toInt())
-            .append(") AND (").append(ContactData.KEY_RCS_STATUS).append("<>")
-            .append(RcsStatus.NOT_RCS.toInt()).append(')').toString();
+    private static final Set<String> COLUMNS_SET_ALLOWED_FOR_EXTERNAL_ACCESS = new HashSet<String>(
+            Arrays.asList(COLUMNS_ALLOWED_FOR_EXTERNAL_ACCESS));
 
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
@@ -302,22 +274,13 @@ public class ContactProvider extends ContentProvider {
         return DatabaseUtils.appendSelectionArgs(idSelectionArg, selectionArgs);
     }
 
-    private String restrictSelectionToExternallyDefinedColumns(String selection) {
-        if (TextUtils.isEmpty(selection)) {
-            return RESTRICTED_SELECTION_QUERY_FOR_EXTERNALLY_DEFINED_COLUMNS;
-        }
-        return new StringBuilder("(")
-                .append(RESTRICTED_SELECTION_QUERY_FOR_EXTERNALLY_DEFINED_COLUMNS)
-                .append(") AND (").append(selection).append(')').toString();
-    }
-
     private String[] restrictProjectionToExternallyDefinedColumns(String[] projection)
             throws UnsupportedOperationException {
         if (projection == null || projection.length == 0) {
-            return RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS;
+            return COLUMNS_ALLOWED_FOR_EXTERNAL_ACCESS;
         }
         for (String projectedColumn : projection) {
-            if (COLUMN_SET_HIDDEN_FOR_EXTERNAL_ACCESS.contains(projectedColumn)) {
+            if (!COLUMNS_SET_ALLOWED_FOR_EXTERNAL_ACCESS.contains(projectedColumn)) {
                 throw new UnsupportedOperationException(new StringBuilder(
                         "No visibility to the accessed column ").append(projectedColumn)
                         .append("!").toString());
@@ -476,7 +439,6 @@ public class ContactProvider extends ContentProvider {
                 case UriType.Contacts.CONTACTS:
                     /* Limited access with exposed URI */
                     db = mOpenHelper.getReadableDatabase();
-                    selection = restrictSelectionToExternallyDefinedColumns(selection);
                     cursor = db.query(CAPABILITY_TABLE,
                             restrictProjectionToExternallyDefinedColumns(projection), selection,
                             selectionArgs, null, null, sort);
