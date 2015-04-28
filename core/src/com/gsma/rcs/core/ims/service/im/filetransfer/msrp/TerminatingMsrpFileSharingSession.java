@@ -29,12 +29,14 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpConstants;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
+import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -82,8 +84,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
     /**
      * The logger
      */
-    private static final Logger logger = Logger.getLogger(TerminatingMsrpFileSharingSession.class
-            .getSimpleName());
+    private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
 
     /**
      * Constructor
@@ -145,8 +146,8 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
      */
     public void run() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Initiate a new file transfer session as terminating");
+            if (mLogger.isActivated()) {
+                mLogger.info("Initiate a new file transfer session as terminating");
             }
 
             Collection<ImsSessionListener> listeners = getListeners();
@@ -156,8 +157,8 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
             long timestamp = getTimestamp();
             /* Check if session should be auto-accepted once */
             if (isSessionAccepted()) {
-                if (logger.isActivated()) {
-                    logger.debug("Auto accept file transfer invitation");
+                if (mLogger.isActivated()) {
+                    mLogger.debug("Auto accept file transfer invitation");
                 }
 
                 for (ImsSessionListener listener : listeners) {
@@ -169,8 +170,8 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                 }
 
             } else {
-                if (logger.isActivated()) {
-                    logger.debug("Accept manually file transfer invitation");
+                if (mLogger.isActivated()) {
+                    mLogger.debug("Accept manually file transfer invitation");
                 }
 
                 for (ImsSessionListener listener : listeners) {
@@ -186,8 +187,8 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                 switch (answer) {
                     case INVITATION_REJECTED:
 
-                        if (logger.isActivated()) {
-                            logger.debug("Session has been rejected by user");
+                        if (mLogger.isActivated()) {
+                            mLogger.debug("Session has been rejected by user");
                         }
 
                         removeSession();
@@ -199,10 +200,10 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                         return;
 
                     case INVITATION_TIMEOUT:
-                        if (logger.isActivated()) {
-                            logger.debug("Session has been rejected on timeout");
+                        if (mLogger.isActivated()) {
+                            mLogger.debug("Session has been rejected on timeout");
                         }
-                        // Ringing period timeout
+                        /* Ringing period timeout */
                         send486Busy(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
                         removeSession();
@@ -214,15 +215,15 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                         return;
 
                     case INVITATION_REJECTED_BY_SYSTEM:
-                        if (logger.isActivated()) {
-                            logger.debug("Session has been aborted by system");
+                        if (mLogger.isActivated()) {
+                            mLogger.debug("Session has been aborted by system");
                         }
                         removeSession();
                         return;
 
                     case INVITATION_CANCELED:
-                        if (logger.isActivated()) {
-                            logger.debug("Session has been rejected by remote");
+                        if (mLogger.isActivated()) {
+                            mLogger.debug("Session has been rejected by remote");
                         }
 
                         removeSession();
@@ -242,22 +243,22 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                         break;
 
                     case INVITATION_DELETED:
-                        if (logger.isActivated()) {
-                            logger.debug("Session has been deleted");
+                        if (mLogger.isActivated()) {
+                            mLogger.debug("Session has been deleted");
                         }
                         removeSession();
                         return;
 
                     default:
-                        if (logger.isActivated()) {
-                            logger.debug("Unknown invitation answer in run; answer=".concat(String
+                        if (mLogger.isActivated()) {
+                            mLogger.debug("Unknown invitation answer in run; answer=".concat(String
                                     .valueOf(answer)));
                         }
                         return;
                 }
             }
 
-            // Parse the remote SDP part
+            /* Parse the remote SDP part */
             String remoteSdp = getDialogPath().getInvite().getSdpContent();
             SdpParser parser = new SdpParser(remoteSdp.getBytes(UTF8));
             Vector<MediaDescription> media = parser.getMediaDescriptions();
@@ -267,7 +268,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
             if (protocol != null) {
                 isSecured = protocol.equalsIgnoreCase(MsrpConstants.SOCKET_MSRP_SECURED_PROTOCOL);
             }
-            // Changed by Deutsche Telekom
+            /* Changed by Deutsche Telekom */
             String fileSelector = mediaDesc.getMediaAttribute("file-selector").getValue();
             String fileTransferId = mediaDesc.getMediaAttribute("file-transfer-id").getValue();
             MediaAttribute attr3 = mediaDesc.getMediaAttribute("path");
@@ -275,40 +276,40 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
             String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
             int remotePort = mediaDesc.port;
 
-            // Changed by Deutsche Telekom
+            /* Changed by Deutsche Telekom */
             String fingerprint = SdpUtils.extractFingerprint(parser, mediaDesc);
 
-            // Extract the "setup" parameter
+            /* Extract the "setup" parameter */
             String remoteSetup = "passive";
             MediaAttribute attr4 = mediaDesc.getMediaAttribute("setup");
             if (attr4 != null) {
                 remoteSetup = attr4.getValue();
             }
-            if (logger.isActivated()) {
-                logger.debug("Remote setup attribute is " + remoteSetup);
+            if (mLogger.isActivated()) {
+                mLogger.debug("Remote setup attribute is " + remoteSetup);
             }
 
-            // Set setup mode
+            /* Set setup mode */
             String localSetup = createSetupAnswer(remoteSetup);
-            if (logger.isActivated()) {
-                logger.debug("Local setup attribute is " + localSetup);
+            if (mLogger.isActivated()) {
+                mLogger.debug("Local setup attribute is " + localSetup);
             }
 
-            // Set local port
+            /* Set local port */
             int localMsrpPort;
             if (localSetup.equals("active")) {
-                localMsrpPort = 9; // See RFC4145, Page 4
+                localMsrpPort = 9; /* See RFC4145, Page 4 */
             } else {
                 localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort(mRcsSettings);
             }
 
-            // Create the MSRP manager
+            /* Create the MSRP manager */
             String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface()
                     .getNetworkAccess().getIpAddress();
             msrpMgr = new MsrpManager(localIpAddress, localMsrpPort, getImsService(), mRcsSettings);
             msrpMgr.setSecured(isSecured);
 
-            // Build SDP part
+            /* Build SDP part */
             String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
             long maxSize = mRcsSettings.getMaxFileTransferSize();
             String sdp = SdpUtils.buildFileSDP(ipAddress, localMsrpPort,
@@ -316,115 +317,86 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                     fileSelector, null, localSetup, msrpMgr.getLocalMsrpPath(),
                     SdpUtils.DIRECTION_RECVONLY, maxSize);
 
-            // Set the local SDP part in the dialog path
+            /* Set the local SDP part in the dialog path */
             getDialogPath().setLocalContent(sdp);
 
-            // Create the MSRP server session
+            /* Create the MSRP server session */
             if (localSetup.equals("passive")) {
-                // Passive mode: client wait a connection
-                // Changed by Deutsche Telekom
+                /* Passive mode: client wait a connection */
+                /* Changed by Deutsche Telekom */
                 MsrpSession session = msrpMgr.createMsrpServerSession(remotePath, this);
-                // Do not use right now the mapping to do not increase memory and cpu consumption
+                /* Do not use right now the mapping to do not increase memory and cpu consumption */
                 session.setMapMsgIdFromTransationId(false);
 
-                // Open the connection
-                Thread thread = new Thread() {
-                    public void run() {
-                        try {
-                            // Open the MSRP session
-                            msrpMgr.openMsrpSession(ImsFileSharingSession.DEFAULT_SO_TIMEOUT);
-
-                            // Send an empty packet
-                            sendEmptyDataChunk();
-                        } catch (IOException e) {
-                            if (logger.isActivated()) {
-                                logger.error("Can't create the MSRP server session", e);
-                            }
-                        }
-                    }
-                };
-                thread.start();
+                msrpMgr.openMsrpSession(ImsFileSharingSession.DEFAULT_SO_TIMEOUT);
+                sendEmptyDataChunk();
             }
 
-            // Create a 200 OK response
-            if (logger.isActivated()) {
-                logger.info("Send 200 OK");
+            /* Create a 200 OK response */
+            if (mLogger.isActivated()) {
+                mLogger.info("Send 200 OK");
             }
             SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
                     InstantMessagingService.FT_FEATURE_TAGS, sdp);
 
-            // The signalisation is established
+            /* The signalisation is established */
             getDialogPath().sigEstablished();
 
-            // Send response
+            /* Send response */
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
                     .sendSipMessageAndWait(resp);
 
-            // Analyze the received response
+            /* Analyze the received response */
             if (ctx.isSipAck()) {
-                // ACK received
-                if (logger.isActivated()) {
-                    logger.info("ACK request received");
+                if (mLogger.isActivated()) {
+                    mLogger.info("ACK request received");
                 }
 
-                // Create the MSRP client session
+                /* / Create the MSRP client session */
                 if (localSetup.equals("active")) {
-                    // Active mode: client should connect
-                    // Changed by Deutsche Telekom
+                    /* Active mode: client should connect */
+                    /* Changed by Deutsche Telekom */
                     MsrpSession session = msrpMgr.createMsrpClientSession(remoteHost, remotePort,
                             remotePath, this, fingerprint);
                     session.setMapMsgIdFromTransationId(false);
-
-                    // Open the connection
-                    Thread thread = new Thread() {
-                        public void run() {
-                            try {
-                                // Open the MSRP session
-                                msrpMgr.openMsrpSession(ImsFileSharingSession.DEFAULT_SO_TIMEOUT);
-
-                                // Send an empty packet
-                                sendEmptyDataChunk();
-                            } catch (IOException e) {
-                                if (logger.isActivated()) {
-                                    logger.error("Can't create the MSRP server session", e);
-                                }
-                            }
-                        }
-                    };
-                    thread.start();
+                    msrpMgr.openMsrpSession(ImsFileSharingSession.DEFAULT_SO_TIMEOUT);
+                    sendEmptyDataChunk();
                 }
 
-                // The session is established
+                /* The session is established */
                 getDialogPath().sessionEstablished();
 
                 for (ImsSessionListener listener : listeners) {
                     listener.handleSessionStarted(contact);
                 }
 
-                // Start session timer
+                /* Start session timer */
                 if (getSessionTimerManager().isSessionTimerActivated(resp)) {
                     getSessionTimerManager().start(SessionTimerManager.UAS_ROLE,
                             getDialogPath().getSessionExpireTime());
                 }
             } else {
-                if (logger.isActivated()) {
-                    logger.debug("No ACK received for INVITE");
+                if (mLogger.isActivated()) {
+                    mLogger.debug("No ACK received for INVITE");
                 }
 
-                // No response received: timeout
-                handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED));
+                /* No response received: timeout */
+                handleError(new FileSharingError(FileSharingError.SEND_RESPONSE_FAILED));
             }
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Session initiation has failed", e);
-            }
-
-            // Unexpected error
-            handleError(new FileSharingError(FileSharingError.UNEXPECTED_EXCEPTION, e.getMessage()));
-        }
-
-        if (logger.isActivated()) {
-            logger.debug("End of thread");
+        } catch (MsrpException e) {
+            handleError(new FileSharingError(FileSharingError.SEND_RESPONSE_FAILED, e));
+        } catch (SipException e) {
+            mLogger.error("Unable to send 200OK response!", e);
+            handleError(new FileSharingError(FileSharingError.SEND_RESPONSE_FAILED, e));
+        } catch (IOException e) {
+            handleError(new FileSharingError(FileSharingError.SEND_RESPONSE_FAILED, e));
+        } catch (RuntimeException e) {
+            /*
+             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
+             * eventually bring the whole system down, which is not intended.
+             */
+            mLogger.error("Failed to initiate chat session as terminating!", e);
+            handleError(new FileSharingError(FileSharingError.SEND_RESPONSE_FAILED, e));
         }
     }
 
@@ -435,8 +407,8 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
         try {
             msrpMgr.sendEmptyChunk();
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Problem while sending empty data chunk", e);
+            if (mLogger.isActivated()) {
+                mLogger.error("Problem while sending empty data chunk", e);
             }
         }
     }
@@ -458,8 +430,8 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * @param mimeType Data mime-type
      */
     public void msrpDataReceived(String msgId, byte[] data, String mimeType) {
-        if (logger.isActivated()) {
-            logger.info("Data received");
+        if (mLogger.isActivated()) {
+            mLogger.info("Data received");
         }
 
         // File has been transfered
@@ -541,8 +513,8 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * Data transfer has been aborted
      */
     public void msrpTransferAborted() {
-        if (logger.isActivated()) {
-            logger.info("Data transfer aborted");
+        if (mLogger.isActivated()) {
+            mLogger.info("Data transfer aborted");
         }
 
         if (!isFileTransfered()) {
@@ -572,8 +544,8 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
         // Close MSRP session
         if (msrpMgr != null) {
             msrpMgr.closeSession();
-            if (logger.isActivated()) {
-                logger.debug("MSRP session has been closed");
+            if (mLogger.isActivated()) {
+                mLogger.debug("MSRP session has been closed");
             }
         }
         if (!isFileTransfered()) {
@@ -586,14 +558,14 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * Delete file
      */
     private void deleteFile() {
-        if (logger.isActivated()) {
-            logger.debug("Delete incomplete received file");
+        if (mLogger.isActivated()) {
+            mLogger.debug("Delete incomplete received file");
         }
         try {
             getContent().deleteFile();
         } catch (IOException e) {
-            if (logger.isActivated()) {
-                logger.error("Can't delete received file", e);
+            if (mLogger.isActivated()) {
+                mLogger.error("Can't delete received file", e);
             }
         }
     }

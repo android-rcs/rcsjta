@@ -1142,7 +1142,10 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                 return new FileTransferStateAndReasonCode(State.FAILED,
                         ReasonCode.FAILED_DATA_TRANSFER);
             case FileSharingError.NO_CHAT_SESSION:
+                /* Intentional fall through */
             case FileSharingError.SESSION_INITIATION_FAILED:
+                /* Intentional fall through */
+            case FileSharingError.SEND_RESPONSE_FAILED:
                 return new FileTransferStateAndReasonCode(State.FAILED,
                         ReasonCode.FAILED_INITIATION);
             case FileSharingError.NOT_ENOUGH_STORAGE_SPACE:
