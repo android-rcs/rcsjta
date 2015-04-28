@@ -290,6 +290,15 @@ public class FileTransferLog implements IFileTransferLog {
         mLocalContentResolver.insert(FileTransferData.CONTENT_URI, values);
     }
 
+    /**
+     * Set file transfer state and reason code. Note that this method should not be used for
+     * State.DELIVERED and State.DISPLAYED. These states require timestamps and should be set
+     * through setFileTransferDelivered and setFileTransferDisplayed respectively.
+     * 
+     * @param fileTransferId File transfer ID
+     * @param state File transfer state (see restriction above)
+     * @param reasonCode File transfer state reason code
+     */
     @Override
     public void setFileTransferStateAndReasonCode(String fileTransferId, State state,
             ReasonCode reasonCode) {
@@ -299,16 +308,18 @@ public class FileTransferLog implements IFileTransferLog {
                     .append(", reasonCode=").append(reasonCode).toString());
         }
 
+        switch (state) {
+            case DELIVERED:
+            case DISPLAYED:
+                throw new IllegalArgumentException(new StringBuilder("State that requires ")
+                        .append("timestamp passed, use specific method taking timestamp")
+                        .append(" to set state ").append(state.toString()).toString());
+            default:
+        }
+
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_STATE, state.toInt());
         values.put(FileTransferData.KEY_REASON_CODE, reasonCode.toInt());
-        if (state == State.DELIVERED) {
-            values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, System.currentTimeMillis());
-            values.put(FileTransferData.KEY_EXPIRED_DELIVERY, 0);
-        } else if (state == State.DISPLAYED) {
-            values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, System.currentTimeMillis());
-            values.put(FileTransferData.KEY_EXPIRED_DELIVERY, 0);
-        }
         mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
                 null);
@@ -627,6 +638,17 @@ public class FileTransferLog implements IFileTransferLog {
         }
     }
 
+    private boolean getDataAsBoolean(Cursor cursor) {
+        try {
+            return cursor.getInt(FIRST_COLUMN_IDX) == 1;
+
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
     @Override
     public State getFileTransferState(String fileTransferId) {
         if (logger.isActivated()) {
@@ -848,6 +870,7 @@ public class FileTransferLog implements IFileTransferLog {
         values.put(FileTransferData.KEY_STATE, FileTransfer.State.DELIVERED.toInt());
         values.put(FileTransferData.KEY_REASON_CODE, FileTransfer.ReasonCode.UNSPECIFIED.toInt());
         values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, timestampDelivered);
+        values.put(FileTransferData.KEY_EXPIRED_DELIVERY, 0);
 
         mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
@@ -866,6 +889,7 @@ public class FileTransferLog implements IFileTransferLog {
         values.put(FileTransferData.KEY_STATE, FileTransfer.State.DISPLAYED.toInt());
         values.put(FileTransferData.KEY_REASON_CODE, FileTransfer.ReasonCode.UNSPECIFIED.toInt());
         values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, timestampDisplayed);
+        values.put(FileTransferData.KEY_EXPIRED_DELIVERY, 0);
 
         mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
@@ -876,6 +900,7 @@ public class FileTransferLog implements IFileTransferLog {
     public void clearFileTransferDeliveryExpiration(List<String> fileTransferIds) {
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_EXPIRED_DELIVERY, 0);
+        values.put(FileTransferData.KEY_DELIVERY_EXPIRATION, 0);
         String[] selectionArgs = new String[fileTransferIds.size()];
         selectionArgs = fileTransferIds.toArray(selectionArgs);
         mLocalContentResolver.update(FileTransferData.CONTENT_URI, values,
@@ -892,9 +917,9 @@ public class FileTransferLog implements IFileTransferLog {
     }
 
     @Override
-    public Cursor getOneToOneFileTransfersWithUnexpiredDelivery() {
+    public Cursor getOneToOneFileTransfersWithUnexpiredDelivery(long currentTime) {
         String[] selectionArgs = new String[] {
-            String.valueOf(System.currentTimeMillis())
+            String.valueOf(currentTime)
         };
         return mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
                 SELECTION_ONETOONE_FILE_TRANSFERS_WITH_UNEXPIRED_DELIVERY, selectionArgs,
@@ -903,7 +928,7 @@ public class FileTransferLog implements IFileTransferLog {
 
     @Override
     public boolean isFileTransferExpiredDelivery(String fileTransferId) {
-        return getDataAsInt(getFileTransferData(FileTransferData.KEY_EXPIRED_DELIVERY,
-                fileTransferId)) == 1;
+        return getDataAsBoolean(getFileTransferData(FileTransferData.KEY_EXPIRED_DELIVERY,
+                fileTransferId));
     }
 }

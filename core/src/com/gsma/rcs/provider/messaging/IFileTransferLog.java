@@ -104,10 +104,12 @@ public interface IFileTransferLog {
             long fileIconExpiration);
 
     /**
-     * Set file transfer state and reason code
+     * Set file transfer state and reason code. Note that this method should not be used for
+     * State.DELIVERED and State.DISPLAYED. These states require timestamps and should be set
+     * through setFileTransferDelivered and setFileTransferDisplayed respectively.
      * 
      * @param fileTransferId File transfer ID
-     * @param state File transfer state
+     * @param state File transfer state (see restriction above)
      * @param reasonCode File transfer state reason code
      */
     public void setFileTransferStateAndReasonCode(String fileTransferId, State state,
@@ -352,10 +354,11 @@ public interface IFileTransferLog {
 
     /**
      * Get one-one file transfers with unexpired delivery
+     * @param currentTime
      * 
      * @return Cursor
      */
-    public Cursor getOneToOneFileTransfersWithUnexpiredDelivery();
+    public Cursor getOneToOneFileTransfersWithUnexpiredDelivery(long currentTime);
 
     /**
      * Returns true if delivery for this file has expired or false otherwise. Note: false means

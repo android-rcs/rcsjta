@@ -22,7 +22,7 @@
 
 package com.gsma.services.rcs.upload;
 
-import com.gsma.rcs.provider.messaging.FileTransferData;
+import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
 import android.net.Uri;
 import android.os.Parcel;
@@ -124,7 +124,7 @@ public class FileUploadInfo implements Parcelable {
         mSize = size;
         mMimeType = type;
         mFileIcon = null;
-        mFileIconExpiration = FileTransferData.UNKNOWN_EXPIRATION;
+        mFileIconExpiration = FileTransferLog.UNKNOWN_EXPIRATION;
         mFileIconSize = 0L;
         mFileIconMimeType = null;
     }

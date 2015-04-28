@@ -284,7 +284,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * 
      * @return IMDN manager
      */
-    public ImdnManager getImdnManager() {
+    protected ImdnManager getImdnManager() {
         return ((InstantMessagingService) getImsService()).getImdnManager();
     }
 
@@ -1005,8 +1005,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                     ((InstantMessagingService) getImsService()).receiveGroupFileDeliveryStatus(
                             mContributionId, contact, imdn);
                 } else {
-                    ((InstantMessagingService) getImsService()).receiveOneToOneFileDeliveryStatus(contact,
-                            imdn);
+                    ((InstantMessagingService) getImsService()).receiveOneToOneFileDeliveryStatus(
+                            contact, imdn);
                 }
             } else {
                 Collection<ImsSessionListener> listeners = getListeners();

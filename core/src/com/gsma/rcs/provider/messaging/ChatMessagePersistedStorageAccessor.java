@@ -97,7 +97,7 @@ public class ChatMessagePersistedStorageAccessor {
                 mRemoteContact = ContactUtil.createContactIdFromTrustedData(contact);
             }
             mDirection = Direction.valueOf(cursor.getInt(cursor
-                    .getColumnIndexOrThrow(Message.DIRECTION)));
+                    .getColumnIndexOrThrow(MessageData.KEY_DIRECTION)));
             mContent = cursor.getString(cursor.getColumnIndexOrThrow(MessageData.KEY_CONTENT));
             mChatId = cursor.getString(cursor.getColumnIndexOrThrow(MessageData.KEY_CHAT_ID));
             mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(MessageData.KEY_MIME_TYPE));

@@ -31,7 +31,6 @@ import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.service.api.ExceptionUtil;
 import com.gsma.rcs.utils.logger.Logger;
 
 import android.text.TextUtils;
@@ -114,17 +113,17 @@ public class RejoinGroupChatSession extends GroupChatSession {
 
             sendInvite(invite);
         } catch (InvalidArgumentException e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            mLogger.error("Unable to set authorization header for chat invite!", e);
             handleError(new ChatError(ChatError.SESSION_REJOIN_FAILED, e));
         } catch (SipException e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            mLogger.error("Unable to send 200OK response!", e);
             handleError(new ChatError(ChatError.SESSION_REJOIN_FAILED, e));
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            mLogger.error("Failed to rejoin a chat session!", e);
             handleError(new ChatError(ChatError.SESSION_REJOIN_FAILED, e));
         }
     }

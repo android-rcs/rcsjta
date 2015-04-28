@@ -366,6 +366,15 @@ public class MessageLog implements IMessageLog {
         }
     }
 
+    /**
+     * Set chat message status and reason code. Note that this method should not be used for
+     * Status.DELIVERED and Status.DISPLAYED. These states require timestamps and should be set
+     * through setChatMessageStatusDelivered and setChatMessageStatusDisplayed respectively.
+     * 
+     * @param msgId Message ID
+     * @param status Message status (See restriction above)
+     * @param reasonCode Message status reason code
+     */
     @Override
     public void setChatMessageStatusAndReasonCode(String msgId, Status status, ReasonCode reasonCode) {
         if (sLogger.isActivated()) {
@@ -373,12 +382,19 @@ public class MessageLog implements IMessageLog {
                     .append(", status=").append(status).append(", reasonCode=").append(reasonCode)
                     .toString());
         }
+
+        switch (status) {
+            case DELIVERED:
+            case DISPLAYED:
+                throw new IllegalArgumentException(new StringBuilder("Status that requires ")
+                        .append("timestamp passed, use specific method taking timestamp")
+                        .append(" to set status ").append(status.toString()).toString());
+            default:
+        }
+
         ContentValues values = new ContentValues();
         values.put(MessageData.KEY_STATUS, status.toInt());
         values.put(MessageData.KEY_REASON_CODE, reasonCode.toInt());
-        if (Status.DELIVERED == status) {
-            values.put(MessageData.KEY_TIMESTAMP_DELIVERED, System.currentTimeMillis());
-        }
 
         if (mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
                 values, null, null) < 1) {
@@ -455,6 +471,17 @@ public class MessageLog implements IMessageLog {
     private String getDataAsString(Cursor cursor) {
         try {
             return cursor.getString(FIRST_COLUMN_IDX);
+
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    private boolean getDataAsBoolean(Cursor cursor) {
+        try {
+            return cursor.getInt(FIRST_COLUMN_IDX) == 1;
 
         } finally {
             if (cursor != null) {
@@ -618,8 +645,7 @@ public class MessageLog implements IMessageLog {
         Cursor cursor = null;
         try {
             cursor = mLocalContentResolver.query(
-                    MessageData.CONTENT_URI.buildUpon().appendPath(msgId).build(),
-                    new String[] {
+                    MessageData.CONTENT_URI.buildUpon().appendPath(msgId).build(), new String[] {
                             MessageData.KEY_CONTACT, MessageData.KEY_CHAT_ID
                     }, null, null, null);
             if (!cursor.moveToNext()) {
@@ -675,9 +701,9 @@ public class MessageLog implements IMessageLog {
 
     @Override
     public void clearMessageDeliveryExpiration(List<String> msgIds) {
-        ContentValues values = new ContentValues();
         String[] selectionArgs = new String[msgIds.size()];
         selectionArgs = msgIds.toArray(selectionArgs);
+        ContentValues values = new ContentValues();
         values.put(MessageData.KEY_DELIVERY_EXPIRATION, 0);
         values.put(MessageData.KEY_EXPIRED_DELIVERY, 0);
         mLocalContentResolver.update(MessageData.CONTENT_URI, values,
@@ -693,9 +719,9 @@ public class MessageLog implements IMessageLog {
     }
 
     @Override
-    public Cursor getOneToOneChatMessagesWithUnexpiredDelivery() {
+    public Cursor getOneToOneChatMessagesWithUnexpiredDelivery(long currentTime) {
         String[] selectionArgs = new String[] {
-            String.valueOf(System.currentTimeMillis())
+            String.valueOf(currentTime)
         };
         return mLocalContentResolver.query(MessageData.CONTENT_URI, null,
                 SELECTION_ONETOONE_CHAT_MESSAGES_WITH_UNEXPIRED_DELIVERY, selectionArgs,
@@ -704,6 +730,6 @@ public class MessageLog implements IMessageLog {
 
     @Override
     public boolean isChatMessageExpiredDelivery(String msgId) {
-        return getDataAsInt(getMessageData(MessageData.KEY_EXPIRED_DELIVERY, msgId)) == 1;
+        return getDataAsBoolean(getMessageData(MessageData.KEY_EXPIRED_DELIVERY, msgId));
     }
 }
