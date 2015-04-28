@@ -138,10 +138,7 @@ public class ChatServiceConfigActivity extends Activity {
         CheckBox checkBox = (CheckBox) findViewById(R.id.WarnSF);
         checkBox.setChecked(mConfig.isChatWarnSF());
 
-        TextView textView = (TextView) findViewById(R.id.IsComposingTimeout);
-        textView.setText(Integer.valueOf(mConfig.getIsComposingTimeout()).toString());
-
-        textView = (TextView) findViewById(R.id.ChatTimeout);
+        TextView textView = (TextView) findViewById(R.id.ChatTimeout);
         textView.setText(Integer.valueOf(mConfig.getChatTimeout()).toString());
 
         textView = (TextView) findViewById(R.id.MinGroupChatParticipants);

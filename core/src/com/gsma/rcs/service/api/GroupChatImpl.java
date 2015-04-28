@@ -1108,26 +1108,20 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     }
 
     /**
-     * Sends an is-composing event. The status is set to true when typing a message, else it is set
-     * to false.
+     * Called when is composing a chat message
      *
-     * @see ImSessionStartMode
-     * @param status Is-composing status
+     * @param enabled It should be set to true if user is composing and set to false when the
+     *            client application is leaving the chat UI
      * @throws RemoteException
      */
-    public void sendIsComposingEvent(final boolean status) throws RemoteException {
+    public void onComposing(final boolean enabled) throws RemoteException {
         try {
             final GroupChatSession session = mImService.getGroupChatSession(mChatId);
             if (session == null) {
-                if (logger.isActivated()) {
-                    logger.debug("Unable to send composing event '" + status
-                            + "' since group chat session found with chatId '" + mChatId
-                            + "' does not exist for now");
-                }
                 return;
             }
             if (session.getDialogPath().isSessionEstablished()) {
-                session.sendIsComposingStatus(status);
+                session.onComposingEvent(enabled);
                 return;
             }
             if (!session.isInitiatedByRemote()) {

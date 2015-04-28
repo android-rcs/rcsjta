@@ -78,21 +78,6 @@ public class ChatServiceConfiguration {
     }
 
     /**
-     * Returns the time after an inactive chat could be closed
-     * 
-     * @return Timeout in seconds
-     * @throws RcsServiceException
-     */
-    public int getIsComposingTimeout() throws RcsServiceException {
-        try {
-            return mIConfig.getIsComposingTimeout();
-
-        } catch (Exception e) {
-            throw new RcsGenericException(e);
-        }
-    }
-
-    /**
      * Returns the maximum number of participants in a group chat
      * 
      * @return Number

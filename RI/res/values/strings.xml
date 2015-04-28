@@ -209,7 +209,6 @@
     <string name="menu_chat_service_config">Chat service configuration</string>
     <string name="label_ImAlwaysOn">IM always on:</string>
     <string name="label_WarnSF">Warning SF:</string>
-    <string name="label_IsComposingTimeout">Composing timeout:</string>
     <string name="label_MinGroupChatParticipants">Min GC participants:</string>
     <string name="label_MaxGroupChatParticipants">MaX GC participants:</string>
     <string name="label_MaxMsgLengthGroupChat">Max GC msg length:</string>

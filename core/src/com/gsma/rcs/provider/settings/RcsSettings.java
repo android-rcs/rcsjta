@@ -1180,7 +1180,7 @@ public class RcsSettings {
     /**
      * Get "Is-composing" timeout for chat service
      * 
-     * @return Timer in seconds
+     * @return Timer in milliseconds
      */
     public int getIsComposingTimeout() {
         return readInteger(RcsSettingsData.IS_COMPOSING_TIMEOUT);

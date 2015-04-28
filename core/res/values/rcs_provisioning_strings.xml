@@ -117,7 +117,7 @@
     <string name="Revoke_timeout_seconds">Revoke timeout (seconds):</string>
     <string name="Ringing_session_period">Ringing session period (ms):</string>
     <string name="Subscribe_expiration_timeout_seconds">Subscribe expiration timeout (seconds):</string>
-    <string name="Is_composing_timeout_for_chat_seconds">Is-composing timeout for chat (seconds):</string>
+    <string name="Is_composing_timeout_for_chat_ms">Is-composing timeout for chat (milliseconds):</string>
     <string name="Session_refresh_expire_period_seconds">Session refresh expire period (seconds):</string>
     <string name="Capability_refresh_timeout_seconds">Capability refresh timeout (seconds):</string>
     <string name="Capability_expiry_timeout_seconds">Capability expiry timeout (seconds):</string>

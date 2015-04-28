@@ -851,10 +851,10 @@ public class RcsSettingsData {
     /* package private */static final Integer DEFAULT_SUBSCRIBE_EXPIRE_PERIOD = 3600;
 
     /**
-     * "Is-composing" timeout for chat service
+     * "Is-composing" timeout milliseconds for chat service
      */
     public static final String IS_COMPOSING_TIMEOUT = "IsComposingTimeout";
-    /* package private */static final Integer DEFAULT_IS_COMPOSING_TIMEOUT = 5;
+    /* package private */static final Integer DEFAULT_IS_COMPOSING_TIMEOUT = 5000;
 
     /**
      * SIP session refresh expire period

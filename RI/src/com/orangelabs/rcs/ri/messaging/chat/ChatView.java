@@ -86,11 +86,6 @@ public abstract class ChatView extends FragmentActivity implements
     protected EditText composeText;
 
     /**
-     * Utility class to manage the is-composing status
-     */
-    protected IsComposingManager composingManager;
-
-    /**
      * A locker to exit only once
      */
     protected LockAccess mExitOnce = new LockAccess();
@@ -166,10 +161,8 @@ public abstract class ChatView extends FragmentActivity implements
                 // we do not wish to consider putting the edit text back to null
                 // (like when sending message), is having activity
                 if (!TextUtils.isEmpty(s)) {
-                    // Warn the composing manager that we have some activity
-                    if (composingManager != null) {
-                        composingManager.hasActivity();
-                    }
+                    // Text composing in progress
+                    onComposing();
                 }
             }
 
@@ -305,8 +298,6 @@ public abstract class ChatView extends FragmentActivity implements
             return;
 
         }
-        // Warn the composing manager that the message was sent
-        composingManager.messageWasSent();
         composeText.setText(null);
     }
 

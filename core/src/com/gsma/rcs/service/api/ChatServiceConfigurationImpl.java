@@ -172,23 +172,6 @@ public class ChatServiceConfigurationImpl extends IChatServiceConfiguration.Stub
     }
 
     @Override
-    public int getIsComposingTimeout() throws RemoteException {
-        try {
-            return mRcsSettings.getIsComposingTimeout();
-
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
-
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
-    }
-
-    @Override
     public int getOneToOneChatMessageMaxLength() throws RemoteException {
         try {
             return mRcsSettings.getMaxChatMessageLength();

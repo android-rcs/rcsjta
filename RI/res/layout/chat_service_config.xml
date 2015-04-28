@@ -41,27 +41,6 @@
                 android:layout_marginRight="5dip"
                 android:gravity="left"
                 android:paddingTop="10dip"
-                android:text="@string/label_IsComposingTimeout" />
-
-            <TextView
-                android:id="@+id/IsComposingTimeout"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
-                android:gravity="left"
-                android:paddingTop="10dip" />
-        </TableRow>
-
-        <TableRow android:paddingTop="5dip" >
-
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
-                android:gravity="left"
-                android:paddingTop="10dip"
                 android:text="@string/label_ChatTimeout" />
 
             <TextView

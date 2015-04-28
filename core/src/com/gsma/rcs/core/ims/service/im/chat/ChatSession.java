@@ -137,9 +137,20 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 
     private static final Logger sLogger = Logger.getLogger(ChatSession.class.getSimpleName());
 
+    /**
+     * Messaging log
+     */
     protected final MessagingLog mMessagingLog;
 
+    /**
+     * First chat message
+     */
     private final ChatMessage mFirstMsg;
+
+    /**
+     * Is-composing generator
+     */
+    protected IsComposingGenerator mComposingMgr;
 
     /**
      * Receive chat message
@@ -180,6 +191,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 
         mMessagingLog = messagingLog;
         mActivityMgr = new ChatActivityManager(this, rcsSettings);
+        mComposingMgr = new IsComposingGenerator(this, rcsSettings);
 
         // Create the MSRP manager
         int localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort(rcsSettings);
@@ -869,6 +881,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      */
     public boolean sendDataChunks(String msgId, String data, String mime,
             TypeMsrpChunk typeMsrpChunk) {
+        //TODO Change exception handling 
         try {
             byte[] bytes = data.getBytes(UTF8);
             ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
@@ -916,7 +929,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * 
      * @param status Status
      */
-    public abstract void sendIsComposingStatus(boolean status);
+    public abstract boolean sendIsComposingStatus(boolean status);
 
     /**
      * Send message delivery status via MSRP
@@ -1097,5 +1110,15 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      */
     public boolean isMediaEstablished() {
         return (getMsrpMgr().isEstablished() && !getDialogPath().isSessionTerminated());
+    }
+
+    /**
+     * On is-composing event
+     * 
+     * @param enabled It should be set to true if user is composing and set to false when the
+     *            client application is leaving the chat UI
+     */
+    public void onComposingEvent(final boolean enabled) {
+        mComposingMgr.handleIsComposingEvent(enabled);
     }
 }

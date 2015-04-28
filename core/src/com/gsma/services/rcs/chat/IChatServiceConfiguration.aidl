@@ -19,8 +19,6 @@ interface IChatServiceConfiguration {
 	
 	int getGroupChatSubjectMaxLength();
 	
-	int getIsComposingTimeout();
-	
 	int getOneToOneChatMessageMaxLength();
 
 	boolean isChatWarnSF();

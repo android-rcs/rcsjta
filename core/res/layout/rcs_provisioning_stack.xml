@@ -444,7 +444,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dip"
-                android:text="@string/Is_composing_timeout_for_chat_seconds" />
+                android:text="@string/Is_composing_timeout_for_chat_ms" />
 
             <EditText
                 android:id="@+id/IsComposingTimeout"
