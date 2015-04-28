@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +15,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.protocol.rtp;
 
 import com.gsma.rcs.core.ims.protocol.rtp.codec.Codec;
 import com.gsma.rcs.core.ims.protocol.rtp.format.Format;
+import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.rtp.media.MediaOutput;
 import com.gsma.rcs.core.ims.protocol.rtp.stream.MediaRendererStream;
 import com.gsma.rcs.core.ims.protocol.rtp.stream.RtpInputStream;
 import com.gsma.rcs.core.ims.protocol.rtp.stream.RtpStreamListener;
 import com.gsma.rcs.utils.logger.Logger;
+
+import java.io.IOException;
 
 /**
  * Media RTP receiver
@@ -67,10 +74,10 @@ public class MediaRtpReceiver {
      * @param renderer Renderer
      * @param format format
      * @param rtpStreamListener RTP Stream listener
-     * @throws RtpException When an error occurs
+     * @throws MediaException When an error occurs
      */
     public void prepareSession(String remoteAddress, int remotePort, MediaOutput renderer,
-            Format format, RtpStreamListener rtpStreamListener) throws RtpException {
+            Format format, RtpStreamListener rtpStreamListener) throws MediaException {
         try {
             // Create the input stream
             inputStream = new RtpInputStream(remoteAddress, remotePort, localPort, format);
@@ -96,11 +103,8 @@ public class MediaRtpReceiver {
             if (logger.isActivated()) {
                 logger.debug("Session has been prepared with success");
             }
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't prepare resources correctly", e);
-            }
-            throw new RtpException("Can't prepare resources");
+        } catch (IOException e) {
+            throw new MediaException("Can't prepare resources", e);
         }
     }
 

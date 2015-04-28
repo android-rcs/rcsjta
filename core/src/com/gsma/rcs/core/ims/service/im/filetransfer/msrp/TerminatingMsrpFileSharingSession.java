@@ -553,19 +553,15 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 
     /**
      * Prepare media session
-     * 
-     * @throws Exception
      */
-    public void prepareMediaSession() throws Exception {
+    public void prepareMediaSession() {
         // Nothing to do in terminating side
     }
 
     /**
      * Start media session
-     * 
-     * @throws Exception
      */
-    public void startMediaSession() throws Exception {
+    public void startMediaSession() {
         // Nothing to do in terminating side
     }
 

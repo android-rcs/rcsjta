@@ -614,8 +614,9 @@ public abstract class GroupChatSession extends ChatSession {
      * Handle 200 0K response
      * 
      * @param resp 200 OK response
+     * @throws SipException
      */
-    public void handle200OK(SipResponse resp) {
+    public void handle200OK(SipResponse resp) throws SipException {
         super.handle200OK(resp);
 
         mConferenceSubscriber.subscribe();

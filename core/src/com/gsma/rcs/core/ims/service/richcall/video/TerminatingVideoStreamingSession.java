@@ -326,19 +326,15 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
 
     /**
      * Prepare media session
-     * 
-     * @throws Exception
      */
-    public void prepareMediaSession() throws Exception {
+    public void prepareMediaSession() {
         // Nothing to do in case of external codec
     }
 
     /**
      * Start media session
-     * 
-     * @throws Exception
      */
-    public void startMediaSession() throws Exception {
+    public void startMediaSession() {
         // Nothing to do in case of external codec
     }
 

@@ -28,14 +28,15 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
+import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
-import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ContributionIdGenerator;
@@ -57,9 +58,11 @@ import com.gsma.services.rcs.contact.ContactId;
 import android.net.Uri;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 
+import javax2.sip.InvalidArgumentException;
 import javax2.sip.header.ContentDispositionHeader;
 import javax2.sip.header.ContentLengthHeader;
 import javax2.sip.header.ContentTypeHeader;
@@ -81,8 +84,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      */
     private MsrpManager msrpMgr;
 
-    private static final Logger logger = Logger.getLogger(OriginatingMsrpFileSharingSession.class
-            .getSimpleName());
+    private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
 
     /**
      * Constructor
@@ -102,8 +104,8 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
         super(parent, content, contact, fileIcon, fileTransferId, rcsSettings, timestamp,
                 contactManager);
 
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("OriginatingFileSharingSession contact=")
+        if (mLogger.isActivated()) {
+            mLogger.debug(new StringBuilder("OriginatingFileSharingSession contact=")
                     .append(contact).append(" filename=").append(content.getName()).toString());
         }
         // Create dialog path
@@ -119,25 +121,25 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      */
     public void run() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Initiate a file transfer session as originating");
+            if (mLogger.isActivated()) {
+                mLogger.info("Initiate a file transfer session as originating");
             }
 
-            // Set setup mode
+            /* Set setup mode */
             String localSetup = createSetupOffer();
-            if (logger.isActivated()) {
-                logger.debug("Local setup attribute is ".concat(localSetup));
+            if (mLogger.isActivated()) {
+                mLogger.debug("Local setup attribute is ".concat(localSetup));
             }
 
-            // Set local port
+            /* Set local port */
             int localMsrpPort;
             if ("active".equals(localSetup)) {
-                localMsrpPort = 9; // See RFC4145, Page 4
+                localMsrpPort = 9; /* See RFC4145, Page 4 */
             } else {
                 localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort(mRcsSettings);
             }
 
-            // Create the MSRP manager
+            /* Create the MSRP manager */
             String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface()
                     .getNetworkAccess().getIpAddress();
             msrpMgr = new MsrpManager(localIpAddress, localMsrpPort, getImsService(), mRcsSettings);
@@ -145,18 +147,18 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
                 msrpMgr.setSecured(mRcsSettings.isSecureMsrpOverWifi());
             }
 
-            // Build SDP part
+            /* Build SDP part */
             String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
             String encoding = getContent().getEncoding();
             long maxSize = mRcsSettings.getMaxFileTransferSize();
-            // Set File-selector attribute
+            /* Set File-selector attribute */
             String selector = getFileSelectorAttribute();
             String sdp = SdpUtils.buildFileSDP(ipAddress, localMsrpPort,
                     msrpMgr.getLocalSocketProtocol(), encoding, getFileTransferIdAttribute(),
                     selector, "attachment", localSetup, msrpMgr.getLocalMsrpPath(),
                     SdpUtils.DIRECTION_SENDONLY, maxSize);
 
-            // Set File-location attribute
+            /* Set File-location attribute */
             Uri location = getFileLocationAttribute();
             if (location != null) {
                 sdp += "a=file-location:" + location.toString() + SipUtils.CRLF;
@@ -165,7 +167,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
             if (getFileicon() != null) {
                 sdp += "a=file-icon:cid:image@joyn.com" + SipUtils.CRLF;
 
-                // Encode the file icon file
+                /* Encode the file icon file */
                 String imageEncoded = Base64.encodeBase64ToString(getFileicon().getData());
 
                 String multipart = new StringBuilder(Multipart.BOUNDARY_DELIMITER)
@@ -187,47 +189,50 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
                         .append(SipUtils.CRLF).append(Multipart.BOUNDARY_DELIMITER)
                         .append(BOUNDARY_TAG).append(Multipart.BOUNDARY_DELIMITER).toString();
 
-                // Set the local SDP part in the dialog path
+                /* Set the local SDP part in the dialog path */
                 getDialogPath().setLocalContent(multipart);
             } else {
-                // Set the local SDP part in the dialog path
+                /* Set the local SDP part in the dialog path */
                 getDialogPath().setLocalContent(sdp);
             }
 
-            // Create an INVITE request
-            if (logger.isActivated()) {
-                logger.info("Send INVITE");
+            /* Create an INVITE request */
+            if (mLogger.isActivated()) {
+                mLogger.info("Send INVITE");
             }
             SipRequest invite = createInvite();
 
-            // Set the Authorization header
+            /* Set the Authorization header */
             getAuthenticationAgent().setAuthorizationHeader(invite);
 
-            // Set initial request in the dialog path
+            /* Set initial request in the dialog path */
             getDialogPath().setInvite(invite);
 
-            // Send INVITE request
+            /* Send INVITE request */
             sendInvite(invite);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Session initiation has failed", e);
-            }
-
-            // Unexpected error
-            handleError(new FileSharingError(FileSharingError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        } catch (SipException e) {
+            mLogger.error("Unable to set and send initial invite!", e);
+            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (InvalidArgumentException e) {
+            mLogger.error("Unable to set authorization header!", e);
+            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (RuntimeException e) {
+            /*
+             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
+             * eventually bring the whole system down, which is not intended.
+             */
+            mLogger.error("Failed to initiate a file transfer session!", e);
+            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
         }
 
-        if (logger.isActivated()) {
-            logger.debug("End of thread");
-        }
     }
 
     /**
      * Prepare media session
      * 
-     * @throws Exception
+     * @throws MsrpException
      */
-    public void prepareMediaSession() throws Exception {
+    public void prepareMediaSession() throws MsrpException {
         // Changed by Deutsche Telekom
         // Get the remote SDP part
         byte[] sdp = getDialogPath().getRemoteContent().getBytes(UTF8);
@@ -246,51 +251,32 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
     /**
      * Start media session
      * 
-     * @throws Exception
+     * @throws IOException
      */
-    public void startMediaSession() throws Exception {
-        // Open the MSRP session
-        msrpMgr.openMsrpSession();
-
-        Thread thread = new Thread() {
-            public void run() {
-                try {
-                    // Start sending data chunks
-                    byte[] data = getContent().getData();
-                    InputStream stream;
-                    if (data == null) {
-                        // Load data from URL
-                        stream = AndroidFactory.getApplicationContext().getContentResolver()
-                                .openInputStream(getContent().getUri());
-                    } else {
-                        // Load data from memory
-                        stream = new ByteArrayInputStream(data);
-                    }
-                    msrpMgr.sendChunks(stream, IdGenerator.generateMessageID(), getContent()
-                            .getEncoding(), getContent().getSize(), TypeMsrpChunk.FileSharing);
-                } catch (SecurityException e) {
-                    if (logger.isActivated()) {
-                        logger.error(
-                                "Session initiation has failed due to that the file is not accessible!",
-                                e);
-                    }
-                    Collection<ImsSessionListener> listeners = getListeners();
-                    ContactId contact = getRemoteContact();
-                    for (ImsSessionListener listener : listeners) {
-                        ((FileSharingSessionListener) listener)
-                                .handleTransferNotAllowedToSend(contact);
-                    }
-                } catch (Exception e) {
-                    // Unexpected error
-                    if (logger.isActivated()) {
-                        logger.error("Session initiation has failed", e);
-                    }
-                    handleError(new ImsServiceError(ImsServiceError.UNEXPECTED_EXCEPTION,
-                            e.getMessage()));
-                }
+    public void startMediaSession() throws IOException {
+        try {
+            msrpMgr.openMsrpSession();
+            /* Start sending data chunks */
+            byte[] data = getContent().getData();
+            InputStream stream;
+            if (data == null) {
+                /* Load data from URL */
+                stream = AndroidFactory.getApplicationContext().getContentResolver()
+                        .openInputStream(getContent().getUri());
+            } else {
+                /* Load data from memory */
+                stream = new ByteArrayInputStream(data);
             }
-        };
-        thread.start();
+            msrpMgr.sendChunks(stream, IdGenerator.generateMessageID(), getContent().getEncoding(),
+                    getContent().getSize(), TypeMsrpChunk.FileSharing);
+        } catch (SecurityException e) {
+            mLogger.error("Session initiation has failed due to that the file is not accessible!",
+                    e);
+            ContactId contact = getRemoteContact();
+            for (ImsSessionListener listener : getListeners()) {
+                ((FileSharingSessionListener) listener).handleTransferNotAllowedToSend(contact);
+            }
+        }
     }
 
     /**
@@ -299,8 +285,8 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * @param msgId Message ID
      */
     public void msrpDataTransfered(String msgId) {
-        if (logger.isActivated()) {
-            logger.info("Data transfered");
+        if (mLogger.isActivated()) {
+            mLogger.info("Data transfered");
         }
 
         long timestamp = System.currentTimeMillis();
@@ -371,8 +357,8 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * Data transfer has been aborted
      */
     public void msrpTransferAborted() {
-        if (logger.isActivated()) {
-            logger.info("Data transfer aborted");
+        if (mLogger.isActivated()) {
+            mLogger.info("Data transfer aborted");
         }
     }
 
@@ -384,8 +370,8 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
         if (msrpMgr != null) {
             msrpMgr.closeSession();
         }
-        if (logger.isActivated()) {
-            logger.debug("MSRP session has been closed");
+        if (mLogger.isActivated()) {
+            mLogger.debug("MSRP session has been closed");
         }
     }
 
@@ -398,8 +384,9 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * Handle 200 0K response
      * 
      * @param resp 200 OK response
+     * @throws SipException
      */
-    public void handle200OK(SipResponse resp) {
+    public void handle200OK(SipResponse resp) throws SipException {
         super.handle200OK(resp);
         long timestamp = System.currentTimeMillis();
         ((InstantMessagingService) getImsService()).receiveOneToOneFileDeliveryStatus(

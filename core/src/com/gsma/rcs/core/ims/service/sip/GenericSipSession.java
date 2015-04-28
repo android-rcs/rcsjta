@@ -38,6 +38,8 @@ import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
+import java.io.IOException;
+
 import gov2.nist.javax2.sip.header.ims.PPreferredServiceHeader;
 import javax2.sip.header.ExtensionHeader;
 
@@ -141,16 +143,16 @@ public abstract class GenericSipSession extends ImsServiceSession {
     /**
      * Prepare media session
      * 
-     * @throws Exception
+     * @throws IOException
      */
-    public abstract void prepareMediaSession() throws Exception;
+    public abstract void prepareMediaSession() throws IOException;
 
     /**
      * Start media session
      * 
-     * @throws Exception
+     * @throws IOException
      */
-    public abstract void startMediaSession() throws Exception;
+    public abstract void startMediaSession() throws IOException;
 
     /**
      * Close media session

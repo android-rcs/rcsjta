@@ -28,6 +28,7 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
@@ -49,6 +50,7 @@ import com.gsma.services.rcs.contact.ContactId;
 import android.net.Uri;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 import javax2.sip.header.ContentDispositionHeader;
@@ -210,9 +212,9 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
     /**
      * Prepare media session
      * 
-     * @throws Exception
+     * @throws MsrpException
      */
-    public void prepareMediaSession() throws Exception {
+    public void prepareMediaSession() throws MsrpException {
         // Changed by Deutsche Telekom
         // Get the remote SDP part
         byte[] sdp = getDialogPath().getRemoteContent().getBytes(UTF8);
@@ -231,9 +233,9 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
     /**
      * Start media session
      * 
-     * @throws Exception
+     * @throws IOException
      */
-    public void startMediaSession() throws Exception {
+    public void startMediaSession() throws IOException {
         // Open the MSRP session
         msrpMgr.openMsrpSession();
 

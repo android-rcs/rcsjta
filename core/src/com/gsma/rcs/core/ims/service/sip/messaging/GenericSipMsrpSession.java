@@ -47,6 +47,7 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Vector;
 
 /**
@@ -147,9 +148,9 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
     /**
      * Prepare media session
      * 
-     * @throws Exception
+     * @throws MsrpException
      */
-    public void prepareMediaSession() throws Exception {
+    public void prepareMediaSession() throws MsrpException {
         // Parse the remote SDP part
         SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(UTF8));
         Vector<MediaDescription> media = parser.getMediaDescriptions();
@@ -169,9 +170,9 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
     /**
      * Start media session
      * 
-     * @throws Exception
+     * @throws IOException
      */
-    public void startMediaSession() throws Exception {
+    public void startMediaSession() throws IOException {
         // Open the MSRP session
         getMsrpMgr().openMsrpSession();
     }

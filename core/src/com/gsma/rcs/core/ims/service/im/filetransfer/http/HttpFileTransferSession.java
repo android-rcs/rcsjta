@@ -23,6 +23,7 @@
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
@@ -238,19 +239,15 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
 
     /**
      * Prepare media session
-     * 
-     * @throws Exception
      */
-    public void prepareMediaSession() throws Exception {
+    public void prepareMediaSession() {
         // Not used here
     }
 
     /**
      * Start media session
-     * 
-     * @throws Exception
      */
-    public void startMediaSession() throws Exception {
+    public void startMediaSession() {
         // Not used here
     }
 

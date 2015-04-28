@@ -33,6 +33,8 @@ import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
+import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
+import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
@@ -65,6 +67,7 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -1024,9 +1027,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     /**
      * Prepare media session
      * 
-     * @throws Exception
+     * @throws MsrpException
      */
-    public void prepareMediaSession() throws Exception {
+    public void prepareMediaSession() throws MsrpException {
         // Changed by Deutsche Telekom
         // Get the remote SDP part
         byte[] sdp = getDialogPath().getRemoteContent().getBytes(UTF8);
@@ -1042,9 +1045,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     /**
      * Start media session
      * 
-     * @throws Exception
+     * @throws IOException
      */
-    public void startMediaSession() throws Exception {
+    public void startMediaSession() throws IOException {
         // Open the MSRP session
         getMsrpMgr().openMsrpSession();
 
@@ -1072,8 +1075,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * Handle 200 0K response
      * 
      * @param resp 200 OK response
+     * @throws SipException
      */
-    public void handle200OK(SipResponse resp) {
+    public void handle200OK(SipResponse resp) throws SipException {
         super.handle200OK(resp);
 
         // Check if geolocation push supported by remote

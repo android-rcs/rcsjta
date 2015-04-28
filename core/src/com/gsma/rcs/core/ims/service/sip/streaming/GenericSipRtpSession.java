@@ -30,6 +30,7 @@ import com.gsma.rcs.core.ims.protocol.rtp.MediaRtpSender;
 import com.gsma.rcs.core.ims.protocol.rtp.RtpException;
 import com.gsma.rcs.core.ims.protocol.rtp.format.Format;
 import com.gsma.rcs.core.ims.protocol.rtp.format.data.DataFormat;
+import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.rtp.stream.RtpStreamListener;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
@@ -43,6 +44,8 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
+
+import java.io.IOException;
 
 /**
  * Generic SIP RTP session
@@ -170,9 +173,9 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
     /**
      * Prepare media session
      * 
-     * @throws Exception
+     * @throws MediaException
      */
-    public void prepareMediaSession() throws Exception {
+    public void prepareMediaSession() throws MediaException {
         // Parse the remote SDP part
         SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(UTF8));
         MediaDescription mediaApp = parser.getMediaDescription("application");
@@ -188,9 +191,9 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
     /**
      * Start media session
      * 
-     * @throws Exception
+     * @throws IOException
      */
-    public void startMediaSession() throws Exception {
+    public void startMediaSession() throws IOException {
         synchronized (this) {
             // Start media
             rtpReceiver.startSession();

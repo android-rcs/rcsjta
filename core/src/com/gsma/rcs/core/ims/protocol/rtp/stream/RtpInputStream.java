@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +15,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.protocol.rtp.stream;
 
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.concurrent.TimeoutException;
 
+import com.gsma.rcs.core.ims.protocol.rtp.RtpException;
 import com.gsma.rcs.core.ims.protocol.rtp.RtpUtils;
 import com.gsma.rcs.core.ims.protocol.rtp.core.RtcpPacketReceiver;
 import com.gsma.rcs.core.ims.protocol.rtp.core.RtcpPacketTransmitter;
@@ -146,9 +152,9 @@ public class RtpInputStream implements ProcessorInputStream {
     /**
      * Open the input stream
      * 
-     * @throws Exception
+     * @throws IOException
      */
-    public void open() throws Exception {
+    public void open() throws IOException {
         // Create the RTP receiver
         rtpReceiver = new RtpPacketReceiver(localPort, rtcpSession, RTP_SOCKET_TIMEOUT);
         rtpReceiver.start();

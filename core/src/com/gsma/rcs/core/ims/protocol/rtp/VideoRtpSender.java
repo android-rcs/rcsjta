@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +15,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.protocol.rtp;
 
 import com.gsma.rcs.core.ims.protocol.rtp.codec.Codec;
 import com.gsma.rcs.core.ims.protocol.rtp.format.Format;
+import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.rtp.media.MediaInput;
 import com.gsma.rcs.core.ims.protocol.rtp.stream.RtpInputStream;
 import com.gsma.rcs.core.ims.protocol.rtp.stream.RtpOutputStream;
 import com.gsma.rcs.core.ims.protocol.rtp.stream.RtpStreamListener;
 import com.gsma.rcs.core.ims.protocol.rtp.stream.VideoCaptureStream;
+
+import java.io.IOException;
 
 /**
  * Video RTP sender
@@ -94,11 +101,11 @@ public class VideoRtpSender extends MediaRtpSender {
      * @param remotePort Remote port
      * @param rtpStream rtp input stream
      * @param RtpStreamListener rtp stream listener
-     * @throws RtpException
+     * @throws MediaException
      */
 
     public void prepareSession(MediaInput player, String remoteAddress, int remotePort,
-            RtpInputStream rtpStream, RtpStreamListener rtpStreamListener) throws RtpException {
+            RtpInputStream rtpStream, RtpStreamListener rtpStreamListener) throws MediaException {
         try {
             // Create the input stream
             inputStream = new VideoCaptureStream(format, player);
@@ -126,11 +133,8 @@ public class VideoRtpSender extends MediaRtpSender {
             if (logger.isActivated()) {
                 logger.debug("Session has been prepared with success");
             }
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't prepare resources correctly", e);
-            }
-            throw new RtpException("Can't prepare resources");
+        } catch (IOException e) {
+            throw new MediaException("Can't prepare resources", e);
         }
     }
 }

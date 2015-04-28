@@ -26,6 +26,8 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
+import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
@@ -139,9 +141,9 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
     /**
      * Prepare media session
      * 
-     * @throws RemoteException
+     * @throws MediaException
      */
-    public void prepareMediaSession() throws SipException {
+    public void prepareMediaSession() throws MediaException {
         // Parse the remote SDP part
         SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(UTF8));
         MediaDescription mediaVideo = parser.getMediaDescription("video");
@@ -180,16 +182,14 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
             // Set the video player remote info
             player.setRemoteInfo(selectedVideoCodec, remoteHost, remotePort, getOrientation());
         } catch (RemoteException e) {
-            throw new SipException("Error when preparing the media session", e);
+            throw new MediaException("Error when preparing the media session", e);
         }
     }
 
     /**
      * Start media session
-     * 
-     * @throws Exception
      */
-    public void startMediaSession() throws Exception {
+    public void startMediaSession() {
         // Nothing to do in case of external codec
     }
 
