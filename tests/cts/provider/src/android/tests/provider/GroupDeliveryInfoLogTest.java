@@ -18,7 +18,8 @@
 
 package android.tests.provider;
 
-import com.gsma.services.rcs.GroupDeliveryInfoLog;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfoLog;
 
 import android.content.ContentProviderClient;
 import android.content.ContentValues;
@@ -112,8 +113,8 @@ public class GroupDeliveryInfoLogTest extends InstrumentationTestCase {
         values.put(GroupDeliveryInfoLog.CHAT_ID, "chat_id");
         values.put(GroupDeliveryInfoLog.CONTACT, "+3360102030405");
         values.put(GroupDeliveryInfoLog.REASON_CODE,
-                GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED.toInt());
-        values.put(GroupDeliveryInfoLog.STATUS, GroupDeliveryInfoLog.Status.DELIVERED.toInt());
+                GroupDeliveryInfo.ReasonCode.UNSPECIFIED.toInt());
+        values.put(GroupDeliveryInfoLog.STATUS, GroupDeliveryInfo.Status.DELIVERED.toInt());
         values.put(GroupDeliveryInfoLog.TIMESTAMP_DELIVERED, 0);
         values.put(GroupDeliveryInfoLog.TIMESTAMP_DISPLAYED, 0);
         try {

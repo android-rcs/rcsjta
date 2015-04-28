@@ -400,235 +400,6 @@
 >
 </method>
 </class>
-<class name="GroupDeliveryInfo"
- extends="java.lang.Object"
- abstract="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<constructor name="GroupDeliveryInfo"
- type="com.gsma.services.rcs.GroupDeliveryInfo"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
-<field name="BASECOLUMN_ID"
- type="java.lang.String"
- transient="false"
- volatile="false"
- value="&quot;_id&quot;"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="CHAT_ID"
- type="java.lang.String"
- transient="false"
- volatile="false"
- value="&quot;chat_id&quot;"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="CONTACT"
- type="java.lang.String"
- transient="false"
- volatile="false"
- value="&quot;contact&quot;"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="CONTENT_URI"
- type="android.net.Uri"
- transient="false"
- volatile="false"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="ID"
- type="java.lang.String"
- transient="false"
- volatile="false"
- value="&quot;id&quot;"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="REASON_CODE"
- type="java.lang.String"
- transient="false"
- volatile="false"
- value="&quot;reason_code&quot;"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="STATUS"
- type="java.lang.String"
- transient="false"
- volatile="false"
- value="&quot;status&quot;"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="TIMESTAMP_DELIVERED"
- type="java.lang.String"
- transient="false"
- volatile="false"
- value="&quot;timestamp_delivered&quot;"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="TIMESTAMP_DISPLAYED"
- type="java.lang.String"
- transient="false"
- volatile="false"
- value="&quot;timestamp_displayed&quot;"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-</class>
-<class name="GroupDeliveryInfo.ReasonCode"
- extends="java.lang.Enum"
- abstract="false"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-<method name="toInt"
- return="int"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="valueOf"
- return="com.gsma.services.rcs.GroupDeliveryInfo.ReasonCode"
- abstract="false"
- native="false"
- synchronized="false"
- static="true"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="name" type="java.lang.String">
-</parameter>
-</method>
-<method name="valueOf"
- return="com.gsma.services.rcs.GroupDeliveryInfo.ReasonCode"
- abstract="false"
- native="false"
- synchronized="false"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="value" type="int">
-</parameter>
-</method>
-<method name="values"
- return="com.gsma.services.rcs.GroupDeliveryInfo.ReasonCode[]"
- abstract="false"
- native="false"
- synchronized="false"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-</class>
-<class name="GroupDeliveryInfo.Status"
- extends="java.lang.Enum"
- abstract="false"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-<method name="toInt"
- return="int"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="valueOf"
- return="com.gsma.services.rcs.GroupDeliveryInfo.Status"
- abstract="false"
- native="false"
- synchronized="false"
- static="true"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="name" type="java.lang.String">
-</parameter>
-</method>
-<method name="valueOf"
- return="com.gsma.services.rcs.GroupDeliveryInfo.Status"
- abstract="false"
- native="false"
- synchronized="false"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="value" type="int">
-</parameter>
-</method>
-<method name="values"
- return="com.gsma.services.rcs.GroupDeliveryInfo.Status[]"
- abstract="false"
- native="false"
- synchronized="false"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-</class>
 <class name="Intents"
  extends="java.lang.Object"
  abstract="false"
@@ -771,6 +542,17 @@
  visibility="public"
 >
 </field>
+<field name="ACTION_GET_COMPATIBLITY"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;com.gsma.services.rcs.action.GET_COMPATIBLITY&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
 <field name="ACTION_SET_ACTIVATION_MODE"
  type="java.lang.String"
  transient="false"
@@ -798,6 +580,61 @@
  transient="false"
  volatile="false"
  value="&quot;get_activation_mode_changeable&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="EXTRA_GET_COMPATIBLITY_CODENAME"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;get_compatibility_codename&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="EXTRA_GET_COMPATIBLITY_INCREMENT"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;get_compatibility_increment&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="EXTRA_GET_COMPATIBLITY_RESPONSE"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;get_compatibility_response&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="EXTRA_GET_COMPATIBLITY_SERVICE"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;get_compatibility_service&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="EXTRA_GET_COMPATIBLITY_VERSION"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;get_compatibility_version&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -863,7 +700,7 @@
 </method>
 </class>
 <class name="RcsIllegalArgumentException"
- extends="com.gsma.services.rcs.RcsServiceException"
+ extends="java.lang.IllegalArgumentException"
  abstract="false"
  static="false"
  final="false"
@@ -1091,6 +928,8 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
 </method>
 <method name="disconnect"
  return="void"
@@ -1795,7 +1634,7 @@
 </method>
 </class>
 <class name="RcsUnsupportedOperationException"
- extends="com.gsma.services.rcs.RcsServiceException"
+ extends="java.lang.UnsupportedOperationException"
  abstract="false"
  static="false"
  final="false"
@@ -2138,7 +1977,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;capability_time_last_refresh&quot;"
+ value="&quot;timestamp&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -2150,7 +1989,7 @@
  extends="com.gsma.services.rcs.RcsService"
  abstract="false"
  static="false"
- final="false"
+ final="true"
  deprecated="not deprecated"
  visibility="public"
 >
@@ -2204,10 +2043,12 @@
  native="false"
  synchronized="false"
  static="false"
- final="false"
+ final="true"
  deprecated="not deprecated"
  visibility="public"
 >
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
 </method>
 <method name="disconnect"
  return="void"
@@ -2451,6 +2292,17 @@
  visibility="public"
 >
 </field>
+<field name="HISTORYLOG_MEMBER_ID"
+ type="int"
+ transient="false"
+ volatile="false"
+ value="0"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
 <field name="PARTICIPANTS"
  type="java.lang.String"
  transient="false"
@@ -2582,6 +2434,17 @@
  transient="false"
  volatile="false"
  value="&quot;direction&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="EXPIRED_DELIVERY"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;expired_delivery&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -3118,6 +2981,19 @@
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
 </method>
+<method name="isExpiredDelivery"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+</exception>
+</method>
 <method name="isRead"
  return="boolean"
  abstract="false"
@@ -3136,7 +3012,7 @@
  extends="com.gsma.services.rcs.RcsService"
  abstract="false"
  static="false"
- final="false"
+ final="true"
  deprecated="not deprecated"
  visibility="public"
 >
@@ -3182,7 +3058,7 @@
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
 </method>
-<method name="connect"
+<method name="clearMessageDeliveryExpiration"
  return="void"
  abstract="false"
  native="false"
@@ -3192,6 +3068,23 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<parameter name="msgIds" type="java.util.Set&lt;java.lang.String&gt;">
+</parameter>
+<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+</exception>
+</method>
+<method name="connect"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
 </method>
 <method name="deleteGroupChat"
  return="void"
@@ -3393,21 +3286,6 @@
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
 </method>
-<method name="markUndeliveredMessagesAsProcessed"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="msgIds" type="java.util.Set&lt;java.lang.String&gt;">
-</parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
 <method name="removeEventListener"
  return="void"
  abstract="false"
@@ -3553,19 +3431,6 @@
 </method>
 <method name="getOneToOneChatMessageMaxLength"
  return="int"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="isChatSf"
- return="boolean"
  abstract="false"
  native="false"
  synchronized="false"
@@ -4218,9 +4083,9 @@
 </parameter>
 <parameter name="msgId" type="java.lang.String">
 </parameter>
-<parameter name="status" type="com.gsma.services.rcs.GroupDeliveryInfo.Status">
+<parameter name="status" type="com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo.Status">
 </parameter>
-<parameter name="reasonCode" type="com.gsma.services.rcs.GroupDeliveryInfo.ReasonCode">
+<parameter name="reasonCode" type="com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo.ReasonCode">
 </parameter>
 </method>
 <method name="onMessageStatusChanged"
@@ -4423,6 +4288,28 @@
  transient="false"
  volatile="false"
  value="&quot;com.gsma.services.rcs.chat.action.NEW_ONE_TO_ONE_CHAT_MESSAGE&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="ACTION_NEW_ONE_TO_ONE_MESSAGE_DELIVERY_EXPIRED"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;com.gsma.services.rcs.chat.action.MESSAGE_DELIVERY_EXPIRED&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="EXTRA_CONTACT"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;contact&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -4656,7 +4543,7 @@
  extends="com.gsma.services.rcs.RcsService"
  abstract="false"
  static="false"
- final="false"
+ final="true"
  deprecated="not deprecated"
  visibility="public"
 >
@@ -4693,10 +4580,12 @@
  native="false"
  synchronized="false"
  static="false"
- final="false"
+ final="true"
  deprecated="not deprecated"
  visibility="public"
 >
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
 </method>
 <method name="disconnect"
  return="void"
@@ -5423,7 +5312,7 @@
  extends="com.gsma.services.rcs.RcsService"
  abstract="false"
  static="false"
- final="false"
+ final="true"
  deprecated="not deprecated"
  visibility="public"
 >
@@ -5475,10 +5364,12 @@
  native="false"
  synchronized="false"
  static="false"
- final="false"
+ final="true"
  deprecated="not deprecated"
  visibility="public"
 >
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
 </method>
 <method name="disconnect"
  return="void"
@@ -6194,6 +6085,19 @@
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
 </method>
+<method name="isExpiredDelivery"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+</exception>
+</method>
 <method name="isRead"
  return="boolean"
  abstract="false"
@@ -6401,11 +6305,33 @@
  visibility="public"
 >
 </field>
+<field name="ACTION_NEW_ONE_TO_ONE_FILE_TRANSFER_DELIVERY_EXPIRED"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;com.gsma.services.rcs.chat.action.FILE_TRANSFER_DELIVERY_EXPIRED&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
 <field name="ACTION_RESUME"
  type="java.lang.String"
  transient="false"
  volatile="false"
  value="&quot;com.gsma.services.rcs.filetransfer.action.RESUME_FILE_TRANSFER&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="EXTRA_CONTACT"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;contact&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -6488,6 +6414,17 @@
  transient="false"
  volatile="false"
  value="&quot;direction&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="EXPIRED_DELIVERY"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;expired_delivery&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -6708,7 +6645,7 @@
  extends="com.gsma.services.rcs.RcsService"
  abstract="false"
  static="false"
- final="false"
+ final="true"
  deprecated="not deprecated"
  visibility="public"
 >
@@ -6754,7 +6691,7 @@
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
 </method>
-<method name="connect"
+<method name="clearFileTransferDeliveryExpiration"
  return="void"
  abstract="false"
  native="false"
@@ -6764,6 +6701,23 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<parameter name="transferIds" type="java.util.Set&lt;java.lang.String&gt;">
+</parameter>
+<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+</exception>
+</method>
+<method name="connect"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
 </method>
 <method name="deleteFileTransfer"
  return="void"
@@ -6875,19 +6829,6 @@
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
 </method>
-<method name="getFileTransfers"
- return="java.util.Set&lt;com.gsma.services.rcs.filetransfer.FileTransfer&gt;"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
 <method name="isAllowedToTransferFile"
  return="boolean"
  abstract="false"
@@ -6929,21 +6870,6 @@
  visibility="public"
 >
 <parameter name="transferId" type="java.lang.String">
-</parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="markUndeliveredFileTransfersAsProcessed"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="transferIds" type="java.util.Set&lt;java.lang.String&gt;">
 </parameter>
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
@@ -7279,9 +7205,9 @@
 </parameter>
 <parameter name="transferId" type="java.lang.String">
 </parameter>
-<parameter name="status" type="com.gsma.services.rcs.GroupDeliveryInfo.Status">
+<parameter name="status" type="com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo.Status">
 </parameter>
-<parameter name="reasonCode" type="com.gsma.services.rcs.GroupDeliveryInfo.ReasonCode">
+<parameter name="reasonCode" type="com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo.ReasonCode">
 </parameter>
 </method>
 <method name="onProgressUpdate"
@@ -7394,6 +7320,255 @@
 </method>
 </class>
 </package>
+<package name="com.gsma.services.rcs.groupdelivery"
+>
+<class name="GroupDeliveryInfo"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="GroupDeliveryInfo"
+ type="com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</constructor>
+</class>
+<class name="GroupDeliveryInfo.ReasonCode"
+ extends="java.lang.Enum"
+ abstract="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="toInt"
+ return="int"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="valueOf"
+ return="com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo.ReasonCode"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="name" type="java.lang.String">
+</parameter>
+</method>
+<method name="valueOf"
+ return="com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo.ReasonCode"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="value" type="int">
+</parameter>
+</method>
+<method name="values"
+ return="com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo.ReasonCode[]"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</class>
+<class name="GroupDeliveryInfo.Status"
+ extends="java.lang.Enum"
+ abstract="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="toInt"
+ return="int"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="valueOf"
+ return="com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo.Status"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="name" type="java.lang.String">
+</parameter>
+</method>
+<method name="valueOf"
+ return="com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo.Status"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="value" type="int">
+</parameter>
+</method>
+<method name="values"
+ return="com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo.Status[]"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</class>
+<class name="GroupDeliveryInfoLog"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="GroupDeliveryInfoLog"
+ type="com.gsma.services.rcs.groupdelivery.GroupDeliveryInfoLog"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</constructor>
+<field name="BASECOLUMN_ID"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;_id&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="CHAT_ID"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;chat_id&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="CONTACT"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;contact&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="CONTENT_URI"
+ type="android.net.Uri"
+ transient="false"
+ volatile="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="ID"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;id&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="REASON_CODE"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;reason_code&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="STATUS"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;status&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="TIMESTAMP_DELIVERED"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;timestamp_delivered&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="TIMESTAMP_DISPLAYED"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;timestamp_displayed&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+</class>
+</package>
 <package name="com.gsma.services.rcs.history"
 >
 <class name="HistoryLog"
@@ -7482,6 +7657,17 @@
  transient="false"
  volatile="false"
  value="&quot;duration&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="EXPIRED_DELIVERY"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;expired_delivery&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -7658,7 +7844,7 @@
  extends="com.gsma.services.rcs.RcsService"
  abstract="false"
  static="false"
- final="false"
+ final="true"
  deprecated="not deprecated"
  visibility="public"
 >
@@ -7680,10 +7866,12 @@
  native="false"
  synchronized="false"
  static="false"
- final="false"
+ final="true"
  deprecated="not deprecated"
  visibility="public"
 >
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
 </method>
 <method name="createUniqueId"
  return="long"
@@ -8299,7 +8487,7 @@
  extends="com.gsma.services.rcs.RcsService"
  abstract="false"
  static="false"
- final="false"
+ final="true"
  deprecated="not deprecated"
  visibility="public"
 >
@@ -8336,10 +8524,12 @@
  native="false"
  synchronized="false"
  static="false"
- final="false"
+ final="true"
  deprecated="not deprecated"
  visibility="public"
 >
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
 </method>
 <method name="deleteGeolocSharing"
  return="void"
@@ -8407,19 +8597,6 @@
 >
 <parameter name="sharingId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="getGeolocSharings"
- return="java.util.Set&lt;com.gsma.services.rcs.sharing.geoloc.GeolocSharing&gt;"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
 </method>
@@ -9034,7 +9211,7 @@
  extends="com.gsma.services.rcs.RcsService"
  abstract="false"
  static="false"
- final="false"
+ final="true"
  deprecated="not deprecated"
  visibility="public"
 >
@@ -9071,10 +9248,12 @@
  native="false"
  synchronized="false"
  static="false"
- final="false"
+ final="true"
  deprecated="not deprecated"
  visibility="public"
 >
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
 </method>
 <method name="deleteImageSharing"
  return="void"
@@ -9155,19 +9334,6 @@
 >
 <parameter name="sharingId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="getImageSharings"
- return="java.util.Set&lt;com.gsma.services.rcs.sharing.image.ImageSharing&gt;"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
 </method>
@@ -9992,7 +10158,7 @@
  extends="com.gsma.services.rcs.RcsService"
  abstract="false"
  static="false"
- final="false"
+ final="true"
  deprecated="not deprecated"
  visibility="public"
 >
@@ -10029,10 +10195,12 @@
  native="false"
  synchronized="false"
  static="false"
- final="false"
+ final="true"
  deprecated="not deprecated"
  visibility="public"
 >
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
 </method>
 <method name="deleteVideoSharing"
  return="void"
@@ -10113,19 +10281,6 @@
 >
 <parameter name="sharingId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="getVideoSharings"
- return="java.util.Set&lt;com.gsma.services.rcs.sharing.video.VideoSharing&gt;"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
 </method>
@@ -10496,7 +10651,7 @@
  extends="com.gsma.services.rcs.RcsService"
  abstract="false"
  static="false"
- final="false"
+ final="true"
  deprecated="not deprecated"
  visibility="public"
 >
@@ -10546,10 +10701,12 @@
  native="false"
  synchronized="false"
  static="false"
- final="false"
+ final="true"
  deprecated="not deprecated"
  visibility="public"
 >
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
 </method>
 <method name="disconnect"
  return="void"
