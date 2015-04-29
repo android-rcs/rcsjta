@@ -357,9 +357,8 @@ public interface IFileTransferLog {
      * Get one-one file transfers with unexpired delivery
      * 
      * @param currentTime
-     * @return Cursor
      */
-    public Cursor getOneToOneFileTransfersWithUnexpiredDelivery(long currentTime);
+    public Cursor getUnDeliveredOneToOneFileTransfers();
 
     /**
      * Returns true if delivery for this file has expired or false otherwise. Note: false means

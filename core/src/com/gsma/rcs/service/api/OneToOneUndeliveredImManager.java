@@ -139,9 +139,7 @@ public class OneToOneUndeliveredImManager {
                 createUndeliveredFileTransferPendingIntent(contact, fileTransferId));
     }
 
-    public void handleChatMessageDeliveryExpiration(Intent intent) {
-        ContactId contact = intent.getParcelableExtra(EXTRA_CONTACT);
-        String msgId = intent.getStringExtra(EXTRA_ID);
+    public void handleChatMessageDeliveryExpiration(ContactId contact, String msgId) {
         cancelDeliveryTimeoutAlarm(msgId);
         mMessagingLog.setChatMessageDeliveryExpired(msgId);
 
@@ -154,9 +152,7 @@ public class OneToOneUndeliveredImManager {
         mCtx.sendBroadcast(undeliveredMessage);
     }
 
-    public void handleFileTransferDeliveryExpiration(Intent intent) {
-        ContactId contact = intent.getParcelableExtra(EXTRA_CONTACT);
-        String fileTransferId = intent.getStringExtra(EXTRA_ID);
+    public void handleFileTransferDeliveryExpiration(ContactId contact, String fileTransferId) {
         cancelDeliveryTimeoutAlarm(fileTransferId);
         mMessagingLog.setFileTransferDeliveryExpired(fileTransferId);
 
@@ -167,5 +163,17 @@ public class OneToOneUndeliveredImManager {
         undeliveredFile.putExtra(FileTransferIntent.EXTRA_CONTACT, (Parcelable) contact);
         undeliveredFile.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, fileTransferId);
         mCtx.sendBroadcast(undeliveredFile);
+    }
+
+    public void handleChatMessageDeliveryExpiration(Intent intent) {
+        ContactId contact = intent.getParcelableExtra(EXTRA_CONTACT);
+        String msgId = intent.getStringExtra(EXTRA_ID);
+        handleChatMessageDeliveryExpiration(contact, msgId);
+    }
+
+    public void handleFileTransferDeliveryExpiration(Intent intent) {
+        ContactId contact = intent.getParcelableExtra(EXTRA_CONTACT);
+        String fileTransferId = intent.getStringExtra(EXTRA_ID);
+        handleFileTransferDeliveryExpiration(contact, fileTransferId);
     }
 }

@@ -87,8 +87,15 @@ public class FileTransferLog implements IFileTransferLog {
     private static final String SELECTION_BY_MULTIPLE_FT_IDS = new StringBuilder(
             FileTransferData.KEY_FT_ID).append(" IN(").append("=?)").toString();
 
-    private static final String SELECTION_ONETOONE_FILE_TRANSFERS_WITH_UNEXPIRED_DELIVERY = new StringBuilder(
-            FileTransferData.KEY_DELIVERY_EXPIRATION).append(">? AND ")
+    private static final int FILE_TRANSFER_DELIVERY_EXPIRED = 1;
+
+    private static final int FILE_TRANSFER_DELIVERY_EXPIRATION_NOT_APPLICABLE = 0;
+
+    private static final String SELECTION_BY_UNDELIVERED_ONETOONE_FILE_TRANSFERS = new StringBuilder(
+            FileTransferData.KEY_EXPIRED_DELIVERY).append("<>")
+            .append(FILE_TRANSFER_DELIVERY_EXPIRED).append(" AND ")
+            .append(FileTransferData.KEY_DELIVERY_EXPIRATION).append("<>")
+            .append(FILE_TRANSFER_DELIVERY_EXPIRATION_NOT_APPLICABLE).append(" AND ")
             .append(FileTransferData.KEY_STATE).append(" NOT IN(").append(State.DELIVERED.toInt())
             .append(",").append(State.DISPLAYED.toInt()).append(")").toString();
 
@@ -917,12 +924,9 @@ public class FileTransferLog implements IFileTransferLog {
     }
 
     @Override
-    public Cursor getOneToOneFileTransfersWithUnexpiredDelivery(long currentTime) {
-        String[] selectionArgs = new String[] {
-            String.valueOf(currentTime)
-        };
+    public Cursor getUnDeliveredOneToOneFileTransfers() {
         return mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
-                SELECTION_ONETOONE_FILE_TRANSFERS_WITH_UNEXPIRED_DELIVERY, selectionArgs,
+                SELECTION_BY_UNDELIVERED_ONETOONE_FILE_TRANSFERS, null,
                 ORDER_BY_TIMESTAMP_ASC);
     }
 

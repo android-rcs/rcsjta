@@ -92,10 +92,16 @@ public class MessageLog implements IMessageLog {
     private static final String SELECTION_BY_MULTIPLE_MSG_IDS = new StringBuilder(
             MessageData.KEY_MESSAGE_ID).append(" IN(").append("=?)").toString();
 
-    private static final String SELECTION_ONETOONE_CHAT_MESSAGES_WITH_UNEXPIRED_DELIVERY = new StringBuilder(
-            MessageData.KEY_DELIVERY_EXPIRATION).append(">? AND ").append(MessageData.KEY_STATUS)
-            .append(" NOT IN(").append(Status.DELIVERED.toInt()).append(",")
-            .append(Status.DISPLAYED.toInt()).append(")").toString();
+    private static final int CHAT_MESSAGE_DELIVERY_EXPIRED = 1;
+
+    private static final int CHAT_MESSAGE_DELIVERY_EXPIRATION_NOT_APPLICABLE = 0;
+
+    private static final String SELECTION_BY_UNDELIVERED_ONETOONE_CHAT_MESSAGES = new StringBuilder(
+            MessageData.KEY_EXPIRED_DELIVERY).append("<>").append(CHAT_MESSAGE_DELIVERY_EXPIRED)
+            .append(" AND ").append(MessageData.KEY_DELIVERY_EXPIRATION).append("<>")
+            .append(CHAT_MESSAGE_DELIVERY_EXPIRATION_NOT_APPLICABLE).append(" AND ")
+            .append(MessageData.KEY_STATUS).append(" NOT IN(").append(Status.DELIVERED.toInt())
+            .append(",").append(Status.DISPLAYED.toInt()).append(")").toString();
 
     private static final String ORDER_BY_TIMESTAMP_ASC = MessageData.KEY_TIMESTAMP.concat(" ASC");
 
@@ -719,13 +725,9 @@ public class MessageLog implements IMessageLog {
     }
 
     @Override
-    public Cursor getOneToOneChatMessagesWithUnexpiredDelivery(long currentTime) {
-        String[] selectionArgs = new String[] {
-            String.valueOf(currentTime)
-        };
+    public Cursor getUndeliveredOneToOneChatMessages() {
         return mLocalContentResolver.query(MessageData.CONTENT_URI, null,
-                SELECTION_ONETOONE_CHAT_MESSAGES_WITH_UNEXPIRED_DELIVERY, selectionArgs,
-                ORDER_BY_TIMESTAMP_ASC);
+                SELECTION_BY_UNDELIVERED_ONETOONE_CHAT_MESSAGES, null, ORDER_BY_TIMESTAMP_ASC);
     }
 
     @Override

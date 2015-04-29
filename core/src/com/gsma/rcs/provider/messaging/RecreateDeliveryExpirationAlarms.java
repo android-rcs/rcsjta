@@ -50,7 +50,7 @@ public class RecreateDeliveryExpirationAlarms implements Runnable {
         try {
             synchronized (mLock) {
                 long currentTime = System.currentTimeMillis();
-                cursor = mMessagingLog.getOneToOneChatMessagesWithUnexpiredDelivery(currentTime);
+                cursor = mMessagingLog.getUndeliveredOneToOneChatMessages();
                 int msgIdIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_MESSAGE_ID);
                 int chatMessageContactIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_CONTACT);
                 int chatMessageDeliveryExpirationIdx = cursor
@@ -59,13 +59,19 @@ public class RecreateDeliveryExpirationAlarms implements Runnable {
                     String msgId = cursor.getString(msgIdIdx);
                     ContactId contact = ContactUtil.createContactIdFromTrustedData(cursor
                             .getString(chatMessageContactIdx));
-                    long deliveryExpiration = cursor.getInt(chatMessageDeliveryExpirationIdx);
-                    mOneToOneUndeliveredImManager.scheduleOneToOneChatMessageDeliveryTimeoutAlarm(
-                            contact, msgId, deliveryExpiration);
+                    long deliveryExpiration = cursor.getLong(chatMessageDeliveryExpirationIdx);
+                    if (deliveryExpiration > currentTime) {
+                        mOneToOneUndeliveredImManager
+                                .scheduleOneToOneChatMessageDeliveryTimeoutAlarm(contact, msgId,
+                                        deliveryExpiration);
+                    } else {
+                        mOneToOneUndeliveredImManager.handleChatMessageDeliveryExpiration(contact,
+                                msgId);
+                    }
                 }
                 cursor.close();
 
-                cursor = mMessagingLog.getOneToOneFileTransfersWithUnexpiredDelivery(currentTime);
+                cursor = mMessagingLog.getUnDeliveredOneToOneFileTransfers();
                 int fileTransferIdIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FT_ID);
                 int fileTransferContactIdx = cursor
                         .getColumnIndexOrThrow(FileTransferData.KEY_CONTACT);
@@ -75,9 +81,15 @@ public class RecreateDeliveryExpirationAlarms implements Runnable {
                     String fileTransferId = cursor.getString(fileTransferIdIdx);
                     ContactId contact = ContactUtil.createContactIdFromTrustedData(cursor
                             .getString(fileTransferContactIdx));
-                    long deliveryExpiration = cursor.getInt(fileTransferDeliveryExpirationIdx);
-                    mOneToOneUndeliveredImManager.scheduleOneToOneFileTransferDeliveryTimeoutAlarm(
-                            contact, fileTransferId, deliveryExpiration);
+                    long deliveryExpiration = cursor.getLong(fileTransferDeliveryExpirationIdx);
+                    if (deliveryExpiration > currentTime) {
+                        mOneToOneUndeliveredImManager
+                                .scheduleOneToOneFileTransferDeliveryTimeoutAlarm(contact,
+                                        fileTransferId, deliveryExpiration);
+                    } else {
+                        mOneToOneUndeliveredImManager.handleFileTransferDeliveryExpiration(contact,
+                                fileTransferId);
+                    }
                 }
             }
         } catch (SQLException e) {
