@@ -1108,9 +1108,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     /**
      * Called when is composing a chat message
-     *
-     * @param enabled It should be set to true if user is composing and set to false when the
-     *            client application is leaving the chat UI
+     * 
+     * @param enabled It should be set to true if user is composing and set to false when the client
+     *            application is leaving the chat UI
      * @throws RemoteException
      */
     public void onComposing(final boolean enabled) throws RemoteException {
@@ -1521,6 +1521,28 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             Content.ReasonCode reasonCode = imdnToMessageFailedReasonCode(imdn);
             handleMessageDeliveryStatusFailed(contact, msgId, reasonCode);
         }
+    }
+
+    @Override
+    public void handleDeliveryStatus(String contributionId, ContactId contact, ImdnDocument imdn) {
+        String msgId = imdn.getMsgId();
+
+        // TODO: Potential race condition, after we've checked that the message is persisted
+        // it may be removed before the handle method executes.
+        if (mMessagingLog.isMessagePersisted(msgId)) {
+            handleMessageDeliveryStatus(contact, imdn);
+            return;
+        }
+
+        if (mMessagingLog.isFileTransfer(msgId)) {
+            mImService.receiveGroupFileDeliveryStatus(contributionId, contact, imdn);
+            return;
+        }
+
+        logger.error(new StringBuilder(
+                "Imdn delivery report received referencing an entry that was ")
+                .append("not found in our database. Message id ").append(msgId)
+                .append(", ignoring.").toString());
     }
 
     /**

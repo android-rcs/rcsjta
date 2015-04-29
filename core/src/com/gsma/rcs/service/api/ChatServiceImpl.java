@@ -361,7 +361,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param contact Contact ID
      * @param imdn Imdn document
      */
-    public void receiveMessageDeliveryStatus(ContactId contact, ImdnDocument imdn) {
+    public void receiveOneToOneMessageDeliveryStatus(ContactId contact, ImdnDocument imdn) {
         String status = imdn.getStatus();
         String msgId = imdn.getMsgId();
         String notificationType = imdn.getNotificationType();
@@ -378,6 +378,10 @@ public class ChatServiceImpl extends IChatService.Stub {
                 || ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
             ReasonCode reasonCode = imdnToFailedReasonCode(imdn);
             synchronized (mLock) {
+                // TODO: Potential race condition, the message may have been removed at this
+                // point which means the database won't be updated, but we'll still do the
+                // broadcast. A local lock like mLock isn't much help since mMessagingLog is
+                // accessed from many other places.
                 mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.FAILED, reasonCode);
 
                 mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, mimeType,
@@ -387,6 +391,10 @@ public class ChatServiceImpl extends IChatService.Stub {
         } else if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
             mOneToOneUndeliveredImManager.cancelDeliveryTimeoutAlarm(msgId);
             synchronized (mLock) {
+                // TODO: Potential race condition, the message may have been removed at this
+                // point which means the database won't be updated, but we'll still do the
+                // broadcast. A local lock like mLock isn't much help since mMessagingLog is
+                // accessed from many other places.
                 mMessagingLog.setChatMessageStatusDelivered(msgId, timestamp);
 
                 mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, mimeType,
@@ -396,6 +404,10 @@ public class ChatServiceImpl extends IChatService.Stub {
         } else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
             mOneToOneUndeliveredImManager.cancelDeliveryTimeoutAlarm(msgId);
             synchronized (mLock) {
+                // TODO: Potential race condition, the message may have been removed at this
+                // point which means the database won't be updated, but we'll still do the
+                // broadcast. A local lock like mLock isn't much help since mMessagingLog is
+                // accessed from many other places.
                 mMessagingLog.setChatMessageStatusDisplayed(msgId, timestamp);
 
                 mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, mimeType,
@@ -437,7 +449,8 @@ public class ChatServiceImpl extends IChatService.Stub {
             return oneToOneChat;
         }
         return new OneToOneChatImpl(contact, mOneToOneChatEventBroadcaster, mImService,
-                mMessagingLog, mRcsSettings, this, mContactManager, mCore, mOneToOneUndeliveredImManager);
+                mMessagingLog, mRcsSettings, this, mContactManager, mCore,
+                mOneToOneUndeliveredImManager);
     }
 
     /**

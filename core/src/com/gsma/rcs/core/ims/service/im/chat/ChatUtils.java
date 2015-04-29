@@ -587,15 +587,12 @@ public class ChatUtils {
      * 
      * @param xml XML document
      * @return IMDN document
+     * @throws Exception
      */
-    public static ImdnDocument parseDeliveryReport(String xml) {
-        try {
-            InputSource input = new InputSource(new ByteArrayInputStream(xml.getBytes()));
-            ImdnParser parser = new ImdnParser(input);
-            return parser.getImdnDocument();
-        } catch (Exception e) {
-            return null;
-        }
+    public static ImdnDocument parseDeliveryReport(String xml) throws Exception {
+        InputSource input = new InputSource(new ByteArrayInputStream(xml.getBytes()));
+        ImdnParser parser = new ImdnParser(input);
+        return parser.getImdnDocument();
     }
 
     /**

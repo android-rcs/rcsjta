@@ -117,20 +117,6 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         mUndeliveredImManager = undeliveredImManager;
     }
 
-    private ReasonCode imdnToFailedReasonCode(ImdnDocument imdn) {
-        String notificationType = imdn.getNotificationType();
-        if (ImdnDocument.DELIVERY_NOTIFICATION.equals(notificationType)) {
-            return ReasonCode.FAILED_DELIVERY;
-
-        } else if (ImdnDocument.DISPLAY_NOTIFICATION.equals(notificationType)) {
-            return ReasonCode.FAILED_DISPLAY;
-        }
-
-        throw new IllegalArgumentException(new StringBuilder(
-                "Received invalid imdn notification type:'").append(notificationType).append("'")
-                .toString());
-    }
-
     private void sendChatMessageInNewSession(ChatMessage msg) {
         try {
             final OneToOneChatSession newSession = mImService.initiateOneToOneChatSession(mContact,
@@ -539,8 +525,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     /**
      * Called when is composing a chat message
      * 
-     * @param enabled It should be set to true if user is composing and set to false when the
-     *            client application is leaving the chat UI
+     * @param enabled It should be set to true if user is composing and set to false when the client
+     *            application is leaving the chat UI
      * @throws RemoteException
      */
     public void onComposing(final boolean enabled) throws RemoteException {
@@ -824,45 +810,27 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
 
     @Override
     public void handleMessageDeliveryStatus(ContactId contact, ImdnDocument imdn) {
+        mChatService.receiveOneToOneMessageDeliveryStatus(contact, imdn);
+    }
+
+    @Override
+    public void handleDeliveryStatus(String contributionId, ContactId contact, ImdnDocument imdn) {
         String msgId = imdn.getMsgId();
-        String status = imdn.getStatus();
-        long timestamp = imdn.getDateTime();
 
-        if (logger.isActivated()) {
-            logger.info(new StringBuilder("New message delivery status for message ").append(msgId)
-                    .append(", status ").append(status).append(", timestamp ").append(timestamp)
-                    .append(".").toString());
+        if (mMessagingLog.isMessagePersisted(msgId)) {
+            handleMessageDeliveryStatus(contact, imdn);
+            return;
         }
-        String mimeType = mMessagingLog.getMessageMimeType(msgId);
-        if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)
-                || ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)
-                || ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
-            ReasonCode reasonCode = imdnToFailedReasonCode(imdn);
-            synchronized (lock) {
-                mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.FAILED, reasonCode);
 
-                mBroadcaster.broadcastMessageStatusChanged(contact, mimeType, msgId, Status.FAILED,
-                        reasonCode);
-            }
-
-        } else if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
-            mUndeliveredImManager.cancelDeliveryTimeoutAlarm(msgId);
-            synchronized (lock) {
-                mMessagingLog.setChatMessageStatusDelivered(msgId, timestamp);
-
-                mBroadcaster.broadcastMessageStatusChanged(contact, mimeType, msgId,
-                        Status.DELIVERED, ReasonCode.UNSPECIFIED);
-            }
-
-        } else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
-            mUndeliveredImManager.cancelDeliveryTimeoutAlarm(msgId);
-            synchronized (lock) {
-                mMessagingLog.setChatMessageStatusDisplayed(msgId, timestamp);
-
-                mBroadcaster.broadcastMessageStatusChanged(contact, mimeType, msgId,
-                        Status.DISPLAYED, ReasonCode.UNSPECIFIED);
-            }
+        if (mMessagingLog.isFileTransfer(msgId)) {
+            mImService.receiveOneToOneFileDeliveryStatus(contact, imdn);
+            return;
         }
+
+        logger.error(new StringBuilder(
+                "Imdn delivery report received referencing an entry that was ")
+                .append("not found in our database. Message id ").append(msgId)
+                .append(", ignoring.").toString());
     }
 
     @Override

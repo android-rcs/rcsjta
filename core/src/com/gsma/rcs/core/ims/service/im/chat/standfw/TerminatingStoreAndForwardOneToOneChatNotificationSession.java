@@ -45,7 +45,6 @@ import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimParser;
-import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -333,10 +332,10 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
                 if (number != null) {
                     ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
                     // Receive an IMDN report
-                    receiveMessageDeliveryStatus(contact, cpimMsg.getMessageContent());
+                    receiveDeliveryStatus(contact, cpimMsg.getMessageContent());
                 } else {
                     // Receive an IMDN report
-                    receiveMessageDeliveryStatus(getRemoteContact(), cpimMsg.getMessageContent());
+                    receiveDeliveryStatus(getRemoteContact(), cpimMsg.getMessageContent());
                 }
             } catch (Exception e) {
                 if (logActivated) {
@@ -387,39 +386,6 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
      */
     public void sendEmptyDataChunk() throws MsrpException {
         mMsrpMgr.sendEmptyChunk();
-
-    }
-
-    /**
-     * Receive a message delivery status (XML document)
-     * 
-     * @param contact Contact identifier
-     * @param xml XML document
-     */
-    public void receiveMessageDeliveryStatus(ContactId contact, String xml) {
-        try {
-            ImdnDocument imdn = ChatUtils.parseDeliveryReport(xml);
-            if (imdn == null) {
-                return;
-            }
-
-            boolean isFileTransfer = mMessagingLog.isFileTransfer(imdn.getMsgId());
-            if (isFileTransfer) {
-                ((InstantMessagingService) getImsService())
-                        .receiveOneToOneFileDeliveryStatus(contact, imdn);
-
-            } else {
-                // Notify the message delivery outside of the chat
-                // session
-                getImsService().getImsModule().getCore().getListener()
-                        .handleOneToOneMessageDeliveryStatus(contact, imdn);
-
-            }
-        } catch (Exception e) {
-            if (mLogger.isActivated()) {
-                mLogger.error("Can't parse IMDN document", e);
-            }
-        }
     }
 
     // Changed by Deutsche Telekom

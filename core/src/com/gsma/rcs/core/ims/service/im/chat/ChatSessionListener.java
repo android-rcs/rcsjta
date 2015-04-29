@@ -79,4 +79,13 @@ public interface ChatSessionListener extends ImsSessionListener {
      * @param ImdnDocument imdn Imdn document
      */
     public void handleMessageDeliveryStatus(ContactId contact, ImdnDocument imdn);
+
+    /**
+     * New message or file transfer delivery status that are received as part of imdn notification
+     * 
+     * @param contributionId Contribution ID
+     * @param contact the remote contact identifier
+     * @param imdn Imdn Document
+     */
+    public void handleDeliveryStatus(String contributionId, ContactId contact, ImdnDocument imdn);
 }

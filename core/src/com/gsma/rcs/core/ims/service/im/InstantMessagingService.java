@@ -1230,24 +1230,28 @@ public class InstantMessagingService extends ImsService {
             if (chatId != null) {
                 if (chatId.equals(contact.toString())) {
                     mCore.getListener().handleOneToOneMessageDeliveryStatus(contact, imdn);
-                } else {
-                    mCore.getListener().handleGroupMessageDeliveryStatus(chatId, contact, imdn);
+                    return;
                 }
+
+                mCore.getListener().handleGroupMessageDeliveryStatus(chatId, contact, imdn);
                 return;
             }
 
-            /* Message not found, check if the id refers to a file transfer. */
             chatId = mMessagingLog.getFileTransferChatId(msgId);
             if (chatId != null) {
                 if (chatId.equals(contact.toString())) {
                     receiveOneToOneFileDeliveryStatus(contact, imdn);
-                } else {
-                    receiveGroupFileDeliveryStatus(chatId, contact, imdn);
+                    return;
                 }
+
+                receiveGroupFileDeliveryStatus(chatId, contact, imdn);
                 return;
             }
-            sLogger.error("SIP imdn delivery report received referencing a message that was "
-                    + " not found in our database. Message id " + msgId);
+
+            sLogger.error(new StringBuilder(
+                    "SIP imdn delivery report received referencing a message that was ")
+                    .append("not found in our database. Message id ").append(msgId)
+                    .append(", ignoring.").toString());
 
         } catch (SipException e) {
             sLogger.error("Failed to send 200 OK response", e);
@@ -1255,7 +1259,7 @@ public class InstantMessagingService extends ImsService {
         } catch (Exception e) {
             // TODO: This will be changed when ChatUtils.parseCpimDeliveryReport
             // is changed to throw a less generic exception.
-            sLogger.warn("Failed to parse imdn delivery report.");
+            sLogger.error("Failed to parse imdn delivery report.", e);
         }
     }
 

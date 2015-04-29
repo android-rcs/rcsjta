@@ -692,8 +692,27 @@ public class FileTransferLog implements IFileTransferLog {
     }
 
     @Override
+    // TODO: This function should be replaced to use getDataAsString(getMessageData))
+    // as soon as that method handles exceptions correctly (i.e. doesn't throw exception
+    // when no row is found).
     public String getFileTransferChatId(String fileTransferId) {
-        return getDataAsString(getFileTransferData(FileTransferData.KEY_CHAT_ID, fileTransferId));
+        Cursor cursor = null;
+        try {
+            cursor = mLocalContentResolver.query(
+                    Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId),
+                    new String[] {
+                        FileTransferData.KEY_CHAT_ID
+                    }, null, null, null);
+            if (cursor.moveToNext()) {
+                return cursor.getString(cursor.getColumnIndexOrThrow(FileTransferData.KEY_CHAT_ID));
+            }
+            return null;
+
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
     }
 
     @Override

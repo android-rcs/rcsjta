@@ -1184,11 +1184,15 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     private void handleGroupFileDeliveryStatusDelivered(String chatId, String fileTransferId,
             ContactId contact, long timestampDelivered) {
+        // TODO: Potential race condition, the message may have been removed at this point which
+        // means the database won't be updated, but we'll still do the broadcast.
         mMessagingLog.setGroupChatDeliveryInfoDelivered(chatId, contact, fileTransferId,
                 timestampDelivered);
         mGroupFileTransferBroadcaster.broadcastDeliveryInfoChanged(chatId, contact, fileTransferId,
                 GroupDeliveryInfo.Status.DELIVERED, GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
         if (mMessagingLog.isDeliveredToAllRecipients(fileTransferId)) {
+            // TODO: Potential race condition, the message may have been removed at this point which
+            // means the database won't be updated, but we'll still do the broadcast.
             mMessagingLog.setFileTransferDelivered(fileTransferId, timestampDelivered);
             mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId,
                     State.DELIVERED, ReasonCode.UNSPECIFIED);
@@ -1197,11 +1201,15 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     private void handleGroupFileDeliveryStatusDisplayed(String chatId, String fileTransferId,
             ContactId contact, long timestampDisplayed) {
+        // TODO: Potential race condition, the file transfer may have been removed at this point
+        // which means the database won't be updated, but we'll still do the broadcast.
         mMessagingLog.setGroupChatDeliveryInfoDisplayed(chatId, contact, fileTransferId,
                 timestampDisplayed);
         mGroupFileTransferBroadcaster.broadcastDeliveryInfoChanged(chatId, contact, fileTransferId,
                 GroupDeliveryInfo.Status.DISPLAYED, GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
         if (mMessagingLog.isDisplayedByAllRecipients(fileTransferId)) {
+            // TODO: Potential race condition, the file transfer may have been removed at this point
+            // which means the database won't be updated, but we'll still do the broadcast.
             mMessagingLog.setFileTransferDisplayed(fileTransferId, timestampDisplayed);
             mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId,
                     State.DISPLAYED, ReasonCode.UNSPECIFIED);

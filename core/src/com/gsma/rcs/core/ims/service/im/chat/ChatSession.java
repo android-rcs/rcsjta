@@ -33,7 +33,6 @@ import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
-import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
@@ -69,7 +68,6 @@ import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax2.sip.message.Response;
@@ -590,7 +588,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                         } else if (ChatUtils.isApplicationIsComposingType(contentType)) {
                             receiveIsComposing(contact, cpimMsg.getMessageContent().getBytes(UTF8));
                         } else if (ChatUtils.isMessageImdnType(contentType)) {
-                            receiveMessageDeliveryStatus(contact, cpimMsg.getMessageContent());
+                            receiveDeliveryStatus(contact, cpimMsg.getMessageContent());
                         } else if (ChatUtils.isGeolocType(contentType)) {
                             ChatMessage msg = new ChatMessage(cpimMsgId, contact,
                                     cpimMsg.getMessageContent(), GeolocInfoDocument.MIME_TYPE,
@@ -687,12 +685,11 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             getImdnManager().sendMessageDeliveryStatus(getRemoteContact(), msgId,
                     ImdnDocument.DELIVERY_STATUS_DISPLAYED, System.currentTimeMillis());
         } else if ((msgId != null) && TypeMsrpChunk.TextMessage.equals(typeMsrpChunk)) {
-            for (int i = 0; i < getListeners().size(); i++) {
+            for (ImsSessionListener listener : getListeners()) {
                 ImdnDocument imdn = new ImdnDocument(msgId, ImdnDocument.DELIVERY_NOTIFICATION,
                         ImdnDocument.DELIVERY_STATUS_FAILED, ImdnDocument.IMDN_DATETIME_NOT_SET);
                 ContactId contact = null;
-                ((ChatSessionListener) getListeners().get(i)).handleMessageDeliveryStatus(contact,
-                        imdn);
+                ((ChatSessionListener) listener).handleMessageDeliveryStatus(contact, imdn);
             }
         } else {
             // do nothing
@@ -881,7 +878,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      */
     public boolean sendDataChunks(String msgId, String data, String mime,
             TypeMsrpChunk typeMsrpChunk) {
-        //TODO Change exception handling 
+        // TODO Change exception handling
         try {
             byte[] bytes = data.getBytes(UTF8);
             ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
@@ -990,50 +987,23 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     }
 
     /**
-     * Handle a message delivery status from a SIP message
-     * 
-     * @param contact contact identifier who notified status
-     * @param imdn Imdn document
-     */
-    public void handleMessageDeliveryStatus(ContactId contact, ImdnDocument imdn) {
-        Collection<ImsSessionListener> listeners = getListeners();
-        for (ImsSessionListener listener : listeners) {
-            ((ChatSessionListener) listener).handleMessageDeliveryStatus(contact, imdn);
-        }
-    }
-
-    /**
      * Receive a message delivery status from an XML document
      * 
      * @param contact Contact identifier
      * @param xml XML document
      */
-    public void receiveMessageDeliveryStatus(ContactId contact, String xml) {
+    public void receiveDeliveryStatus(ContactId contact, String xml) {
         try {
             ImdnDocument imdn = ChatUtils.parseDeliveryReport(xml);
-            if (imdn == null) {
-                return;
-            }
 
-            boolean isFileTransfer = mMessagingLog.isFileTransfer(imdn.getMsgId());
-            if (isFileTransfer) {
-                if (isGroupChat()) {
-                    ((InstantMessagingService) getImsService()).receiveGroupFileDeliveryStatus(
-                            mContributionId, contact, imdn);
-                } else {
-                    ((InstantMessagingService) getImsService()).receiveOneToOneFileDeliveryStatus(
-                            contact, imdn);
-                }
-            } else {
-                Collection<ImsSessionListener> listeners = getListeners();
-                for (ImsSessionListener listener : listeners) {
-                    ((ChatSessionListener) listener).handleMessageDeliveryStatus(contact, imdn);
-                }
+            for (ImsSessionListener listener : getListeners()) {
+                ((ChatSessionListener) listener).handleDeliveryStatus(mContributionId, contact,
+                        imdn);
             }
         } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Can't parse IMDN document", e);
-            }
+            // TODO: This will be changed when ChatUtils.parseDeliveryReport
+            // is changed to throw a less generic exception.
+            sLogger.error("Failed to parse IMDN document", e);
         }
     }
 
@@ -1115,8 +1085,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     /**
      * On is-composing event
      * 
-     * @param enabled It should be set to true if user is composing and set to false when the
-     *            client application is leaving the chat UI
+     * @param enabled It should be set to true if user is composing and set to false when the client
+     *            application is leaving the chat UI
      */
     public void onComposingEvent(final boolean enabled) {
         mComposingMgr.handleIsComposingEvent(enabled);

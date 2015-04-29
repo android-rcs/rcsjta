@@ -321,7 +321,8 @@ public class RcsCoreService extends Service implements CoreListener {
             // Instantiate API
             mContactApi = new ContactServiceImpl(mContactManager, mRcsSettings);
             mCapabilityApi = new CapabilityServiceImpl(mContactManager, mRcsSettings);
-            mOneToOneUndeliveredImManager = new OneToOneUndeliveredImManager(mContext, mMessagingLog);
+            mOneToOneUndeliveredImManager = new OneToOneUndeliveredImManager(mContext,
+                    mMessagingLog);
             core = Core.getInstance();
             InstantMessagingService imService = core.getImService();
             RichcallService richCallService = core.getRichcallService();
@@ -818,10 +819,10 @@ public class RcsCoreService extends Service implements CoreListener {
     @Override
     public void handleOneToOneMessageDeliveryStatus(ContactId contact, ImdnDocument imdn) {
         if (sLogger.isActivated()) {
-            sLogger.debug("Handle message delivery status");
+            sLogger.debug("Handle one to one message delivery status");
         }
 
-        mChatApi.receiveMessageDeliveryStatus(contact, imdn);
+        mChatApi.receiveOneToOneMessageDeliveryStatus(contact, imdn);
     }
 
     @Override
