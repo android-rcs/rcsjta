@@ -744,14 +744,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                 }
                 return false;
             }
-            if (!session.isHttpTransfer()) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug(new StringBuilder("Cannot pause transfer with file transfer Id '")
-                            .append(mFileTransferId).append("' as it is not a HTTP File transfer.")
-                            .toString());
-                }
-                return false;
-            }
             State state = getRcsState(session);
             if (State.STARTED != state) {
                 if (sLogger.isActivated()) {
@@ -782,21 +774,13 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
      */
     public void pauseTransfer() throws RemoteException {
         try {
-            FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
-            if (session == null) {
-                throw new ServerApiPermissionDeniedException(new StringBuilder(
-                        "Unable to pause transfer since session with file transfer ID '")
-                        .append(mFileTransferId).append("' not available!").toString());
-            }
-            State state = getRcsState(session);
-            if (State.STARTED != state) {
-                throw new ServerApiPermissionDeniedException(new StringBuilder(
-                        "Cannot pause transfer with file transfer Id '").append(mFileTransferId)
-                        .append("' as it is in state ").append(state).toString());
+            if (!isAllowedToPauseTransfer()) {
+                throw new ServerApiPermissionDeniedException("Not allowed to pause transfer.");
             }
             if (sLogger.isActivated()) {
                 sLogger.info("Pause session");
             }
+            FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
             ((HttpFileTransferSession) session).pauseFileTransfer();
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -937,10 +921,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                 session.addListener(this);
                 session.startSession();
                 return;
-            }
-            if (!isSessionPaused()) {
-                throw new ServerApiPermissionDeniedException(
-                        "Resuming can only be used on a paused HTTP transfer");
             }
             ((HttpFileTransferSession) session).resumeFileTransfer();
         } catch (ServerApiBaseException e) {

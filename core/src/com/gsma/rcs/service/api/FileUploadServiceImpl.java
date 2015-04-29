@@ -167,6 +167,7 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
             sLogger.info("Initiate a file upload session (thumbnail option " + fileicon + ")");
         }
         ServerApiUtils.testCore();
+        ServerApiUtils.testIms();
         try {
             mImService.assertAvailableFileTransferSession("Max file transfer sessions achieved.");
 

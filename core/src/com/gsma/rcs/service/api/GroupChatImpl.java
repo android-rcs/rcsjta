@@ -333,6 +333,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 }
             }
         }
+        return true;
+    }
+
+    private boolean isParticipantCapableToBeInvited(ContactId participant) {
         boolean inviteOnlyFullSF = mRcsSettings.isGroupChatInviteIfFullStoreForwardSupported();
         Capabilities remoteCapabilities = mContactManager.getContactCapabilities(participant);
         if (remoteCapabilities == null) {
@@ -759,6 +763,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         }
         try {
             if (!isParticipantEligibleToBeInvited(participant)) {
+                return false;
+            }
+            if (!isParticipantCapableToBeInvited(participant)) {
                 return false;
             }
             return true;

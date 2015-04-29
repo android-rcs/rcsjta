@@ -744,7 +744,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                     "Unable to check if it is HTTP transfer since session with file transfer ID '")
                     .append(mFileTransferId).append("' not available!").toString());
         }
-        return (session instanceof HttpFileTransferSession);
+        return session.isHttpTransfer();
     }
 
     /**
@@ -805,25 +805,13 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
      */
     public void pauseTransfer() throws RemoteException {
         try {
+            if (!isAllowedToPauseTransfer()) {
+                throw new ServerApiPermissionDeniedException("Not allowed to pause transfer.");
+            }
             if (sLogger.isActivated()) {
                 sLogger.info("Pause session");
             }
             FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
-            if (session == null) {
-                throw new ServerApiPermissionDeniedException(new StringBuilder(
-                        "Unable to pause transfer since session with file transfer ID '")
-                        .append(mFileTransferId).append("' not available!").toString());
-            }
-            if (!isHttpTransfer()) {
-                throw new ServerApiUnsupportedOperationException(
-                        "Pause available only for HTTP transfer");
-            }
-            State state = getRcsState(session);
-            if (State.STARTED != state) {
-                throw new ServerApiPermissionDeniedException(new StringBuilder(
-                        "Cannot pause transfer with file transfer Id '").append(mFileTransferId)
-                        .append("' as it is in state ").append(state).toString());
-            }
             ((HttpFileTransferSession) session).pauseFileTransfer();
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -972,10 +960,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                 session.addListener(this);
                 session.startSession();
                 return;
-            }
-            if (!(isHttpTransfer() && isSessionPaused())) {
-                throw new ServerApiPermissionDeniedException(
-                        "Resuming can only be used on a paused HTTP transfer");
             }
             ((HttpFileTransferSession) session).resumeFileTransfer();
         } catch (ServerApiBaseException e) {
