@@ -11,6 +11,7 @@ import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactProvider;
+import com.gsma.rcs.provider.history.HistoryLogData;
 import com.gsma.rcs.provider.history.HistoryProvider;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.FileTransferProvider;
@@ -37,8 +38,11 @@ import com.gsma.services.rcs.history.HistoryLog;
 import com.gsma.services.rcs.history.HistoryUriBuilder;
 import com.gsma.services.rcs.history.IHistoryService;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharingLog;
 import com.gsma.services.rcs.sharing.image.ImageSharing;
+import com.gsma.services.rcs.sharing.image.ImageSharingLog;
 import com.gsma.services.rcs.sharing.video.VideoSharing;
+import com.gsma.services.rcs.sharing.video.VideoSharingLog;
 
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -221,20 +225,20 @@ public class HistoryLogTest extends AndroidTestCase {
         MockContentResolver mockResolver = new MockContentResolver();
         IsolatedContext iContext = new IsolatedContext(mockResolver, super.getContext());
 
-        mockResolver.addProvider("com.gsma.services.rcs.provider.chat", realResolver
-                .acquireContentProviderClient("com.gsma.services.rcs.provider.chat")
+        mockResolver.addProvider(ChatLog.Message.CONTENT_URI.getAuthority(), realResolver
+                .acquireContentProviderClient(ChatLog.Message.CONTENT_URI)
                 .getLocalContentProvider());
-        ContentProvider ft = realResolver.acquireContentProviderClient(
-                "com.gsma.services.rcs.provider.filetransfer").getLocalContentProvider();
-        mockResolver.addProvider("com.gsma.services.rcs.provider.filetransfer", ft);
-        mockResolver.addProvider("com.gsma.services.rcs.provider.imageshare", realResolver
-                .acquireContentProviderClient("com.gsma.services.rcs.provider.imageshare")
+        mockResolver.addProvider(FileTransferLog.CONTENT_URI.getAuthority(), realResolver
+                .acquireContentProviderClient(FileTransferLog.CONTENT_URI)
                 .getLocalContentProvider());
-        mockResolver.addProvider("com.gsma.services.rcs.provider.videoshare", realResolver
-                .acquireContentProviderClient("com.gsma.services.rcs.provider.videoshare")
+        mockResolver.addProvider(ImageSharingLog.CONTENT_URI.getAuthority(), realResolver
+                .acquireContentProviderClient(ImageSharingLog.CONTENT_URI)
                 .getLocalContentProvider());
-        mockResolver.addProvider("com.gsma.services.rcs.provider.geolocshare", realResolver
-                .acquireContentProviderClient("com.gsma.services.rcs.provider.geolocshare")
+        mockResolver.addProvider(VideoSharingLog.CONTENT_URI.getAuthority(), realResolver
+                .acquireContentProviderClient(VideoSharingLog.CONTENT_URI)
+                .getLocalContentProvider());
+        mockResolver.addProvider(GeolocSharingLog.CONTENT_URI.getAuthority(), realResolver
+                .acquireContentProviderClient(GeolocSharingLog.CONTENT_URI)
                 .getLocalContentProvider());
 
         HistoryProvider historyProvider = (HistoryProvider) realResolver
@@ -259,11 +263,28 @@ public class HistoryLogTest extends AndroidTestCase {
         mContactUtil = ContactUtil.getInstance(new ContactUtilMockContext(
                 new ContactUtilMockContext(getContext())));
 
+        mockResolver.addProvider(MessageData.CONTENT_URI.getAuthority(), realResolver
+                .acquireContentProviderClient(MessageData.CONTENT_URI).getLocalContentProvider());
+        mockResolver.addProvider(FileTransferData.CONTENT_URI.getAuthority(), realResolver
+                .acquireContentProviderClient(FileTransferData.CONTENT_URI)
+                .getLocalContentProvider());
+        mockResolver.addProvider(ImageSharingData.CONTENT_URI.getAuthority(), realResolver
+                .acquireContentProviderClient(ImageSharingData.CONTENT_URI)
+                .getLocalContentProvider());
+        mockResolver.addProvider(VideoSharingData.CONTENT_URI.getAuthority(), realResolver
+                .acquireContentProviderClient(VideoSharingData.CONTENT_URI)
+                .getLocalContentProvider());
+        mockResolver.addProvider(GeolocSharingData.CONTENT_URI.getAuthority(), realResolver
+                .acquireContentProviderClient(GeolocSharingData.CONTENT_URI)
+                .getLocalContentProvider());
+        mockResolver
+                .addProvider(HistoryLogData.CONTENT_URI.getAuthority(), realResolver
+                        .acquireContentProviderClient(HistoryLogData.CONTENT_URI)
+                        .getLocalContentProvider());
+
         sLocalContentResolver.delete(MessageData.CONTENT_URI, null, null);
-        sLocalContentResolver.delete(Uri.parse("content://com.gsma.rcs.imageshare/imageshare"),
-                null, null);
-        sLocalContentResolver.delete(Uri.parse("content://com.gsma.rcs.videoshare/videoshare"),
-                null, null);
+        sLocalContentResolver.delete(ImageSharingData.CONTENT_URI, null, null);
+        sLocalContentResolver.delete(VideoSharingData.CONTENT_URI, null, null);
         sLocalContentResolver.delete(GeolocSharingData.CONTENT_URI, null, null);
 
         try {
@@ -299,8 +320,8 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     private void addOutgoingFileTransferSharing() {
-        mMessagingLog.addOneToOneFileTransfer(FILE_TRANSFER_ID, getRemoteContact(), Direction.INCOMING,
-                CONTENT, THUMBNAIL, FileTransfer.State.INVITED,
+        mMessagingLog.addOneToOneFileTransfer(FILE_TRANSFER_ID, getRemoteContact(),
+                Direction.INCOMING, CONTENT, THUMBNAIL, FileTransfer.State.INVITED,
                 FileTransfer.ReasonCode.UNSPECIFIED, mTimestamp++, mTimestampSent++,
                 FileTransferLog.UNKNOWN_EXPIRATION, FileTransferLog.UNKNOWN_EXPIRATION);
     }
