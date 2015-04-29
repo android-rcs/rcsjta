@@ -24,7 +24,6 @@ package com.gsma.rcs.core.ims.service.im.chat;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
@@ -845,7 +844,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         if (fileTransferHttpThumbnail != null) {
             try {
                 fileSession.downloadFileIcon();
-            } catch (CoreException e) {
+            } catch (IOException e) {
                 if (sLogger.isActivated()) {
                     sLogger.error("Failed to download file icon", e);
                 }

@@ -60,8 +60,7 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
     /**
      * The logger
      */
-    private final static Logger sLogger = Logger.getLogger(TerminatingHttpFileSharingSession.class
-            .getSimpleName());
+    private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
 
     /**
      * Is File Transfer initiated from a GC
@@ -123,20 +122,20 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
      */
     public void run() {
         try {
-            // Notify listeners
+            /* Notify listeners */
             httpTransferStarted();
 
             Uri file = mDownloadManager.getDownloadedFileUri();
-            // Download file from the HTTP server
+            /* Download file from the HTTP server */
             if (mDownloadManager.downloadFile()) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Download file with success");
+                if (mLogger.isActivated()) {
+                    mLogger.debug("Download file with success");
                 }
 
-                // Set filename
+                /* Set filename */
                 getContent().setUri(file);
 
-                // File transfered
+                /* File transfered */
                 handleFileTransfered();
 
                 // TODO: Should also consider a "send display reports for groups"-setting
@@ -145,24 +144,27 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
                             System.currentTimeMillis());
                 }
             } else {
-                // Don't call handleError in case of Pause or Cancel
+                /* Don't call handleError in case of Pause or Cancel */
                 if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
                     return;
                 }
 
-                // Upload error
-                if (sLogger.isActivated()) {
-                    sLogger.info("Download file has failed");
+                /* Upload error */
+                if (mLogger.isActivated()) {
+                    mLogger.debug("Download file has failed");
                 }
                 handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED));
             }
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Transfer has failed", e);
-            }
-
-            // Unexpected error
-            handleError(new FileSharingError(FileSharingError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        } catch (RuntimeException e) {
+            /*
+             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
+             * eventually bring the whole system down, which is not intended.
+             */
+            mLogger.error(
+                    new StringBuilder("Failed to intiate a file transfer session for sessionId : ")
+                            .append(getSessionID()).append(" with fileTransferId : ")
+                            .append(getFileTransferId()).toString(), e);
+            handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
         }
     }
 
@@ -170,8 +172,8 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
     // 200OK).
     @Override
     public void rejectSession(int code) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Session invitation has been rejected");
+        if (mLogger.isActivated()) {
+            mLogger.debug("Session invitation has been rejected");
         }
         mInvitationStatus = InvitationStatus.INVITATION_REJECTED;
 
@@ -202,8 +204,8 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
      */
     protected void sendDeliveryReport(String status, long timestamp) {
         String msgId = getFileTransferId();
-        if (sLogger.isActivated()) {
-            sLogger.debug("Send delivery report ".concat(status));
+        if (mLogger.isActivated()) {
+            mLogger.debug("Send delivery report ".concat(status));
         }
         ChatSession chatSession;
         ContactId contact = getRemoteContact();
@@ -235,8 +237,8 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
             public void run() {
                 // Download file from the HTTP server
                 if (mDownloadManager.resumeDownload()) {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("Download file with success");
+                    if (mLogger.isActivated()) {
+                        mLogger.debug("Download file with success");
                     }
 
                     // Set filename
@@ -257,8 +259,8 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
                     }
 
                     // Upload error
-                    if (sLogger.isActivated()) {
-                        sLogger.info("Download file has failed");
+                    if (mLogger.isActivated()) {
+                        mLogger.debug("Download file has failed");
                     }
                     handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED));
                 }

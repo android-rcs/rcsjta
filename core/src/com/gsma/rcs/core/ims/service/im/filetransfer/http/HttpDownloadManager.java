@@ -139,49 +139,45 @@ public class HttpDownloadManager extends HttpTransferManager {
      * 
      * @return Returns true if successful. Data are saved during the transfer in the content object.
      */
+    // TODO: This method needs to be refactored as currently its not alligned to exception handling,
+    // This will be done as a new commit as it all will involve refactoring of subsequent methods
+    // calling this method.
     public boolean downloadFile() {
-        try {
-            if (sLogger.isActivated()) {
-                sLogger.debug("Download file " + getHttpServerAddr());
-            }
-            if (mStreamForFile == null) {
-                mStreamForFile = openStreamForFile(mFile);
-                if (mStreamForFile == null)
-                    return false;
-            }
-            // Send GET request
-            HttpGet request = new HttpGet(getHttpServerAddr().toString());
-            request.addHeader("User-Agent", SipUtils.userAgentString());
-            if (HTTP_TRACE_ENABLED) {
-                String trace = ">>> Send HTTP request:";
-                trace += "\n" + request.getMethod() + " " + request.getRequestLine().getUri();
-                System.out.println(trace);
-            }
-            // Execute request with retry procedure
-            if (!getFile(request)) {
-                if (mRetryCount < RETRY_MAX && !isCancelled() && !isPaused()) {
-                    mRetryCount++;
-                    return downloadFile();
-                } else {
-                    if (sLogger.isActivated()) {
-                        if (isPaused()) {
-                            sLogger.debug("Download file paused");
-                        } else if (isCancelled()) {
-                            sLogger.debug("Download file cancelled");
-                        } else {
-                            sLogger.debug("Failed to download file");
-                        }
-                    }
-                    return false;
-                }
-            }
-            return true;
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Donwload file exception", e);
-            }
-            return false;
+        if (sLogger.isActivated()) {
+            sLogger.debug("Download file " + getHttpServerAddr());
         }
+        if (mStreamForFile == null) {
+            mStreamForFile = openStreamForFile(mFile);
+            if (mStreamForFile == null)
+                return false;
+        }
+        /* Send GET request */
+        HttpGet request = new HttpGet(getHttpServerAddr().toString());
+        request.addHeader("User-Agent", SipUtils.userAgentString());
+        if (HTTP_TRACE_ENABLED) {
+            String trace = ">>> Send HTTP request:";
+            trace += "\n" + request.getMethod() + " " + request.getRequestLine().getUri();
+            System.out.println(trace);
+        }
+        /* Execute request with retry procedure */
+        if (!getFile(request)) {
+            if (mRetryCount < RETRY_MAX && !isCancelled() && !isPaused()) {
+                mRetryCount++;
+                return downloadFile();
+            } else {
+                if (sLogger.isActivated()) {
+                    if (isPaused()) {
+                        sLogger.debug("Download file paused");
+                    } else if (isCancelled()) {
+                        sLogger.debug("Download file cancelled");
+                    } else {
+                        sLogger.debug("Failed to download file");
+                    }
+                }
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -190,6 +186,9 @@ public class HttpDownloadManager extends HttpTransferManager {
      * @param request HTTP request
      * @return Returns true if successful
      */
+    // TODO: This method needs to be refactored as currently its not alligned to exception handling,
+    // This will be done as a new commit as it all will involve refactoring of subsequent methods
+    // calling this method.
     private boolean getFile(HttpGet request) {
         HttpResponse response = null;
         try {
@@ -210,15 +209,12 @@ public class HttpDownloadManager extends HttpTransferManager {
             } else {
                 return false;
             }
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Download file exception", e);
-            }
+        } catch (IOException e) {
             return false;
         }
 
         try {
-            // Read content
+            /* Read content */
             byte[] buffer = new byte[CHUNK_MAX_SIZE];
             HttpEntity entity = response.getEntity();
             InputStream input = entity.getContent();
@@ -228,11 +224,10 @@ public class HttpDownloadManager extends HttpTransferManager {
                 getListener().httpTransferProgress(mCalcLength, mContent.getSize());
                 mStreamForFile.write(buffer, 0, num);
             }
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Download file exception. Set in paused", e);
-            }
-            pauseTransferBySystem();
+        } catch (IllegalStateException e) {
+            // Intentionally left unhandled, will change this during refactoring of this method
+        } catch (IOException e) {
+            // Intentionally left unhandled, will change this during refactoring of this method
         }
 
         boolean isSuccess = false;
@@ -250,8 +245,8 @@ public class HttpDownloadManager extends HttpTransferManager {
 
         try {
             mStreamForFile.flush();
-        } catch (Exception e) {
-            /* Nothing to do */
+        } catch (IOException e) {
+            // Intentionally left unhandled, will change this during refactoring of this method
         }
 
         /* If paused, keep the streamForFile and the file */
@@ -261,8 +256,8 @@ public class HttpDownloadManager extends HttpTransferManager {
 
         try {
             mStreamForFile.close();
-        } catch (Exception e) {
-            /* Nothing to do */
+        } catch (IOException e) {
+            // Intentionally left unhandled, will change this during refactoring of this method
         }
         mStreamForFile = null;
 
@@ -351,6 +346,9 @@ public class HttpDownloadManager extends HttpTransferManager {
      * 
      * @return True if successful
      */
+    // TODO: This method needs to be refactored as currently its not alligned to exception handling,
+    // This will be done as a new commit as it all will involve refactoring of subsequent methods
+    // calling this method.
     public boolean resumeDownload() {
         if (mStreamForFile == null) {
             mStreamForFile = openStreamForFile(mFile);
@@ -358,50 +356,42 @@ public class HttpDownloadManager extends HttpTransferManager {
                 return false;
         }
         resetParamForResume();
-        try {
-            Uri serverAddress = getHttpServerAddr();
-            if (sLogger.isActivated()) {
-                sLogger.debug("Resume Download file " + serverAddress + " from byte "
-                        + mFile.length());
-            }
-
-            // Send GET request
-            HttpGet request = new HttpGet(serverAddress.toString());
-            long downloadedLength = mFile.length();
-            long completeSize = mContent.getSize();
-            request.addHeader("User-Agent", SipUtils.userAgentString());
-            request.addHeader("Range", "bytes=" + downloadedLength + "-" + completeSize);
-            if (HTTP_TRACE_ENABLED) {
-                String trace = ">>> Send HTTP request:";
-                trace += "\n" + request.getMethod() + " " + request.getRequestLine().getUri();
-                System.out.println(trace);
-            }
-
-            // Execute request with retry procedure
-            if (!getFile(request)) {
-                if (mRetryCount < RETRY_MAX && !isCancelled() && !isPaused()) {
-                    mRetryCount++;
-                    return downloadFile();
-                } else {
-                    if (sLogger.isActivated()) {
-                        if (isPaused()) {
-                            sLogger.debug("Download file paused");
-                        } else if (isCancelled()) {
-                            sLogger.debug("Download file cancelled");
-                        } else {
-                            sLogger.debug("Failed to download file");
-                        }
-                    }
-                    return false;
-                }
-            }
-
-            return true;
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Download file exception", e);
-            }
-            return false;
+        Uri serverAddress = getHttpServerAddr();
+        if (sLogger.isActivated()) {
+            sLogger.debug("Resume Download file " + serverAddress + " from byte " + mFile.length());
         }
+
+        // Send GET request
+        HttpGet request = new HttpGet(serverAddress.toString());
+        long downloadedLength = mFile.length();
+        long completeSize = mContent.getSize();
+        request.addHeader("User-Agent", SipUtils.userAgentString());
+        request.addHeader("Range", "bytes=" + downloadedLength + "-" + completeSize);
+        if (HTTP_TRACE_ENABLED) {
+            String trace = ">>> Send HTTP request:";
+            trace += "\n" + request.getMethod() + " " + request.getRequestLine().getUri();
+            System.out.println(trace);
+        }
+
+        // Execute request with retry procedure
+        if (!getFile(request)) {
+            if (mRetryCount < RETRY_MAX && !isCancelled() && !isPaused()) {
+                mRetryCount++;
+                return downloadFile();
+            } else {
+                if (sLogger.isActivated()) {
+                    if (isPaused()) {
+                        sLogger.debug("Download file paused");
+                    } else if (isCancelled()) {
+                        sLogger.debug("Download file cancelled");
+                    } else {
+                        sLogger.debug("Failed to download file");
+                    }
+                }
+                return false;
+            }
+        }
+
+        return true;
     }
 }

@@ -35,6 +35,7 @@ import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
+import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -61,8 +62,7 @@ public class FtHttpResumeManager implements Runnable {
      */
     private FtHttpResume mFtHttpResume;
 
-    private static final Logger sLogger = Logger.getLogger(FtHttpResumeManager.class
-            .getSimpleName());
+    private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
 
     private final RcsSettings mRcsSettings;
 
@@ -89,18 +89,26 @@ public class FtHttpResumeManager implements Runnable {
     @Override
     public void run() {
         try {
-            // Retrieve all resumable sessions
+            /* Retrieve all resumable sessions */
             List<FtHttpResume> transfersToResume = mMessagingLog
                     .retrieveFileTransfersPausedBySystem();
             if (!transfersToResume.isEmpty()) {
                 mListOfFtHttpResume = new LinkedList<FtHttpResume>(transfersToResume);
                 processNext();
             }
-        } catch (Exception e) {
-            // handle exception
-            if (sLogger.isActivated()) {
-                sLogger.error("Exception occurred", e);
-            }
+        } catch (ServerApiPersistentStorageException e) {
+            /*
+             * No state change in case we havn't able to find any resumable file transfer sessions ,
+             * as may be they are not any such ones. In case there has been a error while trying to
+             * fetch such sessions then we will retry later to fetch them.
+             */
+            mLogger.error("Error retrieving resumable sessions!", e);
+        } catch (RuntimeException e) {
+            /*
+             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
+             * eventually bring the whole system down, which is not intended.
+             */
+            mLogger.error("Error retrieving resumable sessions!", e);
         }
     }
 
@@ -112,8 +120,8 @@ public class FtHttpResumeManager implements Runnable {
             return;
         // Remove the oldest session from the list
         mFtHttpResume = mListOfFtHttpResume.poll();
-        if (sLogger.isActivated()) {
-            sLogger.debug("Resume FT HTTP ".concat(mFtHttpResume.toString()));
+        if (mLogger.isActivated()) {
+            mLogger.debug("Resume FT HTTP ".concat(mFtHttpResume.toString()));
         }
         switch (mFtHttpResume.getDirection()) {
             case INCOMING:

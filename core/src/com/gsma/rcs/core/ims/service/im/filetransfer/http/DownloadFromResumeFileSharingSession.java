@@ -40,8 +40,7 @@ import com.gsma.rcs.utils.logger.Logger;
  */
 public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSharingSession {
 
-    private final static Logger sLogger = Logger
-            .getLogger(DownloadFromResumeFileSharingSession.class.getSimpleName());
+    private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
 
     private final FtHttpResumeDownload mResume;
 
@@ -85,44 +84,48 @@ public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSha
      * Background processing
      */
     public void run() {
-        boolean logActivated = sLogger.isActivated();
+        final boolean logActivated = mLogger.isActivated();
         if (logActivated) {
-            sLogger.info("Resume a HTTP file transfer session as terminating");
+            mLogger.info("Resume a HTTP file transfer session as terminating");
         }
         try {
             httpTransferStarted();
 
-            // Resume download file from the HTTP server
+            /* Resume download file from the HTTP server */
             if (mDownloadManager.mStreamForFile != null && mDownloadManager.resumeDownload()) {
                 if (logActivated) {
-                    sLogger.debug("Resume download success for ".concat(mResume.toString()));
+                    mLogger.debug("Resume download success for ".concat(mResume.toString()));
                 }
-                // Set file URL
+                /* Set file URL */
                 getContent().setUri(mDownloadManager.getDownloadedFileUri());
 
-                // File transfered
+                /* File transfered */
                 handleFileTransfered();
-                // Send delivery report "displayed"
+                /* Send delivery report "displayed" */
                 sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
                         System.currentTimeMillis());
             } else {
-                // Don't call handleError in case of Pause or Cancel
+                /* Don't call handleError in case of Pause or Cancel */
                 if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
                     return;
                 }
 
-                // Upload error
+                /* Upload error */
                 if (logActivated) {
-                    sLogger.info("Resume Download file has failed");
+                    mLogger.info("Resume Download file has failed");
                 }
                 handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED));
             }
-        } catch (Exception e) {
-            if (logActivated) {
-                sLogger.error("Transfer has failed", e);
-            }
-            // Unexpected error
-            handleError(new FileSharingError(FileSharingError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        } catch (RuntimeException e) {
+            /*
+             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
+             * eventually bring the whole system down, which is not intended.
+             */
+            mLogger.error(
+                    new StringBuilder("Download failed for a file sessionId : ")
+                            .append(getSessionID()).append(" with transferId : ")
+                            .append(getFileTransferId()).toString(), e);
+            handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
         }
     }
 

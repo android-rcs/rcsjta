@@ -22,9 +22,6 @@
 
 package com.gsma.rcs.core.ims.service.upload;
 
-import java.io.IOException;
-import java.util.UUID;
-
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
@@ -33,8 +30,11 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDo
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpUploadManager;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpUploadTransferEventListener;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.service.api.ExceptionUtil;
 import com.gsma.rcs.utils.logger.Logger;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.UUID;
 
 /**
  * File upload session
@@ -159,11 +159,14 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
         } catch (SecurityException e) {
             mLogger.error(
                     "File icon creation has failed as the file is not accessible for HTTP uploadId "
-                            .concat(mUploadId),
-                    e);
+                            .concat(mUploadId), e);
             removeSession();
             mListener.handleUploadNotAllowedToSend();
         } catch (IOException e) {
+            removeSession();
+            mListener.handleUploadError(FileSharingError.MEDIA_UPLOAD_FAILED);
+        } catch (URISyntaxException e) {
+            mLogger.error("Failed to initiate session for HTTP uploadId ".concat(mUploadId), e);
             removeSession();
             mListener.handleUploadError(FileSharingError.MEDIA_UPLOAD_FAILED);
         } catch (RuntimeException e) {
@@ -171,7 +174,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            mLogger.error("Failed to initiate session for HTTP uploadId ".concat(mUploadId), e);
             removeSession();
             mListener.handleUploadError(FileSharingError.MEDIA_UPLOAD_FAILED);
         }

@@ -43,6 +43,9 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 /**
  * Originating file transfer HTTP session
  * 
@@ -125,13 +128,24 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
             // Upload the file to the HTTP server
             byte[] result = mUploadManager.uploadFile();
             sendResultToContact(result);
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("File transfer has failed", e);
-            }
-
-            // Unexpected error
-            handleError(new FileSharingError(FileSharingError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        } catch (IOException e) {
+            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (URISyntaxException e) {
+            sLogger.error(
+                    new StringBuilder("Failed to initiate file transfer session for sessionId : ")
+                            .append(getSessionID()).append(" with fileTransferId : ")
+                            .append(getFileTransferId()).toString(), e);
+            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (RuntimeException e) {
+            /*
+             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
+             * eventually bring the whole system down, which is not intended.
+             */
+            sLogger.error(
+                    new StringBuilder("Failed to initiate file transfer session for sessionId : ")
+                            .append(getSessionID()).append(" with fileTransferId : ")
+                            .append(getFileTransferId()).toString(), e);
+            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
         }
     }
 
@@ -249,9 +263,24 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                     } else {
                         sendResultToContact(null);
                     }
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                } catch (IOException e) {
+                    handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
+                } catch (URISyntaxException e) {
+                    sLogger.error(
+                            new StringBuilder("Failed to resume upload for sessionId : ")
+                                    .append(getSessionID()).append(" with fileTransferId : ")
+                                    .append(getFileTransferId()).toString(), e);
+                    handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
+                } catch (RuntimeException e) {
+                    /*
+                     * Intentionally catch runtime exceptions as else it will abruptly end the
+                     * thread and eventually bring the whole system down, which is not intended.
+                     */
+                    sLogger.error(
+                            new StringBuilder("Failed to resume upload for sessionId : ")
+                                    .append(getSessionID()).append(" with fileTransferId : ")
+                                    .append(getFileTransferId()).toString(), e);
+                    handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
                 }
             }
         }).start();

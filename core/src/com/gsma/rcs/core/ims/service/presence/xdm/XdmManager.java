@@ -25,21 +25,6 @@ package com.gsma.rcs.core.ims.service.presence.xdm;
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 import static com.gsma.rcs.utils.StringUtils.UTF8_STR;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Set;
-
-import org.xml.sax.InputSource;
-
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-
 import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.TerminalInfo;
 import com.gsma.rcs.core.ims.ImsModule;
@@ -61,6 +46,23 @@ import com.gsma.rcs.utils.HttpUtils;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
+import org.xml.sax.InputSource;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Set;
+
+import javax2.sip.InvalidArgumentException;
 
 /**
  * XDM manager
@@ -181,9 +183,11 @@ public class XdmManager {
      * @return HTTP response
      * @throws IOException
      * @throws CoreException
+     * @throws InvalidArgumentException
      */
     private HttpResponse sendHttpRequest(HttpRequest request,
-            HttpAuthenticationAgent authenticationAgent) throws IOException, CoreException {
+            HttpAuthenticationAgent authenticationAgent) throws IOException,
+            InvalidArgumentException {
         // Extract host & port
         String[] parts = xdmServerAddr.substring(7).split(":|/");
         String host = parts[0];

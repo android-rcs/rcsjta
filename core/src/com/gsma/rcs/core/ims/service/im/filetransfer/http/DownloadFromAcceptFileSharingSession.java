@@ -38,8 +38,7 @@ import com.gsma.rcs.utils.logger.Logger;
  */
 public class DownloadFromAcceptFileSharingSession extends TerminatingHttpFileSharingSession {
 
-    private final static Logger sLogger = Logger
-            .getLogger(DownloadFromAcceptFileSharingSession.class.getSimpleName());
+    private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
 
     /**
      * Constructor
@@ -80,22 +79,23 @@ public class DownloadFromAcceptFileSharingSession extends TerminatingHttpFileSha
      * Background processing
      */
     public void run() {
-        boolean logActivated = sLogger.isActivated();
-        if (logActivated) {
-            sLogger.info("Accept HTTP file transfer session");
+        if (mLogger.isActivated()) {
+            mLogger.info("Accept HTTP file transfer session");
         }
         try {
             httpTransferStarted();
-        } catch (Exception e) {
-            if (logActivated) {
-                sLogger.error("Transfer has failed", e);
-            }
-            // Unexpected error
-            handleError(new FileSharingError(FileSharingError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        } catch (RuntimeException e) {
+            /*
+             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
+             * eventually bring the whole system down, which is not intended.
+             */
+            mLogger.error(
+                    new StringBuilder("Download failed for a file sessionId : ")
+                            .append(getSessionID()).append(" with transferId : ")
+                            .append(getFileTransferId()).toString(), e);
+            handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
             return;
-
         }
         super.run();
     }
-
 }

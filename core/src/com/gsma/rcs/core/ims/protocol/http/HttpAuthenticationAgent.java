@@ -24,10 +24,11 @@ package com.gsma.rcs.core.ims.protocol.http;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.security.HttpDigestMd5Authentication;
 import com.gsma.rcs.utils.Base64;
 import com.gsma.rcs.utils.logger.Logger;
+
+import javax2.sip.InvalidArgumentException;
 
 /**
  * HTTP Digest MD5 authentication agent
@@ -79,10 +80,10 @@ public class HttpAuthenticationAgent {
      * @param requestUri Request Uri
      * @param body Entity body
      * @return authorizationHeader Authorization header
-     * @throws CoreException
+     * @throws InvalidArgumentException
      */
     public String generateAuthorizationHeader(String method, String requestUri, String body)
-            throws CoreException {
+            throws InvalidArgumentException {
         return "Authorization: ".concat(generateAuthorizationHeaderValue(method, requestUri, body));
     }
 
@@ -93,61 +94,55 @@ public class HttpAuthenticationAgent {
      * @param requestUri Request Uri
      * @param body Entity body
      * @return authorizationHeader Authorization header value
-     * @throws CoreException
+     * @throws InvalidArgumentException
      */
     public String generateAuthorizationHeaderValue(String method, String requestUri, String body)
-            throws CoreException {
-        try {
-            // According to
-            // "Rich Communication Suite 5.1 Advanced Communications - Services and Client Specification - Version 2.0 - 03 May 2013",
-            // the authentication should be performed using basic authentication or HTTP digest as
-            // per [RFC2617]
-            if (!isDigestAuthentication) {
-                // Build the Basic Authorization header
-                return "Basic ".concat(Base64.encodeBase64ToString((new StringBuilder(serverLogin)
-                        .append(':').append(serverPwd).toString()).getBytes(UTF8)));
-            }
-
-            digest.updateNonceParameters();
-
-            // Build the Authorization header
-            StringBuilder authValue = new StringBuilder("Digest username=\"").append(serverLogin)
-                    .append("\"").append(",realm=\"").append(digest.getRealm()).append("\"")
-                    .append(",nonce=\"").append(digest.getNonce()).append("\"").append(",uri=\"")
-                    .append(requestUri).append("\"").append(",nc=")
-                    .append(digest.buildNonceCounter()).append(",cnonce=\"")
-                    .append(digest.getCnonce()).append("\"");
-
-            String opaque = digest.getOpaque();
-            if (opaque != null) {
-                authValue.append(",opaque=\"").append(opaque).append("\"");
-            }
-
-            String qop = digest.getQop();
-            if (qop != null && qop.startsWith("auth")) {
-                authValue
-                        .append(",qop=\"")
-                        .append(qop)
-                        .append("\"")
-                        .append(",response=\"")
-                        .append(digest.calculateResponse(serverLogin, serverPwd, method,
-                                requestUri, digest.buildNonceCounter(), body)).append("\"");
-
-            } else {
-                authValue
-                        .append(",response=\"")
-                        .append(digest.calculateResponse(serverLogin, serverPwd, method,
-                                requestUri, digest.buildNonceCounter(), "")).append("\"");
-            }
-
-            return authValue.toString();
-
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create the authorization value", e);
-            }
-            throw new CoreException("Can't create the authorization value");
+            throws InvalidArgumentException {
+        /*
+         * According to
+         * "Rich Communication Suite 5.1 Advanced Communications - Services and Client Specification - Version 2.0 - 03 May 2013"
+         * , the authentication should be performed using basic authentication or HTTP digest as
+         * per[RFC2617]
+         */
+        if (!isDigestAuthentication) {
+            /* Build the Basic Authorization header */
+            return "Basic ".concat(Base64.encodeBase64ToString((new StringBuilder(serverLogin)
+                    .append(':').append(serverPwd).toString()).getBytes(UTF8)));
         }
+
+        digest.updateNonceParameters();
+
+        /* Build the Authorization header */
+        StringBuilder authValue = new StringBuilder("Digest username=\"").append(serverLogin)
+                .append("\"").append(",realm=\"").append(digest.getRealm()).append("\"")
+                .append(",nonce=\"").append(digest.getNonce()).append("\"").append(",uri=\"")
+                .append(requestUri).append("\"").append(",nc=").append(digest.buildNonceCounter())
+                .append(",cnonce=\"").append(digest.getCnonce()).append("\"");
+
+        String opaque = digest.getOpaque();
+        if (opaque != null) {
+            authValue.append(",opaque=\"").append(opaque).append("\"");
+        }
+
+        String qop = digest.getQop();
+        if (qop != null && qop.startsWith("auth")) {
+            authValue
+                    .append(",qop=\"")
+                    .append(qop)
+                    .append("\"")
+                    .append(",response=\"")
+                    .append(digest.calculateResponse(serverLogin, serverPwd, method, requestUri,
+                            digest.buildNonceCounter(), body)).append("\"");
+
+        } else {
+            authValue
+                    .append(",response=\"")
+                    .append(digest.calculateResponse(serverLogin, serverPwd, method, requestUri,
+                            digest.buildNonceCounter(), "")).append("\"");
+        }
+
+        return authValue.toString();
+
     }
 
     /**

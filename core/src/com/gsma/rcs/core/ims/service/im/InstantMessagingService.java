@@ -84,6 +84,7 @@ import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -1461,7 +1462,7 @@ public class InstantMessagingService extends ImsService {
         if (fileSharingSession.getFileicon() != null) {
             try {
                 fileSharingSession.downloadFileIcon();
-            } catch (CoreException e) {
+            } catch (IOException e) {
                 sLogger.error("Failed to download file icon", e);
                 sendErrorResponse(invite, Response.DECLINE);
                 handleFileTransferInvitationRejected(invite, remote,
@@ -1490,8 +1491,8 @@ public class InstantMessagingService extends ImsService {
         ContactId remote = ChatUtils.getReferredIdentityAsContactId(invite);
         if (remote == null) {
             if (logActivated) {
-                sLogger.error("Discard S&F OneToOne HttpFileTranfer Invitation. Invalid remote ID '"
-                        + referredId + "'");
+                sLogger.error("Discard S&F OneToOne HttpFileTranfer Invitation. Invalid remote ID "
+                        .concat(referredId));
             }
             /* We cannot refuse a S&F File transfer invitation */
             // TODO normally send a deliver to enable transmission of awaiting messages
@@ -1532,14 +1533,14 @@ public class InstantMessagingService extends ImsService {
         if (filetransferSession.getFileicon() != null) {
             try {
                 filetransferSession.downloadFileIcon();
-            } catch (CoreException e) {
+            } catch (IOException e) {
                 sLogger.error("Failed to download file icon", e);
                 one2oneChatSession.sendErrorResponse(invite, one2oneChatSession.getDialogPath()
                         .getLocalTag(), Response.DECLINE);
 
                 /* Close session */
                 one2oneChatSession.handleError(new FileSharingError(
-                        FileSharingError.MEDIA_DOWNLOAD_FAILED));
+                        FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
                 return;
             }
 

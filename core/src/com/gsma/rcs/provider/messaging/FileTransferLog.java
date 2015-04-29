@@ -28,6 +28,7 @@ import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
+import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService.Direction;
@@ -131,9 +132,10 @@ public class FileTransferLog implements IFileTransferLog {
     }
 
     @Override
-    public void addOneToOneFileTransfer(String fileTransferId, ContactId contact, Direction direction,
-            MmContent content, MmContent fileIcon, State state, ReasonCode reasonCode,
-            long timestamp, long timestampSent, long fileExpiration, long fileIconExpiration) {
+    public void addOneToOneFileTransfer(String fileTransferId, ContactId contact,
+            Direction direction, MmContent content, MmContent fileIcon, State state,
+            ReasonCode reasonCode, long timestamp, long timestampSent, long fileExpiration,
+            long fileIconExpiration) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("Add file transfer entry Id=").append(fileTransferId)
                     .append(", contact=").append(contact).append(", filename=")
@@ -463,10 +465,13 @@ public class FileTransferLog implements IFileTransferLog {
         try {
             cursor = mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
                     SELECTION_BY_PAUSED_BY_SYSTEM, null, ORDER_BY_TIMESTAMP_ASC);
+            if (cursor == null) {
+                throw new ServerApiPersistentStorageException(
+                        "No row returned while querying for resumable file transfers!");
+            }
             if (!cursor.moveToFirst()) {
                 return new ArrayList<FtHttpResume>();
             }
-
             int sizeColumnIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FILESIZE);
             int mimeTypeColumnIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_MIME_TYPE);
             int contactColumnIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_CONTACT);
@@ -529,12 +534,6 @@ public class FileTransferLog implements IFileTransferLog {
                 }
             } while (cursor.moveToNext());
             return fileTransfers;
-
-        } catch (SQLException e) {
-            if (logger.isActivated()) {
-                logger.error("Unable to retrieve resumable file transfers!", e);
-            }
-            return new ArrayList<FtHttpResume>();
 
         } finally {
             if (cursor != null) {
@@ -945,8 +944,7 @@ public class FileTransferLog implements IFileTransferLog {
     @Override
     public Cursor getUnDeliveredOneToOneFileTransfers() {
         return mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
-                SELECTION_BY_UNDELIVERED_ONETOONE_FILE_TRANSFERS, null,
-                ORDER_BY_TIMESTAMP_ASC);
+                SELECTION_BY_UNDELIVERED_ONETOONE_FILE_TRANSFERS, null, ORDER_BY_TIMESTAMP_ASC);
     }
 
     @Override

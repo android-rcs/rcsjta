@@ -46,6 +46,9 @@ import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 /**
  * Originating file transfer HTTP session
  * 
@@ -58,8 +61,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 
     protected HttpUploadManager mUploadManager;
 
-    private final static Logger sLogger = Logger.getLogger(OriginatingHttpFileSharingSession.class
-            .getSimpleName());
+    private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
 
     /**
      * The timestamp to be sent in payload when the file sharing was initiated for outgoing file
@@ -93,8 +95,8 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                 contactManager);
         mCore = core;
         mTimestampSent = timestampSent;
-        if (sLogger.isActivated()) {
-            sLogger.debug("OriginatingHttpFileSharingSession contact=".concat(contact.toString()));
+        if (mLogger.isActivated()) {
+            mLogger.debug("OriginatingHttpFileSharingSession contact=".concat(contact.toString()));
         }
 
         mUploadManager = new HttpUploadManager(getContent(), fileIcon, this, tId, rcsSettings);
@@ -105,18 +107,30 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
      */
     public void run() {
         try {
-            if (sLogger.isActivated()) {
-                sLogger.info("Initiate a new HTTP file transfer session as originating");
+            if (mLogger.isActivated()) {
+                mLogger.info("Initiate a new HTTP file transfer session as originating");
             }
             // Upload the file to the HTTP server
             byte[] result = mUploadManager.uploadFile();
             sendResultToContact(result);
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("File transfer has failed", e);
-            }
-            // Unexpected error
-            handleError(new FileSharingError(FileSharingError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        } catch (IOException e) {
+            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (URISyntaxException e) {
+            mLogger.error(
+                    new StringBuilder("Failed to initiate file transfer session for sessionId : ")
+                            .append(getSessionID()).append(" with fileTransferId : ")
+                            .append(getFileTransferId()).toString(), e);
+            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (RuntimeException e) {
+            /*
+             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
+             * eventually bring the whole system down, which is not intended.
+             */
+            mLogger.error(
+                    new StringBuilder("Failed to initiate file transfer session for sessionId : ")
+                            .append(getSessionID()).append(" with fileTransferId : ")
+                            .append(getFileTransferId()).toString(), e);
+            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
         }
     }
 
@@ -125,7 +139,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
         if (mUploadManager.isCancelled()) {
             return;
         }
-        boolean logActivated = sLogger.isActivated();
+        boolean logActivated = mLogger.isActivated();
         FileTransferHttpInfoDocument infoDocument;
         if (result == null
                 || (infoDocument = FileTransferUtils.parseFileTransferHttpDocument(result,
@@ -135,8 +149,8 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                 return;
             }
 
-            if (sLogger.isActivated()) {
-                sLogger.debug("Upload has failed");
+            if (mLogger.isActivated()) {
+                mLogger.debug("Upload has failed");
             }
             // Upload error
             handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED));
@@ -145,7 +159,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
         }
         String fileInfo = new String(result, UTF8);
         if (logActivated) {
-            sLogger.debug("Upload done with success: ".concat(fileInfo));
+            mLogger.debug("Upload done with success: ".concat(fileInfo));
         }
 
         setFileExpiration(infoDocument.getExpiration());
@@ -163,7 +177,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
         String msgId = getFileTransferId();
         if (chatSession != null) {
             if (logActivated) {
-                sLogger.debug("Send file transfer info via an existing chat session");
+                mLogger.debug("Send file transfer info via an existing chat session");
             }
             if (chatSession.isMediaEstablished()) {
                 setChatSessionID(chatSession.getSessionID());
@@ -178,7 +192,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                     MsrpSession.TypeMsrpChunk.HttpFileSharing);
         } else {
             if (logActivated) {
-                sLogger.debug("Send file transfer info via a new chat session.");
+                mLogger.debug("Send file transfer info via a new chat session.");
             }
             long timestamp = getTimestamp();
             ChatMessage firstMsg = ChatUtils.createFileTransferMessage(getRemoteContact(),
@@ -188,7 +202,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                         firstMsg);
             } catch (CoreException e) {
                 if (logActivated) {
-                    sLogger.debug("Couldn't initiate One to one session :" + e);
+                    mLogger.debug("Couldn't initiate One to one session :" + e);
                 }
                 // Upload error
                 handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED));
@@ -252,8 +266,24 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                     } else {
                         sendResultToContact(null);
                     }
-                } catch (Exception e) {
-                    handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED));
+                } catch (IOException e) {
+                    handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
+                } catch (URISyntaxException e) {
+                    mLogger.error(
+                            new StringBuilder("Failed to resume upload for sessionId : ")
+                                    .append(getSessionID()).append(" with fileTransferId : ")
+                                    .append(getFileTransferId()).toString(), e);
+                    handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
+                } catch (RuntimeException e) {
+                    /*
+                     * Intentionally catch runtime exceptions as else it will abruptly end the
+                     * thread and eventually bring the whole system down, which is not intended.
+                     */
+                    mLogger.error(
+                            new StringBuilder("Failed to resume upload for sessionId : ")
+                                    .append(getSessionID()).append(" with fileTransferId : ")
+                                    .append(getFileTransferId()).toString(), e);
+                    handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
                 }
             }
         }).start();
