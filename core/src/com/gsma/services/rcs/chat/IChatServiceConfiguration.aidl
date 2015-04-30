@@ -5,7 +5,7 @@ package com.gsma.services.rcs.chat;
  */
 interface IChatServiceConfiguration {
 
-	int getChatTimeout();
+	long getIsComposingTimeout();
 
 	int getGeolocExpirationTime();
 	

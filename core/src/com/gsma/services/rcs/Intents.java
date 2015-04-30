@@ -68,33 +68,33 @@ public class Intents {
         /**
          * Intent to check if RCS stack is compatible with RCS API
          */
-        public static final String ACTION_GET_COMPATIBLITY = "com.gsma.services.rcs.action.GET_COMPATIBLITY";
+        public static final String ACTION_GET_COMPATIBILITY = "com.gsma.services.rcs.action.GET_COMPATIBILITY";
 
         /**
-         * Used as a string extra field in ACTION_GET_COMPATIBLITY intent to convey the codename
+         * Used as a string extra field in ACTION_GET_COMPATIBILITY intent to convey the codename
          */
-        public static final String EXTRA_GET_COMPATIBLITY_CODENAME = "get_compatibility_codename";
+        public static final String EXTRA_GET_COMPATIBILITY_CODENAME = "get_compatibility_codename";
 
         /**
-         * Used as an integer extra field in ACTION_GET_COMPATIBLITY intent to convey the version
+         * Used as an integer extra field in ACTION_GET_COMPATIBILITY intent to convey the version
          */
-        public static final String EXTRA_GET_COMPATIBLITY_VERSION = "get_compatibility_version";
+        public static final String EXTRA_GET_COMPATIBILITY_VERSION = "get_compatibility_version";
 
         /**
-         * Used as an integer extra field in ACTION_GET_COMPATIBLITY intent to convey the increment
+         * Used as an integer extra field in ACTION_GET_COMPATIBILITY intent to convey the increment
          */
-        public static final String EXTRA_GET_COMPATIBLITY_INCREMENT = "get_compatibility_increment";
+        public static final String EXTRA_GET_COMPATIBILITY_INCREMENT = "get_compatibility_increment";
 
         /**
-         * Used as an boolean extra field in ACTION_GET_COMPATIBLITY intent to convey the response
+         * Used as an boolean extra field in ACTION_GET_COMPATIBILITY intent to convey the response
          */
-        public static final String EXTRA_GET_COMPATIBLITY_RESPONSE = "get_compatibility_response";
+        public static final String EXTRA_GET_COMPATIBILITY_RESPONSE = "get_compatibility_response";
 
         /**
-         * Used as an string extra field in ACTION_GET_COMPATIBLITY intent to convey the service
+         * Used as an string extra field in ACTION_GET_COMPATIBILITY intent to convey the service
          * class name
          */
-        public static final String EXTRA_GET_COMPATIBLITY_SERVICE = "get_compatibility_service";
+        public static final String EXTRA_GET_COMPATIBILITY_SERVICE = "get_compatibility_service";
 
         private Service() {
         }

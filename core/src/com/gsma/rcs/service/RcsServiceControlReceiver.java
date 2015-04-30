@@ -194,21 +194,21 @@ public class RcsServiceControlReceiver extends BroadcastReceiver {
             boolean active = intent
                     .getBooleanExtra(Intents.Service.EXTRA_SET_ACTIVATION_MODE, true);
             setActivationMode(context, active);
-        } else if (Intents.Service.ACTION_GET_COMPATIBLITY.equals(intent.getAction())) {
+        } else if (Intents.Service.ACTION_GET_COMPATIBILITY.equals(intent.getAction())) {
             Bundle results = getResultExtras(true);
             if (results == null) {
                 return;
             }
             String servicename = intent
-                    .getStringExtra(Intents.Service.EXTRA_GET_COMPATIBLITY_SERVICE);
+                    .getStringExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_SERVICE);
             String codename = intent
-                    .getStringExtra(Intents.Service.EXTRA_GET_COMPATIBLITY_CODENAME);
-            int version = intent.getIntExtra(Intents.Service.EXTRA_GET_COMPATIBLITY_VERSION,
+                    .getStringExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_CODENAME);
+            int version = intent.getIntExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_VERSION,
                     INVALID_EXTRA);
-            int increment = intent.getIntExtra(Intents.Service.EXTRA_GET_COMPATIBLITY_INCREMENT,
+            int increment = intent.getIntExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_INCREMENT,
                     INVALID_EXTRA);
 
-            results.putBoolean(Intents.Service.EXTRA_GET_COMPATIBLITY_RESPONSE,
+            results.putBoolean(Intents.Service.EXTRA_GET_COMPATIBILITY_RESPONSE,
                     isCompatible(servicename, codename, version, increment));
             setResultExtras(results);
         }

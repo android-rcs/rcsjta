@@ -1182,8 +1182,8 @@ public class RcsSettings {
      * 
      * @return Timer in milliseconds
      */
-    public int getIsComposingTimeout() {
-        return readInteger(RcsSettingsData.IS_COMPOSING_TIMEOUT);
+    public long getIsComposingTimeout() {
+        return readLong(RcsSettingsData.IS_COMPOSING_TIMEOUT);
     }
 
     /**

@@ -111,7 +111,7 @@ public class RcsServiceControl {
 
         /**
          * Using reflection to add FLAG_EXCLUDE_STOPPED_PACKAGES support backward compatibility.
-         *
+         * 
          * @param intent Intent to set flags
          */
         static void tryToSetExcludeStoppedPackagesFlag(Intent intent) {
@@ -138,7 +138,7 @@ public class RcsServiceControl {
 
         /**
          * Using reflection to add FLAG_RECEIVER_FOREGROUND support backward compatibility.
-         *
+         * 
          * @param intent Intent to set flags
          */
         static void tryToSetReceiverForegroundFlag(Intent intent) {
@@ -318,13 +318,13 @@ public class RcsServiceControl {
      */
     public boolean isCompatible(RcsService service) throws RcsServiceException {
         String serviceName = service.getClass().getSimpleName();
-        Intent intent = new Intent(Intents.Service.ACTION_GET_COMPATIBLITY);
-        intent.putExtra(Intents.Service.EXTRA_GET_COMPATIBLITY_SERVICE, serviceName);
-        intent.putExtra(Intents.Service.EXTRA_GET_COMPATIBLITY_CODENAME,
+        Intent intent = new Intent(Intents.Service.ACTION_GET_COMPATIBILITY);
+        intent.putExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_SERVICE, serviceName);
+        intent.putExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_CODENAME,
                 RcsService.Build.API_CODENAME);
-        intent.putExtra(Intents.Service.EXTRA_GET_COMPATIBLITY_VERSION,
+        intent.putExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_VERSION,
                 RcsService.Build.API_VERSION);
-        intent.putExtra(Intents.Service.EXTRA_GET_COMPATIBLITY_INCREMENT,
+        intent.putExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_INCREMENT,
                 RcsService.Build.API_INCREMENTAL);
         Bundle resultExtraData = queryRcsStackByIntent(intent);
         if (resultExtraData == null) {
@@ -333,6 +333,6 @@ public class RcsServiceControl {
                     "Failed to check client RCS API compatibility for service " + serviceName
                             + " !");
         }
-        return resultExtraData.getBoolean(Intents.Service.EXTRA_GET_COMPATIBLITY_RESPONSE, false);
+        return resultExtraData.getBoolean(Intents.Service.EXTRA_GET_COMPATIBILITY_RESPONSE, false);
     }
 }

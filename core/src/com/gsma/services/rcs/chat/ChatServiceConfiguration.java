@@ -65,12 +65,12 @@ public class ChatServiceConfiguration {
     /**
      * Returns the time after inactive chat could be closed
      * 
-     * @return Timeout in seconds
+     * @return Timeout in milliseconds
      * @throws RcsServiceException
      */
-    public int getChatTimeout() throws RcsServiceException {
+    public long getIsComposingTimeout() throws RcsServiceException {
         try {
-            return mIConfig.getChatTimeout();
+            return mIConfig.getIsComposingTimeout();
 
         } catch (Exception e) {
             throw new RcsGenericException(e);

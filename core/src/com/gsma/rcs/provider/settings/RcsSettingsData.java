@@ -1290,7 +1290,7 @@ public class RcsSettingsData {
      * Image resize option
      */
     public static final String KEY_IMAGE_RESIZE_OPTION = "ImageResizeOption";
-    /* package private */static final Integer DEFAULT_KEY_IMAGE_RESIZE_OPTION = ImageResizeOption.ONLY_ABOVE_MAX_SIZE
+    /* package private */static final Integer DEFAULT_KEY_IMAGE_RESIZE_OPTION = ImageResizeOption.ALWAYS_ASK
             .toInt();
 
     /**

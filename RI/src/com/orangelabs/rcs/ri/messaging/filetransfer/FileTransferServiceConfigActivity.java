@@ -18,6 +18,17 @@
 
 package com.orangelabs.rcs.ri.messaging.filetransfer;
 
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration;
+import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration.ImageResizeOption;
+
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.Utils;
+
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
@@ -30,16 +41,6 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.TextView;
-
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration;
-import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration.ImageResizeOption;
-import com.orangelabs.rcs.ri.ConnectionManager;
-import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.LockAccess;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Display/update the chat service configuration
@@ -73,8 +74,8 @@ public class FileTransferServiceConfigActivity extends Activity {
             .getSimpleName());
 
     private final static String[] ImageResizeOptionTab = new String[] {
-            ImageResizeOption.ALWAYS_PERFORM.toString(),
-            ImageResizeOption.ONLY_ABOVE_MAX_SIZE.toString(), ImageResizeOption.ASK.toString()
+            ImageResizeOption.ALWAYS_RESIZE.toString(), ImageResizeOption.ALWAYS_ASK.toString(),
+            ImageResizeOption.NEVER_RESIZE.toString()
     };
 
     @Override

@@ -53,9 +53,9 @@ public class ChatServiceConfigurationImpl extends IChatServiceConfiguration.Stub
     }
 
     @Override
-    public int getChatTimeout() throws RemoteException {
+    public long getIsComposingTimeout() throws RemoteException {
         try {
-            return mRcsSettings.getChatIdleDuration();
+            return mRcsSettings.getIsComposingTimeout();
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {

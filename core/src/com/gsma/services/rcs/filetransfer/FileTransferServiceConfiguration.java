@@ -44,17 +44,17 @@ public class FileTransferServiceConfiguration {
      */
     public enum ImageResizeOption {
         /**
-         * Always ask to resize or not
+         * Always resize
          */
-        ALWAYS_PERFORM(0),
+        ALWAYS_RESIZE(0),
         /**
-         * Only ask if above maximum size
+         * Always ask if resize or not
          */
-        ONLY_ABOVE_MAX_SIZE(1),
+        ALWAYS_ASK(1),
         /**
-         * Ask
+         * Never resize
          */
-        ASK(2);
+        NEVER_RESIZE(2);
 
         private int mValue;
 
