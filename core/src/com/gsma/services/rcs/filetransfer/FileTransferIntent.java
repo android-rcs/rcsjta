@@ -62,7 +62,7 @@ public class FileTransferIntent {
      * <li> {@link #EXTRA_TRANSFER_ID} containing the unique ID of the file transfer.
      * </ul>
      */
-    public final static String ACTION_NEW_ONE_TO_ONE_FILE_TRANSFER_DELIVERY_EXPIRED = "com.gsma.services.rcs.chat.action.FILE_TRANSFER_DELIVERY_EXPIRED";
+    public final static String ACTION_FILE_TRANSFER_DELIVERY_EXPIRED = "com.gsma.services.rcs.filetransfer.action.FILE_TRANSFER_DELIVERY_EXPIRED";
 
     /**
      * ContactId of remote contact

@@ -144,7 +144,7 @@ public class OneToOneUndeliveredImManager {
         mMessagingLog.setChatMessageDeliveryExpired(msgId);
 
         Intent undeliveredMessage = new Intent(
-                OneToOneChatIntent.ACTION_NEW_ONE_TO_ONE_MESSAGE_DELIVERY_EXPIRED);
+                OneToOneChatIntent.ACTION_MESSAGE_DELIVERY_EXPIRED);
         IntentUtils.tryToSetExcludeStoppedPackagesFlag(undeliveredMessage);
         IntentUtils.tryToSetReceiverForegroundFlag(undeliveredMessage);
         undeliveredMessage.putExtra(OneToOneChatIntent.EXTRA_CONTACT, (Parcelable) contact);
@@ -157,7 +157,7 @@ public class OneToOneUndeliveredImManager {
         mMessagingLog.setFileTransferDeliveryExpired(fileTransferId);
 
         Intent undeliveredFile = new Intent(
-                FileTransferIntent.ACTION_NEW_ONE_TO_ONE_FILE_TRANSFER_DELIVERY_EXPIRED);
+                FileTransferIntent.ACTION_FILE_TRANSFER_DELIVERY_EXPIRED);
         IntentUtils.tryToSetExcludeStoppedPackagesFlag(undeliveredFile);
         IntentUtils.tryToSetReceiverForegroundFlag(undeliveredFile);
         undeliveredFile.putExtra(FileTransferIntent.EXTRA_CONTACT, (Parcelable) contact);
