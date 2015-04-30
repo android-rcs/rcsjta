@@ -66,6 +66,7 @@ public class OneToOneChatDequeueTask extends DequeueTask {
         try {
             synchronized (mLock) {
                 cursor = mHistoryLog.getQueuedOneToOneChatMessagesAndOneToOneFileTransfers();
+                /* TODO: Handle cursor when null. */
                 int providerIdIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_PROVIDER_ID);
                 int idIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_ID);
                 int contactIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_CONTACT);

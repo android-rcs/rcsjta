@@ -52,6 +52,7 @@ public class UpdateImageSharingStateAfterUngracefulTerminationTask implements Ru
         Cursor cursor = null;
         try {
             cursor = mRichCallHistory.getInterruptedImageSharings();
+            /* TODO: Handle cursor when null. */
             int sharingIdx = cursor.getColumnIndexOrThrow(ImageSharingData.KEY_SHARING_ID);
             int contactIdx = cursor.getColumnIndexOrThrow(ImageSharingData.KEY_CONTACT);
             int stateIdx = cursor.getColumnIndexOrThrow(ImageSharingData.KEY_STATE);

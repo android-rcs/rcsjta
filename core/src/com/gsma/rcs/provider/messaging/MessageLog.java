@@ -538,6 +538,7 @@ public class MessageLog implements IMessageLog {
                     Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), new String[] {
                         MessageData.KEY_CHAT_ID
                     }, null, null, null);
+            /* TODO: Handle cursor when null. */
             if (cursor.moveToNext()) {
                 return cursor.getString(cursor.getColumnIndexOrThrow(MessageData.KEY_CHAT_ID));
             }
@@ -551,9 +552,10 @@ public class MessageLog implements IMessageLog {
     }
 
     @Override
-    public Cursor getCacheableChatMessageData(String msgId) {
+    public Cursor getChatMessageData(String msgId) {
         Cursor cursor = mLocalContentResolver.query(
                 Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), null, null, null, null);
+        /* TODO: Handle cursor when null. */
         if (cursor.moveToFirst()) {
             return cursor;
         }
@@ -654,6 +656,7 @@ public class MessageLog implements IMessageLog {
                     MessageData.CONTENT_URI.buildUpon().appendPath(msgId).build(), new String[] {
                             MessageData.KEY_CONTACT, MessageData.KEY_CHAT_ID
                     }, null, null, null);
+            /* TODO: Handle cursor when null. */
             if (!cursor.moveToNext()) {
                 return false;
             }

@@ -86,7 +86,8 @@ public class VideoSharingPersistedStorageAccessor {
     private void cacheData() {
         Cursor cursor = null;
         try {
-            cursor = mRichCallLog.getCacheableVideoSharingData(mSharingId);
+            cursor = mRichCallLog.getVideoSharingData(mSharingId);
+            /* TODO: Handle cursor when null. */
             String contact = cursor.getString(cursor
                     .getColumnIndexOrThrow(VideoSharingData.KEY_CONTACT));
             if (contact != null) {

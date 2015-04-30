@@ -63,6 +63,7 @@ public class DelayedDisplayNotificationDispatcher implements Runnable {
             cursor = mLocalContentResolver.query(MessageData.CONTENT_URI, PROJECTION_CHAT_MESSAGE,
                     SELECTION_READ_CHAT_MESSAGES_WITH_DISPLAY_REPORT_REQUESTED, null,
                     ORDER_BY_TIMESTAMP_ASC);
+            /* TODO: Handle cursor when null. */
             int columIdxMessageId = cursor.getColumnIndexOrThrow(MessageData.KEY_MESSAGE_ID);
             int columnIdxContact = cursor.getColumnIndexOrThrow(MessageData.KEY_CONTACT);
             int columnIdxTimestampDisplayed = cursor

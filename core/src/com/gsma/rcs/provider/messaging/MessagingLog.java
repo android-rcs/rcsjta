@@ -209,12 +209,13 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public void addOneToOneFileTransfer(String fileTransferId, ContactId contact, Direction direction,
-            MmContent content, MmContent fileIcon, FileTransfer.State state,
+    public void addOneToOneFileTransfer(String fileTransferId, ContactId contact,
+            Direction direction, MmContent content, MmContent fileIcon, FileTransfer.State state,
             FileTransfer.ReasonCode reasonCode, long timestamp, long timestampSent,
             long fileExpiration, long fileIconExpiration) {
-        mFileTransferLog.addOneToOneFileTransfer(fileTransferId, contact, direction, content, fileIcon,
-                state, reasonCode, timestamp, timestampSent, fileExpiration, fileIconExpiration);
+        mFileTransferLog.addOneToOneFileTransfer(fileTransferId, contact, direction, content,
+                fileIcon, state, reasonCode, timestamp, timestampSent, fileExpiration,
+                fileIconExpiration);
     }
 
     @Override
@@ -375,8 +376,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public FileTransfer.ReasonCode getFileTransferStateReasonCode(String fileTransferId) {
-        return mFileTransferLog.getFileTransferStateReasonCode(fileTransferId);
+    public FileTransfer.ReasonCode getFileTransferReasonCode(String fileTransferId) {
+        return mFileTransferLog.getFileTransferReasonCode(fileTransferId);
     }
 
     @Override
@@ -440,18 +441,18 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public Cursor getCacheableFileTransferData(String fileTransferId) {
-        return mFileTransferLog.getCacheableFileTransferData(fileTransferId);
+    public Cursor getFileTransferData(String fileTransferId) {
+        return mFileTransferLog.getFileTransferData(fileTransferId);
     }
 
     @Override
-    public Cursor getCacheableGroupChatData(String chatId) {
-        return mGroupChatLog.getCacheableGroupChatData(chatId);
+    public Cursor getGroupChatData(String chatId) {
+        return mGroupChatLog.getGroupChatData(chatId);
     }
 
     @Override
-    public Cursor getCacheableChatMessageData(String msgId) {
-        return mMessageLog.getCacheableChatMessageData(msgId);
+    public Cursor getChatMessageData(String msgId) {
+        return mMessageLog.getChatMessageData(msgId);
     }
 
     @Override
@@ -490,15 +491,19 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
+    /* TODO: Check if really dead code or someone is missing to call this. */
     public Cursor getQueuedGroupChatMessages(String chatId) {
         return mMessageLog.getQueuedGroupChatMessages(chatId);
     }
 
     @Override
+    /* TODO: Check if really dead code or someone is missing calling it. */
     public Cursor getQueuedGroupFileTransfers(String chatId) {
         return mFileTransferLog.getQueuedGroupFileTransfers(chatId);
     }
 
+    @Override
+    /* TODO: Check if really dead code or someone is missing to call this. */
     public Cursor getQueuedOneToOneFileTransfers(ContactId contact) {
         return mFileTransferLog.getQueuedOneToOneFileTransfers(contact);
     }

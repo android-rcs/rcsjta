@@ -43,6 +43,7 @@ public class UpdateFileTransferStateAfterUngracefulTerminationTask implements Ru
         Cursor cursor = null;
         try {
             cursor = mMessagingLog.getInterruptedFileTransfers();
+            /* TODO: Handle cursor when null. */
             int chatIdIdx = cursor.getColumnIndex(FileTransferData.KEY_CHAT_ID);
             int contactIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_CONTACT);
             int fileTransferIdIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FT_ID);
@@ -107,6 +108,7 @@ public class UpdateFileTransferStateAfterUngracefulTerminationTask implements Ru
                                     fileTransferId, contact, State.REJECTED,
                                     ReasonCode.REJECTED_BY_SYSTEM);
                             break;
+                            /* TODO: Handle default. */
                     }
                 } else {
                     /* Http file transfer */
@@ -159,6 +161,7 @@ public class UpdateFileTransferStateAfterUngracefulTerminationTask implements Ru
                                     fileTransferId, contact, State.REJECTED,
                                     ReasonCode.REJECTED_BY_TIMEOUT);
                             break;
+                            /* TODO: Handle default. */
                     }
                 }
             }

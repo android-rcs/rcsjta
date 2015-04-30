@@ -387,6 +387,7 @@ public class RcsSettingsProvider extends ContentProvider {
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int currentVersion) {
             /* Get old data before deleting the table */
             Cursor oldDataCursor = db.query(TABLE, null, null, null, null, null, null);
+            /* TODO: Handle cursor when null. */
 
             /*
              * Get all the pairs key/value of the old table to insert them back after update
@@ -482,6 +483,7 @@ public class RcsSettingsProvider extends ContentProvider {
                     SQLiteDatabase database = mOpenHelper.getReadableDatabase();
                     cursor = database.query(TABLE, projection, selection, selectionArgs, null,
                             null, sort);
+                    /* TODO: Handle cursor when null. */
                     cursor.setNotificationUri(getContext().getContentResolver(), uri);
                     return cursor;
 
@@ -489,7 +491,12 @@ public class RcsSettingsProvider extends ContentProvider {
                     throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
                             .append(uri).append("!").toString());
             }
-        } catch (RuntimeException e) {
+        }
+        /*
+         * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
+         * exception.
+         */
+        catch (RuntimeException e) {
             if (cursor != null) {
                 cursor.close();
             }

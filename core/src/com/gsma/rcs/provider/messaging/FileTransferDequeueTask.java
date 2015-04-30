@@ -52,6 +52,7 @@ public class FileTransferDequeueTask extends DequeueTask {
         try {
             synchronized (mLock) {
                 cursor = mMessagingLog.getQueuedFileTransfers();
+                /* TODO: Handle cursor when null. */
                 int fileTransferIdIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FT_ID);
                 int fileIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FILE);
                 int fileIconIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FILEICON);

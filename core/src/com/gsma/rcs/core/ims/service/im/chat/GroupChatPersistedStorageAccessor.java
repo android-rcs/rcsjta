@@ -75,7 +75,8 @@ public class GroupChatPersistedStorageAccessor {
     private void cacheData() {
         Cursor cursor = null;
         try {
-            cursor = mMessagingLog.getCacheableGroupChatData(mChatId);
+            cursor = mMessagingLog.getGroupChatData(mChatId);
+            /* TODO: Handle cursor when null. */
             mSubject = cursor.getString(cursor.getColumnIndexOrThrow(GroupChat.SUBJECT));
             mDirection = Direction.valueOf(cursor.getInt(cursor
                     .getColumnIndexOrThrow(GroupChat.DIRECTION)));

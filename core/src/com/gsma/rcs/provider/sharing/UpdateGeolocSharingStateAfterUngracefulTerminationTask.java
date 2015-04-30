@@ -52,6 +52,7 @@ public class UpdateGeolocSharingStateAfterUngracefulTerminationTask implements R
         Cursor cursor = null;
         try {
             cursor = mRichCallHistory.getInterruptedGeolocSharings();
+            /* TODO: Handle cursor when null. */
             int sharingIdx = cursor.getColumnIndexOrThrow(GeolocSharingData.KEY_SHARING_ID);
             int contactIdx = cursor.getColumnIndexOrThrow(GeolocSharingData.KEY_CONTACT);
             int stateIdx = cursor.getColumnIndexOrThrow(GeolocSharingData.KEY_STATE);
@@ -77,6 +78,7 @@ public class UpdateGeolocSharingStateAfterUngracefulTerminationTask implements R
                         mGeolocService.setGeolocSharingStateAndReasonCode(contact, sharingId,
                                 State.REJECTED, ReasonCode.REJECTED_BY_SYSTEM);
                         break;
+                        /* TODO: Handle default. */
                 }
             }
         } catch (Exception e) {

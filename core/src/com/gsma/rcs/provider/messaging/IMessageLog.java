@@ -190,12 +190,12 @@ public interface IMessageLog {
     public String getMessageMimeType(String msgId);
 
     /**
-     * Get cacheable message data from its unique ID
+     * Get message data from its unique ID
      * 
      * @param msgId
-     * @return Cursor
+     * @return Cursor or null if no data exists
      */
-    public Cursor getCacheableChatMessageData(String msgId);
+    public Cursor getChatMessageData(String msgId);
 
     /**
      * Get chat message content

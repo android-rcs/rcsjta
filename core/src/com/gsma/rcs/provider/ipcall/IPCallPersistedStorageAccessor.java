@@ -61,7 +61,8 @@ public class IPCallPersistedStorageAccessor {
     private void cacheData() {
         Cursor cursor = null;
         try {
-            cursor = mIPCallLog.getCacheableIPCallData(mCallId);
+            cursor = mIPCallLog.getIPCallData(mCallId);
+            /* TODO: Handle cursor when null. */
             String contact = cursor.getString(cursor.getColumnIndexOrThrow(IPCallData.KEY_CONTACT));
             if (contact != null) {
                 mContact = ContactUtil.createContactIdFromTrustedData(contact);

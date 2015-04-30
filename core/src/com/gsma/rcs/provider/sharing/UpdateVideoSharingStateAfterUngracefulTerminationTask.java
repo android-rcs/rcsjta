@@ -52,6 +52,7 @@ public class UpdateVideoSharingStateAfterUngracefulTerminationTask implements Ru
         Cursor cursor = null;
         try {
             cursor = mRichCallHistory.getInterruptedVideoSharings();
+            /* TODO: Handle cursor when null. */
             int sharingIdx = cursor.getColumnIndexOrThrow(VideoSharingData.KEY_SHARING_ID);
             int contactIdx = cursor.getColumnIndexOrThrow(VideoSharingData.KEY_CONTACT);
             int stateIdx = cursor.getColumnIndexOrThrow(VideoSharingData.KEY_STATE);
@@ -77,6 +78,7 @@ public class UpdateVideoSharingStateAfterUngracefulTerminationTask implements Ru
                         mVideoService.setVideoSharingStateAndReasonCode(contact, sharingId,
                                 State.REJECTED, ReasonCode.REJECTED_BY_SYSTEM);
                         break;
+                        /* TODO: Handle default. */
                 }
             }
         } catch (Exception e) {

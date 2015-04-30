@@ -31,8 +31,6 @@ import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
-import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
-import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.State;
 import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.video.VideoSharing;
 
@@ -97,16 +95,20 @@ public class RichCallHistory {
         Cursor cursor = null;
         try {
             cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(ImageSharingData.CONTENT_URI, sharingId), projection, null,
-                    null, null);
+                    Uri.withAppendedPath(ImageSharingData.CONTENT_URI, sharingId), projection,
+                    null, null, null);
+            /* TODO: Handle cursor when null. */
             if (cursor.moveToFirst()) {
                 return cursor;
             }
-            throw new SQLException(
-                    "No row returned while querying for image transfer data with sharingId : "
-                            .concat(sharingId));
-
-        } catch (RuntimeException e) {
+            throw new SQLException(new StringBuilder(
+                    "No row returned while querying for image transfer data with sharingId '")
+                    .append(sharingId).append("'!").toString());
+        } /*
+           * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
+           * exception.
+           */
+        catch (RuntimeException e) {
             if (cursor != null) {
                 cursor.close();
             }
@@ -128,16 +130,20 @@ public class RichCallHistory {
         Cursor cursor = null;
         try {
             cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId), projection, null,
-                    null, null);
+                    Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId), projection,
+                    null, null, null);
+            /* TODO: Handle cursor when null. */
             if (cursor.moveToFirst()) {
                 return cursor;
             }
-            throw new SQLException(
-                    "No row returned while querying for video sharing data with sharingId : "
-                            .concat(sharingId));
-
-        } catch (RuntimeException e) {
+            throw new SQLException(new StringBuilder(
+                    "No row returned while querying for video sharing data with sharingId '")
+                    .append(sharingId).append("'!").toString());
+        } /*
+           * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
+           * exception.
+           */
+        catch (RuntimeException e) {
             if (cursor != null) {
                 cursor.close();
             }
@@ -212,20 +218,18 @@ public class RichCallHistory {
             cursor = mLocalContentResolver.query(
                     Uri.withAppendedPath(GeolocSharingData.CONTENT_URI, sharingId), projection,
                     null, null, null);
+            /* TODO: Handle cursor when null. */
             if (cursor.moveToFirst()) {
                 return cursor;
             }
-
-            throw new SQLException(
-                    "No row returned while querying for geoloc sharing data with sharingId : "
-                            + sharingId);
-
-        } catch (RuntimeException e) {
-            if (logger.isActivated()) {
-                logger.error(
-                        "Exception occured while retrieving geoloc sharing data of sharingId = '"
-                                + sharingId + "' ! ", e);
-            }
+            throw new SQLException(new StringBuilder(
+                    "No row returned while querying for geoloc sharing data with sharingId '")
+                    .append(sharingId).append("'!").toString());
+        } /*
+           * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
+           * exception.
+           */
+        catch (RuntimeException e) {
             if (cursor != null) {
                 cursor.close();
             }
@@ -402,6 +406,10 @@ public class RichCallHistory {
      * @param sharingId
      * @return the total size (or 0 if failed)
      */
+    /*
+     * TODO: Rewrite this to use getDataAsLong(getImageSharingData(ImageSharingData.KEY_FILESIZE,
+     * sharingId) and align calling methods with changed behavior.
+     */
     public long getImageSharingTotalSize(String sharingId) {
         Cursor c = null;
         try {
@@ -409,8 +417,8 @@ public class RichCallHistory {
                 ImageSharingData.KEY_FILESIZE
             };
             c = mLocalContentResolver.query(
-                    Uri.withAppendedPath(ImageSharingData.CONTENT_URI, sharingId), projection, null,
-                    null, null);
+                    Uri.withAppendedPath(ImageSharingData.CONTENT_URI, sharingId), projection,
+                    null, null, null);
             if (c.moveToFirst()) {
                 return c.getLong(0);
             }
@@ -448,8 +456,8 @@ public class RichCallHistory {
      * @param timestamp Local timestamp for incoming geoloc sharing
      * @return Uri
      */
-    public Uri addIncomingGeolocSharing(ContactId contact, String sharingId, State state,
-            ReasonCode reasonCode, long timestamp) {
+    public Uri addIncomingGeolocSharing(ContactId contact, String sharingId,
+            GeolocSharing.State state, GeolocSharing.ReasonCode reasonCode, long timestamp) {
         ContentValues values = new ContentValues();
         values.put(GeolocSharingData.KEY_SHARING_ID, sharingId);
         values.put(GeolocSharingData.KEY_CONTACT, contact.toString());
@@ -473,7 +481,7 @@ public class RichCallHistory {
      * @return Uri
      */
     public Uri addOutgoingGeolocSharing(ContactId contact, String sharingId, Geoloc geoloc,
-            State state, ReasonCode reasonCode, long timestamp) {
+            GeolocSharing.State state, GeolocSharing.ReasonCode reasonCode, long timestamp) {
         ContentValues values = new ContentValues();
         values.put(GeolocSharingData.KEY_SHARING_ID, sharingId);
         values.put(GeolocSharingData.KEY_CONTACT, contact.toString());
@@ -514,8 +522,8 @@ public class RichCallHistory {
      * @param state Geoloc sharing state
      * @param reasonCode Reason code of the state
      */
-    public void setGeolocSharingStateAndReasonCode(String sharingId, State state,
-            ReasonCode reasonCode) {
+    public void setGeolocSharingStateAndReasonCode(String sharingId, GeolocSharing.State state,
+            GeolocSharing.ReasonCode reasonCode) {
         ContentValues values = new ContentValues();
         values.put(GeolocSharingData.KEY_STATE, state.toInt());
         values.put(GeolocSharingData.KEY_REASON_CODE, reasonCode.toInt());
@@ -540,22 +548,22 @@ public class RichCallHistory {
             logger.debug(new StringBuilder("Get geoloc sharing state for ").append(sharingId)
                     .append(".").toString());
         }
-        return State.valueOf(getDataAsInt(getGeolocSharingData(GeolocSharingData.KEY_STATE,
-                sharingId)));
+        return GeolocSharing.State.valueOf(getDataAsInt(getGeolocSharingData(
+                GeolocSharingData.KEY_STATE, sharingId)));
     }
 
     /**
-     * Get the geoloc sharing state reason code
+     * Get the geoloc sharing reason code
      * 
      * @param sharingId Sharing ID
      * @return reason code
      */
-    public GeolocSharing.ReasonCode getGeolocSharingStateReasonCode(String sharingId) {
+    public GeolocSharing.ReasonCode getGeolocSharingReasonCode(String sharingId) {
         if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Get geoloc sharing state reason code for ")
-                    .append(sharingId).append(".").toString());
+            logger.debug(new StringBuilder("Get geoloc sharing reason code for ").append(sharingId)
+                    .append(".").toString());
         }
-        return ReasonCode.valueOf(getDataAsInt(getGeolocSharingData(
+        return GeolocSharing.ReasonCode.valueOf(getDataAsInt(getGeolocSharingData(
                 GeolocSharingData.KEY_REASON_CODE, sharingId)));
     }
 
@@ -575,25 +583,29 @@ public class RichCallHistory {
     }
 
     /**
-     * Get cache-able geolocation sharing info from its unique Id
+     * Get geolocation sharing info from its unique Id
      * 
      * @param sharingId
      * @return Cursor the caller of this method has to close the cursor if a cursor is returned
      */
-    public Cursor getCacheableGeolocSharingData(String sharingId) {
+    public Cursor getGeolocSharingData(String sharingId) {
         Cursor cursor = null;
         try {
             cursor = mLocalContentResolver.query(
                     Uri.withAppendedPath(GeolocSharingData.CONTENT_URI, sharingId), null, null,
                     null, null);
+            /* TODO: Handle cursor when null. */
             if (cursor.moveToFirst()) {
                 return cursor;
             }
-            throw new SQLException(
-                    "No row returned while querying for geoloc sharing data with sharingId : "
-                            + sharingId);
-
-        } catch (RuntimeException e) {
+            throw new SQLException(new StringBuilder(
+                    "No row returned while querying for geoloc sharing data with sharingId '")
+                    .append(sharingId).append("'!").toString());
+        } /*
+           * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
+           * exception.
+           */
+        catch (RuntimeException e) {
             if (cursor != null) {
                 cursor.close();
             }
@@ -667,25 +679,29 @@ public class RichCallHistory {
     }
 
     /**
-     * Get cacheable image transfer info from its unique Id
+     * Get image transfer info from its unique Id
      * 
      * @param sharingId
      * @return Cursor the caller of this method has to close the cursor if a cursor is returned
      */
-    public Cursor getCacheableImageTransferData(String sharingId) {
+    public Cursor getImageTransferData(String sharingId) {
         Cursor cursor = null;
         try {
             cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(ImageSharingData.CONTENT_URI, sharingId), null, null, null,
-                    null);
+                    Uri.withAppendedPath(ImageSharingData.CONTENT_URI, sharingId), null, null,
+                    null, null);
+            /* TODO: Handle cursor when null. */
             if (cursor.moveToFirst()) {
                 return cursor;
             }
-            throw new SQLException(
-                    "No row returned while querying for image transfer data with sharingId : "
-                            .concat(sharingId));
-
-        } catch (RuntimeException e) {
+            throw new SQLException(new StringBuilder(
+                    "No row returned while querying for image transfer data with sharingId '")
+                    .append(sharingId).append("'!").toString());
+        } /*
+           * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
+           * exception.
+           */
+        catch (RuntimeException e) {
             if (cursor != null) {
                 cursor.close();
             }
@@ -694,25 +710,29 @@ public class RichCallHistory {
     }
 
     /**
-     * Get cacheable video sharing info from its unique Id
+     * Get video sharing info from its unique Id
      * 
      * @param sharingId
      * @return Cursor the caller of this method has to close the cursor if a cursor is returned
      */
-    public Cursor getCacheableVideoSharingData(String sharingId) {
+    public Cursor getVideoSharingData(String sharingId) {
         Cursor cursor = null;
         try {
             cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId), null, null, null,
-                    null);
+                    Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId), null, null,
+                    null, null);
+            /* TODO: Handle cursor when null. */
             if (cursor.moveToFirst()) {
                 return cursor;
             }
-            throw new SQLException(
-                    "No row returned while querying for video sharing data with sharingId : "
-                            .concat(sharingId));
-
-        } catch (RuntimeException e) {
+            throw new SQLException(new StringBuilder(
+                    "No row returned while querying for video sharing data with sharingId '")
+                    .append(sharingId).append("'!").toString());
+        } /*
+           * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
+           * exception.
+           */
+        catch (RuntimeException e) {
             if (cursor != null) {
                 cursor.close();
             }

@@ -203,6 +203,7 @@ public abstract class DeleteTask<T> implements Runnable {
         try {
             cursor = mLocalContentResolver.query(mContentUri, mProjection, mSelection,
                     mSelectionArgs, null);
+            /* TODO: Handle cursor when null. */
             Map<T, Set<String>> result = null;
             while (cursor.moveToNext()) {
                 String key = cursor.getString(0);

@@ -14,8 +14,10 @@
  * the License.
  */
 
-package com.gsma.rcs.provider.messaging;
+package com.gsma.rcs.provider.history;
 
+import com.gsma.rcs.provider.messaging.FileTransferData;
+import com.gsma.rcs.provider.messaging.MessageData;
 import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
 import com.gsma.rcs.utils.logger.Logger;
@@ -34,7 +36,7 @@ public class GroupChatTerminalExceptionTask implements Runnable {
 
     private final FileTransferServiceImpl mFileTransferService;
 
-    private final MessagingLog mMessagingLog;
+    private final HistoryLog mHistoryLog;
 
     private final Object mLock;
 
@@ -42,11 +44,11 @@ public class GroupChatTerminalExceptionTask implements Runnable {
 
     /* package private */public GroupChatTerminalExceptionTask(String chatId,
             ChatServiceImpl chatService, FileTransferServiceImpl fileTransferService,
-            MessagingLog messagingLog, Object lock) {
+            HistoryLog historyLog, Object lock) {
         mChatId = chatId;
         mChatService = chatService;
         mFileTransferService = fileTransferService;
-        mMessagingLog = messagingLog;
+        mHistoryLog = historyLog;
         mLock = lock;
     }
 
@@ -56,27 +58,32 @@ public class GroupChatTerminalExceptionTask implements Runnable {
             mLogger.debug("Execute task to mark all queued group chat messages and group file transfers as failed with chatId "
                     .concat(mChatId));
         }
-        Cursor messageCursor = null;
-        Cursor fileCursor = null;
+        Cursor cursor = null;
         try {
             synchronized (mLock) {
-                messageCursor = mMessagingLog.getQueuedGroupChatMessages(mChatId);
-                int msgIdIdx = messageCursor.getColumnIndexOrThrow(MessageData.KEY_MESSAGE_ID);
-                int mimeTypeIdx = messageCursor.getColumnIndexOrThrow(MessageData.KEY_MIME_TYPE);
-                while (messageCursor.moveToNext()) {
-                    String msgId = messageCursor.getString(msgIdIdx);
-                    String mimeType = messageCursor.getString(mimeTypeIdx);
-                    mChatService.setGroupChatMessageStatusAndReasonCode(msgId, mimeType, mChatId,
-                            Status.FAILED, Content.ReasonCode.FAILED_SEND);
-                }
-                fileCursor = mMessagingLog.getQueuedGroupFileTransfers(mChatId);
-                int fileTransferIdIdx = fileCursor
-                        .getColumnIndexOrThrow(FileTransferData.KEY_FT_ID);
-                while (fileCursor.moveToNext()) {
-                    String fileTransferId = fileCursor.getString(fileTransferIdIdx);
-                    mFileTransferService.setGroupFileTransferStateAndReasonCode(fileTransferId,
-                            mChatId, State.FAILED,
-                            FileTransfer.ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
+                cursor = mHistoryLog.getQueuedGroupChatMessagesAndGroupFileTransfers(mChatId);
+                /* TODO: Handle cursor when null. */
+                int providerIdIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_PROVIDER_ID);
+                int idIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_ID);
+
+                while (cursor.moveToNext()) {
+                    int providerId = cursor.getInt(providerIdIdx);
+                    String id = cursor.getString(idIdx);
+                    switch (providerId) {
+                        case MessageData.HISTORYLOG_MEMBER_ID:
+                            mChatService.setGroupChatMessageStatusAndReasonCode(id, mChatId,
+                                    Status.FAILED, Content.ReasonCode.FAILED_SEND);
+                            break;
+                        case FileTransferData.HISTORYLOG_MEMBER_ID:
+                            mFileTransferService.setGroupFileTransferStateAndReasonCode(id,
+                                    mChatId, State.FAILED,
+                                    FileTransfer.ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
+                            break;
+                        default:
+                            throw new IllegalArgumentException(new StringBuilder(
+                                    "Not expecting to handle provider id '").append(providerId)
+                                    .append("'!").toString());
+                    }
                 }
             }
         } catch (Exception e) {
@@ -89,11 +96,8 @@ public class GroupChatTerminalExceptionTask implements Runnable {
                                 .concat(mChatId), e);
             }
         } finally {
-            if (messageCursor != null) {
-                messageCursor.close();
-            }
-            if (fileCursor != null) {
-                fileCursor.close();
+            if (cursor != null) {
+                cursor.close();
             }
         }
     }

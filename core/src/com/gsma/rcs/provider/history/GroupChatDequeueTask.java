@@ -67,6 +67,7 @@ public class GroupChatDequeueTask extends DequeueTask {
         try {
             synchronized (mLock) {
                 cursor = mHistoryLog.getQueuedGroupChatMessagesAndGroupFileTransfers(mChatId);
+                /* TODO: Handle cursor when null. */
                 int providerIdIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_PROVIDER_ID);
                 int idIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_ID);
                 int contentIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_CONTENT);

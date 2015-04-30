@@ -357,6 +357,7 @@ public class ChatProvider extends ContentProvider {
                     SQLiteDatabase db = mOpenHelper.getReadableDatabase();
                     cursor = db.query(TABLE_GROUP_CHAT, projection, selection, selectionArgs, null,
                             null, sort);
+                    /* TODO: Handle cursor when null. */
                     cursor.setNotificationUri(getContext().getContentResolver(),
                             Uri.withAppendedPath(ChatLog.GroupChat.CONTENT_URI, chatId));
                     return cursor;
@@ -365,6 +366,7 @@ public class ChatProvider extends ContentProvider {
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db.query(TABLE_GROUP_CHAT, projection, selection, selectionArgs, null,
                             null, sort);
+                    /* TODO: Handle cursor when null. */
                     cursor.setNotificationUri(getContext().getContentResolver(),
                             ChatLog.GroupChat.CONTENT_URI);
                     return cursor;
@@ -379,6 +381,7 @@ public class ChatProvider extends ContentProvider {
                     cursor = db.query(TABLE_GROUP_CHAT,
                             restrictGroupChatProjectionToExternallyDefinedColumns(projection),
                             selection, selectionArgs, null, null, sort);
+                    /* TODO: Handle cursor when null. */
                     cursor.setNotificationUri(getContext().getContentResolver(), uri);
                     return cursor;
 
@@ -389,6 +392,7 @@ public class ChatProvider extends ContentProvider {
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db.query(TABLE_MESSAGE, projection, selection, selectionArgs, null,
                             null, sort);
+                    /* TODO: Handle cursor when null. */
                     cursor.setNotificationUri(getContext().getContentResolver(),
                             Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId));
                     return cursor;
@@ -398,6 +402,7 @@ public class ChatProvider extends ContentProvider {
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db.query(TABLE_MESSAGE, projection, selection, selectionArgs, null,
                             null, sort);
+                    /* TODO: Handle cursor when null. */
                     cursor.setNotificationUri(getContext().getContentResolver(),
                             ChatLog.Message.CONTENT_URI);
                     return cursor;
@@ -412,6 +417,7 @@ public class ChatProvider extends ContentProvider {
                     cursor = db.query(TABLE_MESSAGE,
                             restrictMessageProjectionToExternallyDefinedColumns(projection),
                             selection, selectionArgs, null, null, sort);
+                    /* TODO: Handle cursor when null. */
                     cursor.setNotificationUri(getContext().getContentResolver(), uri);
                     return cursor;
 
@@ -419,7 +425,12 @@ public class ChatProvider extends ContentProvider {
                     throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
                             .append(uri).append("!").toString());
             }
-        } catch (RuntimeException e) {
+        }
+        /*
+         * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
+         * exception.
+         */
+        catch (RuntimeException e) {
             if (cursor != null) {
                 cursor.close();
             }

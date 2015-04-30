@@ -284,6 +284,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
         // Check all phone numbers and query only the new ones
         Cursor phonesCursor = AndroidFactory.getApplicationContext().getContentResolver()
                 .query(Phone.CONTENT_URI, PHONE_PROJECTION, null, null, null);
+        /* TODO: Handle phonesCursor when null. */
 
         // List of unique number that will have to be queried for capabilities
         Set<ContactId> toBeTreatedNumbers = new HashSet<ContactId>();

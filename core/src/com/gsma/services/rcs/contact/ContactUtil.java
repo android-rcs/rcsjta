@@ -520,6 +520,7 @@ public class ContactUtil {
         Cursor cursor = null;
         try {
             cursor = mCtx.getContentResolver().query(contactUri, null, null, null, null);
+            /* TODO: Handle cursor when null. */
             int displayNameColIdx = cursor
                     .getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
             int lookupKeyColIdx = cursor

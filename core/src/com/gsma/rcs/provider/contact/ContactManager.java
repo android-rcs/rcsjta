@@ -440,6 +440,7 @@ public final class ContactManager {
             return new PresenceInfo();
         }
         Cursor cursor = getRawContactDataCursor(getRawContactIdForMe());
+        /* TODO: Handle cursor when null. */
         return getContactInfoFromCursor(cursor).getPresenceInfo();
     }
 
@@ -814,6 +815,7 @@ public final class ContactManager {
         Uri uri = Uri.withAppendedPath(CONTENT_URI, contactNumber);
         try {
             cursor = mLocalContentResolver.query(uri, null, null, null, null);
+            /* TODO: Handle cursor when null. */
             if (cursor.moveToFirst()) {
                 // Get RCS display name
                 infos.setDisplayName(cursor.getString(cursor
@@ -1099,6 +1101,7 @@ public final class ContactManager {
         try {
             cursor = mLocalContentResolver.query(CONTENT_URI, PROJ_RCSCONTACT_CONTACT,
                     WHERE_RCS_STATUS_WITH_SOCIAL_PRESENCE, null, null);
+            /* TODO: Handle cursor when null. */
             if (!cursor.moveToFirst()) {
                 return rcsNumbers;
             }
@@ -1129,6 +1132,7 @@ public final class ContactManager {
         try {
             cursor = mLocalContentResolver.query(CONTENT_URI, PROJ_RCSCONTACT_CONTACT,
                     WHERE_RCS_STATUS_RCS, null, null);
+            /* TODO: Handle cursor when null. */
             if (!cursor.moveToFirst()) {
                 return rcsNumbers;
             }
@@ -1158,6 +1162,7 @@ public final class ContactManager {
         try {
             cursor = mLocalContentResolver.query(CONTENT_URI, PROJ_RCSCONTACT_CONTACT, null, null,
                     null);
+            /* TODO: Handle cursor when null. */
             if (!cursor.moveToFirst()) {
                 return numbers;
             }
@@ -1369,6 +1374,7 @@ public final class ContactManager {
         try {
             cursor = mContentResolver.query(Data.CONTENT_URI, PROJ_DATA_ID, SEL_RAW_CONTACT_ID,
                     selectionArgs, null);
+            /* TODO: Handle cursor when null. */
             if (cursor.moveToNext()) {
                 dataId = cursor.getLong(cursor.getColumnIndexOrThrow(Data._ID));
             }
@@ -1660,6 +1666,7 @@ public final class ContactManager {
                     SEL_RAW_CONTACT_WITH_WEBLINK, new String[] {
                             Long.toString(rawContactId), String.valueOf(Website.TYPE_HOMEPAGE)
                     }, null);
+            /* TODO: Handle cursor when null. */
             if (cur.moveToNext()) {
                 return cur.getLong(cur.getColumnIndexOrThrow(Data._ID));
 
@@ -2206,6 +2213,7 @@ public final class ContactManager {
         try {
             cursor = mContentResolver.query(Data.CONTENT_URI, PROJ_DATA_RAW_CONTACT,
                     SEL_RAW_CONTACT_FROM_NUMBER, selectionArgs, Data.RAW_CONTACT_ID);
+            /* TODO: Handle cursor when null. */
             if (cursor.moveToFirst()) {
                 int contactColumnIdx = cursor.getColumnIndexOrThrow(Data.RAW_CONTACT_ID);
                 do {
@@ -2237,6 +2245,7 @@ public final class ContactManager {
             cursor = mContentResolver.query(Data.CONTENT_URI, PROJ_DATA_RAW_CONTACT,
                     STRICT_SELECTION_RAW_CONTACT_FROM_NUMBER, selectionArgsStrict,
                     Data.RAW_CONTACT_ID);
+            /* TODO: Handle cursor when null. */
             if (!cursor.moveToFirst()) {
                 return rawContactsIds;
             }
@@ -2275,6 +2284,7 @@ public final class ContactManager {
                     PROJ_RCS_RAW_CONTACT_ID, WHERE_RCS_RAW_CONTACT_ID_AND_RCS_NUMBER, new String[] {
                             contact.toString(), String.valueOf(rawContactId)
                     }, null);
+            /* TODO: Handle cursor when null. */
             if (cursor.moveToFirst()) {
                 return cursor.getLong(cursor
                         .getColumnIndexOrThrow(AggregationData.KEY_RCS_RAW_CONTACT_ID));
@@ -2300,6 +2310,7 @@ public final class ContactManager {
         Uri uri = Uri.withAppendedPath(CONTENT_URI, contact.toString());
         try {
             cursor = mLocalContentResolver.query(uri, PROJ_RCSCONTACT_CONTACT, null, null, null);
+            /* TODO: Handle cursor when null. */
             return cursor.moveToFirst();
 
         } finally {
@@ -2325,6 +2336,7 @@ public final class ContactManager {
             try {
                 cursor = mContentResolver.query(RawContacts.CONTENT_URI, PROJ_RAW_CONTACT_ID,
                         NOT_SIM_ACCOUNT_SELECTION, selectionArgs, null);
+                /* TODO: Handle cursor when null. */
                 if (cursor.moveToFirst()) {
                     return false;
                 }
@@ -2351,6 +2363,7 @@ public final class ContactManager {
         try {
             cursor = mContentResolver.query(RawContacts.CONTENT_URI, PROJ_RAW_CONTACT_ID,
                     SIM_ACCOUNT_SELECTION, selectionArgs, null);
+            /* TODO: Handle cursor when null. */
             return cursor.moveToFirst();
 
         } finally {
@@ -2444,6 +2457,7 @@ public final class ContactManager {
                 try {
                     cur2 = mContentResolver.query(Data.CONTENT_URI, projection2,
                             SEL_RAW_CONTACT_ID, selectionArgs2, null);
+                    /* TODO: Handle cursor when null. */
                     if (cur2.moveToNext()) {
                         dataId = cur2.getLong(cur2.getColumnIndexOrThrow(Data._ID));
                         // We already had an etag, update it
@@ -2484,6 +2498,7 @@ public final class ContactManager {
         try {
             cursor = mContentResolver.query(RawContacts.CONTENT_URI, PROJ_RAW_CONTACT_ID,
                     SEL_RAW_CONTACT_ME, null, null);
+            /* TODO: Handle cursor when null. */
             if (!cursor.moveToNext()) {
                 return INVALID_ID;
             }
@@ -2709,6 +2724,7 @@ public final class ContactManager {
         try {
             cursor = mContentResolver.query(Data.CONTENT_URI, PROJ_RAW_CONTACT_DATA1,
                     SEL_DATA_MIMETYPE_NUMBER, null, null);
+            /* TODO: Handle cursor when null. */
             if (!cursor.moveToFirst()) {
                 return;
             }
@@ -2776,6 +2792,7 @@ public final class ContactManager {
         try {
             cursor = mLocalContentResolver.query(CONTENT_URI, PROJ_RCSCONTACT_CONTACT, null, null,
                     null);
+            /* TODO: Handle cursor when null. */
             if (!cursor.moveToFirst()) {
                 return;
             }

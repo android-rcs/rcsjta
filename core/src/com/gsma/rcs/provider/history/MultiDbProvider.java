@@ -132,6 +132,7 @@ import java.util.Set;
                             MAX_PROJECTION
                         }, null, null, null);
 
+                /* TODO: Handle cursor when null. */
                 if (cursor.moveToNext()) {
                     memberDatabase.setMaxId(cursor.getLong(0));
                 }

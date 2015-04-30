@@ -234,6 +234,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
         }
     }
 
+    /* TODO: Check if really dead code (and then remove) or if it should be called by someone */
     public void setVideoSharingStateAndReasonCode(ContactId contact, String sharingId, State state,
             ReasonCode reasonCode, long duration) {
         mRichCallLog.setVideoSharingStateReasonCodeAndDuration(sharingId, state, reasonCode,

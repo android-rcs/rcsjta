@@ -72,13 +72,19 @@ public class IPCallHistory {
             cursor = mLocalContentResolver.query(
                     Uri.withAppendedPath(IPCallData.CONTENT_URI, callId), projection, null, null,
                     null);
+            /* TODO: Handle cursor when null */
             if (cursor.moveToFirst()) {
                 return cursor;
             }
-            throw new SQLException("No row returned while querying for IP call data with callId : "
-                    + callId);
-
-        } catch (RuntimeException e) {
+            throw new SQLException(new StringBuilder(
+                    "No row returned while querying for IP call data with callId '").append(callId)
+                    .append("'!").toString());
+        }
+        /*
+         * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
+         * exception.
+         */
+        catch (RuntimeException e) {
             if (cursor != null) {
                 cursor.close();
             }
@@ -231,18 +237,24 @@ public class IPCallHistory {
      * @param callId
      * @return Cursor the caller of this method has to close the cursor if a cursor is returned
      */
-    public Cursor getCacheableIPCallData(String callId) {
+    public Cursor getIPCallData(String callId) {
         Cursor cursor = null;
         try {
             cursor = mLocalContentResolver.query(
                     Uri.withAppendedPath(IPCallData.CONTENT_URI, callId), null, null, null, null);
+            /* TODO: Handle cursor when null */
             if (cursor.moveToFirst()) {
                 return cursor;
             }
-            throw new SQLException("No row returned while querying for IP call data with callId : "
-                    + callId);
-
-        } catch (RuntimeException e) {
+            throw new SQLException(new StringBuilder(
+                    "No row returned while querying for IP call data with callId '").append(callId)
+                    .append("'!").toString());
+        }
+        /*
+         * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
+         * exception.
+         */
+        catch (RuntimeException e) {
             if (cursor != null) {
                 cursor.close();
             }

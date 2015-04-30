@@ -108,6 +108,7 @@ public class PresenceUtils {
             cursor = context.getContentResolver().query(
                     ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                     PROJECTION_CONTACTID_NUMBER, null, null, null);
+            /* TODO: Handle cursor when null. */
             if (!cursor.moveToNext()) {
                 return INVALID_CONTACT_ID;
             }
@@ -180,6 +181,7 @@ public class PresenceUtils {
         try {
             c = mResolver.query(Data.CONTENT_URI, PROJECTION_DATA_CONTACTID, WHERE_DATA_ID,
                     whereArgs, null);
+            /* TODO: Handle cursor when null. */
             if (c.moveToFirst()) {
                 int columnIdxContactId = c.getColumnIndexOrThrow(Data.CONTACT_ID);
                 contactId = c.getLong(columnIdxContactId);
@@ -236,6 +238,7 @@ public class PresenceUtils {
         try {
             cur = contentResolver.query(Data.CONTENT_URI, PROJECTION_RAW_CONTACT_ID,
                     SELECTION_LOOSE, selectionArgs, Data.RAW_CONTACT_ID);
+            /* TODO: Handle cursor when null. */
             /* We found at least one data with this number */
             if (cur.getCount() > 0) {
                 return true;
@@ -254,6 +257,7 @@ public class PresenceUtils {
         try {
             cur = contentResolver.query(Data.CONTENT_URI, PROJECTION_RAW_CONTACT_ID,
                     SELECTION_STRICT, selectionArgsStrict, Data.RAW_CONTACT_ID);
+            /* TODO: Handle cursor when null. */
             /* We found at least one data with this number */
             if (cur.getCount() > 0) {
                 return true;

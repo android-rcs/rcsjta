@@ -338,6 +338,10 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
             mLogger.error("Failed to send 200OK response!", e);
             handleError(new ContentSharingError(ContentSharingError.SEND_RESPONSE_FAILED, e));
         } catch (RuntimeException e) {
+            /*
+             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
+             * eventually bring the whole system down, which is not intended.
+             */
             mLogger.error("Failed to initiate a new geoloc sharing session as terminating!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         }

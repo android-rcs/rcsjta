@@ -153,7 +153,7 @@ public class FileTransferLogTest extends AndroidTestCase {
         assertEquals(FileTransfer.State.INITIATING,
                 mMessagingLog.getFileTransferState(mFileTransferId));
         assertEquals(FileTransfer.ReasonCode.UNSPECIFIED,
-                mMessagingLog.getFileTransferStateReasonCode(mFileTransferId));
+                mMessagingLog.getFileTransferReasonCode(mFileTransferId));
 
         mLocalContentResolver.delete(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, mFileTransferId), null, null);
@@ -224,7 +224,7 @@ public class FileTransferLogTest extends AndroidTestCase {
         assertEquals(FileTransfer.State.INITIATING,
                 mMessagingLog.getFileTransferState(mFileTransferId));
         assertEquals(FileTransfer.ReasonCode.UNSPECIFIED,
-                mMessagingLog.getFileTransferStateReasonCode(mFileTransferId));
+                mMessagingLog.getFileTransferReasonCode(mFileTransferId));
         mLocalContentResolver.delete(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, mFileTransferId), null, null);
         assertEquals(false, mMessagingLog.isFileTransfer(mFileTransferId));
@@ -292,7 +292,7 @@ public class FileTransferLogTest extends AndroidTestCase {
         assertEquals(FileTransfer.State.ACCEPTING,
                 mMessagingLog.getFileTransferState(mFileTransferId));
         assertEquals(FileTransfer.ReasonCode.UNSPECIFIED,
-                mMessagingLog.getFileTransferStateReasonCode(mFileTransferId));
+                mMessagingLog.getFileTransferReasonCode(mFileTransferId));
         mLocalContentResolver.delete(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, mFileTransferId), null, null);
         assertEquals(false, mMessagingLog.isFileTransfer(mFileTransferId));

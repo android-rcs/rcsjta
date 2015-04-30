@@ -223,17 +223,17 @@ public interface IFileTransferLog {
      * Get file transfer reason code from its unique ID
      * 
      * @param fileTransferId Unique ID of file transfer
-     * @return reason code of the state
+     * @return reason code on the file transfer
      */
-    public ReasonCode getFileTransferStateReasonCode(String fileTransferId);
+    public ReasonCode getFileTransferReasonCode(String fileTransferId);
 
     /**
-     * Get cacheable file transfer data from its unique ID
+     * Get file transfer data from its unique ID
      * 
      * @param fileTransferId
-     * @return Cursor
+     * @return Cursor or null if no data exists
      */
-    public Cursor getCacheableFileTransferData(String fileTransferId);
+    public Cursor getFileTransferData(String fileTransferId);
 
     /**
      * Is group file transfer

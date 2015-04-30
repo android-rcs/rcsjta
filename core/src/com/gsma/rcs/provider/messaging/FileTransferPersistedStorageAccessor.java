@@ -108,7 +108,8 @@ public class FileTransferPersistedStorageAccessor {
     private void cacheData() {
         Cursor cursor = null;
         try {
-            cursor = mMessagingLog.getCacheableFileTransferData(mFileTransferId);
+            cursor = mMessagingLog.getFileTransferData(mFileTransferId);
+            /* TODO: Handle cursor when null. */
             String contact = cursor
                     .getString(cursor.getColumnIndexOrThrow(FileTransferData.KEY_CONTACT));
             if (contact != null) {
@@ -283,7 +284,7 @@ public class FileTransferPersistedStorageAccessor {
     }
 
     public ReasonCode getReasonCode() {
-        return mMessagingLog.getFileTransferStateReasonCode(mFileTransferId);
+        return mMessagingLog.getFileTransferReasonCode(mFileTransferId);
     }
 
     public Direction getDirection() {

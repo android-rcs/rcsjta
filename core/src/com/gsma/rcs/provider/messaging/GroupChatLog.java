@@ -296,8 +296,9 @@ public class GroupChatLog implements IGroupChatLog {
         if (cursor.moveToFirst()) {
             return cursor;
         }
-        throw new SQLException(
-                "No row returned while querying for group chat data with chatId : ".concat(chatId));
+        throw new SQLException(new StringBuilder(
+                "No row returned while querying for group chat data with chatId '").append(chatId)
+                .append("'!").toString());
     }
 
     private String getDataAsString(Cursor cursor) {
@@ -360,15 +361,16 @@ public class GroupChatLog implements IGroupChatLog {
     }
 
     @Override
-    public Cursor getCacheableGroupChatData(String chatId) {
+    public Cursor getGroupChatData(String chatId) {
         Cursor cursor = mLocalContentResolver.query(
                 Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId), null, null, null, null);
         // TODO check null cursor CR03
         if (cursor.moveToFirst()) {
             return cursor;
         }
-        throw new SQLException(
-                "No row returned while querying for group chat data with chatId : ".concat(chatId));
+        throw new SQLException(new StringBuilder(
+                "No row returned while querying for group chat data with chatId '").append(chatId)
+                .append("'!").toString());
     }
 
     @Override

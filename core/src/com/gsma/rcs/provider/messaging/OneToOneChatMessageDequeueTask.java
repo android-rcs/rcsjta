@@ -53,6 +53,7 @@ public class OneToOneChatMessageDequeueTask extends DequeueTask {
         try {
             synchronized (mLock) {
                 cursor = mMessagingLog.getQueuedOneToOneChatMessages(mContact);
+                /* TODO: Handle cursor when null. */
                 int msgIdIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_MESSAGE_ID);
                 int contentIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_CONTENT);
                 int mimeTypeIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_MIME_TYPE);

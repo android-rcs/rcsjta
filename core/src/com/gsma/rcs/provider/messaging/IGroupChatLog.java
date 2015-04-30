@@ -150,12 +150,12 @@ public interface IGroupChatLog {
     public Map<ContactId, ParticipantStatus> getParticipants(String chatId);
 
     /**
-     * Get cacheable group chat data from its chat ID
+     * Get group chat data from its chat ID
      * 
      * @param chatId
-     * @return Cursor
+     * @return Cursor or null if no data exists
      */
-    public Cursor getCacheableGroupChatData(String chatId);
+    public Cursor getGroupChatData(String chatId);
 
     /**
      * Retrieve all active group chats for auto-rejoin

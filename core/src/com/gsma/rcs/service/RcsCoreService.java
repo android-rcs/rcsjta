@@ -56,12 +56,12 @@ import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.history.GroupChatDequeueTask;
+import com.gsma.rcs.provider.history.GroupChatTerminalExceptionTask;
 import com.gsma.rcs.provider.history.HistoryLog;
 import com.gsma.rcs.provider.history.OneToOneChatDequeueTask;
 import com.gsma.rcs.provider.ipcall.IPCallHistory;
 import com.gsma.rcs.provider.messaging.DelayedDisplayNotificationDispatcher;
 import com.gsma.rcs.provider.messaging.FileTransferDequeueTask;
-import com.gsma.rcs.provider.messaging.GroupChatTerminalExceptionTask;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.messaging.OneToOneChatMessageDequeueTask;
 import com.gsma.rcs.provider.messaging.RecreateDeliveryExpirationAlarms;
@@ -1035,7 +1035,7 @@ public class RcsCoreService extends Service implements CoreListener {
     @Override
     public void tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(String chatId) {
         mImOperationExecutor.execute(new GroupChatTerminalExceptionTask(chatId, mChatApi, mFtApi,
-                mMessagingLog, mOperationLock));
+                mHistoryLog, mOperationLock));
     }
 
     @Override

@@ -51,6 +51,7 @@ public class RecreateDeliveryExpirationAlarms implements Runnable {
             synchronized (mLock) {
                 long currentTime = System.currentTimeMillis();
                 cursor = mMessagingLog.getUndeliveredOneToOneChatMessages();
+                /* TODO: Handle cursor when null. */
                 int msgIdIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_MESSAGE_ID);
                 int chatMessageContactIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_CONTACT);
                 int chatMessageDeliveryExpirationIdx = cursor
@@ -72,6 +73,7 @@ public class RecreateDeliveryExpirationAlarms implements Runnable {
                 cursor.close();
 
                 cursor = mMessagingLog.getUnDeliveredOneToOneFileTransfers();
+                /* TODO: Handle cursor when null. */
                 int fileTransferIdIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FT_ID);
                 int fileTransferContactIdx = cursor
                         .getColumnIndexOrThrow(FileTransferData.KEY_CONTACT);

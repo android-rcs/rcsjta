@@ -398,6 +398,11 @@ public class FileTransferLog implements IFileTransferLog {
     }
 
     @Override
+    /*
+     * TODO: Rewrite to use getDataAsString(getFileTransferData(FileTransferData.KEY_FILEICON,
+     * filetransferId)) but then behavior will slightly change for this method and then callers to
+     * this will also be affected.
+     */
     public String getFileTransferIcon(String fileTransferId) {
         Cursor cursor = null;
         try {
@@ -551,6 +556,7 @@ public class FileTransferLog implements IFileTransferLog {
                         tId
                     }, null);
 
+            /* TODO: Handle cursor when null. */
             if (!cursor.moveToFirst()) {
                 return null;
             }
@@ -603,12 +609,13 @@ public class FileTransferLog implements IFileTransferLog {
         Cursor cursor = mLocalContentResolver.query(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), projection,
                 null, null, null);
+        /* TODO: Handle cursor when null. */
         if (cursor.moveToFirst()) {
             return cursor;
         }
-        throw new SQLException(
-                "No row returned while querying for file transfer data with fileTransferId : "
-                        + fileTransferId);
+        throw new SQLException(new StringBuilder(
+                "No row returned while querying for file transfer data with fileTransferId '")
+                .append(fileTransferId).append("'!").toString());
     }
 
     private int getDataAsInt(Cursor cursor) {
@@ -665,7 +672,7 @@ public class FileTransferLog implements IFileTransferLog {
     }
 
     @Override
-    public ReasonCode getFileTransferStateReasonCode(String fileTransferId) {
+    public ReasonCode getFileTransferReasonCode(String fileTransferId) {
         if (logger.isActivated()) {
             logger.debug("Get file transfer reason code for ".concat(fileTransferId));
         }
@@ -734,15 +741,17 @@ public class FileTransferLog implements IFileTransferLog {
     }
 
     @Override
-    public Cursor getCacheableFileTransferData(String fileTransferId) throws SQLException {
+    public Cursor getFileTransferData(String fileTransferId) throws SQLException {
         Cursor cursor = mLocalContentResolver.query(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), null, null,
                 null, null);
+        /* TODO: Handle cursor when null. */
         if (cursor.moveToFirst()) {
             return cursor;
         }
-        throw new SQLException(
-                "No row returned while querying for fileTransferId : ".concat(fileTransferId));
+        throw new SQLException(new StringBuilder(
+                "No row returned while querying for file transfer data with fileTransferId '")
+                .append(fileTransferId).append("'!").toString());
     }
 
     @Override
@@ -752,6 +761,7 @@ public class FileTransferLog implements IFileTransferLog {
             cursor = mLocalContentResolver.query(
                     Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), null, null,
                     null, null);
+            /* TODO: Handle cursor when null. */
             if (!cursor.moveToFirst()) {
                 if (logger.isActivated()) {
                     logger.warn("getFileTransferResumeInfo no data for fileTransferId: "

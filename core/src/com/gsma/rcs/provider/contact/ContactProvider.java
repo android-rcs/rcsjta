@@ -294,6 +294,7 @@ public class ContactProvider extends ContentProvider {
         Cursor cursor = null;
         try {
             cursor = query(uri, PHOTO_DATA_PROJECTION, null, null, null);
+            /* TODO: Handle cursor when null. */
             if (!cursor.moveToFirst()) {
                 throw new FileNotFoundException(new StringBuilder("No item found for URI ")
                         .append(uri).append("!").toString());
@@ -419,6 +420,7 @@ public class ContactProvider extends ContentProvider {
                     SQLiteDatabase db = mOpenHelper.getReadableDatabase();
                     cursor = db.query(CAPABILITY_TABLE, projection, selection, selectionArgs, null,
                             null, sort);
+                    /* TODO: Handle cursor when null. */
                     cursor.setNotificationUri(getContext().getContentResolver(),
                             Uri.withAppendedPath(CapabilitiesLog.CONTENT_URI, contact));
                     return cursor;
@@ -427,6 +429,7 @@ public class ContactProvider extends ContentProvider {
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db.query(CAPABILITY_TABLE, projection, selection, selectionArgs, null,
                             null, sort);
+                    /* TODO: Handle cursor when null. */
                     cursor.setNotificationUri(getContext().getContentResolver(),
                             CapabilitiesLog.CONTENT_URI);
                     return cursor;
@@ -442,6 +445,7 @@ public class ContactProvider extends ContentProvider {
                     cursor = db.query(CAPABILITY_TABLE,
                             restrictProjectionToExternallyDefinedColumns(projection), selection,
                             selectionArgs, null, null, sort);
+                    /* TODO: Handle cursor when null. */
                     cursor.setNotificationUri(getContext().getContentResolver(), uri);
                     return cursor;
 
@@ -455,6 +459,7 @@ public class ContactProvider extends ContentProvider {
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db.query(AGGREGATION_TABLE, projection, selection, selectionArgs,
                             null, null, sort);
+                    /* TODO: Handle cursor when null. */
                     cursor.setNotificationUri(getContext().getContentResolver(), uri);
                     return cursor;
 
@@ -462,7 +467,11 @@ public class ContactProvider extends ContentProvider {
                     throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
                             .append(uri).append("!").toString());
             }
-        } catch (RuntimeException e) {
+        } /*
+           * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
+           * exception.
+           */
+        catch (RuntimeException e) {
             if (cursor != null) {
                 cursor.close();
             }

@@ -213,6 +213,7 @@ public class RcsSettings {
             };
             c = mLocalContentResolver.query(RcsSettingsData.CONTENT_URI, null, WHERE_CLAUSE,
                     whereArg, null);
+            /* TODO: Handle cursor when null. */
             if (!c.moveToFirst()) {
                 throw new IllegalArgumentException("Illegal setting key:".concat(key));
             }

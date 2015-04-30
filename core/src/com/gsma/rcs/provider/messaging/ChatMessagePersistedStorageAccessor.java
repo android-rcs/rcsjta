@@ -89,7 +89,8 @@ public class ChatMessagePersistedStorageAccessor {
     private void cacheData() {
         Cursor cursor = null;
         try {
-            cursor = mMessagingLog.getCacheableChatMessageData(mId);
+            cursor = mMessagingLog.getChatMessageData(mId);
+            /* TODO: Handle cursor when null */
             String contact = cursor
                     .getString(cursor.getColumnIndexOrThrow(MessageData.KEY_CONTACT));
             if (contact != null) {

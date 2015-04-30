@@ -108,6 +108,7 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
             cursor = mLocalContentResolver.query(
                     Uri.withAppendedPath(GroupDeliveryInfoData.CONTENT_URI, msgId), null,
                     SELECTION_CONTACTS_NOT_RECEIVED_MESSAGE, null, null);
+            /* TODO: Handle cursor when null. */
             return !cursor.moveToFirst();
 
         } finally {
@@ -124,7 +125,7 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
             cursor = mLocalContentResolver.query(
                     Uri.withAppendedPath(GroupDeliveryInfoData.CONTENT_URI, msgId), null,
                     SELECTION_DELIVERY_INFO_NOT_DISPLAYED, null, null);
-
+            /* TODO: Handle cursor when null. */
             return !cursor.moveToFirst();
 
         } finally {

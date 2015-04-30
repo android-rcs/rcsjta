@@ -73,7 +73,8 @@ public class ImageSharingPersistedStorageAccessor {
     private void cacheData() {
         Cursor cursor = null;
         try {
-            cursor = mRichCallLog.getCacheableImageTransferData(mSharingId);
+            cursor = mRichCallLog.getImageTransferData(mSharingId);
+            /* TODO: Handle cursor when null. */
             String contact = cursor.getString(cursor
                     .getColumnIndexOrThrow(ImageSharingData.KEY_CONTACT));
             if (contact != null) {

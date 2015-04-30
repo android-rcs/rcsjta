@@ -165,6 +165,7 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
                     SQLiteDatabase db = mOpenHelper.getReadableDatabase();
                     cursor = db.query(DATABASE_TABLE, projection, selection, selectionArgs, null,
                             null, sort);
+                    /* TODO: Handle cursor when null. */
                     cursor.setNotificationUri(getContext().getContentResolver(),
                             Uri.withAppendedPath(GroupDeliveryInfoLog.CONTENT_URI, appendedId));
                     return cursor;
@@ -173,6 +174,7 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db.query(DATABASE_TABLE, projection, selection, selectionArgs, null,
                             null, sort);
+                    /* TODO: Handle cursor when null. */
                     cursor.setNotificationUri(getContext().getContentResolver(),
                             GroupDeliveryInfoLog.CONTENT_URI);
                     return cursor;
@@ -186,6 +188,7 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db.query(DATABASE_TABLE, projection, selection, selectionArgs, null,
                             null, sort);
+                    /* TODO: Handle cursor when null. */
                     cursor.setNotificationUri(getContext().getContentResolver(), uri);
                     return cursor;
 
@@ -193,7 +196,12 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
                     throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
                             .append(uri).append("!").toString());
             }
-        } catch (RuntimeException e) {
+        }
+        /*
+         * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
+         * exception.
+         */
+        catch (RuntimeException e) {
             if (cursor != null) {
                 cursor.close();
             }

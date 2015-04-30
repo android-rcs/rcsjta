@@ -197,6 +197,7 @@ public class VideoSharingProvider extends ContentProvider {
                     SQLiteDatabase db = mOpenHelper.getReadableDatabase();
                     cursor = db
                             .query(TABLE, projection, selection, selectionArgs, null, null, sort);
+                    /* TODO: Handle cursor when null. */
                     cursor.setNotificationUri(getContext().getContentResolver(),
                             Uri.withAppendedPath(VideoSharingLog.CONTENT_URI, sharingId));
                     return cursor;
@@ -205,6 +206,7 @@ public class VideoSharingProvider extends ContentProvider {
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db
                             .query(TABLE, projection, selection, selectionArgs, null, null, sort);
+                    /* TODO: Handle cursor when null. */
                     cursor.setNotificationUri(getContext().getContentResolver(),
                             VideoSharingLog.CONTENT_URI);
                     return cursor;
@@ -218,6 +220,7 @@ public class VideoSharingProvider extends ContentProvider {
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db
                             .query(TABLE, projection, selection, selectionArgs, null, null, sort);
+                    /* TODO: Handle cursor when null. */
                     cursor.setNotificationUri(getContext().getContentResolver(), uri);
                     return cursor;
 
@@ -225,7 +228,11 @@ public class VideoSharingProvider extends ContentProvider {
                     throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
                             .append(uri).append("!").toString());
             }
-        } catch (RuntimeException e) {
+        } /*
+           * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
+           * exception.
+           */
+        catch (RuntimeException e) {
             if (cursor != null) {
                 cursor.close();
             }

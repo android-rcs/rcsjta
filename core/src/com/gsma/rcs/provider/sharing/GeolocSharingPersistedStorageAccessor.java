@@ -63,7 +63,8 @@ public class GeolocSharingPersistedStorageAccessor {
     private void cacheData() {
         Cursor cursor = null;
         try {
-            cursor = mRichCallLog.getCacheableGeolocSharingData(mSharingId);
+            cursor = mRichCallLog.getGeolocSharingData(mSharingId);
+            /* TODO: Handle cursor when null. */
             String contact = cursor.getString(cursor
                     .getColumnIndexOrThrow(GeolocSharingData.KEY_CONTACT));
             if (contact != null) {
@@ -71,8 +72,8 @@ public class GeolocSharingPersistedStorageAccessor {
             }
             mDirection = Direction.valueOf(cursor.getInt(cursor
                     .getColumnIndexOrThrow(GeolocSharingData.KEY_DIRECTION)));
-            String geoloc = cursor
-                    .getString(cursor.getColumnIndexOrThrow(GeolocSharingData.KEY_CONTENT));
+            String geoloc = cursor.getString(cursor
+                    .getColumnIndexOrThrow(GeolocSharingData.KEY_CONTENT));
             if (geoloc != null) {
                 mGeoloc = new Geoloc(geoloc);
             }
@@ -116,7 +117,7 @@ public class GeolocSharingPersistedStorageAccessor {
     }
 
     public ReasonCode getReasonCode() {
-        return mRichCallLog.getGeolocSharingStateReasonCode(mSharingId);
+        return mRichCallLog.getGeolocSharingReasonCode(mSharingId);
     }
 
     public Direction getDirection() {

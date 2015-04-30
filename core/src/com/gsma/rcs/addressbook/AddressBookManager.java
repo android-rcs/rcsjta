@@ -129,6 +129,7 @@ public class AddressBookManager {
             // Query contactContracts phone database
             mContactsContractCursor = mContentResolver.query(Phone.CONTENT_URI, null, null, null,
                     null);
+            /* TODO: Handle mContactsContractCursor when null. */
 
             // Register content observer
             mContactsContractCursor.registerContentObserver(mContactsContractObserver);

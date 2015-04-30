@@ -68,6 +68,7 @@ public class ContentProviderBaseIdCreator {
                 cursor = ctx.getContentResolver().query(providerUri, new String[] {
                     MAX_PROJECTION
                 }, null, null, null);
+                /* TODO: Handle cursor when null. */
                 if (cursor.moveToNext()) {
                     nextId.set(cursor.getLong(0));
                 }
