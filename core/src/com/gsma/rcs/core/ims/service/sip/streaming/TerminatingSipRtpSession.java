@@ -23,6 +23,7 @@
 
 package com.gsma.rcs.core.ims.service.sip.streaming;
 
+import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -38,6 +39,7 @@ import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.Intent;
 
+import java.io.IOException;
 import java.util.Collection;
 
 /**
@@ -49,7 +51,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
     /**
      * The logger
      */
-    private final static Logger sLogger = Logger.getLogger(TerminatingSipRtpSession.class
+    private static final Logger sLogger = Logger.getLogger(TerminatingSipRtpSession.class
             .getSimpleName());
 
     private final Intent mSessionInvite;
@@ -236,13 +238,24 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                 // No response received: timeout
                 handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED));
             }
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Session initiation has failed", e);
-            }
-
-            // Unexpected error
-            handleError(new SipSessionError(SipSessionError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        } catch (IOException e) {
+            handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
+        } catch (SipException e) {
+            sLogger.error(
+                    new StringBuilder("Session initiation has failed for CallId=")
+                            .append(getDialogPath().getCallId()).append(" ContactId=")
+                            .append(getRemoteContact()).toString(), e);
+            handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
+        } catch (RuntimeException e) {
+            /**
+             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
+             * eventually bring the whole system down, which is not intended.
+             */
+            sLogger.error(
+                    new StringBuilder("Session initiation has failed for CallId=")
+                            .append(getDialogPath().getCallId()).append(" ContactId=")
+                            .append(getRemoteContact()).toString(), e);
+            handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
         }
     }
 

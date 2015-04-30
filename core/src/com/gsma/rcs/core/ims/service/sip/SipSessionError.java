@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.sip;
@@ -38,6 +42,9 @@ public class SipSessionError extends ImsSessionBasedServiceError {
      * Constructor
      * 
      * @param error Error
+     * @deprecated <p>
+     *             Should use FileSharingError(int code, Throwable cause)
+     *             </p>
      */
     public SipSessionError(ImsServiceError error) {
         super(error.getErrorCode(), error.getMessage());
@@ -57,8 +64,23 @@ public class SipSessionError extends ImsSessionBasedServiceError {
      * 
      * @param code Error code
      * @param msg Detail message
+     * @deprecated <p>
+     *             Should use FileSharingError(int code, Throwable cause)
+     *             </p>
      */
     public SipSessionError(int code, String msg) {
         super(code, msg);
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param code Error code
+     * @param cause the cause (which is saved for later retrieval by the Throwable.getCause()
+     *            method). (A null value is permitted, and indicates that the cause is nonexistent
+     *            or unknown.)
+     */
+    public SipSessionError(int code, Throwable cause) {
+        super(code, cause);
     }
 }

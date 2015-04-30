@@ -38,9 +38,11 @@ import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
-import java.io.IOException;
-
 import gov2.nist.javax2.sip.header.ims.PPreferredServiceHeader;
+
+import java.io.IOException;
+import java.text.ParseException;
+
 import javax2.sip.header.ExtensionHeader;
 
 /**
@@ -57,7 +59,7 @@ public abstract class GenericSipSession extends ImsServiceSession {
     /**
      * The logger
      */
-    private final static Logger sLogger = Logger.getLogger(GenericSipSession.class.getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(GenericSipSession.class.getSimpleName());
 
     /**
      * Constructor
@@ -103,7 +105,8 @@ public abstract class GenericSipSession extends ImsServiceSession {
      * @throws SipException
      */
     public SipRequest createInvite() throws SipException {
-        String ext = FeatureTags.FEATURE_3GPP + "=\"" + FeatureTags.FEATURE_3GPP_EXTENSION + "\"";
+        String ext = new StringBuilder(FeatureTags.FEATURE_3GPP).append("=\"")
+                .append(FeatureTags.FEATURE_3GPP_EXTENSION).append("\"").toString();
         SipRequest invite = SipMessageFactory.createInvite(getDialogPath(), new String[] {
                 getFeatureTag(), ext
         }, new String[] {
@@ -114,10 +117,10 @@ public abstract class GenericSipSession extends ImsServiceSession {
             ExtensionHeader header = (ExtensionHeader) SipUtils.HEADER_FACTORY.createHeader(
                     PPreferredServiceHeader.NAME, FeatureTags.FEATURE_3GPP_SERVICE_EXTENSION);
             invite.getStackMessage().addHeader(header);
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Can't add SIP header", e);
-            }
+        } catch (ParseException e) {
+            throw new SipException(
+                    "Can't add SIP headertype ".concat(FeatureTags.FEATURE_3GPP_SERVICE_EXTENSION),
+                    e);
         }
 
         return invite;
@@ -169,11 +172,8 @@ public abstract class GenericSipSession extends ImsServiceSession {
             return;
         }
 
-        // Error
-        if (sLogger.isActivated()) {
-            sLogger.info("Session error: " + error.getErrorCode() + ", reason="
-                    + error.getMessage());
-        }
+        sLogger.error(new StringBuilder("Session error: ").append(error.getErrorCode())
+                .append(", reason=").append(error.getMessage()).toString());
 
         // Close media session
         closeMediaSession();
