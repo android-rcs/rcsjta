@@ -86,6 +86,11 @@ public class RegistrationUtils {
 
         // Extensions
         if (rcsSettings.isExtensionsAllowed()) {
+            for (String extension : rcsSettings.getSupportedRcsExtensions()) {
+                StringBuilder sb = new StringBuilder(FeatureTags.FEATURE_RCSE_EXTENSION)
+                        .append('.').append(extension);
+                iariTags.add(sb.toString());
+            }
             icsiTags.add(FeatureTags.FEATURE_3GPP_EXTENSION);
         }
 

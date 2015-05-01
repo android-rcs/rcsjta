@@ -18,9 +18,10 @@
 
 package com.gsma.rcs.core.ims.service.extension;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.gsma.rcs.core.Core;
+import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.capability.CapabilityService;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -28,9 +29,9 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.TextUtils;
 
-import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.capability.CapabilityService;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Service extension manager which adds supported extension after having verified some authorization
@@ -46,14 +47,8 @@ public class ServiceExtensionManager {
      */
     private static volatile ServiceExtensionManager mInstance;
 
-    /**
-     * Separator of extensions
-     */
     private static final String EXTENSION_SEPARATOR = ";";
 
-    /**
-     * The logger
-     */
     private final static Logger sLogger = Logger.getLogger(ServiceExtensionManager.class
             .getSimpleName());
 
@@ -122,24 +117,21 @@ public class ServiceExtensionManager {
     }
 
     /**
-     * Update supported extensions at boot
+     * Update supported extensions at boot or upon install/remove of client application
      * 
      * @param context Context
      */
     public void updateSupportedExtensions(Context context) {
+        boolean logActivated = sLogger.isActivated();
         if (context == null) {
-            if (sLogger.isActivated()) {
-                sLogger.warn("Cannot update supported extension: context is null");
-            }
             return;
         }
+        if (logActivated) {
+            sLogger.debug("Update supported extensions");
+        }
         try {
-            if (sLogger.isActivated()) {
-                sLogger.debug("Update supported extensions");
-            }
-
-            Set<String> supportedExts = new HashSet<String>();
-
+            Set<String> newSupportedExts = new HashSet<String>();
+            Set<String> oldSupportedExts = mRcsSettings.getSupportedRcsExtensions();
             // Intent query on current installed activities
             PackageManager pm = context.getPackageManager();
             List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
@@ -148,21 +140,31 @@ public class ServiceExtensionManager {
                 if (appMeta != null) {
                     String exts = appMeta.getString(CapabilityService.INTENT_EXTENSIONS);
                     if (!TextUtils.isEmpty(exts)) {
-                        if (sLogger.isActivated()) {
-                            sLogger.debug("Update supported extensions " + exts);
+                        if (logActivated) {
+                            sLogger.debug("Update supported extensions ".concat(exts));
                         }
-                        // Check extensions
-                        checkExtensions(context, supportedExts, getExtensions(exts));
+                        checkExtensions(context, newSupportedExts, getExtensions(exts));
                     }
                 }
             }
-
-            // Update supported extensions in database
-            saveSupportedExtensions(supportedExts);
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Unexpected error", e);
+            if (oldSupportedExts.equals(newSupportedExts)) {
+                return;
             }
+            // Update supported extensions in database
+            saveSupportedExtensions(newSupportedExts);
+            Core core = Core.getInstance();
+            if (core == null || !core.isStarted()) {
+                /* Stack is not started, don't process this event */
+                return;
+            }
+            core.getImsModule().getSipManager().getNetworkInterface().getRegistrationManager()
+                    .restart();
+        } catch (RuntimeException e) {
+            /*
+             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
+             * eventually bring the whole system down, which is not intended.
+             */
+            sLogger.error("Failed to update supported extensions!", e);
         }
     }
 

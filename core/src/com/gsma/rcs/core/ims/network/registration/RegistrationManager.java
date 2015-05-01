@@ -83,9 +83,6 @@ public class RegistrationManager extends PeriodicRefresher {
 
     private String mInstanceId;
 
-    /**
-     * Registration flag
-     */
     private boolean mRegistered = false;
 
     /**
@@ -93,14 +90,8 @@ public class RegistrationManager extends PeriodicRefresher {
      */
     private RcsServiceRegistration.ReasonCode mReasonCode = RcsServiceRegistration.ReasonCode.UNSPECIFIED;
 
-    /**
-     * Registration pending flag
-     */
     private boolean mRegistering = false;
 
-    /**
-     * UnRegistration need flag
-     */
     private boolean mNeedUnregister = false;
 
     private int mNb401Failures = 0;
@@ -110,9 +101,6 @@ public class RegistrationManager extends PeriodicRefresher {
      */
     private int mNb4xx5xx6xxFailures;
 
-    /**
-     * Settings
-     */
     private final RcsSettings mRcsSettings;
 
     private Logger mLogger = Logger.getLogger(this.getClass().getName());
@@ -195,6 +183,8 @@ public class RegistrationManager extends PeriodicRefresher {
             public void run() {
                 // Stop the current registration
                 stopRegistration();
+                
+                mFeatureTags = RegistrationUtils.getSupportedFeatureTags(mRcsSettings);
 
                 // Start a new registration
                 registration();
