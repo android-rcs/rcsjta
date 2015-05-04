@@ -855,7 +855,7 @@ public class RcsSettingsData {
      * "Is-composing" timeout milliseconds for chat service
      */
     public static final String IS_COMPOSING_TIMEOUT = "IsComposingTimeout";
-    /* package private */static final Integer DEFAULT_IS_COMPOSING_TIMEOUT = 5000;
+    /* package private */static final Integer DEFAULT_IS_COMPOSING_TIMEOUT = 15000;
 
     /**
      * SIP session refresh expire period
