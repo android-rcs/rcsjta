@@ -33,6 +33,7 @@ import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
+import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.contact.ContactManager;
@@ -171,18 +172,16 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
     private void sendFileTransferInfo() {
         String from = ImsModule.IMS_USER_PROFILE.getPublicAddress();
         String networkContent;
+        String msgId = getFileTransferId();
+        ImdnManager imdnManager = getImdnManager();
 
-        if (getImdnManager().isImdnActivated() && !mRcsSettings.isAlbatrosRelease()) {
-            String msgId = getFileTransferId();
-
-            if (mRcsSettings.isRequestGroupChatDisplayReportsEnabled()) {
-                networkContent = ChatUtils.buildCpimMessageWithImdn(from, ChatUtils.ANOMYNOUS_URI,
-                        msgId, mFileInfo, CpimMessage.MIME_TYPE, mTimestampSent);
-            } else {
-                networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from,
-                        ChatUtils.ANOMYNOUS_URI, msgId, mFileInfo, CpimMessage.MIME_TYPE,
-                        mTimestampSent);
-            }
+        if (imdnManager.isRequestGroupDeliveryDisplayedReportsEnabled()) {
+            networkContent = ChatUtils.buildCpimMessageWithImdn(from, ChatUtils.ANOMYNOUS_URI,
+                    msgId, mFileInfo, CpimMessage.MIME_TYPE, mTimestampSent);
+        } else if (imdnManager.isDeliveryDeliveredReportsEnabled()) {
+            networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from,
+                    ChatUtils.ANOMYNOUS_URI, msgId, mFileInfo, CpimMessage.MIME_TYPE,
+                    mTimestampSent);
         } else {
             networkContent = ChatUtils.buildCpimMessage(from, ChatUtils.ANOMYNOUS_URI, mFileInfo,
                     CpimMessage.MIME_TYPE, mTimestampSent);

@@ -101,9 +101,12 @@ public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSha
 
                 /* File transfered */
                 handleFileTransfered();
-                /* Send delivery report "displayed" */
-                sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
-                        System.currentTimeMillis());
+
+                if (getImdnManager().isSendOneToOneDeliveryDisplayedReportsEnabled()) {
+                    /* Send delivery report "displayed" */
+                    sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
+                            System.currentTimeMillis());
+                }
             } else {
                 /* Don't call handleError in case of Pause or Cancel */
                 if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {

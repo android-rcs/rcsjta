@@ -34,6 +34,7 @@ import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
+import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.contact.ContactManager;
@@ -183,13 +184,25 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                 setChatSessionID(chatSession.getSessionID());
                 setContributionID(chatSession.getContributionID());
             }
-            String mime = CpimMessage.MIME_TYPE;
-            String from = ChatUtils.ANOMYNOUS_URI;
-            String to = ChatUtils.ANOMYNOUS_URI;
-            String content = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, fileInfo,
-                    FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);
-            chatSession.sendDataChunks(IdGenerator.generateMessageID(), content, mime,
-                    MsrpSession.TypeMsrpChunk.HttpFileSharing);
+
+            String networkContent;
+            ImdnManager imdnManager = getImdnManager();
+
+            if (imdnManager.isRequestOneToOneDeliveryDisplayedReportsEnabled()) {
+                networkContent = ChatUtils.buildCpimMessageWithImdn(ChatUtils.ANOMYNOUS_URI,
+                        ChatUtils.ANOMYNOUS_URI, msgId, fileInfo,
+                        FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);
+            } else if (imdnManager.isDeliveryDeliveredReportsEnabled()) {
+                networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(
+                        ChatUtils.ANOMYNOUS_URI, ChatUtils.ANOMYNOUS_URI, msgId, fileInfo,
+                        FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);
+            } else {
+                networkContent = ChatUtils.buildCpimMessage(ChatUtils.ANOMYNOUS_URI,
+                        ChatUtils.ANOMYNOUS_URI, fileInfo, FileTransferHttpInfoDocument.MIME_TYPE,
+                        mTimestampSent);
+            }
+            chatSession.sendDataChunks(IdGenerator.generateMessageID(), networkContent,
+                    CpimMessage.MIME_TYPE, MsrpSession.TypeMsrpChunk.HttpFileSharing);
         } else {
             if (logActivated) {
                 mLogger.debug("Send file transfer info via a new chat session.");

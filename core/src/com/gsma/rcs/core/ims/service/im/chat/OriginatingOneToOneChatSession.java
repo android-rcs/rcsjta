@@ -31,6 +31,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
+import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -118,15 +119,17 @@ public class OriginatingOneToOneChatSession extends OneToOneChatSession {
                 String from = ChatUtils.ANOMYNOUS_URI;
                 String to = ChatUtils.ANOMYNOUS_URI;
 
-                boolean useImdn = getImdnManager().isImdnActivated();
                 String cpim;
-                if (useImdn) {
-                    // Send message in CPIM + IMDN
+                ImdnManager imdnManager = getImdnManager();
+                if (imdnManager.isRequestOneToOneDeliveryDisplayedReportsEnabled()) {
                     cpim = ChatUtils.buildCpimMessageWithImdn(from, to, chatMessage.getMessageId(),
                             chatMessage.getContent(), chatMessage.getMimeType(),
                             chatMessage.getTimestampSent());
+                } else if (imdnManager.isDeliveryDeliveredReportsEnabled()) {
+                    cpim = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from, to,
+                            chatMessage.getMessageId(), chatMessage.getContent(),
+                            chatMessage.getMimeType(), chatMessage.getTimestampSent());
                 } else {
-                    // Send message in CPIM
                     cpim = ChatUtils.buildCpimMessage(from, to, chatMessage.getContent(),
                             chatMessage.getMimeType(), chatMessage.getTimestampSent());
                 }

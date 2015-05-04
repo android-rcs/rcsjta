@@ -1306,7 +1306,7 @@ public class RcsSettingsData {
     public static final String FIRST_MESSAGE_INVITE = "FirstMessageInvite";
     /* package private */static final Boolean DEFAULT_FIRST_MESSAGE_INVITE = true;
 
-    public static final String REQUEST_GROUP_CHAT_DISPLAY_REPORTS = "RequestGroupChatDisplayReports";
-    /* package private */static final Boolean DEFAULT_REQUEST_GROUP_CHAT_DISPLAY_REPORTS = false;
+    public static final String REQUEST_AND_RESPOND_TO_GROUP_DISPLAY_REPORTS = "RequestAndRespondToGroupDisplayReports";
+    /* package private */static final Boolean DEFAULT_REQUEST_AND_RESPOND_TO_GROUP_DISPLAY_REPORTS = false;
 
 }

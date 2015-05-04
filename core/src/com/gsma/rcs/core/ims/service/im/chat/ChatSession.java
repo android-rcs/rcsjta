@@ -545,11 +545,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                     if (!isGroupChat()) {
                         // There is no display notification in Group Chat
                         if (dispositionNotification != null
-                                && dispositionNotification.contains(ImdnDocument.DISPLAY)) {
-                            // Check if respond to displayed delivery report is enabled
-                            if (mRcsSettings.isRespondToDisplayReports()) {
-                                imdnDisplayedRequested = true;
-                            }
+                                && dispositionNotification.contains(ImdnDocument.DISPLAY)
+                                && getImdnManager().isSendOneToOneDeliveryDisplayedReportsEnabled()) {
+                            imdnDisplayedRequested = true;
                         }
                     }
 
@@ -594,6 +592,10 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                                     timestamp, timestampSent, null);
                             receive(msg, imdnDisplayedRequested);
                         }
+                    }
+
+                    if (!getImdnManager().isDeliveryDeliveredReportsEnabled()) {
+                        return;
                     }
 
                     if (isFToHTTP) {
@@ -954,6 +956,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      */
     public void sendMsrpMessageDeliveryStatus(String fromUri, String toUri, String msgId,
             String status, long timestamp) {
+
         if (sLogger.isActivated()) {
             sLogger.debug("Send delivery status " + status + " for message " + msgId);
         }

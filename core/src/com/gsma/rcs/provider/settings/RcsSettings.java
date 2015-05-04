@@ -2169,12 +2169,12 @@ public class RcsSettings {
     }
 
     /**
-     * Get request group chat display reports option
+     * Get group imdn display reports option
      * 
-     * @return True if group chat display reports are to be requested
+     * @return True if group display reports are to be requested and responded to
      */
-    public boolean isRequestGroupChatDisplayReportsEnabled() {
-        return readBoolean(RcsSettingsData.REQUEST_GROUP_CHAT_DISPLAY_REPORTS);
+    public boolean isRequestAndRespondToGroupDisplayReportsEnabled() {
+        return readBoolean(RcsSettingsData.REQUEST_AND_RESPOND_TO_GROUP_DISPLAY_REPORTS);
     }
 
     /**

@@ -138,8 +138,7 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
                 /* File transfered */
                 handleFileTransfered();
 
-                // TODO: Should also consider a "send display reports for groups"-setting
-                if (getImdnManager().isImdnActivated() && !mRcsSettings.isAlbatrosRelease()) {
+                if (getImdnManager().isSendOneToOneDeliveryDisplayedReportsEnabled()) {
                     sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
                             System.currentTimeMillis());
                 }
@@ -247,8 +246,7 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
                     // File transfered
                     handleFileTransfered();
 
-                    // TODO: Should also consider a "send display reports for groups"-setting
-                    if (getImdnManager().isImdnActivated() && !mRcsSettings.isAlbatrosRelease()) {
+                    if (getImdnManager().isSendOneToOneDeliveryDisplayedReportsEnabled()) {
                         sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
                                 System.currentTimeMillis());
                     }

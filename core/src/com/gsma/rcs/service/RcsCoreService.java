@@ -38,6 +38,7 @@ import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.TerminatingAdhocGroupChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.TerminatingOneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
+import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatMessageSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FtHttpResumeManager;
@@ -990,13 +991,18 @@ public class RcsCoreService extends Service implements CoreListener {
         /* Try to dequeue one-to-one chat messages and one-to-one file transfers. */
         mImOperationExecutor.execute(new OneToOneChatDequeueTask(mOperationLock, imService,
                 mChatApi, mFtApi, mHistoryLog, mMessagingLog, mContactManager, mRcsSettings));
-        /*
-         * Try to send delayed displayed notifications for read messages if they were not sent
-         * before already. This only attempts to send report and in case of failure the report will
-         * be sent later as postponed delivery report
-         */
-        mImOperationExecutor.execute(new DelayedDisplayNotificationDispatcher(
-                mLocalContentResolver, mChatApi));
+
+        ImdnManager imdnManager = imService.getImdnManager();
+        if (imdnManager.isSendOneToOneDeliveryDisplayedReportsEnabled()
+                || imdnManager.isSendGroupDeliveryDisplayedReportsEnabled()) {
+            /*
+             * Try to send delayed displayed notifications for read messages if they were not sent
+             * before already. This only attempts to send report and in case of failure the report
+             * will be sent later as postponed delivery report
+             */
+            mImOperationExecutor.execute(new DelayedDisplayNotificationDispatcher(
+                    mLocalContentResolver, mChatApi));
+        }
     }
 
     @Override

@@ -957,7 +957,8 @@ public class InstantMessagingService extends ImsService {
             }
 
             // Send message delivery report if requested
-            if (ChatUtils.isImdnDeliveredRequested(invite)) {
+            if (getImdnManager().isDeliveryDeliveredReportsEnabled()
+                    && ChatUtils.isImdnDeliveredRequested(invite)) {
                 // Check notification disposition
                 String msgId = ChatUtils.getMessageId(invite);
                 if (msgId != null) {
@@ -986,8 +987,9 @@ public class InstantMessagingService extends ImsService {
          * to the defined race conditions in the specification document.
          */
         if (firstMsg != null && !mMessagingLog.isMessagePersisted(firstMsg.getMessageId())) {
-            mMessagingLog.addIncomingOneToOneChatMessage(firstMsg,
-                    ChatUtils.isImdnDisplayedRequested(invite));
+            boolean imdnDisplayRequested = getImdnManager().isSendOneToOneDeliveryDisplayedReportsEnabled()
+                    && ChatUtils.isImdnDisplayedRequested(invite);
+            mMessagingLog.addIncomingOneToOneChatMessage(firstMsg, imdnDisplayRequested);
         }
 
         // Test number of sessions
@@ -1330,8 +1332,9 @@ public class InstantMessagingService extends ImsService {
          * to the defined race conditions in the specification document.
          */
         if (firstMsg != null && !mMessagingLog.isMessagePersisted(firstMsg.getMessageId())) {
-            mMessagingLog.addIncomingOneToOneChatMessage(firstMsg,
-                    ChatUtils.isImdnDisplayedRequested(invite));
+            boolean imdnDisplayRequested = getImdnManager().isSendOneToOneDeliveryDisplayedReportsEnabled()
+                    && ChatUtils.isImdnDisplayedRequested(invite);
+            mMessagingLog.addIncomingOneToOneChatMessage(firstMsg, imdnDisplayRequested);
         }
 
         getStoreAndForwardManager().receiveStoredMessages(invite, remote, timestamp);

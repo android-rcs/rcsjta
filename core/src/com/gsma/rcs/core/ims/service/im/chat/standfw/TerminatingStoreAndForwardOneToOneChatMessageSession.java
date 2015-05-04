@@ -130,7 +130,8 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
             }
 
             /* Send message delivery report if requested */
-            if (ChatUtils.isImdnDeliveredRequested(getDialogPath().getInvite())) {
+            if (getImdnManager().isDeliveryDeliveredReportsEnabled()
+                    && ChatUtils.isImdnDeliveredRequested(getDialogPath().getInvite())) {
                 /* Check notification disposition */
                 String msgId = ChatUtils.getMessageId(getDialogPath().getInvite());
                 if (msgId != null) {

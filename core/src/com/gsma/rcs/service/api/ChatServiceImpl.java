@@ -31,6 +31,7 @@ import com.gsma.rcs.core.ims.service.im.chat.GroupChatPersistedStorageAccessor;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
+import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.ChatMessagePersistedStorageAccessor;
@@ -956,7 +957,12 @@ public class ChatServiceImpl extends IChatService.Stub {
                     sLogger.debug("tryToDispatchAllPendingDisplayNotifications for msgID "
                             .concat(msgId));
                 }
-                mCore.getListener().tryToDispatchAllPendingDisplayNotifications();
+
+                ImdnManager imdnManager = mImService.getImdnManager();
+                if (imdnManager.isSendOneToOneDeliveryDisplayedReportsEnabled()
+                        || imdnManager.isSendGroupDeliveryDisplayedReportsEnabled()) {
+                    mCore.getListener().tryToDispatchAllPendingDisplayNotifications();
+                }
             }
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {

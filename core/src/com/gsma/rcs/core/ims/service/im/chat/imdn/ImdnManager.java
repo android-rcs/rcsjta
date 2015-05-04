@@ -57,11 +57,6 @@ public class ImdnManager extends Thread {
      */
     private FifoBuffer mBuffer = new FifoBuffer();
 
-    /**
-     * Activation flag
-     */
-    private boolean mActivated;
-
     private final RcsSettings mRcsSettings;
 
     private final MessagingLog mMessagingLog;
@@ -80,7 +75,6 @@ public class ImdnManager extends Thread {
      */
     public ImdnManager(ImsService imsService, RcsSettings rcsSettings, MessagingLog messagingLog) {
         mImsService = imsService;
-        mActivated = rcsSettings.isImReportsActivated();
         mRcsSettings = rcsSettings;
         mMessagingLog = messagingLog;
     }
@@ -96,12 +90,42 @@ public class ImdnManager extends Thread {
     }
 
     /**
-     * Is IMDN activated
-     * 
-     * @return Boolean
+     * Should we request and send delivery delivered reports
      */
-    public boolean isImdnActivated() {
-        return mActivated;
+    public boolean isDeliveryDeliveredReportsEnabled() {
+        return mRcsSettings.isImReportsActivated();
+    }
+
+    /**
+     * Should we send one to one delivery displayed reports
+     */
+    public boolean isSendOneToOneDeliveryDisplayedReportsEnabled() {
+        return mRcsSettings.isImReportsActivated() && !mRcsSettings.isAlbatrosRelease()
+                && mRcsSettings.isRespondToDisplayReports();
+    }
+
+    /**
+     * Should we request one to one delivery displayed reports
+     */
+    public boolean isRequestOneToOneDeliveryDisplayedReportsEnabled() {
+        return mRcsSettings.isImReportsActivated() && !mRcsSettings.isAlbatrosRelease();
+    }
+
+    /**
+     * Should we send group delivery displayed reports
+     */
+    public boolean isSendGroupDeliveryDisplayedReportsEnabled() {
+        return mRcsSettings.isImReportsActivated() && !mRcsSettings.isAlbatrosRelease()
+                && mRcsSettings.isRespondToDisplayReports()
+                && mRcsSettings.isRequestAndRespondToGroupDisplayReportsEnabled();
+    }
+
+    /**
+     * Should we send group delivery displayed reports
+     */
+    public boolean isRequestGroupDeliveryDisplayedReportsEnabled() {
+        return mRcsSettings.isImReportsActivated() && !mRcsSettings.isAlbatrosRelease()
+                && mRcsSettings.isRequestAndRespondToGroupDisplayReportsEnabled();
     }
 
     /**
@@ -177,11 +201,6 @@ public class ImdnManager extends Thread {
      */
     private void sendSipMessageDeliveryStatus(DeliveryStatus deliveryStatus, String remoteInstanceId) {
         try {
-            if (!mRcsSettings.isRespondToDisplayReports()
-                    && ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(deliveryStatus.getStatus())) {
-                return;
-            }
-
             if (sLogger.isActivated()) {
                 sLogger.debug("Send delivery status " + deliveryStatus.getStatus()
                         + " for message " + deliveryStatus.getMsgId());

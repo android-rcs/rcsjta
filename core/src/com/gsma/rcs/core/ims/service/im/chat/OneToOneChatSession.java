@@ -34,6 +34,7 @@ import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.core.ims.service.im.chat.geoloc.GeolocInfoDocument;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
+import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.gsma.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.gsma.rcs.provider.contact.ContactManager;
@@ -125,12 +126,14 @@ public abstract class OneToOneChatSession extends ChatSession {
         String to = ChatUtils.ANOMYNOUS_URI;
         String msgId = msg.getMessageId();
         String networkContent;
-        boolean useImdn = getImdnManager().isImdnActivated() && !mRcsSettings.isAlbatrosRelease();
         String mimeType = msg.getMimeType();
-        if (useImdn) {
+        ImdnManager imdnManager = getImdnManager();
+        if (imdnManager.isRequestOneToOneDeliveryDisplayedReportsEnabled()) {
             networkContent = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, msg.getContent(),
                     mimeType, msg.getTimestampSent());
-
+        } else if (imdnManager.isDeliveryDeliveredReportsEnabled()) {
+            networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from, to, msgId,
+                    msg.getContent(), mimeType, msg.getTimestampSent());
         } else {
             networkContent = ChatUtils.buildCpimMessage(from, to, msg.getContent(), mimeType,
                     msg.getTimestampSent());
