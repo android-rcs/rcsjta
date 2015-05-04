@@ -52,8 +52,23 @@ public class PresenceError extends ImsServiceError {
      * 
      * @param code Error code
      * @param msg Detail message
+     * @deprecated <p>
+     *             PresenceError(int code, Throwable cause)
+     *             </p>
      */
     public PresenceError(int code, String msg) {
         super(code, msg);
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param code Error code
+     * @param cause the cause (which is saved for later retrieval by the Throwable.getCause()
+     *            method). (A null value is permitted, and indicates that the cause is nonexistent
+     *            or unknown.)
+     */
+    public PresenceError(int code, Throwable cause) {
+        super(code, cause);
     }
 }

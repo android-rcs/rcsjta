@@ -25,6 +25,7 @@ package com.gsma.rcs.core.ims.service.capability;
 import com.gsma.rcs.addressbook.AddressBookEventListener;
 import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ContactInfo;
 import com.gsma.rcs.core.ims.service.ImsService;
@@ -40,6 +41,7 @@ import android.database.Cursor;
 import android.os.Build;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -251,8 +253,9 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      * Receive a capability request (options procedure)
      * 
      * @param options Received options message
+     * @throws SipException
      */
-    public void receiveCapabilityRequest(SipRequest options) {
+    public void receiveCapabilityRequest(SipRequest options) throws SipException {
         optionsManager.receiveCapabilityRequest(options);
     }
 
@@ -260,8 +263,9 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      * Receive a notification (anonymous fecth procedure)
      * 
      * @param notify Received notify
+     * @throws IOException
      */
-    public void receiveNotification(SipRequest notify) {
+    public void receiveNotification(SipRequest notify) throws IOException {
         anonymousFetchManager.receiveNotification(notify);
     }
 

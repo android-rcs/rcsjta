@@ -36,8 +36,12 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Capability discovery manager using anonymous fetch procedure
@@ -77,24 +81,23 @@ public class AnonymousFetchManager implements DiscoveryManager {
      * Request contact capabilities
      * 
      * @param contact Remote contact identifier
-     * @return Returns true if success
      */
-    public boolean requestCapabilities(ContactId contact) {
+    public void requestCapabilities(ContactId contact) {
         if (logger.isActivated()) {
             logger.debug("Request capabilities in background for " + contact);
         }
         AnonymousFetchRequestTask task = new AnonymousFetchRequestTask(mImsModule, contact,
                 mRcsSettings, mContactManager);
         task.start();
-        return true;
     }
 
     /**
      * Receive a notification
      * 
      * @param notify Received notify
+     * @throws IOException
      */
-    public void receiveNotification(SipRequest notify) {
+    public void receiveNotification(SipRequest notify) throws IOException {
         boolean logActivated = logger.isActivated();
         if (logActivated) {
             logger.debug("Anonymous fetch notification received");
@@ -110,11 +113,12 @@ public class AnonymousFetchManager implements DiscoveryManager {
             PidfParser pidfParser = null;
             try {
                 pidfParser = new PidfParser(pidfInput);
-            } catch (Exception e) {
-                if (logActivated) {
-                    logger.error("Can't parse XML notification", e);
-                }
-                return;
+            } catch (ParserConfigurationException e) {
+                throw new IOException("Can't parse XML notification! CallId=".concat(notify
+                        .getCallId()), e);
+            } catch (SAXException e) {
+                throw new IOException("Can't parse XML notification! CallId=".concat(notify
+                        .getCallId()), e);
             }
             PidfDocument presence = pidfParser.getPresence();
             if (presence == null) {

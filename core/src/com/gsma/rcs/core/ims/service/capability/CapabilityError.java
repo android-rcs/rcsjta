@@ -47,8 +47,23 @@ public class CapabilityError extends ImsServiceError {
      * 
      * @param code Error code
      * @param msg Detail message
+     * @deprecated <p>
+     *             CapabilityError(int code, Throwable cause)
+     *             </p>
      */
     public CapabilityError(int code, String msg) {
         super(code, msg);
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param code Error code
+     * @param cause the cause (which is saved for later retrieval by the Throwable.getCause()
+     *            method). (A null value is permitted, and indicates that the cause is nonexistent
+     *            or unknown.)
+     */
+    public CapabilityError(int code, Throwable cause) {
+        super(code, cause);
     }
 }

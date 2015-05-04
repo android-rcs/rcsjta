@@ -374,15 +374,8 @@ public class CapabilityUtils {
      * @return Service ID
      */
     public static String extractServiceId(String featureTag) {
-        String serviceId;
-        try {
-            String[] values = featureTag.split("=");
-            String value = StringUtils.removeQuotes(values[1]);
-            serviceId = value.substring(FeatureTags.FEATURE_RCSE_EXTENSION.length() + 1,
-                    value.length());
-        } catch (Exception e) {
-            serviceId = null;
-        }
-        return serviceId;
+        String[] values = featureTag.split("=");
+        String value = StringUtils.removeQuotes(values[1]);
+        return value.substring(FeatureTags.FEATURE_RCSE_EXTENSION.length() + 1, value.length());
     }
 }

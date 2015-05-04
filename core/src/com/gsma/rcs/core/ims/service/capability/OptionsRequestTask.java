@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +15,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.capability;
 
+import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
+import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -131,11 +137,13 @@ public class OptionsRequestTask implements Runnable {
 
             // Send OPTIONS request
             sendOptions(options);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("OPTIONS request has failed", e);
-            }
-            handleError(new CapabilityError(CapabilityError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        } catch (SipException e) {
+            logger.error("OPTIONS request has failed! Contact=".concat(mContact.toString()), e);
+            handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, e));
+        } catch (CoreException e) {
+            /* TODO: Remove CoreException in the future because it is too generic. */
+            logger.error("OPTIONS request has failed! Contact=".concat(mContact.toString()), e);
+            handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, e));
         }
     }
 
@@ -143,9 +151,10 @@ public class OptionsRequestTask implements Runnable {
      * Send OPTIONS message
      * 
      * @param options SIP OPTIONS
-     * @throws Exception
+     * @throws CoreException
+     * @throws SipException
      */
-    private void sendOptions(SipRequest options) throws Exception {
+    private void sendOptions(SipRequest options) throws SipException, CoreException {
         if (logger.isActivated()) {
             logger.info("Send OPTIONS");
         }
@@ -280,9 +289,11 @@ public class OptionsRequestTask implements Runnable {
      * Handle 407 response
      * 
      * @param ctx SIP transaction context
-     * @throws Exception
+     * @throws SipException
+     * @throws CoreException
      */
-    private void handle407Authentication(SipTransactionContext ctx) throws Exception {
+    private void handle407Authentication(SipTransactionContext ctx) throws SipException,
+            CoreException {
         // 407 response received
         if (logger.isActivated()) {
             logger.info("407 response received");

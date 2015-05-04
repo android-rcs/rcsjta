@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +15,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.capability;
 
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
@@ -35,6 +36,11 @@ import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
+
+import java.text.ParseException;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Capability discovery manager using options procedure
@@ -103,9 +109,8 @@ public class OptionsManager implements DiscoveryManager {
      * Request contact capabilities
      * 
      * @param contact Remote contact identifier
-     * @return Returns true if success
      */
-    public boolean requestCapabilities(ContactId contact) {
+    public void requestCapabilities(ContactId contact) {
         if (sLogger.isActivated()) {
             sLogger.debug("Request capabilities in background for " + contact);
         }
@@ -114,19 +119,11 @@ public class OptionsManager implements DiscoveryManager {
         mContactManager.updateCapabilitiesTimeLastRequest(contact);
 
         // Start request in background
-        try {
-            boolean richcall = mImsModule.getRichcallService().isCallConnectedWith(contact);
-            OptionsRequestTask task = new OptionsRequestTask(mImsModule, contact,
-                    CapabilityUtils.getSupportedFeatureTags(richcall, mRcsSettings), mRcsSettings,
-                    mContactManager);
-            mThreadPool.submit(task);
-            return true;
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Can't submit task", e);
-            }
-            return false;
-        }
+        boolean richcall = mImsModule.getRichcallService().isCallConnectedWith(contact);
+        OptionsRequestTask task = new OptionsRequestTask(mImsModule, contact,
+                CapabilityUtils.getSupportedFeatureTags(richcall, mRcsSettings), mRcsSettings,
+                mContactManager);
+        mThreadPool.submit(task);
     }
 
     /**
@@ -140,12 +137,7 @@ public class OptionsManager implements DiscoveryManager {
         }
 
         for (ContactId contact : contacts) {
-            if (!requestCapabilities(contact)) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Processing has been stopped");
-                }
-                break;
-            }
+            requestCapabilities(contact);
         }
     }
 
@@ -153,8 +145,9 @@ public class OptionsManager implements DiscoveryManager {
      * Receive a capability request (options procedure)
      * 
      * @param options Received options message
+     * @throws SipException
      */
-    public void receiveCapabilityRequest(SipRequest options) {
+    public void receiveCapabilityRequest(SipRequest options) throws SipException {
         String sipId = SipUtils.getAssertedIdentity(options);
         PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(sipId);
         if (number == null) {
@@ -168,11 +161,11 @@ public class OptionsManager implements DiscoveryManager {
             sLogger.debug("OPTIONS request received from ".concat(contact.toString()));
         }
 
+        // Create 200 OK response
+        String ipAddress = mImsModule.getCurrentNetworkInterface().getNetworkAccess()
+                .getIpAddress();
+        boolean richcall = mImsModule.getRichcallService().isCallConnectedWith(contact);
         try {
-            // Create 200 OK response
-            String ipAddress = mImsModule.getCurrentNetworkInterface().getNetworkAccess()
-                    .getIpAddress();
-            boolean richcall = mImsModule.getRichcallService().isCallConnectedWith(contact);
             SipResponse resp = SipMessageFactory.create200OkOptionsResponse(options, mImsModule
                     .getSipManager().getSipStack().getContact(),
                     CapabilityUtils.getSupportedFeatureTags(richcall, mRcsSettings),
@@ -180,12 +173,10 @@ public class OptionsManager implements DiscoveryManager {
 
             // Send 200 OK response
             mImsModule.getSipManager().sendSipResponse(resp);
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Can't send 200 OK for OPTIONS", e);
-            }
+        } catch (ParseException e) {
+            throw new SipException("Can't send 200 OK for OPTIONS! CallId=".concat(options
+                    .getCallId()), e);
         }
-
         // Read features tag in the request
         Capabilities capabilities = CapabilityUtils.extractCapabilities(options);
 

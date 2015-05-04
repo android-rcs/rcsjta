@@ -42,6 +42,9 @@ import com.gsma.rcs.utils.logger.Logger;
 
 import android.content.Intent;
 
+import java.io.IOException;
+import java.text.ParseException;
+
 import javax2.sip.address.SipURI;
 import javax2.sip.header.ContactHeader;
 import javax2.sip.header.EventHeader;
@@ -123,10 +126,15 @@ public class ImsServiceDispatcher extends Thread {
             try {
                 // Dispatch the received SIP request
                 dispatch(request, System.currentTimeMillis());
-            } catch (Exception e) {
-                if (logger.isActivated()) {
-                    logger.error("Unexpected exception", e);
-                }
+            } catch (SipException e) {
+                logger.error("Failed to dispatch received SIP request! CallId=".concat(request
+                        .getCallId()), e);
+            } catch (IOException e) {
+                logger.error("Failed to dispatch received SIP request! CallId=".concat(request
+                        .getCallId()), e);
+            } catch (RuntimeException e) {
+                logger.error("Failed to dispatch received SIP request! CallId=".concat(request
+                        .getCallId()), e);
             }
         }
         if (logger.isActivated()) {
@@ -139,8 +147,10 @@ public class ImsServiceDispatcher extends Thread {
      * 
      * @param request SIP request
      * @param timestamp Local timestamp when got SipRequest
+     * @throws SipException
+     * @throws IOException
      */
-    private void dispatch(SipRequest request, long timestamp) {
+    private void dispatch(SipRequest request, long timestamp) throws SipException, IOException {
         boolean logActivated = logger.isActivated();
         if (logActivated) {
             logger.debug("Receive " + request.getMethod() + " request");
@@ -153,11 +163,11 @@ public class ImsServiceDispatcher extends Thread {
         SipURI requestURI;
         try {
             requestURI = SipUtils.ADDR_FACTORY.createSipURI(request.getRequestURI());
-        } catch (Exception e) {
+        } catch (ParseException e) {
             if (logActivated) {
                 logger.error("Unable to parse request URI " + request.getRequestURI(), e);
             }
-            sendFinalResponse(request, 400);
+            sendFinalResponse(request, Response.BAD_REQUEST);
             return;
         }
 
@@ -481,17 +491,11 @@ public class ImsServiceDispatcher extends Thread {
             }
 
             // Send a 200 OK response
-            try {
-                if (logActivated) {
-                    logger.info("Send 200 OK");
-                }
-                SipResponse response = SipMessageFactory.createResponse(request, 200);
-                mImsModule.getSipManager().sendSipResponse(response);
-            } catch (Exception e) {
-                if (logActivated) {
-                    logger.error("Can't send 200 OK response", e);
-                }
+            if (logActivated) {
+                logger.info("Send 200 OK");
             }
+            SipResponse response = SipMessageFactory.createResponse(request, Response.OK);
+            mImsModule.getSipManager().sendSipResponse(response);
         } else if (request.getMethod().equals(Request.CANCEL)) {
             // CANCEL received
 
@@ -505,7 +509,7 @@ public class ImsServiceDispatcher extends Thread {
                 if (logActivated) {
                     logger.info("Send 200 OK");
                 }
-                SipResponse cancelResp = SipMessageFactory.createResponse(request, 200);
+                SipResponse cancelResp = SipMessageFactory.createResponse(request, Response.OK);
                 mImsModule.getSipManager().sendSipResponse(cancelResp);
             } catch (Exception e) {
                 if (logActivated) {
@@ -531,19 +535,15 @@ public class ImsServiceDispatcher extends Thread {
      * 
      * @param notify SIP request
      * @param timestamp Local timestamp when got SipRequest
+     * @throws IOException
+     * @throws SipException
      */
-    private void dispatchNotify(SipRequest notify, long timestamp) {
-        try {
-            // Create 200 OK response
-            SipResponse resp = SipMessageFactory.createResponse(notify, 200);
+    private void dispatchNotify(SipRequest notify, long timestamp) throws IOException, SipException {
+        // Create 200 OK response
+        SipResponse resp = SipMessageFactory.createResponse(notify, Response.OK);
 
-            // Send 200 OK response
-            mImsModule.getSipManager().sendSipResponse(resp);
-        } catch (SipException e) {
-            if (logger.isActivated()) {
-                logger.error("Can't send 200 OK for NOTIFY", e);
-            }
-        }
+        // Send 200 OK response
+        mImsModule.getSipManager().sendSipResponse(resp);
 
         // Get the event type
         EventHeader eventHeader = (EventHeader) notify.getHeader(EventHeader.NAME);
