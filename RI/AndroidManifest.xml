@@ -416,6 +416,22 @@
             android:name=".upload.InitiateFileUpload"
             android:label="@string/title_initiate_upload" />
 
+        
+        <!-- History API -->
+        <activity
+            android:name="com.orangelabs.rcs.ri.history.TestHistoryLogApi"
+            android:label="@string/title_history_log" />
+        <activity
+            android:name="com.orangelabs.rcs.ri.history.messaging.MessagingListView"
+            android:label="@string/title_history_log_messaging" />
+        <activity
+            android:name="com.orangelabs.rcs.ri.history.sharing.SharingListView"
+            android:label="@string/title_history_log_sharing" />        
+        <activity
+            android:name="com.orangelabs.rcs.ri.history.sharing.SharingDetailView"
+            android:label="@string/title_history_log_item" />
+        
+        
         <!-- RCS settings application -->
 
         <activity

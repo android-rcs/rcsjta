@@ -70,6 +70,18 @@ public class ContactListAdapter extends CursorAdapter {
      * @return List adapter
      */
     public static ContactListAdapter createContactListAdapter(Context context) {
+        return createContactListAdapter(context, null);
+    }
+
+    /**
+     * Create a contact selector based on the native address book. This selector adds a default
+     * value to allow no contact selection
+     * 
+     * @param context
+     * @param defaultValue
+     * @return List adapter
+     */
+    public static ContactListAdapter createContactListAdapter(Context context, String defaultValue) {
         ContentResolver content = context.getContentResolver();
         Cursor cursor = null;
         try {
@@ -77,6 +89,11 @@ public class ContactListAdapter extends CursorAdapter {
                     null);
             Set<ContactId> treatedNumbers = new HashSet<ContactId>();
             MatrixCursor matrix = new MatrixCursor(PROJECTION_PHONE);
+            if (defaultValue != null) {
+                matrix.addRow(new Object[] {
+                        -1, defaultValue, "", -1, -1
+                });
+            }
             ContactUtil contactUtil = ContactUtil.getInstance(context);
             int columnIdxId = cursor.getColumnIndexOrThrow(Phone._ID);
             int columIdxLabel = cursor.getColumnIndexOrThrow(Phone.LABEL);

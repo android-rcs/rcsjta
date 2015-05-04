@@ -21,6 +21,7 @@ package com.orangelabs.rcs.ri;
 import com.orangelabs.rcs.ri.capabilities.TestCapabilitiesApi;
 import com.orangelabs.rcs.ri.contacts.TestContactsApi;
 import com.orangelabs.rcs.ri.extension.TestMultimediaSessionApi;
+import com.orangelabs.rcs.ri.history.TestHistoryLogApi;
 import com.orangelabs.rcs.ri.intents.TestIntentApps;
 import com.orangelabs.rcs.ri.messaging.TestMessagingApi;
 import com.orangelabs.rcs.ri.service.TestServiceApi;
@@ -61,7 +62,7 @@ public class RI extends ListActivity {
                 getString(R.string.menu_messaging), getString(R.string.menu_sharing),
                 getString(R.string.menu_mm_session), getString(R.string.menu_intents),
                 getString(R.string.menu_service), getString(R.string.menu_upload),
-                getString(R.string.menu_about)
+                getString(R.string.menu_history_log), getString(R.string.menu_about)
         };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
         // Create the API connection manager
@@ -104,6 +105,10 @@ public class RI extends ListActivity {
                 break;
 
             case 8:
+                startActivity(new Intent(this, TestHistoryLogApi.class));
+                break;
+
+            case 9:
                 startActivity(new Intent(this, AboutRI.class));
                 break;
         }

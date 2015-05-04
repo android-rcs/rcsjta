@@ -29,6 +29,7 @@ import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.contact.ContactService;
 import com.gsma.services.rcs.extension.MultimediaSessionService;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
+import com.gsma.services.rcs.history.HistoryService;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingService;
 import com.gsma.services.rcs.sharing.image.ImageSharingService;
 import com.gsma.services.rcs.sharing.video.VideoSharingService;
@@ -76,7 +77,7 @@ public class ConnectionManager {
      */
     @SuppressWarnings("javadoc")
     public enum RcsServiceName {
-        CAPABILITY, CONTACT, CHAT, FILE_TRANSFER, IMAGE_SHARING, VIDEO_SHARING, GEOLOC_SHARING, FILE_UPLOAD, MULTIMEDIA;
+        CAPABILITY, CONTACT, CHAT, FILE_TRANSFER, IMAGE_SHARING, VIDEO_SHARING, GEOLOC_SHARING, FILE_UPLOAD, MULTIMEDIA, HISTORY;
     };
 
     /**
@@ -331,6 +332,8 @@ public class ConnectionManager {
                 newRcsServiceListener(RcsServiceName.GEOLOC_SHARING)));
         mApis.put(RcsServiceName.MULTIMEDIA, new MultimediaSessionService(context,
                 newRcsServiceListener(RcsServiceName.MULTIMEDIA)));
+        mApis.put(RcsServiceName.HISTORY, new HistoryService(context,
+                newRcsServiceListener(RcsServiceName.HISTORY)));
         /* Register the broadcast receiver to catch ACTION_SERVICE_UP */
         IntentFilter filter = new IntentFilter();
         filter.addAction(RcsService.ACTION_SERVICE_UP);
@@ -515,6 +518,15 @@ public class ConnectionManager {
      */
     public FileUploadService getFileUploadApi() {
         return (FileUploadService) mApis.get(RcsServiceName.FILE_UPLOAD);
+    }
+
+    /**
+     * Get the instance of HistoryService
+     * 
+     * @return the instance
+     */
+    public HistoryService getHistoryApi() {
+        return (HistoryService) mApis.get(RcsServiceName.HISTORY);
     }
 
     /**
