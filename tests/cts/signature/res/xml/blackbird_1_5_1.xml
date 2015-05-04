@@ -542,11 +542,11 @@
  visibility="public"
 >
 </field>
-<field name="ACTION_GET_COMPATIBLITY"
+<field name="ACTION_GET_COMPATIBILITY"
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;com.gsma.services.rcs.action.GET_COMPATIBLITY&quot;"
+ value="&quot;com.gsma.services.rcs.action.GET_COMPATIBILITY&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -586,7 +586,7 @@
  visibility="public"
 >
 </field>
-<field name="EXTRA_GET_COMPATIBLITY_CODENAME"
+<field name="EXTRA_GET_COMPATIBILITY_CODENAME"
  type="java.lang.String"
  transient="false"
  volatile="false"
@@ -597,7 +597,7 @@
  visibility="public"
 >
 </field>
-<field name="EXTRA_GET_COMPATIBLITY_INCREMENT"
+<field name="EXTRA_GET_COMPATIBILITY_INCREMENT"
  type="java.lang.String"
  transient="false"
  volatile="false"
@@ -608,7 +608,7 @@
  visibility="public"
 >
 </field>
-<field name="EXTRA_GET_COMPATIBLITY_RESPONSE"
+<field name="EXTRA_GET_COMPATIBILITY_RESPONSE"
  type="java.lang.String"
  transient="false"
  volatile="false"
@@ -619,7 +619,7 @@
  visibility="public"
 >
 </field>
-<field name="EXTRA_GET_COMPATIBLITY_SERVICE"
+<field name="EXTRA_GET_COMPATIBILITY_SERVICE"
  type="java.lang.String"
  transient="false"
  volatile="false"
@@ -630,7 +630,7 @@
  visibility="public"
 >
 </field>
-<field name="EXTRA_GET_COMPATIBLITY_VERSION"
+<field name="EXTRA_GET_COMPATIBILITY_VERSION"
  type="java.lang.String"
  transient="false"
  volatile="false"
@@ -3325,19 +3325,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<method name="getChatTimeout"
- return="int"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
 <method name="getGeolocExpirationTime"
  return="int"
  abstract="false"
@@ -3417,7 +3404,7 @@
 </exception>
 </method>
 <method name="getIsComposingTimeout"
- return="int"
+ return="long"
  abstract="false"
  native="false"
  synchronized="false"
@@ -3717,6 +3704,21 @@
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
 </method>
+<method name="onComposing"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="enabled" type="boolean">
+</parameter>
+<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+</exception>
+</method>
 <method name="openChat"
  return="void"
  abstract="false"
@@ -3727,21 +3729,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="sendIsComposingEvent"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="status" type="boolean">
-</parameter>
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
 </method>
@@ -4193,6 +4180,21 @@
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
 </method>
+<method name="onComposing"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="enabled" type="boolean">
+</parameter>
+<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+</exception>
+</method>
 <method name="openChat"
  return="void"
  abstract="false"
@@ -4217,21 +4219,6 @@
  visibility="public"
 >
 <parameter name="msgId" type="java.lang.String">
-</parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="sendIsComposingEvent"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="status" type="boolean">
 </parameter>
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
@@ -4283,22 +4270,22 @@
  visibility="public"
 >
 </constructor>
-<field name="ACTION_NEW_ONE_TO_ONE_CHAT_MESSAGE"
+<field name="ACTION_MESSAGE_DELIVERY_EXPIRED"
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;com.gsma.services.rcs.chat.action.NEW_ONE_TO_ONE_CHAT_MESSAGE&quot;"
+ value="&quot;com.gsma.services.rcs.chat.action.MESSAGE_DELIVERY_EXPIRED&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
  visibility="public"
 >
 </field>
-<field name="ACTION_NEW_ONE_TO_ONE_MESSAGE_DELIVERY_EXPIRED"
+<field name="ACTION_NEW_ONE_TO_ONE_CHAT_MESSAGE"
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;com.gsma.services.rcs.chat.action.MESSAGE_DELIVERY_EXPIRED&quot;"
+ value="&quot;com.gsma.services.rcs.chat.action.NEW_ONE_TO_ONE_CHAT_MESSAGE&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -6294,22 +6281,22 @@
  visibility="public"
 >
 </constructor>
-<field name="ACTION_NEW_INVITATION"
+<field name="ACTION_FILE_TRANSFER_DELIVERY_EXPIRED"
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;com.gsma.services.rcs.filetransfer.action.NEW_FILE_TRANSFER&quot;"
+ value="&quot;com.gsma.services.rcs.filetransfer.action.FILE_TRANSFER_DELIVERY_EXPIRED&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
  visibility="public"
 >
 </field>
-<field name="ACTION_NEW_ONE_TO_ONE_FILE_TRANSFER_DELIVERY_EXPIRED"
+<field name="ACTION_NEW_INVITATION"
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;com.gsma.services.rcs.chat.action.FILE_TRANSFER_DELIVERY_EXPIRED&quot;"
+ value="&quot;com.gsma.services.rcs.filetransfer.action.NEW_FILE_TRANSFER&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
