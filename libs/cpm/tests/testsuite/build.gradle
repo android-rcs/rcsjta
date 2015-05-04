@@ -1,0 +1,13 @@
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'eclipse'
+
+
+dependencies {
+    compile project(':cpm-impl')
+    compile 'junit:junit:3.8.1'
+    testCompile 'commons-codec:commons-codec:1.9'
+    testCompile 'javax.mail:mail:1.4.+'
+}
+
+mainClassName = 'com.sonymobile.rcs.cpm.ms.tests.util.StandaloneTest'

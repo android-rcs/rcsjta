@@ -1,1 +1,1 @@
-include 'imap', 'cpm-api', 'cpm-impl', 'localstore-impl', 'sync-adapter'
+include 'cpm-api', 'cpm-impl', 'cpm-impl:imap', 'tests', 'tests:imap-james', 'tests:sync-adapter', 'tests:localstore-impl', 'tests:testsuite'

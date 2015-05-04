@@ -16,7 +16,6 @@
 
 package com.sonymobile.rcs.cpm.ms.impl.sync;
 
-import com.sonymobile.rcs.cpm.ms.CpmObjectType;
 import com.sonymobile.rcs.cpm.ms.MessageStore;
 import com.sonymobile.rcs.cpm.ms.sync.MutableReport;
 import com.sonymobile.rcs.cpm.ms.sync.SyncMediator;
@@ -71,10 +70,7 @@ public class DefaultSyncMediator implements SyncMediator {
     }
 
     @Override
-    public SyncReport execute(CpmObjectType... itemTypes) {
-        mLocalStore.setFilter(itemTypes);
-        mRemoteStore.setFilter(itemTypes);
-
+    public SyncReport execute() {
         mCurrentReport = new MutableReport();
 
         try {
@@ -112,8 +108,8 @@ public class DefaultSyncMediator implements SyncMediator {
      * @param itemType
      * @throws Exception
      */
-    public void executeUnsafe(CpmObjectType... itemTypes) throws Exception {
-        SyncReport report = execute(itemTypes);
+    public void executeUnsafe() throws Exception {
+        SyncReport report = execute();
         if (report.getException() != null) {
             throw report.getException();
         }

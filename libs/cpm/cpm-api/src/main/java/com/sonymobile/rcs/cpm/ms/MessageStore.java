@@ -32,13 +32,6 @@ public interface MessageStore extends Closeable {
 
     public boolean isConnected();
 
-    /**
-     * Restrict the object types returned by this message store
-     * 
-     * @param types
-     */
-    public void setFilter(CpmObjectType... types);
-
     public void addMessageStoreListener(MessageStoreListener listener);
 
     public void removeMessageStoreListener(MessageStoreListener listener);

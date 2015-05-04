@@ -16,7 +16,6 @@
 
 package com.sonymobile.rcs.cpm.ms.sync;
 
-import com.sonymobile.rcs.cpm.ms.CpmObjectType;
 import com.sonymobile.rcs.cpm.ms.MessageStore;
 
 /**
@@ -36,7 +35,7 @@ import com.sonymobile.rcs.cpm.ms.MessageStore;
  */
 public interface SyncMediator {
 
-    public SyncReport execute(CpmObjectType... types);
+    public SyncReport execute();
 
     public SyncReport getCurrentReport();
 

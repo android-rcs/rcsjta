@@ -1,0 +1,45 @@
+apply plugin: 'java'
+
+dependencies {
+	compile project(':cpm-impl')
+	testCompile 'junit:junit:4.+'
+	runtime 'commons-codec:commons-codec:1.9'
+}
+
+test {
+	enabled = false
+	testLogging {
+		showStandardStreams = true
+        // set options for log level LIFECYCLE
+        events 'failed', 'started', 'standard_out', 'standard_error'
+        exceptionFormat "short"
+
+        // set options for log level DEBUG
+        debug {
+            events "started", "skipped", "failed"
+            exceptionFormat "full"
+        }
+
+        // remove standard output/error logging from --info builds
+        // by assigning only 'failed' and 'skipped' events
+        info.events = ["failed", "skipped"]
+    }
+}
+
+task imapTest(type: Test) {
+	testLogging.showStandardStreams = true
+	testLogging.events 'standard_out', 'standard_error'
+	testLogging.info.events "started", "skipped", "failed"
+	outputs.upToDateWhen { false }
+	include 'com/sonymobile/rcs/imap/tests/**Test.*'
+}
+
+task cpmTest(type: Test) {
+	logging.level = LogLevel.DEBUG
+	logging.captureStandardOutput LogLevel.DEBUG
+	testLogging.showStandardStreams = true
+	testLogging.events 'standard_out', 'standard_error'
+	testLogging.info.events "started", "skipped", "failed"
+	outputs.upToDateWhen { false }
+	include 'com/sonymobile/rcs/cpm/tests/**Test.*'
+}

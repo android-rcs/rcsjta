@@ -1,0 +1,9 @@
+Content-type: application/group-state-object+xml
+Date: Fri, 05 Dec 2014 18:10:23 +0100
+Content-Type: application/group-state-object+xml
+
+<groupstate timestamp="2012-06-13T16:39:57-05:00" lastfocussessionid="da9274453@company.com" group-type="closed">
+	<participant name="bob" comm-addr="tel:+16135551212"/>
+	<participant name="alice" comm-addr="tel:+15195551212"/>
+	<participant name="bernie" comm-addr="tel:+15145551212"/>
+</groupstate>

@@ -16,14 +16,12 @@
 
 package com.sonymobile.rcs.cpm.ms.impl;
 
-import com.sonymobile.rcs.cpm.ms.CpmObjectType;
 import com.sonymobile.rcs.cpm.ms.MessageStore;
 import com.sonymobile.rcs.cpm.ms.MessageStoreEvent;
 import com.sonymobile.rcs.cpm.ms.MessageStoreEvent.EventType;
 import com.sonymobile.rcs.cpm.ms.MessageStoreListener;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 
 public abstract class AbstractMessageStore implements MessageStore {
@@ -34,39 +32,9 @@ public abstract class AbstractMessageStore implements MessageStore {
 
     private Collection<MessageStoreListener> mListeners = new ArrayList<MessageStoreListener>();
 
-    private CpmObjectType[] mFilterTypes;
-
-    @Override
-    public void setFilter(CpmObjectType... objectType) {
-        this.mFilterTypes = objectType;
-    }
-
-    public boolean isValidType(CpmObjectType type) {
-        if (mFilterTypes == null) {
-            return true;
-        }
-        return (Arrays.binarySearch(mFilterTypes, type) >= 0);
-    }
-
-    // will be called before execution, override if necessary
-    // @Override
-    // public void init() throws MessageStoreException {
-    // mInited = true;
-    // }
-
     protected void setInited(boolean inited) {
         this.mInited = inited;
     }
-
-    // @Override
-    // public boolean isInited() {
-    // return mInited;
-    // }
-    //
-    // @Override
-    // public boolean isAvailable() {
-    // return mAvailable;
-    // }
 
     protected void setAvailable(boolean a) {
         EventType t = null;

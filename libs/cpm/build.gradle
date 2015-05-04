@@ -1,15 +1,19 @@
 apply plugin: 'base'
 
-subprojects {
+allprojects {
 
     buildscript {
         repositories {
-           mavenCentral()
+			maven {
+				url buildRepo
+			}
         }
     }
 
     repositories {
-        mavenCentral()
+        maven {
+        	url buildRepo
+        }
     }
 
 }

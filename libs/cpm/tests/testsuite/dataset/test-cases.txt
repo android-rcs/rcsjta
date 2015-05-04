@@ -1,0 +1,26 @@
+Use cases 
+
+User01 : After sync, all remote text messages are stored locally (1-1, group chat, standalone) with new chat IDs
+
+User02 : After sync, all remote file transfers are stored locally
+
+User03 : New Group chat state (and participants) are updated locally in the group chat table (only last group state is valid)
+
+User04 : New remote media object are stored locally (as chat messages with mime type)
+
+User05 : Having already existing messages in local DB, new messages from the same conversations are stored with same chat IDs
+
+User06 : Deleted messages remotely should be deleted locally
+
+User07 : Deleted messages locally should be deleted remotely
+
+User09 : “Seen” messages remotely should be Read locally
+
+User08 : Read messages locally should be flagged as “Seen” remotely
+
+User10 : After sync 10-50 new messages, Repeat Sync execution again, verify that no update has been done
+
+User11 : 100s of messages, report and limit time of execution
+
+User12 : 1000s of messages, report and limit time of execution
+

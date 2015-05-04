@@ -4,7 +4,7 @@ apply plugin: 'jacoco'
 
 dependencies {
 	compile project(':cpm-api')
-	compile project(':imap')
+	compile project('imap')
 	compile 'net.sf.kxml:kxml2:2.3.0'
     testCompile 'commons-codec:commons-codec:1.9'
 	testCompile 'junit:junit:4.+'

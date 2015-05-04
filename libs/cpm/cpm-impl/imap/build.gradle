@@ -1,0 +1,16 @@
+apply plugin: 'java'
+apply plugin: 'jacoco'
+
+
+dependencies {
+    testCompile 'junit:junit:4.+'
+    testCompile 'commons-codec:commons-codec:1.9'
+}
+
+test {
+	//systemProperties 'java.util.logging.config.file' : 'src/test/resources/logging.properties'
+	testLogging {
+	   showStandardStreams = true
+	   //events = ['standard_out', 'standard_error']
+	}
+}
