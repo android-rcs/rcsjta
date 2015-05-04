@@ -26,8 +26,6 @@ import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipManager;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
-import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
@@ -157,9 +155,6 @@ public abstract class ImsServiceSession extends Thread {
      */
     private long mTimestamp;
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(ImsServiceSession.class.getSimpleName());
 
     /**
@@ -250,7 +245,9 @@ public abstract class ImsServiceSession extends Thread {
         // Set the session timer expire
         mDialogPath.setSessionExpireTime(invite.getSessionTimerExpire());
 
-        mRemoteDisplayName = SipUtils.getDisplayNameFromUri(remoteParty);
+        if (remoteParty != null) {
+            mRemoteDisplayName = SipUtils.getDisplayNameFromUri(remoteParty);
+        }
     }
 
     /**

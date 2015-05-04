@@ -28,7 +28,6 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.utils.PhoneUtils;
 
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.ListIterator;
 import java.util.Vector;
 
@@ -70,18 +69,18 @@ public class SipUtils {
     /**
      * Header factory
      */
-    public static HeaderFactory HEADER_FACTORY = null;
+    public static HeaderFactory HEADER_FACTORY;
 
     /**
      * Address factory
      */
 
-    public static AddressFactory ADDR_FACTORY = null;
+    public static AddressFactory ADDR_FACTORY;
 
     /**
      * Message factory
      */
-    public static MessageFactory MSG_FACTORY = null;
+    public static MessageFactory MSG_FACTORY;
 
     /**
      * Content-Transfer-Encoding header
@@ -334,9 +333,8 @@ public class SipUtils {
         MinExpiresHeader minHeader = (MinExpiresHeader) message.getHeader(MinExpiresHeader.NAME);
         if (minHeader != null) {
             return minHeader.getExpires();
-        } else {
-            return -1;
         }
+        return -1;
     }
 
     /**
@@ -350,9 +348,8 @@ public class SipUtils {
         if (minSeHeader != null) {
             String value = minSeHeader.getValue();
             return Integer.parseInt(value);
-        } else {
-            return -1;
         }
+        return -1;
     }
 
     /**
@@ -440,15 +437,13 @@ public class SipUtils {
      * @return Boolean
      */
     public static boolean isFeatureTagPresent(SipMessage msg, String featureTag) {
-        boolean result = false;
-        ArrayList<String> tags = msg.getFeatureTags();
-        for (int i = 0; i < tags.size(); i++) {
-            if (tags.get(i).contains(featureTag)) {
-                result = true;
-                break;
+        for (String tag : msg.getFeatureTags()) {
+            // TODO comparison should be done on the whole feature tag
+            if (tag.contains(featureTag)) {
+                return true;
             }
         }
-        return result;
+        return false;
     }
 
     /**
@@ -483,8 +478,12 @@ public class SipUtils {
      */
     public static void setFeatureTags(Message message, String[] contactTags,
             String[] acceptContactTags) throws ParseException {
-        setContactFeatureTags(message, contactTags);
-        setAcceptContactFeatureTags(message, acceptContactTags);
+        if (contactTags != null && contactTags.length != 0) {
+            setContactFeatureTags(message, contactTags);
+        }
+        if (acceptContactTags != null && acceptContactTags.length != 0) {
+            setAcceptContactFeatureTags(message, acceptContactTags);
+        }
     }
 
     /**
@@ -494,22 +493,33 @@ public class SipUtils {
      * @param tags List of tags
      * @throws ParseException
      */
-    public static void setAcceptContactFeatureTags(Message message, String[] tags)
+    private static void setAcceptContactFeatureTags(Message message, String[] tags)
             throws ParseException {
-        if ((tags == null) || (tags.length == 0)) {
-            return;
+        if (tags.length > 1 && SipUtils.EXPLICIT_REQUIRE.equals(tags[tags.length - 1])) {
+            /*
+             * According to RFC 3841, there MUST NOT be more than one req-param or explicit-param in
+             * an ac-params. Furthermore, there can only be one instance of any feature tag in
+             * feature-param.
+             */
+            for (int i = 0; i < tags.length - 1; i++) {
+                StringBuilder acceptTags = new StringBuilder("*;");
+                acceptTags.append(tags[i]);
+                acceptTags.append(';');
+                acceptTags.append(SipUtils.EXPLICIT_REQUIRE);
+                Header header = SipUtils.HEADER_FACTORY.createHeader(
+                        SipUtils.HEADER_ACCEPT_CONTACT, acceptTags.toString());
+                message.addHeader(header);
+            }
+        } else {
+            StringBuilder acceptTags = new StringBuilder("*");
+            for (String tag : tags) {
+                acceptTags.append(';');
+                acceptTags.append(tag);
+            }
+            Header header = SipUtils.HEADER_FACTORY.createHeader(SipUtils.HEADER_ACCEPT_CONTACT,
+                    acceptTags.toString());
+            message.addHeader(header);
         }
-
-        // Update Contact header
-        StringBuilder acceptTags = new StringBuilder("*");
-        for (int i = 0; i < tags.length; i++) {
-            acceptTags.append(";" + tags[i]);
-        }
-
-        // Update Accept-Contact header
-        Header header = SipUtils.HEADER_FACTORY.createHeader(SipUtils.HEADER_ACCEPT_CONTACT,
-                acceptTags.toString());
-        message.addHeader(header);
     }
 
     /**
@@ -520,16 +530,12 @@ public class SipUtils {
      * @throws ParseException
      */
     public static void setContactFeatureTags(Message message, String[] tags) throws ParseException {
-        if ((tags == null) || (tags.length == 0)) {
+        ContactHeader contact = (ContactHeader) message.getHeader(ContactHeader.NAME);
+        if (contact == null) {
             return;
         }
-
-        // Update Contact header
-        ContactHeader contact = (ContactHeader) message.getHeader(ContactHeader.NAME);
-        for (int i = 0; i < tags.length; i++) {
-            if (contact != null) {
-                contact.setParameter(tags[i], null);
-            }
+        for (String tag : tags) {
+            contact.setParameter(tag, null);
         }
     }
 
@@ -543,30 +549,27 @@ public class SipUtils {
         // Read Referred-By header
         ExtensionHeader referredByHeader = (ExtensionHeader) message
                 .getHeader(SipUtils.HEADER_REFERRED_BY);
-        if (referredByHeader == null) {
-            // Check contracted form
-            referredByHeader = (ExtensionHeader) message.getHeader(SipUtils.HEADER_REFERRED_BY_C);
-            if (referredByHeader == null) {
-                // Try to extract manually the header in the message
-                // TODO: to be removed when bug fix corrected in native NIST stack
-                String msg = message.getStackMessage().toString();
-                int index = msg.indexOf(SipUtils.CRLF + "b:");
-                if (index != -1) {
-                    try {
-                        int begin = index + 4;
-                        int end = msg.indexOf(SipUtils.CRLF, index + 2);
-                        return msg.substring(begin, end).trim();
-                    } catch (Exception e) {
-                        return null;
-                    }
-                } else {
-                    return null;
-                }
-            } else {
-                return referredByHeader.getValue();
-            }
-        } else {
+        if (referredByHeader != null) {
             return referredByHeader.getValue();
+        }
+        // Check contracted form
+        referredByHeader = (ExtensionHeader) message.getHeader(SipUtils.HEADER_REFERRED_BY_C);
+        if (referredByHeader != null) {
+            return referredByHeader.getValue();
+        }
+        // Try to extract manually the header in the message
+        // TODO: to be removed when bug fix corrected in native NIST stack
+        String msg = message.getStackMessage().toString();
+        int index = msg.indexOf(SipUtils.CRLF + "b:");
+        if (index == -1) {
+            return null;
+        }
+        try {
+            int begin = index + 4;
+            int end = msg.indexOf(SipUtils.CRLF, index + 2);
+            return msg.substring(begin, end).trim();
+        } catch (Exception e) {
+            return null;
         }
     }
 
@@ -577,12 +580,37 @@ public class SipUtils {
      * @return ID or null
      */
     public static String getRemoteInstanceID(SipMessage message) {
-        String instanceId = null;
         ContactHeader contactHeader = (ContactHeader) message.getHeader(ContactHeader.NAME);
         if (contactHeader != null) {
-            instanceId = contactHeader.getParameter(SIP_INSTANCE_PARAM);
+            return contactHeader.getParameter(SIP_INSTANCE_PARAM);
         }
-        return instanceId;
+        return null;
+    }
+
+    private static String getAcceptContactTagValue(SipMessage message, String tagName) {
+        ListIterator<Header> acceptHeaders = message.getHeaders(SipUtils.HEADER_ACCEPT_CONTACT);
+        if (acceptHeaders == null || !acceptHeaders.hasNext()) {
+            /* Check contracted form */
+            acceptHeaders = message.getHeaders(SipUtils.HEADER_ACCEPT_CONTACT_C);
+        }
+        if (acceptHeaders == null) {
+            return null;
+        }
+        while (acceptHeaders.hasNext()) {
+            ExtensionHeader acceptHeader = (ExtensionHeader) acceptHeaders.next();
+            String[] pnames = acceptHeader.getValue().split(";");
+            if (pnames.length <= 1) {
+                continue;
+            }
+            /* Start at index 1 to bypass the address */
+            for (int i = 1; i < pnames.length; i++) {
+                String pname = pnames[i];
+                if (pname.startsWith(tagName)) {
+                    return pname.substring(tagName.length() + 1, pname.length());
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -592,27 +620,7 @@ public class SipUtils {
      * @return ID or null
      */
     public static String getInstanceID(SipMessage message) {
-        String instanceId = null;
-        ExtensionHeader acceptHeader = (ExtensionHeader) message
-                .getHeader(SipUtils.HEADER_ACCEPT_CONTACT);
-        if (acceptHeader == null) {
-            // Check contracted form
-            acceptHeader = (ExtensionHeader) message.getHeader(SipUtils.HEADER_ACCEPT_CONTACT_C);
-        }
-        if (acceptHeader != null) {
-            String[] pnames = acceptHeader.getValue().split(";");
-            if (pnames.length > 1) {
-                // Start at index 1 to bypass the address
-                for (int i = 1; i < pnames.length; i++) {
-                    if (pnames[i].startsWith(SipUtils.SIP_INSTANCE_PARAM)) {
-                        instanceId = pnames[i].substring(SipUtils.SIP_INSTANCE_PARAM.length() + 1,
-                                pnames[i].length());
-                        break;
-                    }
-                }
-            }
-        }
-        return instanceId;
+        return getAcceptContactTagValue(message, SipUtils.SIP_INSTANCE_PARAM);
     }
 
     /**
@@ -622,27 +630,7 @@ public class SipUtils {
      * @return GRUU or null
      */
     public static String getPublicGruu(SipMessage message) {
-        String publicGruu = null;
-        ExtensionHeader acceptHeader = (ExtensionHeader) message
-                .getHeader(SipUtils.HEADER_ACCEPT_CONTACT);
-        if (acceptHeader == null) {
-            // Check contracted form
-            acceptHeader = (ExtensionHeader) message.getHeader(SipUtils.HEADER_ACCEPT_CONTACT_C);
-        }
-        if (acceptHeader != null) {
-            String[] pnames = acceptHeader.getValue().split(";");
-            if (pnames.length > 1) {
-                // Start at index 1 to bypass the address
-                for (int i = 1; i < pnames.length; i++) {
-                    if (pnames[i].startsWith(SipUtils.PUBLIC_GRUU_PARAM)) {
-                        publicGruu = pnames[i].substring(SipUtils.PUBLIC_GRUU_PARAM.length() + 1,
-                                pnames[i].length());
-                        break;
-                    }
-                }
-            }
-        }
-        return publicGruu;
+        return getAcceptContactTagValue(message, SipUtils.PUBLIC_GRUU_PARAM);
     }
 
     /**
@@ -654,20 +642,20 @@ public class SipUtils {
      */
     public static void setRemoteInstanceID(Message message, String instanceId)
             throws ParseException {
-        if (instanceId != null) {
-            ExtensionHeader acceptHeader = (ExtensionHeader) message
-                    .getHeader(SipUtils.HEADER_ACCEPT_CONTACT);
-            if (acceptHeader != null) {
-                // Update existing header with SIP instance
-                acceptHeader.setValue(acceptHeader.getValue() + ";" + SipUtils.SIP_INSTANCE_PARAM
-                        + "=\"" + instanceId + "\"");
-            } else {
-                // Add header with SIP instance
-                Header header = SipUtils.HEADER_FACTORY.createHeader(
-                        SipUtils.HEADER_ACCEPT_CONTACT, "*;" + SipUtils.SIP_INSTANCE_PARAM + "=\""
-                                + instanceId + "\"");
-                message.addHeader(header);
-            }
+        ExtensionHeader acceptHeader = (ExtensionHeader) message
+                .getHeader(SipUtils.HEADER_ACCEPT_CONTACT);
+        StringBuilder featureTag = new StringBuilder(";");
+        featureTag.append(SipUtils.SIP_INSTANCE_PARAM).append("=\"").append(instanceId)
+                .append("\"");
+
+        if (acceptHeader != null) {
+            // Update existing header with SIP instance
+            acceptHeader.setValue(acceptHeader.getValue() + featureTag.toString());
+        } else {
+            // Add header with SIP instance
+            Header header = SipUtils.HEADER_FACTORY.createHeader(SipUtils.HEADER_ACCEPT_CONTACT,
+                    "*" + featureTag.toString());
+            message.addHeader(header);
         }
     }
 
@@ -678,20 +666,13 @@ public class SipUtils {
      * @return Display name or null
      */
     public static String getDisplayNameFromUri(String uri) {
-        if (uri == null) {
-            return null;
-        }
-        try {
-            int index0 = uri.indexOf("\"");
-            if (index0 != -1) {
-                int index1 = uri.indexOf("\"", index0 + 1);
-                if (index1 > 0) {
-                    return uri.substring(index0 + 1, index1);
-                }
+        int index0 = uri.indexOf("\"");
+        if (index0 != -1) {
+            int index1 = uri.indexOf("\"", index0 + 1);
+            if (index1 > 0) {
+                return uri.substring(index0 + 1, index1);
             }
-            return null;
-        } catch (Exception e) {
-            return null;
         }
+        return null;
     }
 }

@@ -19,6 +19,7 @@
 package com.gsma.rcs.core.ims.service;
 
 import java.util.List;
+import java.util.Set;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -38,9 +39,7 @@ import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
  * @author Jean-Marc AUFFRET
  */
 public class SipIntentManager {
-    /**
-     * The logger
-     */
+
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
     /**
@@ -56,22 +55,20 @@ public class SipIntentManager {
      * @return Resolved intent or null if not resolved
      */
     public Intent isSipRequestResolved(SipRequest request) {
-        Intent result = null;
-        List<String> tags = request.getFeatureTags();
-        for (int i = 0; i < tags.size(); i++) {
-            String featureTag = tags.get(i);
+        Set<String> tags = request.getFeatureTags();
+        for (String featureTag : tags) {
             Intent intent = generateSipIntent(request, featureTag);
-            if (intent != null) {
-                if (logger.isActivated()) {
-                    logger.debug("SIP intent: " + intent.getAction() + ", " + intent.getType());
-                }
-                if (isSipIntentResolvedByBroadcastReceiver(intent)) {
-                    result = intent;
-                    break;
-                }
+            if (intent == null) {
+                continue;
+            }
+            if (logger.isActivated()) {
+                logger.debug("SIP intent: " + intent.getAction() + ", " + intent.getType());
+            }
+            if (isSipIntentResolvedByBroadcastReceiver(intent)) {
+                return intent;
             }
         }
-        return result;
+        return null;
     }
 
     /**

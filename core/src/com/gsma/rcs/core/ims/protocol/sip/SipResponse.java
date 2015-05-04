@@ -42,7 +42,7 @@ public class SipResponse extends SipMessage {
      * @return SIP response
      */
     public Response getStackMessage() {
-        return (Response) stackMessage;
+        return (Response) mStackMessage;
     }
 
     /**
@@ -54,9 +54,8 @@ public class SipResponse extends SipMessage {
         Response response = getStackMessage();
         if (response != null) {
             return response.getStatusCode();
-        } else {
-            return -1;
         }
+        return -1;
     }
 
     /**
@@ -68,8 +67,7 @@ public class SipResponse extends SipMessage {
         Response response = getStackMessage();
         if (response != null) {
             return getStackMessage().getReasonPhrase();
-        } else {
-            return null;
         }
+        return null;
     }
 }

@@ -580,7 +580,8 @@
         <item>REJECTED_BY_INACTIVITY</item>
         <item>REJECTED_BY_USER</item>
         <item>REJECTED_BY_REMOTE</item>
-        <item>REJECTED_BY_INACTIVITY</item>
+        <item>REJECTED_BY_TIMEOUT</item>
+        <item>REJECTED_BY_SYSTEM</item>
         <item>FAILED_INITIATION</item>
         <item>FAILED_SESSION</item>
         <item>FAILED_MEDIA</item>

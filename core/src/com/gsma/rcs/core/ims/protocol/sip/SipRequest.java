@@ -43,7 +43,7 @@ public class SipRequest extends SipMessage {
      * @return SIP request
      */
     public Request getStackMessage() {
-        return (Request) stackMessage;
+        return (Request) mStackMessage;
     }
 
     /**
@@ -73,8 +73,7 @@ public class SipRequest extends SipMessage {
         ExpiresHeader expires = (ExpiresHeader) getStackMessage().getHeader(ExpiresHeader.NAME);
         if (expires != null) {
             return expires.getExpires();
-        } else {
-            return -1;
         }
+        return -1;
     }
 }

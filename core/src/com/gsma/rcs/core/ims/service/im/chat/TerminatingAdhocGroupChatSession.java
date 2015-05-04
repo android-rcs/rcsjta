@@ -65,9 +65,6 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 
     private final MessagingLog mMessagingLog;
 
-    /**
-     * The logger
-     */
     private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
 
     /**
@@ -98,7 +95,10 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
         createTerminatingDialogPath(invite);
 
         if (contact != null) {
-            setRemoteDisplayName(SipUtils.getDisplayNameFromUri(invite.getFrom()));
+            String fromUri = invite.getFrom();
+            if (fromUri != null) {
+                setRemoteDisplayName(SipUtils.getDisplayNameFromUri(fromUri));
+            }
         }
 
         String chatId = ChatUtils.getContributionId(invite);

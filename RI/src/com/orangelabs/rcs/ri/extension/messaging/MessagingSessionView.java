@@ -18,6 +18,24 @@
 
 package com.orangelabs.rcs.ri.extension.messaging;
 
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.extension.MultimediaMessagingSession;
+import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
+import com.gsma.services.rcs.extension.MultimediaMessagingSessionListener;
+import com.gsma.services.rcs.extension.MultimediaSession;
+import com.gsma.services.rcs.extension.MultimediaSessionService;
+import com.gsma.services.rcs.extension.MultimediaSessionServiceConfiguration;
+
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.Utils;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -36,25 +54,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.extension.MultimediaMessagingSession;
-import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
-import com.gsma.services.rcs.extension.MultimediaMessagingSessionListener;
-import com.gsma.services.rcs.extension.MultimediaSession;
-import com.gsma.services.rcs.extension.MultimediaSessionService;
-import com.gsma.services.rcs.extension.MultimediaSessionServiceConfiguration;
-
-import com.orangelabs.rcs.ri.ConnectionManager;
-import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.utils.LockAccess;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Messaging session view
@@ -110,7 +109,7 @@ public class MessagingSessionView extends Activity {
     /**
      * Service ID
      */
-    private String serviceId = MessagingSessionUtils.SERVICE_ID;
+    private String mServiceId = MessagingSessionUtils.SERVICE_ID;
 
     /**
      * Session
@@ -370,7 +369,7 @@ public class MessagingSessionView extends Activity {
                 // Manual accept
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle(R.string.title_messaging_session);
-                builder.setMessage(getString(R.string.label_mm_from_id, from, serviceId));
+                builder.setMessage(getString(R.string.label_mm_from_id, from, mServiceId));
                 builder.setCancelable(false);
                 builder.setIcon(R.drawable.ri_notif_mm_session_icon);
                 builder.setPositiveButton(getString(R.string.label_accept), acceptBtnListener);
@@ -379,7 +378,7 @@ public class MessagingSessionView extends Activity {
             }
             // Display session info
             TextView featureTagEdit = (TextView) findViewById(R.id.feature_tag);
-            featureTagEdit.setText(serviceId);
+            featureTagEdit.setText(mServiceId);
             String from = RcsDisplayName.getInstance(this).getDisplayName(mContact);
             TextView contactEdit = (TextView) findViewById(R.id.contact);
             contactEdit.setText(from);
@@ -402,7 +401,7 @@ public class MessagingSessionView extends Activity {
         // Initiate the chat session in background
         try {
             // Initiate session
-            mSession = mCnxManager.getMultimediaSessionApi().initiateMessagingSession(serviceId,
+            mSession = mCnxManager.getMultimediaSessionApi().initiateMessagingSession(mServiceId,
                     mContact);
             mSessionId = mSession.getSessionId();
         } catch (Exception e) {

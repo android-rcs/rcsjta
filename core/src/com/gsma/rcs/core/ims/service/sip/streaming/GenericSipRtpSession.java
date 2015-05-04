@@ -56,42 +56,39 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
     /**
      * RTP payload format
      */
-    private DataFormat format = new DataFormat();
+    private DataFormat mFormat = new DataFormat();
 
     /**
      * Local RTP port
      */
-    private int localRtpPort = -1;
+    private int mLocalRtpPort = -1;
 
     /**
      * Data sender
      */
-    private DataSender dataSender = new DataSender();
+    private DataSender mDataSender = new DataSender();
 
     /**
      * Data receiver
      */
-    private DataReceiver dataReceiver = new DataReceiver(this);
+    private DataReceiver mDataReceiver = new DataReceiver(this);
 
     /**
      * RTP receiver
      */
-    private MediaRtpReceiver rtpReceiver;
+    private MediaRtpReceiver mRtpReceiver;
 
     /**
      * RTP sender
      */
-    private MediaRtpSender rtpSender;
+    private MediaRtpSender mRtpSender;
 
     /**
      * Media Session started flag
      */
     private boolean mMediaSessionStarted;
 
-    /**
-     * The logger
-     */
-    private final static Logger logger = Logger.getLogger(GenericSipRtpSession.class
+    private final static Logger sLogger = Logger.getLogger(GenericSipRtpSession.class
             .getSimpleName());
 
     /**
@@ -109,11 +106,11 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
         super(parent, contact, featureTag, rcsSettings, timestamp, contactManager);
 
         // Get local port
-        localRtpPort = NetworkRessourceManager.generateLocalRtpPort(rcsSettings);
+        mLocalRtpPort = NetworkRessourceManager.generateLocalRtpPort(rcsSettings);
 
         // Create the RTP sender & receiver
-        rtpReceiver = new MediaRtpReceiver(localRtpPort);
-        rtpSender = new MediaRtpSender(format, localRtpPort);
+        mRtpReceiver = new MediaRtpReceiver(mLocalRtpPort);
+        mRtpSender = new MediaRtpSender(mFormat, mLocalRtpPort);
     }
 
     /**
@@ -122,7 +119,7 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
      * @return RTP port
      */
     public int getLocalRtpPort() {
-        return localRtpPort;
+        return mLocalRtpPort;
     }
 
     /**
@@ -131,7 +128,7 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
      * @return RTP receiver
      */
     public MediaRtpReceiver getRtpReceiver() {
-        return rtpReceiver;
+        return mRtpReceiver;
     }
 
     /**
@@ -140,7 +137,7 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
      * @return RTP sender
      */
     public MediaRtpSender getRtpSender() {
-        return rtpSender;
+        return mRtpSender;
     }
 
     /**
@@ -149,7 +146,7 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
      * @return RTP format
      */
     public Format getRtpFormat() {
-        return format;
+        return mFormat;
     }
 
     /**
@@ -163,7 +160,7 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
         return "v=0" + SipUtils.CRLF + "o=- " + ntpTime + " " + ntpTime + " "
                 + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF + "s=-" + SipUtils.CRLF
                 + "c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF + "t=0 0"
-                + SipUtils.CRLF + "m=application " + localRtpPort + " RTP/AVP "
+                + SipUtils.CRLF + "m=application " + mLocalRtpPort + " RTP/AVP "
                 + getRtpFormat().getPayload() + SipUtils.CRLF + "a=rtpmap:"
                 + getRtpFormat().getPayload() + " " + getRtpFormat().getCodec() + "/90000"
                 + SipUtils.CRLF + // TODO: hardcoded value for clock rate and codec
@@ -183,9 +180,9 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
         int remotePort = mediaApp.port;
 
         // Prepare media
-        rtpReceiver.prepareSession(remoteHost, remotePort, dataReceiver, format, this);
-        rtpSender.prepareSession(dataSender, remoteHost, remotePort, rtpReceiver.getInputStream(),
-                this);
+        mRtpReceiver.prepareSession(remoteHost, remotePort, mDataReceiver, mFormat, this);
+        mRtpSender.prepareSession(mDataSender, remoteHost, remotePort,
+                mRtpReceiver.getInputStream(), this);
     }
 
     /**
@@ -196,8 +193,8 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
     public void startMediaSession() throws IOException {
         synchronized (this) {
             // Start media
-            rtpReceiver.startSession();
-            rtpSender.startSession();
+            mRtpReceiver.startSession();
+            mRtpSender.startSession();
 
             mMediaSessionStarted = true;
         }
@@ -211,8 +208,8 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
             mMediaSessionStarted = false;
 
             // Stop media
-            rtpSender.stopSession();
-            rtpReceiver.stopSession();
+            mRtpSender.stopSession();
+            mRtpReceiver.stopSession();
         }
     }
 
@@ -227,7 +224,7 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
         if (!mMediaSessionStarted) {
             throw new RtpException("unable to send payload!");
         }
-        dataSender.addFrame(content, System.currentTimeMillis());
+        mDataSender.addFrame(content, System.currentTimeMillis());
     }
 
     /**
@@ -238,8 +235,8 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
             return;
         }
 
-        if (logger.isActivated()) {
-            logger.error("Media has failed: network failure");
+        if (sLogger.isActivated()) {
+            sLogger.error("Media has failed: network failure");
         }
 
         // Close the media session

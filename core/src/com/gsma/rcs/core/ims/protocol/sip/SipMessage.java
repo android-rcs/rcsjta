@@ -23,12 +23,22 @@
 package com.gsma.rcs.core.ims.protocol.sip;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
+
+import com.gsma.rcs.core.ims.network.sip.FeatureTags;
+import com.gsma.rcs.core.ims.network.sip.Multipart;
+import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.service.SessionTimerManager;
+import com.gsma.rcs.utils.StringUtils;
+
+import android.text.TextUtils;
+
 import gov2.nist.javax2.sip.header.extensions.SessionExpiresHeader;
 
 import java.text.ParseException;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.ListIterator;
+import java.util.Set;
 
 import javax2.sip.Transaction;
 import javax2.sip.header.AcceptHeader;
@@ -44,12 +54,6 @@ import javax2.sip.header.ToHeader;
 import javax2.sip.header.ViaHeader;
 import javax2.sip.message.Message;
 
-import com.gsma.rcs.core.ims.network.sip.FeatureTags;
-import com.gsma.rcs.core.ims.network.sip.Multipart;
-import com.gsma.rcs.core.ims.network.sip.SipUtils;
-import com.gsma.rcs.core.ims.service.SessionTimerManager;
-import com.gsma.rcs.utils.StringUtils;
-
 /**
  * SIP message
  * 
@@ -58,15 +62,20 @@ import com.gsma.rcs.utils.StringUtils;
  */
 public abstract class SipMessage {
 
+    private final String HEADER_OF_NON_BASED_FTAG = "+";
+    
+    private final String FTAG_VALUE_LIST_EQUAL = "=";
+    private final String FTAG_VALUE_LIST_QUOT = "\"";
+    private final String FTAG_VALUE_LIST_COMA = ",";
+    
+    private final String ACCEPT_CONTACT_PARAMS_SEMI = ";";
+
     /**
      * SIP stack API object
      */
-    protected Message stackMessage;
+    protected Message mStackMessage;
 
-    /**
-     * SIP stack transaction
-     */
-    private Transaction stackTransaction = null;
+    private Transaction mStackTransaction;
 
     /**
      * Constructor
@@ -74,7 +83,7 @@ public abstract class SipMessage {
      * @param message SIP stack message
      */
     public SipMessage(Message message) {
-        this.stackMessage = message;
+        mStackMessage = message;
     }
 
     /**
@@ -90,7 +99,7 @@ public abstract class SipMessage {
      * @return SIP transaction
      */
     public Transaction getStackTransaction() {
-        return stackTransaction;
+        return mStackTransaction;
     }
 
     /**
@@ -99,7 +108,7 @@ public abstract class SipMessage {
      * @param transaction SIP transaction
      */
     public void setStackTransaction(Transaction transaction) {
-        stackTransaction = transaction;
+        mStackTransaction = transaction;
     }
 
     /**
@@ -111,7 +120,7 @@ public abstract class SipMessage {
     public void addHeader(String name, String value) {
         try {
             Header header = SipUtils.HEADER_FACTORY.createHeader(name, value);
-            stackMessage.setHeader(header);
+            mStackMessage.setHeader(header);
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -124,7 +133,7 @@ public abstract class SipMessage {
      * @return Header
      */
     public Header getHeader(String name) {
-        return stackMessage.getHeader(name);
+        return mStackMessage.getHeader(name);
     }
 
     /**
@@ -134,7 +143,7 @@ public abstract class SipMessage {
      * @return List of headers
      */
     public ListIterator<Header> getHeaders(String name) {
-        return stackMessage.getHeaders(name);
+        return mStackMessage.getHeaders(name);
     }
 
     /**
@@ -143,7 +152,7 @@ public abstract class SipMessage {
      * @return List of headers
      */
     public ListIterator<ViaHeader> getViaHeaders() {
-        return stackMessage.getHeaders(ViaHeader.NAME);
+        return mStackMessage.getHeaders(ViaHeader.NAME);
     }
 
     /**
@@ -152,7 +161,7 @@ public abstract class SipMessage {
      * @return String
      */
     public String getFrom() {
-        FromHeader header = (FromHeader) stackMessage.getHeader(FromHeader.NAME);
+        FromHeader header = (FromHeader) mStackMessage.getHeader(FromHeader.NAME);
         return header.getAddress().toString();
     }
 
@@ -162,7 +171,7 @@ public abstract class SipMessage {
      * @return String
      */
     public String getFromTag() {
-        FromHeader header = (FromHeader) stackMessage.getHeader(FromHeader.NAME);
+        FromHeader header = (FromHeader) mStackMessage.getHeader(FromHeader.NAME);
         return header.getTag();
     }
 
@@ -172,7 +181,7 @@ public abstract class SipMessage {
      * @return String
      */
     public String getFromUri() {
-        FromHeader header = (FromHeader) stackMessage.getHeader(FromHeader.NAME);
+        FromHeader header = (FromHeader) mStackMessage.getHeader(FromHeader.NAME);
         return header.getAddress().getURI().toString();
     }
 
@@ -182,7 +191,7 @@ public abstract class SipMessage {
      * @return String
      */
     public String getTo() {
-        ToHeader header = (ToHeader) stackMessage.getHeader(ToHeader.NAME);
+        ToHeader header = (ToHeader) mStackMessage.getHeader(ToHeader.NAME);
         return header.getAddress().toString();
     }
 
@@ -192,7 +201,7 @@ public abstract class SipMessage {
      * @return String
      */
     public String getToTag() {
-        ToHeader header = (ToHeader) stackMessage.getHeader(ToHeader.NAME);
+        ToHeader header = (ToHeader) mStackMessage.getHeader(ToHeader.NAME);
         return header.getTag();
     }
 
@@ -202,7 +211,7 @@ public abstract class SipMessage {
      * @return String
      */
     public String getToUri() {
-        ToHeader header = (ToHeader) stackMessage.getHeader(ToHeader.NAME);
+        ToHeader header = (ToHeader) mStackMessage.getHeader(ToHeader.NAME);
         return header.getAddress().getURI().toString();
     }
 
@@ -212,7 +221,7 @@ public abstract class SipMessage {
      * @return Number
      */
     public long getCSeq() {
-        CSeqHeader header = (CSeqHeader) stackMessage.getHeader(CSeqHeader.NAME);
+        CSeqHeader header = (CSeqHeader) mStackMessage.getHeader(CSeqHeader.NAME);
         return header.getSeqNumber();
     }
 
@@ -222,12 +231,11 @@ public abstract class SipMessage {
      * @return String or null
      */
     public String getContactURI() {
-        ContactHeader header = (ContactHeader) stackMessage.getHeader(ContactHeader.NAME);
+        ContactHeader header = (ContactHeader) mStackMessage.getHeader(ContactHeader.NAME);
         if (header != null) {
             return header.getAddress().getURI().toString();
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**
@@ -236,12 +244,11 @@ public abstract class SipMessage {
      * @return String or null
      */
     public String getContent() {
-        byte[] content = stackMessage.getRawContent();
+        byte[] content = mStackMessage.getRawContent();
         if (content != null) {
             return new String(content, UTF8);
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**
@@ -250,7 +257,7 @@ public abstract class SipMessage {
      * @return Byte array or null
      */
     public byte[] getRawContent() {
-        return stackMessage.getRawContent();
+        return mStackMessage.getRawContent();
     }
 
     /**
@@ -273,11 +280,11 @@ public abstract class SipMessage {
             String boundary = getBoundaryContentType();
             Multipart multi = new Multipart(content, boundary);
             return multi.getPart("application/sdp");
+
         } else if (contentType.equals("application/sdp")) {
             return content;
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**
@@ -286,7 +293,7 @@ public abstract class SipMessage {
      * @return String or null
      */
     public byte[] getContentBytes() {
-        return stackMessage.getRawContent();
+        return mStackMessage.getRawContent();
     }
 
     /**
@@ -295,13 +302,12 @@ public abstract class SipMessage {
      * @return String or null
      */
     public String getContentType() {
-        ContentTypeHeader header = (ContentTypeHeader) stackMessage
+        ContentTypeHeader header = (ContentTypeHeader) mStackMessage
                 .getHeader(ContentTypeHeader.NAME);
         if (header != null) {
             return header.getContentType() + "/" + header.getContentSubType();
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**
@@ -310,7 +316,7 @@ public abstract class SipMessage {
      * @return String or null
      */
     public String getBoundaryContentType() {
-        ContentTypeHeader header = (ContentTypeHeader) stackMessage
+        ContentTypeHeader header = (ContentTypeHeader) mStackMessage
                 .getHeader(ContentTypeHeader.NAME);
         if (header != null) {
             String value = header.getParameter("boundary");
@@ -319,9 +325,8 @@ public abstract class SipMessage {
                 value = StringUtils.removeQuotes(value);
             }
             return value;
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**
@@ -330,12 +335,11 @@ public abstract class SipMessage {
      * @return String or null
      */
     public String getCallId() {
-        CallIdHeader header = (CallIdHeader) stackMessage.getHeader(CallIdHeader.NAME);
+        CallIdHeader header = (CallIdHeader) mStackMessage.getHeader(CallIdHeader.NAME);
         if (header != null) {
             return header.getCallId();
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**
@@ -347,9 +351,8 @@ public abstract class SipMessage {
         SubjectHeader header = (SubjectHeader) getHeader(SubjectHeader.NAME);
         if (header != null) {
             return header.getSubject();
-        } else {
-            return "";
         }
+        return "";
     }
 
     /**
@@ -361,101 +364,114 @@ public abstract class SipMessage {
         AcceptHeader header = (AcceptHeader) getHeader(AcceptHeader.NAME);
         if (header != null) {
             return header.getContentType() + "/" + header.getContentSubType();
-        } else {
-            return null;
+        }
+        return null;
+    }
+
+    private StringBuilder formatFeatureTag(String name, String value) {
+        StringBuilder parameter = new StringBuilder(name);
+        parameter.append(FTAG_VALUE_LIST_EQUAL);
+        parameter.append(FTAG_VALUE_LIST_QUOT);
+        parameter.append(value);
+        parameter.append(FTAG_VALUE_LIST_QUOT);
+        return parameter;
+    }
+
+    private void addContactFeatureTags(Set<String> tags, ContactHeader contactHeader) {
+        for (Iterator<?> i = contactHeader.getParameterNames(); i.hasNext();) {
+            /* Extract parameter name & value */
+            String pname = (String) i.next();
+            if (!pname.startsWith(HEADER_OF_NON_BASED_FTAG)
+                    && !pname.equals(FeatureTags.FEATURE_RCSE_IP_VIDEO_CALL)
+                    && !pname.equals(FeatureTags.FEATURE_SIP_AUTOMATA)) {
+                /*
+                 * Only keep non based feature tags except AUTOMATA and VIDEO_CALL. Reject parameter
+                 * not starting with a + except FEATURE_SIP_AUTOMATA and FEATURE_RCSE_IP_VIDEO_CALL
+                 * which do not start with '+'
+                 */
+                continue;
+            }
+            String pvalue = contactHeader.getParameter(pname);
+            if (StringUtils.isEmpty(pvalue)) {
+                /* Add single parameter */
+                tags.add(pname);
+            } else {
+                /* Add pair parameters */
+                String[] values = pvalue.split(FTAG_VALUE_LIST_COMA);
+                for (String tag : values) {
+                    tags.add(formatFeatureTag(pname, tag.trim()).toString());
+                }
+            }
+        }
+    }
+
+    private void addAcceptContactFeatureTags(Set<String> tags, ListIterator<Header> acceptHeaders) {
+        /* Extract header parameters */
+        while (acceptHeaders.hasNext()) {
+            ExtensionHeader acceptHeader = (ExtensionHeader) acceptHeaders.next();
+            String acceptHeaderValue = acceptHeader.getValue();
+            String[] parameters = acceptHeaderValue.split(ACCEPT_CONTACT_PARAMS_SEMI);
+            for (String parameter : parameters) {
+                /* Extract parameter name & value */
+                String[] param = parameter.split(FTAG_VALUE_LIST_EQUAL);
+                String pname = param[0];
+                if (!pname.startsWith(HEADER_OF_NON_BASED_FTAG)) {
+                    /* only keep non based feature tags */
+                    continue;
+                }
+                String pvalue = null;
+                if (param.length == 2) {
+                    pvalue = param[1];
+                }
+                if (TextUtils.isEmpty(pvalue)) {
+                    /* Add single parameter */
+                    tags.add(pname);
+                } else {
+                    /* Add pair parameter */
+                    pvalue = pvalue.replace(FTAG_VALUE_LIST_QUOT, "");
+                    String[] values = pvalue.split(FTAG_VALUE_LIST_COMA);
+                    for (String tag : values) {
+                        tags.add(formatFeatureTag(pname, tag.trim()).toString());
+                    }
+                }
+            }
         }
     }
 
     /**
      * Get the features tags from Contact header and Accept-Contact header
      * 
-     * @return Array of strings
+     * @return Set of feature tags
      */
-    public ArrayList<String> getFeatureTags() {
-        ArrayList<String> tags = new ArrayList<String>();
-        ArrayList<String> temp = new ArrayList<String>();
-
-        // Read Contact header
-        ContactHeader contactHeader = (ContactHeader) stackMessage.getHeader(ContactHeader.NAME);
+    public Set<String> getFeatureTags() {
+        Set<String> tags = new HashSet<String>();
+        /* Read Contact header */
+        ContactHeader contactHeader = (ContactHeader) mStackMessage.getHeader(ContactHeader.NAME);
         if (contactHeader != null) {
-            // Extract header parameters
-            for (Iterator<?> i = contactHeader.getParameterNames(); i.hasNext();) {
-                // Extract parameter name & value
-                String pname = (String) i.next();
-                String pvalue = contactHeader.getParameter(pname);
-                if (StringUtils.isEmpty(pvalue)) {
-                    // Add single parameter
-                    temp.add(pname);
-                } else {
-                    // Add pair parameters
-                    String[] values = pvalue.split(",");
-                    for (int j = 0; j < values.length; j++) {
-                        String tag = values[j].trim();
-                        temp.add(pname + "=\"" + tag + "\"");
-                    }
-                }
-            }
+            addContactFeatureTags(tags, contactHeader);
         }
 
-        // Read Accept-Contact header
-        ExtensionHeader acceptHeader = (ExtensionHeader) stackMessage
-                .getHeader(SipUtils.HEADER_ACCEPT_CONTACT);
-        if (acceptHeader == null) {
-            // Check contracted form
-            acceptHeader = (ExtensionHeader) stackMessage
-                    .getHeader(SipUtils.HEADER_ACCEPT_CONTACT_C);
+        /* Read Accept-Contact header */
+        ListIterator<Header> acceptHeaders = getHeaders(SipUtils.HEADER_ACCEPT_CONTACT);
+        if (acceptHeaders == null || !acceptHeaders.hasNext()) {
+            /* Check contracted form */
+            acceptHeaders = getHeaders(SipUtils.HEADER_ACCEPT_CONTACT_C);
         }
 
-        if (acceptHeader != null) {
-            // Extract header parameters
-            String acceptHeaderValue = acceptHeader.getValue();
-            String[] parameters = acceptHeaderValue.split(";");
-            for (int i = 0; i < parameters.length; i++) {
-                // Extract parameter name & value
-                String[] param = parameters[i].split("=");
-                String pname = param[0];
-                String pvalue = null;
-                if (param.length == 2) {
-                    pvalue = param[1];
-                }
-                if ((pvalue == null) || (pvalue.length() == 0)) {
-                    // Add single parameter
-                    temp.add(pname);
-                } else {
-                    // Add pair parameter
-                    pvalue = pvalue.replace("\"", "");
-                    String[] values = pvalue.split(",");
-                    for (int j = 0; j < values.length; j++) {
-                        String tag = values[j].trim();
-                        temp.add(pname + "=\"" + tag + "\"");
-                    }
-                }
-            }
+        if (acceptHeaders != null) {
+            addAcceptContactFeatureTags(tags, acceptHeaders);
         }
 
-        // Filter results
-        for (int i = 0; i < temp.size(); i++) {
-            String tag = temp.get(i);
-
-            // Reject parameter not starting with a +
-            // FEATURE_SIP_AUTOMATA and FEATURE_RCSE_IP_VIDEO_CALL doesn't start with '+'
-            if (!tag.startsWith("+") && (!tag.equals(FeatureTags.FEATURE_RCSE_IP_VIDEO_CALL))
-                    && (!tag.equals(FeatureTags.FEATURE_SIP_AUTOMATA))) {
-                continue;
-            }
-
-            // Reject sip.instance parameter
+        Set<String> result = new HashSet<String>();
+        /* Filter irrelevant feature tags */
+        for (String tag : tags) {
+            /* Reject sip.instance parameter */
             if (tag.startsWith(SipUtils.SIP_INSTANCE_PARAM)) {
                 continue;
             }
-
-            // Avoid duplicate
-            if (!tags.contains(tag)) {
-                tags.add(tag);
-            }
+            result.add(tag);
         }
-
-        return tags;
+        return result;
     }
 
     /**
@@ -467,9 +483,8 @@ public abstract class SipMessage {
         SessionExpiresHeader sessionExpiresHeader = (SessionExpiresHeader) getHeader(SessionExpiresHeader.NAME);
         if (sessionExpiresHeader != null) {
             return sessionExpiresHeader.getExpires();
-        } else {
-            return -1;
         }
+        return -1;
     }
 
     /**
@@ -485,8 +500,7 @@ public abstract class SipMessage {
         }
         if (role == null) {
             return SessionTimerManager.UAC_ROLE;
-        } else {
-            return role;
         }
+        return role;
     }
 }

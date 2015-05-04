@@ -170,12 +170,11 @@ public class CapabilityUtils {
 
         // Analyze feature tags
         Capabilities capabilities = new Capabilities();
-        ArrayList<String> tags = msg.getFeatureTags();
+        Set<String> tags = msg.getFeatureTags();
         boolean ipCall_RCSE = false;
         boolean ipCall_3GPP = false;
 
-        for (int i = 0; i < tags.size(); i++) {
-            String tag = tags.get(i);
+        for (String tag : tags) {
             if (tag.contains(FeatureTags.FEATURE_3GPP_VIDEO_SHARE)) {
                 // Support video share service
                 capabilities.setVideoSharingSupport(true);
@@ -280,11 +279,7 @@ public class CapabilityUtils {
                     String[] types = attr.getValue().split(" ");
                     for (int j = 0; j < types.length; j++) {
                         String fmt = types[j];
-                        if ((fmt != null) && MimeManager.getInstance().isMimeTypeSupported(fmt)) { // Changed
-                                                                                                   // by
-                                                                                                   // Deutsche
-                                                                                                   // Telekom
-                                                                                                   // AG
+                        if ((fmt != null) && MimeManager.getInstance().isMimeTypeSupported(fmt)) {
                             imgFormats.addElement(fmt);
                         }
                     }
