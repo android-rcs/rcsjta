@@ -267,8 +267,9 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                 dialogPath.sessionEstablished();
 
                 // Start session timer
-                if (getSessionTimerManager().isSessionTimerActivated(resp)) {
-                    getSessionTimerManager().start(SessionTimerManager.UAS_ROLE,
+                SessionTimerManager sessionTimerManager = getSessionTimerManager();
+                if (sessionTimerManager.isSessionTimerActivated(resp)) {
+                    sessionTimerManager.start(SessionTimerManager.UAS_ROLE,
                             dialogPath.getSessionExpireTime());
                 }
 

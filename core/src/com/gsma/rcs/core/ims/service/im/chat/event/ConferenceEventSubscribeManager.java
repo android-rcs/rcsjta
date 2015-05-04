@@ -65,7 +65,12 @@ import javax2.sip.header.SubscriptionStateHeader;
  */
 public class ConferenceEventSubscribeManager extends PeriodicRefresher {
     /**
-     * Last min expire period (in seconds)
+     * Rate to convert from seconds to milliseconds
+     */
+    private static final long SECONDS_TO_MILLISECONDS_CONVERSION_RATE = 1000;
+
+    /**
+     * Last min expire period (in milliseconds)
      */
     private static final String REGISTRY_MIN_EXPIRE_PERIOD = "MinSubscribeConferenceEventExpirePeriod";
 
@@ -85,9 +90,9 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
     private SipDialogPath mDialogPath;
 
     /**
-     * Expire period
+     * Expire period in milliseconds
      */
-    private int mExpirePeriod;
+    private long mExpirePeriod;
 
     /**
      * Subscription flag
@@ -121,9 +126,8 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
         mRcsSettings = rcsSettings;
         mMessagingLog = messagingLog;
 
-        int defaultExpirePeriod = mRcsSettings.getSubscribeExpirePeriod();
-        int minExpireValue = RegistryFactory.getFactory().readInteger(REGISTRY_MIN_EXPIRE_PERIOD,
-                -1);
+        long defaultExpirePeriod = mRcsSettings.getSubscribeExpirePeriod();
+        long minExpireValue = RegistryFactory.getFactory().readLong(REGISTRY_MIN_EXPIRE_PERIOD, -1);
         if ((minExpireValue != -1) && (defaultExpirePeriod < minExpireValue)) {
             mExpirePeriod = minExpireValue;
         } else {
@@ -388,11 +392,11 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * Create a SUBSCRIBE request
      * 
      * @param dialog SIP dialog path
-     * @param expirePeriod Expiration period
+     * @param expirePeriod Expiration period in milliseconds
      * @return SIP request
      * @throws Exception
      */
-    private SipRequest createSubscribe(SipDialogPath dialog, int expirePeriod) throws Exception {
+    private SipRequest createSubscribe(SipDialogPath dialog, long expirePeriod) throws Exception {
         // Create SUBSCRIBE message
         SipRequest subscribe = SipMessageFactory.createSubscribe(dialog, expirePeriod);
 
@@ -526,7 +530,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
         if (expiresHeader != null) {
             int expires = expiresHeader.getExpires();
             if (expires != -1) {
-                mExpirePeriod = expires;
+                mExpirePeriod = expires * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
             }
         }
     }
@@ -539,7 +543,8 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      */
     private void sendSubscribe(SipRequest subscribe) throws Exception {
         if (sLogger.isActivated()) {
-            sLogger.info("Send SUBSCRIBE, expire=" + subscribe.getExpires());
+            sLogger.info(new StringBuilder("Send SUBSCRIBE, expire=")
+                    .append(subscribe.getExpires()).append("ms").toString());
         }
 
         if (mSubscribed) {
@@ -657,7 +662,8 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
             sLogger.info("Send second SUBSCRIBE");
         }
         SipRequest subscribe = createSubscribe(mDialogPath, ctx.getTransaction().getRequest()
-                .getExpires().getExpires());
+                .getExpires().getExpires()
+                * SECONDS_TO_MILLISECONDS_CONVERSION_RATE);
 
         // Set the Authorization header
         mAuthenticationAgent.setProxyAuthorizationHeader(subscribe);
@@ -684,7 +690,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
         mDialogPath.incrementCseq();
 
         // Extract the Min-Expire value
-        int minExpire = SipUtils.getMinExpiresPeriod(resp);
+        long minExpire = SipUtils.getMinExpiresPeriod(resp);
         if (minExpire == -1) {
             if (sLogger.isActivated()) {
                 sLogger.error("Can't read the Min-Expires value");
@@ -695,7 +701,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
         }
 
         // Save the min expire value in the terminal registry
-        RegistryFactory.getFactory().writeInteger(REGISTRY_MIN_EXPIRE_PERIOD, minExpire);
+        RegistryFactory.getFactory().writeLong(REGISTRY_MIN_EXPIRE_PERIOD, minExpire);
 
         // Set the default expire value
         mExpirePeriod = minExpire;

@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +15,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.utils;
+
+import com.gsma.rcs.platform.AndroidFactory;
+import com.gsma.rcs.utils.logger.Logger;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -24,9 +31,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-
-import com.gsma.rcs.platform.AndroidFactory;
-import com.gsma.rcs.utils.logger.Logger;
 
 /**
  * Periodic refresher
@@ -55,11 +59,6 @@ public abstract class PeriodicRefresher {
     private boolean timerStarted = false;
 
     /**
-     * Polling period
-     */
-    private int pollingPeriod;
-
-    /**
      * The logger
      */
     private Logger logger = Logger.getLogger(this.getClass().getName());
@@ -82,19 +81,19 @@ public abstract class PeriodicRefresher {
     /**
      * Start the timer
      * 
-     * @param expirePeriod Expiration period in seconds
+     * @param expirePeriod Expiration period in milliseconds
      */
-    public void startTimer(int expirePeriod) {
+    public void startTimer(long expirePeriod) {
         startTimer(expirePeriod, 1.0);
     }
 
     /**
      * Start the timer
      * 
-     * @param expirePeriod Expiration period in seconds
+     * @param expirePeriod Expiration period in milliseconds
      * @param delta Delta to apply on the expire period in percentage
      */
-    public synchronized void startTimer(int expirePeriod, double delta) {
+    public synchronized void startTimer(long expirePeriod, double delta) {
         // Check expire period
         if (expirePeriod <= 0) {
             // Expire period is null
@@ -105,10 +104,10 @@ public abstract class PeriodicRefresher {
         }
 
         // Calculate the effective refresh period
-        pollingPeriod = (int) (expirePeriod * delta);
+        long pollingPeriod = (long) (expirePeriod * delta);
         if (logger.isActivated()) {
-            logger.debug("Start timer at period=" + pollingPeriod + "s (expiration=" + expirePeriod
-                    + "s)");
+            logger.debug(new StringBuilder("Start timer at period=").append(pollingPeriod)
+                    .append("ms (expiration=").append(expirePeriod).append("ms)").toString());
         }
 
         // Register the alarm receiver
@@ -118,8 +117,7 @@ public abstract class PeriodicRefresher {
         // Start alarm from now to the expire value
         AlarmManager am = (AlarmManager) AndroidFactory.getApplicationContext().getSystemService(
                 Context.ALARM_SERVICE);
-        am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + pollingPeriod * 1000,
-                alarmIntent);
+        am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + pollingPeriod, alarmIntent);
 
         // The timer is started
         timerStarted = true;

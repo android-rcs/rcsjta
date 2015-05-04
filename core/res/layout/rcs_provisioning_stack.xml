@@ -102,7 +102,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dip"
-                android:text="@string/IMS_service_polling_period_seconds" />
+                android:text="@string/IMS_service_polling_period_milliseconds" />
 
             <EditText
                 android:id="@+id/ImsServicePollingPeriod"
@@ -112,7 +112,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
-                android:maxLength="10" />
+                android:maxLength="13" />
 
             <TextView
                 android:layout_width="fill_parent"
@@ -252,7 +252,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dip"
-                android:text="@string/SIP_keep_alive_period_seconds" />
+                android:text="@string/SIP_keep_alive_period_milliseconds" />
 
             <EditText
                 android:id="@+id/SipKeepAlivePeriod"
@@ -262,7 +262,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
-                android:maxLength="5" />
+                android:maxLength="8" />
 
             <TextView
                 android:layout_width="fill_parent"
@@ -316,7 +316,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dip"
-                android:text="@string/MSRP_transaction_timeout_seconds" />
+                android:text="@string/MSRP_transaction_timeout_milliseconds" />
 
             <EditText
                 android:id="@+id/MsrpTransactionTimeout"
@@ -326,13 +326,13 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
-                android:maxLength="5" />
+                android:maxLength="8" />
 
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dip"
-                android:text="@string/Registration_expire_period_seconds" />
+                android:text="@string/Registration_expire_period_milliseconds" />
 
             <EditText
                 android:id="@+id/RegisterExpirePeriod"
@@ -342,13 +342,13 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
-                android:maxLength="10" />
+                android:maxLength="13" />
 
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dip"
-                android:text="@string/Registration_retry_base_time_seconds" />
+                android:text="@string/Registration_retry_base_time_milliseconds" />
 
             <EditText
                 android:id="@+id/RegisterRetryBaseTime"
@@ -358,13 +358,13 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
-                android:maxLength="10" />
+                android:maxLength="13" />
 
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dip"
-                android:text="@string/Registration_retry_max_time_seconds" />
+                android:text="@string/Registration_retry_max_time_milliseconds" />
 
             <EditText
                 android:id="@+id/RegisterRetryMaxTime"
@@ -374,13 +374,13 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
-                android:maxLength="10" />
+                android:maxLength="13" />
 
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dip"
-                android:text="@string/Publish_expire_period_seconds" />
+                android:text="@string/Publish_expire_period_milliseconds" />
 
             <EditText
                 android:id="@+id/PublishExpirePeriod"
@@ -390,13 +390,13 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
-                android:maxLength="10" />
+                android:maxLength="13" />
 
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dip"
-                android:text="@string/Revoke_timeout_seconds" />
+                android:text="@string/Revoke_timeout_milliseconds" />
 
             <EditText
                 android:id="@+id/RevokeTimeout"
@@ -406,7 +406,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
-                android:maxLength="10" />
+                android:maxLength="13" />
 
             <TextView
                 android:layout_width="fill_parent"
@@ -428,7 +428,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dip"
-                android:text="@string/Subscribe_expiration_timeout_seconds" />
+                android:text="@string/Subscribe_expiration_timeout_milliseconds" />
 
             <EditText
                 android:id="@+id/SubscribeExpirePeriod"
@@ -438,7 +438,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
-                android:maxLength="10" />
+                android:maxLength="13" />
 
             <TextView
                 android:layout_width="fill_parent"
@@ -460,7 +460,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dip"
-                android:text="@string/Session_refresh_expire_period_seconds" />
+                android:text="@string/Session_refresh_expire_period_milliseconds" />
 
             <EditText
                 android:id="@+id/SessionRefreshExpirePeriod"
@@ -470,13 +470,13 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
-                android:maxLength="10" />
+                android:maxLength="13" />
 
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dip"
-                android:text="@string/Capability_refresh_timeout_seconds" />
+                android:text="@string/Capability_refresh_timeout_milliseconds" />
 
             <EditText
                 android:id="@+id/CapabilityRefreshTimeout"
@@ -486,13 +486,13 @@
                 android:layout_marginRight="5dip"
                 android:inputType="numberSigned"
                 android:lines="1"
-                android:maxLength="10" />
+                android:maxLength="13" />
 
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dip"
-                android:text="@string/Capability_expiry_timeout_seconds" />
+                android:text="@string/Capability_expiry_timeout_milliseconds" />
 
             <EditText
                 android:id="@+id/CapabilityExpiryTimeout"
@@ -502,13 +502,13 @@
                 android:layout_marginRight="5dip"
                 android:inputType="numberSigned"
                 android:lines="1"
-                android:maxLength="10" />
+                android:maxLength="13" />
 
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dip"
-                android:text="@string/Capability_polling_period_seconds" />
+                android:text="@string/Capability_polling_period_milliseconds" />
 
             <EditText
                 android:id="@+id/CapabilityPollingPeriod"
@@ -518,7 +518,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="numberSigned"
                 android:lines="1"
-                android:maxLength="10" />
+                android:maxLength="13" />
 
             <TextView
                 android:layout_width="fill_parent"

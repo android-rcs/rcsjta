@@ -876,7 +876,7 @@ public class RcsCoreService extends Service implements CoreListener {
     @Override
     public void handleUserConfirmationRequest(ContactId remote, String id, String type,
             boolean pin, String subject, String text, String acceptButtonLabel,
-            String rejectButtonLabel, int timeout) {
+            String rejectButtonLabel, long timeout) {
         if (sLogger.isActivated()) {
             sLogger.debug("Handle event user terms confirmation request");
         }

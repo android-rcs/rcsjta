@@ -336,9 +336,10 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
                 for (ImsSessionListener listener : listeners) {
                     listener.handleSessionStarted(contact);
                 }
-                if (getSessionTimerManager().isSessionTimerActivated(resp)) {
-                    getSessionTimerManager().start(SessionTimerManager.UAS_ROLE,
-                            getDialogPath().getSessionExpireTime());
+                SessionTimerManager sessionTimerManager = getSessionTimerManager();
+                if (sessionTimerManager.isSessionTimerActivated(resp)) {
+                    sessionTimerManager.start(SessionTimerManager.UAS_ROLE, getDialogPath()
+                            .getSessionExpireTime());
                 }
                 getActivityManager().start();
 

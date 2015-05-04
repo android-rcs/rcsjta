@@ -14,13 +14,12 @@
  * the License.
  */
 
-package com.gsma.rcs.core.ims.service.im.chat;
+package com.gsma.rcs.provider.messaging;
 
-import com.gsma.rcs.provider.messaging.MessagingLog;
+import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.chat.ChatLog.GroupChat;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent;
@@ -77,14 +76,15 @@ public class GroupChatPersistedStorageAccessor {
         try {
             cursor = mMessagingLog.getGroupChatData(mChatId);
             /* TODO: Handle cursor when null. */
-            mSubject = cursor.getString(cursor.getColumnIndexOrThrow(GroupChat.SUBJECT));
+            mSubject = cursor.getString(cursor.getColumnIndexOrThrow(GroupChatData.KEY_SUBJECT));
             mDirection = Direction.valueOf(cursor.getInt(cursor
-                    .getColumnIndexOrThrow(GroupChat.DIRECTION)));
-            String contact = cursor.getString(cursor.getColumnIndexOrThrow(GroupChat.CONTACT));
+                    .getColumnIndexOrThrow(GroupChatData.KEY_DIRECTION)));
+            String contact = cursor.getString(cursor
+                    .getColumnIndexOrThrow(GroupChatData.KEY_CONTACT));
             if (contact != null) {
                 mContact = ContactUtil.createContactIdFromTrustedData(contact);
             }
-            mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(GroupChat.TIMESTAMP));
+            mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(GroupChatData.KEY_TIMESTAMP));
         } finally {
             if (cursor != null) {
                 cursor.close();

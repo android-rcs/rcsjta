@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +15,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.presence;
-
-import java.util.Vector;
-
-import javax2.sip.header.ExpiresHeader;
 
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
@@ -35,6 +35,10 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PeriodicRefresher;
 import com.gsma.rcs.utils.logger.Logger;
 
+import java.util.Vector;
+
+import javax2.sip.header.ExpiresHeader;
+
 /**
  * Generic subscribe manager
  * 
@@ -42,7 +46,12 @@ import com.gsma.rcs.utils.logger.Logger;
  */
 public abstract class SubscribeManager extends PeriodicRefresher {
     /**
-     * Last min expire period (in seconds)
+     * Rate to convert from seconds to milliseconds
+     */
+    private static final long SECONDS_TO_MILLISECONDS_CONVERSION_RATE = 1000;
+
+    /**
+     * Last min expire period (in milliseconds)
      */
     private static final String REGISTRY_MIN_EXPIRE_PERIOD = "MinSubscribeExpirePeriod";
 
@@ -57,9 +66,9 @@ public abstract class SubscribeManager extends PeriodicRefresher {
     private SipDialogPath mDialogPath;
 
     /**
-     * Expire period
+     * Expire period in milliseconds
      */
-    private int mExpirePeriod;
+    private long mExpirePeriod;
 
     /**
      * Subscription flag
@@ -89,9 +98,8 @@ public abstract class SubscribeManager extends PeriodicRefresher {
         mAuthenticationAgent = new SessionAuthenticationAgent(mImsModule);
         mRcsSettings = rcsSettings;
 
-        int defaultExpirePeriod = rcsSettings.getSubscribeExpirePeriod();
-        int minExpireValue = RegistryFactory.getFactory().readInteger(REGISTRY_MIN_EXPIRE_PERIOD,
-                -1);
+        long defaultExpirePeriod = rcsSettings.getSubscribeExpirePeriod();
+        long minExpireValue = RegistryFactory.getFactory().readLong(REGISTRY_MIN_EXPIRE_PERIOD, -1);
         if ((minExpireValue != -1) && (defaultExpirePeriod < minExpireValue)) {
             mExpirePeriod = minExpireValue;
         } else {
@@ -194,11 +202,11 @@ public abstract class SubscribeManager extends PeriodicRefresher {
      * Create a SUBSCRIBE request
      * 
      * @param dialog SIP dialog path
-     * @param expirePeriod Expiration period
+     * @param expirePeriod Expiration period in milliseconds
      * @return SIP request
      * @throws SipException
      */
-    public abstract SipRequest createSubscribe(SipDialogPath dialog, int expirePeriod)
+    public abstract SipRequest createSubscribe(SipDialogPath dialog, long expirePeriod)
             throws SipException;
 
     /**
@@ -324,7 +332,7 @@ public abstract class SubscribeManager extends PeriodicRefresher {
         if (expiresHeader != null) {
             int expires = expiresHeader.getExpires();
             if (expires != -1) {
-                mExpirePeriod = expires;
+                mExpirePeriod = expires * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
             }
         }
     }
@@ -337,7 +345,8 @@ public abstract class SubscribeManager extends PeriodicRefresher {
      */
     private void sendSubscribe(SipRequest subscribe) throws Exception {
         if (logger.isActivated()) {
-            logger.info("Send SUBSCRIBE, expire=" + subscribe.getExpires());
+            logger.info(new StringBuilder("Send SUBSCRIBE, expire=").append(subscribe.getExpires())
+                    .append("ms").toString());
         }
 
         if (mSubscribed) {
@@ -448,7 +457,8 @@ public abstract class SubscribeManager extends PeriodicRefresher {
             logger.info("Send second SUBSCRIBE");
         }
         SipRequest subscribe = createSubscribe(mDialogPath, ctx.getTransaction().getRequest()
-                .getExpires().getExpires());
+                .getExpires().getExpires()
+                * SECONDS_TO_MILLISECONDS_CONVERSION_RATE);
 
         // Set the Authorization header
         mAuthenticationAgent.setProxyAuthorizationHeader(subscribe);
@@ -475,7 +485,7 @@ public abstract class SubscribeManager extends PeriodicRefresher {
         mDialogPath.incrementCseq();
 
         // Extract the Min-Expire value
-        int minExpire = SipUtils.getMinExpiresPeriod(resp);
+        long minExpire = SipUtils.getMinExpiresPeriod(resp);
         if (minExpire == -1) {
             if (logger.isActivated()) {
                 logger.error("Can't read the Min-Expires value");
@@ -486,7 +496,7 @@ public abstract class SubscribeManager extends PeriodicRefresher {
         }
 
         // Save the min expire value in the terminal registry
-        RegistryFactory.getFactory().writeInteger(REGISTRY_MIN_EXPIRE_PERIOD, minExpire);
+        RegistryFactory.getFactory().writeLong(REGISTRY_MIN_EXPIRE_PERIOD, minExpire);
 
         // Set the default expire value
         mExpirePeriod = minExpire;

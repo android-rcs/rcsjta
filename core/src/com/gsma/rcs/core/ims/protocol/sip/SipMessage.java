@@ -61,13 +61,17 @@ import javax2.sip.message.Message;
  * @author Deutsche Telekom AG
  */
 public abstract class SipMessage {
+    /**
+     * Rate to convert from seconds to milliseconds
+     */
+    protected static final long SECONDS_TO_MILLISECONDS_CONVERSION_RATE = 1000;
 
     private final String HEADER_OF_NON_BASED_FTAG = "+";
-    
+
     private final String FTAG_VALUE_LIST_EQUAL = "=";
     private final String FTAG_VALUE_LIST_QUOT = "\"";
     private final String FTAG_VALUE_LIST_COMA = ",";
-    
+
     private final String ACCEPT_CONTACT_PARAMS_SEMI = ";";
 
     /**
@@ -477,12 +481,12 @@ public abstract class SipMessage {
     /**
      * Get session timer expire
      * 
-     * @return Expire time or -1 if no session timer
+     * @return Expire time in milliseconds or -1 if no session timer
      */
-    public int getSessionTimerExpire() {
+    public long getSessionTimerExpire() {
         SessionExpiresHeader sessionExpiresHeader = (SessionExpiresHeader) getHeader(SessionExpiresHeader.NAME);
         if (sessionExpiresHeader != null) {
-            return sessionExpiresHeader.getExpires();
+            return sessionExpiresHeader.getExpires() * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
         }
         return -1;
     }

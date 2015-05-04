@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.protocol.msrp;
@@ -28,9 +32,9 @@ import java.util.TimerTask;
  */
 public class MsrpTransaction extends Object {
     /**
-     * MRSP report transaction timeout (in seconds)
+     * MRSP report transaction timeout (in milliseconds)
      */
-    private final static int TIMEOUT = 30;
+    private final static long TIMEOUT = 30000;
 
     /**
      * Count number of sent requests without response
@@ -156,7 +160,7 @@ public class MsrpTransaction extends Object {
                 timerExpire();
             }
         };
-        timer.schedule(timertask, TIMEOUT * 1000);
+        timer.schedule(timertask, TIMEOUT);
     }
 
     /**

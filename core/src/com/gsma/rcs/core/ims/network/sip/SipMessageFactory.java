@@ -79,6 +79,11 @@ import javax2.sip.message.Response;
  */
 public class SipMessageFactory {
     /**
+     * Rate to convert from seconds to milliseconds
+     */
+    private static final long SECONDS_TO_MILLISECONDS_CONVERSION_RATE = 1000;
+
+    /**
      * The logger
      */
     private static Logger logger = Logger.getLogger(SipMessageFactory.class.getName());
@@ -88,13 +93,13 @@ public class SipMessageFactory {
      * 
      * @param dialog SIP dialog path
      * @param featureTags Feature tags
-     * @param expirePeriod Expiration period
+     * @param expirePeriod Expiration period in milliseconds
      * @param instanceId UA SIP instance ID
      * @return SIP request
      * @throws SipException
      */
     public static SipRequest createRegister(SipDialogPath dialog, String[] featureTags,
-            int expirePeriod, String instanceId) throws SipException {
+            long expirePeriod, String instanceId) throws SipException {
         try {
             // Set request line header
             URI requestURI = SipUtils.ADDR_FACTORY.createURI(dialog.getTarget());
@@ -155,7 +160,8 @@ public class SipMessageFactory {
             SipUtils.buildAllowHeader(register);
 
             // Set the Expires header
-            ExpiresHeader expHeader = SipUtils.HEADER_FACTORY.createExpiresHeader(expirePeriod);
+            ExpiresHeader expHeader = SipUtils.HEADER_FACTORY
+                    .createExpiresHeader((int) (expirePeriod / SECONDS_TO_MILLISECONDS_CONVERSION_RATE));
             register.addHeader(expHeader);
 
             // Set User-Agent header
@@ -178,11 +184,11 @@ public class SipMessageFactory {
      * Create a SIP SUBSCRIBE request
      * 
      * @param dialog SIP dialog path
-     * @param expirePeriod Expiration period
+     * @param expirePeriod Expiration period in milliseconds
      * @return SIP request
      * @throws SipException
      */
-    public static SipRequest createSubscribe(SipDialogPath dialog, int expirePeriod)
+    public static SipRequest createSubscribe(SipDialogPath dialog, long expirePeriod)
             throws SipException {
         try {
             // Set request line header
@@ -220,7 +226,8 @@ public class SipMessageFactory {
             }
 
             // Set the Expires header
-            ExpiresHeader expHeader = SipUtils.HEADER_FACTORY.createExpiresHeader(expirePeriod);
+            ExpiresHeader expHeader = SipUtils.HEADER_FACTORY
+                    .createExpiresHeader((int) (expirePeriod / SECONDS_TO_MILLISECONDS_CONVERSION_RATE));
             subscribe.addHeader(expHeader);
 
             // Set User-Agent header
@@ -361,13 +368,13 @@ public class SipMessageFactory {
      * Create a SIP PUBLISH request
      * 
      * @param dialog SIP dialog path
-     * @param expirePeriod Expiration period
+     * @param expirePeriod Expiration period in milliseconds
      * @param entityTag Entity tag
      * @param sdp SDP part
      * @return SIP request
      * @throws SipException
      */
-    public static SipRequest createPublish(SipDialogPath dialog, int expirePeriod,
+    public static SipRequest createPublish(SipDialogPath dialog, long expirePeriod,
             String entityTag, String sdp) throws SipException {
         try {
             // Set request line header
@@ -405,7 +412,8 @@ public class SipMessageFactory {
             }
 
             // Set the Expires header
-            ExpiresHeader expHeader = SipUtils.HEADER_FACTORY.createExpiresHeader(expirePeriod);
+            ExpiresHeader expHeader = SipUtils.HEADER_FACTORY
+                    .createExpiresHeader((int) (expirePeriod / SECONDS_TO_MILLISECONDS_CONVERSION_RATE));
             publish.addHeader(expHeader);
 
             // Set the SIP-If-Match header
@@ -695,8 +703,10 @@ public class SipMessageFactory {
 
                 // Set Session-Timer header
                 Header sessionExpiresHeader = SipUtils.HEADER_FACTORY.createHeader(
-                        SipUtils.HEADER_SESSION_EXPIRES, dialog.getSessionExpireTime()
-                                + ";refresher=" + dialog.getInvite().getSessionTimerRefresher());
+                        SipUtils.HEADER_SESSION_EXPIRES,
+                        new StringBuilder(String.valueOf(dialog.getSessionExpireTime()
+                                / SECONDS_TO_MILLISECONDS_CONVERSION_RATE)).append(";refresher=")
+                                .append(dialog.getInvite().getSessionTimerRefresher()).toString());
                 response.addHeader(sessionExpiresHeader);
             }
 

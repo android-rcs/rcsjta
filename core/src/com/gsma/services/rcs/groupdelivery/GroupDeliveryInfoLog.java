@@ -83,7 +83,7 @@ public class GroupDeliveryInfoLog {
      * The name of the column containing the time when message or file transfer notification is
      * displayed.
      * <P>
-     * Type: LONG
+     * Type: INTEGER
      * </P>
      */
     public static final String TIMESTAMP_DELIVERED = "timestamp_delivered";
@@ -91,7 +91,7 @@ public class GroupDeliveryInfoLog {
     /**
      * The name of the column containing the time when message is displayed or file transfer is done
      * <P>
-     * Type: LONG
+     * Type: INTEGER
      * </P>
      */
     public static final String TIMESTAMP_DISPLAYED = "timestamp_displayed";

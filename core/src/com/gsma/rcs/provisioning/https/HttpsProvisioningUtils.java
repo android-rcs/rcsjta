@@ -42,7 +42,7 @@ public class HttpsProvisioningUtils {
     protected static final String UNKNOWN = "unknown";
 
     /**
-     * Retry base timeout - 5min
+     * Retry base timeout - 5min (in milliseconds)
      */
     protected static final int RETRY_BASE_TIMEOUT = 300000;
 

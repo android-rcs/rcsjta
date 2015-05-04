@@ -70,7 +70,7 @@ public class ChatServiceConfigurationImpl extends IChatServiceConfiguration.Stub
     }
 
     @Override
-    public int getGeolocExpirationTime() throws RemoteException {
+    public long getGeolocExpirationTime() throws RemoteException {
         try {
             return mRcsSettings.getGeolocExpirationTime();
 

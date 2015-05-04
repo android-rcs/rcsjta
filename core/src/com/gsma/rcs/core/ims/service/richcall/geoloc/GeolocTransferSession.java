@@ -44,9 +44,9 @@ import com.gsma.services.rcs.contact.ContactId;
  */
 public abstract class GeolocTransferSession extends ContentSharingSession {
     /**
-     * Default SO_TIMEOUT value (in seconds)
+     * Default SO_TIMEOUT value (in milliseconds)
      */
-    public final static int DEFAULT_SO_TIMEOUT = 30;
+    public final static long DEFAULT_SO_TIMEOUT = 30000;
 
     /**
      * Geoloc transfered

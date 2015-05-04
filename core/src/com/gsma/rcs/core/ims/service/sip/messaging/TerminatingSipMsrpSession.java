@@ -267,9 +267,10 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
                 getDialogPath().sessionEstablished();
 
                 // Start session timer
-                if (getSessionTimerManager().isSessionTimerActivated(resp)) {
-                    getSessionTimerManager().start(SessionTimerManager.UAS_ROLE,
-                            getDialogPath().getSessionExpireTime());
+                SessionTimerManager sessionTimerManager = getSessionTimerManager();
+                if (sessionTimerManager.isSessionTimerActivated(resp)) {
+                    sessionTimerManager.start(SessionTimerManager.UAS_ROLE, getDialogPath()
+                            .getSessionExpireTime());
                 }
 
                 // Notify listeners

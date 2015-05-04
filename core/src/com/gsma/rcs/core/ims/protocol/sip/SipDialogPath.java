@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.protocol.sip;
@@ -112,9 +116,9 @@ public class SipDialogPath {
     private SessionAuthenticationAgent mAuthenticationAgent;
 
     /**
-     * Session expire time
+     * Session expire time in milliseconds
      */
-    private int mSessionExpireTime;
+    private long mSessionExpireTime;
 
     /**
      * Flag that indicates if the signalisation is established or not
@@ -168,8 +172,8 @@ public class SipDialogPath {
         mRemoteParty = remoteParty;
         mRoute = route;
 
-        int defaultExpireTime = rcsSettings.getSessionRefreshExpirePeriod();
-        int minExpireValue = RegistryFactory.getFactory().readInteger(
+        long defaultExpireTime = rcsSettings.getSessionRefreshExpirePeriod();
+        long minExpireValue = RegistryFactory.getFactory().readLong(
                 REGISTRY_MIN_SESSION_EXPIRE_PERIOD, -1);
         if ((defaultExpireTime > SessionTimerManager.MIN_EXPIRE_PERIOD) && (minExpireValue != -1)
                 && (defaultExpireTime < minExpireValue)) {
@@ -528,28 +532,28 @@ public class SipDialogPath {
     /**
      * Returns the session expire value
      * 
-     * @return Session expire time in seconds
+     * @return Session expire time in milliseconds
      */
-    public int getSessionExpireTime() {
+    public long getSessionExpireTime() {
         return mSessionExpireTime;
     }
 
     /**
      * Set the session expire value
      * 
-     * @param sessionExpireTime Session expire time in seconds
+     * @param sessionExpireTime Session expire time in milliseconds
      */
-    public void setSessionExpireTime(int sessionExpireTime) {
+    public void setSessionExpireTime(long sessionExpireTime) {
         mSessionExpireTime = sessionExpireTime;
     }
 
     /**
      * Set the min session expire value
      * 
-     * @param sessionExpireTime Session expire time in seconds
+     * @param sessionExpireTime Session expire time in milliseconds
      */
-    public void setMinSessionExpireTime(int sessionExpireTime) {
-        RegistryFactory.getFactory().writeInteger(REGISTRY_MIN_SESSION_EXPIRE_PERIOD,
+    public void setMinSessionExpireTime(long sessionExpireTime) {
+        RegistryFactory.getFactory().writeLong(REGISTRY_MIN_SESSION_EXPIRE_PERIOD,
                 sessionExpireTime);
     }
 

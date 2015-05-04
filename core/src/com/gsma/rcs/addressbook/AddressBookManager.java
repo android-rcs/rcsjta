@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +15,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.addressbook;
 
-import java.util.Vector;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import com.gsma.rcs.core.CoreException;
+import com.gsma.rcs.platform.AndroidFactory;
+import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.utils.logger.Logger;
 
 import android.content.ContentResolver;
 import android.database.ContentObserver;
@@ -29,10 +34,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 
-import com.gsma.rcs.core.CoreException;
-import com.gsma.rcs.platform.AndroidFactory;
-import com.gsma.rcs.provider.contact.ContactManager;
-import com.gsma.rcs.utils.logger.Logger;
+import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Address book manager:<br>
@@ -76,9 +80,9 @@ public class AddressBookManager {
     private final static int CHECK_MESSAGE = 5765;
 
     /**
-     * Minimum period awaited before we do the checking
+     * Minimum period awaited before we do the checking in milliseconds
      */
-    private final static int MINIMUM_CHECK_PERIOD = 1 * 1000;
+    private final static long MINIMUM_CHECK_PERIOD = 1 * 1000;
 
     /**
      * Content observer registered flag
@@ -203,8 +207,8 @@ public class AddressBookManager {
                 // If we do not have a check already scheduled, schedule a new one
                 mCheckHandler.sendEmptyMessageDelayed(CHECK_MESSAGE, MINIMUM_CHECK_PERIOD);
                 if (mLogger.isActivated()) {
-                    mLogger.debug("New address book checking scheduled in " + MINIMUM_CHECK_PERIOD
-                            + " ms");
+                    mLogger.debug(new StringBuilder("New address book checking scheduled in ")
+                            .append(MINIMUM_CHECK_PERIOD).append(" ms").toString());
                 }
             }
         }

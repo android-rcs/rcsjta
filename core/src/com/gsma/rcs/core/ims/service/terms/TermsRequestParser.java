@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +15,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.terms;
 
-import java.util.HashMap;
-
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
+import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.utils.logger.Logger;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
 
-import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.logger.Logger;
+import java.util.HashMap;
+
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 /**
  * End User Confirmation Request request parser. Parse message of type
@@ -50,6 +54,11 @@ public class TermsRequestParser extends DefaultHandler {
      * <ButtonReject xml:lang="de">xxxxxxxxxx</ButtonReject> <ButtonReject
      * xml:lang="es">xxxxxxxxxx</ButtonReject> </EndUserConfirmationRequest>
      */
+
+    /**
+     * Rate to convert from seconds to milliseconds
+     */
+    private static final long SECONDS_TO_MILLISECONDS_CONVERSION_RATE = 1000;
 
     /**
      * Default language is English
@@ -74,7 +83,7 @@ public class TermsRequestParser extends DefaultHandler {
     /**
      * Value off attribute 'timeout' off element 'EndUserNotification'
      */
-    private int mTimeout;
+    private long mTimeout;
 
     /**
      * Value off attribute 'pin' off element 'EndUserConfirmationRequest'
@@ -137,7 +146,7 @@ public class TermsRequestParser extends DefaultHandler {
         return mType;
     }
 
-    public int getTimeout() {
+    public long getTimeout() {
         return mTimeout;
     }
 
@@ -182,7 +191,8 @@ public class TermsRequestParser extends DefaultHandler {
             mType = attr.getValue("type").trim();
             if (mType.equalsIgnoreCase("Volatile")) {
                 try {
-                    mTimeout = 1000 * Integer.parseInt(attr.getValue("timeout").trim());
+                    mTimeout = SECONDS_TO_MILLISECONDS_CONVERSION_RATE
+                            * Integer.parseInt(attr.getValue("timeout").trim());
                 } catch (Exception e) {
                     // If the attribute timeout is not present a default value of 64*T1 seconds
                     // (with T1 as defined in

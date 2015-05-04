@@ -204,7 +204,7 @@ public class HistoryLog {
     public static final String TRANSFERRED = "transferred";
 
     /**
-     * The name of the column containing the duration of a call or sharing (in seconds).
+     * The name of the column containing the duration of a call or sharing (in milliseconds).
      * <P>
      * Type: INTEGER
      * </P>

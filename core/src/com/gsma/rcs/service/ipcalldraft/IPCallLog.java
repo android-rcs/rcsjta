@@ -76,16 +76,16 @@ public class IPCallLog {
     /**
      * The name of the column containing the date of the call (in milliseconds).
      * <P>
-     * Type: LONG
+     * Type: INTEGER
      * </P>
      */
     public static final String TIMESTAMP = "timestamp";
 
     /**
-     * The name of the column containing the duration of the call (in seconds). The value is only
-     * set at the end of the call.
+     * The name of the column containing the duration of the call (in milliseconds). The value is
+     * only set at the end of the call.
      * <P>
-     * Type: LONG
+     * Type: INTEGER
      * </P>
      */
     public static final String DURATION = "duration";

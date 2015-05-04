@@ -461,10 +461,10 @@ public class RcsSettingsData {
     /* package private */static final Integer DEFAULT_MAX_GC_MSG_LENGTH = 100;
 
     /**
-     * Idle duration of a chat session
+     * Idle duration of a chat session in milliseconds
      */
     public static final String CHAT_IDLE_DURATION = "ChatIdleDuration";
-    /* package private */static final Integer DEFAULT_CHAT_IDLE_DURATION = 300;
+    /* package private */static final Long DEFAULT_CHAT_IDLE_DURATION = 300000L;
 
     /**
      * Max size of a file transfer
@@ -485,10 +485,10 @@ public class RcsSettingsData {
     /* package private */static final Long DEFAULT_MAX_ISH_SIZE = 3072L * 1024L;
 
     /**
-     * Max duration of a video share
+     * Max duration of a video share in milliseconds
      */
     public static final String MAX_VIDEO_SHARE_DURATION = "MaxVideoShareDuration";
-    /* package private */static final Integer DEFAULT_MAX_VSH_DURATION = 54000;
+    /* package private */static final Long DEFAULT_MAX_VSH_DURATION = 54000000L;
 
     /**
      * Max number of simultaneous chat sessions
@@ -578,7 +578,7 @@ public class RcsSettingsData {
      * Geolocation expiration time
      */
     public static final String GEOLOC_EXPIRATION_TIME = "GeolocExpirationTime";
-    /* package private */static final Integer DEFAULT_GEOLOC_EXPIRATION_TIME = 3600;
+    /* package private */static final Long DEFAULT_GEOLOC_EXPIRATION_TIME = 3600000L;
 
     /**
      * Convergent messaging UX option
@@ -733,7 +733,7 @@ public class RcsSettingsData {
      * service)
      */
     public static final String IMS_SERVICE_POLLING_PERIOD = "ImsServicePollingPeriod";
-    /* package private */static final Integer DEFAULT_IMS_SERVICE_POLLING_PERIOD = 300;
+    /* package private */static final Long DEFAULT_IMS_SERVICE_POLLING_PERIOD = 30000L;
 
     /**
      * Default SIP port
@@ -784,40 +784,40 @@ public class RcsSettingsData {
     /* package private */static final Integer DEFAULT_RTP_DEFAULT_PORT = 10000;
 
     /**
-     * MSRP transaction timeout used to wait MSRP response
+     * MSRP transaction timeout used to wait MSRP response in milliseconds
      */
     public static final String MSRP_TRANSACTION_TIMEOUT = "MsrpTransactionTimeout";
-    /* package private */static final Integer DEFAULT_MSRP_TRANSACTION_TIMEOUT = 5;
+    /* package private */static final Long DEFAULT_MSRP_TRANSACTION_TIMEOUT = 5000L;
 
     /**
      * Registration expire period
      */
     public static final String REGISTER_EXPIRE_PERIOD = "RegisterExpirePeriod";
-    /* package private */static final Integer DEFAULT_REGISTER_EXPIRE_PERIOD = 600000;
+    /* package private */static final Long DEFAULT_REGISTER_EXPIRE_PERIOD = 600000000L;
 
     /**
      * Registration retry base time
      */
     public static final String REGISTER_RETRY_BASE_TIME = "RegisterRetryBaseTime";
-    /* package private */static final Integer DEFAULT_REGISTER_RETRY_BASE_TIME = 30;
+    /* package private */static final Long DEFAULT_REGISTER_RETRY_BASE_TIME = 30000L;
 
     /**
      * Registration retry max time
      */
     public static final String REGISTER_RETRY_MAX_TIME = "RegisterRetryMaxTime";
-    /* package private */static final Integer DEFAULT_REGISTER_RETRY_MAX_TIME = 1800;
+    /* package private */static final Long DEFAULT_REGISTER_RETRY_MAX_TIME = 1800000L;
 
     /**
      * Publish expire period
      */
     public static final String PUBLISH_EXPIRE_PERIOD = "PublishExpirePeriod";
-    /* package private */static final Integer DEFAULT_PUBLISH_EXPIRE_PERIOD = 3600;
+    /* package private */static final Long DEFAULT_PUBLISH_EXPIRE_PERIOD = 3600000L;
 
     /**
-     * Revoke timeout
+     * Revoke timeout in milliseconds
      */
     public static final String REVOKE_TIMEOUT = "RevokeTimeout";
-    /* package private */static final Integer DEFAULT_REVOKE_TIMEOUT = 300;
+    /* package private */static final Long DEFAULT_REVOKE_TIMEOUT = 300000L;
 
     /**
      * IMS authentication procedure for mobile access
@@ -846,22 +846,22 @@ public class RcsSettingsData {
     /* package private */static final Long DEFAULT_RINGING_SESSION_PERIOD = 60000L;
 
     /**
-     * Subscribe expiration timeout
+     * Subscribe expiration period
      */
     public static final String SUBSCRIBE_EXPIRE_PERIOD = "SubscribeExpirePeriod";
-    /* package private */static final Integer DEFAULT_SUBSCRIBE_EXPIRE_PERIOD = 3600;
+    /* package private */static final Long DEFAULT_SUBSCRIBE_EXPIRE_PERIOD = 3600000L;
 
     /**
      * "Is-composing" timeout milliseconds for chat service
      */
     public static final String IS_COMPOSING_TIMEOUT = "IsComposingTimeout";
-    /* package private */static final Integer DEFAULT_IS_COMPOSING_TIMEOUT = 15000;
+    /* package private */static final Long DEFAULT_IS_COMPOSING_TIMEOUT = 15000L;
 
     /**
      * SIP session refresh expire period
      */
     public static final String SESSION_REFRESH_EXPIRE_PERIOD = "SessionRefreshExpirePeriod";
-    /* package private */static final Integer DEFAULT_SESSION_REFRESH_EXPIRE_PERIOD = 0;
+    /* package private */static final Long DEFAULT_SESSION_REFRESH_EXPIRE_PERIOD = 0L;
 
     /**
      * Activate or not permanent state mode
@@ -904,19 +904,19 @@ public class RcsSettingsData {
      * Capability refresh timeout used to avoid too many requests in a short time
      */
     public static final String CAPABILITY_REFRESH_TIMEOUT = "CapabilityRefreshTimeout";
-    /* package private */static final Integer DEFAULT_CAPABILITY_REFRESH_TIMEOUT = 1;
+    /* package private */static final Long DEFAULT_CAPABILITY_REFRESH_TIMEOUT = 1000L;
 
     /**
      * Capability refresh timeout used to decide when to refresh contact capabilities
      */
     public static final String CAPABILITY_EXPIRY_TIMEOUT = "CapabilityExpiryTimeout";
-    /* package private */static final Integer DEFAULT_CAPABILITY_EXPIRY_TIMEOUT = 86400;
+    /* package private */static final Long DEFAULT_CAPABILITY_EXPIRY_TIMEOUT = 86400000L;
 
     /**
      * Polling period used to decide when to refresh contacts capabilities
      */
     public static final String CAPABILITY_POLLING_PERIOD = "CapabilityPollingPeriod";
-    /* package private */static final Integer DEFAULT_CAPABILITY_POLLING_PERIOD = 3600;
+    /* package private */static final Long DEFAULT_CAPABILITY_POLLING_PERIOD = 3600000L;
 
     /**
      * CS video capability
@@ -1078,22 +1078,22 @@ public class RcsSettingsData {
             .toInt();
 
     /**
-     * SIP stack timer T1
+     * SIP stack timer T1 in milliseconds
      */
     public static final String SIP_TIMER_T1 = "SipTimerT1";
-    /* package private */static final Integer DEFAULT_SIP_TIMER_T1 = 2000;
+    /* package private */static final Long DEFAULT_SIP_TIMER_T1 = 2000L;
 
     /**
-     * SIP stack timer T2
+     * SIP stack timer T2 in milliseconds
      */
     public static final String SIP_TIMER_T2 = "SipTimerT2";
-    /* package private */static final Integer DEFAULT_SIP_TIMER_T2 = 16000;
+    /* package private */static final Long DEFAULT_SIP_TIMER_T2 = 16000L;
 
     /**
-     * SIP stack timer T4
+     * SIP stack timer T4 in milliseconds
      */
     public static final String SIP_TIMER_T4 = "SipTimerT4";
-    /* package private */static final Integer DEFAULT_SIP_TIMER_T4 = 17000;
+    /* package private */static final Long DEFAULT_SIP_TIMER_T4 = 17000L;
 
     /**
      * Enable SIP keep alive
@@ -1105,7 +1105,7 @@ public class RcsSettingsData {
      * SIP keep alive period
      */
     public static final String SIP_KEEP_ALIVE_PERIOD = "SipKeepAlivePeriod";
-    /* package private */static final Integer DEFAULT_SIP_KEEP_ALIVE_PERIOD = 60;
+    /* package private */static final Long DEFAULT_SIP_KEEP_ALIVE_PERIOD = 60000L;
 
     /**
      * RCS APN

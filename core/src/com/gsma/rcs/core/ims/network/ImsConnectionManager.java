@@ -559,9 +559,9 @@ public class ImsConnectionManager implements Runnable {
             logger.debug("Start polling of the IMS connection");
         }
 
-        int servicePollingPeriod = mRcsSettings.getImsServicePollingPeriod();
-        int regBaseTime = mRcsSettings.getRegisterRetryBaseTime();
-        int regMaxTime = mRcsSettings.getRegisterRetryMaxTime();
+        long servicePollingPeriod = mRcsSettings.getImsServicePollingPeriod();
+        long regBaseTime = mRcsSettings.getRegisterRetryBaseTime();
+        long regMaxTime = mRcsSettings.getRegisterRetryMaxTime();
         Random random = new Random();
         int nbFailures = 0;
 
@@ -657,23 +657,25 @@ public class ImsConnectionManager implements Runnable {
                         double w = Math.min(regMaxTime, (regBaseTime * Math.pow(2, nbFailures)));
                         double coeff = (random.nextInt(51) + 50) / 100.0; // Coeff between 50% and
                                                                           // 100%
-                        int retryPeriod = (int) (coeff * w);
+                        long retryPeriod = (long) (coeff * w);
                         if (logger.isActivated()) {
-                            logger.debug("Wait " + retryPeriod
-                                    + "s before retry registration (failures=" + nbFailures
-                                    + ", coeff=" + coeff + ")");
+                            logger.debug(new StringBuilder("Wait ").append(retryPeriod)
+                                    .append("ms before retry registration (failures=")
+                                    .append(nbFailures).append(", coeff=").append(coeff)
+                                    .append(')').toString());
                         }
-                        Thread.sleep(retryPeriod * 1000);
+                        Thread.sleep(retryPeriod);
                     }
                 } else if (!mImsServicesStarted) {
-                    int retryPeriod = 5;
+                    long retryPeriod = 5000;
                     if (logger.isActivated()) {
-                        logger.debug("Wait " + retryPeriod + "s before retry to start services");
+                        logger.debug(new StringBuilder("Wait ").append(retryPeriod)
+                                .append("ms before retry to start services").toString());
                     }
-                    Thread.sleep(retryPeriod * 1000);
+                    Thread.sleep(retryPeriod);
                 } else {
                     // Pause before the next service check
-                    Thread.sleep(servicePollingPeriod * 1000);
+                    Thread.sleep(servicePollingPeriod);
                 }
             } catch (InterruptedException e) {
                 break;

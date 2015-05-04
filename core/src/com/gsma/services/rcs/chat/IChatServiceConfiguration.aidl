@@ -7,7 +7,7 @@ interface IChatServiceConfiguration {
 
 	long getIsComposingTimeout();
 
-	int getGeolocExpirationTime();
+	long getGeolocExpirationTime();
 	
 	int getGeolocLabelMaxLength();
 	

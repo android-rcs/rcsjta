@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +15,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.protocol.msrp;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Vector;
 
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
@@ -31,6 +31,10 @@ import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.IpAddressUtils;
 import com.gsma.rcs.utils.logger.Logger;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Vector;
 
 /**
  * MSRP manager
@@ -194,10 +198,10 @@ public class MsrpManager {
     /**
      * Open the connection with SO_TIMEOUT on the socket
      * 
-     * @param timeout Timeout value (in seconds)
+     * @param timeout Timeout value (in milliseconds)
      * @throws IOException
      */
-    public void openMsrpSession(int timeout) throws IOException {
+    public void openMsrpSession(long timeout) throws IOException {
         if ((mMsrpSession == null) || (mMsrpSession.getConnection() == null)) {
             throw new IOException("Session not yet created");
         }

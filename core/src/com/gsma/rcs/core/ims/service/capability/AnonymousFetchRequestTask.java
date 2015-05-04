@@ -183,7 +183,8 @@ public class AnonymousFetchRequestTask {
      */
     private void sendSubscribe(SipRequest subscribe) throws SipException, CoreException {
         if (sLogger.isActivated()) {
-            sLogger.info("Send SUBSCRIBE, expire=" + subscribe.getExpires());
+            sLogger.info(new StringBuilder("Send SUBSCRIBE, expire=")
+                    .append(subscribe.getExpires()).append("ms").toString());
         }
 
         /* Send SUBSCRIBE request */

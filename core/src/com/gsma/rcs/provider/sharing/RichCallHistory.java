@@ -326,6 +326,7 @@ public class RichCallHistory {
      * @param sharingId
      * @param duration Duration
      */
+    /* TODO: Check if really dead code or somebody is missing calling this method. */
     public void setVideoSharingDuration(String sharingId, long duration) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("Update duration of sharing ").append(sharingId)

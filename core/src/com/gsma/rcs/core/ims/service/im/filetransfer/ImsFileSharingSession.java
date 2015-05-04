@@ -54,9 +54,9 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
     private final static String BOUNDARY_TAG = "boundary1";
 
     /**
-     * Default SO_TIMEOUT value (in seconds)
+     * Default SO_TIMEOUT value (in milliseconds)
      */
-    public final static int DEFAULT_SO_TIMEOUT = 30;
+    public final static long DEFAULT_SO_TIMEOUT = 30000;
 
     /**
      * The logger

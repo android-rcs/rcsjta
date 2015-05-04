@@ -37,7 +37,6 @@ import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardO
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.ipcall.IPCallSession;
 import com.gsma.rcs.core.ims.service.presence.pidf.PidfDocument;
-import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.gsma.rcs.core.ims.service.richcall.image.ImageTransferSession;
 import com.gsma.rcs.core.ims.service.richcall.video.VideoStreamingSession;
@@ -277,11 +276,11 @@ public interface CoreListener {
      * @param text Text
      * @param btnLabelAccept Label of Accept button
      * @param btnLabelReject Label of Reject button
-     * @param timeout Timeout request
+     * @param timeout Timeout request in milliseconds
      */
     public void handleUserConfirmationRequest(ContactId contact, String id, String type,
             boolean pin, String subject, String text, String btnLabelAccept, String btnLabelReject,
-            int timeout);
+            long timeout);
 
     /**
      * User terms confirmation acknowledge

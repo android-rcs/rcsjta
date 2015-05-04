@@ -779,10 +779,10 @@ public class RcsSettings {
     /**
      * Get idle duration of a chat session
      * 
-     * @return Duration in seconds
+     * @return Duration in milliseconds
      */
-    public int getChatIdleDuration() {
-        return readInteger(RcsSettingsData.CHAT_IDLE_DURATION);
+    public long getChatIdleDuration() {
+        return readLong(RcsSettingsData.CHAT_IDLE_DURATION);
     }
 
     /**
@@ -842,10 +842,10 @@ public class RcsSettings {
     /**
      * Get max duration of a video share
      * 
-     * @return Duration in seconds
+     * @return Duration in milliseconds
      */
-    public int getMaxVideoShareDuration() {
-        return readInteger(RcsSettingsData.MAX_VIDEO_SHARE_DURATION);
+    public long getMaxVideoShareDuration() {
+        return readLong(RcsSettingsData.MAX_VIDEO_SHARE_DURATION);
     }
 
     /**
@@ -981,10 +981,10 @@ public class RcsSettings {
      * Get polling period used before each IMS service check (e.g. test subscription state for
      * presence service)
      * 
-     * @return Period in seconds
+     * @return Period in milliseconds
      */
-    public int getImsServicePollingPeriod() {
-        return readInteger(RcsSettingsData.IMS_SERVICE_POLLING_PERIOD);
+    public long getImsServicePollingPeriod() {
+        return readLong(RcsSettingsData.IMS_SERVICE_POLLING_PERIOD);
     }
 
     /**
@@ -1062,55 +1062,56 @@ public class RcsSettings {
     /**
      * Get MSRP transaction timeout used to wait MSRP response
      * 
-     * @return Timeout in seconds
+     * @return Timeout in milliseconds
      */
-    public int getMsrpTransactionTimeout() {
-        return readInteger(RcsSettingsData.MSRP_TRANSACTION_TIMEOUT);
+    public long getMsrpTransactionTimeout() {
+        return readLong(RcsSettingsData.MSRP_TRANSACTION_TIMEOUT);
     }
 
     /**
      * Get default expire period for REGISTER
      * 
-     * @return Period in seconds
+     * @return Period in milliseconds
      */
-    public int getRegisterExpirePeriod() {
-        return readInteger(RcsSettingsData.REGISTER_EXPIRE_PERIOD);
+    public long getRegisterExpirePeriod() {
+        return readLong(RcsSettingsData.REGISTER_EXPIRE_PERIOD);
     }
 
     /**
      * Get registration retry base time
      * 
-     * @return Time in seconds
+     * @return Time in milliseconds
      */
-    public int getRegisterRetryBaseTime() {
-        return readInteger(RcsSettingsData.REGISTER_RETRY_BASE_TIME);
+    public long getRegisterRetryBaseTime() {
+        return readLong(RcsSettingsData.REGISTER_RETRY_BASE_TIME);
     }
 
     /**
      * Get registration retry max time
      * 
-     * @return Time in seconds
+     * @return Time in milliseconds
      */
-    public int getRegisterRetryMaxTime() {
-        return readInteger(RcsSettingsData.REGISTER_RETRY_MAX_TIME);
+    public long getRegisterRetryMaxTime() {
+        return readLong(RcsSettingsData.REGISTER_RETRY_MAX_TIME);
     }
 
     /**
      * Get default expire period for PUBLISH
      * 
-     * @return Period in seconds
+     * @return Period in milliseconds
      */
-    public int getPublishExpirePeriod() {
-        return readInteger(RcsSettingsData.PUBLISH_EXPIRE_PERIOD);
+    public long getPublishExpirePeriod() {
+        return readLong(RcsSettingsData.PUBLISH_EXPIRE_PERIOD);
     }
 
     /**
      * Get revoke timeout before to unrevoke a revoked contact
      * 
-     * @return Timeout in seconds
+     * @return Timeout in milliseconds
      */
-    public int getRevokeTimeout() {
-        return readInteger(RcsSettingsData.REVOKE_TIMEOUT);
+    /* TODO: Check if really dead code or somebody missing calling this. */
+    public long getRevokeTimeout() {
+        return readLong(RcsSettingsData.REVOKE_TIMEOUT);
     }
 
     /**
@@ -1172,10 +1173,10 @@ public class RcsSettings {
     /**
      * Get default expire period for SUBSCRIBE
      * 
-     * @return Period in seconds
+     * @return Period in milliseconds
      */
-    public int getSubscribeExpirePeriod() {
-        return readInteger(RcsSettingsData.SUBSCRIBE_EXPIRE_PERIOD);
+    public long getSubscribeExpirePeriod() {
+        return readLong(RcsSettingsData.SUBSCRIBE_EXPIRE_PERIOD);
     }
 
     /**
@@ -1190,10 +1191,10 @@ public class RcsSettings {
     /**
      * Get default expire period for INVITE (session refresh)
      * 
-     * @return Period in seconds
+     * @return Period in milliseconds
      */
-    public int getSessionRefreshExpirePeriod() {
-        return readInteger(RcsSettingsData.SESSION_REFRESH_EXPIRE_PERIOD);
+    public long getSessionRefreshExpirePeriod() {
+        return readLong(RcsSettingsData.SESSION_REFRESH_EXPIRE_PERIOD);
     }
 
     /**
@@ -1253,28 +1254,28 @@ public class RcsSettings {
     /**
      * Get capability refresh timeout used to avoid too many requests in a short time
      * 
-     * @return Timeout in seconds
+     * @return Timeout in milliseconds
      */
-    public int getCapabilityRefreshTimeout() {
-        return readInteger(RcsSettingsData.CAPABILITY_REFRESH_TIMEOUT);
+    public long getCapabilityRefreshTimeout() {
+        return readLong(RcsSettingsData.CAPABILITY_REFRESH_TIMEOUT);
     }
 
     /**
      * Get capability expiry timeout used to decide when to refresh contact capabilities
      * 
-     * @return Timeout in seconds
+     * @return Timeout in milliseconds
      */
-    public int getCapabilityExpiryTimeout() {
-        return readInteger(RcsSettingsData.CAPABILITY_EXPIRY_TIMEOUT);
+    public long getCapabilityExpiryTimeout() {
+        return readLong(RcsSettingsData.CAPABILITY_EXPIRY_TIMEOUT);
     }
 
     /**
      * Get capability polling period used to refresh contacts capabilities
      * 
-     * @return Timeout in seconds
+     * @return Timeout in milliseconds
      */
-    public int getCapabilityPollingPeriod() {
-        return readInteger(RcsSettingsData.CAPABILITY_POLLING_PERIOD);
+    public long getCapabilityPollingPeriod() {
+        return readLong(RcsSettingsData.CAPABILITY_POLLING_PERIOD);
     }
 
     /**
@@ -1522,8 +1523,8 @@ public class RcsSettings {
      * 
      * @return Timer in milliseconds
      */
-    public int getSipTimerT1() {
-        return readInteger(RcsSettingsData.SIP_TIMER_T1);
+    public long getSipTimerT1() {
+        return readLong(RcsSettingsData.SIP_TIMER_T1);
     }
 
     /**
@@ -1531,8 +1532,8 @@ public class RcsSettings {
      * 
      * @return Timer in milliseconds
      */
-    public int getSipTimerT2() {
-        return readInteger(RcsSettingsData.SIP_TIMER_T2);
+    public long getSipTimerT2() {
+        return readLong(RcsSettingsData.SIP_TIMER_T2);
     }
 
     /**
@@ -1540,8 +1541,8 @@ public class RcsSettings {
      * 
      * @return Timer in milliseconds
      */
-    public int getSipTimerT4() {
-        return readInteger(RcsSettingsData.SIP_TIMER_T4);
+    public long getSipTimerT4() {
+        return readLong(RcsSettingsData.SIP_TIMER_T4);
     }
 
     /**
@@ -1556,10 +1557,10 @@ public class RcsSettings {
     /**
      * Get SIP keep-alive period
      * 
-     * @return Period in seconds
+     * @return Period in milliseconds
      */
-    public int getSipKeepAlivePeriod() {
-        return readInteger(RcsSettingsData.SIP_KEEP_ALIVE_PERIOD);
+    public long getSipKeepAlivePeriod() {
+        return readLong(RcsSettingsData.SIP_KEEP_ALIVE_PERIOD);
     }
 
     /**
@@ -1859,10 +1860,10 @@ public class RcsSettings {
     /**
      * Get geolocation expiration time
      * 
-     * @return Time in seconds
+     * @return Time in milliseconds
      */
-    public int getGeolocExpirationTime() {
-        return readInteger(RcsSettingsData.GEOLOC_EXPIRATION_TIME);
+    public long getGeolocExpirationTime() {
+        return readLong(RcsSettingsData.GEOLOC_EXPIRATION_TIME);
     }
 
     /**

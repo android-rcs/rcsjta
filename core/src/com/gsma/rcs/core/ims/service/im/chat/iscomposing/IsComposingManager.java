@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.im.chat.iscomposing;
@@ -45,9 +49,9 @@ public class IsComposingManager {
     private ExpirationTimer timerTask = null;
 
     /**
-     * Is-composing timeout (in seconds)
+     * Is-composing timeout (in milliseconds)
      */
-    private int timeout = 120;
+    private long mTimeout = 120000;
 
     /**
      * IM session
@@ -88,11 +92,11 @@ public class IsComposingManager {
                 }
 
                 // Start the expiration timer
-                if (isComposingInfo.getRefreshTime() != 0) {
-                    startExpirationTimer(isComposingInfo.getRefreshTime(), contact);
-                } else {
-                    startExpirationTimer(timeout, contact);
+                long timeout = isComposingInfo.getRefreshTime();
+                if (timeout == 0) {
+                    timeout = mTimeout;
                 }
+                startExpirationTimer(timeout, contact);
             } else {
                 // Send status message to "idle"
                 for (int j = 0; j < session.getListeners().size(); j++) {
@@ -131,7 +135,7 @@ public class IsComposingManager {
     /**
      * Start the expiration timer for a given contact
      * 
-     * @param duration Timer period
+     * @param duration Timer period in milliseconds
      * @param contact Contact identifier
      */
     public synchronized void startExpirationTimer(long duration, ContactId contact) {
@@ -143,11 +147,12 @@ public class IsComposingManager {
 
         // Start timer
         if (logger.isActivated()) {
-            logger.debug("Start is-composing timer for " + duration + "s");
+            logger.debug(new StringBuilder("Start is-composing timer for ").append(duration)
+                    .append("ms").toString());
         }
         timerTask = new ExpirationTimer(contact);
         timer = new Timer();
-        timer.schedule(timerTask, duration * 1000);
+        timer.schedule(timerTask, duration);
     }
 
     /**

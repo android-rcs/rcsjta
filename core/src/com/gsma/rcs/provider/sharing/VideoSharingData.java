@@ -85,7 +85,7 @@ public class VideoSharingData {
     /* package private */static final String KEY_DIRECTION = VideoSharingLog.DIRECTION;
 
     /**
-     * Duration of the sharing in seconds. The value is only set at the end of the sharing.
+     * Duration of the sharing in milliseconds. The value is only set at the end of the sharing.
      */
     /* package private */static final String KEY_DURATION = VideoSharingLog.DURATION;
 

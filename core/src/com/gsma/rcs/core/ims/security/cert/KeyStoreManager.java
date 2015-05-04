@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.security.cert;
@@ -70,6 +74,10 @@ import java.util.Date;
  * @author Deutsche Telekom AG
  */
 public class KeyStoreManager {
+    /**
+     * Rate to convert from seconds to milliseconds
+     */
+    private static final long SECONDS_TO_MILLISECONDS_CONVERSION_RATE = 1000;
 
     /**
      * Keystore name
@@ -316,9 +324,11 @@ public class KeyStoreManager {
             // + OemCustomization.customizeString("com.gsma.rcs.client"));
             X500Name subjectName = new X500Name("CN=com.gsma.rcs.client");
             long timestamp = System.currentTimeMillis();
-            Date startDate = new Date(timestamp - 24 * 60 * 60 * 1000);
+            Date startDate = new Date(timestamp - 24 * 60 * 60
+                    * SECONDS_TO_MILLISECONDS_CONVERSION_RATE);
             // validity of 1 year
-            Date endDate = new Date(timestamp + 365L * 26 * 60 * 60 * 1000);
+            Date endDate = new Date(timestamp + 365L * 26 * 60 * 60
+                    * SECONDS_TO_MILLISECONDS_CONVERSION_RATE);
             X509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(subjectName,
                     BigInteger.ONE, startDate, endDate, subjectName, pubKey);
             JcaX509ExtensionUtils x509ExtUtils = new JcaX509ExtensionUtils();

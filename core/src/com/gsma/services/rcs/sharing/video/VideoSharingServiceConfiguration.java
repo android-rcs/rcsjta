@@ -50,7 +50,7 @@ public class VideoSharingServiceConfiguration {
      * Returns the maximum authorized duration of the video sharing. It returns 0 if there is no
      * limitation.
      * 
-     * @return Duration in seconds
+     * @return long Duration in milliseconds
      * @throws RcsServiceException
      */
     public long getMaxTime() throws RcsServiceException {

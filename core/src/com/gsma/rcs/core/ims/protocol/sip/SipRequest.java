@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.protocol.sip;
@@ -67,12 +71,12 @@ public class SipRequest extends SipMessage {
     /**
      * Return the expires value
      * 
-     * @return Expire value
+     * @return Expire value in milliseconds
      */
-    public int getExpires() {
+    public long getExpires() {
         ExpiresHeader expires = (ExpiresHeader) getStackMessage().getHeader(ExpiresHeader.NAME);
         if (expires != null) {
-            return expires.getExpires();
+            return expires.getExpires() * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
         }
         return -1;
     }

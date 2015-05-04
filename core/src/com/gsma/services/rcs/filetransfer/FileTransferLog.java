@@ -87,7 +87,7 @@ public class FileTransferLog {
     /**
      * The name of the column containing the file size to be transferred (in bytes).
      * <P>
-     * Type: LONG
+     * Type: INTEGER
      * </P>
      */
     public static final String FILESIZE = "filesize";
@@ -113,7 +113,7 @@ public class FileTransferLog {
     /**
      * The name of the column containing the amount of data transferred (in bytes).
      * <P>
-     * Type: LONG
+     * Type: INTEGER
      * </P>
      */
     public static final String TRANSFERRED = "transferred";
@@ -121,7 +121,7 @@ public class FileTransferLog {
     /**
      * The name of the column containing the time when transfer is initiated.
      * <P>
-     * Type: LONG
+     * Type: INTEGER
      * </P>
      */
     public static final String TIMESTAMP = "timestamp";
@@ -129,7 +129,7 @@ public class FileTransferLog {
     /**
      * The name of the column containing the time when file is sent. If 0 means not sent.
      * <P>
-     * Type: LONG
+     * Type: INTEGER
      * </P>
      */
     public static final String TIMESTAMP_SENT = "timestamp_sent";
@@ -137,7 +137,7 @@ public class FileTransferLog {
     /**
      * The name of the column containing the time when file is delivered. If 0 means not delivered.
      * <P>
-     * Type: LONG
+     * Type: INTEGER
      * </P>
      */
     public static final String TIMESTAMP_DELIVERED = "timestamp_delivered";
@@ -145,7 +145,7 @@ public class FileTransferLog {
     /**
      * The name of the column containing the time when file is displayed. If 0 means not displayed.
      * <P>
-     * Type: LONG
+     * Type: INTEGER
      * </P>
      */
     public static final String TIMESTAMP_DISPLAYED = "timestamp_displayed";
@@ -214,7 +214,7 @@ public class FileTransferLog {
      * The name of the column containing the timestamp when the file on the content server is no
      * longer valid to download.
      * <P>
-     * Type: LONG
+     * Type: INTEGER
      * </P>
      */
     public static final String FILE_EXPIRATION = "file_expiration";
@@ -223,7 +223,7 @@ public class FileTransferLog {
      * The name of the column containing the timestamp when the file icon on the content server is
      * no longer valid to download.
      * <P>
-     * Type: LONG
+     * Type: INTEGER
      * </P>
      */
     public static final String FILEICON_EXPIRATION = "fileicon_expiration";

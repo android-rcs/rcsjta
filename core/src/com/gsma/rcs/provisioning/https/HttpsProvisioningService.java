@@ -23,8 +23,8 @@
 package com.gsma.rcs.provisioning.https;
 
 import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provisioning.ProvisioningInfo;
 import com.gsma.rcs.service.LauncherUtils;
@@ -169,7 +169,7 @@ public class HttpsProvisioningService extends Service {
                     }
                     if (logActivated) {
                         sLogger.debug(new StringBuilder("Configuration will expire in ")
-                                .append(delay / 1000).append(" secs at ").append(expiration)
+                                .append(delay).append(" millisecs at ").append(expiration)
                                 .toString());
                     }
                     startRetryAlarm(this, mRetryIntent, delay);
@@ -200,8 +200,8 @@ public class HttpsProvisioningService extends Service {
      */
     public static void startRetryAlarm(Context context, PendingIntent intent, long delay) {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Retry HTTP configuration update in ")
-                    .append(delay / 1000).append(" secs").toString());
+            sLogger.debug(new StringBuilder("Retry HTTP configuration update in ").append(delay)
+                    .append(" millisecs").toString());
         }
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + delay, intent);

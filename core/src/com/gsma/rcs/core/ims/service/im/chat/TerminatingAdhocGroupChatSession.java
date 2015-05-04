@@ -386,9 +386,10 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 
                 getConferenceEventSubscriber().subscribe();
 
-                if (getSessionTimerManager().isSessionTimerActivated(resp)) {
-                    getSessionTimerManager().start(SessionTimerManager.UAS_ROLE,
-                            getDialogPath().getSessionExpireTime());
+                SessionTimerManager sessionTimerManager = getSessionTimerManager();
+                if (sessionTimerManager.isSessionTimerActivated(resp)) {
+                    sessionTimerManager.start(SessionTimerManager.UAS_ROLE, getDialogPath()
+                            .getSessionExpireTime());
                 }
             } else {
                 if (logActivated) {

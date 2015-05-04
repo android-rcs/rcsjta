@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.protocol.msrp;
@@ -118,15 +122,15 @@ public abstract class MsrpConnection {
     /**
      * Open the connection with SO_TIMEOUT on the socket
      * 
-     * @param timeout Timeout value (in seconds)
+     * @param timeout Timeout value (in milliseconds)
      * @throws IOException
      */
-    public void open(int timeout) throws IOException {
+    public void open(long timeout) throws IOException {
         // Open socket connection
         socket = getSocketConnection();
 
         // Set SoTimeout
-        socket.setSoTimeout(timeout * 1000);
+        socket.setSoTimeout(timeout);
 
         // Open I/O stream
         inputStream = socket.getInputStream();

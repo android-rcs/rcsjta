@@ -26,8 +26,8 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.TerminalInfo;
 import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.GsmaRelease;
 import com.gsma.rcs.provisioning.ProvisioningFailureReasons;
@@ -99,6 +99,10 @@ import java.net.UnknownHostException;
  * @author Deutsche Telekom AG
  */
 public class HttpsProvisioningManager {
+    /**
+     * Rate to convert from seconds to milliseconds
+     */
+    private static final long SECONDS_TO_MILLISECONDS_CONVERSION_RATE = 1000;
 
     private static final int HTTP_STATUS_ERROR_NETWORK_AUTHENTICATION_REQUIRED = 511;
 
@@ -791,13 +795,14 @@ public class HttpsProvisioningManager {
     /**
      * Get retry-after value
      * 
-     * @return retry-after value
+     * @return retry-after value in milliseconds
      */
-    protected int getRetryAfter(HttpResponse response) {
+    protected long getRetryAfter(HttpResponse response) {
         Header[] headers = response.getHeaders("Retry-After");
         if (headers.length > 0) {
             try {
-                return Integer.parseInt(headers[0].getValue());
+                return Integer.parseInt(headers[0].getValue())
+                        * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
             } catch (NumberFormatException e) {
                 return 0;
             }
@@ -859,7 +864,8 @@ public class HttpsProvisioningManager {
                     String version = info.getVersion();
                     long validity = info.getValidity();
                     if (logActivated) {
-                        sLogger.debug("Provisioning version=" + version + ", validity=" + validity);
+                        sLogger.debug(new StringBuilder("Provisioning version=").append(version)
+                                .append(", validity=").append(validity).toString());
                     }
 
                     // Save the latest positive version of the configuration
@@ -982,17 +988,18 @@ public class HttpsProvisioningManager {
             } else if (HttpStatus.SC_SERVICE_UNAVAILABLE == result.code) {
                 // Server Unavailable
                 if (logActivated) {
-                    sLogger.debug("Server Unavailable. Retry after: " + result.retryAfter);
+                    sLogger.debug(new StringBuilder("Server Unavailable. Retry after: ")
+                            .append(result.retryAfter).append("ms").toString());
                 }
                 if (mFirst) {
                     // Reason: Unable to get configuration
                     provisioningFails(ProvisioningFailureReasons.UNABLE_TO_GET_CONFIGURATION);
                     if (result.retryAfter > 0) {
                         HttpsProvisioningService.startRetryAlarm(mCtx, mRetryIntent,
-                                result.retryAfter * 1000);
+                                result.retryAfter);
                     }
                 } else {
-                    tryLaunchRcsCoreService(mCtx, result.retryAfter * 1000);
+                    tryLaunchRcsCoreService(mCtx, result.retryAfter);
                 }
             } else if (HttpStatus.SC_FORBIDDEN == result.code) {
                 // Forbidden: reset account + version = 0
@@ -1051,10 +1058,10 @@ public class HttpsProvisioningManager {
      * Try to launch RCS Core Service. RCS Service is only launched if version is positive.
      * 
      * @param context
-     * @param timerRetry timer to trigger next provisioning request. Only applicable if greater than
-     *            0.
+     * @param timerRetry timer in milliseconds to trigger next provisioning request. Only applicable
+     *            if greater than 0.
      */
-    private void tryLaunchRcsCoreService(Context context, int timerRetry) {
+    private void tryLaunchRcsCoreService(Context context, long timerRetry) {
         try {
             int version = Integer.parseInt(mRcsSettings.getProvisioningVersion());
             // Only launch service if version is positive

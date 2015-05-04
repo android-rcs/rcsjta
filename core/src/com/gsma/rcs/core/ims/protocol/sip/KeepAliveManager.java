@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.protocol.sip;
@@ -29,9 +33,9 @@ import com.gsma.rcs.utils.logger.Logger;
  */
 public class KeepAliveManager extends PeriodicRefresher {
     /**
-     * Keep-alive period (in seconds)
+     * Keep-alive period (in milliseconds)
      */
-    private int mPeriod;
+    private long mPeriod;
 
     /**
      * SIP interface
@@ -61,7 +65,7 @@ public class KeepAliveManager extends PeriodicRefresher {
         if (logger.isActivated()) {
             logger.debug("Start keep-alive");
         }
-        startTimer(mPeriod, 1);
+        startTimer(mPeriod);
     }
 
     /**
@@ -88,7 +92,7 @@ public class KeepAliveManager extends PeriodicRefresher {
                     mSip.getOutboundProxyAddr(), mSip.getOutboundProxyPort());
 
             // Start timer
-            startTimer(mPeriod, 1);
+            startTimer(mPeriod);
         } catch (Exception e) {
             if (logger.isActivated()) {
                 logger.error("SIP heartbeat has failed", e);
@@ -97,9 +101,9 @@ public class KeepAliveManager extends PeriodicRefresher {
     }
 
     /**
-     * @param period the keep alive period in seconds
+     * @param period the keep alive period in milliseconds
      */
-    public void setPeriod(int period) {
+    public void setPeriod(long period) {
         mPeriod = period;
         if (logger.isActivated()) {
             logger.debug("Set keep-alive period \"" + period + "\"");

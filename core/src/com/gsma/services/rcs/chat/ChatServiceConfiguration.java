@@ -223,10 +223,10 @@ public class ChatServiceConfiguration {
     /**
      * Get geoloc expiration time
      * 
-     * @return int Time in seconds
+     * @return int Time in milliseconds
      * @throws RcsGenericException
      */
-    public int getGeolocExpirationTime() throws RcsGenericException {
+    public long getGeolocExpirationTime() throws RcsGenericException {
         try {
             return mIConfig.getGeolocExpirationTime();
 

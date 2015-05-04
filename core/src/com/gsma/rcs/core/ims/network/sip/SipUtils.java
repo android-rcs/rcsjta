@@ -53,6 +53,10 @@ import javax2.sip.message.Request;
  * @author JM. Auffret
  */
 public class SipUtils {
+    /**
+     * Rate to convert from seconds to milliseconds
+     */
+    private static final long SECONDS_TO_MILLISECONDS_CONVERSION_RATE = 1000;
 
     private final static char WHITESPACE = ' ';
 
@@ -201,7 +205,7 @@ public class SipUtils {
      */
     public static String constructNTPtime(long date) {
         long ntpTime = 2208988800L;
-        long startTime = (date / 1000) + ntpTime;
+        long startTime = (date / SECONDS_TO_MILLISECONDS_CONVERSION_RATE) + ntpTime;
         return String.valueOf(startTime);
     }
 
@@ -323,12 +327,12 @@ public class SipUtils {
      * Get Min-Expires period from message
      * 
      * @param message SIP message
-     * @return Expire period in seconds or -1 in case of error
+     * @return Expire period in milliseconds or -1 in case of error
      */
-    public static int getMinExpiresPeriod(SipMessage message) {
+    public static long getMinExpiresPeriod(SipMessage message) {
         MinExpiresHeader minHeader = (MinExpiresHeader) message.getHeader(MinExpiresHeader.NAME);
         if (minHeader != null) {
-            return minHeader.getExpires();
+            return minHeader.getExpires() * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
         }
         return -1;
     }
@@ -337,13 +341,13 @@ public class SipUtils {
      * Get Min-SE period from message
      * 
      * @param message SIP message
-     * @return Expire period in seconds or -1 in case of error
+     * @return Expire period in milliseconds or -1 in case of error
      */
-    public static int getMinSessionExpirePeriod(SipMessage message) {
+    public static long getMinSessionExpirePeriod(SipMessage message) {
         ExtensionHeader minSeHeader = (ExtensionHeader) message.getHeader(SipUtils.HEADER_MIN_SE);
         if (minSeHeader != null) {
             String value = minSeHeader.getValue();
-            return Integer.parseInt(value);
+            return Long.parseLong(value) * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
         }
         return -1;
     }

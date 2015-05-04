@@ -48,9 +48,9 @@ public class MsrpSession {
 
     // Changed by Deutsche Telekom
     /**
-     * Transaction info expiry timeout in seconds
+     * Transaction info expiry timeout in milliseconds
      */
-    private static final int TRANSACTION_INFO_EXPIRY_PERIOD = 30;
+    private static final long TRANSACTION_INFO_EXPIRY_PERIOD = 30000;
 
     private static final byte[] NEW_LINE = MsrpConstants.NEW_LINE.getBytes(UTF8);
 
@@ -1236,7 +1236,7 @@ public class MsrpSession {
                                 mTransactionInfoMap.values());
                     }
                     for (MsrpTransactionInfo msrpTransactionInfo : msrpTransactionInfos) {
-                        long delta = (System.currentTimeMillis() - msrpTransactionInfo.timestamp) / 1000;
+                        long delta = System.currentTimeMillis() - msrpTransactionInfo.timestamp;
                         if ((delta >= TRANSACTION_INFO_EXPIRY_PERIOD) || (delta < 0)) {
                             if (logger.isActivated()) {
                                 logger.debug("Transaction info have expired (transactionId: "

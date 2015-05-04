@@ -74,6 +74,11 @@ import javax2.sip.InvalidArgumentException;
  */
 public class HttpUploadManager extends HttpTransferManager {
     /**
+     * Rate to convert from seconds to milliseconds
+     */
+    private static final long SECONDS_TO_MILLISECONDS_CONVERSION_RATE = 1000;
+
+    /**
      * Boundary tag
      */
     private final static String BOUNDARY_TAG = "boundary1";
@@ -196,17 +201,18 @@ public class HttpUploadManager extends HttpTransferManager {
             case HttpStatus.SC_SERVICE_UNAVAILABLE:
                 /* SERVICE_UNAVAILABLE : 503 - check retry-after header */
                 Header[] headers = resp.getHeaders("Retry-After");
-                int retryAfter = 0;
+                long retryAfter = 0;
                 if (headers.length > 0) {
                     try {
-                        retryAfter = Integer.parseInt(headers[0].getValue());
+                        retryAfter = Integer.parseInt(headers[0].getValue())
+                                * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
                     } catch (NumberFormatException e) {
                         /* Nothing to do */
                     }
                 }
                 if (retryAfter > 0) {
                     try {
-                        Thread.sleep(retryAfter * 1000);
+                        Thread.sleep(retryAfter);
                     } catch (InterruptedException e) {
                         /* Nothing to do */
                     }
@@ -378,14 +384,15 @@ public class HttpUploadManager extends HttpTransferManager {
                             break;
                         case HttpStatus.SC_SERVICE_UNAVAILABLE:
                             String header = connection.getHeaderField("Retry-After");
-                            int retryAfter = 0;
+                            long retryAfter = 0;
                             if (header != null) {
                                 try {
-                                    retryAfter = Integer.parseInt(header) * 1000;
+                                    retryAfter = Integer.parseInt(header)
+                                            * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
                                 } catch (NumberFormatException ignore) {
                                     /* Nothing to do, ignore the exception */
                                 }
-                                if (retryAfter >= 0) {
+                                if (retryAfter > 0) {
                                     try {
                                         Thread.sleep(retryAfter);
                                         /* Retry procedure */

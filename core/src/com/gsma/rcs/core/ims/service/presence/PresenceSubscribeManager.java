@@ -85,11 +85,12 @@ public class PresenceSubscribeManager extends SubscribeManager {
      * Create a SUBSCRIBE request
      * 
      * @param dialog SIP dialog path
-     * @param expirePeriod Expiration period
+     * @param expirePeriod Expiration period in milliseconds
      * @return SIP request
      * @throws SipException
      */
-    public SipRequest createSubscribe(SipDialogPath dialog, int expirePeriod) throws SipException {
+    @Override
+    public SipRequest createSubscribe(SipDialogPath dialog, long expirePeriod) throws SipException {
         // Create SUBSCRIBE message
         SipRequest subscribe = SipMessageFactory.createSubscribe(dialog, expirePeriod);
 

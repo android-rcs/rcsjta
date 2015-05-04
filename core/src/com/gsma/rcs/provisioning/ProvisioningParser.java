@@ -65,7 +65,7 @@ public class ProvisioningParser {
      */
     private static final int TYPE_INT = 1;
 
-    private static final long SECONDS_TO_MILILSECONDS_CONVERSION_RATE = 1000;
+    private static final long SECONDS_TO_MILLISECONDS_CONVERSION_RATE = 1000;
 
     private static final String UUID_VALUE = "uuid_Value";
 
@@ -279,7 +279,7 @@ public class ProvisioningParser {
                 if (validity == null) {
                     if ((validity = getValueByParamName("validity", versionchild, TYPE_INT)) != null) {
                         provisioningInfo.setValidity(Long.parseLong(validity)
-                                * SECONDS_TO_MILILSECONDS_CONVERSION_RATE);
+                                * SECONDS_TO_MILLISECONDS_CONVERSION_RATE);
                         continue;
                     }
                 }
@@ -500,8 +500,9 @@ public class ProvisioningParser {
 
                 if (publishTimer == null) {
                     if ((publishTimer = getValueByParamName("PublishTimer", childnode, TYPE_INT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.PUBLISH_EXPIRE_PERIOD,
-                                publishTimer);
+                        mRcsSettings.writeLong(RcsSettingsData.PUBLISH_EXPIRE_PERIOD,
+                                Long.parseLong(publishTimer)
+                                        * SECONDS_TO_MILLISECONDS_CONVERSION_RATE);
                         continue;
                     }
                 }
@@ -652,7 +653,9 @@ public class ProvisioningParser {
             do {
                 if (revokeTimer == null) {
                     if ((revokeTimer = getValueByParamName("RevokeTimer", childnode, TYPE_INT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.REVOKE_TIMEOUT, revokeTimer);
+                        mRcsSettings.writeLong(RcsSettingsData.REVOKE_TIMEOUT,
+                                Long.parseLong(revokeTimer)
+                                        * SECONDS_TO_MILLISECONDS_CONVERSION_RATE);
                         continue;
                     }
                 }
@@ -709,8 +712,9 @@ public class ProvisioningParser {
                 if (locInfoMaxValidTime == null) {
                     if ((locInfoMaxValidTime = getValueByParamName("LocInfoMaxValidTime",
                             childnode, TYPE_INT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.GEOLOC_EXPIRATION_TIME,
-                                locInfoMaxValidTime);
+                        mRcsSettings.writeLong(RcsSettingsData.GEOLOC_EXPIRATION_TIME,
+                                Long.parseLong(locInfoMaxValidTime)
+                                        * SECONDS_TO_MILLISECONDS_CONVERSION_RATE);
                         continue;
                     }
                 }
@@ -778,7 +782,7 @@ public class ProvisioningParser {
                 if (msgCapValidity == null) {
                     if ((msgCapValidity = getValueByParamName("msgCapValidity", childnode, TYPE_INT)) != null) {
                         long validity = Long.parseLong(msgCapValidity)
-                                * SECONDS_TO_MILILSECONDS_CONVERSION_RATE;
+                                * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
                         mRcsSettings.writeLong(RcsSettingsData.MSG_CAP_VALIDITY_PERIOD, validity);
                     }
                 }
@@ -813,7 +817,7 @@ public class ProvisioningParser {
                     if ((deliveryTimeout = getValueByParamName("deliveryTimeout", childnode,
                             TYPE_INT)) != null) {
                         long timeout = Long.parseLong(deliveryTimeout)
-                                * SECONDS_TO_MILILSECONDS_CONVERSION_RATE;
+                                * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
                         mRcsSettings.writeLong(RcsSettingsData.MSG_DELIVERY_TIMEOUT, timeout);
                         continue;
                     }
@@ -1089,7 +1093,10 @@ public class ProvisioningParser {
 
                 if (timerIdle == null) {
                     if ((timerIdle = getValueByParamName("TimerIdle", childnode, TYPE_INT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.CHAT_IDLE_DURATION, timerIdle);
+                        mRcsSettings
+                                .writeLong(RcsSettingsData.CHAT_IDLE_DURATION,
+                                        Long.parseLong(timerIdle)
+                                                * SECONDS_TO_MILLISECONDS_CONVERSION_RATE);
                         continue;
                     }
                 }
@@ -1182,16 +1189,18 @@ public class ProvisioningParser {
                 }
                 if (pollingPeriod == null) {
                     if ((pollingPeriod = getValueByParamName("pollingPeriod", childnode, TYPE_INT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.CAPABILITY_POLLING_PERIOD,
-                                pollingPeriod);
+                        mRcsSettings.writeLong(RcsSettingsData.CAPABILITY_POLLING_PERIOD,
+                                Long.parseLong(pollingPeriod)
+                                        * SECONDS_TO_MILLISECONDS_CONVERSION_RATE);
                         continue;
                     }
                 }
 
                 if (capInfoExpiry == null) {
                     if ((capInfoExpiry = getValueByParamName("capInfoExpiry", childnode, TYPE_INT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.CAPABILITY_EXPIRY_TIMEOUT,
-                                capInfoExpiry);
+                        mRcsSettings.writeLong(RcsSettingsData.CAPABILITY_EXPIRY_TIMEOUT,
+                                Long.parseLong(capInfoExpiry)
+                                        * SECONDS_TO_MILLISECONDS_CONVERSION_RATE);
                         continue;
                     }
                 }
@@ -1604,8 +1613,9 @@ public class ProvisioningParser {
                 if (maxTimeVideoShare == null) {
                     if ((maxTimeVideoShare = getValueByParamName("MaxTimeVideoShare", childnode,
                             TYPE_INT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.MAX_VIDEO_SHARE_DURATION,
-                                maxTimeVideoShare);
+                        mRcsSettings.writeLong(RcsSettingsData.MAX_VIDEO_SHARE_DURATION,
+                                Long.parseLong(maxTimeVideoShare)
+                                        * SECONDS_TO_MILLISECONDS_CONVERSION_RATE);
                         continue;
                     }
                 }
@@ -1821,21 +1831,21 @@ public class ProvisioningParser {
 
                 if (timert1 == null) {
                     if ((timert1 = getValueByParamName("Timer_T1", childnode, TYPE_INT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.SIP_TIMER_T1, timert1);
+                        mRcsSettings.writeLong(RcsSettingsData.SIP_TIMER_T1, Long.getLong(timert1));
                         continue;
                     }
                 }
 
                 if (timert2 == null) {
                     if ((timert2 = getValueByParamName("Timer_T2", childnode, TYPE_INT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.SIP_TIMER_T2, timert2);
+                        mRcsSettings.writeLong(RcsSettingsData.SIP_TIMER_T2, Long.getLong(timert2));
                         continue;
                     }
                 }
 
                 if (timert4 == null) {
                     if ((timert4 = getValueByParamName("Timer_T4", childnode, TYPE_INT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.SIP_TIMER_T4, timert4);
+                        mRcsSettings.writeLong(RcsSettingsData.SIP_TIMER_T4, Long.getLong(timert4));
                         continue;
                     }
                 }
@@ -1868,8 +1878,9 @@ public class ProvisioningParser {
                 if (regRetryBasetime == null) {
                     if ((regRetryBasetime = getValueByParamName("RegRetryBaseTime", childnode,
                             TYPE_INT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.REGISTER_RETRY_BASE_TIME,
-                                regRetryBasetime);
+                        mRcsSettings.writeLong(RcsSettingsData.REGISTER_RETRY_BASE_TIME,
+                                Long.parseLong(regRetryBasetime)
+                                        * SECONDS_TO_MILLISECONDS_CONVERSION_RATE);
                         continue;
                     }
                 }
@@ -1877,8 +1888,9 @@ public class ProvisioningParser {
                 if (regRetryMaxtime == null) {
                     if ((regRetryMaxtime = getValueByParamName("RegRetryMaxTime", childnode,
                             TYPE_INT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.REGISTER_RETRY_MAX_TIME,
-                                regRetryMaxtime);
+                        mRcsSettings.writeLong(RcsSettingsData.REGISTER_RETRY_MAX_TIME,
+                                Long.parseLong(regRetryMaxtime)
+                                        * SECONDS_TO_MILLISECONDS_CONVERSION_RATE);
                         continue;
                     }
                 }

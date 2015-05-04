@@ -605,7 +605,7 @@ public abstract class ImsServiceSession extends Thread {
         }
 
         // Stop session timer
-        getSessionTimerManager().stop();
+        mSessionTimer.stop();
 
         // Update dialog path
         if (TerminationReason.TERMINATION_BY_USER == reason) {
@@ -663,7 +663,7 @@ public abstract class ImsServiceSession extends Thread {
         removeSession();
 
         // Stop session timer
-        getSessionTimerManager().stop();
+        mSessionTimer.stop();
 
         // Notify listeners
         for (int i = 0; i < getListeners().size(); i++) {
@@ -1112,9 +1112,8 @@ public abstract class ImsServiceSession extends Thread {
             }
 
             // Start session timer
-            if (getSessionTimerManager().isSessionTimerActivated(resp)) {
-                getSessionTimerManager().start(resp.getSessionTimerRefresher(),
-                        resp.getSessionTimerExpire());
+            if (mSessionTimer.isSessionTimerActivated(resp)) {
+                mSessionTimer.start(resp.getSessionTimerRefresher(), resp.getSessionTimerExpire());
             }
         } catch (IOException e) {
             throw new SipException("Session initiation has failed!", e);
@@ -1206,7 +1205,7 @@ public abstract class ImsServiceSession extends Thread {
             }
 
             // Extract the Min-SE value
-            int minExpire = SipUtils.getMinSessionExpirePeriod(resp);
+            long minExpire = SipUtils.getMinSessionExpirePeriod(resp);
             if (minExpire == -1) {
                 if (sLogger.isActivated()) {
                     sLogger.error("Can't read the Min-SE value");
@@ -1217,13 +1216,14 @@ public abstract class ImsServiceSession extends Thread {
             }
 
             // Set the min expire value
-            getDialogPath().setMinSessionExpireTime(minExpire);
+            SipDialogPath sipDialogPath = getDialogPath();
+            sipDialogPath.setMinSessionExpireTime(minExpire);
 
             // Set the expire value
-            getDialogPath().setSessionExpireTime(minExpire);
+            sipDialogPath.setSessionExpireTime(minExpire);
 
             // Increment the Cseq number of the dialog path
-            getDialogPath().incrementCseq();
+            sipDialogPath.incrementCseq();
 
             // Create a new INVITE with the right expire period
             if (sLogger.isActivated()) {
@@ -1235,7 +1235,7 @@ public abstract class ImsServiceSession extends Thread {
             getAuthenticationAgent().setAuthorizationHeader(invite);
 
             // Reset initial request in the dialog path
-            getDialogPath().setInvite(invite);
+            sipDialogPath.setInvite(invite);
 
             // Send INVITE request
             sendInvite(invite);

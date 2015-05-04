@@ -47,12 +47,12 @@ public class IsComposingInfo {
     private boolean state = false;
 
     /**
-     * Last active state in seconds
+     * Last active state in milliseconds
      */
     private long lastActiveDate = 0L;
 
     /**
-     * Refresh time in seconds
+     * Refresh time in milliseconds
      */
     private long refreshTime = 0L;
 
@@ -76,11 +76,16 @@ public class IsComposingInfo {
     }
 
     public void setLastActiveDate(String lastActiveTimestamp) {
-        this.lastActiveDate = DateUtils.decodeDate(lastActiveTimestamp) / 1000;
+        this.lastActiveDate = DateUtils.decodeDate(lastActiveTimestamp);
     }
 
-    public void setRefreshTime(String refreshTime) {
-        this.refreshTime = Long.parseLong(refreshTime);
+    /**
+     * Sets the refresh time
+     * 
+     * @param refreshTime in milliseconds
+     */
+    public void setRefreshTime(long refreshTime) {
+        this.refreshTime = refreshTime;
     }
 
     public void setContentType(String contentType) {
@@ -95,6 +100,11 @@ public class IsComposingInfo {
         return lastActiveDate;
     }
 
+    /**
+     * Get the refresh time
+     * 
+     * @return refresh time in milliseconds
+     */
     public long getRefreshTime() {
         return refreshTime;
     }

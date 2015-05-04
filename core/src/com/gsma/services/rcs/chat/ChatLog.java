@@ -116,7 +116,7 @@ public class ChatLog {
         /**
          * The name of the column containing the time when group chat is created.
          * <P>
-         * Type: LONG
+         * Type: INTEGER
          * </P>
          */
         public static final String TIMESTAMP = "timestamp";
@@ -263,7 +263,7 @@ public class ChatLog {
         /**
          * The name of the column containing the time when message is created.
          * <P>
-         * Type: LONG
+         * Type: INTEGER
          * </P>
          */
         public static final String TIMESTAMP = "timestamp";
@@ -271,7 +271,7 @@ public class ChatLog {
         /**
          * The name of the column containing the time when message is sent. If 0 means not sent.
          * <P>
-         * Type: LONG
+         * Type: INTEGER
          * </P>
          */
         public static final String TIMESTAMP_SENT = "timestamp_sent";
@@ -280,7 +280,7 @@ public class ChatLog {
          * The name of the column containing the time when message is delivered. If 0 means not
          * delivered.
          * <P>
-         * Type: LONG
+         * Type: INTEGER
          * </P>
          */
         public static final String TIMESTAMP_DELIVERED = "timestamp_delivered";
@@ -289,7 +289,7 @@ public class ChatLog {
          * The name of the column containing the time when message is displayed. If 0 means not
          * displayed.
          * <P>
-         * Type: LONG
+         * Type: INTEGER
          * </P>
          */
         public static final String TIMESTAMP_DISPLAYED = "timestamp_displayed";

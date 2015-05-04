@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +15,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.im.chat.iscomposing;
 
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
+import com.gsma.rcs.utils.logger.Logger;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -27,7 +30,8 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import com.gsma.rcs.utils.logger.Logger;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 /**
  * Is composing event parser (RFC3994)
@@ -40,6 +44,11 @@ public class IsComposingParser extends DefaultHandler {
      * xsi:schemaLocation="urn:ietf:params:xml:ns:im-composing iscomposing.xsd"> <state>idle</state>
      * <lastactive>2003-01-27T10:43:00Z</lastactive> <contenttype>audio</contenttype> </isComposing>
      */
+    /**
+     * Rate to convert from seconds to milliseconds
+     */
+    private static final long SECONDS_TO_MILLISECONDS_CONVERSION_RATE = 1000;
+
     private StringBuffer accumulator = null;
 
     private IsComposingInfo isComposingInfo = null;
@@ -96,7 +105,9 @@ public class IsComposingParser extends DefaultHandler {
             }
         } else if (localName.equals("refresh")) {
             if (isComposingInfo != null) {
-                isComposingInfo.setRefreshTime(accumulator.toString());
+                long time = Long.parseLong(accumulator.toString())
+                        * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
+                isComposingInfo.setRefreshTime(time);
             }
         } else if (localName.equals("isComposing")) {
             if (logger.isActivated()) {

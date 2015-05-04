@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +15,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.protocol.msrp;
 
-import java.util.Hashtable;
-
 import com.gsma.rcs.provider.settings.RcsSettings;
+
+import java.util.Hashtable;
 
 /**
  * Request transaction
@@ -29,9 +33,9 @@ import com.gsma.rcs.provider.settings.RcsSettings;
  */
 public class RequestTransaction extends Object {
     /**
-     * MRSP request transaction timeout (in seconds)
+     * RcsSettings
      */
-    private final int mTimeout;
+    private RcsSettings mRcsSettings;
 
     /**
      * Received response
@@ -44,7 +48,7 @@ public class RequestTransaction extends Object {
      * @param rcsSettings
      */
     public RequestTransaction(RcsSettings rcsSettings) {
-        mTimeout = rcsSettings.getMsrpTransactionTimeout();
+        mRcsSettings = rcsSettings;
     }
 
     /**
@@ -70,7 +74,7 @@ public class RequestTransaction extends Object {
         synchronized (this) {
             try {
                 // Wait semaphore
-                super.wait(mTimeout * 1000);
+                super.wait(mRcsSettings.getMsrpTransactionTimeout());
             } catch (InterruptedException e) {
                 // Nothing to do
             }

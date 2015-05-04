@@ -102,7 +102,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dip"
-                android:text="@string/Idle_duration_of_a_chat_session_seconds" />
+                android:text="@string/Idle_duration_of_a_chat_session_milliseconds" />
 
             <EditText
                 android:id="@+id/ChatIdleDuration"
@@ -112,7 +112,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
-                android:maxLength="10" />
+                android:maxLength="13" />
 
             <TextView
                 android:layout_width="fill_parent"
@@ -163,7 +163,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dip"
-                android:text="@string/Max_duration_of_a_video_share_seconds" />
+                android:text="@string/Max_duration_of_a_video_share_milliseconds" />
 
             <EditText
                 android:id="@+id/MaxVideoShareDuration"
@@ -173,7 +173,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
-                android:maxLength="10" />
+                android:maxLength="13" />
 
             <TextView
                 android:layout_width="fill_parent"
@@ -321,7 +321,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dip"
-                android:text="@string/Expiration_time_of_a_geolocation_seconds" />
+                android:text="@string/Expiration_time_of_a_geolocation_milliseconds" />
 
             <EditText
                 android:id="@+id/GeolocExpirationTime"
@@ -331,7 +331,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
-                android:maxLength="10" />
+                android:maxLength="13" />
 
             <TextView
                 android:layout_width="fill_parent"

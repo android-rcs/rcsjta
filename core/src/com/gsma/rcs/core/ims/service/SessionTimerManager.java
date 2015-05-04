@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +15,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service;
 
 import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
+import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipMessage;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
@@ -39,9 +44,9 @@ import javax2.sip.Dialog;
  */
 public class SessionTimerManager extends PeriodicRefresher {
     /**
-     * Minimum value of expire period
+     * Minimum value of expire period in milliseconds
      */
-    public final static int MIN_EXPIRE_PERIOD = 90;
+    public final static long MIN_EXPIRE_PERIOD = 90000;
 
     /**
      * UAC role
@@ -61,7 +66,7 @@ public class SessionTimerManager extends PeriodicRefresher {
     /**
      * Expire period
      */
-    private int mExpirePeriod;
+    private long mExpirePeriod;
 
     /**
      * Refresher
@@ -95,8 +100,7 @@ public class SessionTimerManager extends PeriodicRefresher {
      */
     public boolean isSessionTimerActivated(SipMessage msg) {
         // Check the Session-Expires header
-        int expire = msg.getSessionTimerExpire();
-        if (expire < MIN_EXPIRE_PERIOD) {
+        if (msg.getSessionTimerExpire() < MIN_EXPIRE_PERIOD) {
             if (mLogger.isActivated()) {
                 mLogger.debug("Session timer not activated");
             }
@@ -110,18 +114,20 @@ public class SessionTimerManager extends PeriodicRefresher {
      * Start the session timer
      * 
      * @param refresher Refresher role
-     * @param expirePeriod Expire period
+     * @param expirePeriod Expire period in milliseconds
      */
-    public void start(String refresher, int expirePeriod) {
+    public void start(String refresher, long expirePeriod) {
         if (mLogger.isActivated()) {
-            mLogger.debug("Start session timer for session " + mSession.getId() + " (role="
-                    + refresher + ", expire=" + expirePeriod + ")");
+            mLogger.debug(new StringBuilder("Start session timer for session ")
+                    .append(mSession.getId()).append(" (role=").append(refresher)
+                    .append(", expire=").append(expirePeriod).append("ms)").toString());
         }
 
         // If the session timer is set to 0 value, it may have not been set, so take the expire
         // period as value
-        if (mSession.getDialogPath().getSessionExpireTime() == 0) {
-            mSession.getDialogPath().setSessionExpireTime(expirePeriod);
+        SipDialogPath path = mSession.getDialogPath();
+        if (path.getSessionExpireTime() == 0) {
+            path.setSessionExpireTime(expirePeriod);
         }
 
         // Set refresher role
@@ -144,7 +150,7 @@ public class SessionTimerManager extends PeriodicRefresher {
         if (UAC_ROLE.equals(mRefresher)) {
             startTimer(mExpirePeriod, 0.5);
         } else {
-            startTimer(mExpirePeriod, 1);
+            startTimer(mExpirePeriod);
         }
     }
 
@@ -296,7 +302,7 @@ public class SessionTimerManager extends PeriodicRefresher {
                 mLogger.debug("Session timer refresh (UAS role)");
             }
 
-            if (((System.currentTimeMillis() - mLastSessionRefresh) / 1000) >= mExpirePeriod) {
+            if ((System.currentTimeMillis() - mLastSessionRefresh) >= mExpirePeriod) {
                 // Session has expired
                 if (mLogger.isActivated()) {
                     mLogger.debug("Session timer refresh has failed: close the session");

@@ -185,17 +185,17 @@ public class SipInterface implements SipListener {
     /**
      * Base timer T1 (in ms)
      */
-    private int mTimerT1 = 500;
+    private long mTimerT1 = 500;
 
     /**
      * Base timer T2 (in ms)
      */
-    private int mTimerT2 = 4000;
+    private long mTimerT2 = 4000;
 
     /**
      * Base timer T4 (in ms)
      */
-    private int mTimerT4 = 5000;
+    private long mTimerT4 = 5000;
 
     /**
      * The logger
@@ -483,7 +483,8 @@ public class SipInterface implements SipListener {
 
         ClientTransaction transaction = mDefaultSipProvider.getNewClientTransaction(request
                 .getStackMessage());
-        transaction.setRetransmitTimers(mTimerT1, mTimerT2, mTimerT4);
+        /* NOTE: External API limiting timers that should be in type 'long' to 'int'. */
+        transaction.setRetransmitTimers((int) mTimerT1, (int) mTimerT2, (int) mTimerT4);
         return transaction;
     }
 
@@ -597,7 +598,7 @@ public class SipInterface implements SipListener {
 
     /**
      * Returns the local via path
-     *
+     * 
      * @return List of headers
      * @throws SipException
      */
@@ -629,7 +630,7 @@ public class SipInterface implements SipListener {
 
     /**
      * Get local contact
-     *
+     * 
      * @return Header
      * @throws SipException
      */

@@ -121,7 +121,7 @@ public class CapabilitiesLog {
     /**
      * The name of the column containing the time of the last capability update from network.
      * <P>
-     * Type: LONG
+     * Type: INTEGER
      * </P>
      */
     public static final String TIMESTAMP = "timestamp";

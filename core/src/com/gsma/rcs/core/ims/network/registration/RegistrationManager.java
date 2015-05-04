@@ -61,14 +61,21 @@ public class RegistrationManager extends PeriodicRefresher {
 
     private static final int MAX_REGISTRATION_FAILURES = 3;
 
-    private static final int MILLISEC_CONVERSION_RATE = 1000;
+    /**
+     * Rate to convert from seconds to milliseconds
+     */
+    private static final long SECONDS_TO_MILLISECONDS_CONVERSION_RATE = 1000;
+
+    private static final long DEFAULT_EXPIRE_PERIOD = 1200 * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
+
+    private static final long SUBSTRACT_EXPIRE_PERIOD = DEFAULT_EXPIRE_PERIOD / 2;
 
     /**
      * First C Sequence
      */
     private static final int CSEQ_ONE = 1;
 
-    private int mExpirePeriod;
+    private long mExpirePeriod;
 
     private SipDialogPath mDialogPath;
 
@@ -128,10 +135,10 @@ public class RegistrationManager extends PeriodicRefresher {
 
     /**
      * Get the expiry value duration for the next SIP register
-     *
-     * @return value of the expiry period
+     * 
+     * @return value of the expiry period in milliseconds
      */
-    private int getExpiryValue() {
+    private long getExpiryValue() {
         if (CSEQ_ONE == mDialogPath.getCseq()) {
             return mRcsSettings.getRegisterExpirePeriod();
         } else {
@@ -353,7 +360,8 @@ public class RegistrationManager extends PeriodicRefresher {
      */
     private void sendRegister(SipRequest register) throws SipException, CoreException {
         if (mLogger.isActivated()) {
-            mLogger.info("Send REGISTER, expire=" + register.getExpires());
+            mLogger.info(new StringBuilder("Send REGISTER, expire=").append(register.getExpires())
+                    .append("ms").toString());
         }
 
         // Set the security header
@@ -501,10 +509,10 @@ public class RegistrationManager extends PeriodicRefresher {
         mReasonCode = ReasonCode.UNSPECIFIED;
 
         // Start the periodic registration
-        if (mExpirePeriod <= 1200) {
+        if (mExpirePeriod <= DEFAULT_EXPIRE_PERIOD) {
             startTimer(mExpirePeriod, 0.5);
         } else {
-            startTimer(mExpirePeriod - 600);
+            startTimer(mExpirePeriod - SUBSTRACT_EXPIRE_PERIOD);
         }
 
         // Notify event listener
@@ -562,7 +570,8 @@ public class RegistrationManager extends PeriodicRefresher {
             mLogger.info("Send REGISTER to new address");
         }
         SipRequest register = SipMessageFactory.createRegister(mDialogPath, mFeatureTags, ctx
-                .getTransaction().getRequest().getExpires().getExpires(), mInstanceId);
+                .getTransaction().getRequest().getExpires().getExpires()
+                * SECONDS_TO_MILLISECONDS_CONVERSION_RATE, mInstanceId);
 
         // Send REGISTER request
         sendRegister(register);
@@ -608,7 +617,8 @@ public class RegistrationManager extends PeriodicRefresher {
             mLogger.info("Send REGISTER with security token");
         }
         SipRequest register = SipMessageFactory.createRegister(mDialogPath, mFeatureTags, ctx
-                .getTransaction().getRequest().getExpires().getExpires(), mInstanceId);
+                .getTransaction().getRequest().getExpires().getExpires()
+                * SECONDS_TO_MILLISECONDS_CONVERSION_RATE, mInstanceId);
 
         // Send REGISTER request
         sendRegister(register);
@@ -634,7 +644,7 @@ public class RegistrationManager extends PeriodicRefresher {
         mDialogPath.incrementCseq();
 
         // Extract the Min-Expire value
-        int minExpire = SipUtils.getMinExpiresPeriod(resp);
+        long minExpire = SipUtils.getMinExpiresPeriod(resp);
         if (minExpire == -1) {
             if (mLogger.isActivated()) {
                 mLogger.error("Can't read the Min-Expires value");
@@ -703,7 +713,7 @@ public class RegistrationManager extends PeriodicRefresher {
                         .equals(mNetworkInterface.getNetworkAccess().getIpAddress())) {
                     int expires = contact.getExpires();
                     if (expires != -1) {
-                        mExpirePeriod = expires;
+                        mExpirePeriod = expires * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
                     }
                     return;
                 }
@@ -715,7 +725,7 @@ public class RegistrationManager extends PeriodicRefresher {
         if (expiresHeader != null) {
             int expires = expiresHeader.getExpires();
             if (expires != -1) {
-                mExpirePeriod = expires;
+                mExpirePeriod = expires * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
             }
         }
     }
@@ -746,7 +756,8 @@ public class RegistrationManager extends PeriodicRefresher {
         final SipResponse response = ctx.getSipResponse();
         final RetryAfterHeader retryHeader = (RetryAfterHeader) response.getStackMessage()
                 .getHeader(RetryAfterHeader.NAME);
-        final int durationInMillis = retryHeader.getDuration() * MILLISEC_CONVERSION_RATE;
+        final long durationInMillis = retryHeader.getDuration()
+                * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
         if (retryHeader != null && durationInMillis > 0) {
             mNetworkInterface.setRetryAfterHeaderDuration(durationInMillis);
             handleError(new ImsError(ImsError.REGISTRATION_FAILED, new StringBuilder("retry after")
@@ -763,7 +774,8 @@ public class RegistrationManager extends PeriodicRefresher {
             }
         }
         SipRequest register = SipMessageFactory.createRegister(mDialogPath, mFeatureTags, ctx
-                .getTransaction().getRequest().getExpires().getExpires(), mInstanceId);
+                .getTransaction().getRequest().getExpires().getExpires()
+                * SECONDS_TO_MILLISECONDS_CONVERSION_RATE, mInstanceId);
         sendRegister(register);
     }
 }

@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +15,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.network.sip;
-
-import java.util.ListIterator;
-
-import javax2.sip.header.ViaHeader;
-import javax2.sip.header.WarningHeader;
-import javax2.sip.message.Request;
-import javax2.sip.message.Response;
 
 import com.gsma.rcs.core.ims.network.ImsNetworkInterface;
 import com.gsma.rcs.core.ims.protocol.sip.KeepAliveManager;
@@ -37,12 +34,23 @@ import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 
+import java.util.ListIterator;
+
+import javax2.sip.header.ViaHeader;
+import javax2.sip.header.WarningHeader;
+import javax2.sip.message.Request;
+import javax2.sip.message.Response;
+
 /**
  * SIP manager
  * 
  * @author JM. Auffret
  */
 public class SipManager {
+    /**
+     * Rate to convert from seconds to milliseconds
+     */
+    private static final long SECONDS_TO_MILLISECONDS_CONVERSION_RATE = 1000;
 
     /**
      * SIP timeout for SIP transaction (in milliseconds)
@@ -244,7 +252,7 @@ public class SipManager {
             viaKeep = Integer.parseInt(keepStr);
             if (viaKeep > 0) {
                 // If "keep" value is valid, set keep alive period
-                keepAliveManager.setPeriod(viaKeep);
+                keepAliveManager.setPeriod(viaKeep * SECONDS_TO_MILLISECONDS_CONVERSION_RATE);
             } else {
                 if (sLogger.isActivated())
                     sLogger.warn("Non positive keep value \"" + keepStr + "\"");

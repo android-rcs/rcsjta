@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.im.chat;
@@ -31,12 +35,7 @@ public class ChatActivityManager extends PeriodicRefresher {
     /**
      * Last activity timestamp
      */
-    private long mActivityTimesamp = 0L;
-
-    /**
-     * Session timeout (in seconds)
-     */
-    private int mTimeout;
+    private long mActivityTimestamp = 0L;
 
     /**
      * IM session
@@ -49,6 +48,11 @@ public class ChatActivityManager extends PeriodicRefresher {
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
     /**
+     * RcsSettings
+     */
+    private RcsSettings mRcsSettings;
+
+    /**
      * Constructor
      * 
      * @param session IM session
@@ -56,29 +60,31 @@ public class ChatActivityManager extends PeriodicRefresher {
      */
     public ChatActivityManager(ChatSession session, RcsSettings rcsSettings) {
         mSession = session;
-        mTimeout = rcsSettings.getChatIdleDuration();
+        mRcsSettings = rcsSettings;
     }
 
     /**
      * Update the session activity
      */
     public void updateActivity() {
-        mActivityTimesamp = System.currentTimeMillis();
+        mActivityTimestamp = System.currentTimeMillis();
     }
 
     /**
      * Start manager
      */
     public void start() {
+        long timeout = mRcsSettings.getChatIdleDuration();
         if (logger.isActivated()) {
-            logger.info("Start the activity manager for " + mTimeout + "s");
+            logger.info(new StringBuilder("Start the activity manager for ").append(timeout)
+                    .append("ms").toString());
         }
 
         // Reset the inactivity timestamp
         updateActivity();
 
         // Start a timer to check if the inactivity period has been reach or not each 10seconds
-        startTimer(mTimeout, 1.0);
+        startTimer(timeout);
     }
 
     /**
@@ -97,23 +103,24 @@ public class ChatActivityManager extends PeriodicRefresher {
      * Periodic processing
      */
     public void periodicProcessing() {
-        long currentTime = System.currentTimeMillis();
-        int inactivityPeriod = (int) ((currentTime - mActivityTimesamp) / 1000) + 1;
-        int remainingPeriod = mTimeout - inactivityPeriod;
+        long timeout = mRcsSettings.getChatIdleDuration();
+        long inactivityPeriod = System.currentTimeMillis() - mActivityTimestamp;
+        long remainingPeriod = timeout - inactivityPeriod;
         if (logger.isActivated()) {
-            logger.debug("Check inactivity period: inactivity=" + inactivityPeriod + ", remaining="
-                    + remainingPeriod);
+            logger.debug(new StringBuilder("Check inactivity period: inactivity=")
+                    .append(inactivityPeriod).append(", remaining=").append(remainingPeriod)
+                    .toString());
         }
 
-        if (inactivityPeriod >= mTimeout) {
+        if (inactivityPeriod >= timeout) {
             if (logger.isActivated()) {
-                logger.debug("No activity on the session during " + mTimeout
-                        + "s: abort the session");
+                logger.debug(new StringBuilder("No activity on the session during ")
+                        .append(timeout).append("ms: abort the session").toString());
             }
             mSession.handleChatInactivityEvent();
         } else {
             // Restart timer
-            startTimer(remainingPeriod, 1.0);
+            startTimer(remainingPeriod);
         }
     }
 }

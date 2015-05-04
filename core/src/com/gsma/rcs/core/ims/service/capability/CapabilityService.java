@@ -232,7 +232,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
             return true;
         }
         // Is current time after capability refresh timeout ?
-        return (now > (timestampOfLastRequest + mRcsSettings.getCapabilityRefreshTimeout() * 1000));
+        return (now > (timestampOfLastRequest + mRcsSettings.getCapabilityRefreshTimeout()));
     }
 
     /**

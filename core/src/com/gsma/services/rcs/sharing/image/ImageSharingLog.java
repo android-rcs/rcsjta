@@ -87,7 +87,7 @@ public class ImageSharingLog {
     /**
      * The name of the column containing the image size to be transferred (in bytes).
      * <P>
-     * Type: LONG
+     * Type: INTEGER
      * </P>
      */
     public static final String FILESIZE = "filesize";
@@ -113,7 +113,7 @@ public class ImageSharingLog {
     /**
      * The name of the column containing the amount of data transferred (in bytes).
      * <P>
-     * Type: LONG
+     * Type: INTEGER
      * </P>
      */
     public static final String TRANSFERRED = "transferred";
@@ -121,7 +121,7 @@ public class ImageSharingLog {
     /**
      * The name of the column containing the date of the sharing (in milliseconds).
      * <P>
-     * Type: LONG
+     * Type: INTEGER
      * </P>
      */
     public static final String TIMESTAMP = "timestamp";

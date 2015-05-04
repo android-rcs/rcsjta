@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.capability;
@@ -38,11 +42,6 @@ public class PollingManager extends PeriodicRefresher {
      */
     private final CapabilityService mImsService;
 
-    /**
-     * Polling period (in seconds)
-     */
-    private final int mPollingPeriod;
-
     private final RcsSettings mRcsSettings;
 
     private final ContactManager mContatManager;
@@ -62,7 +61,6 @@ public class PollingManager extends PeriodicRefresher {
     public PollingManager(CapabilityService parent, RcsSettings rcsSettings,
             ContactManager contactManager) {
         mImsService = parent;
-        mPollingPeriod = rcsSettings.getCapabilityPollingPeriod();
         mRcsSettings = rcsSettings;
         mContatManager = contactManager;
     }
@@ -71,10 +69,11 @@ public class PollingManager extends PeriodicRefresher {
      * Start polling
      */
     public void start() {
-        if (mPollingPeriod == 0) {
+        long pollingPeriod = mRcsSettings.getCapabilityPollingPeriod();
+        if (pollingPeriod == 0) {
             return;
         }
-        startTimer(mPollingPeriod, 1);
+        startTimer(pollingPeriod);
     }
 
     /**
@@ -100,7 +99,7 @@ public class PollingManager extends PeriodicRefresher {
         }
 
         // Restart timer
-        startTimer(mPollingPeriod, 1);
+        startTimer(mRcsSettings.getCapabilityPollingPeriod());
     }
 
     /**
@@ -159,6 +158,6 @@ public class PollingManager extends PeriodicRefresher {
             return true;
         }
         // Is current time after capability expiration time ?
-        return (now > (timestampOfLastResponse + rcsSettings.getCapabilityExpiryTimeout() * 1000));
+        return (now > (timestampOfLastResponse + rcsSettings.getCapabilityExpiryTimeout()));
     }
 }

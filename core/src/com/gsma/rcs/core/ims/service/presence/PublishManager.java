@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +15,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.presence;
-
-import java.util.Vector;
-
-import javax2.sip.header.ExpiresHeader;
-import javax2.sip.header.SIPETagHeader;
 
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
@@ -36,6 +35,11 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PeriodicRefresher;
 import com.gsma.rcs.utils.logger.Logger;
 
+import java.util.Vector;
+
+import javax2.sip.header.ExpiresHeader;
+import javax2.sip.header.SIPETagHeader;
+
 /**
  * Publish manager for sending current user presence status
  * 
@@ -43,7 +47,12 @@ import com.gsma.rcs.utils.logger.Logger;
  */
 public class PublishManager extends PeriodicRefresher {
     /**
-     * Last min expire period (in seconds)
+     * Rate to convert from seconds to milliseconds
+     */
+    private static final long SECONDS_TO_MILLISECONDS_CONVERSION_RATE = 1000;
+
+    /**
+     * Last min expire period (in milliseconds)
      */
     private static final String REGISTRY_MIN_EXPIRE_PERIOD = "MinPublishExpirePeriod";
 
@@ -63,9 +72,9 @@ public class PublishManager extends PeriodicRefresher {
     private ImsModule mImsModule;
 
     /**
-     * Expire period
+     * Expire period in milliseconds
      */
-    private int mExpirePeriod;
+    private long mExpirePeriod;
 
     /**
      * Dialog path
@@ -105,9 +114,8 @@ public class PublishManager extends PeriodicRefresher {
         mAuthenticationAgent = new SessionAuthenticationAgent(mImsModule);
         mRcsSettings = rcsSettings;
 
-        int defaultExpirePeriod = rcsSettings.getPublishExpirePeriod();
-        int minExpireValue = RegistryFactory.getFactory().readInteger(REGISTRY_MIN_EXPIRE_PERIOD,
-                -1);
+        long defaultExpirePeriod = rcsSettings.getPublishExpirePeriod();
+        long minExpireValue = RegistryFactory.getFactory().readLong(REGISTRY_MIN_EXPIRE_PERIOD, -1);
         if ((minExpireValue != -1) && (defaultExpirePeriod < minExpireValue)) {
             mExpirePeriod = minExpireValue;
         } else {
@@ -243,7 +251,8 @@ public class PublishManager extends PeriodicRefresher {
      */
     private void sendPublish(SipRequest publish) throws Exception {
         if (logger.isActivated()) {
-            logger.info("Send PUBLISH, expire=" + publish.getExpires());
+            logger.info(new StringBuilder("Send PUBLISH, expire=").append(publish.getExpires())
+                    .append("ms").toString());
         }
 
         if (mPublished) {
@@ -357,7 +366,9 @@ public class PublishManager extends PeriodicRefresher {
             logger.info("Send second PUBLISH");
         }
         SipRequest publish = SipMessageFactory.createPublish(mDialogPath, ctx.getTransaction()
-                .getRequest().getExpires().getExpires(), mEntityTag, mDialogPath.getLocalContent());
+                .getRequest().getExpires().getExpires()
+                * SECONDS_TO_MILLISECONDS_CONVERSION_RATE, mEntityTag,
+                mDialogPath.getLocalContent());
 
         // Set the Authorization header
         mAuthenticationAgent.setProxyAuthorizationHeader(publish);
@@ -409,7 +420,7 @@ public class PublishManager extends PeriodicRefresher {
         mDialogPath.incrementCseq();
 
         // Extract the Min-Expire value
-        int minExpire = SipUtils.getMinExpiresPeriod(resp);
+        long minExpire = SipUtils.getMinExpiresPeriod(resp);
         if (minExpire == -1) {
             if (logger.isActivated()) {
                 logger.error("Can't read the Min-Expires value");
@@ -420,7 +431,7 @@ public class PublishManager extends PeriodicRefresher {
         }
 
         // Save the min expire value in the terminal registry
-        RegistryFactory.getFactory().writeInteger(REGISTRY_MIN_EXPIRE_PERIOD, minExpire);
+        RegistryFactory.getFactory().writeLong(REGISTRY_MIN_EXPIRE_PERIOD, minExpire);
 
         // Set the default expire value
         mExpirePeriod = minExpire;
@@ -466,7 +477,7 @@ public class PublishManager extends PeriodicRefresher {
         if (expiresHeader != null) {
             int expires = expiresHeader.getExpires();
             if (expires != -1) {
-                mExpirePeriod = expires;
+                mExpirePeriod = expires * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
             }
         }
     }
@@ -484,7 +495,7 @@ public class PublishManager extends PeriodicRefresher {
         }
         if (mEntityTag != null) {
             RegistryFactory.getFactory().writeString(REGISTRY_SIP_ETAG, mEntityTag);
-            long etagExpiration = System.currentTimeMillis() + (mExpirePeriod * 1000);
+            long etagExpiration = System.currentTimeMillis() + mExpirePeriod;
             RegistryFactory.getFactory().writeLong(REGISTRY_SIP_ETAG_EXPIRATION, etagExpiration);
             if (logger.isActivated()) {
                 logger.debug("New entity tag: " + mEntityTag + ", expire at=" + etagExpiration);
