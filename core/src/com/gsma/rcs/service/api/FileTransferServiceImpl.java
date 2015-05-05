@@ -500,10 +500,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         final FileSharingSession session = mImService.initiateFileTransferSession(fileTransferId,
                 contact, file, fileIcon, timestamp, timestampSent, ftProtocol);
 
+        FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
+                fileTransferId, contact, Direction.OUTGOING, contact.toString(), file, fileIcon,
+                mMessagingLog);
         OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
-                fileTransferId, mOneToOneFileTransferBroadcaster, mImService,
-                new FileTransferPersistedStorageAccessor(fileTransferId, mMessagingLog), this,
-                mRcsSettings, mCore, mMessagingLog, mContactManager, mOneToOneUndeliveredImManager);
+                fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
+                this, mRcsSettings, mCore, mMessagingLog, mContactManager,
+                mOneToOneUndeliveredImManager);
         session.addListener(oneToOneFileTransfer);
         addFileTransfer(oneToOneFileTransfer);
         session.startSession();
@@ -911,10 +914,11 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 fileTransferId, content, fileIcon, chatId, groupChatSession.getSessionID(),
                 timestamp, timestampSent);
 
+        FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
+                fileTransferId, null, Direction.OUTGOING, chatId, content, fileIcon, mMessagingLog);
         GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(fileTransferId, chatId,
-                mGroupFileTransferBroadcaster, mImService,
-                new FileTransferPersistedStorageAccessor(fileTransferId, mMessagingLog), this,
-                mRcsSettings, mCore, mMessagingLog, mContactManager);
+                mGroupFileTransferBroadcaster, mImService, storageAccessor, this, mRcsSettings,
+                mCore, mMessagingLog, mContactManager);
         session.addListener(groupFileTransfer);
         addFileTransfer(groupFileTransfer);
         session.startSession();

@@ -687,9 +687,21 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             }
             final FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
             if (session == null) {
-                throw new ServerApiPermissionDeniedException(new StringBuilder(
-                        "Session with file transfer ID '").append(mFileTransferId)
-                        .append("' not available!").toString());
+                /*
+                 * File transfer can be aborted only if it is in state QUEUED/ PAUSED when there is
+                 * no session.
+                 */
+                State state = mPersistentStorage.getState();
+                switch (state) {
+                    case QUEUED:
+                    case PAUSED:
+                        setStateAndReasonCode(State.ABORTED, ReasonCode.ABORTED_BY_SYSTEM);
+                        return;
+                    default:
+                        throw new ServerApiPermissionDeniedException(new StringBuilder(
+                                "Session with file transfer ID '").append(mFileTransferId)
+                                .append("' not available!").toString());
+                }
             }
             if (session.isFileTransfered()) {
                 /* File already transferred and session automatically closed after transfer */
