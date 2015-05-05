@@ -34,6 +34,9 @@ import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 /**
  * Terminating file transfer HTTP session starting from system resuming (because core was
  * restarted).
@@ -92,7 +95,8 @@ public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSha
             httpTransferStarted();
 
             /* Resume download file from the HTTP server */
-            if (mDownloadManager.mStreamForFile != null && mDownloadManager.resumeDownload()) {
+            if (mDownloadManager.isFileStreamAllocated()) {
+                mDownloadManager.resumeDownload();
                 if (logActivated) {
                     mLogger.debug("Resume download success for ".concat(mResume.toString()));
                 }
@@ -115,21 +119,37 @@ public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSha
 
                 /* Upload error */
                 if (logActivated) {
-                    mLogger.info("Resume Download file has failed");
+                    mLogger.info("Resume Download file has failed for ".concat(mResume.toString()));
                 }
                 handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED));
             }
+        } catch (FileNotFoundException e) {
+            /* Don't call handleError in case of Pause or Cancel */
+            if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
+                return;
+            }
+            mLogger.error("Resume Download file has failed for ".concat(mResume.toString()), e);
+            handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
+        } catch (FileNotDownloadedException e) {
+            /* Don't call handleError in case of Pause or Cancel */
+            if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
+                return;
+            }
+            mLogger.error("Resume Download file has failed for ".concat(mResume.toString()), e);
+            handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
+        } catch (IOException e) {
+            /* Don't call handleError in case of Pause or Cancel */
+            if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
+                return;
+            }
+            handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
-            mLogger.error(
-                    new StringBuilder("Download failed for a file sessionId : ")
-                            .append(getSessionID()).append(" with transferId : ")
-                            .append(getFileTransferId()).toString(), e);
+            mLogger.error("Resume Download file has failed for ".concat(mResume.toString()), e);
             handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
         }
     }
-
 }

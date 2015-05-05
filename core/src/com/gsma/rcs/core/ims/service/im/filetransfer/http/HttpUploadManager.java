@@ -424,13 +424,15 @@ public class HttpUploadManager extends HttpTransferManager {
                 } catch (IOException e) {
                     if (mLogger.isActivated()) {
                         mLogger.warn("File Upload paused due to " + e.getLocalizedMessage()
-                                + " now in state paused.");
+                                + " and is now in state paused.");
                     }
                     /*
                      * When there is a connection problem causing transfer terminated, state should
                      * be set to paused.
                      */
-                    pauseTransferBySystem();
+                    if (!isPaused() && !isCancelled()) {
+                        pauseTransferBySystem();
+                    }
                     return null;
                 }
             } else {
@@ -463,6 +465,19 @@ public class HttpUploadManager extends HttpTransferManager {
                 }
                 return null;
             }
+        } catch (IOException e) {
+            if (mLogger.isActivated()) {
+                mLogger.warn("File Upload paused due to " + e.getLocalizedMessage()
+                        + " and is now in state paused.");
+            }
+            /*
+             * When there is a connection problem causing transfer terminated, state should be set
+             * to paused.
+             */
+            if (!isPaused() && !isCancelled()) {
+                pauseTransferBySystem();
+            }
+            return null;
         } catch (SecurityException e) {
             if (mLogger.isActivated()) {
                 mLogger.error("Upload has failed due to that the file is not accessible!", e);

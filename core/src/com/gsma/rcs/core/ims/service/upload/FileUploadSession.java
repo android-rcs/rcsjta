@@ -279,7 +279,6 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
          * for file upload
          */
         removeSession();
-        mListener.handleUploadError(FileSharingError.MEDIA_TRANSFER_FAILED);
     }
 
     /**

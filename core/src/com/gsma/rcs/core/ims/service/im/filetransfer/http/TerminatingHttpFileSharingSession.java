@@ -39,6 +39,9 @@ import com.gsma.services.rcs.contact.ContactId;
 
 import android.net.Uri;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 /**
  * Terminating file transfer HTTP session
  * 
@@ -127,42 +130,50 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
 
             Uri file = mDownloadManager.getDownloadedFileUri();
             /* Download file from the HTTP server */
-            if (mDownloadManager.downloadFile()) {
-                if (mLogger.isActivated()) {
-                    mLogger.debug("Download file with success");
-                }
-
-                /* Set filename */
-                getContent().setUri(file);
-
-                /* File transfered */
-                handleFileTransfered();
-
-                if (getImdnManager().isSendOneToOneDeliveryDisplayedReportsEnabled()) {
-                    sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
-                            System.currentTimeMillis());
-                }
-            } else {
-                /* Don't call handleError in case of Pause or Cancel */
-                if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
-                    return;
-                }
-
-                /* Upload error */
-                if (mLogger.isActivated()) {
-                    mLogger.debug("Download file has failed");
-                }
-                handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED));
+            mDownloadManager.downloadFile();
+            if (mLogger.isActivated()) {
+                mLogger.debug("Download file with success");
             }
+
+            /* Set filename */
+            getContent().setUri(file);
+
+            /* File transfered */
+            handleFileTransfered();
+
+            if (getImdnManager().isSendOneToOneDeliveryDisplayedReportsEnabled()) {
+                sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
+                        System.currentTimeMillis());
+            }
+        } catch (FileNotFoundException e) {
+            /* Don't call handleError in case of Pause or Cancel */
+            if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
+                return;
+            }
+            mLogger.error("Download of file has failed for mRemoteInstanceId : "
+                    .concat(mRemoteInstanceId), e);
+            handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
+        } catch (FileNotDownloadedException e) {
+            /* Don't call handleError in case of Pause or Cancel */
+            if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
+                return;
+            }
+            mLogger.error("Download of file has failed for mRemoteInstanceId : "
+                    .concat(mRemoteInstanceId), e);
+            handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
+        } catch (IOException e) {
+            /* Don't call handleError in case of Pause or Cancel */
+            if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
+                return;
+            }
+            handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
-            mLogger.error(
-                    new StringBuilder("Failed to intiate a file transfer session for sessionId : ")
-                            .append(getSessionID()).append(" with fileTransferId : ")
-                            .append(getFileTransferId()).toString(), e);
+            mLogger.error("Download of file has failed for mRemoteInstanceId : "
+                    .concat(mRemoteInstanceId), e);
             handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
         }
     }
@@ -234,33 +245,52 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
 
         new Thread(new Runnable() {
             public void run() {
-                // Download file from the HTTP server
-                if (mDownloadManager.resumeDownload()) {
+                try {
+                    /* Download file from the HTTP server */
+                    mDownloadManager.resumeDownload();
                     if (mLogger.isActivated()) {
                         mLogger.debug("Download file with success");
                     }
 
-                    // Set filename
+                    /* Set filename */
                     getContent().setUri(mDownloadManager.getDownloadedFileUri());
 
-                    // File transfered
                     handleFileTransfered();
 
                     if (getImdnManager().isSendOneToOneDeliveryDisplayedReportsEnabled()) {
                         sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
                                 System.currentTimeMillis());
                     }
-                } else {
-                    // Don't call handleError in case of Pause or Cancel
+                } catch (FileNotFoundException e) {
+                    /* Don't call handleError in case of Pause or Cancel */
                     if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
                         return;
                     }
-
-                    // Upload error
-                    if (mLogger.isActivated()) {
-                        mLogger.debug("Download file has failed");
+                    mLogger.error("Download of file has failed for mRemoteInstanceId : "
+                            .concat(mRemoteInstanceId), e);
+                    handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
+                } catch (FileNotDownloadedException e) {
+                    /* Don't call handleError in case of Pause or Cancel */
+                    if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
+                        return;
                     }
-                    handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED));
+                    mLogger.error("Download of file has failed for mRemoteInstanceId : "
+                            .concat(mRemoteInstanceId), e);
+                    handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
+                } catch (IOException e) {
+                    /* Don't call handleError in case of Pause or Cancel */
+                    if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
+                        return;
+                    }
+                    handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
+                } catch (RuntimeException e) {
+                    /*
+                     * Intentionally catch runtime exceptions as else it will abruptly end the
+                     * thread and eventually bring the whole system down, which is not intended.
+                     */
+                    mLogger.error("Download of file has failed for mRemoteInstanceId : "
+                            .concat(mRemoteInstanceId), e);
+                    handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
                 }
             }
         }).start();
@@ -280,5 +310,4 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
     public boolean isInitiatedByRemote() {
         return true;
     }
-
 }
