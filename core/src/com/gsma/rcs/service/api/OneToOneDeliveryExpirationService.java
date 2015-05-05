@@ -17,9 +17,6 @@
 package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.Core;
-import com.gsma.rcs.core.CoreListener;
-
-import com.gsma.rcs.service.api.OneToOneUndeliveredImManager;
 import com.gsma.rcs.utils.logger.Logger;
 
 import android.app.IntentService;
@@ -36,8 +33,8 @@ public class OneToOneDeliveryExpirationService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         Core core = Core.getInstance();
-        if (core == null) {
-            /* Stack is not running, don't process this intent */
+        if (core == null || !core.isStarted()) {
+            /* Stack is not started, don't process this intent */
             if (mLogger.isActivated()) {
                 mLogger.warn("Stack is not running, do not process the delivery expiration intent!");
             }
