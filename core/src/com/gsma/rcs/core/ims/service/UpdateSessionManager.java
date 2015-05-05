@@ -185,7 +185,7 @@ public class UpdateSessionManager {
                         } else {
                             // Other error response => generate call error
                             mSession.handleError(new ImsSessionBasedServiceError(
-                                    ImsSessionBasedServiceError.UNEXPECTED_EXCEPTION, ctx
+                                    ImsSessionBasedServiceError.SESSION_INITIATION_FAILED, ctx
                                             .getSipResponse().getStatusCode()
                                             + " "
                                             + ctx.getSipResponse().getReasonPhrase()));
@@ -196,12 +196,21 @@ public class UpdateSessionManager {
                                 ctx.getSipResponse(), reInviteContext);
                     }
                 } catch (SipException e) {
-                    // Unexpected error => generate call error
-                    if (sLogger.isActivated()) {
-                        sLogger.error("Send ReInvite has failed", e);
-                    }
+                    sLogger.error(
+                            new StringBuilder("Send ReInvite has failed! CallId=").append(
+                                    reInvite.getCallId()).toString(), e);
                     mSession.handleError(new ImsSessionBasedServiceError(
-                            ImsSessionBasedServiceError.UNEXPECTED_EXCEPTION, e.getMessage()));
+                            ImsSessionBasedServiceError.SESSION_INITIATION_FAILED, e));
+                } catch (RuntimeException e) {
+                    /**
+                     * Intentionally catch runtime exceptions as else it will abruptly end the
+                     * thread and eventually bring the whole system down, which is not intended.
+                     */
+                    sLogger.error(
+                            new StringBuilder("Send ReInvite has failed! CallId=").append(
+                                    reInvite.getCallId()).toString(), e);
+                    mSession.handleError(new ImsSessionBasedServiceError(
+                            ImsSessionBasedServiceError.SESSION_INITIATION_FAILED, e));
                 }
             }
         };
@@ -256,16 +265,23 @@ public class UpdateSessionManager {
                         }
                         // No ACK received => generate call error for local client
                         mSession.handleError(new ImsSessionBasedServiceError(
-                                ImsSessionBasedServiceError.UNEXPECTED_EXCEPTION,
+                                ImsSessionBasedServiceError.SEND_RESPONSE_FAILED,
                                 "ack not received"));
                     }
-                } catch (Exception e) {
-                    // Unexpected error => generate call error for local client
-                    if (sLogger.isActivated()) {
-                        sLogger.error("Session update refresh has failed", e);
-                    }
+                } catch (SipException e) {
+                    sLogger.error(new StringBuilder("Session update refresh has failed! CallId=")
+                            .append(reInvite.getCallId()).toString(), e);
                     mSession.handleError(new ImsSessionBasedServiceError(
-                            ImsSessionBasedServiceError.UNEXPECTED_EXCEPTION, e.getMessage()));
+                            ImsSessionBasedServiceError.SEND_RESPONSE_FAILED, e));
+                } catch (RuntimeException e) {
+                    /**
+                     * Intentionally catch runtime exceptions as else it will abruptly end the
+                     * thread and eventually bring the whole system down, which is not intended.
+                     */
+                    sLogger.error(new StringBuilder("Session update refresh has failed! CallId=")
+                            .append(reInvite.getCallId()).toString(), e);
+                    mSession.handleError(new ImsSessionBasedServiceError(
+                            ImsSessionBasedServiceError.SEND_RESPONSE_FAILED, e));
                 }
             }
         };
@@ -332,7 +348,7 @@ public class UpdateSessionManager {
                             if (sdp == null) {
                                 // sdp null - terminate session and send error
                                 mSession.handleError(new ImsSessionBasedServiceError(
-                                        ImsSessionBasedServiceError.UNEXPECTED_EXCEPTION,
+                                        ImsSessionBasedServiceError.SEND_RESPONSE_FAILED,
                                         "error on sdp building, sdp is null "));
                                 return;
                             }
@@ -368,23 +384,30 @@ public class UpdateSessionManager {
                                 }
                                 // No ACK received: send error
                                 mSession.handleError(new ImsSessionBasedServiceError(
-                                        ImsSessionBasedServiceError.UNEXPECTED_EXCEPTION,
+                                        ImsSessionBasedServiceError.SEND_RESPONSE_FAILED,
                                         "ack not received"));
                             }
                             break;
                         default:
                             mSession.handleError(new ImsSessionBasedServiceError(
-                                    ImsSessionBasedServiceError.UNEXPECTED_EXCEPTION,
+                                    ImsSessionBasedServiceError.SEND_RESPONSE_FAILED,
                                     "unknown invitation answer"));
                             break;
                     }
-                } catch (Exception e) {
-                    if (sLogger.isActivated()) {
-                        sLogger.error("Session update refresh has failed", e);
-                    }
-                    // Unexpected error
+                } catch (SipException e) {
+                    sLogger.error(new StringBuilder("Session update refresh has failed! CallId=")
+                            .append(reInvite.getCallId()).toString(), e);
                     mSession.handleError(new ImsSessionBasedServiceError(
-                            ImsSessionBasedServiceError.UNEXPECTED_EXCEPTION, e.getMessage()));
+                            ImsSessionBasedServiceError.SEND_RESPONSE_FAILED, e));
+                } catch (RuntimeException e) {
+                    /**
+                     * Intentionally catch runtime exceptions as else it will abruptly end the
+                     * thread and eventually bring the whole system down, which is not intended.
+                     */
+                    sLogger.error(new StringBuilder("Session update refresh has failed! CallId=")
+                            .append(reInvite.getCallId()).toString(), e);
+                    mSession.handleError(new ImsSessionBasedServiceError(
+                            ImsSessionBasedServiceError.SEND_RESPONSE_FAILED, e));
                 }
             }
         };
