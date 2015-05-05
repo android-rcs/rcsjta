@@ -29,7 +29,6 @@ import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
@@ -57,7 +56,6 @@ import com.gsma.services.rcs.contact.ContactId;
 
 import android.os.RemoteException;
 
-import java.io.IOException;
 import java.util.Vector;
 
 /**
@@ -373,7 +371,7 @@ public abstract class IPCallSession extends ImsServiceSession {
      * @throws SipException
      */
     public SipRequest createInvite() throws SipException {
-        return SipMessageFactory.createInvite(getDialogPath(), null, getDialogPath()
+        return SipMessageFactory.createInvite(getDialogPath(), new String[] {}, getDialogPath()
                 .getLocalContent());
     }
 

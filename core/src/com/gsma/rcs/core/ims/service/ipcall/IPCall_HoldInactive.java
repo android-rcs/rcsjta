@@ -39,7 +39,7 @@ public class IPCall_HoldInactive extends CallHoldManager {
         session.getDialogPath().setLocalContent(sdp);
 
         // get feature tags
-        String[] featureTags = null;
+        String[] featureTags = new String[] {};
         if (session.isTagPresent(sdp, "m=video")) { // audio+ video
             featureTags = IPCallService.FEATURE_TAGS_IP_VIDEO_CALL;
         } else { // audio only

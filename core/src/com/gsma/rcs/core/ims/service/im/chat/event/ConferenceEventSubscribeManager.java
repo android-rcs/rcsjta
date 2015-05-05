@@ -397,7 +397,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
         SipRequest subscribe = SipMessageFactory.createSubscribe(dialog, expirePeriod);
 
         // Set feature tags
-        SipUtils.setFeatureTags(subscribe, InstantMessagingService.CHAT_FEATURE_TAGS);
+        SipUtils.setFeatureTags(subscribe.getStackMessage(), InstantMessagingService.CHAT_FEATURE_TAGS);
 
         // Set the Event header
         subscribe.addHeader("Event", "conference");

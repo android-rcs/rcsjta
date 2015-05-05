@@ -449,17 +449,6 @@ public class SipUtils {
     /**
      * Set feature tags to a message
      * 
-     * @param message SIP message
-     * @param tags Table of tags
-     * @throws ParseException
-     */
-    public static void setFeatureTags(SipMessage message, String[] tags) throws Exception {
-        setFeatureTags(message.getStackMessage(), tags);
-    }
-
-    /**
-     * Set feature tags to a message
-     * 
      * @param message SIP stack message
      * @param tags Table of tags
      * @throws ParseException
@@ -478,10 +467,10 @@ public class SipUtils {
      */
     public static void setFeatureTags(Message message, String[] contactTags,
             String[] acceptContactTags) throws ParseException {
-        if (contactTags != null && contactTags.length != 0) {
+        if (contactTags.length != 0) {
             setContactFeatureTags(message, contactTags);
         }
-        if (acceptContactTags != null && acceptContactTags.length != 0) {
+        if (acceptContactTags.length != 0) {
             setAcceptContactFeatureTags(message, acceptContactTags);
         }
     }

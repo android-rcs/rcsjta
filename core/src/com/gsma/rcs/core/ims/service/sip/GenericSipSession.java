@@ -53,7 +53,7 @@ import javax2.sip.header.ExtensionHeader;
  */
 public abstract class GenericSipSession extends ImsServiceSession {
 
-    private String mFeatureTag;
+    private final String mFeatureTag;
 
     private static final Logger sLogger = Logger.getLogger(GenericSipSession.class.getSimpleName());
 

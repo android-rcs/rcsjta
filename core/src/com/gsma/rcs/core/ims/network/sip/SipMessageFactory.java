@@ -146,7 +146,7 @@ public class SipMessageFactory {
                     .createSupportedHeader(supported);
             register.addHeader(supportedHeader);
 
-            if (featureTags != null && featureTags.length != 0) {
+            if (featureTags.length != 0) {
                 // Set feature tags
                 SipUtils.setContactFeatureTags(register, featureTags);
             }
@@ -528,21 +528,6 @@ public class SipMessageFactory {
         } catch (ParseException e) {
             throw new SipException("Can't create multipart for a SIP INVITE!", e);
         }
-    }
-
-    /**
-     * Create a SIP INVITE request
-     * 
-     * @param dialog SIP dialog path
-     * @param featureTags Feature tags
-     * @param content Content
-     * @param contentType Content type
-     * @return SIP request
-     * @throws SipException
-     */
-    public static SipRequest createInvite(SipDialogPath dialog, String[] featureTags,
-            String content, ContentTypeHeader contentType) throws SipException {
-        return createInvite(dialog, featureTags, featureTags, content, contentType);
     }
 
     /**
