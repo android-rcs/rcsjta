@@ -19,6 +19,7 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
+
 package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.provider.settings.RcsSettings;

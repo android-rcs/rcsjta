@@ -137,7 +137,8 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
                 mApi.connect();
             } catch (RcsPermissionDeniedException e) {
                 mApi = null;
-                Utils.showMessageAndExit(ServiceStatus.this, getString(R.string.label_api_not_compatible), mExitOnce);
+                Utils.showMessageAndExit(ServiceStatus.this,
+                        getString(R.string.label_api_not_compatible), mExitOnce);
             }
         }
     };

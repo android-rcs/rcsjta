@@ -187,7 +187,7 @@ public class ChatMessageDAO implements Parcelable {
 
             mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.MIME_TYPE));
             mContent = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CONTENT));
-            int status = cursor.getColumnIndexOrThrow(ChatLog.Message.STATUS);
+            int status = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.Message.STATUS));
             if (Message.MimeType.GROUPCHAT_EVENT.equals(mMimeType)) {
                 mChatEvent = GroupChatEvent.Status.valueOf(status);
                 mStatus = null;

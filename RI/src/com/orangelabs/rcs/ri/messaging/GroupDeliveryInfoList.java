@@ -67,8 +67,8 @@ public class GroupDeliveryInfoList extends FragmentActivity implements
     };
     // @formatter:on
 
-    private static final String WHERE_CLAUSE = new StringBuilder(GroupDeliveryInfoLog.ID).append("=?")
-            .toString();
+    private static final String WHERE_CLAUSE = new StringBuilder(GroupDeliveryInfoLog.ID).append(
+            "=?").toString();
 
     /**
      * The log tag for this class

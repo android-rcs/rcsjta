@@ -121,8 +121,8 @@ public class OneToOneChat {
     /**
      * Called when is composing a chat message
      * 
-     * @param enabled It should be set to true if user is composing and set to false when the
-     *            client application is leaving the chat UI
+     * @param enabled It should be set to true if user is composing and set to false when the client
+     *            application is leaving the chat UI
      * @throws RcsServiceException
      */
     public void onComposing(final boolean enabled) throws RcsServiceException {

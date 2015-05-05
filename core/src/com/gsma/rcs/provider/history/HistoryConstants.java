@@ -136,8 +136,7 @@ import java.util.Set;
                 ChatLog.Message.TIMESTAMP_DELIVERED);
         columnMapping.put(HistoryLogData.KEY_TIMESTAMP_DISPLAYED,
                 ChatLog.Message.TIMESTAMP_DISPLAYED);
-        columnMapping.put(HistoryLogData.KEY_EXPIRED_DELIVERY,
-                ChatLog.Message.EXPIRED_DELIVERY);
+        columnMapping.put(HistoryLogData.KEY_EXPIRED_DELIVERY, ChatLog.Message.EXPIRED_DELIVERY);
         columnMapping.put(HistoryLogData.KEY_STATUS, ChatLog.Message.STATUS);
         columnMapping.put(HistoryLogData.KEY_REASON_CODE, ChatLog.Message.REASON_CODE);
         columnMapping.put(HistoryLogData.KEY_READ_STATUS, ChatLog.Message.READ_STATUS);
@@ -161,8 +160,7 @@ import java.util.Set;
                 FileTransferLog.TIMESTAMP_DELIVERED);
         columnMapping.put(HistoryLogData.KEY_TIMESTAMP_DISPLAYED,
                 FileTransferLog.TIMESTAMP_DISPLAYED);
-        columnMapping.put(HistoryLogData.KEY_EXPIRED_DELIVERY,
-                FileTransferLog.EXPIRED_DELIVERY);
+        columnMapping.put(HistoryLogData.KEY_EXPIRED_DELIVERY, FileTransferLog.EXPIRED_DELIVERY);
         columnMapping.put(HistoryLogData.KEY_STATUS, FileTransferLog.STATE);
         columnMapping.put(HistoryLogData.KEY_REASON_CODE, FileTransferLog.REASON_CODE);
         columnMapping.put(HistoryLogData.KEY_READ_STATUS, FileTransferLog.READ_STATUS);

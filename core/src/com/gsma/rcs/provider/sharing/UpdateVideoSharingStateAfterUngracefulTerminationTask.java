@@ -78,7 +78,7 @@ public class UpdateVideoSharingStateAfterUngracefulTerminationTask implements Ru
                         mVideoService.setVideoSharingStateAndReasonCode(contact, sharingId,
                                 State.REJECTED, ReasonCode.REJECTED_BY_SYSTEM);
                         break;
-                        /* TODO: Handle default. */
+                /* TODO: Handle default. */
                 }
             }
         } catch (Exception e) {

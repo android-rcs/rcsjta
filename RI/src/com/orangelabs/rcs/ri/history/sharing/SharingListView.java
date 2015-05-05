@@ -47,7 +47,7 @@ public class SharingListView extends HistoryListView {
 
     private final static String WHERE_CLAUSE_WITH_CONTACT = new StringBuilder(HistoryLog.CONTACT)
             .append("=?").toString();
-    
+
     private Spinner mSpinner;
 
     /**
@@ -220,7 +220,8 @@ public class SharingListView extends HistoryListView {
                 case ImageSharingLog.HISTORYLOG_MEMBER_ID:
                     sharingTypeView.setText(R.string.label_history_log_image_sharing);
                     String filename = cursor.getString(cursor.getColumnIndex(HistoryLog.FILENAME));
-                    descriptionView.setText((TextUtils.isEmpty(filename)) ? "" : truncateString(filename, MAX_LENGTH_DESCRIPTION));
+                    descriptionView.setText((TextUtils.isEmpty(filename)) ? "" : truncateString(
+                            filename, MAX_LENGTH_DESCRIPTION));
                     break;
                 case VideoSharingLog.HISTORYLOG_MEMBER_ID:
                     sharingTypeView.setText(R.string.label_history_log_video_sharing);

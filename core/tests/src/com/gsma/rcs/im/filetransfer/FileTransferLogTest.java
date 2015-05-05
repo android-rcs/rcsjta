@@ -94,9 +94,9 @@ public class FileTransferLogTest extends AndroidTestCase {
 
     public void testAddFileTransfer() {
         // Add entry
-        mMessagingLog.addOneToOneFileTransfer(mFileTransferId, mContact, Direction.OUTGOING, CONTENT, null,
-                State.INITIATING, ReasonCode.UNSPECIFIED, mTimestamp, mTimestampSent,
-                mFileExpiration, FileTransferLog.UNKNOWN_EXPIRATION);
+        mMessagingLog.addOneToOneFileTransfer(mFileTransferId, mContact, Direction.OUTGOING,
+                CONTENT, null, State.INITIATING, ReasonCode.UNSPECIFIED, mTimestamp,
+                mTimestampSent, mFileExpiration, FileTransferLog.UNKNOWN_EXPIRATION);
         // Read entry
         Uri uri = Uri.withAppendedPath(FileTransferLog.CONTENT_URI, mFileTransferId);
         Cursor cursor = mContentResolver.query(uri, null, null, null, null);

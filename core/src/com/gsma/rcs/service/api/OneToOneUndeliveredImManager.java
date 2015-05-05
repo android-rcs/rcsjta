@@ -108,7 +108,7 @@ public class OneToOneUndeliveredImManager {
     }
 
     /* package private */void cancelDeliveryTimeoutAlarm(String id) {
-        if(mLogger.isActivated()){
+        if (mLogger.isActivated()) {
             mLogger.debug("Cancel delivery expiration timer for Id ".concat(id));
         }
         synchronized (mUndeliveredImAlarms) {
@@ -143,8 +143,7 @@ public class OneToOneUndeliveredImManager {
         cancelDeliveryTimeoutAlarm(msgId);
         mMessagingLog.setChatMessageDeliveryExpired(msgId);
 
-        Intent undeliveredMessage = new Intent(
-                OneToOneChatIntent.ACTION_MESSAGE_DELIVERY_EXPIRED);
+        Intent undeliveredMessage = new Intent(OneToOneChatIntent.ACTION_MESSAGE_DELIVERY_EXPIRED);
         IntentUtils.tryToSetExcludeStoppedPackagesFlag(undeliveredMessage);
         IntentUtils.tryToSetReceiverForegroundFlag(undeliveredMessage);
         undeliveredMessage.putExtra(OneToOneChatIntent.EXTRA_CONTACT, (Parcelable) contact);

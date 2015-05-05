@@ -64,6 +64,5 @@ public class SharingDetailView extends Activity {
         intent.putExtra(EXTRA_INFOS, (Parcelable) infos);
         context.startActivity(intent);
     }
-    
 
 }

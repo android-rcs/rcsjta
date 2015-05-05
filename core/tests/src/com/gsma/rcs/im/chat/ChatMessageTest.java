@@ -115,7 +115,8 @@ public class ChatMessageTest extends AndroidTestCase {
         assertEquals(msgId, id);
         assertEquals(mTimestamp, readTimestamp);
         assertEquals(mTimestampSent, readTimestampSent);
-        mLocalContentResolver.delete(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), null, null);
+        mLocalContentResolver.delete(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), null,
+                null);
         assertFalse(mMessagingLog.isMessagePersisted(msgId));
     }
 
@@ -157,7 +158,8 @@ public class ChatMessageTest extends AndroidTestCase {
         assertEquals(msgId, id);
         assertEquals(mTimestamp, readTimestamp);
         assertEquals(mTimestampSent, readTimestampSent);
-        mLocalContentResolver.delete(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), null, null);
+        mLocalContentResolver.delete(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), null,
+                null);
         assertFalse(mMessagingLog.isMessagePersisted(msgId));
     }
 }

@@ -38,8 +38,7 @@ public class MessageData {
     /**
      * Database URIs
      */
-    public static final Uri CONTENT_URI = Uri
-            .parse("content://com.gsma.rcs.chat/chatmessage");
+    public static final Uri CONTENT_URI = Uri.parse("content://com.gsma.rcs.chat/chatmessage");
 
     /**
      * History log member id

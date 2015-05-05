@@ -1,3 +1,4 @@
+
 package com.orangelabs.rcs.ri.history.sharing;
 
 import android.os.Parcel;
@@ -5,7 +6,6 @@ import android.os.Parcelable;
 
 /**
  * @author yplo6403
- *
  */
 public class SharingInfos implements Parcelable {
 
@@ -42,6 +42,7 @@ public class SharingInfos implements Parcelable {
 
     /**
      * Constructor
+     * 
      * @param in
      */
     public SharingInfos(Parcel in) {
@@ -95,7 +96,7 @@ public class SharingInfos implements Parcelable {
                 mContact, mFilename, mFilesize, mState, mDirection, mTimestamp, mDuration
         });
     }
-    
+
     /**
      * 
      */

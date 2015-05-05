@@ -189,20 +189,20 @@ public class MessagingListView extends HistoryListView {
             } else {
                 viewHolder.mConversationType.setText(R.string.label_history_log_group_conversation);
                 String subject = item.getSubject();
-                viewHolder.mConversationLabel.setText((TextUtils.isEmpty(subject)) ? "" : truncateString(
-                        subject, MAX_LENGTH_SUBJECT));
+                viewHolder.mConversationLabel.setText((TextUtils.isEmpty(subject)) ? ""
+                        : truncateString(subject, MAX_LENGTH_SUBJECT));
             }
 
             if (ChatLog.Message.HISTORYLOG_MEMBER_ID == providerId) {
                 viewHolder.mEvent.setImageDrawable(mDrawableChat);
                 String content = item.getContent();
-                viewHolder.mDescription.setText(TextUtils.isEmpty(content) ? "" : truncateString(content,
-                        MAX_LENGTH_DESCRIPTION));
+                viewHolder.mDescription.setText(TextUtils.isEmpty(content) ? "" : truncateString(
+                        content, MAX_LENGTH_DESCRIPTION));
             } else if (FileTransferLog.HISTORYLOG_MEMBER_ID == providerId) {
                 viewHolder.mEvent.setImageDrawable(mDrawableFileTransfer);
                 String filename = item.getFilename();
-                viewHolder.mDescription.setText(TextUtils.isEmpty(filename) ? "" : truncateString(filename,
-                        MAX_LENGTH_DESCRIPTION));
+                viewHolder.mDescription.setText(TextUtils.isEmpty(filename) ? "" : truncateString(
+                        filename, MAX_LENGTH_DESCRIPTION));
             }
             return convertView;
         }

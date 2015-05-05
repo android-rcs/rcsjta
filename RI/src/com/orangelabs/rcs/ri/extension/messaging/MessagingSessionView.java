@@ -151,8 +151,7 @@ public class MessagingSessionView extends Activity {
                         + " state=" + state + " reason=" + reasonCode);
             }
             // Discard event if not for current sessionId
-            if (mSessionId == null
-                    || !mSessionId.equals(sessionId)) {
+            if (mSessionId == null || !mSessionId.equals(sessionId)) {
                 return;
             }
             final String _reasonCode = RiApplication.sMultimediaReasonCodes[reasonCode.toInt()];
@@ -212,8 +211,7 @@ public class MessagingSessionView extends Activity {
                 Log.d(LOGTAG, "onMessageReceived contact=" + contact + " sessionId=" + sessionId);
             }
             // Discard event if not for current sessionId
-            if (mSessionId == null
-                    || !mSessionId.equals(sessionId)) {
+            if (mSessionId == null || !mSessionId.equals(sessionId)) {
                 return;
             }
             final String data = new String(content);

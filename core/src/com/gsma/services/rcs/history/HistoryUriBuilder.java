@@ -36,8 +36,7 @@ public class HistoryUriBuilder {
      * @return the builder
      */
     public HistoryUriBuilder appendProvider(int providerId) {
-        mUriBuilder
-                .appendQueryParameter(HistoryLog.PROVIDER_ID, String.valueOf(providerId));
+        mUriBuilder.appendQueryParameter(HistoryLog.PROVIDER_ID, String.valueOf(providerId));
         return this;
     }
 

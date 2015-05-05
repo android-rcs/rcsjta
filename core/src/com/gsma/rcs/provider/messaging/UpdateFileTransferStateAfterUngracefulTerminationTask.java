@@ -108,7 +108,7 @@ public class UpdateFileTransferStateAfterUngracefulTerminationTask implements Ru
                                     fileTransferId, contact, State.REJECTED,
                                     ReasonCode.REJECTED_BY_SYSTEM);
                             break;
-                            /* TODO: Handle default. */
+                    /* TODO: Handle default. */
                     }
                 } else {
                     /* Http file transfer */
@@ -161,7 +161,7 @@ public class UpdateFileTransferStateAfterUngracefulTerminationTask implements Ru
                                     fileTransferId, contact, State.REJECTED,
                                     ReasonCode.REJECTED_BY_TIMEOUT);
                             break;
-                            /* TODO: Handle default. */
+                    /* TODO: Handle default. */
                     }
                 }
             }

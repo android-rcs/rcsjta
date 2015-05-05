@@ -110,8 +110,8 @@ public class FileTransferPersistedStorageAccessor {
         try {
             cursor = mMessagingLog.getFileTransferData(mFileTransferId);
             /* TODO: Handle cursor when null. */
-            String contact = cursor
-                    .getString(cursor.getColumnIndexOrThrow(FileTransferData.KEY_CONTACT));
+            String contact = cursor.getString(cursor
+                    .getColumnIndexOrThrow(FileTransferData.KEY_CONTACT));
             if (contact != null) {
                 mContact = ContactUtil.createContactIdFromTrustedData(contact);
             }
@@ -327,8 +327,9 @@ public class FileTransferPersistedStorageAccessor {
             long timestampSent, long fileExpiration, long fileIconExpiration) {
         mContact = contact;
         mDirection = direction;
-        mMessagingLog.addOneToOneFileTransfer(mFileTransferId, contact, direction, content, fileIcon,
-                status, reasonCode, timestamp, timestampSent, fileExpiration, fileIconExpiration);
+        mMessagingLog.addOneToOneFileTransfer(mFileTransferId, contact, direction, content,
+                fileIcon, status, reasonCode, timestamp, timestampSent, fileExpiration,
+                fileIconExpiration);
     }
 
     public void addIncomingGroupFileTransfer(String chatId, ContactId contact, MmContent content,

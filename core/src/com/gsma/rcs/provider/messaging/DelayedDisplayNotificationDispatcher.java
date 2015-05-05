@@ -41,8 +41,8 @@ public class DelayedDisplayNotificationDispatcher implements Runnable {
             MessageData.KEY_MIME_TYPE).append(" IN('").append(MimeType.TEXT_MESSAGE).append("','")
             .append(MimeType.GEOLOC_MESSAGE).append("') AND ").append(MessageData.KEY_READ_STATUS)
             .append("=").append(ReadStatus.READ.toInt()).append(" AND ")
-            .append(MessageData.KEY_STATUS)
-            .append("=").append(Status.DISPLAY_REPORT_REQUESTED.toInt()).toString();
+            .append(MessageData.KEY_STATUS).append("=")
+            .append(Status.DISPLAY_REPORT_REQUESTED.toInt()).toString();
 
     private static final String ORDER_BY_TIMESTAMP_ASC = MessageData.KEY_TIMESTAMP.concat(" ASC");
 
@@ -50,8 +50,8 @@ public class DelayedDisplayNotificationDispatcher implements Runnable {
 
     private ChatServiceImpl mChatApi;
 
-    public DelayedDisplayNotificationDispatcher(
-            LocalContentResolver localContentResolver, ChatServiceImpl chatApi) {
+    public DelayedDisplayNotificationDispatcher(LocalContentResolver localContentResolver,
+            ChatServiceImpl chatApi) {
         mLocalContentResolver = localContentResolver;
         mChatApi = chatApi;
     }
