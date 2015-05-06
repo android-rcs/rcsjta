@@ -18,12 +18,12 @@
 
 package com.gsma.rcs.core.ims.protocol.msrp;
 
+import com.gsma.rcs.platform.network.SocketConnection;
+import com.gsma.rcs.utils.logger.Logger;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import com.gsma.rcs.platform.network.SocketConnection;
-import com.gsma.rcs.utils.logger.Logger;
 
 /**
  * Abstract MSRP connection between two end points
@@ -191,6 +191,9 @@ public abstract class MsrpConnection {
      * @throws IOException
      */
     public void sendChunk(byte chunk[]) throws IOException {
+        if (sender == null) {
+            throw new IOException("ChunkSender is already closed!");
+        }
         sender.sendChunk(chunk);
     }
 
