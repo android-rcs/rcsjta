@@ -159,9 +159,12 @@ public final class CapabilityService extends RcsService {
      * fixed by the MNO and read during the provisioning.
      * 
      * @return Capabilities
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public Capabilities getMyCapabilities() throws RcsServiceException {
+    public Capabilities getMyCapabilities() throws RcsPersistentStorageException,
+            RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -182,9 +185,13 @@ public final class CapabilityService extends RcsService {
      * 
      * @param contact Contact Identifier
      * @return Capabilities
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public Capabilities getContactCapabilities(ContactId contact) throws RcsServiceException {
+    public Capabilities getContactCapabilities(ContactId contact)
+            throws RcsPersistentStorageException, RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -210,9 +217,13 @@ public final class CapabilityService extends RcsService {
      * listener for this event.
      * 
      * @param contact Contact Identifier
-     * @throws RcsServiceException
+     * @throws RcsServiceNotRegisteredException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void requestContactCapabilities(ContactId contact) throws RcsServiceException {
+    public void requestContactCapabilities(ContactId contact)
+            throws RcsServiceNotRegisteredException, RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -237,9 +248,13 @@ public final class CapabilityService extends RcsService {
      * listener for this event.
      * 
      * @param contacts Set of contact identifiers
-     * @throws RcsServiceException
+     * @throws RcsServiceNotRegisteredException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void requestContactCapabilities(Set<ContactId> contacts) throws RcsServiceException {
+    public void requestContactCapabilities(Set<ContactId> contacts)
+            throws RcsServiceNotRegisteredException, RcsServiceNotAvailableException,
+            RcsGenericException {
         Iterator<ContactId> values = contacts.iterator();
         while (values.hasNext()) {
             requestContactCapabilities(values.next());
@@ -255,9 +270,12 @@ public final class CapabilityService extends RcsService {
      * provisioning). The result of the capability refresh request is provided to all the clients
      * that have registered the listener for this event.
      * 
-     * @throws RcsServiceException
+     * @throws RcsServiceNotRegisteredException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void requestAllContactsCapabilities() throws RcsServiceException {
+    public void requestAllContactsCapabilities() throws RcsServiceNotRegisteredException,
+            RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -273,9 +291,11 @@ public final class CapabilityService extends RcsService {
      * Registers a capabilities listener on any contact
      * 
      * @param listener Capabilities listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void addCapabilitiesListener(CapabilitiesListener listener) throws RcsServiceException {
+    public void addCapabilitiesListener(CapabilitiesListener listener)
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -291,10 +311,11 @@ public final class CapabilityService extends RcsService {
      * Unregisters a capabilities listener
      * 
      * @param listener Capabilities listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     public void removeCapabilitiesListener(CapabilitiesListener listener)
-            throws RcsServiceException {
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -311,10 +332,11 @@ public final class CapabilityService extends RcsService {
      * 
      * @param contacts Set of contact Identifiers
      * @param listener Capabilities listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     public void addCapabilitiesListener(Set<ContactId> contacts, CapabilitiesListener listener)
-            throws RcsServiceException {
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -336,10 +358,11 @@ public final class CapabilityService extends RcsService {
      * 
      * @param contacts Set of contact identifiers
      * @param listener Capabilities listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     public void removeCapabilitiesListener(Set<ContactId> contacts, CapabilitiesListener listener)
-            throws RcsServiceException {
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
