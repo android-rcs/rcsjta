@@ -26,7 +26,6 @@ import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsIllegalArgumentException;
 import com.gsma.services.rcs.RcsPersistentStorageException;
-import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
 
 /**
@@ -54,9 +53,9 @@ public class OneToOneChat {
      * Returns the remote contact
      * 
      * @return ContactId
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public ContactId getRemoteContact() throws RcsServiceException {
+    public ContactId getRemoteContact() throws RcsGenericException {
         try {
             return mOneToOneChatInf.getRemoteContact();
 
@@ -70,9 +69,11 @@ public class OneToOneChat {
      * return false.
      * 
      * @return boolean
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public boolean isAllowedToSendMessage() throws RcsServiceException {
+    public boolean isAllowedToSendMessage() throws RcsPersistentStorageException,
+            RcsGenericException {
         try {
             return mOneToOneChatInf.isAllowedToSendMessage();
 
@@ -86,10 +87,12 @@ public class OneToOneChat {
      * Sends a chat message
      * 
      * @param message Message
-     * @return Chat message
-     * @throws RcsServiceException
+     * @return ChatMessage
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public ChatMessage sendMessage(String message) throws RcsServiceException {
+    public ChatMessage sendMessage(String message) throws RcsPersistentStorageException,
+            RcsGenericException {
         try {
             return new ChatMessage(mOneToOneChatInf.sendMessage(message));
 
@@ -104,10 +107,12 @@ public class OneToOneChat {
      * Sends a geoloc message
      * 
      * @param geoloc Geoloc info
-     * @return Chat message
-     * @throws RcsServiceException
+     * @return ChatMessage
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public ChatMessage sendMessage(Geoloc geoloc) throws RcsServiceException {
+    public ChatMessage sendMessage(Geoloc geoloc) throws RcsPersistentStorageException,
+            RcsGenericException {
         try {
             return new ChatMessage(mOneToOneChatInf.sendMessage2(geoloc));
 
@@ -123,9 +128,9 @@ public class OneToOneChat {
      * 
      * @param enabled It should be set to true if user is composing and set to false when the client
      *            application is leaving the chat UI
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public void onComposing(final boolean enabled) throws RcsServiceException {
+    public void onComposing(final boolean enabled) throws RcsGenericException {
         try {
             mOneToOneChatInf.onComposing(enabled);
         } catch (Exception e) {
@@ -138,9 +143,9 @@ public class OneToOneChat {
      * Note: if it is an incoming pending chat session and the parameter IM SESSION START is 0 then
      * the session is accepted now.
      * 
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public void openChat() throws RcsServiceException {
+    public void openChat() throws RcsGenericException {
         try {
             mOneToOneChatInf.openChat();
         } catch (Exception e) {
@@ -152,9 +157,11 @@ public class OneToOneChat {
      * Resend a message which previously failed.
      * 
      * @param msgId
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public void resendMessage(String msgId) throws RcsServiceException {
+    public void resendMessage(String msgId) throws RcsPersistentStorageException,
+            RcsGenericException {
         try {
             mOneToOneChatInf.resendMessage(msgId);
         } catch (Exception e) {

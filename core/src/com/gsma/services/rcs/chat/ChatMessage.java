@@ -25,7 +25,6 @@ package com.gsma.services.rcs.chat;
 import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.contact.ContactId;
@@ -52,10 +51,10 @@ public class ChatMessage {
     /**
      * Returns the message ID
      * 
-     * @return ID
-     * @throws RcsServiceException
+     * @return String
+     * @throws RcsGenericException
      */
-    public String getId() throws RcsServiceException {
+    public String getId() throws RcsGenericException {
         try {
             return mChatMessageInf.getId();
 
@@ -68,9 +67,10 @@ public class ChatMessage {
      * Returns the contact
      * 
      * @return ContactId
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public ContactId getRemoteContact() throws RcsServiceException {
+    public ContactId getRemoteContact() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mChatMessageInf.getContact();
 
@@ -84,9 +84,9 @@ public class ChatMessage {
      * Returns the message content
      * 
      * @return String
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
      */
-    public String getContent() throws RcsServiceException {
+    public String getContent() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mChatMessageInf.getContent();
 
@@ -99,10 +99,11 @@ public class ChatMessage {
     /**
      * Returns the mime type of the chat message.
      * 
-     * @return ContactId
-     * @throws RcsServiceException
+     * @return String
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public String getMimeType() throws RcsServiceException {
+    public String getMimeType() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mChatMessageInf.getMimeType();
 
@@ -117,9 +118,10 @@ public class ChatMessage {
      * 
      * @return Direction
      * @see Direction
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public Direction getDirection() throws RcsServiceException {
+    public Direction getDirection() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return Direction.valueOf(mChatMessageInf.getDirection());
 
@@ -134,9 +136,10 @@ public class ChatMessage {
      * messages or the local time-stamp of when the chat message was received for incoming messages.
      * 
      * @return long
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public long getTimestamp() throws RcsServiceException {
+    public long getTimestamp() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mChatMessageInf.getTimestamp();
 
@@ -151,9 +154,10 @@ public class ChatMessage {
      * messages or the remote time-stamp of when the chat message was sent for incoming messages.
      * 
      * @return long
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public long getTimestampSent() throws RcsServiceException {
+    public long getTimestampSent() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mChatMessageInf.getTimestampSent();
 
@@ -168,9 +172,10 @@ public class ChatMessage {
      * for incoming messages or it was not yet delivered.
      * 
      * @return long
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public long getTimestampDelivered() throws RcsServiceException {
+    public long getTimestampDelivered() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mChatMessageInf.getTimestampDelivered();
 
@@ -185,9 +190,10 @@ public class ChatMessage {
      * for incoming messages or it was not yes displayed.
      * 
      * @return long
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public long getTimestampDisplayed() throws RcsServiceException {
+    public long getTimestampDisplayed() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mChatMessageInf.getTimestampDisplayed();
 
@@ -201,9 +207,10 @@ public class ChatMessage {
      * Returns the status of the chat message.
      * 
      * @return Status
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public Status getStatus() throws RcsServiceException {
+    public Status getStatus() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return Status.valueOf(mChatMessageInf.getStatus());
 
@@ -217,9 +224,10 @@ public class ChatMessage {
      * Returns the reason code of the chat message.
      * 
      * @return ReasonCode
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public ReasonCode getReasonCode() throws RcsServiceException {
+    public ReasonCode getReasonCode() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return ReasonCode.valueOf(mChatMessageInf.getReasonCode());
 
@@ -233,9 +241,10 @@ public class ChatMessage {
      * Returns the chat ID of this chat message.
      * 
      * @return String
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public String getChatId() throws RcsServiceException {
+    public String getChatId() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mChatMessageInf.getChatId();
 
@@ -249,9 +258,10 @@ public class ChatMessage {
      * Returns true is this chat message has been marked as read.
      * 
      * @return boolean
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public boolean isRead() throws RcsServiceException {
+    public boolean isRead() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mChatMessageInf.isRead();
 
@@ -268,9 +278,10 @@ public class ChatMessage {
      * this particular chat message is not eligible for delivery expiration in the first place.
      * 
      * @return boolean
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public boolean isExpiredDelivery() throws RcsServiceException {
+    public boolean isExpiredDelivery() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mChatMessageInf.isExpiredDelivery();
 

@@ -28,7 +28,6 @@ import com.gsma.services.rcs.RcsIllegalArgumentException;
 import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsUnsupportedOperationException;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -308,10 +307,10 @@ public class GroupChat {
     /**
      * Returns the chat ID
      * 
-     * @return Chat ID
-     * @throws RcsServiceException
+     * @return String
+     * @throws
      */
-    public String getChatId() throws RcsServiceException {
+    public String getChatId() throws RcsGenericException {
         try {
             return mGroupChatInf.getChatId();
 
@@ -325,9 +324,10 @@ public class GroupChat {
      * 
      * @return Direction
      * @see Direction
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public Direction getDirection() throws RcsServiceException {
+    public Direction getDirection() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return Direction.valueOf(mGroupChatInf.getDirection());
 
@@ -342,9 +342,10 @@ public class GroupChat {
      * 
      * @return State
      * @see State
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public State getState() throws RcsServiceException {
+    public State getState() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return State.valueOf(mGroupChatInf.getState());
 
@@ -359,9 +360,10 @@ public class GroupChat {
      * 
      * @return ReasonCode
      * @see ReasonCode
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public ReasonCode getReasonCode() throws RcsServiceException {
+    public ReasonCode getReasonCode() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return ReasonCode.valueOf(mGroupChatInf.getReasonCode());
 
@@ -374,10 +376,11 @@ public class GroupChat {
     /**
      * Returns the remote contact
      * 
-     * @return Contact
-     * @throws RcsServiceException
+     * @return ContactId
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public ContactId getRemoteContact() throws RcsServiceException {
+    public ContactId getRemoteContact() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mGroupChatInf.getRemoteContact();
 
@@ -390,10 +393,11 @@ public class GroupChat {
     /**
      * Returns the subject of the group chat
      * 
-     * @return Subject
-     * @throws RcsServiceException
+     * @return String
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public String getSubject() throws RcsServiceException {
+    public String getSubject() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mGroupChatInf.getSubject();
 
@@ -407,14 +411,16 @@ public class GroupChat {
      * Returns the list of connected participants. A participant is identified by its MSISDN in
      * national or international format, SIP address, SIP-URI or Tel-URI.
      * 
-     * @return List of participants
-     * @throws RcsServiceException
+     * @return Map&lt;ContactId, ParticipantStatus&gt;
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
     /*
      * Unchecked cast must be suppressed since AIDL provides a raw Map type that must be cast.
      */
     @SuppressWarnings("unchecked")
-    public Map<ContactId, ParticipantStatus> getParticipants() throws RcsServiceException {
+    public Map<ContactId, ParticipantStatus> getParticipants()
+            throws RcsPersistentStorageException, RcsGenericException {
         try {
             Map<ContactId, Integer> apiParticipants = mGroupChatInf.getParticipants();
             Map<ContactId, ParticipantStatus> participants = new HashMap<ContactId, ParticipantStatus>();
@@ -437,10 +443,11 @@ public class GroupChat {
      * group chats or the local timestamp of when the group chat invitation was received for
      * incoming group chat invitations.
      * 
-     * @return timestamp
-     * @throws RcsServiceException
+     * @return long
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public long getTimestamp() throws RcsServiceException {
+    public long getTimestamp() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mGroupChatInf.getTimestamp();
 
@@ -455,9 +462,11 @@ public class GroupChat {
      * false.
      * 
      * @return boolean
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public boolean isAllowedToSendMessage() throws RcsServiceException {
+    public boolean isAllowedToSendMessage() throws RcsPersistentStorageException,
+            RcsGenericException {
         try {
             return mGroupChatInf.isAllowedToSendMessage();
 
@@ -472,9 +481,12 @@ public class GroupChat {
      * 
      * @param text Message
      * @return ChatMessage
-     * @throws RcsServiceException
+     * @throws RcsPermissionDeniedException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public ChatMessage sendMessage(String text) throws RcsServiceException {
+    public ChatMessage sendMessage(String text) throws RcsPermissionDeniedException,
+            RcsPersistentStorageException, RcsGenericException {
         try {
             return new ChatMessage(mGroupChatInf.sendMessage(text));
 
@@ -491,9 +503,12 @@ public class GroupChat {
      * 
      * @param geoloc Geoloc info
      * @return ChatMessage
-     * @throws RcsServiceException
+     * @throws RcsPermissionDeniedException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public ChatMessage sendMessage(Geoloc geoloc) throws RcsServiceException {
+    public ChatMessage sendMessage(Geoloc geoloc) throws RcsPermissionDeniedException,
+            RcsPersistentStorageException, RcsGenericException {
         try {
             return new ChatMessage(mGroupChatInf.sendMessage2(geoloc));
 
@@ -510,9 +525,9 @@ public class GroupChat {
      * 
      * @param enabled It should be set to true if user is composing and set to false when the client
      *            application is leaving the chat UI
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public void onComposing(final boolean enabled) throws RcsServiceException {
+    public void onComposing(final boolean enabled) throws RcsGenericException {
         try {
             mGroupChatInf.onComposing(enabled);
         } catch (Exception e) {
@@ -525,9 +540,11 @@ public class GroupChat {
      * else returns false.
      * 
      * @return boolean
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public boolean isAllowedToInviteParticipants() throws RcsServiceException {
+    public boolean isAllowedToInviteParticipants() throws RcsPersistentStorageException,
+            RcsGenericException {
         try {
             return mGroupChatInf.isAllowedToInviteParticipants();
 
@@ -543,9 +560,11 @@ public class GroupChat {
      * 
      * @param participant
      * @return boolean
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public boolean isAllowedToInviteParticipant(ContactId participant) throws RcsServiceException {
+    public boolean isAllowedToInviteParticipant(ContactId participant)
+            throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mGroupChatInf.isAllowedToInviteParticipant(participant);
 
@@ -560,9 +579,12 @@ public class GroupChat {
      * Invite additional participants to this group chat.
      * 
      * @param participants List of participants
-     * @throws RcsServiceException
+     * @throws RcsPermissionDeniedException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public void inviteParticipants(Set<ContactId> participants) throws RcsServiceException {
+    public void inviteParticipants(Set<ContactId> participants)
+            throws RcsPermissionDeniedException, RcsPersistentStorageException, RcsGenericException {
         try {
             mGroupChatInf.inviteParticipants(new ArrayList<ContactId>(participants));
         } catch (Exception e) {
@@ -578,10 +600,10 @@ public class GroupChat {
      * Returns the max number of participants in the group chat. This limit is read during the
      * conference event subscription and overrides the provisioning parameter.
      * 
-     * @return Number
-     * @throws RcsServiceException
+     * @return int
+     * @throws RcsGenericException
      */
-    public int getMaxParticipants() throws RcsServiceException {
+    public int getMaxParticipants() throws RcsGenericException {
         try {
             return mGroupChatInf.getMaxParticipants();
 
@@ -594,9 +616,10 @@ public class GroupChat {
      * Returns true if it is possible to leave this group chat.
      * 
      * @return boolean
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public boolean isAllowedToLeave() throws RcsServiceException {
+    public boolean isAllowedToLeave() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mGroupChatInf.isAllowedToLeave();
 
@@ -610,9 +633,10 @@ public class GroupChat {
      * Leaves a group chat willingly and permanently. The group chat will continue between other
      * participants if there are enough participants.
      * 
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public void leave() throws RcsServiceException {
+    public void leave() throws RcsPersistentStorageException, RcsGenericException {
         try {
             mGroupChatInf.leave();
         } catch (Exception e) {
@@ -627,9 +651,9 @@ public class GroupChat {
      * Note: if it is an incoming pending chat session and the parameter IM SESSION START is 0 then
      * the session is accepted now.
      * 
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public void openChat() throws RcsServiceException {
+    public void openChat() throws RcsGenericException {
         try {
             mGroupChatInf.openChat();
         } catch (Exception e) {

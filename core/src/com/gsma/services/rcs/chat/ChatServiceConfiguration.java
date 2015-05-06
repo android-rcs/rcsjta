@@ -23,7 +23,6 @@
 package com.gsma.services.rcs.chat;
 
 import com.gsma.services.rcs.RcsGenericException;
-import com.gsma.services.rcs.RcsServiceException;
 
 /**
  * Chat service configuration
@@ -50,10 +49,10 @@ public class ChatServiceConfiguration {
      * Forward functionality is involved. It returns True if user should be informed when sending
      * message to offline user.
      * 
-     * @return Boolean
-     * @throws RcsServiceException
+     * @return boolean
+     * @throws RcsGenericException
      */
-    public boolean isChatWarnSF() throws RcsServiceException {
+    public boolean isChatWarnSF() throws RcsGenericException {
         try {
             return mIConfig.isChatWarnSF();
 
@@ -65,10 +64,10 @@ public class ChatServiceConfiguration {
     /**
      * Returns the time after inactive chat could be closed
      * 
-     * @return Timeout in milliseconds
-     * @throws RcsServiceException
+     * @return long Timeout in milliseconds
+     * @throws RcsGenericException
      */
-    public long getIsComposingTimeout() throws RcsServiceException {
+    public long getIsComposingTimeout() throws RcsGenericException {
         try {
             return mIConfig.getIsComposingTimeout();
 
@@ -80,10 +79,10 @@ public class ChatServiceConfiguration {
     /**
      * Returns the maximum number of participants in a group chat
      * 
-     * @return Number
-     * @throws RcsServiceException
+     * @return int Number
+     * @throws RcsGenericException
      */
-    public int getGroupChatMaxParticipants() throws RcsServiceException {
+    public int getGroupChatMaxParticipants() throws RcsGenericException {
         try {
             return mIConfig.getGroupChatMaxParticipants();
 
@@ -95,10 +94,10 @@ public class ChatServiceConfiguration {
     /**
      * Returns the minimum number of participants in a group chat
      * 
-     * @return number
-     * @throws RcsServiceException
+     * @return int number
+     * @throws RcsGenericException
      */
-    public int getGroupChatMinParticipants() throws RcsServiceException {
+    public int getGroupChatMinParticipants() throws RcsGenericException {
         try {
             return mIConfig.getGroupChatMinParticipants();
 
@@ -112,10 +111,10 @@ public class ChatServiceConfiguration {
      * <p>
      * The length is the number of bytes of the message encoded in UTF-8.
      * 
-     * @return Number of bytes
-     * @throws RcsServiceException
+     * @return int Number of bytes
+     * @throws RcsGenericException
      */
-    public int getOneToOneChatMessageMaxLength() throws RcsServiceException {
+    public int getOneToOneChatMessageMaxLength() throws RcsGenericException {
         try {
             return mIConfig.getOneToOneChatMessageMaxLength();
 
@@ -129,10 +128,10 @@ public class ChatServiceConfiguration {
      * <p>
      * The length is the number of bytes of the message encoded in UTF-8.
      * 
-     * @return Number of bytes
-     * @throws RcsServiceException
+     * @return int Number of bytes
+     * @throws RcsGenericException
      */
-    public int getGroupChatMessageMaxLength() throws RcsServiceException {
+    public int getGroupChatMessageMaxLength() throws RcsGenericException {
         try {
             return mIConfig.getGroupChatMessageMaxLength();
 
@@ -146,10 +145,10 @@ public class ChatServiceConfiguration {
      * <p>
      * The length is the number of bytes of the message encoded in UTF-8.
      * 
-     * @return The maximum group chat subject's length can have.
-     * @throws RcsServiceException
+     * @return int The maximum group chat subject's length can have.
+     * @throws RcsGenericException
      */
-    public int getGroupChatSubjectMaxLength() throws RcsServiceException {
+    public int getGroupChatSubjectMaxLength() throws RcsGenericException {
         try {
             return mIConfig.getGroupChatSubjectMaxLength();
 
@@ -161,10 +160,10 @@ public class ChatServiceConfiguration {
     /**
      * Returns True if group chat is supported, else returns False.
      * 
-     * @return True if group chat is supported, else returns False.
-     * @throws RcsServiceException
+     * @return boolean True if group chat is supported, else returns False.
+     * @throws RcsGenericException
      */
-    public boolean isGroupChatSupported() throws RcsServiceException {
+    public boolean isGroupChatSupported() throws RcsGenericException {
         try {
             return mIConfig.isGroupChatSupported();
 
@@ -177,10 +176,10 @@ public class ChatServiceConfiguration {
      * Does the UX proposes automatically a SMS fallback in case of chat failure. It returns True if
      * SMS fallback procedure is activated, else returns False.
      * 
-     * @return Boolean
-     * @throws RcsServiceException
+     * @return boolean
+     * @throws RcsGenericException
      */
-    public boolean isSmsFallback() throws RcsServiceException {
+    public boolean isSmsFallback() throws RcsGenericException {
         try {
             return mIConfig.isSmsFallback();
 
@@ -194,10 +193,10 @@ public class ChatServiceConfiguration {
      * <p>
      * Only applicable to one to one chat message.
      * 
-     * @return Boolean
-     * @throws RcsServiceException
+     * @return boolean
+     * @throws RcsGenericException
      */
-    public boolean isRespondToDisplayReportsEnabled() throws RcsServiceException {
+    public boolean isRespondToDisplayReportsEnabled() throws RcsGenericException {
         try {
             return mIConfig.isRespondToDisplayReportsEnabled();
 
@@ -209,10 +208,10 @@ public class ChatServiceConfiguration {
     /**
      * Return maximum length of a geoloc label
      * 
-     * @return Number of bytes
-     * @throws RcsServiceException
+     * @return int Number of bytes
+     * @throws RcsGenericException
      */
-    public int getGeolocLabelMaxLength() throws RcsServiceException {
+    public int getGeolocLabelMaxLength() throws RcsGenericException {
         try {
             return mIConfig.getGeolocLabelMaxLength();
 
@@ -224,10 +223,10 @@ public class ChatServiceConfiguration {
     /**
      * Get geoloc expiration time
      * 
-     * @return Time in seconds
-     * @throws RcsServiceException
+     * @return int Time in seconds
+     * @throws RcsGenericException
      */
-    public int getGeolocExpirationTime() throws RcsServiceException {
+    public int getGeolocExpirationTime() throws RcsGenericException {
         try {
             return mIConfig.getGeolocExpirationTime();
 
@@ -242,9 +241,9 @@ public class ChatServiceConfiguration {
      * Applicable to one to one chat messages.
      * 
      * @param enable
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public void setRespondToDisplayReports(boolean enable) throws RcsServiceException {
+    public void setRespondToDisplayReports(boolean enable) throws RcsGenericException {
         try {
             mIConfig.setRespondToDisplayReports(enable);
         } catch (Exception e) {

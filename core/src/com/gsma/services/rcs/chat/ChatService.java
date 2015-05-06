@@ -154,10 +154,12 @@ public final class ChatService extends RcsService {
     /**
      * Returns the configuration of the chat service
      * 
-     * @return Configuration
-     * @throws RcsServiceException
+     * @return ChatServiceConfiguration
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public ChatServiceConfiguration getConfiguration() throws RcsServiceException {
+    public ChatServiceConfiguration getConfiguration() throws RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -165,7 +167,7 @@ public final class ChatService extends RcsService {
             return new ChatServiceConfiguration(mApi.getConfiguration());
 
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -175,11 +177,18 @@ public final class ChatService extends RcsService {
      * 
      * @param contacts Set of contact identifiers
      * @param subject The subject is optional and may be null
-     * @return a GroupChat instance
-     * @throws RcsServiceException
+     * @return GroupChat instance
+     * @throws RcsPermissionDeniedException
+     * @throws RcsServiceNotRegisteredException
+     * @throws RcsMaxAllowedSessionLimitReachedException
+     * @throws RcsPersistentStorageException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     public GroupChat initiateGroupChat(Set<ContactId> contacts, String subject)
-            throws RcsServiceException {
+            throws RcsPermissionDeniedException, RcsServiceNotRegisteredException,
+            RcsMaxAllowedSessionLimitReachedException, RcsPersistentStorageException,
+            RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -202,10 +211,12 @@ public final class ChatService extends RcsService {
      * Returns a chat with a given contact
      * 
      * @param contact ContactId
-     * @return Chat
-     * @throws RcsServiceException
+     * @return OneToOneChat
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public OneToOneChat getOneToOneChat(ContactId contact) throws RcsServiceException {
+    public OneToOneChat getOneToOneChat(ContactId contact) throws RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -214,7 +225,7 @@ public final class ChatService extends RcsService {
 
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -223,9 +234,11 @@ public final class ChatService extends RcsService {
      * 
      * @param chatId Chat ID
      * @return GroupChat
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public GroupChat getGroupChat(String chatId) throws RcsServiceException {
+    public GroupChat getGroupChat(String chatId) throws RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -234,7 +247,7 @@ public final class ChatService extends RcsService {
 
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -242,9 +255,11 @@ public final class ChatService extends RcsService {
      * Returns true if it is possible to initiate a new group chat now else returns false.
      * 
      * @return boolean
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public boolean isAllowedToInitiateGroupChat() throws RcsServiceException {
+    public boolean isAllowedToInitiateGroupChat() throws RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -252,7 +267,7 @@ public final class ChatService extends RcsService {
             return mApi.isAllowedToInitiateGroupChat();
 
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -262,9 +277,13 @@ public final class ChatService extends RcsService {
      * 
      * @param contact
      * @return boolean
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public boolean isAllowedToInitiateGroupChat(ContactId contact) throws RcsServiceException {
+    public boolean isAllowedToInitiateGroupChat(ContactId contact)
+            throws RcsPersistentStorageException, RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -274,7 +293,7 @@ public final class ChatService extends RcsService {
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             RcsPersistentStorageException.assertException(e);
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -282,16 +301,17 @@ public final class ChatService extends RcsService {
      * Deletes all one to one chat from history and abort/reject any associated ongoing session if
      * such exists.
      * 
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void deleteOneToOneChats() throws RcsServiceException {
+    public void deleteOneToOneChats() throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
         try {
             mApi.deleteOneToOneChats();
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -299,16 +319,17 @@ public final class ChatService extends RcsService {
      * Deletes all group chat from history and abort/reject any associated ongoing session if such
      * exists.
      * 
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void deleteGroupChats() throws RcsServiceException {
+    public void deleteGroupChats() throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
         try {
             mApi.deleteGroupChats();
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -317,9 +338,11 @@ public final class ChatService extends RcsService {
      * ongoing session if such exists.
      * 
      * @param contact
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void deleteOneToOneChat(ContactId contact) throws RcsServiceException {
+    public void deleteOneToOneChat(ContactId contact) throws RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -327,7 +350,7 @@ public final class ChatService extends RcsService {
             mApi.deleteOneToOneChat(contact);
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -336,9 +359,11 @@ public final class ChatService extends RcsService {
      * session if such exists.
      * 
      * @param chatId
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void deleteGroupChat(String chatId) throws RcsServiceException {
+    public void deleteGroupChat(String chatId) throws RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -346,7 +371,7 @@ public final class ChatService extends RcsService {
             mApi.deleteGroupChat(chatId);
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -354,9 +379,11 @@ public final class ChatService extends RcsService {
      * Delete a message from its message id from history.
      * 
      * @param msgId
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void deleteMessage(String msgId) throws RcsServiceException {
+    public void deleteMessage(String msgId) throws RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -364,7 +391,7 @@ public final class ChatService extends RcsService {
             mApi.deleteMessage(msgId);
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -373,9 +400,11 @@ public final class ChatService extends RcsService {
      * delivery of them has expired already or not.
      * 
      * @param msgIds
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void clearMessageDeliveryExpiration(Set<String> msgIds) throws RcsServiceException {
+    public void clearMessageDeliveryExpiration(Set<String> msgIds)
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -383,7 +412,7 @@ public final class ChatService extends RcsService {
             mApi.clearMessageDeliveryExpiration(new ArrayList<String>(msgIds));
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -391,9 +420,11 @@ public final class ChatService extends RcsService {
      * Mark a received message as read (ie. displayed in the UI)
      * 
      * @param msgId Message id
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void markMessageAsRead(String msgId) throws RcsServiceException {
+    public void markMessageAsRead(String msgId) throws RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -401,7 +432,7 @@ public final class ChatService extends RcsService {
             mApi.markMessageAsRead(msgId);
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -409,9 +440,11 @@ public final class ChatService extends RcsService {
      * Adds a listener on group chat events
      * 
      * @param listener Group chat listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void addEventListener(GroupChatListener listener) throws RcsServiceException {
+    public void addEventListener(GroupChatListener listener)
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -421,7 +454,7 @@ public final class ChatService extends RcsService {
             mApi.addEventListener3(rcsListener);
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -429,9 +462,11 @@ public final class ChatService extends RcsService {
      * Removes a listener on group chat events
      * 
      * @param listener Group chat event listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void removeEventListener(GroupChatListener listener) throws RcsServiceException {
+    public void removeEventListener(GroupChatListener listener)
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -446,7 +481,7 @@ public final class ChatService extends RcsService {
             }
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -454,9 +489,11 @@ public final class ChatService extends RcsService {
      * Adds a listener for one-to-one chat events
      * 
      * @param listener One-to-one chat listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void addEventListener(OneToOneChatListener listener) throws RcsServiceException {
+    public void addEventListener(OneToOneChatListener listener)
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -467,7 +504,7 @@ public final class ChatService extends RcsService {
             mApi.addEventListener2(rcsListener);
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -475,9 +512,11 @@ public final class ChatService extends RcsService {
      * Removes a listener for one-to-one chat events
      * 
      * @param listener One-to-one chat listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void removeEventListener(OneToOneChatListener listener) throws RcsServiceException {
+    public void removeEventListener(OneToOneChatListener listener)
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -492,7 +531,7 @@ public final class ChatService extends RcsService {
             }
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -501,9 +540,11 @@ public final class ChatService extends RcsService {
      * 
      * @param msgId
      * @return ChatMessage
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public ChatMessage getChatMessage(String msgId) throws RcsServiceException {
+    public ChatMessage getChatMessage(String msgId) throws RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -512,7 +553,7 @@ public final class ChatService extends RcsService {
 
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 }
