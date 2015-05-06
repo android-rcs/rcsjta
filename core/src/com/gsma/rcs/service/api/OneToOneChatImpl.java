@@ -176,9 +176,12 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
              * TODO : If session is originated by remote, then queue the message and accept the
              * pending session as part of this send operation
              */
-            addOutgoingChatMessage(msg, Status.QUEUED);
             if (session.isInitiatedByRemote()) {
+                addOutgoingChatMessage(msg, Status.QUEUED);
                 acceptPendingSession(session);
+            } else {
+                addOutgoingChatMessage(msg, Status.SENDING);
+                sendChatMessageInNewSession(msg);
             }
         }
     }

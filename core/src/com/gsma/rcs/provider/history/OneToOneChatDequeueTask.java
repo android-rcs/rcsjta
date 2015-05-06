@@ -94,15 +94,14 @@ public class OneToOneChatDequeueTask extends DequeueTask {
                                     OneToOneChatSession session = mImService
                                             .getOneToOneChatSession(contact);
                                     if (session == null) {
-                                        if (mImService.isChatSessionAvailable()) {
-                                            oneToOneChat.dequeueChatMessageInNewSession(message);
-                                        }
-                                    } else if (!session.isMediaEstablished()
-                                            && session.isInitiatedByRemote()) {
-                                        session.acceptSession();
+                                        oneToOneChat.dequeueChatMessageInNewSession(message);
                                     } else if (session.isMediaEstablished()) {
                                         oneToOneChat.dequeueChatMessageWithinSession(message,
                                                 session);
+                                    } else if (session.isInitiatedByRemote()) {
+                                        session.acceptSession();
+                                    } else {
+                                        oneToOneChat.dequeueChatMessageInNewSession(message);
                                     }
                                 }
                                 break;

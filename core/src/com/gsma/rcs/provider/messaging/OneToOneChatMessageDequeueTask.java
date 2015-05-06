@@ -71,14 +71,13 @@ public class OneToOneChatMessageDequeueTask extends DequeueTask {
                             OneToOneChatSession session = mImService
                                     .getOneToOneChatSession(mContact);
                             if (session == null) {
-                                if (mImService.isChatSessionAvailable()) {
-                                    oneToOneChat.dequeueChatMessageInNewSession(message);
-                                }
-                            } else if (!session.isMediaEstablished()
-                                    && session.isInitiatedByRemote()) {
+                                oneToOneChat.dequeueChatMessageInNewSession(message);
+                            } else if (session.isMediaEstablished()) {
+                                oneToOneChat.dequeueChatMessageWithinSession(message, session);
+                            } else if (session.isInitiatedByRemote()) {
                                 session.acceptSession();
                             } else {
-                                oneToOneChat.dequeueChatMessageWithinSession(message, session);
+                                oneToOneChat.dequeueChatMessageInNewSession(message);
                             }
                         }
                     } catch (Exception e) {
