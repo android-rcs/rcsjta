@@ -36,7 +36,7 @@ public class DataSender implements MediaInput {
     /**
      * Received frames
      */
-    private FifoBuffer fifo = null;
+    private FifoBuffer mFifo;
 
     /**
      * Constructor
@@ -49,12 +49,11 @@ public class DataSender implements MediaInput {
      * 
      * @param data Data
      * @param timestamp Timestamp
-     * @param marker Marker bit
      */
     public void addFrame(byte[] data, long timestamp) {
-        if (fifo != null) {
+        if (mFifo != null) {
             MediaSample sample = new MediaSample(data, timestamp);
-            fifo.addObject(sample);
+            mFifo.addObject(sample);
         }
     }
 
@@ -62,16 +61,16 @@ public class DataSender implements MediaInput {
      * Open the player
      */
     public void open() {
-        fifo = new FifoBuffer();
+        mFifo = new FifoBuffer();
     }
 
     /**
      * Close the player
      */
     public void close() {
-        if (fifo != null) {
-            fifo.close();
-            fifo = null;
+        if (mFifo != null) {
+            mFifo.close();
+            mFifo = null;
         }
     }
 
@@ -82,8 +81,8 @@ public class DataSender implements MediaInput {
      * @throws MediaException
      */
     public MediaSample readSample() throws MediaException {
-        if (fifo != null) {
-            return (MediaSample) fifo.getObject();
+        if (mFifo != null) {
+            return (MediaSample) mFifo.getObject();
         }
         throw new MediaException("Media input not opened");
     }

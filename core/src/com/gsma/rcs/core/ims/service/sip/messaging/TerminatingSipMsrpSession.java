@@ -223,7 +223,18 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
                 session.setFailureReportOption(false);
                 session.setSuccessReportOption(false);
                 /* Open the MSRP session */
-                getMsrpMgr().openMsrpSession();
+                new Thread() {
+                    public void run() {
+                        try {
+                            // Open the MSRP session
+                            getMsrpMgr().openMsrpSession();
+                        } catch (IOException e) {
+                            if (logActivated) {
+                                sLogger.error("Can't create the MSRP server session", e);
+                            }
+                        }
+                    }
+                }.start();
             } else {
                 // Active mode: client should connect
                 // MSRP session without TLS
@@ -233,7 +244,18 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
                 session.setSuccessReportOption(false);
 
                 /* Open the MSRP session */
-                getMsrpMgr().openMsrpSession();
+                new Thread() {
+
+                    public void run() {
+                        try {
+                            getMsrpMgr().openMsrpSession();
+                        } catch (IOException e) {
+                            if (logActivated) {
+                                sLogger.error("Can't create the MSRP server session", e);
+                            }
+                        }
+                    }
+                }.start();
             }
 
             // Test if the session should be interrupted
@@ -292,8 +314,6 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
                             .append(getRemoteContact()).toString(), e);
             handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
         } catch (MsrpException e) {
-            handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
-        } catch (IOException e) {
             handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
         } catch (RuntimeException e) {
             /**

@@ -19,6 +19,7 @@
 package com.orangelabs.rcs.ri.messaging.chat.group;
 
 import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
@@ -732,9 +733,6 @@ public class GroupChatView extends ChatView {
                 try {
                     Utils.showList(this, getString(R.string.menu_participants),
                             getSetOfParticipants(mGroupChat.getParticipants()));
-                } catch (RcsServiceNotAvailableException e) {
-                    Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable),
-                            mExitOnce, e);
                 } catch (RcsServiceException e) {
                     Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce,
                             e);

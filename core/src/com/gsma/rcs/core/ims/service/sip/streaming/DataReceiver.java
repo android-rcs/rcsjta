@@ -31,13 +31,14 @@ public class DataReceiver implements MediaOutput {
     /**
      * Parent
      */
-    private GenericSipRtpSession parent;
+    private GenericSipRtpSession mParent;
 
     /**
      * Constructor
+     * @param parent 
      */
     public DataReceiver(GenericSipRtpSession parent) {
-        this.parent = parent;
+        mParent = parent;
     }
 
     /**
@@ -61,6 +62,6 @@ public class DataReceiver implements MediaOutput {
      */
     public void writeSample(MediaSample sample) {
         // Notify API
-        parent.receiveData(sample.getData());
+        mParent.receiveData(sample.getData());
     }
 }

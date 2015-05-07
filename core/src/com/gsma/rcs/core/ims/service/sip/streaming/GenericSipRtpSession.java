@@ -217,7 +217,6 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
      * Sends a payload in real time
      * 
      * @param content Payload content
-     * @return Returns true if sent successfully else returns false
      * @throws RtpException
      */
     public void sendPlayload(byte[] content) throws RtpException {
