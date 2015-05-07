@@ -145,11 +145,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     private final ChatMessage mFirstMsg;
 
     /**
-     * Is-composing generator
-     */
-    protected IsComposingGenerator mComposingMgr;
-
-    /**
      * Receive chat message
      * 
      * @param msg Chat message
@@ -188,7 +183,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 
         mMessagingLog = messagingLog;
         mActivityMgr = new ChatActivityManager(this, rcsSettings);
-        mComposingMgr = new IsComposingGenerator(this, rcsSettings);
 
         // Create the MSRP manager
         int localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort(rcsSettings);
@@ -1088,15 +1082,5 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      */
     public boolean isMediaEstablished() {
         return (getMsrpMgr().isEstablished() && !getDialogPath().isSessionTerminated());
-    }
-
-    /**
-     * On is-composing event
-     * 
-     * @param enabled It should be set to true if user is composing and set to false when the client
-     *            application is leaving the chat UI
-     */
-    public void onComposingEvent(final boolean enabled) {
-        mComposingMgr.handleIsComposingEvent(enabled);
     }
 }

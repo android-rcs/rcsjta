@@ -31,6 +31,7 @@ public class FileTransferProperties {
 
     /**
      * Gets the file URI
+     * 
      * @return the file URI
      */
     public Uri getUri() {
@@ -39,6 +40,7 @@ public class FileTransferProperties {
 
     /**
      * Gets the file icon flag
+     * 
      * @return the file icon flag
      */
     public boolean isFileicon() {
@@ -70,6 +72,7 @@ public class FileTransferProperties {
 
     /**
      * Gets the file transfer status
+     * 
      * @return the Status
      */
     public String getStatus() {
@@ -78,6 +81,7 @@ public class FileTransferProperties {
 
     /**
      * Sets the file transfer status
+     * 
      * @param status the status
      */
     public void setStatus(String status) {
@@ -86,6 +90,7 @@ public class FileTransferProperties {
 
     /**
      * Gets the file transfer progress (in percentage)
+     * 
      * @return the file transfer progress
      */
     public int getProgress() {
@@ -94,6 +99,7 @@ public class FileTransferProperties {
 
     /**
      * Sets the file transfer progress (in percentage)
+     * 
      * @param progress the file transfer progress
      */
     public void setProgress(int progress) {
@@ -102,6 +108,7 @@ public class FileTransferProperties {
 
     /**
      * Gets the file size
+     * 
      * @return the size
      */
     public long getSize() {
@@ -110,6 +117,7 @@ public class FileTransferProperties {
 
     /**
      * Sets the file size
+     * 
      * @param size the size
      */
     public void setSize(long size) {
@@ -118,6 +126,7 @@ public class FileTransferProperties {
 
     /**
      * Gets the reason code
+     * 
      * @return the reason code
      */
     public String getReasonCode() {
@@ -126,6 +135,7 @@ public class FileTransferProperties {
 
     /**
      * Sets the reason code
+     * 
      * @param reasonCode the reason code
      */
     public void setReasonCode(String reasonCode) {

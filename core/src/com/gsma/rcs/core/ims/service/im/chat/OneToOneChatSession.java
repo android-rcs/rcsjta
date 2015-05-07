@@ -146,7 +146,6 @@ public abstract class OneToOneChatSession extends ChatSession {
         } else {
             sendOperationSucceeded = sendDataChunks(IdGenerator.generateMessageID(),
                     networkContent, CpimMessage.MIME_TYPE, TypeMsrpChunk.TextMessage);
-            mComposingMgr.handleMessageWasSentEvent();
         }
 
         if (sendOperationSucceeded) {
@@ -165,7 +164,7 @@ public abstract class OneToOneChatSession extends ChatSession {
     /**
      * Send is composing status
      * 
-     * @param status Status on is-composing event
+     * @param status Status
      */
     public boolean sendIsComposingStatus(boolean status) {
         String content = IsComposingInfo.buildIsComposingInfo(status);

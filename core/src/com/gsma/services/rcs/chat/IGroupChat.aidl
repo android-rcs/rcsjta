@@ -31,7 +31,7 @@ interface IGroupChat {
 
 	IChatMessage sendMessage(in String text);
 
-	void onComposing(in boolean enabled);
+	void setComposingStatus(in boolean ongoing);
 
 	void inviteParticipants(in List<ContactId> participants);
 	

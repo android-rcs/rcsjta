@@ -18,10 +18,11 @@
 
 package com.orangelabs.rcs.ri.messaging.chat;
 
-import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.ChatService;
+import com.gsma.services.rcs.Geoloc;
+import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager.INotifyComposing;
 
 /**
  * @author YPLO6403
@@ -68,14 +69,14 @@ public interface IChatView {
     void removeChatEventListener(ChatService chatService) throws RcsServiceException;
 
     /**
-     * Is a 1-1 chat
+     * Get interface to notify composing
      * 
+     * @return the interface to notify composing
+     */
+    INotifyComposing getNotifyComposing();
+
+    /**
      * @return True if single chat
      */
     boolean isSingleChat();
-
-    /**
-     * On is-composing event
-     */
-    void onComposing();
 }

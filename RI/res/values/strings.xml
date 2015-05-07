@@ -215,6 +215,7 @@
     <string name="menu_chat_service_config">Chat service configuration</string>
     <string name="label_ImAlwaysOn">IM always on:</string>
     <string name="label_WarnSF">Warning SF:</string>
+    <string name="label_IsComposingTimeout">Composing timeout:</string>
     <string name="label_MinGroupChatParticipants">Min GC participants:</string>
     <string name="label_MaxGroupChatParticipants">MaX GC participants:</string>
     <string name="label_MaxMsgLengthGroupChat">Max GC msg length:</string>
@@ -225,7 +226,6 @@
     <string name="label_MaxGeolocLabelLength">Max Geoloc label length:</string>
     <string name="label_GeolocExpireTime">Geoloc Expire Timeout:</string>
     <string name="label_GroupChatSupported">GC supported:</string>
-    <string name="label_ChatTimeout">Chat timeout</string>
     <string name="label_NotAllowedToInitiateGroupChat">Not allowed to initiate Group Chat</string>
 
     <!-- Sharing menu -->

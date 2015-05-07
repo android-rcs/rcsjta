@@ -305,10 +305,8 @@ public class GroupChat {
     }
 
     /**
-     * Returns the chat ID
-     * 
-     * @return String
-     * @throws
+     * @throws RcsGenericException Returns the chat ID
+     * @return chat Id
      */
     public String getChatId() throws RcsGenericException {
         try {
@@ -521,15 +519,24 @@ public class GroupChat {
     }
 
     /**
-     * Called when is composing a chat message
+     * This method should be called to notify the stack of if there is ongoing composing or not in
+     * this GroupChat. If there is an ongoing chat session established with the remote side
+     * corresponding to this GroupChat this means that a call to this method will send the
+     * 'is-composing' event or the 'is-not-composing' event to the remote side. However since this
+     * method can be called at any time even when there is no chat session established with the
+     * remote side or when the stack is not even connected to the IMS server then the stack
+     * implementation needs to hold the last given information (i.e. composing or not composing) in
+     * memory and then send it later when there is an established session available to relay this
+     * information on. Note: if this GroupChat corresponds to an incoming pending chat session and
+     * the parameter IM SESSION START is 1 then the session is accepted before sending the
+     * 'is-composing' event.
      * 
-     * @param enabled It should be set to true if user is composing and set to false when the client
-     *            application is leaving the chat UI
+     * @param ongoing True is client application is composing
      * @throws RcsGenericException
      */
-    public void onComposing(final boolean enabled) throws RcsGenericException {
+    public void setComposingStatus(boolean ongoing) throws RcsGenericException {
         try {
-            mGroupChatInf.onComposing(enabled);
+            mGroupChatInf.setComposingStatus(ongoing);
         } catch (Exception e) {
             throw new RcsGenericException(e);
         }
