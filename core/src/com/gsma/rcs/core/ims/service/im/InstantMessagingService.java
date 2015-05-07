@@ -144,6 +144,16 @@ public class InstantMessagingService extends ImsService {
     private Map<String, GroupChatSession> mGroupChatConferenceSubscriberCache = new HashMap<String, GroupChatSession>();
 
     /**
+     * Group Chat composing status to notify upon MSRP session restart
+     */
+    private final Map<String, Boolean> mGroupChatComposingStatusToNotify = new HashMap<String, Boolean>();
+
+    /**
+     * One-to-One Chat composing status to notify upon MSRP session restart
+     */
+    private final Map<ContactId, Boolean> mOneToOneChatComposingStatusToNotify = new HashMap<ContactId, Boolean>();
+
+    /**
      * Chat features tags
      */
     public final static String[] CHAT_FEATURE_TAGS = {
@@ -1580,5 +1590,97 @@ public class InstantMessagingService extends ImsService {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Removes the group chat composing status from the map
+     * 
+     * @param chatId
+     */
+    public void removeGroupChatComposingStatus(final String chatId) {
+        /*
+         * Performing remove session operation on a new thread so that ongoing threads trying to get
+         * that session can finish up before it is actually removed
+         */
+        new Thread() {
+            @Override
+            public void run() {
+                synchronized (getImsServiceSessionOperationLock()) {
+                    mGroupChatComposingStatusToNotify.remove(chatId);
+                }
+            }
+        }.start();
+    }
+
+    /**
+     * Adds the group chat composing status to the map to enable re-sending upon media session
+     * restart
+     * 
+     * @param chatId the group chat identifier
+     * @param status the composing status which failed to be notified
+     */
+    public void addGroupChatComposingStatus(String chatId, boolean status) {
+        synchronized (getImsServiceSessionOperationLock()) {
+            mGroupChatComposingStatusToNotify.put(chatId, status);
+        }
+    }
+
+    /**
+     * Gets the group chat composing status
+     * 
+     * @param chatId
+     * @return the group chat composing status if previous sending failed or null if network is
+     *         aligned with client composing status
+     */
+    public Boolean getGroupChatComposingStatus(String chatId) {
+        synchronized (getImsServiceSessionOperationLock()) {
+            return mGroupChatComposingStatusToNotify.get(chatId);
+        }
+    }
+
+    /**
+     * Removes the one-to-one chat composing status from the map
+     * 
+     * @param contact the remote contact
+     */
+    public void removeOneToOneChatComposingStatus(final ContactId contact) {
+        /*
+         * Performing remove session operation on a new thread so that ongoing threads trying to get
+         * that session can finish up before it is actually removed
+         */
+        new Thread() {
+            @Override
+            public void run() {
+                synchronized (getImsServiceSessionOperationLock()) {
+                    mOneToOneChatComposingStatusToNotify.remove(contact);
+                }
+            }
+        }.start();
+    }
+
+    /**
+     * Adds the one-to-one chat composing status to the map to enable re-sending upon media session
+     * restart
+     * 
+     * @param contact the remote contact
+     * @param status the composing status which failed to be notified
+     */
+    public void addOneToOneChatComposingStatus(ContactId contact, boolean status) {
+        synchronized (getImsServiceSessionOperationLock()) {
+            mOneToOneChatComposingStatusToNotify.put(contact, status);
+        }
+    }
+
+    /**
+     * Gets the one-to-one chat composing status
+     * 
+     * @param contact the remote contact
+     * @return the one-to-one chat composing status if previous sending failed or null if network is
+     *         aligned with client composing status
+     */
+    public Boolean getOneToOneChatComposingStatus(ContactId contact) {
+        synchronized (getImsServiceSessionOperationLock()) {
+            return mOneToOneChatComposingStatusToNotify.get(contact);
+        }
     }
 }

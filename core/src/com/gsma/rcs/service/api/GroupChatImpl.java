@@ -1037,6 +1037,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     "Not allowed to send GroupChat message on the connected IMS server!");
         }
         try {
+            mImService.removeGroupChatComposingStatus(mChatId); /* clear cache */
             long timestamp = System.currentTimeMillis();
             /* For outgoing message, timestampSent = timestamp */
             ChatMessage msg = ChatUtils.createTextMessage(null, text, timestamp, timestamp);
@@ -1132,6 +1133,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      */
     public void setComposingStatus(final boolean status) throws RemoteException {
         try {
+            mImService.removeGroupChatComposingStatus(mChatId);
             final GroupChatSession session = mImService.getGroupChatSession(mChatId);
             if (session == null) {
                 if (logger.isActivated()) {
@@ -1139,13 +1141,17 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                             + "' since group chat session found with chatId '" + mChatId
                             + "' does not exist for now");
                 }
+                mImService.addGroupChatComposingStatus(mChatId, status);
                 return;
             }
             if (session.getDialogPath().isSessionEstablished()) {
-                session.sendIsComposingStatus(status);
+                if (!session.sendIsComposingStatus(status)) {
+                    mImService.addGroupChatComposingStatus(mChatId, status);
+                }
                 return;
             }
             if (!session.isInitiatedByRemote()) {
+                mImService.addGroupChatComposingStatus(mChatId, status);
                 return;
             }
             ImSessionStartMode imSessionStartMode = mRcsSettings.getImSessionStartMode();
@@ -1156,7 +1162,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                         logger.debug("Core chat session is pending: auto accept it.");
                     }
                     session.acceptSession();
-                    session.sendIsComposingStatus(status);
+                    if (!session.sendIsComposingStatus(status)) {
+                        mImService.addGroupChatComposingStatus(mChatId, status);
+                    }
                     break;
                 default:
                     break;
@@ -1306,12 +1314,23 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     @Override
     public void handleSessionStarted(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info(new StringBuilder("Session status ").append(State.STARTED).toString());
+        boolean loggerActivated = logger.isActivated();
+        if (loggerActivated) {
+            logger.info("Session started");
         }
         setRejoinedAsPartOfSendOperation(false);
         synchronized (lock) {
             GroupChatSession session = mImService.getGroupChatSession(mChatId);
+            Boolean composingStatus = mImService.getGroupChatComposingStatus(mChatId);
+            if (composingStatus != null) {
+                if (loggerActivated) {
+                    logger.debug("Sending isComposing command with status :".concat(composingStatus
+                            .toString()));
+                }
+                if (session.sendIsComposingStatus(composingStatus)) {
+                    mImService.removeGroupChatComposingStatus(mChatId);
+                }
+            }
             if (mPersistentStorage.setRejoinId(session.getImSessionIdentity())) {
                 mBroadcaster.broadcastStateChanged(mChatId, State.STARTED, ReasonCode.UNSPECIFIED);
             }
