@@ -7,7 +7,7 @@ if [ -d "$GIT_HOME/rcsjta/doclava" ]; then
 		cp -R $GIT_HOME/rcsjta/doclava/reference $GIT_HOME/rcsjta.javadoc
 		git add --all
 		git commit -m "Generate javadoc 1.5"
-		git push -f origin javadoc1.5
+		git push -f origin master:javadoc1.5
 		echo "Doclava created for release 1.5"
 	else
 		echo "First clone rcsjta.javadoc repository"
