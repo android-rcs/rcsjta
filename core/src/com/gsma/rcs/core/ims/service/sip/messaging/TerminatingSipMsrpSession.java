@@ -223,39 +223,7 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
                 session.setFailureReportOption(false);
                 session.setSuccessReportOption(false);
                 /* Open the MSRP session */
-                new Thread() {
-                    public void run() {
-                        try {
-                            // Open the MSRP session
-                            getMsrpMgr().openMsrpSession();
-                        } catch (IOException e) {
-                            if (logActivated) {
-                                sLogger.error("Can't create the MSRP server session", e);
-                            }
-                        }
-                    }
-                }.start();
-            } else {
-                // Active mode: client should connect
-                // MSRP session without TLS
-                MsrpSession session = getMsrpMgr().createMsrpClientSession(remoteHost, remotePort,
-                        remotePath, this, null);
-                session.setFailureReportOption(false);
-                session.setSuccessReportOption(false);
-
-                /* Open the MSRP session */
-                new Thread() {
-
-                    public void run() {
-                        try {
-                            getMsrpMgr().openMsrpSession();
-                        } catch (IOException e) {
-                            if (logActivated) {
-                                sLogger.error("Can't create the MSRP server session", e);
-                            }
-                        }
-                    }
-                }.start();
+                getMsrpMgr().openMsrpSession();
             }
 
             // Test if the session should be interrupted
@@ -284,6 +252,15 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
                 // ACK received
                 if (logActivated) {
                     sLogger.info("ACK request received");
+                }
+                /* Create the MSRP client session */
+                if (localSetup.equals("active")) {
+                    /* Active mode: client should connect MSRP session without TLS */
+                    MsrpSession session = getMsrpMgr().createMsrpClientSession(remoteHost,
+                            remotePort, remotePath, this, null);
+                    session.setFailureReportOption(false);
+                    session.setSuccessReportOption(false);
+                    getMsrpMgr().openMsrpSession();
                 }
 
                 // The session is established
@@ -315,6 +292,9 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
             handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
         } catch (MsrpException e) {
             handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
+        } catch (IOException e) {
+            handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
+
         } catch (RuntimeException e) {
             /**
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
