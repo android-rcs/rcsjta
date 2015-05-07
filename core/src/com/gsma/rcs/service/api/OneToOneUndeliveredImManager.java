@@ -17,6 +17,7 @@
 package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.provider.messaging.MessagingLog;
+import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.chat.OneToOneChatIntent;
@@ -75,7 +76,11 @@ public class OneToOneUndeliveredImManager {
         Intent undeliveredMessage = new Intent(mCtx, OneToOneDeliveryExpirationService.class);
         undeliveredMessage.setAction(ACTION_CHAT_MESSAGE_DELIVERY_TIMEOUT);
         undeliveredMessage.putExtra(EXTRA_ID, msgId);
-        undeliveredMessage.putExtra(EXTRA_CONTACT, (Parcelable) contact);
+        /*
+         * Passing contact as a string due to issues in deserializing parcelable extra from the
+         * PendingIntent
+         */
+        undeliveredMessage.putExtra(EXTRA_CONTACT, contact.toString());
         IntentUtils.tryToSetExcludeStoppedPackagesFlag(undeliveredMessage);
         IntentUtils.tryToSetReceiverForegroundFlag(undeliveredMessage);
         int requestCode = msgId.hashCode();
@@ -87,7 +92,11 @@ public class OneToOneUndeliveredImManager {
         Intent undeliveredFile = new Intent(mCtx, OneToOneDeliveryExpirationService.class);
         undeliveredFile.setAction(ACTION_FILE_TRANSFER_DELIVERY_TIMEOUT);
         undeliveredFile.putExtra(EXTRA_ID, msgId);
-        undeliveredFile.putExtra(EXTRA_CONTACT, (Parcelable) contact);
+        /*
+         * Passing contact as a string due to issues in deserializing parcelable extra from the
+         * PendingIntent
+         */
+        undeliveredFile.putExtra(EXTRA_CONTACT, contact.toString());
         IntentUtils.tryToSetExcludeStoppedPackagesFlag(undeliveredFile);
         IntentUtils.tryToSetReceiverForegroundFlag(undeliveredFile);
         int requestCode = msgId.hashCode();
@@ -165,13 +174,15 @@ public class OneToOneUndeliveredImManager {
     }
 
     public void handleChatMessageDeliveryExpiration(Intent intent) {
-        ContactId contact = intent.getParcelableExtra(EXTRA_CONTACT);
+        ContactId contact = ContactUtil.createContactIdFromTrustedData(intent
+                .getStringExtra(EXTRA_CONTACT));
         String msgId = intent.getStringExtra(EXTRA_ID);
         handleChatMessageDeliveryExpiration(contact, msgId);
     }
 
     public void handleFileTransferDeliveryExpiration(Intent intent) {
-        ContactId contact = intent.getParcelableExtra(EXTRA_CONTACT);
+        ContactId contact = ContactUtil.createContactIdFromTrustedData(intent
+                .getStringExtra(EXTRA_CONTACT));
         String fileTransferId = intent.getStringExtra(EXTRA_ID);
         handleFileTransferDeliveryExpiration(contact, fileTransferId);
     }
