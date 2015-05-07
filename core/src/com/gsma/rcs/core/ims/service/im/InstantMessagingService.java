@@ -196,7 +196,8 @@ public class InstantMessagingService extends ImsService {
     }
 
     private void handleFileTransferInvitationRejected(SipRequest invite, ContactId contact,
-            FileTransfer.ReasonCode reasonCode, long timestamp, long timestampSent) {
+            FileTransfer.ReasonCode reasonCode, long timestamp, long timestampSent)
+            throws SipException {
         MmContent content = ContentManager.createMmContentFromSdp(invite, mRcsSettings);
         MmContent fileIcon = FileTransferUtils.extractFileIcon(invite, mRcsSettings);
         mCore.getListener().handleFileTransferInvitationRejected(contact, content, fileIcon,
@@ -764,8 +765,10 @@ public class InstantMessagingService extends ImsService {
      * 
      * @param invite Initial invite
      * @param timestamp Local timestamp when got SipRequest
+     * @throws SipException
      */
-    public void receiveMsrpFileTransferInvitation(SipRequest invite, long timestamp) {
+    public void receiveMsrpFileTransferInvitation(SipRequest invite, long timestamp)
+            throws SipException {
         boolean logActivated = sLogger.isActivated();
         String assertedId = SipUtils.getAssertedIdentity(invite);
         PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(assertedId);
@@ -1377,9 +1380,10 @@ public class InstantMessagingService extends ImsService {
      * @param invite Received invite
      * @param ftinfo File transfer info document
      * @param timestamp Local timestamp when got SipRequest
+     * @throws SipException
      */
     public void receiveOneToOneHttpFileTranferInvitation(SipRequest invite,
-            FileTransferHttpInfoDocument ftinfo, long timestamp) {
+            FileTransferHttpInfoDocument ftinfo, long timestamp) throws SipException {
         boolean logActivated = sLogger.isActivated();
         String referredId = ChatUtils.getReferredIdentityAsContactUri(invite);
         ContactId remote = ChatUtils.getReferredIdentityAsContactId(invite);

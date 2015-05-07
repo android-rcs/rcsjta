@@ -29,6 +29,7 @@ import com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
+import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.platform.file.FileFactory;
@@ -344,8 +345,10 @@ public class ContentManager {
      * @param invite SIP invite request
      * @param rcsSettings
      * @return Content instance
+     * @throws SipException
      */
-    public static MmContent createMmContentFromSdp(SipRequest invite, RcsSettings rcsSettings) {
+    public static MmContent createMmContentFromSdp(SipRequest invite, RcsSettings rcsSettings)
+            throws SipException {
         try {
             String remoteSdp = invite.getSdpContent();
             SdpParser parser = new SdpParser(remoteSdp.getBytes(UTF8));
@@ -360,8 +363,10 @@ public class ContentManager {
             Uri file = ContentManager.generateUriForReceivedContent(filename, mime, rcsSettings);
             MmContent mContent = ContentManager.createMmContent(file, size, filename);
             return mContent;
-        } catch (Exception e) {
-            return null;
+        } catch (NumberFormatException e) {
+            throw new SipException(
+                    "Error when extracting file size from sip invite! CallId=".concat(invite
+                            .getCallId()), e);
         }
     }
 }

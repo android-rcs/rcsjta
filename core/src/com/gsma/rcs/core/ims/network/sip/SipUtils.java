@@ -300,27 +300,23 @@ public class SipUtils {
      * @return Returns the parameter value or a default value in case of error
      */
     public static String extractParameter(String input, String param, String defaultValue) {
-        try {
-            int begin = input.indexOf(param) + param.length();
-            if (begin != -1) {
-                int end = input.indexOf(" ", begin); // The end is by default the next space
-                                                     // encountered
-                if (input.charAt(begin) == '\"') {
-                    // The exception is when the first character of the param is a "
-                    // In this case, the end is the next " character, not the blank one
-                    begin++; // we remove also the first quote
-                    end = input.indexOf("\"", begin); // do not take last doubleQuote
-                }
-                if (end == -1) {
-                    return input.substring(begin);
-                } else {
-                    return input.substring(begin, end);
-                }
+        int begin = input.indexOf(param) + param.length();
+        if (begin != -1) {
+            int end = input.indexOf(" ", begin); // The end is by default the next space
+                                                 // encountered
+            if (input.charAt(begin) == '\"') {
+                // The exception is when the first character of the param is a "
+                // In this case, the end is the next " character, not the blank one
+                begin++; // we remove also the first quote
+                end = input.indexOf("\"", begin); // do not take last doubleQuote
             }
-            return defaultValue;
-        } catch (Exception e) {
-            return defaultValue;
+            if (end == -1) {
+                return input.substring(begin);
+            } else {
+                return input.substring(begin, end);
+            }
         }
+        return defaultValue;
     }
 
     /**

@@ -96,10 +96,11 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * @param timestamp Local timestamp for the session
      * @param timestampSent the remote timestamp sent in payload for the file sharing
      * @param contactManager
+     * @throws SipException
      */
     public TerminatingMsrpFileSharingSession(ImsService parent, SipRequest invite,
             ContactId remote, RcsSettings rcsSettings, long timestamp, long timestampSent,
-            ContactManager contactManager) {
+            ContactManager contactManager) throws SipException {
         super(parent, ContentManager.createMmContentFromSdp(invite, rcsSettings), remote,
                 FileTransferUtils.extractFileIcon(invite, rcsSettings), IdGenerator
                         .generateMessageID(), rcsSettings, timestamp, contactManager);
