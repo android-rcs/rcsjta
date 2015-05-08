@@ -361,17 +361,17 @@ public final class ContactManager {
     };
 
     private static final String SEL_RAW_CONTACT_MIME_TYPES = new StringBuilder(Data.RAW_CONTACT_ID)
-            .append("=? AND ").append(Data.MIMETYPE).append(" IN (")
-            .append(MIMETYPE_REGISTRATION_STATE).append(',').append(MIMETYPE_BLOCKING_STATE)
-            .append(',').append(MIMETYPE_NUMBER).append(',')
-            .append(MIMETYPE_CAPABILITY_IMAGE_SHARING).append(',')
-            .append(MIMETYPE_CAPABILITY_VIDEO_SHARING).append(',')
-            .append(MIMETYPE_CAPABILITY_IP_VOICE_CALL).append(',')
-            .append(MIMETYPE_CAPABILITY_IP_VIDEO_CALL).append(',')
-            .append(MIMETYPE_CAPABILITY_IM_SESSION).append(',')
-            .append(MIMETYPE_CAPABILITY_FILE_TRANSFER).append(',')
-            .append(MIMETYPE_CAPABILITY_GEOLOCATION_PUSH).append(',')
-            .append(MIMETYPE_CAPABILITY_EXTENSIONS).append(')').toString();
+            .append("=? AND ").append(Data.MIMETYPE).append(" IN ('")
+            .append(MIMETYPE_REGISTRATION_STATE).append("','").append(MIMETYPE_BLOCKING_STATE)
+            .append("','").append(MIMETYPE_NUMBER).append("','")
+            .append(MIMETYPE_CAPABILITY_IMAGE_SHARING).append("','")
+            .append(MIMETYPE_CAPABILITY_VIDEO_SHARING).append("','")
+            .append(MIMETYPE_CAPABILITY_IP_VOICE_CALL).append("','")
+            .append(MIMETYPE_CAPABILITY_IP_VIDEO_CALL).append("','")
+            .append(MIMETYPE_CAPABILITY_IM_SESSION).append("','")
+            .append(MIMETYPE_CAPABILITY_FILE_TRANSFER).append("','")
+            .append(MIMETYPE_CAPABILITY_GEOLOCATION_PUSH).append("','")
+            .append(MIMETYPE_CAPABILITY_EXTENSIONS).append("')").toString();
 
     /**
      * Current instance
