@@ -1075,6 +1075,17 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             throw new ServerApiPermissionDeniedException(
                     "Not allowed to send Geoloc message on the connected IMS server!");
         }
+        String label = geoloc.getLabel();
+        if (label != null) {
+            int labelLength = label.length();
+            int labelMaxLength = mRcsSettings.getMaxGeolocLabelLength();
+            if (labelLength > labelMaxLength) {
+                throw new ServerApiIllegalArgumentException(new StringBuilder()
+                        .append("geoloc message label length: ").append(labelLength)
+                        .append(" exeeds max length: ").append(labelMaxLength).append("!")
+                        .toString());
+            }
+        }
         try {
             long timestamp = System.currentTimeMillis();
             /** For outgoing message, timestampSent = timestamp */

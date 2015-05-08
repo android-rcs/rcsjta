@@ -426,6 +426,17 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         if (geoloc == null) {
             throw new ServerApiIllegalArgumentException("geoloc must not be null!");
         }
+        String label = geoloc.getLabel();
+        if (label != null) {
+            int labelLength = label.length();
+            int labelMaxLength = mRcsSettings.getMaxGeolocLabelLength();
+            if (labelLength > labelMaxLength) {
+                throw new ServerApiIllegalArgumentException(new StringBuilder()
+                        .append("geoloc message label length: ").append(labelLength)
+                        .append(" exeeds max length: ").append(labelMaxLength).append("!")
+                        .toString());
+            }
+        }
         if (logger.isActivated()) {
             logger.debug("Send geolocation message.");
         }
