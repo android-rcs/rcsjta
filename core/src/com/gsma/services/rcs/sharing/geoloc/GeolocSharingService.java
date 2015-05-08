@@ -155,11 +155,16 @@ public final class GeolocSharingService extends RcsService {
      * 
      * @param contact Contact identifier
      * @param geoloc Geolocation info
-     * @return Geoloc sharing
-     * @throws RcsServiceException
+     * @return GeolocSharing
+     * @throws RcsServiceNotRegisteredException
+     * @throws RcsPersistentStorageException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      * @see Geoloc
      */
-    public GeolocSharing shareGeoloc(ContactId contact, Geoloc geoloc) throws RcsServiceException {
+    public GeolocSharing shareGeoloc(ContactId contact, Geoloc geoloc)
+            throws RcsServiceNotRegisteredException, RcsPersistentStorageException,
+            RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -183,10 +188,12 @@ public final class GeolocSharingService extends RcsService {
      * Returns a current geoloc sharing from its unique ID
      * 
      * @param sharingId Sharing ID
-     * @return Geoloc sharing or null if not found
-     * @throws RcsServiceException
+     * @return GeolocSharing Geoloc sharing or null if not found
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public GeolocSharing getGeolocSharing(String sharingId) throws RcsServiceException {
+    public GeolocSharing getGeolocSharing(String sharingId) throws RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -203,9 +210,10 @@ public final class GeolocSharingService extends RcsService {
      * Deletes all geoloc sharing from history and abort/reject any associated ongoing session if
      * such exists.
      * 
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void deleteGeolocSharings() throws RcsServiceException {
+    public void deleteGeolocSharings() throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -221,9 +229,11 @@ public final class GeolocSharingService extends RcsService {
      * ongoing session if such exists.
      * 
      * @param contact
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void deleteGeolocSharings(ContactId contact) throws RcsServiceException {
+    public void deleteGeolocSharings(ContactId contact) throws RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -240,9 +250,11 @@ public final class GeolocSharingService extends RcsService {
      * ongoing session if such exists.
      * 
      * @param sharingId
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void deleteGeolocSharing(String sharingId) throws RcsServiceException {
+    public void deleteGeolocSharing(String sharingId) throws RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -258,9 +270,11 @@ public final class GeolocSharingService extends RcsService {
      * Adds a listener on geoloc sharing events
      * 
      * @param listener Listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void addEventListener(GeolocSharingListener listener) throws RcsServiceException {
+    public void addEventListener(GeolocSharingListener listener)
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -279,9 +293,11 @@ public final class GeolocSharingService extends RcsService {
      * Removes a listener on geoloc sharing events
      * 
      * @param listener Listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void removeEventListener(GeolocSharingListener listener) throws RcsServiceException {
+    public void removeEventListener(GeolocSharingListener listener)
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }

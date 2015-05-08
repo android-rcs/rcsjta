@@ -27,7 +27,6 @@ import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.util.SparseArray;
@@ -234,10 +233,10 @@ public class GeolocSharing {
     /**
      * Returns the sharing ID of the geoloc sharing
      * 
-     * @return Sharing ID
-     * @throws RcsServiceException
+     * @return String Sharing ID
+     * @throws RcsGenericException
      */
-    public String getSharingId() throws RcsServiceException {
+    public String getSharingId() throws RcsGenericException {
         try {
             return mSharingInf.getSharingId();
 
@@ -250,9 +249,10 @@ public class GeolocSharing {
      * Returns the remote contact identifier
      * 
      * @return ContactId
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public ContactId getRemoteContact() throws RcsServiceException {
+    public ContactId getRemoteContact() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mSharingInf.getRemoteContact();
 
@@ -266,10 +266,11 @@ public class GeolocSharing {
      * Returns the geolocation info
      * 
      * @return Geoloc object
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      * @see Geoloc
      */
-    public Geoloc getGeoloc() throws RcsServiceException {
+    public Geoloc getGeoloc() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mSharingInf.getGeoloc();
 
@@ -283,10 +284,11 @@ public class GeolocSharing {
      * Returns the state of the sharing
      * 
      * @return State
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      * @see State
-     * @throws RcsServiceException
      */
-    public State getState() throws RcsServiceException {
+    public State getState() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return State.valueOf(mSharingInf.getState());
 
@@ -300,10 +302,11 @@ public class GeolocSharing {
      * Returns the reason code of the state of the sharing
      * 
      * @return ReasonCode
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      * @see ReasonCode
-     * @throws RcsServiceException
      */
-    public ReasonCode getReasonCode() throws RcsServiceException {
+    public ReasonCode getReasonCode() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return ReasonCode.valueOf(mSharingInf.getReasonCode());
 
@@ -317,10 +320,11 @@ public class GeolocSharing {
      * Returns the direction of the sharing
      * 
      * @return Direction
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      * @see Direction
-     * @throws RcsServiceException
      */
-    public Direction getDirection() throws RcsServiceException {
+    public Direction getDirection() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return Direction.valueOf(mSharingInf.getDirection());
 
@@ -336,9 +340,10 @@ public class GeolocSharing {
      * incoming geoloc sharings.
      * 
      * @return long
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public long getTimestamp() throws RcsServiceException {
+    public long getTimestamp() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mSharingInf.getTimestamp();
 
@@ -351,9 +356,9 @@ public class GeolocSharing {
     /**
      * Accepts geoloc sharing invitation
      * 
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public void acceptInvitation() throws RcsServiceException {
+    public void acceptInvitation() throws RcsGenericException {
         try {
             mSharingInf.acceptInvitation();
         } catch (Exception e) {
@@ -364,9 +369,9 @@ public class GeolocSharing {
     /**
      * Rejects geoloc sharing invitation
      * 
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public void rejectInvitation() throws RcsServiceException {
+    public void rejectInvitation() throws RcsGenericException {
         try {
             mSharingInf.rejectInvitation();
         } catch (Exception e) {
@@ -377,9 +382,10 @@ public class GeolocSharing {
     /**
      * Aborts the sharing
      * 
-     * @throws RcsServiceException
+     * @throws RcsPermissionDeniedException
+     * @throws RcsGenericException
      */
-    public void abortSharing() throws RcsServiceException {
+    public void abortSharing() throws RcsPermissionDeniedException, RcsGenericException {
         try {
             mSharingInf.abortSharing();
         } catch (Exception e) {
