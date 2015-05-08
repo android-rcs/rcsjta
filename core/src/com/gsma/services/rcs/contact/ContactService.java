@@ -146,13 +146,13 @@ public final class ContactService extends RcsService {
      * 
      * @param contact Contact ID
      * @return RcsContact
-     * @throws RcsServiceNotAvailableException
      * @throws RcsPersistentStorageException
+     * @throws RcsServiceNotAvailableException
      * @throws RcsGenericException
      * @see RcsContact
      */
-    public RcsContact getRcsContact(ContactId contact) throws RcsServiceNotAvailableException,
-            RcsPersistentStorageException, RcsGenericException {
+    public RcsContact getRcsContact(ContactId contact) throws RcsPersistentStorageException,
+            RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -170,13 +170,13 @@ public final class ContactService extends RcsService {
      * Returns the list of rcs contacts
      * 
      * @return Set&lt;RcsContact&gt; List of contacts
-     * @throws RcsServiceNotAvailableException
      * @throws RcsPersistentStorageException
+     * @throws RcsServiceNotAvailableException
      * @throws RcsGenericException
      * @see RcsContact
      */
-    public Set<RcsContact> getRcsContacts() throws RcsServiceNotAvailableException,
-            RcsPersistentStorageException, RcsGenericException {
+    public Set<RcsContact> getRcsContacts() throws RcsPersistentStorageException,
+            RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -193,13 +193,13 @@ public final class ContactService extends RcsService {
      * Returns the list of online contacts (i.e. registered)
      * 
      * @return Set&lt;RcsContact&gt; List of contacts
-     * @throws RcsServiceNotAvailableException
      * @throws RcsPersistentStorageException
+     * @throws RcsServiceNotAvailableException
      * @throws RcsGenericException
      * @see RcsContact
      */
-    public Set<RcsContact> getRcsContactsOnline() throws RcsServiceNotAvailableException,
-            RcsPersistentStorageException, RcsGenericException {
+    public Set<RcsContact> getRcsContactsOnline() throws RcsPersistentStorageException,
+            RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -217,13 +217,13 @@ public final class ContactService extends RcsService {
      * 
      * @param serviceId Service ID
      * @return Set&lt;RcsContact&gt; List of contacts
-     * @throws RcsServiceNotAvailableException
      * @throws RcsPersistentStorageException
+     * @throws RcsServiceNotAvailableException
      * @throws RcsGenericException
      * @see RcsContact
      */
     public Set<RcsContact> getRcsContactsSupporting(String serviceId)
-            throws RcsServiceNotAvailableException, RcsPersistentStorageException,
+            throws RcsPersistentStorageException, RcsServiceNotAvailableException,
             RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
@@ -243,12 +243,12 @@ public final class ContactService extends RcsService {
      * the corresponding spambox.
      * 
      * @param contact Contact ID
-     * @throws RcsServiceNotAvailableException
      * @throws RcsPersistentStorageException
+     * @throws RcsServiceNotAvailableException
      * @throws RcsGenericException
      */
-    public void blockContact(ContactId contact) throws RcsServiceNotAvailableException,
-            RcsPersistentStorageException, RcsGenericException {
+    public void blockContact(ContactId contact) throws RcsPersistentStorageException,
+            RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -265,12 +265,12 @@ public final class ContactService extends RcsService {
      * Unblock a contact
      * 
      * @param contact Contact ID
-     * @throws RcsServiceNotAvailableException
      * @throws RcsPersistentStorageException
+     * @throws RcsServiceNotAvailableException
      * @throws RcsGenericException
      */
-    public void unblockContact(ContactId contact) throws RcsServiceNotAvailableException,
-            RcsPersistentStorageException, RcsGenericException {
+    public void unblockContact(ContactId contact) throws RcsPersistentStorageException,
+            RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
