@@ -18,6 +18,7 @@ package com.gsma.rcs.provider.ipcall;
 
 import com.gsma.rcs.core.content.AudioContent;
 import com.gsma.rcs.core.content.VideoContent;
+import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.service.ipcalldraft.IPCall.ReasonCode;
 import com.gsma.rcs.service.ipcalldraft.IPCall.State;
 import com.gsma.rcs.utils.ContactUtil;
@@ -62,7 +63,10 @@ public class IPCallPersistedStorageAccessor {
         Cursor cursor = null;
         try {
             cursor = mIPCallLog.getIPCallData(mCallId);
-            /* TODO: Handle cursor when null. */
+            if (!cursor.moveToNext()) {
+                throw new ServerApiPersistentStorageException(
+                        "Data not found for ip call ".concat(mCallId));
+            }
             String contact = cursor.getString(cursor.getColumnIndexOrThrow(IPCallData.KEY_CONTACT));
             if (contact != null) {
                 mContact = ContactUtil.createContactIdFromTrustedData(contact);
@@ -89,11 +93,21 @@ public class IPCallPersistedStorageAccessor {
     }
 
     public State getState() {
-        return mIPCallLog.getState(mCallId);
+        State state = mIPCallLog.getState(mCallId);
+        if (state == null) {
+            throw new ServerApiPersistentStorageException(
+                    "State not found for ip call ".concat(mCallId));
+        }
+        return state;
     }
 
     public ReasonCode getReasonCode() {
-        return mIPCallLog.getReasonCode(mCallId);
+        ReasonCode reasonCode = mIPCallLog.getReasonCode(mCallId);
+        if (reasonCode == null) {
+            throw new ServerApiPersistentStorageException(
+                    "Reason code not found for ip call ".concat(mCallId));
+        }
+        return reasonCode;
     }
 
     public Direction getDirection() {

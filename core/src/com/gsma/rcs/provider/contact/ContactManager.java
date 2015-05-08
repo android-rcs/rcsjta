@@ -77,6 +77,7 @@ import com.gsma.rcs.core.ims.service.presence.FavoriteLink;
 import com.gsma.rcs.core.ims.service.presence.Geoloc;
 import com.gsma.rcs.core.ims.service.presence.PhotoIcon;
 import com.gsma.rcs.core.ims.service.presence.PresenceInfo;
+import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactData.AggregationData;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -815,7 +816,7 @@ public final class ContactManager {
         Uri uri = Uri.withAppendedPath(CONTENT_URI, contactNumber);
         try {
             cursor = mLocalContentResolver.query(uri, null, null, null, null);
-            /* TODO: Handle cursor when null. */
+            CursorUtil.assertCursorIsNotNull(cursor, uri);
             if (cursor.moveToFirst()) {
                 // Get RCS display name
                 infos.setDisplayName(cursor.getString(cursor
@@ -1101,7 +1102,7 @@ public final class ContactManager {
         try {
             cursor = mLocalContentResolver.query(CONTENT_URI, PROJ_RCSCONTACT_CONTACT,
                     WHERE_RCS_STATUS_WITH_SOCIAL_PRESENCE, null, null);
-            /* TODO: Handle cursor when null. */
+            CursorUtil.assertCursorIsNotNull(cursor, CONTENT_URI);
             if (!cursor.moveToFirst()) {
                 return rcsNumbers;
             }
@@ -1132,7 +1133,7 @@ public final class ContactManager {
         try {
             cursor = mLocalContentResolver.query(CONTENT_URI, PROJ_RCSCONTACT_CONTACT,
                     WHERE_RCS_STATUS_RCS, null, null);
-            /* TODO: Handle cursor when null. */
+            CursorUtil.assertCursorIsNotNull(cursor, CONTENT_URI);
             if (!cursor.moveToFirst()) {
                 return rcsNumbers;
             }
@@ -1162,7 +1163,7 @@ public final class ContactManager {
         try {
             cursor = mLocalContentResolver.query(CONTENT_URI, PROJ_RCSCONTACT_CONTACT, null, null,
                     null);
-            /* TODO: Handle cursor when null. */
+            CursorUtil.assertCursorIsNotNull(cursor, CONTENT_URI);
             if (!cursor.moveToFirst()) {
                 return numbers;
             }
@@ -2284,7 +2285,7 @@ public final class ContactManager {
                     PROJ_RCS_RAW_CONTACT_ID, WHERE_RCS_RAW_CONTACT_ID_AND_RCS_NUMBER, new String[] {
                             contact.toString(), String.valueOf(rawContactId)
                     }, null);
-            /* TODO: Handle cursor when null. */
+            CursorUtil.assertCursorIsNotNull(cursor, AggregationData.CONTENT_URI);
             if (cursor.moveToFirst()) {
                 return cursor.getLong(cursor
                         .getColumnIndexOrThrow(AggregationData.KEY_RCS_RAW_CONTACT_ID));
@@ -2310,7 +2311,7 @@ public final class ContactManager {
         Uri uri = Uri.withAppendedPath(CONTENT_URI, contact.toString());
         try {
             cursor = mLocalContentResolver.query(uri, PROJ_RCSCONTACT_CONTACT, null, null, null);
-            /* TODO: Handle cursor when null. */
+            CursorUtil.assertCursorIsNotNull(cursor, uri);
             return cursor.moveToFirst();
 
         } finally {
@@ -2792,7 +2793,7 @@ public final class ContactManager {
         try {
             cursor = mLocalContentResolver.query(CONTENT_URI, PROJ_RCSCONTACT_CONTACT, null, null,
                     null);
-            /* TODO: Handle cursor when null. */
+            CursorUtil.assertCursorIsNotNull(cursor, CONTENT_URI);
             if (!cursor.moveToFirst()) {
                 return;
             }

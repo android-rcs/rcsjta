@@ -18,6 +18,7 @@ package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content;
@@ -75,7 +76,10 @@ public class GroupChatPersistedStorageAccessor {
         Cursor cursor = null;
         try {
             cursor = mMessagingLog.getGroupChatData(mChatId);
-            /* TODO: Handle cursor when null. */
+            if (!cursor.moveToNext()) {
+                throw new ServerApiPersistentStorageException(
+                        "Data not found for group chat ".concat(mChatId));
+            }
             mSubject = cursor.getString(cursor.getColumnIndexOrThrow(GroupChatData.KEY_SUBJECT));
             mDirection = Direction.valueOf(cursor.getInt(cursor
                     .getColumnIndexOrThrow(GroupChatData.KEY_DIRECTION)));
@@ -104,11 +108,21 @@ public class GroupChatPersistedStorageAccessor {
     }
 
     public State getState() {
-        return mMessagingLog.getGroupChatState(mChatId);
+        State state = mMessagingLog.getGroupChatState(mChatId);
+        if (state == null) {
+            throw new ServerApiPersistentStorageException(
+                    "State not found for group chat ".concat(mChatId));
+        }
+        return state;
     }
 
     public ReasonCode getReasonCode() {
-        return mMessagingLog.getGroupChatReasonCode(mChatId);
+        ReasonCode reasonCode = mMessagingLog.getGroupChatReasonCode(mChatId);
+        if (reasonCode == null) {
+            throw new ServerApiPersistentStorageException(
+                    "Reason code not found for group chat ".concat(mChatId));
+        }
+        return reasonCode;
     }
 
     public String getSubject() {

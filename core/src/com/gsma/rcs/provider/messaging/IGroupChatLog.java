@@ -70,8 +70,9 @@ public interface IGroupChatLog {
      * @param chatId Chat ID
      * @param state Group chat state
      * @param reasonCode Group chat state reason code
+     * @return the number of updated rows
      */
-    public void setGroupChatStateAndReasonCode(String chatId, State state, ReasonCode reasonCode);
+    public int setGroupChatStateAndReasonCode(String chatId, State state, ReasonCode reasonCode);
 
     /**
      * Set group chat participants, state and reason code
@@ -80,8 +81,9 @@ public interface IGroupChatLog {
      * @param chatId Chat ID
      * @param state Group chat state
      * @param reasonCode Group chat state reason code
+     * @return the number of updated rows
      */
-    public void setGroupChatParticipantsStateAndReasonCode(
+    public int setGroupChatParticipantsStateAndReasonCode(
             Map<ContactId, ParticipantStatus> participants, String chatId, State state,
             ReasonCode reasonCode);
 
@@ -99,8 +101,9 @@ public interface IGroupChatLog {
      * 
      * @param chatId Chat ID
      * @param rejoinId Rejoin ID
+     * @return the number of updated rows
      */
-    public void setGroupChatRejoinId(String chatId, String rejoinId);
+    public int setGroupChatRejoinId(String chatId, String rejoinId);
 
     /**
      * Get the group chat info
@@ -122,8 +125,9 @@ public interface IGroupChatLog {
      * Set reject the next group chat invitation
      * 
      * @param chatId Chat ID
+     * @return the number of updated rows
      */
-    public void setRejectNextGroupChatNextInvitation(String chatId);
+    public int setRejectNextGroupChatNextInvitation(String chatId);
 
     /**
      * Get group chat state from its chat ID

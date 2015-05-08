@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
@@ -57,7 +58,7 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
 
     /**
      * Constructor
-     *
+     * 
      * @param localContentResolver Local content resolver
      */
     /* package private */GroupDeliveryInfoLog(LocalContentResolver localContentResolver) {
@@ -80,7 +81,7 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
 
     /**
      * Set delivery status for outgoing group chat messages and files
-     *
+     * 
      * @param chatId Group chat ID
      * @param contact The contact ID for which the entry is to be updated
      * @param msgId Message ID
@@ -108,7 +109,7 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
             cursor = mLocalContentResolver.query(
                     Uri.withAppendedPath(GroupDeliveryInfoData.CONTENT_URI, msgId), null,
                     SELECTION_CONTACTS_NOT_RECEIVED_MESSAGE, null, null);
-            /* TODO: Handle cursor when null. */
+            CursorUtil.assertCursorIsNotNull(cursor, GroupDeliveryInfoData.CONTENT_URI);
             return !cursor.moveToFirst();
 
         } finally {
@@ -122,10 +123,10 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
     public boolean isDisplayedByAllRecipients(String msgId) {
         Cursor cursor = null;
         try {
-            cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(GroupDeliveryInfoData.CONTENT_URI, msgId), null,
+            Uri contentUri = Uri.withAppendedPath(GroupDeliveryInfoData.CONTENT_URI, msgId);
+            cursor = mLocalContentResolver.query(contentUri, null,
                     SELECTION_DELIVERY_INFO_NOT_DISPLAYED, null, null);
-            /* TODO: Handle cursor when null. */
+            CursorUtil.assertCursorIsNotNull(cursor, contentUri);
             return !cursor.moveToFirst();
 
         } finally {
@@ -137,7 +138,7 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
 
     /**
      * Set outgoing group chat message or file to delivered
-     *
+     * 
      * @param chatId Group chat ID
      * @param contact The contact ID for which the entry is to be updated
      * @param msgId Message ID
@@ -169,7 +170,7 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
 
     /**
      * Set outgoing group chat message or file to displayed
-     *
+     * 
      * @param chatId Group chat ID
      * @param contact The contact ID for which the entry is to be updated
      * @param msgId Message ID

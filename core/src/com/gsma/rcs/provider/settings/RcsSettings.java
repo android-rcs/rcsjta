@@ -24,6 +24,7 @@ package com.gsma.rcs.provider.settings;
 
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.extension.ServiceExtensionManager;
+import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.settings.RcsSettingsData.AuthenticationProcedure;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ConfigurationMode;
@@ -213,7 +214,7 @@ public class RcsSettings {
             };
             c = mLocalContentResolver.query(RcsSettingsData.CONTENT_URI, null, WHERE_CLAUSE,
                     whereArg, null);
-            /* TODO: Handle cursor when null. */
+            CursorUtil.assertCursorIsNotNull(c, RcsSettingsData.CONTENT_URI);
             if (!c.moveToFirst()) {
                 throw new IllegalArgumentException("Illegal setting key:".concat(key));
             }

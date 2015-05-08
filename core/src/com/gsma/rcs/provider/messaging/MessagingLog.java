@@ -124,8 +124,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public void setGroupChatStateAndReasonCode(String chatId, State state, ReasonCode reasonCode) {
-        mGroupChatLog.setGroupChatStateAndReasonCode(chatId, state, reasonCode);
+    public int setGroupChatStateAndReasonCode(String chatId, State state, ReasonCode reasonCode) {
+        return mGroupChatLog.setGroupChatStateAndReasonCode(chatId, state, reasonCode);
     }
 
     @Override
@@ -135,8 +135,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public void setGroupChatRejoinId(String chatId, String rejoinId) {
-        mGroupChatLog.setGroupChatRejoinId(chatId, rejoinId);
+    public int setGroupChatRejoinId(String chatId, String rejoinId) {
+        return mGroupChatLog.setGroupChatRejoinId(chatId, rejoinId);
     }
 
     @Override
@@ -403,8 +403,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public void setRejectNextGroupChatNextInvitation(String chatId) {
-        mGroupChatLog.setRejectNextGroupChatNextInvitation(chatId);
+    public int setRejectNextGroupChatNextInvitation(String chatId) {
+        return mGroupChatLog.setRejectNextGroupChatNextInvitation(chatId);
     }
 
     @Override
@@ -540,11 +540,11 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public void setGroupChatParticipantsStateAndReasonCode(
+    public int setGroupChatParticipantsStateAndReasonCode(
             Map<ContactId, ParticipantStatus> participants, String chatId, State state,
             ReasonCode reasonCode) {
-        mGroupChatLog.setGroupChatParticipantsStateAndReasonCode(participants, chatId, state,
-                reasonCode);
+        return mGroupChatLog.setGroupChatParticipantsStateAndReasonCode(participants, chatId,
+                state, reasonCode);
     }
 
     @Override

@@ -24,6 +24,7 @@ package com.gsma.rcs.provider.ipcall;
 
 import com.gsma.rcs.core.content.AudioContent;
 import com.gsma.rcs.core.content.VideoContent;
+import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.service.ipcalldraft.IPCall.ReasonCode;
 import com.gsma.rcs.service.ipcalldraft.IPCall.State;
@@ -33,7 +34,6 @@ import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.net.Uri;
 
 /**
@@ -67,39 +67,24 @@ public class IPCallHistory {
         String[] projection = new String[] {
             columnName
         };
-        Cursor cursor = null;
-        try {
-            cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(IPCallData.CONTENT_URI, callId), projection, null, null,
-                    null);
-            /* TODO: Handle cursor when null */
-            if (cursor.moveToFirst()) {
-                return cursor;
-            }
-            throw new SQLException(new StringBuilder(
-                    "No row returned while querying for IP call data with callId '").append(callId)
-                    .append("'!").toString());
+        Uri contentUri = Uri.withAppendedPath(IPCallData.CONTENT_URI, callId);
+        Cursor cursor = mLocalContentResolver.query(contentUri, projection, null, null, null);
+        CursorUtil.assertCursorIsNotNull(cursor, contentUri);
+        if (!cursor.moveToNext()) {
+            return null;
         }
-        /*
-         * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
-         * exception.
-         */
-        catch (RuntimeException e) {
-            if (cursor != null) {
-                cursor.close();
-            }
-            throw e;
-        }
+        return cursor;
     }
 
-    private int getDataAsInt(Cursor cursor) {
+    private Integer getDataAsInteger(Cursor cursor) {
         try {
+            if (cursor.isNull(FIRST_COLUMN_IDX)) {
+                return null;
+            }
             return cursor.getInt(FIRST_COLUMN_IDX);
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -183,8 +168,9 @@ public class IPCallHistory {
      * @param callId Call ID
      * @param state New state
      * @param reasonCode Reason code
+     * @return the number of updated rows
      */
-    public void setCallStateAndReasonCode(String callId, State state, ReasonCode reasonCode) {
+    public int setCallStateAndReasonCode(String callId, State state, ReasonCode reasonCode) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("Update call state of call ").append(callId)
                     .append(" state=").append(state).append(", reasonCode=").append(reasonCode)
@@ -194,8 +180,8 @@ public class IPCallHistory {
         ContentValues values = new ContentValues();
         values.put(IPCallData.KEY_STATE, state.toInt());
         values.put(IPCallData.KEY_REASON_CODE, reasonCode.toInt());
-        mLocalContentResolver.update(Uri.withAppendedPath(IPCallData.CONTENT_URI, callId), values,
-                null, null);
+        return mLocalContentResolver.update(Uri.withAppendedPath(IPCallData.CONTENT_URI, callId),
+                values, null, null);
     }
 
     /**
@@ -215,7 +201,11 @@ public class IPCallHistory {
         if (logger.isActivated()) {
             logger.debug("Get IP call state for callId ".concat(callId));
         }
-        return State.valueOf(getDataAsInt(getIPCallData(IPCallData.KEY_STATE, callId)));
+        Cursor cursor = getIPCallData(IPCallData.KEY_STATE, callId);
+        if (cursor == null) {
+            return null;
+        }
+        return State.valueOf(getDataAsInteger(cursor));
     }
 
     /**
@@ -228,7 +218,11 @@ public class IPCallHistory {
         if (logger.isActivated()) {
             logger.debug("Get IP call reason code for callId ".concat(callId));
         }
-        return ReasonCode.valueOf(getDataAsInt(getIPCallData(IPCallData.KEY_REASON_CODE, callId)));
+        Cursor cursor = getIPCallData(IPCallData.KEY_REASON_CODE, callId);
+        if (cursor == null) {
+            return null;
+        }
+        return ReasonCode.valueOf(getDataAsInteger(cursor));
     }
 
     /**
@@ -238,27 +232,9 @@ public class IPCallHistory {
      * @return Cursor the caller of this method has to close the cursor if a cursor is returned
      */
     public Cursor getIPCallData(String callId) {
-        Cursor cursor = null;
-        try {
-            cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(IPCallData.CONTENT_URI, callId), null, null, null, null);
-            /* TODO: Handle cursor when null */
-            if (cursor.moveToFirst()) {
-                return cursor;
-            }
-            throw new SQLException(new StringBuilder(
-                    "No row returned while querying for IP call data with callId '").append(callId)
-                    .append("'!").toString());
-        }
-        /*
-         * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
-         * exception.
-         */
-        catch (RuntimeException e) {
-            if (cursor != null) {
-                cursor.close();
-            }
-            throw e;
-        }
+        Uri contentUri = Uri.withAppendedPath(IPCallData.CONTENT_URI, callId);
+        Cursor cursor = mLocalContentResolver.query(contentUri, null, null, null, null);
+        CursorUtil.assertCursorIsNotNull(cursor, contentUri);
+        return cursor;
     }
 }

@@ -498,18 +498,24 @@ public class RichCallHistory {
     }
 
     public Cursor getInterruptedGeolocSharings() {
-        return mLocalContentResolver.query(GeolocSharingData.CONTENT_URI, null,
+        Cursor cursor = mLocalContentResolver.query(GeolocSharingData.CONTENT_URI, null,
                 SELECTION_BY_INTERRUPTED_GEOLOC_SHARINGS, null, ORDER_BY_TIMESTAMP_ASC);
+        CursorUtil.assertCursorIsNotNull(cursor, GeolocSharingData.CONTENT_URI);
+        return cursor;
     }
 
     public Cursor getInterruptedImageSharings() {
-        return mLocalContentResolver.query(ImageSharingData.CONTENT_URI, null,
+        Cursor cursor = mLocalContentResolver.query(ImageSharingData.CONTENT_URI, null,
                 SELECTION_BY_INTERRUPTED_IMAGE_SHARINGS, null, ORDER_BY_TIMESTAMP_ASC);
+        CursorUtil.assertCursorIsNotNull(cursor, GeolocSharingData.CONTENT_URI);
+        return cursor;
     }
 
     public Cursor getInterruptedVideoSharings() {
-        return mLocalContentResolver.query(VideoSharingData.CONTENT_URI, null,
+        Cursor cursor = mLocalContentResolver.query(VideoSharingData.CONTENT_URI, null,
                 SELECTION_BY_INTERRUPTED_VIDEO_SHARINGS, null, ORDER_BY_TIMESTAMP_ASC);
+        CursorUtil.assertCursorIsNotNull(cursor, GeolocSharingData.CONTENT_URI);
+        return cursor;
     }
 
     /**

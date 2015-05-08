@@ -16,6 +16,7 @@
 
 package com.gsma.rcs.provider.history;
 
+import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.MessageData;
@@ -88,14 +89,18 @@ public class HistoryLog {
         String[] selectionArgs = new String[] {
             chatId
         };
-        return mLocalContentResolver.query(CHATMESSAGE_AND_FILETRANSFER_CONTENT_URI, null,
+        Cursor cursor = mLocalContentResolver.query(CHATMESSAGE_AND_FILETRANSFER_CONTENT_URI, null,
                 SELECTION_QUEUED_GROUPCHATMESSAGES_AND_GROUPFILETRANSFERS, selectionArgs,
                 ORDER_BY_TIMESTAMP_ASC);
+        CursorUtil.assertCursorIsNotNull(cursor, CHATMESSAGE_AND_FILETRANSFER_CONTENT_URI);
+        return cursor;
     }
 
     public Cursor getQueuedOneToOneChatMessagesAndOneToOneFileTransfers() {
-        return mLocalContentResolver.query(CHATMESSAGE_AND_FILETRANSFER_CONTENT_URI, null,
+        Cursor cursor = mLocalContentResolver.query(CHATMESSAGE_AND_FILETRANSFER_CONTENT_URI, null,
                 SELECTION_QUEUED_ONETOONECHATMESSAGES_AND_ONETOONE_FILETRANSFERS, null,
                 ORDER_BY_TIMESTAMP_ASC);
+        CursorUtil.assertCursorIsNotNull(cursor, CHATMESSAGE_AND_FILETRANSFER_CONTENT_URI);
+        return cursor;
     }
 }

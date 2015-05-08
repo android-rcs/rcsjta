@@ -23,6 +23,7 @@
 package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
+import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService.Direction;
@@ -174,7 +175,7 @@ public class GroupChatLog implements IGroupChatLog {
     }
 
     @Override
-    public void setGroupChatParticipantsStateAndReasonCode(
+    public int setGroupChatParticipantsStateAndReasonCode(
             Map<ContactId, ParticipantStatus> participants, String chatId, State state,
             ReasonCode reasonCode) {
         String encodedParticipants = convert(participants);
@@ -187,12 +188,12 @@ public class GroupChatLog implements IGroupChatLog {
         values.put(GroupChatData.KEY_PARTICIPANTS, encodedParticipants);
         values.put(GroupChatData.KEY_STATE, state.toInt());
         values.put(GroupChatData.KEY_REASON_CODE, reasonCode.toInt());
-        mLocalContentResolver.update(Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId),
-                values, null, null);
+        return mLocalContentResolver.update(
+                Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId), values, null, null);
     }
 
     @Override
-    public void setGroupChatStateAndReasonCode(String chatId, State state, ReasonCode reasonCode) {
+    public int setGroupChatStateAndReasonCode(String chatId, State state, ReasonCode reasonCode) {
         if (logger.isActivated()) {
             logger.debug("setGroupChatStateAndReasonCode (chatId=" + chatId + ") (state=" + state
                     + ") (reasonCode=" + reasonCode + ")");
@@ -200,8 +201,8 @@ public class GroupChatLog implements IGroupChatLog {
         ContentValues values = new ContentValues();
         values.put(GroupChatData.KEY_STATE, state.toInt());
         values.put(GroupChatData.KEY_REASON_CODE, reasonCode.toInt());
-        mLocalContentResolver.update(Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId),
-                values, null, null);
+        return mLocalContentResolver.update(
+                Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId), values, null, null);
     }
 
     @Override
@@ -219,26 +220,25 @@ public class GroupChatLog implements IGroupChatLog {
     }
 
     @Override
-    public void setGroupChatRejoinId(String chatId, String rejoinId) {
+    public int setGroupChatRejoinId(String chatId, String rejoinId) {
         if (logger.isActivated()) {
             logger.debug("Update group chat rejoin ID to ".concat(rejoinId));
         }
         ContentValues values = new ContentValues();
         values.put(GroupChatData.KEY_REJOIN_ID, rejoinId);
         values.put(GroupChatData.KEY_STATE, State.STARTED.toInt());
-        mLocalContentResolver.update(Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId),
-                values, null, null);
+        return mLocalContentResolver.update(
+                Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId), values, null, null);
     }
 
     @Override
     public GroupChatInfo getGroupChatInfo(String chatId) {
         Cursor cursor = null;
         try {
-            cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId), PROJECTION_GC_INFO,
-                    null, null, null);
-            // TODO check null cursor CR037
-            if (!cursor.moveToFirst()) {
+            Uri contentUri = Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId);
+            cursor = mLocalContentResolver.query(contentUri, PROJECTION_GC_INFO, null, null, null);
+            CursorUtil.assertCursorIsNotNull(cursor, contentUri);
+            if (!cursor.moveToNext()) {
                 return null;
             }
             int columnIdxChatId = cursor.getColumnIndexOrThrow(GroupChatData.KEY_CHAT_ID);
@@ -253,9 +253,7 @@ public class GroupChatLog implements IGroupChatLog {
                     cursor.getString(columnIdxRejoinId), chatId, participants,
                     cursor.getString(columnIdxSubject), cursor.getLong(columnIdxTimestamp));
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -273,15 +271,13 @@ public class GroupChatLog implements IGroupChatLog {
     public boolean isGroupChatNextInviteRejected(String chatId) {
         Cursor cursor = null;
         try {
-            cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId), PROJECTION_GC_CHAT_ID,
+            Uri contentUri = Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId);
+            cursor = mLocalContentResolver.query(contentUri, PROJECTION_GC_CHAT_ID,
                     SELECT_CHAT_ID_STATUS_REJECTED, null, null);
-            // TODO check null cursor CR037
-            return cursor.moveToFirst();
+            CursorUtil.assertCursorIsNotNull(cursor, contentUri);
+            return cursor.moveToNext();
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -289,11 +285,10 @@ public class GroupChatLog implements IGroupChatLog {
         String[] projection = new String[] {
             columnName
         };
-        Cursor cursor = mLocalContentResolver.query(
-                Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId), projection, null, null,
-                null);
-        // TODO check null cursor CR037
-        if (cursor.moveToFirst()) {
+        Uri contentUri = Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId);
+        Cursor cursor = mLocalContentResolver.query(contentUri, projection, null, null, null);
+        CursorUtil.assertCursorIsNotNull(cursor, contentUri);
+        if (cursor.moveToNext()) {
             return cursor;
         }
         throw new SQLException(new StringBuilder(
@@ -305,39 +300,47 @@ public class GroupChatLog implements IGroupChatLog {
         try {
             return cursor.getString(FIRST_COLUMN_IDX);
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
-    private int getDataAsInt(Cursor cursor) {
+    private Integer getDataAsInteger(Cursor cursor) {
         try {
-            return cursor.getInt(FIRST_COLUMN_IDX);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
+            if (cursor.isNull(FIRST_COLUMN_IDX)) {
+                return null;
             }
+            return cursor.getInt(FIRST_COLUMN_IDX);
+
+        } finally {
+            CursorUtil.close(cursor);
         }
     }
 
     public State getGroupChatState(String chatId) {
-        return State.valueOf(getDataAsInt(getGroupChatData(GroupChatData.KEY_STATE, chatId)));
+        Cursor cursor = getGroupChatData(GroupChatData.KEY_STATE, chatId);
+        if (cursor == null) {
+            return null;
+        }
+        return State.valueOf(getDataAsInteger(cursor));
     }
 
     public ReasonCode getGroupChatReasonCode(String chatId) {
-        return ReasonCode.valueOf(getDataAsInt(getGroupChatData(GroupChatData.KEY_REASON_CODE,
-                chatId)));
+        Cursor cursor = getGroupChatData(GroupChatData.KEY_REASON_CODE, chatId);
+        if (cursor == null) {
+            return null;
+        }
+        return ReasonCode.valueOf(getDataAsInteger(cursor));
     }
 
-    public void setRejectNextGroupChatNextInvitation(String chatId) {
+    @Override
+    public int setRejectNextGroupChatNextInvitation(String chatId) {
         if (logger.isActivated()) {
             logger.debug("setRejectNextGroupChatNextInvitation (chatId=" + chatId + ")");
         }
         ContentValues values = new ContentValues();
         values.put(GroupChatData.KEY_USER_ABORTION, UserAbortion.SERVER_NOT_NOTIFIED.toInt());
-        mLocalContentResolver.update(Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId),
-                values, null, null);
+        return mLocalContentResolver.update(
+                Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId), values, null, null);
     }
 
     @Override
@@ -346,7 +349,7 @@ public class GroupChatLog implements IGroupChatLog {
         try {
             cursor = mLocalContentResolver.query(GroupChatData.CONTENT_URI, PROJECTION_GC_CHAT_ID,
                     SELECT_ACTIVE_GROUP_CHATS, null, null);
-            // TODO check null cursor CR037
+            CursorUtil.assertCursorIsNotNull(cursor, GroupChatData.CONTENT_URI);
             Set<String> activeGroupChats = new HashSet<String>();
             while (cursor.moveToNext()) {
                 String chatId = cursor.getString(FIRST_COLUMN_IDX);
@@ -354,23 +357,16 @@ public class GroupChatLog implements IGroupChatLog {
             }
             return activeGroupChats;
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
     @Override
     public Cursor getGroupChatData(String chatId) {
-        Cursor cursor = mLocalContentResolver.query(
-                Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId), null, null, null, null);
-        // TODO check null cursor CR03
-        if (cursor.moveToFirst()) {
-            return cursor;
-        }
-        throw new SQLException(new StringBuilder(
-                "No row returned while querying for group chat data with chatId '").append(chatId)
-                .append("'!").toString());
+        Uri contentUri = Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId);
+        Cursor cursor = mLocalContentResolver.query(contentUri, null, null, null, null);
+        CursorUtil.assertCursorIsNotNull(cursor, contentUri);
+        return cursor;
     }
 
     @Override
@@ -389,15 +385,13 @@ public class GroupChatLog implements IGroupChatLog {
     public boolean isGroupChatPersisted(String chatId) {
         Cursor cursor = null;
         try {
-            cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId), PROJECTION_GC_CHAT_ID,
-                    null, null, null);
-            // TODO check null cursor CR037
-            return cursor.moveToFirst();
+            Uri contentUri = Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId);
+            cursor = mLocalContentResolver.query(contentUri, PROJECTION_GC_CHAT_ID, null, null,
+                    null);
+            CursorUtil.assertCursorIsNotNull(cursor, contentUri);
+            return cursor.moveToNext();
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
