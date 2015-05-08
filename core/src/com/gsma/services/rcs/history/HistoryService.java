@@ -137,10 +137,12 @@ public final class HistoryService extends RcsService {
      * @param database URI of database to register
      * @param table Name of table to register
      * @param columnMapping Translator of internal field names to history log provider field names
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     public void registerExtraHistoryLogMember(int providerId, Uri providerUri, Uri database,
-            String table, Map<String, String> columnMapping) throws RcsServiceException {
+            String table, Map<String, String> columnMapping)
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mService == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -157,9 +159,11 @@ public final class HistoryService extends RcsService {
      * Unregisters an external history log member.
      * 
      * @param providerId Provider ID of history log member
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void unregisterExtraHistoryLogMember(int providerId) throws RcsServiceException {
+    public void unregisterExtraHistoryLogMember(int providerId)
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mService == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -175,10 +179,12 @@ public final class HistoryService extends RcsService {
      * Creates an id that will be unique across all tables in the base column "_id".
      * 
      * @param providerId of the provider that requires the generated id for its table
-     * @return the generated id as long
-     * @throws RcsServiceException
+     * @return long the generated id as long
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public long createUniqueId(int providerId) throws RcsServiceException {
+    public long createUniqueId(int providerId) throws RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mService == null) {
             throw new RcsServiceNotAvailableException();
         }
