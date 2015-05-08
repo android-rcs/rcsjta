@@ -23,8 +23,6 @@
 package com.gsma.services.rcs.sharing.image;
 
 import com.gsma.services.rcs.RcsGenericException;
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.sharing.image.IImageSharingServiceConfiguration;
 
 /**
  * Image sharing service configuration
@@ -50,10 +48,10 @@ public class ImageSharingServiceConfiguration {
      * Returns the maximum authorized size of the image that can be sent. It returns 0 if there is
      * no limitation.
      * 
-     * @return Size in kilobytes
-     * @throws RcsServiceException
+     * @return long Size in bytes
+     * @throws RcsGenericException
      */
-    public long getMaxSize() throws RcsServiceException {
+    public long getMaxSize() throws RcsGenericException {
         try {
             return mConfiguration.getMaxSize();
 

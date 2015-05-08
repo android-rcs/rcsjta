@@ -26,7 +26,6 @@ import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.net.Uri;
@@ -246,10 +245,10 @@ public class ImageSharing {
     /**
      * Returns the sharing ID of the image sharing
      * 
-     * @return Sharing ID
-     * @throws RcsServiceException
+     * @return String Sharing ID
+     * @throws RcsGenericException
      */
-    public String getSharingId() throws RcsServiceException {
+    public String getSharingId() throws RcsGenericException {
         try {
             return mSharingInf.getSharingId();
 
@@ -262,9 +261,10 @@ public class ImageSharing {
      * Returns the remote contact identifier
      * 
      * @return ContactId
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public ContactId getRemoteContact() throws RcsServiceException {
+    public ContactId getRemoteContact() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mSharingInf.getRemoteContact();
 
@@ -278,9 +278,10 @@ public class ImageSharing {
      * Returns the URI of the file to be shared
      * 
      * @return Uri
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public Uri getFile() throws RcsServiceException {
+    public Uri getFile() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mSharingInf.getFile();
 
@@ -293,10 +294,11 @@ public class ImageSharing {
     /**
      * Returns the complete filename including the path of the file to be transferred
      * 
-     * @return Filename
-     * @throws RcsServiceException
+     * @return String Filename
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public String getFileName() throws RcsServiceException {
+    public String getFileName() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mSharingInf.getFileName();
 
@@ -309,10 +311,11 @@ public class ImageSharing {
     /**
      * Returns the size of the file to be transferred
      * 
-     * @return Size in bytes
-     * @throws RcsServiceException
+     * @return long Size in bytes
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public long getFileSize() throws RcsServiceException {
+    public long getFileSize() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mSharingInf.getFileSize();
 
@@ -325,10 +328,11 @@ public class ImageSharing {
     /**
      * Returns the MIME type of the file to be transferred
      * 
-     * @return Type
-     * @throws RcsServiceException
+     * @return String Type
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public String getMimeType() throws RcsServiceException {
+    public String getMimeType() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mSharingInf.getMimeType();
 
@@ -344,9 +348,10 @@ public class ImageSharing {
      * image sharings.
      * 
      * @return long
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public long getTimestamp() throws RcsServiceException {
+    public long getTimestamp() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mSharingInf.getTimestamp();
 
@@ -360,10 +365,11 @@ public class ImageSharing {
      * Returns the state of the sharing
      * 
      * @return State
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      * @see ImageSharing.State
-     * @throws RcsServiceException
      */
-    public State getState() throws RcsServiceException {
+    public State getState() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return State.valueOf(mSharingInf.getState());
 
@@ -377,10 +383,11 @@ public class ImageSharing {
      * Returns the reason code of the state of the sharing
      * 
      * @return ReasonCode
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      * @see ImageSharing.ReasonCode
-     * @throws RcsServiceException
      */
-    public ReasonCode getReasonCode() throws RcsServiceException {
+    public ReasonCode getReasonCode() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return ReasonCode.valueOf(mSharingInf.getReasonCode());
 
@@ -394,10 +401,11 @@ public class ImageSharing {
      * Returns the direction of the sharing
      * 
      * @return Direction
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      * @see Direction
-     * @throws RcsServiceException
      */
-    public Direction getDirection() throws RcsServiceException {
+    public Direction getDirection() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return Direction.valueOf(mSharingInf.getDirection());
 
@@ -410,9 +418,9 @@ public class ImageSharing {
     /**
      * Accepts image sharing invitation
      * 
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public void acceptInvitation() throws RcsServiceException {
+    public void acceptInvitation() throws RcsGenericException {
         try {
             mSharingInf.acceptInvitation();
         } catch (Exception e) {
@@ -423,9 +431,9 @@ public class ImageSharing {
     /**
      * Rejects image sharing invitation
      * 
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public void rejectInvitation() throws RcsServiceException {
+    public void rejectInvitation() throws RcsGenericException {
         try {
             mSharingInf.rejectInvitation();
         } catch (Exception e) {
@@ -436,9 +444,10 @@ public class ImageSharing {
     /**
      * Aborts the sharing
      * 
-     * @throws RcsServiceException
+     * @throws RcsPermissionDeniedException
+     * @throws RcsGenericException
      */
-    public void abortSharing() throws RcsServiceException {
+    public void abortSharing() throws RcsPermissionDeniedException, RcsGenericException {
         try {
             mSharingInf.abortSharing();
         } catch (Exception e) {

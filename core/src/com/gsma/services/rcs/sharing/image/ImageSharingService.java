@@ -172,10 +172,12 @@ public final class ImageSharingService extends RcsService {
     /**
      * Returns the configuration of image sharing service
      * 
-     * @return Configuration
-     * @throws RcsServiceException
+     * @return ImageSharingServiceConfiguration
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public ImageSharingServiceConfiguration getConfiguration() throws RcsServiceException {
+    public ImageSharingServiceConfiguration getConfiguration()
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -196,10 +198,15 @@ public final class ImageSharingService extends RcsService {
      * 
      * @param contact Contact identifier
      * @param file Uri of file to share
-     * @return Image sharing
-     * @throws RcsServiceException
+     * @return ImageSharing
+     * @throws RcsServiceNotRegisteredException
+     * @throws RcsPersistentStorageException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public ImageSharing shareImage(ContactId contact, Uri file) throws RcsServiceException {
+    public ImageSharing shareImage(ContactId contact, Uri file)
+            throws RcsServiceNotRegisteredException, RcsPersistentStorageException,
+            RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -225,10 +232,12 @@ public final class ImageSharingService extends RcsService {
      * Returns a current image sharing from its unique ID
      * 
      * @param sharingId Sharing ID
-     * @return Image sharing or null if not found
-     * @throws RcsServiceException
+     * @return ImageSharing Image sharing or null if not found
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public ImageSharing getImageSharing(String sharingId) throws RcsServiceException {
+    public ImageSharing getImageSharing(String sharingId) throws RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -245,9 +254,11 @@ public final class ImageSharingService extends RcsService {
      * Adds a listener on image sharing events
      * 
      * @param listener Listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void addEventListener(ImageSharingListener listener) throws RcsServiceException {
+    public void addEventListener(ImageSharingListener listener)
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -266,9 +277,11 @@ public final class ImageSharingService extends RcsService {
      * Removes a listener on image sharing events
      * 
      * @param listener Listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void removeEventListener(ImageSharingListener listener) throws RcsServiceException {
+    public void removeEventListener(ImageSharingListener listener)
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -291,9 +304,10 @@ public final class ImageSharingService extends RcsService {
      * Deletes all image sharing from history and abort/reject any associated ongoing session if
      * such exists.
      * 
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void deleteImageSharings() throws RcsServiceException {
+    public void deleteImageSharings() throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -309,9 +323,11 @@ public final class ImageSharingService extends RcsService {
      * ongoing session if such exists
      * 
      * @param contact
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void deleteImageSharings(ContactId contact) throws RcsServiceException {
+    public void deleteImageSharings(ContactId contact) throws RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -328,9 +344,11 @@ public final class ImageSharingService extends RcsService {
      * ongoing session if such exists.
      * 
      * @param sharingId
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void deleteImageSharing(String sharingId) throws RcsServiceException {
+    public void deleteImageSharing(String sharingId) throws RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
