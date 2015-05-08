@@ -2,7 +2,8 @@
 
 	<property environment="env"/>
 	<property name="android.root" 		value="${env.ANDROID_HOME}"/>
-	<property name="android.platform"	value="${android.root}/platforms/android-21"/>
+	<property name="android.target" 	value="${env.ANDROID_TARGET}"/>
+	<property name="android.platform"	value="${android.root}/platforms/${android.target}"/>
 	<property name="terminal.root" 		value="."/>
 	<property name="terminal.api" 		value="${terminal.root}/core/rcs_api.jar"/>
 	<property name="terminal.ri" 		value="${terminal.root}/RI/bin/GSMA_RI.apk"/>
