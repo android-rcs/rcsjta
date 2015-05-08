@@ -114,7 +114,7 @@ public class FileTransferServiceConfiguration {
      * Returns the file transfer size threshold when the user should be warned about the potential
      * charges associated to the transfer of a large file. It returns 0 if there no need to warn.
      * 
-     * @return long Size in kilobytes
+     * @return long Size in bytes
      * @throws RcsGenericException
      */
     public long getWarnSize() throws RcsGenericException {
@@ -129,7 +129,7 @@ public class FileTransferServiceConfiguration {
     /**
      * Returns the file transfer size limit. It returns 0 if there is no limitation.
      * 
-     * @return long Size in kilobytes
+     * @return long Size in bytes
      * @throws RcsGenericException
      */
     public long getMaxSize() throws RcsGenericException {
