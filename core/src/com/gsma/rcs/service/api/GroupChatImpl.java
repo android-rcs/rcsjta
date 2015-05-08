@@ -63,6 +63,7 @@ import android.database.SQLException;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -862,25 +863,24 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      */
     public void inviteParticipants(final GroupChatSession session, final Set<ContactId> participants) {
         if (logger.isActivated()) {
-            StringBuilder listOfParticipants = new StringBuilder("Add ");
-            for (ContactId contactId : participants) {
-                listOfParticipants.append(contactId.toString()).append(" ");
-            }
-            listOfParticipants.append("participants to the session");
-            logger.info(listOfParticipants.toString());
+            logger.debug(new StringBuilder("Adding ")
+                    .append(Arrays.toString(participants.toArray())).append(" to the session.")
+                    .toString());
         }
 
-        if (participants.size() <= session.getMaxNumberOfAdditionalParticipants()) {
-            new Thread() {
-                public void run() {
-                    session.inviteParticipants(participants);
-                }
-            }.start();
-        } else {
-            for (ContactId contact : participants) {
-                handleAddParticipantFailed(contact, "Maximum number of participants reached");
-            }
+        int maxNumberOfAdditionalParticipants = session.getMaxNumberOfAdditionalParticipants();
+        if (maxNumberOfAdditionalParticipants < participants.size()) {
+            throw new ServerApiPermissionDeniedException(new StringBuilder().append("Invite of ")
+                    .append(participants.size())
+                    .append(" participants failed, max number of additional participants: ")
+                    .append(maxNumberOfAdditionalParticipants).append("!").toString());
         }
+
+        new Thread() {
+            public void run() {
+                session.inviteParticipants(participants);
+            }
+        }.start();
     }
 
     /**
@@ -1570,7 +1570,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * @param contact Contact ID
      * @param reason Error reason
      */
-    private void handleAddParticipantFailed(ContactId contact, String reason) {
+    public void handleAddParticipantFailed(ContactId contact, String reason) {
         if (logger.isActivated()) {
             logger.info("Add participant request has failed " + reason);
         }

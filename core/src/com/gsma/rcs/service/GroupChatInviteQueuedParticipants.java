@@ -24,6 +24,7 @@ import com.gsma.rcs.service.api.GroupChatImpl;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
+import java.util.Arrays;
 import java.util.Set;
 
 /* package private */class GroupChatInviteQueuedParticipants implements Runnable {
@@ -47,6 +48,30 @@ import java.util.Set;
         mImService = imService;
     }
 
+    private void inviteQueuedParticipants(final GroupChatSession session,
+            final Set<ContactId> participants) {
+        if (mLogger.isActivated()) {
+            mLogger.debug(new StringBuilder("Adding ")
+                    .append(Arrays.toString(participants.toArray())).append(" to the session.")
+                    .toString());
+        }
+
+        if (session.getMaxNumberOfAdditionalParticipants() < participants.size()) {
+            GroupChatImpl groupChat = mChatService.getOrCreateGroupChat(mChatId);
+
+            for (ContactId contact : participants) {
+                groupChat.handleAddParticipantFailed(contact,
+                        "Maximum number of participants reached");
+            }
+            return;
+        }
+        new Thread() {
+            public void run() {
+                session.inviteParticipants(participants);
+            }
+        }.start();
+    }
+
     @Override
     public void run() {
         try {
@@ -59,9 +84,7 @@ import java.util.Set;
 
             GroupChatSession session = mImService.getGroupChatSession(mChatId);
             if (session != null && session.isMediaEstablished()) {
-                GroupChatImpl groupChat = mChatService.getOrCreateGroupChat(mChatId);
-
-                groupChat.inviteParticipants(session, participants);
+                inviteQueuedParticipants(session, participants);
             }
         } catch (Exception e) {
             /*
