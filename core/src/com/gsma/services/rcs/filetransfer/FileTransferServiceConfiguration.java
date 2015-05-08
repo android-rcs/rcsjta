@@ -25,7 +25,6 @@ package com.gsma.services.rcs.filetransfer;
 import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.RcsPersistentStorageException;
-import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsUnsupportedOperationException;
 
 import android.util.SparseArray;
@@ -115,10 +114,10 @@ public class FileTransferServiceConfiguration {
      * Returns the file transfer size threshold when the user should be warned about the potential
      * charges associated to the transfer of a large file. It returns 0 if there no need to warn.
      * 
-     * @return Size in kilobytes
-     * @throws RcsServiceException
+     * @return long Size in kilobytes
+     * @throws RcsGenericException
      */
-    public long getWarnSize() throws RcsServiceException {
+    public long getWarnSize() throws RcsGenericException {
         try {
             return mIFtServiceConfig.getWarnSize();
 
@@ -130,10 +129,10 @@ public class FileTransferServiceConfiguration {
     /**
      * Returns the file transfer size limit. It returns 0 if there is no limitation.
      * 
-     * @return Size in kilobytes
-     * @throws RcsServiceException
+     * @return long Size in kilobytes
+     * @throws RcsGenericException
      */
-    public long getMaxSize() throws RcsServiceException {
+    public long getMaxSize() throws RcsGenericException {
         try {
             return mIFtServiceConfig.getMaxSize();
 
@@ -145,10 +144,10 @@ public class FileTransferServiceConfiguration {
     /**
      * Is file transfer invitation automatically accepted
      * 
-     * @return Returns true if File Transfer is automatically accepted else returns false
-     * @throws RcsServiceException
+     * @return boolean Returns true if File Transfer is automatically accepted else returns false
+     * @throws RcsGenericException
      */
-    public boolean isAutoAcceptEnabled() throws RcsServiceException {
+    public boolean isAutoAcceptEnabled() throws RcsGenericException {
         try {
             return mIFtServiceConfig.isAutoAcceptEnabled();
 
@@ -163,9 +162,11 @@ public class FileTransferServiceConfiguration {
      * true.
      * 
      * @param enable
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public void setAutoAccept(boolean enable) throws RcsServiceException {
+    public void setAutoAccept(boolean enable) throws RcsPersistentStorageException,
+            RcsGenericException {
         try {
             mIFtServiceConfig.setAutoAccept(enable);
         } catch (Exception e) {
@@ -181,11 +182,11 @@ public class FileTransferServiceConfiguration {
      * This parameter is only applicable if auto accept is active for File Transfer in normal
      * conditions (see isAutoAcceptEnabled).
      * 
-     * @return Returns true if File Transfer is automatically accepted while in roaming else returns
-     *         false
-     * @throws RcsServiceException
+     * @return boolean Returns true if File Transfer is automatically accepted while in roaming else
+     *         returns false
+     * @throws RcsGenericException
      */
-    public boolean isAutoAcceptInRoamingEnabled() throws RcsServiceException {
+    public boolean isAutoAcceptInRoamingEnabled() throws RcsGenericException {
         try {
             return mIFtServiceConfig.isAutoAcceptInRoamingEnabled();
 
@@ -200,9 +201,12 @@ public class FileTransferServiceConfiguration {
      * isAutoAcceptModeChangeable is true and if the AutoAccept Mode in normal conditions is true.
      * 
      * @param enable
-     * @throws RcsServiceException
+     * @throws RcsPermissionDeniedException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public void setAutoAcceptInRoaming(boolean enable) throws RcsServiceException {
+    public void setAutoAcceptInRoaming(boolean enable) throws RcsPermissionDeniedException,
+            RcsPersistentStorageException, RcsGenericException {
         try {
             mIFtServiceConfig.setAutoAcceptInRoaming(enable);
 
@@ -217,11 +221,11 @@ public class FileTransferServiceConfiguration {
     /**
      * is default Auto Accept mode (both in normal or roaming modes) changeable
      * 
-     * @return True if client is allowed to change the default Auto Accept mode (both in normal or
-     *         roaming modes)
-     * @throws RcsServiceException
+     * @return boolean True if client is allowed to change the default Auto Accept mode (both in
+     *         normal or roaming modes)
+     * @throws RcsGenericException
      */
-    public boolean isAutoAcceptModeChangeable() throws RcsServiceException {
+    public boolean isAutoAcceptModeChangeable() throws RcsGenericException {
         try {
             return mIFtServiceConfig.isAutoAcceptModeChangeable();
 
@@ -233,10 +237,10 @@ public class FileTransferServiceConfiguration {
     /**
      * Returns the max number of simultaneous file transfers
      * 
-     * @return the max number of simultaneous file transfers
-     * @throws RcsServiceException
+     * @return int the max number of simultaneous file transfers
+     * @throws RcsGenericException
      */
-    public int getMaxFileTransfers() throws RcsServiceException {
+    public int getMaxFileTransfers() throws RcsGenericException {
         try {
             return mIFtServiceConfig.getMaxFileTransfers();
 
@@ -250,9 +254,9 @@ public class FileTransferServiceConfiguration {
      * ONLY_ABOVE_MAX_SIZE, ASK
      * 
      * @return ImageResizeOption instance
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public ImageResizeOption getImageResizeOption() throws RcsServiceException {
+    public ImageResizeOption getImageResizeOption() throws RcsGenericException {
         try {
             return ImageResizeOption.valueOf(mIFtServiceConfig.getImageResizeOption());
 
@@ -265,9 +269,9 @@ public class FileTransferServiceConfiguration {
      * Sets the image resize option for file transfer.
      * 
      * @param option
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public void setImageResizeOption(ImageResizeOption option) throws RcsServiceException {
+    public void setImageResizeOption(ImageResizeOption option) throws RcsGenericException {
         try {
             mIFtServiceConfig.setImageResizeOption(option.toInt());
         } catch (Exception e) {
@@ -278,10 +282,10 @@ public class FileTransferServiceConfiguration {
     /**
      * Returns True if group file transfer is supported, else returns False.
      * 
-     * @return True if group file transfer is supported, else returns False.
-     * @throws RcsServiceException
+     * @return boolean True if group file transfer is supported, else returns False.
+     * @throws RcsGenericException
      */
-    public boolean isGroupFileTransferSupported() throws RcsServiceException {
+    public boolean isGroupFileTransferSupported() throws RcsGenericException {
         try {
             return mIFtServiceConfig.isGroupFileTransferSupported();
 

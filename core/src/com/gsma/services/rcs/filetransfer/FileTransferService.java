@@ -175,10 +175,12 @@ public final class FileTransferService extends RcsService {
     /**
      * Returns the configuration of the file transfer service
      * 
-     * @return Configuration
-     * @throws RcsServiceException
+     * @return FileTransferServiceConfiguration
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public FileTransferServiceConfiguration getConfiguration() throws RcsServiceException {
+    public FileTransferServiceConfiguration getConfiguration()
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -196,9 +198,12 @@ public final class FileTransferService extends RcsService {
      * 
      * @param contact
      * @return boolean
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public boolean isAllowedToTransferFile(ContactId contact) throws RcsServiceException {
+    public boolean isAllowedToTransferFile(ContactId contact) throws RcsPersistentStorageException,
+            RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -223,11 +228,14 @@ public final class FileTransferService extends RcsService {
      * @param attachFileIcon File icon option. If true, the stack tries to attach fileicon. Fileicon
      *            may not be attached if file is not an image or if local or remote contact does not
      *            support fileicon.
-     * @return File transfer
-     * @throws RcsServiceException
+     * @return FileTransfer
+     * @throws RcsPersistentStorageException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     public FileTransfer transferFile(ContactId contact, Uri file, boolean attachFileIcon)
-            throws RcsServiceException {
+            throws RcsPersistentStorageException, RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -254,9 +262,13 @@ public final class FileTransferService extends RcsService {
      * 
      * @param chatId
      * @return boolean
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public boolean isAllowedToTransferFileToGroupChat(String chatId) throws RcsServiceException {
+    public boolean isAllowedToTransferFileToGroupChat(String chatId)
+            throws RcsPersistentStorageException, RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -279,10 +291,14 @@ public final class FileTransferService extends RcsService {
      *            FileIcon may not be attached if file is not an image or if local or remote contact
      *            does not support fileIcon.
      * @return FileTransfer
-     * @throws RcsServiceException
+     * @throws RcsPermissionDeniedException
+     * @throws RcsPersistentStorageException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     public FileTransfer transferFileToGroupChat(String chatId, Uri file, boolean attachFileIcon)
-            throws RcsServiceException {
+            throws RcsPermissionDeniedException, RcsPersistentStorageException,
+            RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -309,9 +325,12 @@ public final class FileTransferService extends RcsService {
      * the UI).
      * 
      * @param transferId
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void markFileTransferAsRead(String transferId) throws RcsServiceException {
+    public void markFileTransferAsRead(String transferId) throws RcsPersistentStorageException,
+            RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -328,10 +347,13 @@ public final class FileTransferService extends RcsService {
      * Returns a current file transfer from its unique ID
      * 
      * @param transferId
-     * @return File transfer or null if not found
-     * @throws RcsServiceException
+     * @return FileTransfer File transfer or null if not found
+     * @throws RcsPersistentStorageException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public FileTransfer getFileTransfer(String transferId) throws RcsServiceException {
+    public FileTransfer getFileTransfer(String transferId) throws RcsPersistentStorageException,
+            RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -354,9 +376,11 @@ public final class FileTransferService extends RcsService {
      * Adds a listener on file transfer events
      * 
      * @param listener One-to-one file transfer listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void addEventListener(OneToOneFileTransferListener listener) throws RcsServiceException {
+    public void addEventListener(OneToOneFileTransferListener listener)
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -376,10 +400,11 @@ public final class FileTransferService extends RcsService {
      * Removes a listener on file transfer events
      * 
      * @param listener File transfer listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     public void removeEventListener(OneToOneFileTransferListener listener)
-            throws RcsServiceException {
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -403,9 +428,11 @@ public final class FileTransferService extends RcsService {
      * Adds a listener on group file transfer events
      * 
      * @param listener Group file transfer listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void addEventListener(GroupFileTransferListener listener) throws RcsServiceException {
+    public void addEventListener(GroupFileTransferListener listener)
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -424,9 +451,11 @@ public final class FileTransferService extends RcsService {
      * Removes a listener on group file transfer events
      * 
      * @param listener Group file transfer listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void removeEventListener(GroupFileTransferListener listener) throws RcsServiceException {
+    public void removeEventListener(GroupFileTransferListener listener)
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -450,9 +479,11 @@ public final class FileTransferService extends RcsService {
      * Deletes all one to one file transfer from history and abort/reject any associated ongoing
      * session if such exists.
      * 
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void deleteOneToOneFileTransfers() throws RcsServiceException {
+    public void deleteOneToOneFileTransfers() throws RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -467,9 +498,11 @@ public final class FileTransferService extends RcsService {
      * Deletes all group file transfer from history and abort/reject any associated ongoing session
      * if such exists.
      * 
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void deleteGroupFileTransfers() throws RcsServiceException {
+    public void deleteGroupFileTransfers() throws RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -485,9 +518,11 @@ public final class FileTransferService extends RcsService {
      * history and abort/reject any associated ongoing session if such exists.
      * 
      * @param contact
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void deleteOneToOneFileTransfers(ContactId contact) throws RcsServiceException {
+    public void deleteOneToOneFileTransfers(ContactId contact)
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -504,9 +539,11 @@ public final class FileTransferService extends RcsService {
      * and abort/reject any associated ongoing session if such exists.
      * 
      * @param chatId
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void deleteGroupFileTransfers(String chatId) throws RcsServiceException {
+    public void deleteGroupFileTransfers(String chatId) throws RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -523,9 +560,12 @@ public final class FileTransferService extends RcsService {
      * session if such exists.
      * 
      * @param transferId
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void deleteFileTransfer(String transferId) throws RcsServiceException {
+    public void deleteFileTransfer(String transferId) throws RcsPersistentStorageException,
+            RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -543,10 +583,11 @@ public final class FileTransferService extends RcsService {
      * delivery of them has expired already or not.
      * 
      * @param transferIds
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     public void clearFileTransferDeliveryExpiration(Set<String> transferIds)
-            throws RcsServiceException {
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }

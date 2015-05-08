@@ -26,7 +26,6 @@ import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsUnsupportedOperationException;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -315,10 +314,11 @@ public class FileTransfer {
     /**
      * Returns the chat ID if this file transfer is a group file transfer
      * 
-     * @return Chat ID
-     * @throws RcsServiceException
+     * @return String Chat ID
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public String getChatId() throws RcsServiceException {
+    public String getChatId() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mTransferInf.getChatId();
 
@@ -331,10 +331,10 @@ public class FileTransfer {
     /**
      * Returns the file transfer ID of the file transfer
      * 
-     * @return Transfer ID
-     * @throws RcsServiceException
+     * @return String Transfer ID
+     * @throws RcsGenericException
      */
-    public String getTransferId() throws RcsServiceException {
+    public String getTransferId() throws RcsGenericException {
         try {
             return mTransferInf.getTransferId();
 
@@ -347,9 +347,10 @@ public class FileTransfer {
      * Returns the remote contact identifier
      * 
      * @return ContactId
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public ContactId getRemoteContact() throws RcsServiceException {
+    public ContactId getRemoteContact() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mTransferInf.getRemoteContact();
 
@@ -362,10 +363,11 @@ public class FileTransfer {
     /**
      * Returns the complete filename including the path of the file to be transferred
      * 
-     * @return Filename
-     * @throws RcsServiceException
+     * @return String Filename
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public String getFileName() throws RcsServiceException {
+    public String getFileName() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mTransferInf.getFileName();
 
@@ -378,10 +380,11 @@ public class FileTransfer {
     /**
      * Returns the size of the file to be transferred
      * 
-     * @return Size in bytes
-     * @throws RcsServiceException
+     * @return long Size in bytes
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public long getFileSize() throws RcsServiceException {
+    public long getFileSize() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mTransferInf.getFileSize();
 
@@ -394,10 +397,11 @@ public class FileTransfer {
     /**
      * Returns the MIME type of the file to be transferred
      * 
-     * @return Type
-     * @throws RcsServiceException
+     * @return String Type
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public String getMimeType() throws RcsServiceException {
+    public String getMimeType() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mTransferInf.getMimeType();
 
@@ -410,10 +414,11 @@ public class FileTransfer {
     /**
      * Returns the Uri of the file icon
      * 
-     * @return the Uri of the file icon or thumbnail
-     * @throws RcsServiceException
+     * @return Uri the Uri of the file icon or thumbnail
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public Uri getFileIcon() throws RcsServiceException {
+    public Uri getFileIcon() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mTransferInf.getFileIcon();
 
@@ -426,10 +431,11 @@ public class FileTransfer {
     /**
      * Returns the MIME type of the file icon to be transfered
      * 
-     * @return MIME Type
-     * @throws RcsServiceException
+     * @return String MIME Type
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public String getFileIconMimeType() throws RcsServiceException {
+    public String getFileIconMimeType() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mTransferInf.getFileIconMimeType();
 
@@ -443,9 +449,10 @@ public class FileTransfer {
      * Returns the Uri of the file
      * 
      * @return Uri of file
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public Uri getFile() throws RcsServiceException {
+    public Uri getFile() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mTransferInf.getFile();
 
@@ -460,9 +467,10 @@ public class FileTransfer {
      * 
      * @return State
      * @see FileTransfer.State
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public State getState() throws RcsServiceException {
+    public State getState() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return State.valueOf(mTransferInf.getState());
 
@@ -478,9 +486,10 @@ public class FileTransfer {
      * @return ReasonCode
      * @see ReasonCode
      * @see FileTransfer.ReasonCode
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public ReasonCode getReasonCode() throws RcsServiceException {
+    public ReasonCode getReasonCode() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return ReasonCode.valueOf(mTransferInf.getReasonCode());
 
@@ -495,15 +504,16 @@ public class FileTransfer {
      * 
      * @return Direction
      * @see Direction
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public Direction getDirection() throws RcsServiceException {
+    public Direction getDirection() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return Direction.valueOf(mTransferInf.getDirection());
 
         } catch (Exception e) {
             RcsPersistentStorageException.assertException(e);
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -513,9 +523,10 @@ public class FileTransfer {
      * received for incoming file transfers
      * 
      * @return long
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public long getTimestamp() throws RcsServiceException {
+    public long getTimestamp() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mTransferInf.getTimestamp();
 
@@ -531,9 +542,10 @@ public class FileTransfer {
      * incoming file transfers
      * 
      * @return long
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public long getTimestampSent() throws RcsServiceException {
+    public long getTimestampSent() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mTransferInf.getTimestampSent();
 
@@ -548,9 +560,10 @@ public class FileTransfer {
      * transfers or 0 for incoming file transfers or it was not yet displayed
      * 
      * @return long
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public long getTimestampDelivered() throws RcsServiceException {
+    public long getTimestampDelivered() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mTransferInf.getTimestampDelivered();
 
@@ -565,9 +578,10 @@ public class FileTransfer {
      * transfers or 0 for incoming file transfers or it was not yet displayed
      * 
      * @return long
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public long getTimestampDisplayed() throws RcsServiceException {
+    public long getTimestampDisplayed() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mTransferInf.getTimestampDisplayed();
 
@@ -580,9 +594,12 @@ public class FileTransfer {
     /**
      * Accepts file transfer invitation
      * 
-     * @throws RcsServiceException
+     * @throws RcsPermissionDeniedException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public void acceptInvitation() throws RcsServiceException {
+    public void acceptInvitation() throws RcsPermissionDeniedException,
+            RcsPersistentStorageException, RcsGenericException {
         try {
             mTransferInf.acceptInvitation();
         } catch (Exception e) {
@@ -596,9 +613,12 @@ public class FileTransfer {
     /**
      * Rejects file transfer invitation
      * 
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsPermissionDeniedException
+     * @throws RcsGenericException
      */
-    public void rejectInvitation() throws RcsServiceException {
+    public void rejectInvitation() throws RcsPersistentStorageException,
+            RcsPermissionDeniedException, RcsGenericException {
         try {
             mTransferInf.rejectInvitation();
         } catch (Exception e) {
@@ -612,9 +632,10 @@ public class FileTransfer {
     /**
      * Aborts the file transfer
      * 
-     * @throws RcsServiceException
+     * @throws RcsPermissionDeniedException
+     * @throws RcsGenericException
      */
-    public void abortTransfer() throws RcsServiceException {
+    public void abortTransfer() throws RcsPermissionDeniedException, RcsGenericException {
         try {
             mTransferInf.abortTransfer();
         } catch (Exception e) {
@@ -629,9 +650,9 @@ public class FileTransfer {
      * storage false will be returned (this is no error)
      * 
      * @return boolean
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public boolean isAllowedToPauseTransfer() throws RcsServiceException {
+    public boolean isAllowedToPauseTransfer() throws RcsGenericException {
         try {
             return mTransferInf.isAllowedToPauseTransfer();
 
@@ -643,9 +664,10 @@ public class FileTransfer {
     /**
      * Pauses the file transfer
      * 
-     * @throws RcsServiceException
+     * @throws RcsPermissionDeniedException
+     * @throws RcsGenericException
      */
-    public void pauseTransfer() throws RcsServiceException {
+    public void pauseTransfer() throws RcsPermissionDeniedException, RcsGenericException {
         try {
             mTransferInf.pauseTransfer();
         } catch (Exception e) {
@@ -661,9 +683,11 @@ public class FileTransfer {
      * storage false will be returned.
      * 
      * @return boolean
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public boolean isAllowedToResumeTransfer() throws RcsServiceException {
+    public boolean isAllowedToResumeTransfer() throws RcsPersistentStorageException,
+            RcsGenericException {
         try {
             return mTransferInf.isAllowedToResumeTransfer();
 
@@ -676,9 +700,12 @@ public class FileTransfer {
     /**
      * Resumes the file transfer
      * 
-     * @throws RcsServiceException
+     * @throws RcsPermissionDeniedException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public void resumeTransfer() throws RcsServiceException {
+    public void resumeTransfer() throws RcsPermissionDeniedException,
+            RcsPersistentStorageException, RcsGenericException {
         try {
             mTransferInf.resumeTransfer();
         } catch (Exception e) {
@@ -692,9 +719,11 @@ public class FileTransfer {
      * Returns whether you can resend the transfer.
      * 
      * @return boolean
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public boolean isAllowedToResendTransfer() throws RcsServiceException {
+    public boolean isAllowedToResendTransfer() throws RcsPersistentStorageException,
+            RcsGenericException {
         try {
             return mTransferInf.isAllowedToResendTransfer();
 
@@ -708,9 +737,10 @@ public class FileTransfer {
      * Resend a file transfer which was previously failed. This only for 1-1 file transfer, an
      * exception is thrown in case of a file transfer to group.
      * 
-     * @throws RcsServiceException
+     * @throws RcsPermissionDeniedException
+     * @throws RcsGenericException
      */
-    public void resendTransfer() throws RcsServiceException {
+    public void resendTransfer() throws RcsPermissionDeniedException, RcsGenericException {
         try {
             mTransferInf.resendTransfer();
         } catch (Exception e) {
@@ -724,47 +754,50 @@ public class FileTransfer {
      * Returns true if file transfer has been marked as read
      * 
      * @return boolean
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public boolean isRead() throws RcsServiceException {
+    public boolean isRead() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mTransferInf.isRead();
 
         } catch (Exception e) {
             RcsPersistentStorageException.assertException(e);
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
     /**
      * Returns the time for when file on the content server is no longer valid to download.
      * 
-     * @return time in milliseconds or 0 if not applicable or -1 if unknown
-     * @throws RcsServiceException
+     * @return long time in milliseconds or 0 if not applicable or -1 if unknown
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public long getFileExpiration() throws RcsServiceException {
+    public long getFileExpiration() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mTransferInf.getFileExpiration();
 
         } catch (Exception e) {
             RcsPersistentStorageException.assertException(e);
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
     /**
      * Returns the time for when file icon on the content server is no longer valid to download.
      * 
-     * @return time in milliseconds or 0 if not applicable or -1 if unknown
-     * @throws RcsServiceException
+     * @return long time in milliseconds or 0 if not applicable or -1 if unknown
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public long getFileIconExpiration() throws RcsServiceException {
+    public long getFileIconExpiration() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mTransferInf.getFileIconExpiration();
 
         } catch (Exception e) {
             RcsPersistentStorageException.assertException(e);
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -775,15 +808,16 @@ public class FileTransfer {
      * particular file is not eligible for delivery expiration in the first place.
      * 
      * @return boolean
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public boolean isExpiredDelivery() throws RcsServiceException {
+    public boolean isExpiredDelivery() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mTransferInf.isExpiredDelivery();
 
         } catch (Exception e) {
             RcsPersistentStorageException.assertException(e);
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 }
