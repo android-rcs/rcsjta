@@ -82,11 +82,10 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
-     * @throws SipException
      */
     public TerminatingGeolocTransferSession(ImsService parent, SipRequest invite,
             ContactId contact, RcsSettings rcsSettings, long timestamp,
-            ContactManager contactManager) throws SipException {
+            ContactManager contactManager) {
         super(parent, ContentManager.createMmContentFromSdp(invite, rcsSettings), contact,
                 rcsSettings, timestamp, contactManager);
 

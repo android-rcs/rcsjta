@@ -33,7 +33,6 @@ import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
@@ -136,7 +135,7 @@ public class RichcallService extends ImsService {
     }
 
     private void handleImageSharingInvitationRejected(SipRequest invite, ContactId contact,
-            ImageSharing.ReasonCode reasonCode, long timestamp) throws SipException {
+            ImageSharing.ReasonCode reasonCode, long timestamp) {
         MmContent content = ContentManager.createMmContentFromSdp(invite, mRcsSettings);
         getImsModule().getCore().getListener()
                 .handleImageSharingInvitationRejected(contact, content, reasonCode, timestamp);
@@ -151,7 +150,7 @@ public class RichcallService extends ImsService {
     }
 
     private void handleGeolocSharingInvitationRejected(SipRequest invite, ContactId contact,
-            ReasonCode reasonCode, long timestamp) throws SipException {
+            ReasonCode reasonCode, long timestamp) {
         GeolocContent content = (GeolocContent) ContentManager.createMmContentFromSdp(invite,
                 mRcsSettings);
         getImsModule().getCore().getListener()
@@ -481,9 +480,8 @@ public class RichcallService extends ImsService {
      * 
      * @param invite Initial invite
      * @param timestamp Local timestamp when got SipRequest
-     * @throws SipException 
      */
-    public void receiveImageSharingInvitation(SipRequest invite, long timestamp) throws SipException {
+    public void receiveImageSharingInvitation(SipRequest invite, long timestamp) {
         boolean logActivated = sLogger.isActivated();
         if (logActivated) {
             sLogger.info("Receive an image sharing session invitation");
@@ -796,9 +794,8 @@ public class RichcallService extends ImsService {
      * 
      * @param invite Initial invite
      * @param timestamp Local timestamp when got SipRequest
-     * @throws SipException
      */
-    public void receiveGeolocSharingInvitation(SipRequest invite, long timestamp) throws SipException {
+    public void receiveGeolocSharingInvitation(SipRequest invite, long timestamp) {
         boolean logActivated = sLogger.isActivated();
         if (logActivated) {
             sLogger.info("Receive a geoloc sharing session invitation");

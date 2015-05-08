@@ -85,10 +85,9 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
-     * @throws SipException
      */
     public TerminatingImageTransferSession(ImsService parent, SipRequest invite, ContactId contact,
-            RcsSettings rcsSettings, long timestamp, ContactManager contactManager) throws SipException {
+            RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
         super(parent, ContentManager.createMmContentFromSdp(invite, rcsSettings), contact,
                 FileTransferUtils.extractFileIcon(invite, rcsSettings), rcsSettings, timestamp,
                 contactManager);
