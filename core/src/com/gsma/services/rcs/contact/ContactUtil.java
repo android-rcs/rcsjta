@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +15,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.services.rcs.contact;
 
-import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsGenericException;
 
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
@@ -514,9 +518,9 @@ public class ContactUtil {
      * 
      * @param contactUri Contact URI of the contact in the address book
      * @return Uri of vCard
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public Uri getVCard(Uri contactUri) throws RcsServiceException {
+    public Uri getVCard(Uri contactUri) throws RcsGenericException {
         Cursor cursor = null;
         try {
             cursor = mCtx.getContentResolver().query(contactUri, null, null, null, null);
@@ -553,7 +557,7 @@ public class ContactUtil {
             return Uri.fromFile(vCardFile);
 
         } catch (IOException e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
 
         } finally {
             if (cursor != null) {
