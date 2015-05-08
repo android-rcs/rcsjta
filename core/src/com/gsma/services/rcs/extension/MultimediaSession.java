@@ -22,8 +22,9 @@
 
 package com.gsma.services.rcs.extension;
 
+import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.util.SparseArray;
@@ -208,72 +209,77 @@ public abstract class MultimediaSession {
     /**
      * Returns the session ID of the multimedia session
      * 
-     * @return Session ID
-     * @throws RcsServiceException
+     * @return String Session ID
+     * @throws RcsGenericException
      */
-    public abstract String getSessionId() throws RcsServiceException;
+    public abstract String getSessionId() throws RcsGenericException;
 
     /**
      * Returns the remote contact identifier
      * 
      * @return ContactId
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public abstract ContactId getRemoteContact() throws RcsServiceException;
+    public abstract ContactId getRemoteContact() throws RcsGenericException;
 
     /**
      * Returns the service ID
      * 
-     * @return Service ID
-     * @throws RcsServiceException
+     * @return String Service ID
+     * @throws RcsGenericException
      */
-    public abstract String getServiceId() throws RcsServiceException;
+    public abstract String getServiceId() throws RcsGenericException;
 
     /**
      * Returns the state of the session
      * 
      * @return State
      * @see MultimediaSession.State
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public abstract State getState() throws RcsServiceException;
+    public abstract State getState() throws RcsGenericException;
 
     /**
      * Returns the direction of the session
      * 
      * @return Direction
      * @see Direction
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public abstract Direction getDirection() throws RcsServiceException;
+    public abstract Direction getDirection() throws RcsGenericException;
 
     /**
      * Returns the reason code of the session.
      * 
      * @return ReasonCode
      * @see MultimediaSession.ReasonCode
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public abstract ReasonCode getReasonCode() throws RcsServiceException;
+    public abstract ReasonCode getReasonCode() throws RcsGenericException;
 
     /**
      * Accepts session invitation.
      * 
-     * @throws RcsServiceException
+     * @throws RcsPermissionDeniedException
+     * @throws RcsGenericException
      */
-    public abstract void acceptInvitation() throws RcsServiceException;
+    public abstract void acceptInvitation() throws RcsPermissionDeniedException,
+            RcsGenericException;
 
     /**
      * Rejects session invitation
      * 
-     * @throws RcsServiceException
+     * @throws RcsPermissionDeniedException
+     * @throws RcsGenericException
      */
-    public abstract void rejectInvitation() throws RcsServiceException;
+    public abstract void rejectInvitation() throws RcsPermissionDeniedException,
+            RcsGenericException;
 
     /**
      * Aborts the session
      * 
-     * @throws RcsServiceException
+     * @throws RcsPermissionDeniedException
+     * @throws RcsGenericException
      */
-    public abstract void abortSession() throws RcsServiceException;
+    public abstract void abortSession() throws RcsPermissionDeniedException, RcsGenericException;
 }

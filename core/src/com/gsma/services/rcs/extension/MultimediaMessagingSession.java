@@ -25,9 +25,7 @@ package com.gsma.services.rcs.extension;
 import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsIllegalArgumentException;
 import com.gsma.services.rcs.RcsPermissionDeniedException;
-import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
 
 /**
@@ -56,10 +54,10 @@ public class MultimediaMessagingSession extends MultimediaSession {
     /**
      * Returns the session ID of the multimedia session
      * 
-     * @return Session ID
-     * @throws RcsServiceException
+     * @return String Session ID
+     * @throws RcsGenericException
      */
-    public String getSessionId() throws RcsServiceException {
+    public String getSessionId() throws RcsGenericException {
         try {
             return sessionIntf.getSessionId();
 
@@ -72,9 +70,9 @@ public class MultimediaMessagingSession extends MultimediaSession {
      * Returns the remote contact identifier
      * 
      * @return ContactId
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public ContactId getRemoteContact() throws RcsServiceException {
+    public ContactId getRemoteContact() throws RcsGenericException {
         try {
             return sessionIntf.getRemoteContact();
 
@@ -86,10 +84,10 @@ public class MultimediaMessagingSession extends MultimediaSession {
     /**
      * Returns the service ID
      * 
-     * @return Service ID
-     * @throws RcsServiceException
+     * @return String Service ID
+     * @throws RcsGenericException
      */
-    public String getServiceId() throws RcsServiceException {
+    public String getServiceId() throws RcsGenericException {
         try {
             return sessionIntf.getServiceId();
 
@@ -103,9 +101,9 @@ public class MultimediaMessagingSession extends MultimediaSession {
      * 
      * @return State
      * @see MultimediaSession.State
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public State getState() throws RcsServiceException {
+    public State getState() throws RcsGenericException {
         try {
             return State.valueOf(sessionIntf.getState());
 
@@ -119,9 +117,9 @@ public class MultimediaMessagingSession extends MultimediaSession {
      * 
      * @return ReasonCode
      * @see MultimediaSession.ReasonCode
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public ReasonCode getReasonCode() throws RcsServiceException {
+    public ReasonCode getReasonCode() throws RcsGenericException {
         try {
             return ReasonCode.valueOf(sessionIntf.getReasonCode());
 
@@ -135,9 +133,9 @@ public class MultimediaMessagingSession extends MultimediaSession {
      * 
      * @return Direction
      * @see Direction
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public Direction getDirection() throws RcsServiceException {
+    public Direction getDirection() throws RcsGenericException {
         try {
             return Direction.valueOf(sessionIntf.getDirection());
 
@@ -149,9 +147,10 @@ public class MultimediaMessagingSession extends MultimediaSession {
     /**
      * Accepts session invitation.
      * 
-     * @throws RcsServiceException
+     * @throws RcsPermissionDeniedException
+     * @throws RcsGenericException
      */
-    public void acceptInvitation() throws RcsServiceException {
+    public void acceptInvitation() throws RcsPermissionDeniedException, RcsGenericException {
         try {
             sessionIntf.acceptInvitation();
         } catch (Exception e) {
@@ -163,9 +162,10 @@ public class MultimediaMessagingSession extends MultimediaSession {
     /**
      * Rejects session invitation
      * 
-     * @throws RcsServiceException
+     * @throws RcsPermissionDeniedException
+     * @throws RcsGenericException
      */
-    public void rejectInvitation() throws RcsServiceException {
+    public void rejectInvitation() throws RcsPermissionDeniedException, RcsGenericException {
         try {
             sessionIntf.rejectInvitation();
         } catch (Exception e) {
@@ -177,9 +177,10 @@ public class MultimediaMessagingSession extends MultimediaSession {
     /**
      * Aborts the session
      * 
-     * @throws RcsServiceException
+     * @throws RcsPermissionDeniedException
+     * @throws RcsGenericException
      */
-    public void abortSession() throws RcsServiceException {
+    public void abortSession() throws RcsPermissionDeniedException, RcsGenericException {
         try {
             sessionIntf.abortSession();
         } catch (Exception e) {
@@ -192,9 +193,11 @@ public class MultimediaMessagingSession extends MultimediaSession {
      * Sends a message in real time
      * 
      * @param content Message content
-     * @throws RcsServiceException
+     * @throws RcsPermissionDeniedException
+     * @throws RcsGenericException
      */
-    public void sendMessage(byte[] content) throws RcsServiceException {
+    public void sendMessage(byte[] content) throws RcsPermissionDeniedException,
+            RcsGenericException {
         try {
             sessionIntf.sendMessage(content);
         } catch (Exception e) {

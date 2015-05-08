@@ -25,7 +25,6 @@ package com.gsma.services.rcs.extension;
 import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsIllegalArgumentException;
 import com.gsma.services.rcs.RcsPermissionDeniedException;
-import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsServiceControl;
 import com.gsma.services.rcs.RcsServiceException;
@@ -153,10 +152,12 @@ public final class MultimediaSessionService extends RcsService {
     /**
      * Returns the configuration of the multimedia session service
      * 
-     * @return Configuration
-     * @throws RcsServiceException
+     * @return MultimediaSessionServiceConfiguration
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public MultimediaSessionServiceConfiguration getConfiguration() throws RcsServiceException {
+    public MultimediaSessionServiceConfiguration getConfiguration()
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -177,11 +178,15 @@ public final class MultimediaSessionService extends RcsService {
      * 
      * @param serviceId Service ID
      * @param contact Contact identifier
-     * @return Multimedia messaging session
-     * @throws RcsServiceException
+     * @return MultimediaMessagingSession
+     * @throws RcsServiceNotRegisteredException
+     * @throws RcsPermissionDeniedException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     public MultimediaMessagingSession initiateMessagingSession(String serviceId, ContactId contact)
-            throws RcsServiceException {
+            throws RcsServiceNotRegisteredException, RcsPermissionDeniedException,
+            RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -198,7 +203,6 @@ public final class MultimediaSessionService extends RcsService {
             RcsIllegalArgumentException.assertException(e);
             RcsServiceNotRegisteredException.assertException(e);
             RcsPermissionDeniedException.assertException(e);
-            RcsPersistentStorageException.assertException(e);
             throw new RcsGenericException(e);
         }
     }
@@ -207,11 +211,12 @@ public final class MultimediaSessionService extends RcsService {
      * Returns the list of messaging sessions associated to a given service ID
      * 
      * @param serviceId Service ID
-     * @return List of messaging sessions
-     * @throws RcsServiceException
+     * @return Set&lt;MultimediaMessagingSession&gt; List of messaging sessions
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     public Set<MultimediaMessagingSession> getMessagingSessions(String serviceId)
-            throws RcsServiceException {
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -235,11 +240,12 @@ public final class MultimediaSessionService extends RcsService {
      * Returns a current messaging session from its unique session ID
      * 
      * @param sessionId
-     * @return Multimedia messaging session or null if not found
-     * @throws RcsServiceException
+     * @return MultimediaMessagingSession Multimedia messaging session or null if not found
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     public MultimediaMessagingSession getMessagingSession(String sessionId)
-            throws RcsServiceException {
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -266,11 +272,15 @@ public final class MultimediaSessionService extends RcsService {
      * 
      * @param serviceId Service ID
      * @param contact Contact ID
-     * @return Multimedia streaming session
-     * @throws RcsServiceException
+     * @return MultimediaStreamingSession
+     * @throws RcsServiceNotRegisteredException
+     * @throws RcsPermissionDeniedException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     public MultimediaStreamingSession initiateStreamingSession(String serviceId, ContactId contact)
-            throws RcsServiceException {
+            throws RcsServiceNotRegisteredException, RcsPermissionDeniedException,
+            RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -287,7 +297,6 @@ public final class MultimediaSessionService extends RcsService {
             RcsIllegalArgumentException.assertException(e);
             RcsServiceNotRegisteredException.assertException(e);
             RcsPermissionDeniedException.assertException(e);
-            RcsPersistentStorageException.assertException(e);
             throw new RcsGenericException(e);
         }
     }
@@ -296,11 +305,12 @@ public final class MultimediaSessionService extends RcsService {
      * Returns the list of streaming sessions associated to a given service ID
      * 
      * @param serviceId Service ID
-     * @return List of streaming sessions
-     * @throws RcsServiceException
+     * @return Set&lt;MultimediaStreamingSession&gt; List of streaming sessions
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     public Set<MultimediaStreamingSession> getStreamingSessions(String serviceId)
-            throws RcsServiceException {
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -324,11 +334,12 @@ public final class MultimediaSessionService extends RcsService {
      * Returns a current streaming session from its unique session ID
      * 
      * @param sessionId
-     * @return Multimedia streaming session or null if not found
-     * @throws RcsServiceException
+     * @return MultimediaStreamingSession Multimedia streaming session or null if not found
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     public MultimediaStreamingSession getStreamingSession(String sessionId)
-            throws RcsServiceException {
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -350,10 +361,11 @@ public final class MultimediaSessionService extends RcsService {
      * Adds a listener on multimedia messaging session events
      * 
      * @param listener Session event listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     public void addEventListener(MultimediaMessagingSessionListener listener)
-            throws RcsServiceException {
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -374,10 +386,11 @@ public final class MultimediaSessionService extends RcsService {
      * Removes a listener on multimedia messaging session events
      * 
      * @param listener Session event listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     public void removeEventListener(MultimediaMessagingSessionListener listener)
-            throws RcsServiceException {
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -401,10 +414,11 @@ public final class MultimediaSessionService extends RcsService {
      * Adds a listener on multimedia streaming session events
      * 
      * @param listener Session event listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     public void addEventListener(MultimediaStreamingSessionListener listener)
-            throws RcsServiceException {
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -425,10 +439,11 @@ public final class MultimediaSessionService extends RcsService {
      * Removes a listener on multimedia streaming session events
      * 
      * @param listener Session event listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     public void removeEventListener(MultimediaStreamingSessionListener listener)
-            throws RcsServiceException {
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }

@@ -23,7 +23,6 @@
 package com.gsma.services.rcs.extension;
 
 import com.gsma.services.rcs.RcsGenericException;
-import com.gsma.services.rcs.RcsServiceException;
 
 /**
  * Multimedia session configuration
@@ -48,10 +47,10 @@ public class MultimediaSessionServiceConfiguration {
     /**
      * Return maximum length of a multimedia message
      * 
-     * @return Number of bytes
-     * @throws RcsServiceException
+     * @return int Number of bytes
+     * @throws RcsGenericException
      */
-    public int getMessageMaxLength() throws RcsServiceException {
+    public int getMessageMaxLength() throws RcsGenericException {
         try {
             return mIConfig.getMessageMaxLength();
 
