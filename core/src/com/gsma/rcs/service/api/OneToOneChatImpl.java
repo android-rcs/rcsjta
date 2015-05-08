@@ -383,6 +383,14 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         if (TextUtils.isEmpty(message)) {
             throw new ServerApiIllegalArgumentException("message must not be null or empty!");
         }
+        int messageLength = message.length();
+        int maxMessageLength = mRcsSettings.getMaxChatMessageLength();
+        if (messageLength > maxMessageLength) {
+            throw new ServerApiIllegalArgumentException(new StringBuilder()
+                    .append("chat message length: ").append(messageLength)
+                    .append(" exeeds max chat message length: ").append(maxMessageLength)
+                    .append("!").toString());
+        }
         if (logger.isActivated()) {
             logger.debug("Send text message.");
         }

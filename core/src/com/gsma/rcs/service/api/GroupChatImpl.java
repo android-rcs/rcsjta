@@ -1026,6 +1026,14 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             throw new ServerApiIllegalArgumentException(
                     "GroupChat message must not be null or empty!");
         }
+        int messageLength = text.length();
+        int maxMessageLength = mRcsSettings.getMaxGroupChatMessageLength();
+        if (messageLength > maxMessageLength) {
+            throw new ServerApiIllegalArgumentException(new StringBuilder()
+                    .append("chat message length: ").append(messageLength)
+                    .append(" exeeds max group chat message length: ").append(maxMessageLength)
+                    .append("!").toString());
+        }
         if (!isAllowedToSendMessage()) {
             throw new ServerApiPermissionDeniedException(
                     "Not allowed to send GroupChat message on the connected IMS server!");
