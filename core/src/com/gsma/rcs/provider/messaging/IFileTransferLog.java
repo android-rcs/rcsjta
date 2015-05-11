@@ -291,30 +291,6 @@ public interface IFileTransferLog {
     public void dequeueFileTransfer(String fileTransferId, long timestamp, long timestampSent);
 
     /**
-     * Get queued group file transfers
-     * 
-     * @param chatId
-     * @return Cursor
-     */
-    public Cursor getQueuedGroupFileTransfers(String chatId);
-
-    /**
-     * Get queued one-one file transfers
-     * 
-     * @param contact
-     * @return Cursor
-     */
-    public Cursor getQueuedOneToOneFileTransfers(ContactId contact);
-
-    /**
-     * Get file transfer Upload Tid
-     * 
-     * @param fileTransferId
-     * @return Tid
-     */
-    public String getFileTransferUploadTid(String fileTransferId);
-
-    /**
      * Get interrupted file transfers
      * 
      * @return

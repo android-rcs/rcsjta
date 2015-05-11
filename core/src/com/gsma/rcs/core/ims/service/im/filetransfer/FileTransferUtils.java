@@ -52,7 +52,6 @@ import org.xml.sax.InputSource;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -113,9 +112,9 @@ public class FileTransferUtils {
             // Recreate the new bitmap
             Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
 
-            // Compress the file to be under the limit (10KBytes)
+            // Compress the file to be under the limit
             int quality = 90;
-            int maxSize = 1024 * 10;
+            long maxSize = rcsSettings.getMaxFileIconSize();
             while (size > maxSize) {
                 out = new ByteArrayOutputStream();
                 resizedBitmap.compress(CompressFormat.JPEG, quality, out);

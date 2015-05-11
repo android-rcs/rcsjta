@@ -16,6 +16,7 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.service.api.OneToOneUndeliveredImManager;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.logger.Logger;
@@ -50,7 +51,6 @@ public class RecreateDeliveryExpirationAlarms implements Runnable {
             synchronized (mLock) {
                 long currentTime = System.currentTimeMillis();
                 cursor = mMessagingLog.getUndeliveredOneToOneChatMessages();
-                /* TODO: Handle cursor when null. */
                 int msgIdIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_MESSAGE_ID);
                 int chatMessageContactIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_CONTACT);
                 int chatMessageDeliveryExpirationIdx = cursor
@@ -69,10 +69,10 @@ public class RecreateDeliveryExpirationAlarms implements Runnable {
                                 msgId);
                     }
                 }
-                cursor.close();
+                CursorUtil.close(cursor);
 
                 cursor = mMessagingLog.getUnDeliveredOneToOneFileTransfers();
-                /* TODO: Handle cursor when null. */
+
                 int fileTransferIdIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FT_ID);
                 int fileTransferContactIdx = cursor
                         .getColumnIndexOrThrow(FileTransferData.KEY_CONTACT);
@@ -101,9 +101,7 @@ public class RecreateDeliveryExpirationAlarms implements Runnable {
                     "Exception occured while recreating delivery expiration alarms for one-to-one chat message and one-to-one file transfer ",
                     e);
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 }

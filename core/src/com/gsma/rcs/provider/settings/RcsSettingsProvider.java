@@ -121,10 +121,12 @@ public class RcsSettingsProvider extends ContentProvider {
                     RcsSettingsData.DEFAULT_CHAT_RESPOND_TO_DISPLAY_REPORTS);
             addParameter(db, RcsSettingsData.MIN_BATTERY_LEVEL,
                     RcsSettingsData.DEFAULT_MIN_BATTERY_LEVEL);
+            addParameter(db, RcsSettingsData.MAX_FILE_ICON_SIZE,
+                    RcsSettingsData.DEFAULT_MAX_FILE_ICON_SIZE);
             addParameter(db, RcsSettingsData.MAX_PHOTO_ICON_SIZE,
                     RcsSettingsData.DEFAULT_MAX_PHOTO_ICON_SIZE);
             addParameter(db, RcsSettingsData.MAX_FREETXT_LENGTH,
-                    RcsSettingsData.DEFAULT_MAX_PHOTO_ICON_SIZE);
+                    RcsSettingsData.DEFAULT_MAX_FREETXT_LENGTH);
             addParameter(db, RcsSettingsData.MAX_GEOLOC_LABEL_LENGTH,
                     RcsSettingsData.DEFAULT_MAX_GEOLOC_LABEL_LENGTH);
             addParameter(db, RcsSettingsData.GEOLOC_EXPIRATION_TIME,

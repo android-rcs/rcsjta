@@ -292,24 +292,6 @@ public class RichCallHistory {
                 Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId), values, null, null) > 0;
     }
 
-    /**
-     * Update the video sharing duration at the end of the call
-     * 
-     * @param sharingId
-     * @param duration Duration
-     * @return true if updated
-     */
-    public boolean setVideoSharingDuration(String sharingId, long duration) {
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Update duration of sharing ").append(sharingId)
-                    .append(" to ").append(duration).toString());
-        }
-        ContentValues values = new ContentValues();
-        values.put(VideoSharingData.KEY_DURATION, duration);
-        return mLocalContentResolver.update(
-                Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId), values, null, null) > 0;
-    }
-
     /*--------------------- Image sharing update / add methods ----------------------*/
 
     /**

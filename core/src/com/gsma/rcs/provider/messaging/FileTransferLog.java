@@ -71,14 +71,6 @@ public class FileTransferLog implements IFileTransferLog {
     private static final String SELECTION_BY_QUEUED_FILE_TRANSFERS = new StringBuilder(
             FileTransferData.KEY_STATE).append("=").append(State.QUEUED.toInt()).toString();
 
-    private static final String SELECTION_BY_QUEUED_GROUP_FILE_TRANSFERS = new StringBuilder(
-            FileTransferData.KEY_CHAT_ID).append("=? AND ")
-            .append(SELECTION_BY_QUEUED_FILE_TRANSFERS).toString();
-
-    private static final String SELECTION_BY_QUEUED_ONETOONE_FILE_TRANSFERS = new StringBuilder(
-            FileTransferData.KEY_CONTACT).append("=? AND ")
-            .append(SELECTION_BY_QUEUED_FILE_TRANSFERS).toString();
-
     private static final String SELECTION_BY_INTERRUPTED_FILE_TRANSFERS = new StringBuilder(
             FileTransferData.KEY_STATE).append(" IN ('").append(State.STARTED.toInt())
             .append("','").append(State.INVITED.toInt()).append("','")
@@ -692,15 +684,6 @@ public class FileTransferLog implements IFileTransferLog {
     }
 
     @Override
-    public String getFileTransferUploadTid(String fileTransferId) {
-        Cursor cursor = getFileTransferData(FileTransferData.KEY_UPLOAD_TID, fileTransferId);
-        if (cursor == null) {
-            return null;
-        }
-        return getDataAsString(cursor);
-    }
-
-    @Override
     public Boolean isFileTransferExpiredDelivery(String fileTransferId) {
         Cursor cursor = getFileTransferData(FileTransferData.KEY_EXPIRED_DELIVERY, fileTransferId);
         if (cursor == null) {
@@ -811,28 +794,6 @@ public class FileTransferLog implements IFileTransferLog {
         mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
                 null);
-    }
-
-    @Override
-    public Cursor getQueuedGroupFileTransfers(String chatId) {
-        String[] selectionArgs = new String[] {
-            chatId
-        };
-        Cursor cursor = mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
-                SELECTION_BY_QUEUED_GROUP_FILE_TRANSFERS, selectionArgs, ORDER_BY_TIMESTAMP_ASC);
-        CursorUtil.assertCursorIsNotNull(cursor, FileTransferData.CONTENT_URI);
-        return cursor;
-    }
-
-    @Override
-    public Cursor getQueuedOneToOneFileTransfers(ContactId contact) {
-        String[] selectionArgs = new String[] {
-            contact.toString()
-        };
-        Cursor cursor = mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
-                SELECTION_BY_QUEUED_ONETOONE_FILE_TRANSFERS, selectionArgs, ORDER_BY_TIMESTAMP_ASC);
-        CursorUtil.assertCursorIsNotNull(cursor, FileTransferData.CONTENT_URI);
-        return cursor;
     }
 
     @Override

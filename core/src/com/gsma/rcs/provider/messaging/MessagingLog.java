@@ -495,29 +495,6 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    /* TODO: Check if really dead code or someone is missing to call this. */
-    public Cursor getQueuedGroupChatMessages(String chatId) {
-        return mMessageLog.getQueuedGroupChatMessages(chatId);
-    }
-
-    @Override
-    /* TODO: Check if really dead code or someone is missing calling it. */
-    public Cursor getQueuedGroupFileTransfers(String chatId) {
-        return mFileTransferLog.getQueuedGroupFileTransfers(chatId);
-    }
-
-    @Override
-    /* TODO: Check if really dead code or someone is missing to call this. */
-    public Cursor getQueuedOneToOneFileTransfers(ContactId contact) {
-        return mFileTransferLog.getQueuedOneToOneFileTransfers(contact);
-    }
-
-    @Override
-    public String getFileTransferUploadTid(String fileTransferId) {
-        return mFileTransferLog.getFileTransferUploadTid(fileTransferId);
-    }
-
-    @Override
     public Cursor getInterruptedFileTransfers() {
         return mFileTransferLog.getInterruptedFileTransfers();
     }

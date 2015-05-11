@@ -225,14 +225,6 @@ public interface IMessageLog {
     public void dequeueChatMessage(ChatMessage message);
 
     /**
-     * Get queued group chat messages
-     * 
-     * @param chatId
-     * @return Cursor
-     */
-    public Cursor getQueuedGroupChatMessages(String chatId);
-
-    /**
      * Gets group chat events per contacts for chat ID
      * 
      * @param chatId

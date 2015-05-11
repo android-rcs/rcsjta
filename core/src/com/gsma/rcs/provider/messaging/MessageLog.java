@@ -85,10 +85,6 @@ public class MessageLog implements IMessageLog {
             MessageData.KEY_CHAT_ID).append("=? AND ").append(MessageData.KEY_STATUS).append("=")
             .append(Status.QUEUED.toInt()).toString();
 
-    private static final String SELECTION_QUEUED_GROUP_CHAT_MESSAGES = new StringBuilder(
-            MessageData.KEY_CHAT_ID).append("=? AND ").append(MessageData.KEY_STATUS).append("=")
-            .append(Status.QUEUED.toInt()).toString();
-
     private static final String SELECTION_BY_MULTIPLE_MSG_IDS = new StringBuilder(
             MessageData.KEY_MESSAGE_ID).append(" IN(").append("=?)").toString();
 
@@ -598,17 +594,6 @@ public class MessageLog implements IMessageLog {
         mLocalContentResolver.update(
                 Uri.withAppendedPath(MessageData.CONTENT_URI, message.getMessageId()), values,
                 null, null);
-    }
-
-    @Override
-    public Cursor getQueuedGroupChatMessages(String chatId) {
-        String[] selectionArgs = new String[] {
-            chatId
-        };
-        Cursor cursor = mLocalContentResolver.query(MessageData.CONTENT_URI, null,
-                SELECTION_QUEUED_GROUP_CHAT_MESSAGES, selectionArgs, ORDER_BY_TIMESTAMP_ASC);
-        CursorUtil.assertCursorIsNotNull(cursor, MessageData.CONTENT_URI);
-        return cursor;
     }
 
     @Override

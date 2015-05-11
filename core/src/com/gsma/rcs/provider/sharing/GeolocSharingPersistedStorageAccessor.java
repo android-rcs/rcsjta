@@ -159,11 +159,6 @@ public class GeolocSharingPersistedStorageAccessor {
         return mRichCallLog.setGeolocSharingStateAndReasonCode(mSharingId, state, reasonCode);
     }
 
-    public boolean setTransferred(Geoloc geoloc) {
-        mGeoloc = geoloc;
-        return mRichCallLog.setGeolocSharingTransferred(mSharingId, geoloc);
-    }
-
     public void addIncomingGeolocSharing(ContactId contact, State state, ReasonCode reasonCode,
             long timestamp) {
         mContact = contact;
