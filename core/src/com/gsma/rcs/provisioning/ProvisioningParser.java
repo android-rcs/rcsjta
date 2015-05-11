@@ -1831,21 +1831,24 @@ public class ProvisioningParser {
 
                 if (timert1 == null) {
                     if ((timert1 = getValueByParamName("Timer_T1", childnode, TYPE_INT)) != null) {
-                        mRcsSettings.writeLong(RcsSettingsData.SIP_TIMER_T1, Long.getLong(timert1));
+                        mRcsSettings.writeLong(RcsSettingsData.SIP_TIMER_T1,
+                                Long.parseLong(timert1));
                         continue;
                     }
                 }
 
                 if (timert2 == null) {
                     if ((timert2 = getValueByParamName("Timer_T2", childnode, TYPE_INT)) != null) {
-                        mRcsSettings.writeLong(RcsSettingsData.SIP_TIMER_T2, Long.getLong(timert2));
+                        mRcsSettings.writeLong(RcsSettingsData.SIP_TIMER_T2,
+                                Long.parseLong(timert2));
                         continue;
                     }
                 }
 
                 if (timert4 == null) {
                     if ((timert4 = getValueByParamName("Timer_T4", childnode, TYPE_INT)) != null) {
-                        mRcsSettings.writeLong(RcsSettingsData.SIP_TIMER_T4, Long.getLong(timert4));
+                        mRcsSettings.writeLong(RcsSettingsData.SIP_TIMER_T4,
+                                Long.parseLong(timert4));
                         continue;
                     }
                 }
