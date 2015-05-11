@@ -22,9 +22,9 @@
 
 package com.gsma.services.rcs;
 
-import android.util.SparseArray;
-
 import com.gsma.services.rcs.contact.ContactId;
+
+import android.util.SparseArray;
 
 /**
  * This class represents the common configuration of RCS Services
@@ -228,10 +228,10 @@ public class CommonServiceConfiguration {
     /**
      * Returns True if RCS configuration is valid.
      * 
-     * @return True if RCS configuration is valid.
-     * @throws RcsServiceException
+     * @return boolean True if RCS configuration is valid.
+     * @throws RcsGenericException
      */
-    public boolean isConfigValid() throws RcsServiceException {
+    public boolean isConfigValid() throws RcsGenericException {
         try {
             return mIConfig.isConfigValid();
 
@@ -244,10 +244,10 @@ public class CommonServiceConfiguration {
      * Returns the display name associated to the RCS user account.<br>
      * The display name may be updated by the end user via the RCS settings application.
      * 
-     * @return Display name
-     * @throws RcsServiceException
+     * @return String Display name
+     * @throws RcsGenericException
      */
-    public String getMyDisplayName() throws RcsServiceException {
+    public String getMyDisplayName() throws RcsGenericException {
         try {
             return mIConfig.getMyDisplayName();
 
@@ -260,9 +260,11 @@ public class CommonServiceConfiguration {
      * Sets the display name associated to the RCS user account.
      * 
      * @param name the new display name
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public void setMyDisplayName(String name) throws RcsServiceException {
+    public void setMyDisplayName(String name) throws RcsPersistentStorageException,
+            RcsGenericException {
         try {
             mIConfig.setMyDisplayName(name);
         } catch (Exception e) {
@@ -275,10 +277,10 @@ public class CommonServiceConfiguration {
     /**
      * Returns the user contact Identifier (i.e. username part of the IMPU).
      * 
-     * @return the contact ID
-     * @throws RcsServiceException
+     * @return ContactId the contact ID
+     * @throws RcsGenericException
      */
-    public ContactId getMyContactId() throws RcsServiceException {
+    public ContactId getMyContactId() throws RcsGenericException {
         try {
             return mIConfig.getMyContactId();
 
@@ -290,10 +292,10 @@ public class CommonServiceConfiguration {
     /**
      * Returns the messaging client mode which can be INTEGRATED, CONVERGED, SEAMLESS or NONE.
      * 
-     * @return the messaging client mode
-     * @throws RcsServiceException
+     * @return MessagingMode the messaging client mode
+     * @throws RcsGenericException
      */
-    public MessagingMode getMessagingUX() throws RcsServiceException {
+    public MessagingMode getMessagingUX() throws RcsGenericException {
         try {
             return MessagingMode.valueOf(mIConfig.getMessagingUX());
 
@@ -306,10 +308,10 @@ public class CommonServiceConfiguration {
      * Returns the minimum battery level which can be NEVER_STOP, PERCENT_5, PERCENT_10 or
      * PERCENT_20.
      * 
-     * @return the minimum battery level
-     * @throws RcsServiceException
+     * @return MinimumBatteryLevel the minimum battery level
+     * @throws RcsGenericException
      */
-    public MinimumBatteryLevel getMinimumBatteryLevel() throws RcsServiceException {
+    public MinimumBatteryLevel getMinimumBatteryLevel() throws RcsGenericException {
         try {
             return MinimumBatteryLevel.valueOf(mIConfig.getMinimumBatteryLevel());
 
@@ -323,9 +325,9 @@ public class CommonServiceConfiguration {
      * 
      * @param level the minimum battery level which can be NEVER_STOP, PERCENT_5, PERCENT_10 or
      *            PERCENT_20.
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public void setMinimumBatteryLevel(MinimumBatteryLevel level) throws RcsServiceException {
+    public void setMinimumBatteryLevel(MinimumBatteryLevel level) throws RcsGenericException {
         try {
             mIConfig.setMinimumBatteryLevel(level.toInt());
         } catch (Exception e) {
@@ -336,10 +338,10 @@ public class CommonServiceConfiguration {
     /**
      * Returns the default messaging method which can be AUTOMATIC, RCS or NON_RCS.
      * 
-     * @return the default messaging method
-     * @throws RcsServiceException
+     * @return MessagingMethod the default messaging method
+     * @throws RcsGenericException
      */
-    public MessagingMethod getDefaultMessagingMethod() throws RcsServiceException {
+    public MessagingMethod getDefaultMessagingMethod() throws RcsGenericException {
         try {
             return MessagingMethod.valueOf(mIConfig.getDefaultMessagingMethod());
 
@@ -352,9 +354,9 @@ public class CommonServiceConfiguration {
      * Sets the default messaging method.
      * 
      * @param method the default messaging method which can be AUTOMATIC, RCS or NON_RCS.
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public void setDefaultMessagingMethod(MessagingMethod method) throws RcsServiceException {
+    public void setDefaultMessagingMethod(MessagingMethod method) throws RcsGenericException {
         try {
             mIConfig.setDefaultMessagingMethod(method.toInt());
         } catch (Exception e) {

@@ -22,14 +22,14 @@
 
 package com.gsma.services.rcs;
 
+import android.content.Context;
+import android.os.IInterface;
+import android.util.SparseArray;
+
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.WeakHashMap;
-
-import android.content.Context;
-import android.os.IInterface;
-import android.util.SparseArray;
 
 /**
  * Abstract RCS service
@@ -242,10 +242,12 @@ public abstract class RcsService {
      * @param param Parameters of the method
      * @param paramClass Class of the parameter passed
      * @return Object
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     private Object callApiMethod(String method, Object param,
-            Class<IRcsServiceRegistrationListener> paramClass) throws RcsServiceException {
+            Class<IRcsServiceRegistrationListener> paramClass)
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -296,11 +298,12 @@ public abstract class RcsService {
     /**
      * Returns service version
      * 
-     * @return Version
+     * @return int Version
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      * @see Build.VERSION_CODES
-     * @throws RcsServiceException
      */
-    public int getServiceVersion() throws RcsServiceException {
+    public int getServiceVersion() throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -319,10 +322,12 @@ public abstract class RcsService {
     /**
      * Returns true if the service is registered to the platform, else returns false
      * 
-     * @return Returns true if registered else returns false
-     * @throws RcsServiceException
+     * @return boolean true if registered else returns false
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public boolean isServiceRegistered() throws RcsServiceException {
+    public boolean isServiceRegistered() throws RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -338,10 +343,11 @@ public abstract class RcsService {
      * Returns the reason code for the service registration
      * 
      * @return RcsServiceRegistration.ReasonCode
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     public RcsServiceRegistration.ReasonCode getServiceRegistrationReasonCode()
-            throws RcsServiceException {
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -358,10 +364,11 @@ public abstract class RcsService {
      * Adds a listener on service registration events
      * 
      * @param listener Service registration listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     public void addEventListener(RcsServiceRegistrationListener listener)
-            throws RcsServiceException {
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -380,10 +387,11 @@ public abstract class RcsService {
      * Removes a listener on service registration events
      * 
      * @param listener Service registration listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     public void removeEventListener(RcsServiceRegistrationListener listener)
-            throws RcsServiceException {
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -406,10 +414,12 @@ public abstract class RcsService {
     /**
      * Returns the configuration that is common for all the service APIs
      * 
-     * @return the CommonServiceConfiguration instance
-     * @throws RcsServiceException
+     * @return CommonServiceConfiguration instance
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public CommonServiceConfiguration getCommonConfiguration() throws RcsServiceException {
+    public CommonServiceConfiguration getCommonConfiguration()
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }

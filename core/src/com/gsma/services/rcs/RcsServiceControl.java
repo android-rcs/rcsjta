@@ -71,7 +71,7 @@ public class RcsServiceControl {
      * Gets an instance of RcsServiceControl
      * 
      * @param ctx
-     * @return the singleton instance
+     * @return RcsServiceControl the singleton instance
      */
     public static RcsServiceControl getInstance(Context ctx) {
         if (sInstance != null) {
@@ -236,7 +236,7 @@ public class RcsServiceControl {
     /**
      * Returns true if the RCS stack is installed and not disabled on the device.
      * 
-     * @return true if the RCS stack is installed and not disabled on the device.
+     * @return boolean true if the RCS stack is installed and not disabled on the device.
      */
     public boolean isAvailable() {
         try {
@@ -251,7 +251,7 @@ public class RcsServiceControl {
     /**
      * Returns true if the RCS stack de-activation/activation is allowed by the client.
      * 
-     * @return true if the RCS stack de-activation/activation is allowed by the client.
+     * @return boolean true if the RCS stack de-activation/activation is allowed by the client.
      * @throws RcsServiceException
      */
     public boolean isActivationModeChangeable() throws RcsServiceException {
@@ -267,7 +267,7 @@ public class RcsServiceControl {
     /**
      * Returns true if the RCS stack is marked as active on the device.
      * 
-     * @return true if the RCS stack is marked as active on the device.
+     * @return boolean true if the RCS stack is marked as active on the device.
      * @throws RcsServiceException
      */
     public boolean isActivated() throws RcsServiceException {
@@ -312,7 +312,8 @@ public class RcsServiceControl {
      * Returns true if the client RCS API and core RCS stack are compatible for the given service.
      * 
      * @param service the RCS service
-     * @return true if the client RCS stack and RCS API are compatible for the given service.
+     * @return boolean true if the client RCS stack and RCS API are compatible for the given
+     *         service.
      * @throws RcsServiceException
      * @hide
      */
