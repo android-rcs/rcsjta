@@ -1146,9 +1146,9 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
     }
 
     private void setStateAndReasonCode(ContactId contact, State state, ReasonCode reasonCode) {
-        mPersistentStorage.setStateAndReasonCode(state, reasonCode);
-        mBroadcaster.broadcastStateChanged(contact, mFileTransferId, state, reasonCode);
-
+        if (mPersistentStorage.setStateAndReasonCode(state, reasonCode)) {
+            mBroadcaster.broadcastStateChanged(contact, mFileTransferId, state, reasonCode);
+        }
     }
 
     private void handleSessionRejected(ReasonCode reasonCode, ContactId contact) {
@@ -1271,9 +1271,10 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
      */
     public void handleTransferProgress(ContactId contact, long currentSize, long totalSize) {
         synchronized (mLock) {
-            mPersistentStorage.setProgress(currentSize);
-
-            mBroadcaster.broadcastProgressUpdate(contact, mFileTransferId, currentSize, totalSize);
+            if (mPersistentStorage.setProgress(currentSize)) {
+                mBroadcaster.broadcastProgressUpdate(contact, mFileTransferId, currentSize,
+                        totalSize);
+            }
         }
     }
 
@@ -1316,11 +1317,11 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                             mFileTransferId, deliveryExpiration);
                 }
             }
-            mPersistentStorage.setTransferred(content, fileExpiration, fileIconExpiration,
-                    deliveryExpiration);
-
-            mBroadcaster.broadcastStateChanged(contact, mFileTransferId, State.TRANSFERRED,
-                    ReasonCode.UNSPECIFIED);
+            if (mPersistentStorage.setTransferred(content, fileExpiration, fileIconExpiration,
+                    deliveryExpiration)) {
+                mBroadcaster.broadcastStateChanged(contact, mFileTransferId, State.TRANSFERRED,
+                        ReasonCode.UNSPECIFIED);
+            }
         }
         mCore.getListener().tryToDequeueFileTransfers(mImService);
     }

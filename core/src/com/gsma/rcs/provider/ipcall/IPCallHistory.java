@@ -168,9 +168,9 @@ public class IPCallHistory {
      * @param callId Call ID
      * @param state New state
      * @param reasonCode Reason code
-     * @return the number of updated rows
+     * @return True if updated
      */
-    public int setCallStateAndReasonCode(String callId, State state, ReasonCode reasonCode) {
+    public boolean setCallStateAndReasonCode(String callId, State state, ReasonCode reasonCode) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("Update call state of call ").append(callId)
                     .append(" state=").append(state).append(", reasonCode=").append(reasonCode)
@@ -181,7 +181,7 @@ public class IPCallHistory {
         values.put(IPCallData.KEY_STATE, state.toInt());
         values.put(IPCallData.KEY_REASON_CODE, reasonCode.toInt());
         return mLocalContentResolver.update(Uri.withAppendedPath(IPCallData.CONTENT_URI, callId),
-                values, null, null);
+                values, null, null) > 0;
     }
 
     /**

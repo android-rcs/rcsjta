@@ -144,8 +144,8 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
      * @param msgId Message ID
      * @param timestampDelivered Time for delivery
      */
-    public void setGroupChatDeliveryInfoDelivered(String chatId, ContactId contact, String msgId,
-            long timestampDelivered) {
+    public boolean setGroupChatDeliveryInfoDelivered(String chatId, ContactId contact,
+            String msgId, long timestampDelivered) {
         GroupDeliveryInfo.Status status = GroupDeliveryInfo.Status.DELIVERED;
         GroupDeliveryInfo.ReasonCode reason = GroupDeliveryInfo.ReasonCode.UNSPECIFIED;
 
@@ -166,18 +166,12 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
             addGroupChatDeliveryInfoEntry(chatId, contact, msgId, status, reason,
                     timestampDelivered, 0);
         }
+        return true;
     }
 
-    /**
-     * Set outgoing group chat message or file to displayed
-     * 
-     * @param chatId Group chat ID
-     * @param contact The contact ID for which the entry is to be updated
-     * @param msgId Message ID
-     * @param timestampDisplayed Time for display
-     */
-    public void setGroupChatDeliveryInfoDisplayed(String chatId, ContactId contact, String msgId,
-            long timestampDisplayed) {
+    @Override
+    public boolean setGroupChatDeliveryInfoDisplayed(String chatId, ContactId contact,
+            String msgId, long timestampDisplayed) {
         ContentValues values = new ContentValues();
         GroupDeliveryInfo.Status status = GroupDeliveryInfo.Status.DISPLAYED;
         GroupDeliveryInfo.ReasonCode reason = GroupDeliveryInfo.ReasonCode.UNSPECIFIED;
@@ -199,5 +193,6 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
             addGroupChatDeliveryInfoEntry(chatId, contact, msgId, status, reason,
                     timestampDisplayed, timestampDisplayed);
         }
+        return true;
     }
 }

@@ -100,6 +100,12 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
         }
     }
 
+    private void setStateAndReasonCode(ContactId contact, State state, ReasonCode reasonCode) {
+        if (mPersistentStorage.setStateAndReasonCode(state, reasonCode)) {
+            mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, state, reasonCode);
+        }
+    }
+
     /*
      * TODO: Fix reasoncode mapping in the switch.
      */
@@ -124,10 +130,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 
         synchronized (lock) {
             mIPCallServiceImpl.removeIPCall(mCallId);
-
-            mPersistentStorage.setStateAndReasonCode(State.REJECTED, reasonCode);
-
-            mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, State.REJECTED, reasonCode);
+            setStateAndReasonCode(contact, State.REJECTED, reasonCode);
         }
     }
 
@@ -564,8 +567,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
         }
         synchronized (lock) {
             ReasonCode reasonCode = sessionAbortedReasonToReasonCode(reason);
-            mPersistentStorage.setStateAndReasonCode(State.ABORTED, reasonCode);
-            mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, State.ABORTED, reasonCode);
+            setStateAndReasonCode(contact, State.ABORTED, reasonCode);
             mIPCallServiceImpl.removeIPCall(mCallId);
         }
     }
@@ -579,11 +581,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
         }
         synchronized (lock) {
             mIPCallServiceImpl.removeIPCall(mCallId);
-
-            mPersistentStorage.setStateAndReasonCode(State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
-
-            mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, State.ABORTED,
-                    ReasonCode.ABORTED_BY_REMOTE);
+            setStateAndReasonCode(contact, State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
         }
     }
 
@@ -602,10 +600,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
         ReasonCode reasonCode = stateAndReasonCode.getReasonCode();
         synchronized (lock) {
             mIPCallServiceImpl.removeIPCall(mCallId);
-
-            mPersistentStorage.setStateAndReasonCode(state, reasonCode);
-
-            mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, state, reasonCode);
+            setStateAndReasonCode(contact, state, reasonCode);
         }
     }
 
@@ -684,8 +679,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
         }
         ReasonCode reasonCode = sessionAbortedReasonToReasonCode(reason);
         synchronized (lock) {
-            mPersistentStorage.setStateAndReasonCode(State.ABORTED, reasonCode);
-            mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, State.ABORTED, reasonCode);
+            setStateAndReasonCode(contact, State.ABORTED, reasonCode);
         }
     }
 
@@ -701,8 +695,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
         }
         ReasonCode reasonCode = sessionAbortedReasonToReasonCode(reason);
         synchronized (lock) {
-            mPersistentStorage.setStateAndReasonCode(State.ABORTED, reasonCode);
-            mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, State.ABORTED, reasonCode);
+            setStateAndReasonCode(contact, State.ABORTED, reasonCode);
         }
     }
 
@@ -714,10 +707,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
             logger.info("Call hold");
         }
         synchronized (lock) {
-            mPersistentStorage.setStateAndReasonCode(State.HOLD, ReasonCode.UNSPECIFIED);
-
-            mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, State.HOLD,
-                    ReasonCode.UNSPECIFIED);
+            setStateAndReasonCode(contact, State.HOLD, ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -729,10 +719,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
             logger.info("Call Resume invitation");
         }
         synchronized (lock) {
-            mPersistentStorage.setStateAndReasonCode(State.STARTED, ReasonCode.UNSPECIFIED);
-
-            mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, State.STARTED,
-                    ReasonCode.UNSPECIFIED);
+            setStateAndReasonCode(contact, State.STARTED, ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -836,10 +823,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
         }
 
         synchronized (lock) {
-            mPersistentStorage.setStateAndReasonCode(State.ACCEPTING, ReasonCode.UNSPECIFIED);
-
-            mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, State.ACCEPTING,
-                    ReasonCode.UNSPECIFIED);
+            setStateAndReasonCode(contact, State.ACCEPTING, ReasonCode.UNSPECIFIED);
         }
     }
 

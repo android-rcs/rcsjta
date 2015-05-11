@@ -129,8 +129,9 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     }
 
     private void setStateAndReasonCode(ContactId contact, State state, ReasonCode reasonCode) {
-        mPersistentStorage.setStateAndReasonCode(state, reasonCode);
-        mBroadcaster.broadcastStateChanged(contact, mSharingId, state, reasonCode);
+        if (mPersistentStorage.setStateAndReasonCode(state, reasonCode)) {
+            mBroadcaster.broadcastStateChanged(contact, mSharingId, state, reasonCode);
+        }
     }
 
     private void handleSessionRejected(ReasonCode reasonCode, ContactId contact) {
@@ -603,9 +604,9 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
      */
     public void handleSharingProgress(ContactId contact, long currentSize, long totalSize) {
         synchronized (lock) {
-            mPersistentStorage.setProgress(currentSize);
-
-            mBroadcaster.broadcastProgressUpdate(contact, mSharingId, currentSize, totalSize);
+            if (mPersistentStorage.setProgress(currentSize)) {
+                mBroadcaster.broadcastProgressUpdate(contact, mSharingId, currentSize, totalSize);
+            }
         }
     }
 

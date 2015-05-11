@@ -1045,8 +1045,9 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
     }
 
     private void setStateAndReasonCode(State state, ReasonCode reasonCode) {
-        mPersistentStorage.setStateAndReasonCode(state, reasonCode);
-        mBroadcaster.broadcastStateChanged(mChatId, mFileTransferId, state, reasonCode);
+        if (mPersistentStorage.setStateAndReasonCode(state, reasonCode)) {
+            mBroadcaster.broadcastStateChanged(mChatId, mFileTransferId, state, reasonCode);
+        }
     }
 
     /**
@@ -1145,9 +1146,10 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
      */
     public void handleTransferProgress(ContactId contact, long currentSize, long totalSize) {
         synchronized (mLock) {
-            mPersistentStorage.setProgress(currentSize);
-
-            mBroadcaster.broadcastProgressUpdate(mChatId, mFileTransferId, currentSize, totalSize);
+            if (mPersistentStorage.setProgress(currentSize)) {
+                mBroadcaster.broadcastProgressUpdate(mChatId, mFileTransferId, currentSize,
+                        totalSize);
+            }
         }
     }
 
@@ -1181,10 +1183,11 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         synchronized (mLock) {
             mFileTransferService.removeFileTransfer(mFileTransferId);
             long deliveryExpiration = 0;
-            mPersistentStorage.setTransferred(content, fileExpiration, fileIconExpiration,
-                    deliveryExpiration);
-            mBroadcaster.broadcastStateChanged(mChatId, mFileTransferId, State.TRANSFERRED,
-                    ReasonCode.UNSPECIFIED);
+            if (mPersistentStorage.setTransferred(content, fileExpiration, fileIconExpiration,
+                    deliveryExpiration)) {
+                mBroadcaster.broadcastStateChanged(mChatId, mFileTransferId, State.TRANSFERRED,
+                        ReasonCode.UNSPECIFIED);
+            }
         }
         mCore.getListener().tryToDequeueFileTransfers(mImService);
     }
@@ -1198,10 +1201,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             sLogger.info("Transfer paused by user");
         }
         synchronized (mLock) {
-            mPersistentStorage.setStateAndReasonCode(State.PAUSED, ReasonCode.PAUSED_BY_USER);
-
-            mBroadcaster.broadcastStateChanged(mChatId, mFileTransferId, State.PAUSED,
-                    ReasonCode.PAUSED_BY_USER);
+            setStateAndReasonCode(State.PAUSED, ReasonCode.PAUSED_BY_USER);
         }
     }
 

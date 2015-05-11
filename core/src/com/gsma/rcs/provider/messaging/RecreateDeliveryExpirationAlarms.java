@@ -22,7 +22,6 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.database.Cursor;
-import android.database.SQLException;
 
 public class RecreateDeliveryExpirationAlarms implements Runnable {
 
@@ -94,7 +93,7 @@ public class RecreateDeliveryExpirationAlarms implements Runnable {
                     }
                 }
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             /*
              * Exceptions will be handled better in CR037.
              */

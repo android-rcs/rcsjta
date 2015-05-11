@@ -42,7 +42,6 @@ import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.net.Uri;
 
 import java.util.Collections;
@@ -384,7 +383,8 @@ public class MessageLog implements IMessageLog {
      * @return the number of updated rows
      */
     @Override
-    public int setChatMessageStatusAndReasonCode(String msgId, Status status, ReasonCode reasonCode) {
+    public boolean setChatMessageStatusAndReasonCode(String msgId, Status status,
+            ReasonCode reasonCode) {
         if (sLogger.isActivated()) {
             sLogger.debug(new StringBuilder("Update chat message: msgId=").append(msgId)
                     .append(", status=").append(status).append(", reasonCode=").append(reasonCode)
@@ -402,7 +402,7 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_STATUS, status.toInt());
         values.put(MessageData.KEY_REASON_CODE, reasonCode.toInt());
         return mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
-                values, null, null);
+                values, null, null) > 0;
     }
 
     @Override
@@ -429,7 +429,7 @@ public class MessageLog implements IMessageLog {
         }
     }
 
-    private Cursor getMessageData(String columnName, String msgId) throws SQLException {
+    private Cursor getMessageData(String columnName, String msgId) {
         String[] projection = new String[] {
             columnName
         };
@@ -612,7 +612,7 @@ public class MessageLog implements IMessageLog {
     }
 
     @Override
-    public int setChatMessageTimestamp(String msgId, long timestamp, long timestampSent) {
+    public boolean setChatMessageTimestamp(String msgId, long timestamp, long timestampSent) {
         if (sLogger.isActivated()) {
             sLogger.debug(new StringBuilder("Set chat message timestamp msgId=").append(msgId)
                     .append(", timestamp=").append(timestamp).append(", timestampSent=")
@@ -622,7 +622,7 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_TIMESTAMP, timestamp);
         values.put(MessageData.KEY_TIMESTAMP_SENT, timestampSent);
         return mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
-                values, null, null);
+                values, null, null) > 0;
     }
 
     @Override
@@ -679,7 +679,7 @@ public class MessageLog implements IMessageLog {
     }
 
     @Override
-    public int setChatMessageStatusDelivered(String msgId, long timestampDelivered) {
+    public boolean setChatMessageStatusDelivered(String msgId, long timestampDelivered) {
         if (sLogger.isActivated()) {
             sLogger.debug(new StringBuilder("setChatMessageStatusDelivered msgId=").append(msgId)
                     .append(", timestampDelivered=").append(timestampDelivered).toString());
@@ -690,11 +690,11 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_TIMESTAMP_DELIVERED, timestampDelivered);
         values.put(MessageData.KEY_EXPIRED_DELIVERY, 0);
         return mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
-                values, null, null);
+                values, null, null) > 0;
     }
 
     @Override
-    public int setChatMessageStatusDisplayed(String msgId, long timestampDisplayed) {
+    public boolean setChatMessageStatusDisplayed(String msgId, long timestampDisplayed) {
         if (sLogger.isActivated()) {
             sLogger.debug(new StringBuilder("setChatMessageStatusDisplayed msgId=").append(msgId)
                     .append(", timestampDisplayed=").append(timestampDisplayed).toString());
@@ -705,7 +705,7 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, timestampDisplayed);
         values.put(MessageData.KEY_EXPIRED_DELIVERY, 0);
         return mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
-                values, null, null);
+                values, null, null) > 0;
     }
 
     @Override
@@ -720,11 +720,11 @@ public class MessageLog implements IMessageLog {
     }
 
     @Override
-    public int setChatMessageDeliveryExpired(String msgId) {
+    public boolean setChatMessageDeliveryExpired(String msgId) {
         ContentValues values = new ContentValues();
         values.put(MessageData.KEY_EXPIRED_DELIVERY, 1);
         return mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
-                values, null, null);
+                values, null, null) > 0;
     }
 
     @Override

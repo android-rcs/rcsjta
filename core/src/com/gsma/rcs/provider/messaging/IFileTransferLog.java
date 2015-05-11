@@ -112,9 +112,9 @@ public interface IFileTransferLog {
      * @param fileTransferId File transfer ID
      * @param state File transfer state (see restriction above)
      * @param reasonCode File transfer state reason code
-     * @return the number of updated rows
+     * @return True if an entry was updated, otherwise false
      */
-    public int setFileTransferStateAndReasonCode(String fileTransferId, State state,
+    public boolean setFileTransferStateAndReasonCode(String fileTransferId, State state,
             ReasonCode reasonCode);
 
     /**
@@ -125,9 +125,9 @@ public interface IFileTransferLog {
      * @param reasonCode New file transfer reason code
      * @param timestamp New local timestamp for the file transfer
      * @param timestampSent New timestamp sent in payload for the file transfer
-     * @return the number of updated rows
+     * @return True if an entry was updated, otherwise false
      */
-    public int setFileTransferStateAndTimestamps(String fileTransferId, State state,
+    public boolean setFileTransferStateAndTimestamps(String fileTransferId, State state,
             ReasonCode reasonCode, long timestamp, long timestampSent);
 
     /**
@@ -142,9 +142,9 @@ public interface IFileTransferLog {
      * 
      * @param fileTransferId File transfer ID
      * @param currentSize Current size
-     * @return the number of updated rows
+     * @return True if an entry was updated, otherwise false
      */
-    public int setFileTransferProgress(String fileTransferId, long currentSize);
+    public boolean setFileTransferProgress(String fileTransferId, long currentSize);
 
     /**
      * Set file transfer URI
@@ -155,10 +155,10 @@ public interface IFileTransferLog {
      * @param fileIconExpiration the time when file icon on the content server is no longer valid to
      *            download
      * @param deliveryExpiration delivery expiration
-     * @return the number of updated rows
+     * @return True if an entry was updated, otherwise false
      */
-    public int setFileTransferred(String fileTransferId, MmContent content, long fileExpiration,
-            long fileIconExpiration, long deliveryExpiration);
+    public boolean setFileTransferred(String fileTransferId, MmContent content,
+            long fileExpiration, long fileIconExpiration, long deliveryExpiration);
 
     /**
      * Tells if the MessageID corresponds to that of a file transfer
@@ -181,18 +181,18 @@ public interface IFileTransferLog {
      * 
      * @param fileTransferId File transfer ID
      * @param tId TID
-     * @return the number of updated rows
+     * @return True if an entry was updated, otherwise false
      */
-    public int setFileUploadTId(String fileTransferId, String tId);
+    public boolean setFileUploadTId(String fileTransferId, String tId);
 
     /**
      * Set file download server uri
      * 
      * @param fileTransferId File transfer ID
      * @param downloadAddress Download Address
-     * @return the number of updated rows
+     * @return True if an entry was updated, otherwise false
      */
-    public int setFileDownloadAddress(String fileTransferId, Uri downloadAddress);
+    public boolean setFileDownloadAddress(String fileTransferId, Uri downloadAddress);
 
     /**
      * Retrieve file transfers paused by SYSTEM on connection loss
@@ -326,27 +326,27 @@ public interface IFileTransferLog {
      * 
      * @param fileTransferId
      * @param remoteInstanceId
-     * @return the number of updated rows
+     * @return True if an entry was updated, otherwise false
      */
-    public int setRemoteSipId(String fileTransferId, String remoteInstanceId);
+    public boolean setRemoteSipId(String fileTransferId, String remoteInstanceId);
 
     /**
      * Set file transfer delivered
      * 
      * @param fileTransferId File transfer ID
      * @param timestampDelivered Time delivered
-     * @return the number of updated rows
+     * @return True if an entry was updated, otherwise false
      */
-    public int setFileTransferDelivered(String fileTransferId, long timestampDelivered);
+    public boolean setFileTransferDelivered(String fileTransferId, long timestampDelivered);
 
     /**
      * Set file transfer displayed
      * 
      * @param fileTransferId File transfer ID
      * @param timestampDisplayed Time displayed
-     * @return the number of updated rows
+     * @return True if an entry was updated, otherwise false
      */
-    public int setFileTransferDisplayed(String fileTransferId, long timestampDisplayed);
+    public boolean setFileTransferDisplayed(String fileTransferId, long timestampDisplayed);
 
     /**
      * Marks undelivered file transfers to indicate that transfers have been processed.
@@ -359,9 +359,9 @@ public interface IFileTransferLog {
      * Set file transfer delivery expired for specified file transfer id.
      * 
      * @param fileTransferId
-     * @return the number of updated rows
+     * @return True if an entry was updated, otherwise false
      */
-    public int setFileTransferDeliveryExpired(String fileTransferId);
+    public boolean setFileTransferDeliveryExpired(String fileTransferId);
 
     /**
      * Get one-one file transfers with unexpired delivery

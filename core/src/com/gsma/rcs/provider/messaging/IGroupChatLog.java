@@ -70,30 +70,30 @@ public interface IGroupChatLog {
      * @param chatId Chat ID
      * @param state Group chat state
      * @param reasonCode Group chat state reason code
-     * @return the number of updated rows
+     * @return True if an entry was updated, otherwise false
      */
-    public int setGroupChatStateAndReasonCode(String chatId, State state, ReasonCode reasonCode);
+    public boolean setGroupChatStateAndReasonCode(String chatId, State state, ReasonCode reasonCode);
 
     /**
      * Set group chat participants, state and reason code
      * 
-     * @param participants map of participants and associated status
      * @param chatId Chat ID
+     * @param participants map of participants and associated status
      * @param state Group chat state
      * @param reasonCode Group chat state reason code
-     * @return the number of updated rows
+     * @return True if an entry was updated, otherwise false
      */
-    public int setGroupChatParticipantsStateAndReasonCode(
-            Map<ContactId, ParticipantStatus> participants, String chatId, State state,
-            ReasonCode reasonCode);
+    public boolean setGroupChatParticipantsStateAndReasonCode(String chatId,
+            Map<ContactId, ParticipantStatus> participants, State state, ReasonCode reasonCode);
 
     /**
-     * Update group chat participants
+     * Set group chat participants
      * 
      * @param chatId Chat ID
      * @param participants map of participants and associated status
+     * @return True if an entry was updated, otherwise false
      */
-    public void updateGroupChatParticipants(String chatId,
+    public boolean setGroupChatParticipants(String chatId,
             Map<ContactId, ParticipantStatus> participants);
 
     /**
@@ -101,9 +101,9 @@ public interface IGroupChatLog {
      * 
      * @param chatId Chat ID
      * @param rejoinId Rejoin ID
-     * @return the number of updated rows
+     * @return True if an entry was updated, otherwise false
      */
-    public int setGroupChatRejoinId(String chatId, String rejoinId);
+    public boolean setGroupChatRejoinId(String chatId, String rejoinId);
 
     /**
      * Get the group chat info
@@ -125,9 +125,9 @@ public interface IGroupChatLog {
      * Set reject the next group chat invitation
      * 
      * @param chatId Chat ID
-     * @return the number of updated rows
+     * @return True if an entry was updated, otherwise false
      */
-    public int setRejectNextGroupChatNextInvitation(String chatId);
+    public boolean setRejectNextGroupChatNextInvitation(String chatId);
 
     /**
      * Get group chat state from its chat ID
@@ -182,5 +182,5 @@ public interface IGroupChatLog {
      * @param chatId
      * @return true if group chat is persisted
      */
-    boolean isGroupChatPersisted(String chatId);
+    public boolean isGroupChatPersisted(String chatId);
 }

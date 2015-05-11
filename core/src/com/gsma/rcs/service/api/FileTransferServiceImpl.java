@@ -68,7 +68,6 @@ import com.gsma.services.rcs.filetransfer.IGroupFileTransferListener;
 import com.gsma.services.rcs.filetransfer.IOneToOneFileTransferListener;
 import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
-import android.database.SQLException;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.text.TextUtils;
@@ -741,10 +740,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 }
                 return false;
             }
-            GroupChat.ReasonCode reasonCode;
-            try {
-                reasonCode = mMessagingLog.getGroupChatReasonCode(chatId);
-            } catch (SQLException e) {
+            GroupChat.ReasonCode reasonCode = mMessagingLog.getGroupChatReasonCode(chatId);
+            if (reasonCode == null) {
                 if (sLogger.isActivated()) {
                     sLogger.debug(new StringBuilder(
                             "Cannot transfer file to group chat with group chat Id '")

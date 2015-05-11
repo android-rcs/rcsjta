@@ -36,7 +36,6 @@ import com.gsma.services.rcs.contact.ContactId;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.net.Uri;
 import android.util.SparseArray;
 
@@ -175,9 +174,8 @@ public class GroupChatLog implements IGroupChatLog {
     }
 
     @Override
-    public int setGroupChatParticipantsStateAndReasonCode(
-            Map<ContactId, ParticipantStatus> participants, String chatId, State state,
-            ReasonCode reasonCode) {
+    public boolean setGroupChatParticipantsStateAndReasonCode(String chatId,
+            Map<ContactId, ParticipantStatus> participants, State state, ReasonCode reasonCode) {
         String encodedParticipants = convert(participants);
         if (logger.isActivated()) {
             logger.debug("setGCParticipantsStateAndReasonCode (chatId=" + chatId
@@ -189,11 +187,11 @@ public class GroupChatLog implements IGroupChatLog {
         values.put(GroupChatData.KEY_STATE, state.toInt());
         values.put(GroupChatData.KEY_REASON_CODE, reasonCode.toInt());
         return mLocalContentResolver.update(
-                Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId), values, null, null);
+                Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId), values, null, null) > 0;
     }
 
     @Override
-    public int setGroupChatStateAndReasonCode(String chatId, State state, ReasonCode reasonCode) {
+    public boolean setGroupChatStateAndReasonCode(String chatId, State state, ReasonCode reasonCode) {
         if (logger.isActivated()) {
             logger.debug("setGroupChatStateAndReasonCode (chatId=" + chatId + ") (state=" + state
                     + ") (reasonCode=" + reasonCode + ")");
@@ -202,11 +200,11 @@ public class GroupChatLog implements IGroupChatLog {
         values.put(GroupChatData.KEY_STATE, state.toInt());
         values.put(GroupChatData.KEY_REASON_CODE, reasonCode.toInt());
         return mLocalContentResolver.update(
-                Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId), values, null, null);
+                Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId), values, null, null) > 0;
     }
 
     @Override
-    public void updateGroupChatParticipants(String chatId,
+    public boolean setGroupChatParticipants(String chatId,
             Map<ContactId, ParticipantStatus> participants) {
         String encodedParticipants = convert(participants);
         if (logger.isActivated()) {
@@ -215,12 +213,12 @@ public class GroupChatLog implements IGroupChatLog {
         }
         ContentValues values = new ContentValues();
         values.put(GroupChatData.KEY_PARTICIPANTS, encodedParticipants);
-        mLocalContentResolver.update(Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId),
-                values, null, null);
+        return mLocalContentResolver.update(
+                Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId), values, null, null) > 0;
     }
 
     @Override
-    public int setGroupChatRejoinId(String chatId, String rejoinId) {
+    public boolean setGroupChatRejoinId(String chatId, String rejoinId) {
         if (logger.isActivated()) {
             logger.debug("Update group chat rejoin ID to ".concat(rejoinId));
         }
@@ -228,7 +226,7 @@ public class GroupChatLog implements IGroupChatLog {
         values.put(GroupChatData.KEY_REJOIN_ID, rejoinId);
         values.put(GroupChatData.KEY_STATE, State.STARTED.toInt());
         return mLocalContentResolver.update(
-                Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId), values, null, null);
+                Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId), values, null, null) > 0;
     }
 
     @Override
@@ -288,12 +286,10 @@ public class GroupChatLog implements IGroupChatLog {
         Uri contentUri = Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId);
         Cursor cursor = mLocalContentResolver.query(contentUri, projection, null, null, null);
         CursorUtil.assertCursorIsNotNull(cursor, contentUri);
-        if (cursor.moveToNext()) {
-            return cursor;
+        if (!cursor.moveToNext()) {
+            return null;
         }
-        throw new SQLException(new StringBuilder(
-                "No row returned while querying for group chat data with chatId '").append(chatId)
-                .append("'!").toString());
+        return cursor;
     }
 
     private String getDataAsString(Cursor cursor) {
@@ -333,14 +329,14 @@ public class GroupChatLog implements IGroupChatLog {
     }
 
     @Override
-    public int setRejectNextGroupChatNextInvitation(String chatId) {
+    public boolean setRejectNextGroupChatNextInvitation(String chatId) {
         if (logger.isActivated()) {
             logger.debug("setRejectNextGroupChatNextInvitation (chatId=" + chatId + ")");
         }
         ContentValues values = new ContentValues();
         values.put(GroupChatData.KEY_USER_ABORTION, UserAbortion.SERVER_NOT_NOTIFIED.toInt());
         return mLocalContentResolver.update(
-                Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId), values, null, null);
+                Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId), values, null, null) > 0;
     }
 
     @Override

@@ -37,7 +37,6 @@ import com.gsma.services.rcs.sharing.video.VideoSharing;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.net.Uri;
 
 /**
@@ -129,7 +128,7 @@ public class RichCallHistory {
      * @param sharingId Sharing ID
      * @return Cursor
      */
-    private Cursor getGeolocSharingData(String columnName, String sharingId) throws SQLException {
+    private Cursor getGeolocSharingData(String columnName, String sharingId) {
         String[] projection = new String[] {
             columnName
         };
@@ -254,9 +253,9 @@ public class RichCallHistory {
      * @param state New state
      * @param reasonCode Reason Code
      * @param duration
-     * @return number of updated rows
+     * @return true if updated
      */
-    public int setVideoSharingStateReasonCodeAndDuration(String sharingId,
+    public boolean setVideoSharingStateReasonCodeAndDuration(String sharingId,
             VideoSharing.State state, VideoSharing.ReasonCode reasonCode, long duration) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("Update video sharing state of sharing ")
@@ -268,7 +267,7 @@ public class RichCallHistory {
         values.put(VideoSharingData.KEY_REASON_CODE, reasonCode.toInt());
         values.put(VideoSharingData.KEY_DURATION, duration);
         return mLocalContentResolver.update(
-                Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId), values, null, null);
+                Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId), values, null, null) > 0;
     }
 
     /**
@@ -277,9 +276,9 @@ public class RichCallHistory {
      * @param sharingId sharing ID of the entry
      * @param state New state
      * @param reasonCode Reason Code
-     * @return number of updated rows
+     * @return true if updated
      */
-    public int setVideoSharingStateReasonCode(String sharingId, VideoSharing.State state,
+    public boolean setVideoSharingStateReasonCode(String sharingId, VideoSharing.State state,
             VideoSharing.ReasonCode reasonCode) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("Update video sharing state of sharing ")
@@ -290,7 +289,7 @@ public class RichCallHistory {
         values.put(VideoSharingData.KEY_STATE, state.toInt());
         values.put(VideoSharingData.KEY_REASON_CODE, reasonCode.toInt());
         return mLocalContentResolver.update(
-                Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId), values, null, null);
+                Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId), values, null, null) > 0;
     }
 
     /**
@@ -298,9 +297,9 @@ public class RichCallHistory {
      * 
      * @param sharingId
      * @param duration Duration
-     * @return number of updated rows
+     * @return true if updated
      */
-    public int setVideoSharingDuration(String sharingId, long duration) {
+    public boolean setVideoSharingDuration(String sharingId, long duration) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("Update duration of sharing ").append(sharingId)
                     .append(" to ").append(duration).toString());
@@ -308,7 +307,7 @@ public class RichCallHistory {
         ContentValues values = new ContentValues();
         values.put(VideoSharingData.KEY_DURATION, duration);
         return mLocalContentResolver.update(
-                Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId), values, null, null);
+                Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId), values, null, null) > 0;
     }
 
     /*--------------------- Image sharing update / add methods ----------------------*/
@@ -354,9 +353,9 @@ public class RichCallHistory {
      * @param sharingId
      * @param state New state
      * @param reasonCode Reason Code
-     * @return number of updated rows
+     * @return true if updated
      */
-    public int setImageSharingStateAndReasonCode(String sharingId, ImageSharing.State state,
+    public boolean setImageSharingStateAndReasonCode(String sharingId, ImageSharing.State state,
             ImageSharing.ReasonCode reasonCode) {
         if (logger.isActivated()) {
             logger.debug("Update status of image sharing " + sharingId + " to " + state);
@@ -372,7 +371,7 @@ public class RichCallHistory {
             }
         }
         return mLocalContentResolver.update(
-                Uri.withAppendedPath(ImageSharingData.CONTENT_URI, sharingId), values, null, null);
+                Uri.withAppendedPath(ImageSharingData.CONTENT_URI, sharingId), values, null, null) > 0;
     }
 
     /**
@@ -380,12 +379,13 @@ public class RichCallHistory {
      * 
      * @param sharingId Session ID of the entry
      * @param currentSize Current size
+     * @return true if updated
      */
-    public int setImageSharingProgress(String sharingId, long currentSize) {
+    public boolean setImageSharingProgress(String sharingId, long currentSize) {
         ContentValues values = new ContentValues();
         values.put(ImageSharingData.KEY_TRANSFERRED, currentSize);
         return mLocalContentResolver.update(
-                Uri.withAppendedPath(ImageSharingData.CONTENT_URI, sharingId), values, null, null);
+                Uri.withAppendedPath(ImageSharingData.CONTENT_URI, sharingId), values, null, null) > 0;
     }
 
     /*--------------------- Geoloc sharing update / add methods ----------------------*/
@@ -443,14 +443,15 @@ public class RichCallHistory {
      * 
      * @param sharingId Sharing ID
      * @param geoloc Geolococation
+     * @return true if updated
      */
-    public int setGeolocSharingTransferred(String sharingId, Geoloc geoloc) {
+    public boolean setGeolocSharingTransferred(String sharingId, Geoloc geoloc) {
         ContentValues values = new ContentValues();
         values.put(GeolocSharingData.KEY_CONTENT, geoloc.toString());
         values.put(GeolocSharingData.KEY_STATE, GeolocSharing.State.TRANSFERRED.toInt());
         values.put(GeolocSharingData.KEY_REASON_CODE, GeolocSharing.ReasonCode.UNSPECIFIED.toInt());
         return mLocalContentResolver.update(
-                Uri.withAppendedPath(GeolocSharingData.CONTENT_URI, sharingId), values, null, null);
+                Uri.withAppendedPath(GeolocSharingData.CONTENT_URI, sharingId), values, null, null) > 0;
     }
 
     /**
@@ -459,14 +460,15 @@ public class RichCallHistory {
      * @param sharingId Sharing ID
      * @param state Geoloc sharing state
      * @param reasonCode Reason code of the state
+     * @return true if updated
      */
-    public int setGeolocSharingStateAndReasonCode(String sharingId, GeolocSharing.State state,
+    public boolean setGeolocSharingStateAndReasonCode(String sharingId, GeolocSharing.State state,
             GeolocSharing.ReasonCode reasonCode) {
         ContentValues values = new ContentValues();
         values.put(GeolocSharingData.KEY_STATE, state.toInt());
         values.put(GeolocSharingData.KEY_REASON_CODE, reasonCode.toInt());
         return mLocalContentResolver.update(
-                Uri.withAppendedPath(GeolocSharingData.CONTENT_URI, sharingId), values, null, null);
+                Uri.withAppendedPath(GeolocSharingData.CONTENT_URI, sharingId), values, null, null) > 0;
     }
 
     /**

@@ -332,17 +332,17 @@ public class FileTransferPersistedStorageAccessor {
         return mRead;
     }
 
-    public void setStateAndReasonCode(State state, ReasonCode reasonCode) {
-        mMessagingLog.setFileTransferStateAndReasonCode(mFileTransferId, state, reasonCode);
+    public boolean setStateAndReasonCode(State state, ReasonCode reasonCode) {
+        return mMessagingLog.setFileTransferStateAndReasonCode(mFileTransferId, state, reasonCode);
     }
 
-    public void setProgress(long currentSize) {
-        mMessagingLog.setFileTransferProgress(mFileTransferId, currentSize);
+    public boolean setProgress(long currentSize) {
+        return mMessagingLog.setFileTransferProgress(mFileTransferId, currentSize);
     }
 
-    public void setTransferred(MmContent content, long fileExpiration, long fileIconExpiration,
+    public boolean setTransferred(MmContent content, long fileExpiration, long fileIconExpiration,
             long deliveryExpiration) {
-        mMessagingLog.setFileTransferred(mFileTransferId, content, fileExpiration,
+        return mMessagingLog.setFileTransferred(mFileTransferId, content, fileExpiration,
                 fileIconExpiration, deliveryExpiration);
     }
 

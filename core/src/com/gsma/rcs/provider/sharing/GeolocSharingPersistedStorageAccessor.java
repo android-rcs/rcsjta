@@ -155,13 +155,13 @@ public class GeolocSharingPersistedStorageAccessor {
         return mTimestamp;
     }
 
-    public void setStateAndReasonCode(State state, ReasonCode reasonCode) {
-        mRichCallLog.setGeolocSharingStateAndReasonCode(mSharingId, state, reasonCode);
+    public boolean setStateAndReasonCode(State state, ReasonCode reasonCode) {
+        return mRichCallLog.setGeolocSharingStateAndReasonCode(mSharingId, state, reasonCode);
     }
 
-    public void setTransferred(Geoloc geoloc) {
+    public boolean setTransferred(Geoloc geoloc) {
         mGeoloc = geoloc;
-        mRichCallLog.setGeolocSharingTransferred(mSharingId, geoloc);
+        return mRichCallLog.setGeolocSharingTransferred(mSharingId, geoloc);
     }
 
     public void addIncomingGeolocSharing(ContactId contact, State state, ReasonCode reasonCode,

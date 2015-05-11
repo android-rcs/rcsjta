@@ -170,21 +170,21 @@ public class GroupChatPersistedStorageAccessor {
         return mRcsSettings.getMaxChatParticipants();
     }
 
-    public void setStateAndReasonCode(State state, ReasonCode reasonCode) {
-        mMessagingLog.setGroupChatStateAndReasonCode(mChatId, state, reasonCode);
+    public boolean setStateAndReasonCode(State state, ReasonCode reasonCode) {
+        return mMessagingLog.setGroupChatStateAndReasonCode(mChatId, state, reasonCode);
     }
 
-    public void setMessageStatusAndReasonCode(String msgId, Status status,
+    public boolean setMessageStatusAndReasonCode(String msgId, Status status,
             Content.ReasonCode reasonCode) {
-        mMessagingLog.setChatMessageStatusAndReasonCode(msgId, status, reasonCode);
+        return mMessagingLog.setChatMessageStatusAndReasonCode(msgId, status, reasonCode);
     }
 
-    public void setMessageStatusDelivered(String msgId, long timestampDelivered) {
-        mMessagingLog.setChatMessageStatusDelivered(msgId, timestampDelivered);
+    public boolean setMessageStatusDelivered(String msgId, long timestampDelivered) {
+        return mMessagingLog.setChatMessageStatusDelivered(msgId, timestampDelivered);
     }
 
-    public void setMessageStatusDisplayed(String msgId, long timestampDisplayed) {
-        mMessagingLog.setChatMessageStatusDisplayed(msgId, timestampDisplayed);
+    public boolean setMessageStatusDisplayed(String msgId, long timestampDisplayed) {
+        return mMessagingLog.setChatMessageStatusDisplayed(msgId, timestampDisplayed);
     }
 
     public boolean setGroupDeliveryInfoStatusAndReasonCode(String chatId, ContactId contact,
@@ -201,8 +201,8 @@ public class GroupChatPersistedStorageAccessor {
         return mMessagingLog.isDisplayedByAllRecipients(msgId);
     }
 
-    public void setRejoinId(String rejoinId) {
-        mMessagingLog.setGroupChatRejoinId(mChatId, rejoinId);
+    public boolean setRejoinId(String rejoinId) {
+        return mMessagingLog.setGroupChatRejoinId(mChatId, rejoinId);
     }
 
     public void addGroupChat(ContactId contact, String subject,
@@ -232,27 +232,29 @@ public class GroupChatPersistedStorageAccessor {
         mMessagingLog.addOutgoingGroupChatMessage(mChatId, msg, status, reasonCode);
     }
 
-    public void setRejectNextGroupChatNextInvitation() {
-        mMessagingLog.setRejectNextGroupChatNextInvitation(mChatId);
+    public boolean setRejectNextGroupChatNextInvitation() {
+        return mMessagingLog.setRejectNextGroupChatNextInvitation(mChatId);
     }
 
     public void dequeueChatMessage(ChatMessage message) {
         mMessagingLog.dequeueChatMessage(message);
     }
 
-    public void setParticipantsStateAndReasonCode(Map<ContactId, ParticipantStatus> participants,
-            State state, ReasonCode reasonCode) {
-        mMessagingLog.setGroupChatParticipantsStateAndReasonCode(participants, mChatId, state,
-                reasonCode);
+    public boolean setParticipantsStateAndReasonCode(
+            Map<ContactId, ParticipantStatus> participants, State state, ReasonCode reasonCode) {
+        return mMessagingLog.setGroupChatParticipantsStateAndReasonCode(mChatId, participants,
+                state, reasonCode);
     }
 
-    public void setGroupChatDeliveryInfoDelivered(String chatId, ContactId contact, String msgId,
-            long timestampDelivered) {
-        mMessagingLog.setGroupChatDeliveryInfoDelivered(chatId, contact, msgId, timestampDelivered);
+    public boolean setGroupChatDeliveryInfoDelivered(String chatId, ContactId contact,
+            String msgId, long timestampDelivered) {
+        return mMessagingLog.setGroupChatDeliveryInfoDelivered(chatId, contact, msgId,
+                timestampDelivered);
     }
 
-    public void setDeliveryInfoDisplayed(String chatId, ContactId contact, String msgId,
+    public boolean setDeliveryInfoDisplayed(String chatId, ContactId contact, String msgId,
             long timestampDisplayed) {
-        mMessagingLog.setGroupChatDeliveryInfoDisplayed(chatId, contact, msgId, timestampDisplayed);
+        return mMessagingLog.setGroupChatDeliveryInfoDisplayed(chatId, contact, msgId,
+                timestampDisplayed);
     }
 }

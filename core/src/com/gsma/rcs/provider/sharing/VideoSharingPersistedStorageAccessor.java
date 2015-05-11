@@ -178,10 +178,11 @@ public class VideoSharingPersistedStorageAccessor {
      * @param state
      * @param reasonCode
      * @param duration
+     * @return true if updated
      */
-    public void setStateReasonCodeAndDuration(State state, ReasonCode reasonCode, long duration) {
-        mRichCallLog.setVideoSharingStateReasonCodeAndDuration(mSharingId, state, reasonCode,
-                duration);
+    public boolean setStateReasonCodeAndDuration(State state, ReasonCode reasonCode, long duration) {
+        return mRichCallLog.setVideoSharingStateReasonCodeAndDuration(mSharingId, state,
+                reasonCode, duration);
     }
 
     /**

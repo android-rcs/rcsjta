@@ -309,7 +309,7 @@ public class FileTransferLog implements IFileTransferLog {
      * @param reasonCode File transfer state reason code
      */
     @Override
-    public int setFileTransferStateAndReasonCode(String fileTransferId, State state,
+    public boolean setFileTransferStateAndReasonCode(String fileTransferId, State state,
             ReasonCode reasonCode) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("updateFileTransferStatus: fileTransferId=")
@@ -331,7 +331,7 @@ public class FileTransferLog implements IFileTransferLog {
         values.put(FileTransferData.KEY_REASON_CODE, reasonCode.toInt());
         return mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
-                null);
+                null) > 0;
     }
 
     @Override
@@ -354,17 +354,17 @@ public class FileTransferLog implements IFileTransferLog {
     }
 
     @Override
-    public int setFileTransferProgress(String fileTransferId, long currentSize) {
+    public boolean setFileTransferProgress(String fileTransferId, long currentSize) {
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_TRANSFERRED, currentSize);
         return mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
-                null);
+                null) > 0;
     }
 
     @Override
-    public int setFileTransferred(String fileTransferId, MmContent content, long fileExpiration,
-            long fileIconExpiration, long deliveryExpiration) {
+    public boolean setFileTransferred(String fileTransferId, MmContent content,
+            long fileExpiration, long fileIconExpiration, long deliveryExpiration) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("setFileTransferred (Id=").append(fileTransferId)
                     .append(") (uri=").append(content.getUri()).append(")").toString());
@@ -378,7 +378,7 @@ public class FileTransferLog implements IFileTransferLog {
         values.put(FileTransferData.KEY_DELIVERY_EXPIRATION, deliveryExpiration);
         return mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
-                null);
+                null) > 0;
     }
 
     @Override
@@ -396,7 +396,7 @@ public class FileTransferLog implements IFileTransferLog {
     }
 
     @Override
-    public int setFileUploadTId(String fileTransferId, String tId) {
+    public boolean setFileUploadTId(String fileTransferId, String tId) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("setFileUploadTId (tId=").append(tId)
                     .append(") (fileTransferId=").append(fileTransferId).append(")").toString());
@@ -405,11 +405,11 @@ public class FileTransferLog implements IFileTransferLog {
         values.put(FileTransferData.KEY_UPLOAD_TID, tId);
         return mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
-                null);
+                null) > 0;
     }
 
     @Override
-    public int setFileDownloadAddress(String fileTransferId, Uri downloadAddress) {
+    public boolean setFileDownloadAddress(String fileTransferId, Uri downloadAddress) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("setFileDownloadAddress (address=")
                     .append(downloadAddress).append(") (fileTransferId=").append(fileTransferId)
@@ -419,11 +419,11 @@ public class FileTransferLog implements IFileTransferLog {
         values.put(FileTransferData.KEY_DOWNLOAD_URI, downloadAddress.toString());
         return mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
-                null);
+                null) > 0;
     }
 
     @Override
-    public int setRemoteSipId(String fileTransferId, String remoteInstanceId) {
+    public boolean setRemoteSipId(String fileTransferId, String remoteInstanceId) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("setRemoteSipId (sip ID=").append(fileTransferId)
                     .append(") (fileTransferId=").append(fileTransferId).append(")").toString());
@@ -432,7 +432,7 @@ public class FileTransferLog implements IFileTransferLog {
         values.put(FileTransferData.KEY_REMOTE_SIP_ID, remoteInstanceId);
         return mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
-                null);
+                null) > 0;
     }
 
     @Override
@@ -843,7 +843,7 @@ public class FileTransferLog implements IFileTransferLog {
         return cursor;
     }
 
-    public int setFileTransferStateAndTimestamps(String fileTransferId, State state,
+    public boolean setFileTransferStateAndTimestamps(String fileTransferId, State state,
             ReasonCode reasonCode, long timestamp, long timestampSent) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("updateFileTransfer: fileTransferId=")
@@ -859,10 +859,10 @@ public class FileTransferLog implements IFileTransferLog {
         values.put(FileTransferData.KEY_TIMESTAMP_SENT, timestampSent);
         return mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
-                null);
+                null) > 0;
     }
 
-    public int setFileTransferDelivered(String fileTransferId, long timestampDelivered) {
+    public boolean setFileTransferDelivered(String fileTransferId, long timestampDelivered) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("setFileTransferDelivered fileTransferId=")
                     .append(fileTransferId).append(", timestampDelivered=")
@@ -877,10 +877,10 @@ public class FileTransferLog implements IFileTransferLog {
 
         return mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
-                null);
+                null) > 0;
     }
 
-    public int setFileTransferDisplayed(String fileTransferId, long timestampDisplayed) {
+    public boolean setFileTransferDisplayed(String fileTransferId, long timestampDisplayed) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("setFileTransferDisplayed fileTransferId=")
                     .append(fileTransferId).append(", timestampDisplayed=")
@@ -896,7 +896,7 @@ public class FileTransferLog implements IFileTransferLog {
 
         return mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
-                null);
+                null) > 0;
     }
 
     @Override
@@ -911,12 +911,12 @@ public class FileTransferLog implements IFileTransferLog {
     }
 
     @Override
-    public int setFileTransferDeliveryExpired(String fileTransferId) {
+    public boolean setFileTransferDeliveryExpired(String fileTransferId) {
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_EXPIRED_DELIVERY, 1);
         return mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
-                null);
+                null) > 0;
     }
 
     @Override

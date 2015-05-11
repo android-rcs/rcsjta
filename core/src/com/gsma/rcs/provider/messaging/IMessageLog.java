@@ -114,9 +114,10 @@ public interface IMessageLog {
      * @param msgId Message ID
      * @param status Message status (See restriction above)
      * @param reasonCode Message status reason code
-     * @return the number of updated rows
+     * @return True if an entry was updated, otherwise false
      */
-    public int setChatMessageStatusAndReasonCode(String msgId, Status status, ReasonCode reasonCode);
+    public boolean setChatMessageStatusAndReasonCode(String msgId, Status status,
+            ReasonCode reasonCode);
 
     /**
      * Set chat message timestamp and timestampSent
@@ -124,9 +125,9 @@ public interface IMessageLog {
      * @param msgId Message ID
      * @param timestamp New local timestamp
      * @param timestampSent New timestamp sent in payload
-     * @return the number of updated rows
+     * @return True if an entry was updated, otherwise false
      */
-    public int setChatMessageTimestamp(String msgId, long timestamp, long timestampSent);
+    public boolean setChatMessageTimestamp(String msgId, long timestamp, long timestampSent);
 
     /**
      * Mark incoming chat message status as received
@@ -237,7 +238,7 @@ public interface IMessageLog {
      * @param chatId
      * @return group chat events for contacts or null if there is no group chat events
      */
-    Map<ContactId, GroupChatEvent.Status> getGroupChatEvents(String chatId);
+    public Map<ContactId, GroupChatEvent.Status> getGroupChatEvents(String chatId);
 
     /**
      * Returns true if the chat id and contact are same for this message id.
@@ -252,18 +253,18 @@ public interface IMessageLog {
      * 
      * @param msgId Message ID
      * @param timestampDelivered Delivered time
-     * @return the number of updated rows
+     * @return True if an entry was updated, otherwise false
      */
-    public int setChatMessageStatusDelivered(String msgId, long timestampDelivered);
+    public boolean setChatMessageStatusDelivered(String msgId, long timestampDelivered);
 
     /**
      * Set chat message displayed
      * 
      * @param msgId Message ID
      * @param timestampDisplayed Displayed time
-     * @return the number of updated rows
+     * @return True if an entry was updated, otherwise false
      */
-    public int setChatMessageStatusDisplayed(String msgId, long timestampDisplayed);
+    public boolean setChatMessageStatusDisplayed(String msgId, long timestampDisplayed);
 
     /**
      * Marks undelivered chat messages to indicate that messages have been processed.
@@ -276,9 +277,9 @@ public interface IMessageLog {
      * Set message delivery expired for specified message id.
      * 
      * @param msgId
-     * @return the number of updated rows
+     * @return True if an entry was updated, otherwise false
      */
-    public int setChatMessageDeliveryExpired(String msgId);
+    public boolean setChatMessageDeliveryExpired(String msgId);
 
     /**
      * Get one-one chat messages with unexpired delivery

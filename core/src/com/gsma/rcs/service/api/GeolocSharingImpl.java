@@ -420,8 +420,9 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
     }
 
     private void setStateAndReasonCode(ContactId contact, State state, ReasonCode reasonCode) {
-        mPersistentStorage.setStateAndReasonCode(state, reasonCode);
-        mBroadcaster.broadcastStateChanged(contact, mSharingId, state, reasonCode);
+        if (mPersistentStorage.setStateAndReasonCode(state, reasonCode)) {
+            mBroadcaster.broadcastStateChanged(contact, mSharingId, state, reasonCode);
+        }
     }
 
     private void handleSessionRejected(ReasonCode reasonCode, ContactId contact) {
@@ -522,12 +523,17 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
         synchronized (lock) {
             mGeolocSharingService.removeGeolocSharing(mSharingId);
             if (initiatedByRemote) {
-                RichCallHistory.getInstance().setGeolocSharingTransferred(mSharingId, geoloc);
+                if (RichCallHistory.getInstance().setGeolocSharingTransferred(mSharingId, geoloc)) {
+                    mBroadcaster.broadcastStateChanged(contact, mSharingId, State.TRANSFERRED,
+                            ReasonCode.UNSPECIFIED);
+                }
             } else {
-                mPersistentStorage.setStateAndReasonCode(State.TRANSFERRED, ReasonCode.UNSPECIFIED);
+                if (mPersistentStorage.setStateAndReasonCode(State.TRANSFERRED,
+                        ReasonCode.UNSPECIFIED)) {
+                    mBroadcaster.broadcastStateChanged(contact, mSharingId, State.TRANSFERRED,
+                            ReasonCode.UNSPECIFIED);
+                }
             }
-            mBroadcaster.broadcastStateChanged(contact, mSharingId, State.TRANSFERRED,
-                    ReasonCode.UNSPECIFIED);
         }
     }
 

@@ -127,12 +127,8 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         }
         synchronized (mLock) {
             mVideoSharingService.removeVideoSharing(mSharingId);
-
-            mPersistentStorage.setStateReasonCodeAndDuration(VideoSharing.State.REJECTED,
-                    reasonCode, getCurrentDuration());
-
-            mBroadcaster.broadcastStateChanged(contact, mSharingId, VideoSharing.State.ABORTED,
-                    reasonCode);
+            setStateAndReasonCodeAndDuration(contact, getCurrentDuration(),
+                    VideoSharing.State.REJECTED, reasonCode);
         }
     }
 
@@ -147,8 +143,9 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 
     private void setStateAndReasonCodeAndDuration(ContactId contact, long currentDuration,
             State state, ReasonCode reasonCode) {
-        mPersistentStorage.setStateReasonCodeAndDuration(state, reasonCode, currentDuration);
-        mBroadcaster.broadcastStateChanged(contact, mSharingId, state, reasonCode);
+        if (mPersistentStorage.setStateReasonCodeAndDuration(state, reasonCode, currentDuration)) {
+            mBroadcaster.broadcastStateChanged(contact, mSharingId, state, reasonCode);
+        }
     }
 
     /**

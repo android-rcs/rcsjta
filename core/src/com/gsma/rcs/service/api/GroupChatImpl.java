@@ -59,7 +59,6 @@ import com.gsma.services.rcs.chat.IGroupChat;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
-import android.database.SQLException;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
@@ -148,8 +147,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     }
 
     private void setStateAndReasonCode(State state, ReasonCode reasonCode) {
-        mPersistentStorage.setStateAndReasonCode(state, reasonCode);
-        mBroadcaster.broadcastStateChanged(mChatId, state, reasonCode);
+        if (mPersistentStorage.setStateAndReasonCode(state, reasonCode)) {
+            mBroadcaster.broadcastStateChanged(mChatId, state, reasonCode);
+        }
     }
 
     private void handleSessionRejected(ReasonCode reasonCode) {
@@ -232,10 +232,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             /* Group chat is not abandoned if there exists a session */
             return false;
         }
-        ReasonCode reasonCode;
-        try {
-            reasonCode = mPersistentStorage.getReasonCode();
-        } catch (SQLException e) {
+        ReasonCode reasonCode = mPersistentStorage.getReasonCode();
+        if (reasonCode == null) {
             return false;
         }
         switch (reasonCode) {
@@ -826,7 +824,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 if (session != null) {
                     session.updateParticipants(participantsToStore);
                 } else {
-                    mMessagingLog.updateGroupChatParticipants(mChatId, participantsToStore);
+                    mMessagingLog.setGroupChatParticipants(mChatId, participantsToStore);
                 }
             }
 
@@ -1308,9 +1306,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         setRejoinedAsPartOfSendOperation(false);
         synchronized (lock) {
             GroupChatSession session = mImService.getGroupChatSession(mChatId);
-            mPersistentStorage.setRejoinId(session.getImSessionIdentity());
-
-            mBroadcaster.broadcastStateChanged(mChatId, State.STARTED, ReasonCode.UNSPECIFIED);
+            if (mPersistentStorage.setRejoinId(session.getImSessionIdentity())) {
+                mBroadcaster.broadcastStateChanged(mChatId, State.STARTED, ReasonCode.UNSPECIFIED);
+            }
         }
         CoreListener listener = mCore.getListener();
         listener.tryToInviteQueuedGroupChatParticipantInvitations(mChatId, mImService);
@@ -1478,11 +1476,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         }
 
         synchronized (lock) {
-            mPersistentStorage.setMessageStatusAndReasonCode(msgId, Status.FAILED,
-                    Content.ReasonCode.FAILED_SEND);
-
-            mBroadcaster.broadcastMessageStatusChanged(getChatId(), mimeType, msgId, Status.FAILED,
-                    Content.ReasonCode.FAILED_SEND);
+            if (mPersistentStorage.setMessageStatusAndReasonCode(msgId, Status.FAILED,
+                    Content.ReasonCode.FAILED_SEND)) {
+                mBroadcaster.broadcastMessageStatusChanged(getChatId(), mimeType, msgId,
+                        Status.FAILED, Content.ReasonCode.FAILED_SEND);
+            }
         }
     }
 
@@ -1494,11 +1492,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         }
 
         synchronized (lock) {
-            mPersistentStorage.setMessageStatusAndReasonCode(msgId, Status.SENT,
-                    Content.ReasonCode.UNSPECIFIED);
-
-            mBroadcaster.broadcastMessageStatusChanged(getChatId(), mimeType, msgId, Status.SENT,
-                    Content.ReasonCode.UNSPECIFIED);
+            if (mPersistentStorage.setMessageStatusAndReasonCode(msgId, Status.SENT,
+                    Content.ReasonCode.UNSPECIFIED)) {
+                mBroadcaster.broadcastMessageStatusChanged(getChatId(), mimeType, msgId,
+                        Status.SENT, Content.ReasonCode.UNSPECIFIED);
+            }
         }
     }
 
@@ -1618,16 +1616,16 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             logger.info("Invited to group chat session");
         }
         synchronized (lock) {
-            if (mMessagingLog.isGroupChatPersisted(mChatId)) {
-                mPersistentStorage.setParticipantsStateAndReasonCode(participants, State.INVITED,
-                        ReasonCode.UNSPECIFIED);
+            if (mMessagingLog.isGroupChatPersisted(mChatId)
+                    && mPersistentStorage.setParticipantsStateAndReasonCode(participants,
+                            State.INVITED, ReasonCode.UNSPECIFIED)) {
+                mBroadcaster.broadcastInvitation(mChatId);
             } else {
                 mPersistentStorage.addGroupChat(contact, subject, participants, State.INVITED,
                         ReasonCode.UNSPECIFIED, Direction.INCOMING, timestamp);
+                mBroadcaster.broadcastInvitation(mChatId);
             }
         }
-
-        mBroadcaster.broadcastInvitation(mChatId);
     }
 
     @Override
@@ -1637,23 +1635,25 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             logger.info("Session auto accepted");
         }
         synchronized (lock) {
-            if (mMessagingLog.isGroupChatPersisted(mChatId)) {
-                mPersistentStorage.setParticipantsStateAndReasonCode(participants, State.ACCEPTING,
-                        ReasonCode.UNSPECIFIED);
+            if (mMessagingLog.isGroupChatPersisted(mChatId)
+                    && mPersistentStorage.setParticipantsStateAndReasonCode(participants,
+                            State.ACCEPTING, ReasonCode.UNSPECIFIED)) {
+                mBroadcaster.broadcastInvitation(mChatId);
             } else {
                 mPersistentStorage.addGroupChat(contact, subject, participants, State.ACCEPTING,
                         ReasonCode.UNSPECIFIED, Direction.INCOMING, timestamp);
+                mBroadcaster.broadcastInvitation(mChatId);
             }
         }
-
-        mBroadcaster.broadcastInvitation(mChatId);
     }
 
     @Override
     public void handleParticipantUpdates(Map<ContactId, ParticipantStatus> updatedParticipants,
             Map<ContactId, ParticipantStatus> allParticipants) {
         synchronized (lock) {
-            mMessagingLog.updateGroupChatParticipants(mChatId, allParticipants);
+            if (!mMessagingLog.setGroupChatParticipants(mChatId, allParticipants)) {
+                return;
+            }
         }
 
         for (Map.Entry<ContactId, ParticipantStatus> updatedParticipant : updatedParticipants

@@ -85,9 +85,10 @@ public interface IGroupDeliveryInfoLog {
      * @param contact The contact ID for which the entry is to be updated
      * @param msgID Message ID
      * @param timestampDelivered Timestamp for message delivery
+     * @return True if an entry was updated, otherwise false
      */
-    void setGroupChatDeliveryInfoDelivered(String chatId, ContactId contact, String msgId,
-            long timestampDelivered);
+    public boolean setGroupChatDeliveryInfoDelivered(String chatId, ContactId contact,
+            String msgId, long timestampDelivered);
 
     /**
      * Set delivery info status to displayed for outgoing group chat message or file
@@ -96,7 +97,8 @@ public interface IGroupDeliveryInfoLog {
      * @param contact The contact ID for which the entry is to be updated
      * @param msgID Message ID
      * @param timestampDisplayed Timestamp for message display
+     * @return True if an entry was updated, otherwise false
      */
-    void setGroupChatDeliveryInfoDisplayed(String chatId, ContactId contact, String msgId,
-            long timestampDisplayed);
+    public boolean setGroupChatDeliveryInfoDisplayed(String chatId, ContactId contact,
+            String msgId, long timestampDisplayed);
 }

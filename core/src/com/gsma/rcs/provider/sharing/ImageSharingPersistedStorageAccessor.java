@@ -196,12 +196,12 @@ public class ImageSharingPersistedStorageAccessor {
         return mTimestamp;
     }
 
-    public void setStateAndReasonCode(State state, ReasonCode reasonCode) {
-        mRichCallLog.setImageSharingStateAndReasonCode(mSharingId, state, reasonCode);
+    public boolean setStateAndReasonCode(State state, ReasonCode reasonCode) {
+        return mRichCallLog.setImageSharingStateAndReasonCode(mSharingId, state, reasonCode);
     }
 
-    public void setProgress(long currentSize) {
-        mRichCallLog.setImageSharingProgress(mSharingId, currentSize);
+    public boolean setProgress(long currentSize) {
+        return mRichCallLog.setImageSharingProgress(mSharingId, currentSize);
     }
 
     public Uri addImageSharing(ContactId contact, Direction direction, MmContent content,

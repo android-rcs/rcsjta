@@ -132,8 +132,8 @@ public class IPCallPersistedStorageAccessor {
         return mTimestamp;
     }
 
-    public void setStateAndReasonCode(State state, ReasonCode reasonCode) {
-        mIPCallLog.setCallStateAndReasonCode(mCallId, state, reasonCode);
+    public boolean setStateAndReasonCode(State state, ReasonCode reasonCode) {
+        return mIPCallLog.setCallStateAndReasonCode(mCallId, state, reasonCode);
     }
 
     public Uri addCall(ContactId contact, Direction direction, AudioContent audiocontent,
