@@ -321,7 +321,7 @@ public class PublishManager extends PeriodicRefresher {
         saveEntityTag((SIPETagHeader) resp.getHeader(SIPETagHeader.NAME));
 
         // Start the periodic publish
-        startTimer(mExpirePeriod, 0.5);
+        startTimer(System.currentTimeMillis(), mExpirePeriod, 0.5);
     }
 
     /**

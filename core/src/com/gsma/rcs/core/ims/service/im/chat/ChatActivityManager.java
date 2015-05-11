@@ -84,7 +84,7 @@ public class ChatActivityManager extends PeriodicRefresher {
         updateActivity();
 
         // Start a timer to check if the inactivity period has been reach or not each 10seconds
-        startTimer(timeout);
+        startTimer(System.currentTimeMillis(), timeout);
     }
 
     /**
@@ -120,7 +120,7 @@ public class ChatActivityManager extends PeriodicRefresher {
             mSession.handleChatInactivityEvent();
         } else {
             // Restart timer
-            startTimer(remainingPeriod);
+            startTimer(System.currentTimeMillis(), remainingPeriod);
         }
     }
 }

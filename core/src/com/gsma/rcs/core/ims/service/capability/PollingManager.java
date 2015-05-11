@@ -73,7 +73,7 @@ public class PollingManager extends PeriodicRefresher {
         if (pollingPeriod == 0) {
             return;
         }
-        startTimer(pollingPeriod);
+        startTimer(System.currentTimeMillis(), pollingPeriod);
     }
 
     /**
@@ -99,7 +99,7 @@ public class PollingManager extends PeriodicRefresher {
         }
 
         // Restart timer
-        startTimer(mRcsSettings.getCapabilityPollingPeriod());
+        startTimer(System.currentTimeMillis(), mRcsSettings.getCapabilityPollingPeriod());
     }
 
     /**

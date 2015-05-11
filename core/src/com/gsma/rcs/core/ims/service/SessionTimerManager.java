@@ -147,10 +147,11 @@ public class SessionTimerManager extends PeriodicRefresher {
      * Start processing the session timer
      */
     private void startProcessing() {
+        long currentTime = System.currentTimeMillis();
         if (UAC_ROLE.equals(mRefresher)) {
-            startTimer(mExpirePeriod, 0.5);
+            startTimer(currentTime, mExpirePeriod, 0.5);
         } else {
-            startTimer(mExpirePeriod);
+            startTimer(currentTime, mExpirePeriod);
         }
     }
 

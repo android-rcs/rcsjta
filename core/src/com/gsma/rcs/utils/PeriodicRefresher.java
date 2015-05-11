@@ -41,36 +41,36 @@ public abstract class PeriodicRefresher {
     /**
      * Keep alive manager
      */
-    private KeepAlive alarmReceiver = new KeepAlive();
+    private KeepAlive mAlarmReceiver = new KeepAlive();
 
     /**
      * Alarm intent
      */
-    private PendingIntent alarmIntent;
+    private PendingIntent mAlarmIntent;
 
     /**
      * Action
      */
-    private String action;
+    private String mAction;
 
     /**
      * Timer state
      */
-    private boolean timerStarted = false;
+    private boolean mTimerStarted = false;
 
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private Logger mLogger = Logger.getLogger(this.getClass().getName());
 
     /**
      * Constructor
      */
     public PeriodicRefresher() {
         // Create a unique pending intent
-        this.action = this.toString(); // Unique action ID
-        this.alarmIntent = PendingIntent.getBroadcast(AndroidFactory.getApplicationContext(), 0,
-                new Intent(action), 0);
+        this.mAction = this.toString(); // Unique action ID
+        this.mAlarmIntent = PendingIntent.getBroadcast(AndroidFactory.getApplicationContext(), 0,
+                new Intent(mAction), 0);
     }
 
     /**
@@ -80,73 +80,73 @@ public abstract class PeriodicRefresher {
 
     /**
      * Start the timer
-     * 
+     * @param currentTime Time from when the timer has to be started
      * @param expirePeriod Expiration period in milliseconds
      */
-    public void startTimer(long expirePeriod) {
-        startTimer(expirePeriod, 1.0);
+    public void startTimer(long currentTime, long expirePeriod) {
+        startTimer(currentTime, expirePeriod, 1.0);
     }
 
     /**
      * Start the timer
-     * 
+     * @param currentTime Time from when the timer has to be started
      * @param expirePeriod Expiration period in milliseconds
      * @param delta Delta to apply on the expire period in percentage
      */
-    public synchronized void startTimer(long expirePeriod, double delta) {
+    public synchronized void startTimer(long currentTime, long expirePeriod, double delta) {
         // Check expire period
         if (expirePeriod <= 0) {
             // Expire period is null
-            if (logger.isActivated()) {
-                logger.debug("Timer is deactivated");
+            if (mLogger.isActivated()) {
+                mLogger.debug("Timer is deactivated");
             }
             return;
         }
 
         // Calculate the effective refresh period
         long pollingPeriod = (long) (expirePeriod * delta);
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Start timer at period=").append(pollingPeriod)
+        if (mLogger.isActivated()) {
+            mLogger.debug(new StringBuilder("Start timer at period=").append(pollingPeriod)
                     .append("ms (expiration=").append(expirePeriod).append("ms)").toString());
         }
 
         // Register the alarm receiver
-        AndroidFactory.getApplicationContext().registerReceiver(alarmReceiver,
-                new IntentFilter(action));
+        AndroidFactory.getApplicationContext().registerReceiver(mAlarmReceiver,
+                new IntentFilter(mAction));
 
         // Start alarm from now to the expire value
         AlarmManager am = (AlarmManager) AndroidFactory.getApplicationContext().getSystemService(
                 Context.ALARM_SERVICE);
-        am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + pollingPeriod, alarmIntent);
+        am.set(AlarmManager.RTC_WAKEUP, currentTime + pollingPeriod, mAlarmIntent);
 
         // The timer is started
-        timerStarted = true;
+        mTimerStarted = true;
     }
 
     /**
      * Stop the timer
      */
     public synchronized void stopTimer() {
-        if (!timerStarted) {
+        if (!mTimerStarted) {
             // Already stopped
             return;
         }
 
-        if (logger.isActivated()) {
-            logger.debug("Stop timer");
+        if (mLogger.isActivated()) {
+            mLogger.debug("Stop timer");
         }
 
         // The timer is stopped
-        timerStarted = false;
+        mTimerStarted = false;
 
         // Cancel alarm
         AlarmManager am = (AlarmManager) AndroidFactory.getApplicationContext().getSystemService(
                 Context.ALARM_SERVICE);
-        am.cancel(alarmIntent);
+        am.cancel(mAlarmIntent);
 
         // Unregister the alarm receiver
         try {
-            AndroidFactory.getApplicationContext().unregisterReceiver(alarmReceiver);
+            AndroidFactory.getApplicationContext().unregisterReceiver(mAlarmReceiver);
         } catch (IllegalArgumentException e) {
             // Nothing to do
         }

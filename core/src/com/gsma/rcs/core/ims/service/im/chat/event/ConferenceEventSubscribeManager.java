@@ -619,7 +619,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
         retrieveExpirePeriod(resp);
 
         // Start the periodic subscribe
-        startTimer(mExpirePeriod, 0.5);
+        startTimer(System.currentTimeMillis(), mExpirePeriod, 0.5);
 
         Core.getInstance().getImService()
                 .addGroupChatConferenceSubscriber(mDialogPath.getCallId(), mSession);

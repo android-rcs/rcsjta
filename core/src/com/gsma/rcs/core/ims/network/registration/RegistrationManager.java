@@ -509,10 +509,11 @@ public class RegistrationManager extends PeriodicRefresher {
         mReasonCode = ReasonCode.UNSPECIFIED;
 
         // Start the periodic registration
+        long currentTime = System.currentTimeMillis();
         if (mExpirePeriod <= DEFAULT_EXPIRE_PERIOD) {
-            startTimer(mExpirePeriod, 0.5);
+            startTimer(currentTime, mExpirePeriod, 0.5);
         } else {
-            startTimer(mExpirePeriod - SUBSTRACT_EXPIRE_PERIOD);
+            startTimer(currentTime, mExpirePeriod - SUBSTRACT_EXPIRE_PERIOD);
         }
 
         // Notify event listener

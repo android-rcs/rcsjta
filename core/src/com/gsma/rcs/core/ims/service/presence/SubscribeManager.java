@@ -417,7 +417,7 @@ public abstract class SubscribeManager extends PeriodicRefresher {
         retrieveExpirePeriod(resp);
 
         // Start the periodic subscribe
-        startTimer(mExpirePeriod, 0.5);
+        startTimer(System.currentTimeMillis(), mExpirePeriod, 0.5);
     }
 
     /**

@@ -65,7 +65,7 @@ public class KeepAliveManager extends PeriodicRefresher {
         if (logger.isActivated()) {
             logger.debug("Start keep-alive");
         }
-        startTimer(mPeriod);
+        startTimer(System.currentTimeMillis(), mPeriod);
     }
 
     /**
@@ -92,7 +92,7 @@ public class KeepAliveManager extends PeriodicRefresher {
                     mSip.getOutboundProxyAddr(), mSip.getOutboundProxyPort());
 
             // Start timer
-            startTimer(mPeriod);
+            startTimer(System.currentTimeMillis(), mPeriod);
         } catch (Exception e) {
             if (logger.isActivated()) {
                 logger.error("SIP heartbeat has failed", e);
