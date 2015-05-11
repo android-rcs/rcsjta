@@ -73,7 +73,7 @@ public class EditGeoloc extends Activity {
      */
     public final static int SELECT_GEOLOCATION = 0;
 
-    private int geolocExpirationTime = 0;
+    private long geolocExpirationTime = 0;
 
     private int geolocLabelMaxLength = 0;
 

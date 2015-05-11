@@ -165,7 +165,7 @@ public class ChatServiceConfigActivity extends Activity {
         textView.setText(Integer.valueOf(mConfig.getGeolocLabelMaxLength()).toString());
 
         textView = (TextView) findViewById(R.id.GeolocExpireTime);
-        textView.setText(Integer.valueOf(mConfig.getGeolocExpirationTime()).toString());
+        textView.setText(Long.valueOf(mConfig.getGeolocExpirationTime()).toString());
 
         checkBox = (CheckBox) findViewById(R.id.GroupChatSupported);
         checkBox.setChecked(mConfig.isGroupChatSupported());
