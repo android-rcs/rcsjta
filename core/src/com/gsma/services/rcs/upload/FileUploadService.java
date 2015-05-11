@@ -171,10 +171,11 @@ public final class FileUploadService extends RcsService {
     /**
      * Can a file be uploaded now
      * 
-     * @return Returns true if a file can be uploaded, else returns false
-     * @throws RcsServiceException
+     * @return boolean true if a file can be uploaded, else returns false
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public boolean canUploadFile() throws RcsServiceException {
+    public boolean canUploadFile() throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -189,10 +190,12 @@ public final class FileUploadService extends RcsService {
     /**
      * Returns the configuration of the file upload service
      * 
-     * @return Configuration
-     * @throws RcsServiceException
+     * @return FileUploadServiceConfiguration
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public FileUploadServiceConfiguration getConfiguration() throws RcsServiceException {
+    public FileUploadServiceConfiguration getConfiguration()
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -212,9 +215,13 @@ public final class FileUploadService extends RcsService {
      * @param attachFileIcon Attach file icon option. If true and if it's an image, a file icon is
      *            attached.
      * @return FileUpload
-     * @throws RcsServiceException
+     * @throws RcsMaxAllowedSessionLimitReachedException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public FileUpload uploadFile(Uri file, boolean attachFileIcon) throws RcsServiceException {
+    public FileUpload uploadFile(Uri file, boolean attachFileIcon)
+            throws RcsMaxAllowedSessionLimitReachedException, RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -238,10 +245,12 @@ public final class FileUploadService extends RcsService {
     /**
      * Returns the list of file uploads in progress
      * 
-     * @return List of file uploads
-     * @throws RcsServiceException
+     * @return Set&lt;FileUpload&gt; List of file uploads
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public Set<FileUpload> getFileUploads() throws RcsServiceException {
+    public Set<FileUpload> getFileUploads() throws RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -263,10 +272,12 @@ public final class FileUploadService extends RcsService {
      * Returns a current file upload from its unique ID
      * 
      * @param uploadId Upload ID
-     * @return File upload or null if not found
-     * @throws RcsServiceException
+     * @return FileUpload File upload or null if not found
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public FileUpload getFileUpload(String uploadId) throws RcsServiceException {
+    public FileUpload getFileUpload(String uploadId) throws RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -288,9 +299,11 @@ public final class FileUploadService extends RcsService {
      * Adds a listener on file upload events
      * 
      * @param listener Listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void addEventListener(FileUploadListener listener) throws RcsServiceException {
+    public void addEventListener(FileUploadListener listener)
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -309,9 +322,11 @@ public final class FileUploadService extends RcsService {
      * Removes a listener on file upload events
      * 
      * @param listener Listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void removeEventListener(FileUploadListener listener) throws RcsServiceException {
+    public void removeEventListener(FileUploadListener listener)
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }

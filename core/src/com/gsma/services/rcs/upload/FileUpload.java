@@ -23,7 +23,6 @@
 package com.gsma.services.rcs.upload;
 
 import com.gsma.services.rcs.RcsGenericException;
-import com.gsma.services.rcs.RcsServiceException;
 
 import android.net.Uri;
 import android.util.SparseArray;
@@ -120,10 +119,10 @@ public class FileUpload {
     /**
      * Returns the upload ID of the upload
      * 
-     * @return Upload ID
-     * @throws RcsServiceException
+     * @return String Upload ID
+     * @throws RcsGenericException
      */
-    public String getUploadId() throws RcsServiceException {
+    public String getUploadId() throws RcsGenericException {
         try {
             return mUploadInf.getUploadId();
 
@@ -136,9 +135,9 @@ public class FileUpload {
      * Returns the URI of the file to be uploaded
      * 
      * @return Uri
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public Uri getFile() throws RcsServiceException {
+    public Uri getFile() throws RcsGenericException {
         try {
             return mUploadInf.getFile();
 
@@ -150,11 +149,11 @@ public class FileUpload {
     /**
      * Returns info related to the uploaded file on the content server
      * 
-     * @return Upload info or null if not yet upload or in case of error
+     * @return FileUploadInfo info or null if not yet upload or in case of error
+     * @throws RcsGenericException
      * @see FileUploadInfo
-     * @throws RcsServiceException
      */
-    public FileUploadInfo getUploadInfo() throws RcsServiceException {
+    public FileUploadInfo getUploadInfo() throws RcsGenericException {
         try {
             return mUploadInf.getUploadInfo();
 
@@ -167,10 +166,10 @@ public class FileUpload {
      * Returns the state of the upload
      * 
      * @return State
+     * @throws RcsGenericException
      * @see FileUpload.State
-     * @throws RcsServiceException
      */
-    public State getState() throws RcsServiceException {
+    public State getState() throws RcsGenericException {
         try {
             return State.valueOf(mUploadInf.getState());
 
@@ -182,9 +181,9 @@ public class FileUpload {
     /**
      * Aborts the upload
      * 
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public void abortUpload() throws RcsServiceException {
+    public void abortUpload() throws RcsGenericException {
         try {
             mUploadInf.abortUpload();
         } catch (Exception e) {
