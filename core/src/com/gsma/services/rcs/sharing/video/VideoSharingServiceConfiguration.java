@@ -23,8 +23,6 @@
 package com.gsma.services.rcs.sharing.video;
 
 import com.gsma.services.rcs.RcsGenericException;
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.sharing.video.IVideoSharingServiceConfiguration;
 
 /**
  * Video sharing service configuration
@@ -51,9 +49,9 @@ public class VideoSharingServiceConfiguration {
      * limitation.
      * 
      * @return long Duration in milliseconds
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public long getMaxTime() throws RcsServiceException {
+    public long getMaxTime() throws RcsGenericException {
         try {
             return mConfiguration.getMaxTime();
 

@@ -26,7 +26,6 @@ import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsIllegalArgumentException;
 import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.util.SparseArray;
@@ -236,10 +235,10 @@ public class VideoSharing {
     /**
      * Returns the sharing ID of the video sharing
      * 
-     * @return Sharing ID
-     * @throws RcsServiceException
+     * @return String Sharing ID
+     * @throws RcsGenericException
      */
-    public String getSharingId() throws RcsServiceException {
+    public String getSharingId() throws RcsGenericException {
         try {
             return mSharingInf.getSharingId();
 
@@ -252,9 +251,10 @@ public class VideoSharing {
      * Returns the remote contact identifier
      * 
      * @return ContactId
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public ContactId getRemoteContact() throws RcsServiceException {
+    public ContactId getRemoteContact() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mSharingInf.getRemoteContact();
 
@@ -268,10 +268,11 @@ public class VideoSharing {
      * Returns the state of the sharing
      * 
      * @return State
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      * @see VideoSharing.State
-     * @throws RcsServiceException
      */
-    public State getState() throws RcsServiceException {
+    public State getState() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return State.valueOf(mSharingInf.getState());
 
@@ -285,10 +286,11 @@ public class VideoSharing {
      * Returns the reason code of the sharing
      * 
      * @return ReasonCode
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      * @see VideoSharing.ReasonCode
-     * @throws RcsServiceException
      */
-    public ReasonCode getReasonCode() throws RcsServiceException {
+    public ReasonCode getReasonCode() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return ReasonCode.valueOf(mSharingInf.getReasonCode());
 
@@ -302,10 +304,11 @@ public class VideoSharing {
      * Returns the direction of the sharing
      * 
      * @return Direction
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      * @see Direction
-     * @throws RcsServiceException
      */
-    public Direction getDirection() throws RcsServiceException {
+    public Direction getDirection() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return Direction.valueOf(mSharingInf.getDirection());
 
@@ -319,9 +322,9 @@ public class VideoSharing {
      * Accepts video sharing invitation
      * 
      * @param player Video player
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public void acceptInvitation(VideoPlayer player) throws RcsServiceException {
+    public void acceptInvitation(VideoPlayer player) throws RcsGenericException {
         try {
             mSharingInf.acceptInvitation(player);
         } catch (Exception e) {
@@ -333,9 +336,9 @@ public class VideoSharing {
     /**
      * Rejects video sharing invitation
      * 
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public void rejectInvitation() throws RcsServiceException {
+    public void rejectInvitation() throws RcsGenericException {
         try {
             mSharingInf.rejectInvitation();
         } catch (Exception e) {
@@ -346,9 +349,9 @@ public class VideoSharing {
     /**
      * Aborts the sharing
      * 
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public void abortSharing() throws RcsServiceException {
+    public void abortSharing() throws RcsGenericException {
         try {
             mSharingInf.abortSharing();
         } catch (Exception e) {
@@ -359,10 +362,11 @@ public class VideoSharing {
     /**
      * Return the video encoding (eg. H.264)
      * 
-     * @return Encoding
-     * @throws RcsServiceException
+     * @return String Encoding
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public String getVideoEncoding() throws RcsServiceException {
+    public String getVideoEncoding() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mSharingInf.getVideoEncoding();
 
@@ -377,10 +381,11 @@ public class VideoSharing {
      * sharing or the local timestamp of when the video sharing invitation was received for incoming
      * video sharings.
      * 
-     * @return Timestamp in milliseconds
-     * @throws RcsServiceException
+     * @return long Timestamp in milliseconds
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public long getTimestamp() throws RcsServiceException {
+    public long getTimestamp() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mSharingInf.getTimestamp();
 
@@ -393,10 +398,11 @@ public class VideoSharing {
     /**
      * Returns the duration of the video sharing
      * 
-     * @return Duration in milliseconds
-     * @throws RcsServiceException
+     * @return long Duration in milliseconds
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      */
-    public long getDuration() throws RcsServiceException {
+    public long getDuration() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mSharingInf.getDuration();
 
@@ -409,11 +415,13 @@ public class VideoSharing {
     /**
      * Returns the video descriptor
      * 
-     * @return Video descriptor
+     * @return VideoDescriptor
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
      * @see VideoDescriptor
-     * @throws RcsServiceException
      */
-    public VideoDescriptor getVideoDescriptor() throws RcsServiceException {
+    public VideoDescriptor getVideoDescriptor() throws RcsPersistentStorageException,
+            RcsGenericException {
         try {
             return mSharingInf.getVideoDescriptor();
 

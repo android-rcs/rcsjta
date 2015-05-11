@@ -149,10 +149,12 @@ public final class VideoSharingService extends RcsService {
     /**
      * Returns the configuration of video sharing service
      * 
-     * @return Configuration
-     * @throws RcsServiceException
+     * @return VideoSharingServiceConfiguration
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public VideoSharingServiceConfiguration getConfiguration() throws RcsServiceException {
+    public VideoSharingServiceConfiguration getConfiguration()
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -173,11 +175,15 @@ public final class VideoSharingService extends RcsService {
      * 
      * @param contact Contact identifier
      * @param player Video player
-     * @return Video sharing
-     * @throws RcsServiceException
+     * @return VideoSharing
+     * @throws RcsPersistentStorageException
+     * @throws RcsServiceNotRegisteredException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     public VideoSharing shareVideo(ContactId contact, VideoPlayer player)
-            throws RcsServiceException {
+            throws RcsPersistentStorageException, RcsServiceNotRegisteredException,
+            RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -201,10 +207,12 @@ public final class VideoSharingService extends RcsService {
      * Returns a current video sharing from its unique ID
      * 
      * @param sharingId Sharing ID
-     * @return Video sharing or null if not found
-     * @throws RcsServiceException
+     * @return VideoSharing Video sharing or null if not found
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public VideoSharing getVideoSharing(String sharingId) throws RcsServiceException {
+    public VideoSharing getVideoSharing(String sharingId) throws RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -221,9 +229,11 @@ public final class VideoSharingService extends RcsService {
      * Adds a listener on video sharing events
      * 
      * @param listener Listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void addEventListener(VideoSharingListener listener) throws RcsServiceException {
+    public void addEventListener(VideoSharingListener listener)
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -242,9 +252,11 @@ public final class VideoSharingService extends RcsService {
      * Removes a listener on video sharing events
      * 
      * @param listener Listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void removeEventListener(VideoSharingListener listener) throws RcsServiceException {
+    public void removeEventListener(VideoSharingListener listener)
+            throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -267,9 +279,10 @@ public final class VideoSharingService extends RcsService {
      * Deletes all video sharing from history and abort/reject any associated ongoing session if
      * such exists.
      * 
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void deleteVideoSharings() throws RcsServiceException {
+    public void deleteVideoSharings() throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -285,9 +298,11 @@ public final class VideoSharingService extends RcsService {
      * associated ongoing session if such exists.
      * 
      * @param contact
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void deleteVideoSharings(ContactId contact) throws RcsServiceException {
+    public void deleteVideoSharings(ContactId contact) throws RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -304,9 +319,11 @@ public final class VideoSharingService extends RcsService {
      * ongoing session if such exists.
      * 
      * @param sharingId
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public void deleteVideoSharing(String sharingId) throws RcsServiceException {
+    public void deleteVideoSharing(String sharingId) throws RcsServiceNotAvailableException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
