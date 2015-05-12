@@ -381,6 +381,8 @@ public class RcsSettingsProvider extends ContentProvider {
                     RcsSettingsData.DEFAULT_FIRST_MESSAGE_INVITE);
             addParameter(db, RcsSettingsData.REQUEST_AND_RESPOND_TO_GROUP_DISPLAY_REPORTS,
                     RcsSettingsData.DEFAULT_REQUEST_AND_RESPOND_TO_GROUP_DISPLAY_REPORTS);
+            addParameter(db, RcsSettingsData.MAX_ALLOWED_DISPLAY_NAME_CHARS,
+                    RcsSettingsData.DEFAULT_MAX_ALLOWED_DISPLAY_NAME_CHARS);
         }
 
         @Override

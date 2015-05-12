@@ -110,7 +110,11 @@ public class CommonServiceConfigurationImpl extends ICommonServiceConfiguration.
     @Override
     public String getMyDisplayName() throws RemoteException {
         try {
-            return mRcsSettings.getUserProfileImsDisplayName();
+            String displayName = mRcsSettings.getUserProfileImsDisplayName();
+            if (TextUtils.isEmpty(displayName)) {
+                return null;
+            }
+            return displayName;
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -159,10 +163,14 @@ public class CommonServiceConfigurationImpl extends ICommonServiceConfiguration.
 
     @Override
     public void setMyDisplayName(String name) throws RemoteException {
-        if (TextUtils.isEmpty(name)) {
-            throw new ServerApiIllegalArgumentException("name must not be null or empty!");
-        }
         try {
+            if (TextUtils.isEmpty(name)) {
+                mRcsSettings.setUserProfileImsDisplayName("");
+                return;
+            }
+            if (name.length() > mRcsSettings.getMaxAllowedDisplayNameChars()) {
+                throw new ServerApiIllegalArgumentException("name exceeds max allowed characters!");
+            }
             mRcsSettings.setUserProfileImsDisplayName(name);
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {

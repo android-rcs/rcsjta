@@ -2187,4 +2187,14 @@ public class RcsSettings {
     public long getMsgDeliveryTimeoutPeriod() {
         return readLong(RcsSettingsData.MSG_DELIVERY_TIMEOUT);
     }
+
+    /**
+     * Restrict display name length to 256 characters, as allowing infinite length string as display
+     * name will eventually crash the stack.
+     * 
+     * @return the maximum characters allowed for display name
+     */
+    public int getMaxAllowedDisplayNameChars() {
+        return readInteger(RcsSettingsData.MAX_ALLOWED_DISPLAY_NAME_CHARS);
+    }
 }
