@@ -30,6 +30,8 @@ import com.gsma.rcs.provider.settings.RcsSettingsData.AuthenticationProcedure;
 import com.gsma.rcs.provider.settings.RcsSettingsData.EnableRcseSwitch;
 import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.provider.settings.RcsSettingsData.GsmaRelease;
+import com.gsma.rcs.provider.settings.RcsSettingsData.ImMsgTech;
+import com.gsma.rcs.provider.settings.RcsSettingsData.ImSessionStartMode;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.DeviceUtils;
@@ -47,6 +49,7 @@ import java.io.ByteArrayInputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+
 import javax2.sip.ListeningPoint;
 
 /**
@@ -1024,8 +1027,9 @@ public class ProvisioningParser {
 
                 if (imSessionStart == null) {
                     if ((imSessionStart = getValueByParamName("imSessionStart", childnode, TYPE_INT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.IM_SESSION_START,
-                                imSessionStart);
+                        ImSessionStartMode mode = ImSessionStartMode.valueOf(Integer
+                                .parseInt(imSessionStart));
+                        mRcsSettings.setImSessionStartMode(mode);
                         continue;
                     }
                 }
@@ -1137,8 +1141,8 @@ public class ProvisioningParser {
 
                 if (imMsgTech == null) {
                     if ((imMsgTech = getValueByParamName("imMsgTech", childnode, TYPE_INT)) != null) {
-                        mRcsSettings.writeInteger(RcsSettingsData.IM_MSG_TECH,
-                                Integer.valueOf(imMsgTech));
+                        ImMsgTech value = ImMsgTech.valueOf(Integer.parseInt(imMsgTech));
+                        mRcsSettings.setImMsgTech(value);
                         continue;
                     }
                 }
@@ -1146,8 +1150,7 @@ public class ProvisioningParser {
                 if (firstMessageInvite == null) {
                     if ((firstMessageInvite = getValueByParamName("firstMsgInvite", childnode,
                             TYPE_INT)) != null) {
-                        mRcsSettings.writeBoolean(RcsSettingsData.FIRST_MESSAGE_INVITE,
-                                !firstMessageInvite.equals("0"));
+                        mRcsSettings.setFirstMessageInInvite(!firstMessageInvite.equals("0"));
                         continue;
                     }
                 }

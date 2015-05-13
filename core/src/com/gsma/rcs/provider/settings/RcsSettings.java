@@ -950,6 +950,14 @@ public class RcsSettings {
     public ImSessionStartMode getImSessionStartMode() {
         return ImSessionStartMode.valueOf(readInteger(RcsSettingsData.IM_SESSION_START));
     }
+    
+    /**
+     * Set IM session start mode
+     * @param mode IM session start mode
+     */
+    public void setImSessionStartMode(ImSessionStartMode mode) {
+        writeInteger(RcsSettingsData.IM_SESSION_START, mode.toInt());
+    }
 
     /**
      * Get max number of entries per contact in the chat log
