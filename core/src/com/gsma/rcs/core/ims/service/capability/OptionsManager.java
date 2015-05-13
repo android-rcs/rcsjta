@@ -106,24 +106,69 @@ public class OptionsManager implements DiscoveryManager {
     }
 
     /**
-     * Request contact capabilities
+     * Request capabilities in background
      * 
-     * @param contact Remote contact identifier
+     * @param contact
      */
-    public void requestCapabilities(ContactId contact) {
+    private void requestCapabilitiesInBackground(ContactId contact) {
         if (sLogger.isActivated()) {
             sLogger.debug("Request capabilities in background for " + contact);
         }
 
-        // Update capability time of last request
         mContactManager.updateCapabilitiesTimeLastRequest(contact);
 
-        // Start request in background
         boolean richcall = mImsModule.getRichcallService().isCallConnectedWith(contact);
         OptionsRequestTask task = new OptionsRequestTask(mImsModule, contact,
                 CapabilityUtils.getSupportedFeatureTags(richcall, mRcsSettings), mRcsSettings,
                 mContactManager);
         mThreadPool.submit(task);
+    }
+
+    /**
+     * Check if refresh of capability is authorized
+     * 
+     * @param timestampOfLastRequest timestamp of last capability request in milliseconds
+     * @return true if capability request is authorized
+     */
+    private boolean isCapabilityRefreshAuthorized(long timestampOfLastRequest) {
+        long currentTime = System.currentTimeMillis();
+        /*
+         * Is current time before last capability request ? (may occur if current time has been
+         * updated)
+         */
+        if (currentTime < timestampOfLastRequest) {
+            return true;
+        }
+        return (currentTime > (timestampOfLastRequest + mRcsSettings.getCapabilityRefreshTimeout()));
+    }
+
+    /**
+     * Request contact capabilities
+     * 
+     * @param contact Remote contact identifier
+     */
+    public void requestCapabilities(ContactId contact) {
+        boolean logActivated = sLogger.isActivated();
+        if (contact == null || contact.equals(ImsModule.IMS_USER_PROFILE.getUsername())) {
+            return;
+        }
+        Capabilities capabilities = mContactManager.getContactCapabilities(contact);
+        if (capabilities == null) {
+            if (logActivated) {
+                sLogger.debug("No capability exist for ".concat(contact.toString()));
+            }
+            requestCapabilitiesInBackground(contact);
+        } else {
+            if (logActivated) {
+                sLogger.debug("Capabilities exist for ".concat(contact.toString()));
+            }
+            if (isCapabilityRefreshAuthorized(capabilities.getTimestampOfLastRequest())) {
+                if (logActivated) {
+                    sLogger.debug("Request capabilities for ".concat(contact.toString()));
+                }
+                requestCapabilitiesInBackground(contact);
+            }
+        }
     }
 
     /**

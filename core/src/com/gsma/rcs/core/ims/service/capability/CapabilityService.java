@@ -179,60 +179,12 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      * Request contact capabilities
      * 
      * @param contact Contact identifier
-     * @return Capabilities
      */
-    public synchronized Capabilities requestContactCapabilities(ContactId contact) {
-        boolean logActivated = sLogger.isActivated();
-        if (logActivated) {
+    public synchronized void requestContactCapabilities(ContactId contact) {
+        if (sLogger.isActivated()) {
             sLogger.debug("Request capabilities to " + contact);
         }
-
-        // Do not request capabilities for oneself
-        if (contact == null || contact.equals(ImsModule.IMS_USER_PROFILE.getUsername())) {
-            return null;
-        }
-
-        // Read capabilities from the database
-        Capabilities capabilities = mContactManager.getContactCapabilities(contact);
-        if (capabilities == null) {
-            if (logActivated) {
-                sLogger.debug("No capability exist for ".concat(contact.toString()));
-            }
-
-            // New contact: request capabilities from the network
-            optionsManager.requestCapabilities(contact);
-        } else {
-            if (logActivated) {
-                sLogger.debug("Capabilities exist for ".concat(contact.toString()));
-            }
-            if (isCapabilityRefreshAuthorized(capabilities.getTimestampOfLastRequest())) {
-                if (logActivated) {
-                    sLogger.debug("Request capabilities for ".concat(contact.toString()));
-                }
-
-                // Capabilities are too old: request capabilities from the network
-                optionsManager.requestCapabilities(contact);
-            }
-        }
-        return capabilities;
-    }
-
-    /**
-     * Check if refresh of capability is authorized
-     * 
-     * @param timestampOfLastRequest timestamp of last capability request in milliseconds
-     * @return true if capability request is authorized
-     */
-    private boolean isCapabilityRefreshAuthorized(long timestampOfLastRequest) {
-        // Do not request capability refresh too often
-        long now = System.currentTimeMillis();
-        // Is current time before last capability request ? (may occur if current time has been
-        // updated)
-        if (now < timestampOfLastRequest) {
-            return true;
-        }
-        // Is current time after capability refresh timeout ?
-        return (now > (timestampOfLastRequest + mRcsSettings.getCapabilityRefreshTimeout()));
+        optionsManager.requestCapabilities(contact);
     }
 
     /**
