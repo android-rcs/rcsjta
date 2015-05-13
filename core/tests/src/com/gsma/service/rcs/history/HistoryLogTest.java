@@ -26,6 +26,7 @@ import com.gsma.rcs.provider.sharing.VideoSharingData;
 import com.gsma.rcs.service.api.HistoryServiceImpl;
 import com.gsma.rcs.utils.ContactUtilMockContext;
 import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message;
@@ -315,18 +316,18 @@ public class HistoryLogTest extends AndroidTestCase {
         super.tearDown();
     }
 
-    private ContactId getRemoteContact() {
+    private ContactId getRemoteContact() throws RcsPermissionDeniedException {
         return mContactUtil.formatContact(REMOTE_CONTACT_NUMBER);
     }
 
-    private void addOutgoingFileTransferSharing() {
+    private void addOutgoingFileTransferSharing() throws RcsPermissionDeniedException {
         mMessagingLog.addOneToOneFileTransfer(FILE_TRANSFER_ID, getRemoteContact(),
                 Direction.INCOMING, CONTENT, THUMBNAIL, FileTransfer.State.INVITED,
                 FileTransfer.ReasonCode.UNSPECIFIED, mTimestamp++, mTimestampSent++,
                 FileTransferLog.UNKNOWN_EXPIRATION, FileTransferLog.UNKNOWN_EXPIRATION);
     }
 
-    private void addOutgoingOneToOneChatMessages(String... ids) {
+    private void addOutgoingOneToOneChatMessages(String... ids) throws RcsPermissionDeniedException {
         if (ids.length == 0) {
             ChatMessage msg = new ChatMessage(MESSAGE_ID, getRemoteContact(), TXT,
                     MimeType.TEXT_MESSAGE, mTimestamp++, mTimestampSent++, DISPLAY_NAME);
@@ -341,25 +342,25 @@ public class HistoryLogTest extends AndroidTestCase {
         }
     }
 
-    private void addOutgoingImageSharing() {
+    private void addOutgoingImageSharing() throws RcsPermissionDeniedException {
         mRichCallHistory.addImageSharing(IMAGE_SHARING_ID, getRemoteContact(), Direction.INCOMING,
                 CONTENT, ImageSharing.State.ACCEPTING, ImageSharing.ReasonCode.UNSPECIFIED,
                 mTimestamp++);
     }
 
-    private void addOutgoingVideoSharing() {
+    private void addOutgoingVideoSharing() throws RcsPermissionDeniedException {
         mRichCallHistory.addVideoSharing(VIDEO_SHARING_ID, getRemoteContact(), Direction.INCOMING,
                 VIDEO_CONTENT, VideoSharing.State.ACCEPTING, VideoSharing.ReasonCode.UNSPECIFIED,
                 mTimestamp++);
     }
 
-    private void addOutgoingGeolocSharing() {
+    private void addOutgoingGeolocSharing() throws RcsPermissionDeniedException {
         mRichCallHistory.addOutgoingGeolocSharing(getRemoteContact(), GEOLOC_SHARING_ID,
                 new Geoloc("test", 0, 0, 0, 0), GeolocSharing.State.TRANSFERRED,
                 GeolocSharing.ReasonCode.UNSPECIFIED, mTimestamp++);
     }
 
-    private void addItems() {
+    private void addItems() throws RcsPermissionDeniedException {
         addOutgoingOneToOneChatMessages();
         addOutgoingFileTransferSharing();
         addOutgoingImageSharing();
@@ -444,7 +445,11 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     public void testQueryHistoryLogProviderWithoutProjection() {
-        addItems();
+        try {
+            addItems();
+        } catch (RcsPermissionDeniedException e) {
+            fail(e.getMessage());
+        }
         Uri historyUri = getUriWithAllInternalProviders();
         Cursor cursor = getContext().getContentResolver().query(historyUri, null, null, null, null);
         assertEquals(5, cursor.getCount());
@@ -452,7 +457,11 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     public void testQueryHistoryLogProviderWithProjection() {
-        addItems();
+        try {
+            addItems();
+        } catch (RcsPermissionDeniedException e) {
+            fail(e.getMessage());
+        }
         Uri historyUri = getUriWithAllInternalProviders();
         Cursor cursor = getContext().getContentResolver().query(historyUri, PROJECTION, null, null,
                 null);
@@ -461,7 +470,11 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     public void testQueryHistoryLogProviderWithSelection() {
-        addItems();
+        try {
+            addItems();
+        } catch (RcsPermissionDeniedException e) {
+            fail(e.getMessage());
+        }
         Uri historyUri = getUriWithAllInternalProviders();
         Cursor cursor = getContext().getContentResolver().query(historyUri, null,
                 SELECTION_WITH_MESSAGE_ID, null, null);
@@ -470,7 +483,11 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     public void testQueryHistoryLogProviderWithSelectionArgs() {
-        addItems();
+        try {
+            addItems();
+        } catch (RcsPermissionDeniedException e) {
+            fail(e.getMessage());
+        }
         Uri historyUri = getUriWithAllInternalProviders();
         Cursor cursor = getContext().getContentResolver().query(historyUri, null, SELECTION_ID,
                 SELECTION_ARGS, null);
@@ -479,7 +496,11 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     public void testQueryHistoryLogProviderWithSelectionEmpty() {
-        addItems();
+        try {
+            addItems();
+        } catch (RcsPermissionDeniedException e) {
+            fail(e.getMessage());
+        }
         Uri historyUri = getUriWithAllInternalProviders();
         Cursor cursor = getContext().getContentResolver().query(historyUri, null, SELECTION_EMPTY,
                 null, null);
@@ -488,7 +509,11 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     public void testQueryHistoryLogProviderWithSelectionNotEmpty() {
-        addItems();
+        try {
+            addItems();
+        } catch (RcsPermissionDeniedException e) {
+            fail(e.getMessage());
+        }
         Uri historyUri = getUriWithAllInternalProviders();
         Cursor cursor = getContext().getContentResolver().query(historyUri, null,
                 SELECTION_NOT_EMPTY, null, null);
@@ -497,8 +522,12 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     public void testQueryHistoryLogProviderWithSort() {
-        addOutgoingOneToOneChatMessages();
-        addOutgoingFileTransferSharing();
+        try {
+            addOutgoingOneToOneChatMessages();
+            addOutgoingFileTransferSharing();
+        } catch (RcsPermissionDeniedException e) {
+            fail(e.getMessage());
+        }
         Uri historyUri = getUriWithAllInternalProviders();
         Cursor cursor = getContext().getContentResolver().query(historyUri, null, null, null,
                 SORT_TIMESTAMP_ASC);
@@ -520,7 +549,11 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     public void testRegisterInvalidExtraHistoryLogMember_badproviderid() {
-        addItems();
+        try {
+            addItems();
+        } catch (RcsPermissionDeniedException e) {
+            fail(e.getMessage());
+        }
         Map<String, String> columnMapping = new HashMap<String, String>();
         columnMapping.put(HistoryLog.PROVIDER_ID, String.valueOf(INVALID_EXTERNAL_PROVIDER_ID));
 
@@ -534,7 +567,11 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     public void testRegisterExtraHistoryLogMemberWithForbiddenDatabases() {
-        addItems();
+        try {
+            addItems();
+        } catch (RcsPermissionDeniedException e) {
+            fail(e.getMessage());
+        }
         Map<String, String> columnMapping = new HashMap<String, String>();
         columnMapping.put(HistoryLog.PROVIDER_ID, String.valueOf(EXTERNAL_PROVIDER_ID));
 
@@ -556,7 +593,11 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     public void testRegisterExtraHistoryLogMemberWithMappingNull() {
-        addItems();
+        try {
+            addItems();
+        } catch (RcsPermissionDeniedException e) {
+            fail(e.getMessage());
+        }
         Map<String, String> columnMapping = null;
 
         Uri database = Uri.fromFile(getContext().getDatabasePath(EXTERNAL_DATABASE_NAME));
@@ -577,57 +618,75 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     public void testSQLInjection_selection() throws RemoteException {
-        addItems(); // 5
-
-        assertEquals(
-                5,
-                getContext().getContentResolver()
-                        .query(getUriWithAllInternalProviders(), null, null, null, null).getCount());
-
         try {
+            addItems(); // 5
+
+            assertEquals(
+                    5,
+                    getContext().getContentResolver()
+                            .query(getUriWithAllInternalProviders(), null, null, null, null)
+                            .getCount());
+
+            try {
+                getContext()
+                        .getContentResolver()
+                        .query(createHistoryUri(1), null, "_id = 1;DROP TABLE MESSAGE;", null, null)
+                        .close();
+                fail();
+            } catch (Exception e) {
+                addOutgoingOneToOneChatMessages("AnotherOne"); // 1
+                assertEquals(
+                        6,
+                        getContext().getContentResolver()
+                                .query(getUriWithAllInternalProviders(), null, null, null, null)
+                                .getCount());
+            }
+        } catch (RcsPermissionDeniedException e1) {
+            fail(e1.getMessage());
+        }
+    }
+
+    public void testSQLInjection_sort() throws RemoteException {
+        try {
+            addItems(); // 5
+
             getContext().getContentResolver()
-                    .query(createHistoryUri(1), null, "_id = 1;DROP TABLE MESSAGE;", null, null)
+                    .query(createHistoryUri(1), null, null, null, "_id;DROP TABLE MESSAGE;")
                     .close();
-            fail();
-        } catch (Exception e) {
             addOutgoingOneToOneChatMessages("AnotherOne"); // 1
             assertEquals(
                     6,
                     getContext().getContentResolver()
                             .query(getUriWithAllInternalProviders(), null, null, null, null)
                             .getCount());
+        } catch (RcsPermissionDeniedException e) {
+            fail(e.getMessage());
         }
     }
 
-    public void testSQLInjection_sort() throws RemoteException {
-        addItems(); // 5
-
-        getContext().getContentResolver()
-                .query(createHistoryUri(1), null, null, null, "_id;DROP TABLE MESSAGE;").close();
-        addOutgoingOneToOneChatMessages("AnotherOne"); // 1
-        assertEquals(
-                6,
-                getContext().getContentResolver()
-                        .query(getUriWithAllInternalProviders(), null, null, null, null).getCount());
-    }
-
     public void testSQLInjection_tablename() throws RemoteException {
-        addItems(); // 5
+        try {
+            addItems(); // 5
 
-        assertEquals(
-                5,
-                getContext().getContentResolver()
-                        .query(getUriWithAllInternalProviders(), null, null, null, null).getCount());
+            assertEquals(
+                    5,
+                    getContext().getContentResolver()
+                            .query(getUriWithAllInternalProviders(), null, null, null, null)
+                            .getCount());
 
-        Uri database = Uri.fromFile(getContext().getDatabasePath(EXTERNAL_DATABASE_NAME));
-        mHistoryService.registerExtraHistoryLogMember(EXTERNAL_PROVIDER_ID, EXTERNAL_URI, database,
-                EXTERNAL_TABLE + ";DROP TABLE MESSAGE;", getExternalColumnMapping());
+            Uri database = Uri.fromFile(getContext().getDatabasePath(EXTERNAL_DATABASE_NAME));
+            mHistoryService.registerExtraHistoryLogMember(EXTERNAL_PROVIDER_ID, EXTERNAL_URI,
+                    database, EXTERNAL_TABLE + ";DROP TABLE MESSAGE;", getExternalColumnMapping());
 
-        addOutgoingOneToOneChatMessages("YetAnotherOne"); // 1
-        assertEquals(
-                6,
-                getContext().getContentResolver()
-                        .query(getUriWithAllInternalProviders(), null, null, null, null).getCount());
+            addOutgoingOneToOneChatMessages("YetAnotherOne"); // 1
+            assertEquals(
+                    6,
+                    getContext().getContentResolver()
+                            .query(getUriWithAllInternalProviders(), null, null, null, null)
+                            .getCount());
+        } catch (RcsPermissionDeniedException e) {
+            fail(e.getMessage());
+        }
     }
 
 }

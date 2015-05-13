@@ -243,7 +243,11 @@ public class LauncherUtils {
         TelephonyManager mgr = (TelephonyManager) context
                 .getSystemService(Context.TELEPHONY_SERVICE);
         String currentUserAccount = mgr.getSubscriberId();
-        mgr = null;
+        if (currentUserAccount == null) {
+            if (sLogger.isActivated()) {
+                sLogger.warn("Cannot get subscriber ID from telephony manager!");
+            }
+        }
         return currentUserAccount;
     }
 

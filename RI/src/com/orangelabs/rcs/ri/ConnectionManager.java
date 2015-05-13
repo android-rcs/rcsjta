@@ -186,7 +186,7 @@ public class ConnectionManager {
             if (mActivity != null) {
                 String msg = null;
                 if (ReasonCode.SERVICE_DISABLED == error) {
-                    msg = mActivity.getString(R.string.label_api_disabled_);
+                    msg = mActivity.getString(R.string.label_api_disabled);
                 } else {
                     msg = mActivity.getString(R.string.label_api_disconnected);
                 }

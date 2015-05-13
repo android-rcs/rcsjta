@@ -18,6 +18,9 @@
 
 package com.orangelabs.rcs.ri;
 
+import com.gsma.services.rcs.RcsPermissionDeniedException;
+import com.gsma.services.rcs.contact.ContactUtil;
+
 import com.orangelabs.rcs.ri.capabilities.TestCapabilitiesApi;
 import com.orangelabs.rcs.ri.contacts.TestContactsApi;
 import com.orangelabs.rcs.ri.extension.TestMultimediaSessionApi;
@@ -28,6 +31,7 @@ import com.orangelabs.rcs.ri.service.TestServiceApi;
 import com.orangelabs.rcs.ri.sharing.TestSharingApi;
 import com.orangelabs.rcs.ri.upload.InitiateFileUpload;
 import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.ListActivity;
 import android.content.Intent;
@@ -47,16 +51,16 @@ public class RI extends ListActivity {
     /**
      * A locker to exit only once
      */
-    protected LockAccess mExitOnce = new LockAccess();
+    private LockAccess mExitOnce = new LockAccess();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Set layout
+        /* Set layout */
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        // Set items
+        /* Set items */
         String[] items = {
                 getString(R.string.menu_contacts), getString(R.string.menu_capabilities),
                 getString(R.string.menu_messaging), getString(R.string.menu_sharing),
@@ -65,8 +69,16 @@ public class RI extends ListActivity {
                 getString(R.string.menu_history_log), getString(R.string.menu_about)
         };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
-        // Create the API connection manager
         ConnectionManager.getInstance(this);
+
+        ContactUtil contactUtil = ContactUtil.getInstance(this);
+        try {
+            contactUtil.getMyCountryCode();
+        } catch (RcsPermissionDeniedException e) {
+            /* We should not be allowed to continue if this exception occurs */
+            Utils.showMessageAndExit(this, getString(R.string.error_api_permission_denied),
+                    mExitOnce, e);
+        }
     }
 
     @Override

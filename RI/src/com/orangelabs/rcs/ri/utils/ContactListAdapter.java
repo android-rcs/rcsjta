@@ -35,7 +35,6 @@ import android.widget.CursorAdapter;
 import android.widget.TextView;
 
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.contact.ContactService;
 import com.gsma.services.rcs.contact.RcsContact;
 
@@ -94,7 +93,6 @@ public class ContactListAdapter extends CursorAdapter {
                         -1, defaultValue, "", -1, -1
                 });
             }
-            ContactUtil contactUtil = ContactUtil.getInstance(context);
             int columnIdxId = cursor.getColumnIndexOrThrow(Phone._ID);
             int columIdxLabel = cursor.getColumnIndexOrThrow(Phone.LABEL);
             int columnIdxType = cursor.getColumnIndexOrThrow(Phone.TYPE);
@@ -102,11 +100,11 @@ public class ContactListAdapter extends CursorAdapter {
             int columnIdxNumber = cursor.getColumnIndexOrThrow(Phone.NUMBER);
             while (cursor.moveToNext()) {
                 String phoneNumber = cursor.getString(columnIdxNumber);
-                if (!contactUtil.isValidContact(phoneNumber)) {
+                if (!ContactUtil.isValidContact(phoneNumber)) {
                     /* Not a valid phone number: skip it */
                     continue;
                 }
-                ContactId contact = contactUtil.formatContact(phoneNumber);
+                ContactId contact = ContactUtil.formatContact(phoneNumber);
                 /* Filter number already treated */
                 if (!treatedNumbers.contains(contact)) {
                     matrix.addRow(new Object[] {
@@ -135,7 +133,6 @@ public class ContactListAdapter extends CursorAdapter {
         ContentResolver content = context.getContentResolver();
         Cursor cursor = null;
         ConnectionManager apiConnectionManager = ConnectionManager.getInstance(context);
-        ContactUtil contactUtil = ContactUtil.getInstance(context);
         MatrixCursor matrix = new MatrixCursor(PROJECTION_PHONE);
         ContactService contactsApi = apiConnectionManager.getContactApi();
         try {
@@ -159,11 +156,11 @@ public class ContactListAdapter extends CursorAdapter {
                 while (cursor.moveToNext()) {
                     // Keep a trace of already treated row
                     String phoneNumber = cursor.getString(columnIdxNumber);
-                    if (!contactUtil.isValidContact(phoneNumber)) {
+                    if (!ContactUtil.isValidContact(phoneNumber)) {
                         /* Not a valid phone number: skip it */
                         continue;
                     }
-                    ContactId contact = contactUtil.formatContact(phoneNumber);
+                    ContactId contact = ContactUtil.formatContact(phoneNumber);
                     // If this number is RCS and not already in the list,
                     // take it
                     if (rcsContactIds.contains(contact) && !treatedContactIDs.contains(contact)) {

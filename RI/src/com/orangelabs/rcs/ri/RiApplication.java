@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import android.app.Application;
+import android.content.Context;
 import android.content.res.Resources;
 
 import com.gsma.services.rcs.RcsService.Direction;
@@ -32,6 +33,8 @@ import com.gsma.services.rcs.RcsService.Direction;
  * @author YPLO6403
  */
 public class RiApplication extends Application {
+
+    private static Context mContext;
 
     /**
      * Array of participant statuses
@@ -138,6 +141,7 @@ public class RiApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        mContext = getApplicationContext();
         Resources resources = getResources();
         sParticipantStatuses = resources.getStringArray(R.array.participant_statuses);
         sDeliveryStatuses = resources.getStringArray(R.array.delivery_statuses);
@@ -164,7 +168,16 @@ public class RiApplication extends Application {
         sDirectionToString.put(Direction.IRRELEVANT,
                 resources.getString(R.string.label_direction_unknown));
 
-        ConnectionManager.getInstance(getApplicationContext()).connectApis();
+        ConnectionManager.getInstance(mContext).connectApis();
+    }
+
+    /**
+     * Gets the application context
+     * 
+     * @return the application context
+     */
+    public static Context getAppContext() {
+        return mContext;
     }
 
 }

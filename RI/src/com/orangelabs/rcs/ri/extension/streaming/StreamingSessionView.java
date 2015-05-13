@@ -149,8 +149,7 @@ public class StreamingSessionView extends Activity {
                         + " sessionId=" + sessionId + " state=" + state + " reason=" + reasonCode);
             }
             // Discard event if not for current sessionId
-            if (mSessionId == null
-                    || !mSessionId.equals(sessionId)) {
+            if (mSessionId == null || !mSessionId.equals(sessionId)) {
                 return;
             }
             final String _reasonCode = RiApplication.sMultimediaReasonCodes[reasonCode.toInt()];
@@ -188,7 +187,8 @@ public class StreamingSessionView extends Activity {
                             // Session is failed: hide progress dialog then exit
                             hideProgressDialog();
                             Utils.showMessageAndExit(StreamingSessionView.this,
-                                    getString(R.string.label_session_failed, _reasonCode), mExitOnce);
+                                    getString(R.string.label_session_failed, _reasonCode),
+                                    mExitOnce);
                             break;
 
                         default:
@@ -209,8 +209,7 @@ public class StreamingSessionView extends Activity {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG, "onNewMessage contact=" + contact + " sessionId=" + sessionId);
             }
-            if (mSessionId == null
-                    || !mSessionId.equals(sessionId)) {
+            if (mSessionId == null || !mSessionId.equals(sessionId)) {
                 return;
             }
             final String data = new String(content);
@@ -290,7 +289,8 @@ public class StreamingSessionView extends Activity {
             // Accept the invitation
             mSession.acceptInvitation();
         } catch (Exception e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce, e);
+            Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce,
+                    e);
         }
     }
 
@@ -403,7 +403,8 @@ public class StreamingSessionView extends Activity {
                     mServiceId, mContact);
             mSessionId = mSession.getSessionId();
         } catch (Exception e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce, e);
+            Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce,
+                    e);
             return;
         }
 

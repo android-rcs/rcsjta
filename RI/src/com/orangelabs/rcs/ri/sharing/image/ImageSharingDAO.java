@@ -20,10 +20,10 @@ package com.orangelabs.rcs.ri.sharing.image;
 
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.image.ImageSharingLog;
 
+import com.orangelabs.rcs.ri.utils.ContactUtil;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 
 import android.content.ContentResolver;
@@ -65,8 +65,6 @@ public class ImageSharingDAO implements Parcelable {
     private final ImageSharing.ReasonCode mReasonCode;
 
     private static ContentResolver sContentResolver;
-
-    private static ContactUtil sContactUtil;
 
     private static final String LOGTAG = LogUtils.getTag(ImageSharingDAO.class.getSimpleName());
 
@@ -218,7 +216,7 @@ public class ImageSharingDAO implements Parcelable {
         return mReasonCode;
     }
 
-    private ImageSharingDAO(ContactUtil contactUtil, ContentResolver resolver, String sharingId) {
+    private ImageSharingDAO(ContentResolver resolver, String sharingId) {
         Cursor cursor = null;
         try {
             cursor = resolver.query(Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, sharingId),
@@ -227,9 +225,9 @@ public class ImageSharingDAO implements Parcelable {
                 throw new SQLException("Failed to find Image Sharing with ID: ".concat(sharingId));
             }
             mSharingId = sharingId;
-            String _contact = cursor.getString(cursor
-                    .getColumnIndexOrThrow(ImageSharingLog.CONTACT));
-            mContact = contactUtil.formatContact(_contact);
+            String contact = cursor
+                    .getString(cursor.getColumnIndexOrThrow(ImageSharingLog.CONTACT));
+            mContact = ContactUtil.formatContact(contact);
             mFile = Uri.parse(cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.FILE)));
             mFilename = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.FILENAME));
             mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.MIME_TYPE));
@@ -288,11 +286,8 @@ public class ImageSharingDAO implements Parcelable {
         if (sContentResolver == null) {
             sContentResolver = context.getContentResolver();
         }
-        if (sContactUtil == null) {
-            sContactUtil = ContactUtil.getInstance(context);
-        }
         try {
-            return new ImageSharingDAO(sContactUtil, sContentResolver, sharingId);
+            return new ImageSharingDAO(sContentResolver, sharingId);
         } catch (SQLException e) {
             if (LogUtils.isActive) {
                 Log.e(LOGTAG, e.getMessage());

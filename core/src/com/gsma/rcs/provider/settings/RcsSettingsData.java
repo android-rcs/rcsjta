@@ -406,7 +406,7 @@ public class RcsSettingsData {
      * Activate or not the RCS service
      */
     public static final String SERVICE_ACTIVATED = "ServiceActivated";
-    /* package private */static final Boolean DEFAULT_SERVICE_ACTIVATED = false;
+    /* package private */static final Boolean DEFAULT_SERVICE_ACTIVATED = true;
 
     /**
      * Send or not the displayed notification

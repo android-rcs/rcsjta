@@ -21,11 +21,11 @@ package com.orangelabs.rcs.ri.messaging.chat.single;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.ContactUtil;
 
 import com.orangelabs.rcs.ri.ConnectionManager;
 import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.ContactUtil;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsDisplayName;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -80,16 +80,8 @@ public class SingleChatList extends Activity {
     private static final String WHERE_CLAUSE = new StringBuilder(Message.CHAT_ID).append("=")
             .append(Message.CONTACT).toString();
 
-    /**
-     * List view
-     */
     private ListView mListView;
 
-    private ContactUtil mContactUtil;
-
-    /**
-     * The log tag for this class
-     */
     private static final String LOGTAG = LogUtils.getTag(SingleChatList.class.getSimpleName());
 
     @Override
@@ -99,8 +91,6 @@ public class SingleChatList extends Activity {
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.chat_list);
-
-        mContactUtil = ContactUtil.getInstance(this);
 
         // Set list adapter
         mListView = (ListView) findViewById(android.R.id.list);
@@ -124,7 +114,7 @@ public class SingleChatList extends Activity {
                 Cursor cursor = (Cursor) (parent.getAdapter()).getItem(pos);
                 String number = cursor.getString(cursor.getColumnIndexOrThrow(Message.CONTACT));
 
-                ContactId contact = mContactUtil.formatContact(number);
+                ContactId contact = ContactUtil.formatContact(number);
                 // Open chat
                 startActivity(SingleChatView.forgeIntentToStart(SingleChatList.this, contact));
 

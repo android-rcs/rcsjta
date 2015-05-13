@@ -29,11 +29,11 @@ import android.util.Log;
 
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.sharing.video.VideoSharingLog;
 
 import com.orangelabs.rcs.ri.sharing.image.ImageSharingDAO;
+import com.orangelabs.rcs.ri.utils.ContactUtil;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 
 /**
@@ -64,8 +64,6 @@ public class VideoSharingDAO implements Parcelable {
     private final String mVideoEncoding;
 
     private static ContentResolver sContentResolver;
-
-    private static ContactUtil sContactUtil;
 
     private static final String LOGTAG = LogUtils.getTag(ImageSharingDAO.class.getSimpleName());
 
@@ -177,18 +175,18 @@ public class VideoSharingDAO implements Parcelable {
         return mVideoEncoding;
     }
 
-    private VideoSharingDAO(ContactUtil contactUtil, ContentResolver resolver, String sharingId) {
+    private VideoSharingDAO(ContentResolver resolver, String sharingId) {
         Cursor cursor = null;
         try {
             cursor = resolver.query(Uri.withAppendedPath(VideoSharingLog.CONTENT_URI, sharingId),
                     null, null, null, null);
             if (!cursor.moveToFirst()) {
-                throw new SQLException("Failed to find VIdeo Sharing with ID: ".concat(sharingId));
+                throw new SQLException("Failed to find Video Sharing with ID: ".concat(sharingId));
             }
             mSharingId = sharingId;
-            String _contact = cursor.getString(cursor
-                    .getColumnIndexOrThrow(VideoSharingLog.CONTACT));
-            mContact = contactUtil.formatContact(_contact);
+            String contact = cursor
+                    .getString(cursor.getColumnIndexOrThrow(VideoSharingLog.CONTACT));
+            mContact = ContactUtil.formatContact(contact);
             mState = VideoSharing.State.valueOf(cursor.getInt(cursor
                     .getColumnIndexOrThrow(VideoSharingLog.STATE)));
             mDirection = Direction.valueOf(cursor.getInt(cursor
@@ -264,11 +262,8 @@ public class VideoSharingDAO implements Parcelable {
         if (sContentResolver == null) {
             sContentResolver = context.getContentResolver();
         }
-        if (sContactUtil == null) {
-            sContactUtil = ContactUtil.getInstance(context);
-        }
         try {
-            return new VideoSharingDAO(sContactUtil, sContentResolver, sharingId);
+            return new VideoSharingDAO(sContentResolver, sharingId);
         } catch (SQLException e) {
             if (LogUtils.isActive) {
                 Log.e(LOGTAG, e.getMessage());

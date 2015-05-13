@@ -24,6 +24,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.test.AndroidTestCase;
 
+import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.rcs.core.ims.service.ContactInfo;
@@ -92,7 +93,12 @@ public class ContactManagerTest extends AndroidTestCase {
         info.setRegistrationState(RegistrationState.ONLINE);
 
         // info.setContact(contact);
-        ContactId contactId = contactUtils.formatContact(mNumber);
+        ContactId contactId = null;
+        try {
+            contactId = contactUtils.formatContact(mNumber);
+        } catch (RcsPermissionDeniedException e1) {
+            fail(e1.getMessage());
+        }
         info.setContact(contactId);
         Capabilities capa = new Capabilities();
         capa.setCsVideoSupport(false);

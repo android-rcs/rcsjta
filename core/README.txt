@@ -1,6 +1,6 @@
 Build instruction:
 
-Prior to build the core package please create the third party libraries by entrering the folowing command line:
+Prior to build the core package please create the third party libraries by entering the following command line:
 
 > ant libs
 

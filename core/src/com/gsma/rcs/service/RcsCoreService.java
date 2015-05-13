@@ -304,12 +304,14 @@ public class RcsCoreService extends Service implements CoreListener {
 
         mRestartCoreRequested = false;
         try {
+            /* Instantiate the contactUtils instance */
+            com.gsma.services.rcs.contact.ContactUtil contactUtil = com.gsma.services.rcs.contact.ContactUtil
+                    .getInstance(this);
+            /* Read country code to check that we have permission to start the core stack */
+            String myCC = contactUtil.getMyCountryCode();
             if (logActivated) {
-                sLogger.debug("Start RCS core service");
+                sLogger.debug("Start RCS core service (country code=" + myCC + ")");
             }
-
-            // Instantiate the contactUtils instance (CountryCode is already set)
-            com.gsma.services.rcs.contact.ContactUtil.getInstance(this);
 
             IPCallHistory.createInstance(mLocalContentResolver);
 
@@ -395,6 +397,7 @@ public class RcsCoreService extends Service implements CoreListener {
                 sLogger.info("RCS core service started with success");
             }
         } catch (Exception e) {
+            // TODO CR037 exception handling
             // Unexpected error
             if (logActivated) {
                 sLogger.error("Can't instanciate the RCS core service", e);

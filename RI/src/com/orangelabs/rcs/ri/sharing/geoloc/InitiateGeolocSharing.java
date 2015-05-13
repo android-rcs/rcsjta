@@ -21,7 +21,6 @@ package com.orangelabs.rcs.ri.sharing.geoloc;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingListener;
 
@@ -32,6 +31,7 @@ import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.messaging.geoloc.DisplayGeoloc;
 import com.orangelabs.rcs.ri.messaging.geoloc.EditGeoloc;
 import com.orangelabs.rcs.ri.utils.ContactListAdapter;
+import com.orangelabs.rcs.ri.utils.ContactUtil;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -77,29 +77,14 @@ public class InitiateGeolocSharing extends Activity {
      */
     private final Handler mHandler = new Handler();
 
-    /**
-     * Progress dialog
-     */
     private Dialog mProgressDialog;
 
-    /**
-     * Geoloc info
-     */
     private Geoloc mGeoloc;
 
-    /**
-     * Geoloc sharing session
-     */
     private GeolocSharing mGeolocSharing;
 
-    /**
-     * Geoloc sharing identifier
-     */
     private String mSharingId;
 
-    /**
-     * The log tag for this class
-     */
     private static final String LOGTAG = LogUtils.getTag(InitiateGeolocSharing.class
             .getSimpleName());
 
@@ -118,9 +103,6 @@ public class InitiateGeolocSharing extends Activity {
      */
     private Spinner mSpinner;
 
-    /**
-     * Geolocation sharing listener
-     */
     private GeolocSharingListener gshListener = new GeolocSharingListener() {
 
         @Override
@@ -329,8 +311,7 @@ public class InitiateGeolocSharing extends Activity {
             ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
 
-            ContactUtil contactUtil = ContactUtil.getInstance(InitiateGeolocSharing.this);
-            ContactId contact = contactUtil.formatContact(phoneNumber);
+            ContactId contact = ContactUtil.formatContact(phoneNumber);
 
             try {
                 // Initiate location share

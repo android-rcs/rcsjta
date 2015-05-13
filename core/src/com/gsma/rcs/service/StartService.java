@@ -41,6 +41,8 @@ import com.gsma.services.rcs.RcsService;
 
 import android.accounts.Account;
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -71,30 +73,21 @@ public class StartService extends Service {
      */
     private ConnectivityManager mConnMgr;
 
-    /**
-     * Network state listener
-     */
     private BroadcastReceiver mNetworkStateListener;
 
-    /**
-     * Last User account
-     */
     private String mLastUserAccount;
 
-    /**
-     * Current User account
-     */
     private String mCurrentUserAccount;
 
     /**
      * Launch boot flag
      */
-    boolean mBoot = false;
+    private boolean mBoot = false;
 
     /**
      * Launch user flag
      */
-    boolean mUser = false;
+    private boolean mUser = false;
 
     private RcsSettings mRcsSettings;
 
@@ -102,10 +95,18 @@ public class StartService extends Service {
 
     private ContactManager mContactManager;
 
+    private PendingIntent mPoolTelephonyManagerIntent;
+
     private static final Logger sLogger = Logger.getLogger(StartService.class.getSimpleName());
 
     private static final String INTENT_KEY_BOOT = "boot";
     private static final String INTENT_KEY_USER = "user";
+
+    private static final String ACTION_POOL_TELEPHONY_MANAGER = "com.gsma.rcs.service.ACTION_POOL_TELEPHONY_MANAGER";
+
+    private static final long TELEPHONY_MANAGER_POOLING_PERIOD = 1000;
+
+    private BroadcastReceiver mPollingTelephonyManagerReceiver;
 
     @Override
     public void onCreate() {
@@ -122,11 +123,15 @@ public class StartService extends Service {
         if (sLogger.isActivated()) {
             sLogger.debug("onCreate ConfigurationMode=".concat(mode.toString()));
         }
-        // In manual configuration, use a network listener to start RCS core when the data will be
-        // ON
-        if (ConfigurationMode.MANUAL.equals(mode)) {
+        /*
+         * In manual configuration, use a network listener to start RCS core when the data will be
+         * ON
+         */
+        if (ConfigurationMode.MANUAL == mode) {
             registerNetworkStateListener();
         }
+        mPoolTelephonyManagerIntent = PendingIntent.getBroadcast(context, 0, new Intent(
+                ACTION_POOL_TELEPHONY_MANAGER), 0);
     }
 
     @Override
@@ -148,13 +153,14 @@ public class StartService extends Service {
 
     @Override
     public int onStartCommand(final Intent intent, final int flags, final int startId) {
-        if (sLogger.isActivated()) {
+        final boolean logActivated = sLogger.isActivated();
+        if (logActivated) {
             sLogger.debug("Start RCS service");
         }
         new Thread() {
             @Override
             public void run() {
-                // Check boot
+                /* Check boot */
                 if (intent != null) {
                     mBoot = intent.getBooleanExtra(INTENT_KEY_BOOT, false);
                     mUser = intent.getBooleanExtra(INTENT_KEY_USER, false);
@@ -162,18 +168,22 @@ public class StartService extends Service {
                 if (checkAccount(mLocalContentResolver)) {
                     launchRcsService(mBoot, mUser);
                 } else {
-                    // User account can't be initialized (no radio to read IMSI, .etc)
-                    if (sLogger.isActivated()) {
-                        sLogger.error("Can't create the user account");
+                    /* User account can't be initialized (no radio to read IMSI, .etc) */
+                    if (logActivated) {
+                        sLogger.warn("Can't create current user account: pool the telephony manager");
                     }
-                    // Exit service
-                    stopSelf();
+                    mPollingTelephonyManagerReceiver = getPollingTelephonyManagerReceiver();
+                    registerReceiver(mPollingTelephonyManagerReceiver, new IntentFilter(
+                            ACTION_POOL_TELEPHONY_MANAGER));
+                    retryPollingTelephonyManagerPooling();
                 }
             }
         }.start();
 
-        // We want this service to continue running until it is explicitly
-        // stopped, so return sticky.
+        /*
+         * We want this service to continue running until it is explicitly stopped, so return
+         * sticky.
+         */
         return START_STICKY;
     }
 
@@ -501,5 +511,41 @@ public class StartService extends Service {
         intent.putExtra(INTENT_KEY_BOOT, boot);
         intent.putExtra(INTENT_KEY_USER, user);
         context.startService(intent);
+    }
+
+    private void retryPollingTelephonyManagerPooling() {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Retry polling telephony manager");
+        }
+        AlarmManager am = (AlarmManager) getApplicationContext().getSystemService(
+                Context.ALARM_SERVICE);
+        am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
+                + TELEPHONY_MANAGER_POOLING_PERIOD, mPoolTelephonyManagerIntent);
+    }
+
+    private BroadcastReceiver getPollingTelephonyManagerReceiver() {
+        return new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                new Thread() {
+                    public void run() {
+                        if (checkAccount(mLocalContentResolver)) {
+                            /* Finally we succeed to read the IMSI from SIM card */
+                            if (mPollingTelephonyManagerReceiver != null) {
+                                unregisterReceiver(mPollingTelephonyManagerReceiver);
+                                mPollingTelephonyManagerReceiver = null;
+                            }
+                            launchRcsService(mBoot, mUser);
+                        } else {
+                            /*
+                             * User account can't be initialized: IMSI cannot be read from SIM card.
+                             * Retry pooling the telephony manager.
+                             */
+                            retryPollingTelephonyManagerPooling();
+                        }
+                    }
+                }.start();
+            }
+        };
     }
 }

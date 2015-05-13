@@ -24,8 +24,8 @@ import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.ContactUtil;
 
+import com.orangelabs.rcs.ri.utils.ContactUtil;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 
 import android.content.ContentResolver;
@@ -73,8 +73,6 @@ public class ChatMessageDAO implements Parcelable {
     private final long mTimestampDisplayed;
 
     private static ContentResolver sContentResolver;
-
-    private static ContactUtil sContactUtil;
 
     private static final String LOGTAG = LogUtils.getTag(ChatMessageDAO.class.getSimpleName());
 
@@ -166,7 +164,7 @@ public class ChatMessageDAO implements Parcelable {
         mReasonCode = Message.Content.ReasonCode.valueOf(source.readInt());
     }
 
-    private ChatMessageDAO(ContactUtil contactUtil, ContentResolver resolver, String messageId) {
+    private ChatMessageDAO(ContentResolver resolver, String messageId) {
         Cursor cursor = null;
         try {
             cursor = resolver.query(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, messageId),
@@ -179,7 +177,7 @@ public class ChatMessageDAO implements Parcelable {
             String contact = cursor
                     .getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CONTACT));
             if (contact != null) {
-                mContact = contactUtil.formatContact(contact);
+                mContact = ContactUtil.formatContact(contact);
             } else {
                 /* outgoing group chat message */
                 mContact = null;
@@ -277,11 +275,8 @@ public class ChatMessageDAO implements Parcelable {
         if (sContentResolver == null) {
             sContentResolver = context.getContentResolver();
         }
-        if (sContactUtil == null) {
-            sContactUtil = ContactUtil.getInstance(context);
-        }
         try {
-            return new ChatMessageDAO(sContactUtil, sContentResolver, msgId);
+            return new ChatMessageDAO(sContentResolver, msgId);
         } catch (SQLException e) {
             if (LogUtils.isActive) {
                 Log.e(LOGTAG, e.getMessage());

@@ -22,7 +22,6 @@ import android.content.Context;
 import android.util.Log;
 
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.contact.ContactService;
 import com.gsma.services.rcs.contact.RcsContact;
 import com.orangelabs.rcs.ri.ConnectionManager;
@@ -46,8 +45,6 @@ public class RcsDisplayName {
 
     private ContactService mService;
 
-    private ContactUtil mContactUtil;
-
     /**
      * The default display name
      */
@@ -61,7 +58,6 @@ public class RcsDisplayName {
     private RcsDisplayName(Context context) {
         mContext = context;
         mService = ConnectionManager.getInstance(mContext).getContactApi();
-        mContactUtil = ContactUtil.getInstance(mContext);
         sDefaultDisplayName = context.getString(R.string.label_no_contact);
     }
 
@@ -124,10 +120,10 @@ public class RcsDisplayName {
         if (number == null) {
             return sDefaultDisplayName;
         }
-        if (!mContactUtil.isValidContact(number)) {
+        if (!ContactUtil.isValidContact(number)) {
             return number;
         }
-        ContactId contact = mContactUtil.formatContact(number);
+        ContactId contact = ContactUtil.formatContact(number);
         return getDisplayName(contact);
     }
 }

@@ -53,7 +53,6 @@ import android.widget.Toast;
 
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.sharing.video.VideoDescriptor;
 import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.sharing.video.VideoSharingListener;
@@ -70,6 +69,7 @@ import com.orangelabs.rcs.ri.sharing.video.media.OriginatingVideoPlayer;
 import com.orangelabs.rcs.ri.sharing.video.media.VideoPlayerListener;
 import com.orangelabs.rcs.ri.sharing.video.media.VideoSurfaceView;
 import com.orangelabs.rcs.ri.utils.ContactListAdapter;
+import com.orangelabs.rcs.ri.utils.ContactUtil;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsDisplayName;
@@ -440,8 +440,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
             ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
 
-            ContactUtil contactUtil = ContactUtil.getInstance(OutgoingVideoSharing.this);
-            mContact = contactUtil.formatContact(phoneNumber);
+            mContact = ContactUtil.formatContact(phoneNumber);
 
             new Thread() {
                 public void run() {

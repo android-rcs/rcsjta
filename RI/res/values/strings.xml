@@ -18,7 +18,7 @@
     <string name="label_api_not_compatible">API is not compatible</string>
     <string name="label_api_unavailable">RCS service not available</string>
     <string name="label_api_disconnected">RCS service disconnected</string>
-    <string name="label_api_disabled_">RCS service disabled</string>
+    <string name="label_api_disabled">RCS service disabled</string>
     <string name="label_ok">OK</string>
     <string name="label_cancel">Cancel</string>
     <string name="title_msg">Information</string>
@@ -74,6 +74,7 @@
     <string name="label_uninitialized_filename">filename</string>
     <string name="label_uninitialized_filesize">filesize</string>
     <string name="label_uninitialized_direction">direction</string>
+    <string name="error_api_permission_denied">RCS API permission denied</string>
 
     <!-- About menu -->
     <string name="label_about_title">Reference Implementation</string>

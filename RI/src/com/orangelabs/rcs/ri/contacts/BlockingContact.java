@@ -14,12 +14,13 @@ import android.widget.ToggleButton;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.contact.RcsContact;
+
 import com.orangelabs.rcs.ri.ConnectionManager;
 import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.ContactListAdapter;
+import com.orangelabs.rcs.ri.utils.ContactUtil;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -49,11 +50,6 @@ public class BlockingContact extends Activity {
      */
     private ToggleButton toggleBtn;
 
-    /**
-     * Contact utils
-     */
-    private ContactUtil mContactUtil;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,9 +67,6 @@ public class BlockingContact extends Activity {
             return;
         }
         connectionManager.startMonitorServices(this, null, RcsServiceName.CONTACT);
-
-        // Set contact utils instance
-        mContactUtil = ContactUtil.getInstance(this);
 
         // Set the contact selector
         mSpinner = (Spinner) findViewById(R.id.contact);
@@ -140,7 +133,7 @@ public class BlockingContact extends Activity {
     private ContactId getSelectedContact() {
         // get selected phone number
         ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
-        return mContactUtil.formatContact(adapter.getSelectedNumber(mSpinner.getSelectedView()));
+        return ContactUtil.formatContact(adapter.getSelectedNumber(mSpinner.getSelectedView()));
     }
 
     /**

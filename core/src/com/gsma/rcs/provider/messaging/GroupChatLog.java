@@ -26,6 +26,7 @@ import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.GroupChat;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
@@ -77,7 +78,7 @@ public class GroupChatLog implements IGroupChatLog {
         GroupChatData.KEY_CHAT_ID
     };
 
-    private static final Logger logger = Logger.getLogger(GroupChatLog.class.getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(GroupChatLog.class.getSimpleName());
 
     private static final int FIRST_COLUMN_IDX = 0;
 
@@ -139,8 +140,8 @@ public class GroupChatLog implements IGroupChatLog {
             Map<ContactId, ParticipantStatus> participants, State state, ReasonCode reasonCode,
             Direction direction, long timestamp) {
         String encodedParticipants = convert(participants);
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("addGroupChat; chatID=").append(chatId)
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("addGroupChat; chatID=").append(chatId)
                     .append(", subject=").append(subject).append(", state=").append(state)
                     .append(" reasonCode=").append(reasonCode).append(", direction=")
                     .append(direction).append(", timestamp=").append(timestamp)
@@ -164,8 +165,8 @@ public class GroupChatLog implements IGroupChatLog {
 
     @Override
     public void acceptGroupChatNextInvitation(String chatId) {
-        if (logger.isActivated()) {
-            logger.debug("acceptGroupChatNextInvitation (chatId=" + chatId + ")");
+        if (sLogger.isActivated()) {
+            sLogger.debug("acceptGroupChatNextInvitation (chatId=" + chatId + ")");
         }
         ContentValues values = new ContentValues();
         values.put(GroupChatData.KEY_USER_ABORTION, UserAbortion.SERVER_NOTIFIED.toInt());
@@ -177,8 +178,8 @@ public class GroupChatLog implements IGroupChatLog {
     public boolean setGroupChatParticipantsStateAndReasonCode(String chatId,
             Map<ContactId, ParticipantStatus> participants, State state, ReasonCode reasonCode) {
         String encodedParticipants = convert(participants);
-        if (logger.isActivated()) {
-            logger.debug("setGCParticipantsStateAndReasonCode (chatId=" + chatId
+        if (sLogger.isActivated()) {
+            sLogger.debug("setGCParticipantsStateAndReasonCode (chatId=" + chatId
                     + ") (participants=" + encodedParticipants + ") (state=" + state
                     + ") (reasonCode=" + reasonCode + ")");
         }
@@ -192,8 +193,8 @@ public class GroupChatLog implements IGroupChatLog {
 
     @Override
     public boolean setGroupChatStateAndReasonCode(String chatId, State state, ReasonCode reasonCode) {
-        if (logger.isActivated()) {
-            logger.debug("setGroupChatStateAndReasonCode (chatId=" + chatId + ") (state=" + state
+        if (sLogger.isActivated()) {
+            sLogger.debug("setGroupChatStateAndReasonCode (chatId=" + chatId + ") (state=" + state
                     + ") (reasonCode=" + reasonCode + ")");
         }
         ContentValues values = new ContentValues();
@@ -207,8 +208,8 @@ public class GroupChatLog implements IGroupChatLog {
     public boolean setGroupChatParticipants(String chatId,
             Map<ContactId, ParticipantStatus> participants) {
         String encodedParticipants = convert(participants);
-        if (logger.isActivated()) {
-            logger.debug("updateGroupChatParticipant (chatId=" + chatId + ") (participants="
+        if (sLogger.isActivated()) {
+            sLogger.debug("updateGroupChatParticipant (chatId=" + chatId + ") (participants="
                     + encodedParticipants + ")");
         }
         ContentValues values = new ContentValues();
@@ -219,8 +220,8 @@ public class GroupChatLog implements IGroupChatLog {
 
     @Override
     public boolean setGroupChatRejoinId(String chatId, String rejoinId) {
-        if (logger.isActivated()) {
-            logger.debug("Update group chat rejoin ID to ".concat(rejoinId));
+        if (sLogger.isActivated()) {
+            sLogger.debug("Update group chat rejoin ID to ".concat(rejoinId));
         }
         ContentValues values = new ContentValues();
         values.put(GroupChatData.KEY_REJOIN_ID, rejoinId);
@@ -250,6 +251,15 @@ public class GroupChatLog implements IGroupChatLog {
             return new GroupChatInfo(cursor.getString(columnIdxChatId),
                     cursor.getString(columnIdxRejoinId), chatId, participants,
                     cursor.getString(columnIdxSubject), cursor.getLong(columnIdxTimestamp));
+        } catch (RcsPermissionDeniedException e) {
+            /*
+             * This exception should not occur since core stack cannot be started if country code
+             * failed to be resolved.
+             */
+            String errorMessage = new StringBuilder("Failed to get group chat info for chatId '")
+                    .append(chatId).append("'!").toString();
+            sLogger.error(errorMessage);
+            throw new IllegalStateException(errorMessage);
         } finally {
             CursorUtil.close(cursor);
         }
@@ -257,12 +267,26 @@ public class GroupChatLog implements IGroupChatLog {
 
     @Override
     public Map<ContactId, ParticipantStatus> getParticipants(String chatId) {
-        Map<ContactId, ParticipantStatus> participants = GroupChat.getParticipants(mCtx,
-                getDataAsString(getGroupChatData(GroupChatData.KEY_PARTICIPANTS, chatId)));
-        if (participants == null) {
-            return new HashMap<ContactId, ParticipantStatus>();
+        Map<ContactId, ParticipantStatus> participants;
+        try {
+            participants = GroupChat.getParticipants(mCtx,
+                    getDataAsString(getGroupChatData(GroupChatData.KEY_PARTICIPANTS, chatId)));
+            if (participants == null) {
+                return new HashMap<ContactId, ParticipantStatus>();
+            }
+            return participants;
+        } catch (RcsPermissionDeniedException e) {
+            /*
+             * This exception should not occur since core stack cannot be started if country code
+             * failed to be resolved.
+             */
+            String errorMessage = new StringBuilder(
+                    "Failed to get group chat participants for chatId '").append(chatId)
+                    .append("'!").toString();
+            sLogger.error(errorMessage);
+            throw new IllegalStateException(errorMessage);
         }
-        return participants;
+
     }
 
     @Override
@@ -330,8 +354,8 @@ public class GroupChatLog implements IGroupChatLog {
 
     @Override
     public boolean setRejectNextGroupChatNextInvitation(String chatId) {
-        if (logger.isActivated()) {
-            logger.debug("setRejectNextGroupChatNextInvitation (chatId=" + chatId + ")");
+        if (sLogger.isActivated()) {
+            sLogger.debug("setRejectNextGroupChatNextInvitation (chatId=" + chatId + ")");
         }
         ContentValues values = new ContentValues();
         values.put(GroupChatData.KEY_USER_ABORTION, UserAbortion.SERVER_NOT_NOTIFIED.toInt());

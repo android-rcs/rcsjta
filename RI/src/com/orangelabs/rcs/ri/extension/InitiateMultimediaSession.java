@@ -27,9 +27,10 @@ import android.widget.Button;
 import android.widget.Spinner;
 
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.ContactUtil;
+
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.ContactListAdapter;
+import com.orangelabs.rcs.ri.utils.ContactUtil;
 
 /**
  * Abstract class to initiate a multimedia session
@@ -43,8 +44,6 @@ public abstract class InitiateMultimediaSession extends Activity {
      */
     private Spinner mSpinner;
 
-    private ContactUtil mContactUtil;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,8 +51,6 @@ public abstract class InitiateMultimediaSession extends Activity {
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.extension_initiate_session);
-
-        mContactUtil = ContactUtil.getInstance(this);
 
         // Set contact selector
         mSpinner = (Spinner) findViewById(R.id.contact);
@@ -82,7 +79,7 @@ public abstract class InitiateMultimediaSession extends Activity {
             // get selected phone number
             ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
-            ContactId contact = mContactUtil.formatContact(phoneNumber);
+            ContactId contact = ContactUtil.formatContact(phoneNumber);
             // Initiate session
             initiateSession(contact);
             // Exit activity

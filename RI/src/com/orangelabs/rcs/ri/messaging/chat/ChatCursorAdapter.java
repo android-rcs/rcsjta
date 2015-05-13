@@ -24,9 +24,10 @@ import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.ContactUtil;
+
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.utils.ContactUtil;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsDisplayName;
 import com.orangelabs.rcs.ri.utils.SmileyParser;
@@ -43,8 +44,6 @@ public class ChatCursorAdapter extends CursorAdapter {
 
     private final static SimpleDateFormat df = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
 
-    private ContactUtil mContactUtils;
-
     /**
      * A map between contact and display name to minimize queries of RCS settings provider
      */
@@ -52,14 +51,8 @@ public class ChatCursorAdapter extends CursorAdapter {
 
     private Context mContext;
 
-    /**
-     * Smileys
-     */
     private Smileys mSmileyResources;
 
-    /**
-     * The log tag for this class
-     */
     private static final String LOGTAG = LogUtils.getTag(ChatCursorAdapter.class.getSimpleName());
 
     /**
@@ -74,8 +67,6 @@ public class ChatCursorAdapter extends CursorAdapter {
         super(context, cursor, flags);
         mInflater = LayoutInflater.from(context);
         mIsSingleChat = isSingleChat;
-        mContactUtils = ContactUtil.getInstance(context);
-        // Smiley resources
         mSmileyResources = new Smileys(context);
         mContext = context;
     }
@@ -104,7 +95,7 @@ public class ChatCursorAdapter extends CursorAdapter {
         if (!mIsSingleChat && Direction.OUTGOING != direction) {
             String number = cursor.getString(holder.columnContact);
             if (number != null) {
-                ContactId contact = mContactUtils.formatContact(number);
+                ContactId contact = ContactUtil.formatContact(number);
                 if (!mContactIdDisplayNameMap.containsKey(contact)) {
                     // Display name is not known, save it into map
                     displayName = RcsDisplayName.getInstance(context).getDisplayName(contact);

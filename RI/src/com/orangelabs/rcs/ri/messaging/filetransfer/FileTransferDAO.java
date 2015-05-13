@@ -21,10 +21,10 @@ package com.orangelabs.rcs.ri.messaging.filetransfer;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
+import com.orangelabs.rcs.ri.utils.ContactUtil;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 
 import android.content.ContentResolver;
@@ -82,8 +82,6 @@ public class FileTransferDAO implements Parcelable {
     private final FileTransfer.ReasonCode mReasonCode;
 
     private static ContentResolver sContentResolver;
-
-    private static ContactUtil sContactUtil;
 
     private static final String LOGTAG = LogUtils.getTag(FileTransferDAO.class.getSimpleName());
 
@@ -215,7 +213,7 @@ public class FileTransferDAO implements Parcelable {
         mFileIconExpiration = source.readLong();
     }
 
-    private FileTransferDAO(ContactUtil contactUtil, ContentResolver resolver, String fileTransferId) {
+    private FileTransferDAO(ContentResolver resolver, String fileTransferId) {
         Cursor cursor = null;
         try {
             cursor = resolver.query(
@@ -227,10 +225,10 @@ public class FileTransferDAO implements Parcelable {
             }
             mTransferId = fileTransferId;
             mChatId = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.CHAT_ID));
-            String _contact = cursor.getString(cursor
-                    .getColumnIndexOrThrow(FileTransferLog.CONTACT));
-            if (_contact != null) {
-                mContact = sContactUtil.formatContact(_contact);
+            String contact = cursor
+                    .getString(cursor.getColumnIndexOrThrow(FileTransferLog.CONTACT));
+            if (contact != null) {
+                mContact = ContactUtil.formatContact(contact);
             } else {
                 mContact = null;
             }
@@ -348,11 +346,8 @@ public class FileTransferDAO implements Parcelable {
         if (sContentResolver == null) {
             sContentResolver = context.getContentResolver();
         }
-        if (sContactUtil == null) {
-            sContactUtil = ContactUtil.getInstance(context);
-        }
         try {
-            return new FileTransferDAO(sContactUtil, sContentResolver, fileTransferId);
+            return new FileTransferDAO(sContentResolver, fileTransferId);
         } catch (SQLException e) {
             if (LogUtils.isActive) {
                 Log.e(LOGTAG, e.getMessage());

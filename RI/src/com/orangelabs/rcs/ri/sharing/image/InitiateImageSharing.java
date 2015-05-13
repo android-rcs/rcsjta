@@ -20,7 +20,6 @@ package com.orangelabs.rcs.ri.sharing.image;
 
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.image.ImageSharingListener;
 
@@ -29,6 +28,7 @@ import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.ContactListAdapter;
+import com.orangelabs.rcs.ri.utils.ContactUtil;
 import com.orangelabs.rcs.ri.utils.FileUtils;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -73,36 +73,18 @@ public class InitiateImageSharing extends Activity {
     /**
      * UI handler
      */
-    private final Handler handler = new Handler();
+    private final Handler mHandler = new Handler();
 
-    /**
-     * Selected filename
-     */
     private String mFilename;
 
-    /**
-     * Selected fileUri
-     */
     private Uri mFile;
 
-    /**
-     * Selected filesize (kB)
-     */
     private long mFilesize = -1;
 
-    /**
-     * Image sharing
-     */
     private ImageSharing mImageSharing;
 
-    /**
-     * Image sharing Id
-     */
     private String mSharingId;
 
-    /**
-     * Progress dialog
-     */
     private Dialog mProgressDialog;
 
     /**
@@ -120,15 +102,9 @@ public class InitiateImageSharing extends Activity {
      */
     private Spinner mSpinner;
 
-    /**
-     * The log tag for this class
-     */
     private static final String LOGTAG = LogUtils
             .getTag(InitiateImageSharing.class.getSimpleName());
 
-    /**
-     * Image sharing listener
-     */
     private ImageSharingListener ishListener = new ImageSharingListener() {
 
         @Override
@@ -139,7 +115,7 @@ public class InitiateImageSharing extends Activity {
                 return;
 
             }
-            handler.post(new Runnable() {
+            mHandler.post(new Runnable() {
                 public void run() {
                     // Display sharing progress
                     updateProgressBar(currentSize, totalSize);
@@ -161,7 +137,7 @@ public class InitiateImageSharing extends Activity {
             }
             final String _reasonCode = RiApplication.sImageSharingReasonCodes[reasonCode.toInt()];
             final String _state = RiApplication.sImageSharingStates[state.toInt()];
-            handler.post(new Runnable() {
+            mHandler.post(new Runnable() {
                 public void run() {
                     TextView statusView = (TextView) findViewById(R.id.progress_status);
                     switch (state) {
@@ -337,8 +313,7 @@ public class InitiateImageSharing extends Activity {
             // Get the remote contact
             ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
-            ContactUtil contactUtil = ContactUtil.getInstance(InitiateImageSharing.this);
-            final ContactId remote = contactUtil.formatContact(phoneNumber);
+            final ContactId remote = ContactUtil.formatContact(phoneNumber);
 
             if (LogUtils.isActive) {
                 Log.d(LOGTAG, "shareImage image=" + mFilename + " size=" + mFilesize);

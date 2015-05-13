@@ -39,11 +39,12 @@ import com.gsma.services.rcs.capability.Capabilities;
 import com.gsma.services.rcs.capability.CapabilitiesListener;
 import com.gsma.services.rcs.capability.CapabilityService;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.ContactUtil;
+
 import com.orangelabs.rcs.ri.ConnectionManager;
 import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.ContactListAdapter;
+import com.orangelabs.rcs.ri.utils.ContactUtil;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -54,34 +55,18 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author Jean-Marc AUFFRET
  */
 public class RequestCapabilities extends Activity {
-    /**
-     * UI handler
-     */
-    private final Handler handler = new Handler();
 
-    /**
-     * A locker to exit only once
-     */
+    private final Handler mHandler = new Handler();
+
     private LockAccess mExitOnce = new LockAccess();
 
-    /**
-     * API connection manager
-     */
     private ConnectionManager mCnxManager;
 
-    /**
-     * Capabilities listener
-     */
     private MyCapabilitiesListener capabilitiesListener = new MyCapabilitiesListener();
 
     private static final String EXTENSION_SEPARATOR = "\n";
 
-    /**
-     * The log tag for this class
-     */
     private static final String LOGTAG = LogUtils.getTag(RequestCapabilities.class.getSimpleName());
-
-    private ContactUtil mContactUtil;
 
     /**
      * Spinner for contact selection
@@ -112,8 +97,6 @@ public class RequestCapabilities extends Activity {
         } else {
             refreshBtn.setEnabled(true);
         }
-
-        mContactUtil = ContactUtil.getInstance(this);
 
         // Register to API connection manager
         mCnxManager = ConnectionManager.getInstance(this);
@@ -172,7 +155,7 @@ public class RequestCapabilities extends Activity {
                 // Discard capabilities if not for selected contact
                 return;
             }
-            handler.post(new Runnable() {
+            mHandler.post(new Runnable() {
                 public void run() {
                     // Check if this intent concerns the current selected
                     // contact
@@ -226,7 +209,7 @@ public class RequestCapabilities extends Activity {
     private ContactId getSelectedContact() {
         // get selected phone number
         ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
-        return mContactUtil.formatContact(adapter.getSelectedNumber(mSpinner.getSelectedView()));
+        return ContactUtil.formatContact(adapter.getSelectedNumber(mSpinner.getSelectedView()));
     }
 
     /**

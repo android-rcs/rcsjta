@@ -21,7 +21,6 @@ package com.orangelabs.rcs.ri.messaging.filetransfer;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
@@ -31,6 +30,7 @@ import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.ContactListAdapter;
+import com.orangelabs.rcs.ri.utils.ContactUtil;
 import com.orangelabs.rcs.ri.utils.FileUtils;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -302,8 +302,7 @@ public class InitiateFileTransfer extends Activity {
         // get selected phone number
         ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
         String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
-        ContactUtil contactUtil = ContactUtil.getInstance(this);
-        ContactId remote = contactUtil.formatContact(phoneNumber);
+        ContactId remote = ContactUtil.formatContact(phoneNumber);
 
         // Get thumbnail option
         CheckBox ftThumb = (CheckBox) findViewById(R.id.ft_thumb);

@@ -2,7 +2,6 @@
 package com.orangelabs.rcs.ri.history.sharing;
 
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.history.HistoryLog;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingLog;
@@ -14,6 +13,7 @@ import com.gsma.services.rcs.sharing.video.VideoSharingLog;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.history.HistoryListView;
 import com.orangelabs.rcs.ri.utils.ContactListAdapter;
+import com.orangelabs.rcs.ri.utils.ContactUtil;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -121,7 +121,7 @@ public class SharingListView extends HistoryListView {
         if (getString(R.string.label_history_log_contact_spinner_default_value).equals(contact)) {
             return contact;
         }
-        return ContactUtil.getInstance(this).formatContact(contact).toString();
+        return ContactUtil.formatContact(contact).toString();
     }
 
     protected void startQuery() {

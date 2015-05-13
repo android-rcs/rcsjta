@@ -22,6 +22,7 @@
 
 package com.gsma.services.rcs.chat;
 
+import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
@@ -147,13 +148,11 @@ public class ChatLog {
          * @param ctx
          * @param participants Participants in string representation
          * @return Participants
+         * @throws RcsPermissionDeniedException
          */
         public static Map<ContactId, ParticipantStatus> getParticipants(Context ctx,
-                String participants) {
+                String participants) throws RcsPermissionDeniedException {
             ContactUtil contactUtils = ContactUtil.getInstance(ctx);
-            if (contactUtils == null) {
-                throw new IllegalStateException("Cannot read contact from provider");
-            }
             String[] tokens = participants.split(",");
             Map<ContactId, ParticipantStatus> participantResult = new HashMap<ContactId, ParticipantStatus>();
             for (String participant : tokens) {

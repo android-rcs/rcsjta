@@ -27,9 +27,10 @@ import android.widget.Button;
 import android.widget.Spinner;
 
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.ContactUtil;
+
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.ContactListAdapter;
+import com.orangelabs.rcs.ri.utils.ContactUtil;
 
 /**
  * Initiate chat
@@ -44,8 +45,6 @@ public class InitiateSingleChat extends Activity {
      */
     private Spinner mSpinner;
 
-    private ContactUtil mContactUtil;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,8 +52,6 @@ public class InitiateSingleChat extends Activity {
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.chat_initiate_single);
-
-        mContactUtil = ContactUtil.getInstance(this);
 
         // Set contact selector
         mSpinner = (Spinner) findViewById(R.id.contact);
@@ -80,7 +77,7 @@ public class InitiateSingleChat extends Activity {
             ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
             // Format phone number to contactId
-            ContactId contact = mContactUtil.formatContact(phoneNumber);
+            ContactId contact = ContactUtil.formatContact(phoneNumber);
             // start chat view activity
             startActivity(SingleChatView.forgeIntentToStart(InitiateSingleChat.this, contact));
 

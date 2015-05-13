@@ -23,6 +23,8 @@
 package com.gsma.rcs.utils;
 
 import com.gsma.rcs.platform.AndroidFactory;
+import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.contact.ContactId;
 
 /**
@@ -31,6 +33,8 @@ import com.gsma.services.rcs.contact.ContactId;
 public class ContactUtil {
 
     private static volatile com.gsma.services.rcs.contact.ContactUtil mContactUtil;
+
+    private static final Logger sLogger = Logger.getLogger(ContactUtil.class.getSimpleName());
 
     /**
      * A class to hold a valid phone number
@@ -71,8 +75,15 @@ public class ContactUtil {
                         .getApplicationContext());
             }
         }
-        if (mContactUtil.isValidContact(number)) {
-            return new PhoneNumber(number);
+        try {
+            if (mContactUtil.isValidContact(number)) {
+                return new PhoneNumber(number);
+            }
+        } catch (RcsPermissionDeniedException e) {
+            if (sLogger.isActivated()) {
+                sLogger.error(new StringBuilder("Failed to validate phone number from URI '")
+                        .append(uri).append(("'!")).toString(), e);
+            }
         }
         return null;
     }
@@ -91,8 +102,15 @@ public class ContactUtil {
                         .getApplicationContext());
             }
         }
-        if (mContactUtil.isValidContact(contact)) {
-            return new PhoneNumber(contact);
+        try {
+            if (mContactUtil.isValidContact(contact)) {
+                return new PhoneNumber(contact);
+            }
+        } catch (RcsPermissionDeniedException e) {
+            if (sLogger.isActivated()) {
+                sLogger.error(new StringBuilder("Failed to validate phone number from Android '")
+                        .append(contact).append(("'!")).toString(), e);
+            }
         }
         return null;
     }
@@ -110,7 +128,19 @@ public class ContactUtil {
                         .getApplicationContext());
             }
         }
-        return mContactUtil.formatContact(phoneNumber.getNumber());
+        try {
+            return mContactUtil.formatContact(phoneNumber.getNumber());
+
+        } catch (RcsPermissionDeniedException e) {
+            /*
+             * This exception cannot occur since PhoneNumber can only be instantiated for valid
+             * numbers.
+             */
+            String errorMessage = new StringBuilder("Phone number '").append(phoneNumber)
+                    .append("' cannot be converted into contactId!").toString();
+            sLogger.error(errorMessage);
+            throw new IllegalStateException(errorMessage);
+        }
     }
 
     /**
@@ -127,7 +157,19 @@ public class ContactUtil {
                         .getApplicationContext());
             }
         }
-        return mContactUtil.formatContact(phoneNumber);
+        try {
+            return mContactUtil.formatContact(phoneNumber);
+
+        } catch (RcsPermissionDeniedException e) {
+            /*
+             * This exception should not occur since core stack cannot be started if country code
+             * cannot be resolved.
+             */
+            String errorMessage = new StringBuilder("Failed to convert phone number '")
+                    .append(phoneNumber).append("' into contactId!").toString();
+            sLogger.error(errorMessage);
+            throw new IllegalStateException(errorMessage);
+        }
     }
 
 }

@@ -23,6 +23,7 @@
 package com.gsma.services.rcs.contact;
 
 import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.RcsPermissionDeniedException;
 
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
@@ -56,12 +57,12 @@ public class ContactUtil {
     /**
      * The country code of the device
      */
-    private final String mCountryCode;
+    private String mCountryCode;
 
     /**
      * The country area code
      */
-    private final String mCountryAreaCode;
+    private String mCountryAreaCode;
 
     /**
      * Application context
@@ -345,46 +346,25 @@ public class ContactUtil {
      * Constructor
      * 
      * @param context
-     * @param countryCode
      */
     private ContactUtil(Context context) {
         mCtx = context;
-        Configuration config = context.getResources().getConfiguration();
-        /* Get the country code information associated to the mobile country code */
-        String[] countryCodeInfo = sCountryCodes.get(config.mcc);
-        if (countryCodeInfo == null) {
-            throw new IllegalStateException(new StringBuilder(
-                    "Instantation failure: no CC for mobile country code '").append(config.mcc)
-                    .append("'").toString());
-
-        }
-        /* Get the country code from map */
-        String ccWithoutHeader = countryCodeInfo[COUNTRY_CODE_IDX];
-        mCountryCode = COUNTRY_CODE_PREFIX.concat(ccWithoutHeader);
-        if (countryCodeInfo.length == 2) {
-            /* Get the country area code from map */
-            mCountryAreaCode = countryCodeInfo[COUNTRY_AREA_CODE_IDX];
-        } else {
-            mCountryAreaCode = null;
-        }
     }
 
     /**
-     * Get an instance of ContactUtil.
+     * Gets a singleton instance of ContactUtil.
      * 
-     * @param context the context
-     * @return the singleton instance. May be null if country code cannot be read from provider.
+     * @param context the context.
+     * @return the singleton instance.
      */
     public static ContactUtil getInstance(Context context) {
         if (sInstance != null) {
             return sInstance;
-
         }
         synchronized (ContactUtil.class) {
             if (sInstance == null) {
                 if (context == null) {
                     throw new IllegalArgumentException("Context is null");
-
                 }
                 sInstance = new ContactUtil(context);
             }
@@ -393,7 +373,7 @@ public class ContactUtil {
     }
 
     /**
-     * Remove blank and minus characters from contact
+     * Removes blank and minus characters from contact
      * 
      * @param contact the phone number
      * @return phone string stripped of separators.
@@ -403,18 +383,22 @@ public class ContactUtil {
         Matcher matcher = PATTERN_CONTACT.matcher(contact);
         if (matcher.find()) {
             return matcher.group();
-
         }
         return null;
     }
 
     /**
-     * Verify the validity of a contact number.
+     * Checks the validity of a contact number.
      * 
-     * @param contact the contact number
-     * @return Returns true if the given ContactId have the syntax of valid RCS ContactId.
+     * @param contact the contact number.
+     * @return Returns true if the given contactId have the syntax of valid RCS contactId. If the
+     *         string is too short (1 digit at least), too long (more than 15 digits) or contains
+     *         illegal characters (valid characters are digits, space, ‘-‘, leading ‘+’) then it
+     *         returns false.
+     * @throws RcsPermissionDeniedException if the mobile country code failed to be read and is
+     *             required to validate the contact.
      */
-    public boolean isValidContact(String contact) {
+    public boolean isValidContact(String contact) throws RcsPermissionDeniedException {
         if (TextUtils.isEmpty(contact)) {
             return false;
         }
@@ -428,9 +412,14 @@ public class ContactUtil {
         if (strippedContact.startsWith(MSISDN_PREFIX_INTERNATIONAL)) {
             return true;
         }
+        /*
+         * At this point, the contact is using a local area formatting so the mobile country code is
+         * required to validate its format.
+         */
         if (mCountryCode == null) {
-            return false;
+            getCountryAndAreaCodes();
         }
+        /* At this point, the mobile country and area codes are resolved */
         if (TextUtils.isEmpty(mCountryAreaCode)) {
             return true;
         }
@@ -442,23 +431,21 @@ public class ContactUtil {
 
     /**
      * Formats the given contact to uniquely represent a RCS contact phone number.
-     * <p>
-     * May throw a IllegalArgumentException exception if the string contact parameter is not enabled
-     * to produce a valid ContactId.
      * 
-     * @param contact the contact phone number
-     * @return the ContactId
+     * @param contact the contact phone number to format.
+     * @return the ContactId.
+     * @throws RcsPermissionDeniedException if the mobile country code failed to be read and is
+     *             required to format the contact.
      */
-    public ContactId formatContact(String contact) {
+    public ContactId formatContact(String contact) throws RcsPermissionDeniedException {
         if (TextUtils.isEmpty(contact)) {
-            throw new IllegalArgumentException("Input parameter is null or empty");
+            throw new IllegalArgumentException("Input parameter is null or empty!");
         }
         String strippedContact = stripSeparators(contact);
         if (TextUtils.isEmpty(strippedContact)) {
             throw new IllegalArgumentException(new StringBuilder("Contact '").append(contact)
-                    .append("' has invalid characters or is too long").toString());
+                    .append("' has invalid characters or is too long!").toString());
         }
-
         /* Is Country Code provided ? */
         if (strippedContact.startsWith(COUNTRY_CODE_PREFIX)) {
             return new ContactId(strippedContact);
@@ -468,11 +455,12 @@ public class ContactUtil {
             return new ContactId(new StringBuilder(COUNTRY_CODE_PREFIX).append(strippedContact,
                     MSISDN_PREFIX_INTERNATIONAL.length(), strippedContact.length()).toString());
         }
-        /* CC not provided, does it exists in provider ? */
+        /*
+         * The contact is using a local area formatting so the mobile country code is required to
+         * validate its format.
+         */
         if (mCountryCode == null) {
-            throw new IllegalArgumentException(new StringBuilder("Local phone number '")
-                    .append(strippedContact).append("' cannot be formatted: unknown country code")
-                    .toString());
+            getCountryAndAreaCodes();
         }
         /* Local numbering ? */
         if (TextUtils.isEmpty(mCountryAreaCode)) {
@@ -490,21 +478,53 @@ public class ContactUtil {
                 .append(mCountryAreaCode).append(")").toString());
     }
 
+    private void getCountryAndAreaCodes() throws RcsPermissionDeniedException {
+        synchronized (ContactUtil.class) {
+            if (mCountryCode != null) {
+                return;
+            }
+            Configuration config = mCtx.getResources().getConfiguration();
+            /* Get the country code information associated to the mobile country code */
+            String[] countryCodeInfo = sCountryCodes.get(config.mcc);
+            if (countryCodeInfo == null) {
+                throw new RcsPermissionDeniedException(new StringBuilder(
+                        "Failed to get mobile country code (").append(config.mcc).append(")!")
+                        .toString());
+            }
+            /* Get the country code from map */
+            String ccWithoutHeader = countryCodeInfo[COUNTRY_CODE_IDX];
+            mCountryCode = COUNTRY_CODE_PREFIX.concat(ccWithoutHeader);
+            mCountryAreaCode = null;
+            if (countryCodeInfo.length == 2) {
+                /* Get the country area code from map */
+                mCountryAreaCode = countryCodeInfo[COUNTRY_AREA_CODE_IDX];
+            }
+        }
+    }
+
     /**
      * Gets the user country code.
      * 
-     * @return the country code
+     * @return the user country code.
+     * @throws RcsPermissionDeniedException if the mobile country code failed to be read.
      */
-    public String getMyCountryCode() {
+    public String getMyCountryCode() throws RcsPermissionDeniedException {
+        if (mCountryCode == null) {
+            getCountryAndAreaCodes();
+        }
         return mCountryCode;
     }
 
     /**
      * Gets the user country area code.
      * 
-     * @return the country area code or null if it does not exist
+     * @return the country area code or null if it does not exist.
+     * @throws RcsPermissionDeniedException thrown if the mobile country code failed to be read.
      */
-    public String getMyCountryAreaCode() {
+    public String getMyCountryAreaCode() throws RcsPermissionDeniedException {
+        if (mCountryCode == null) {
+            getCountryAndAreaCodes();
+        }
         return mCountryAreaCode;
     }
 
