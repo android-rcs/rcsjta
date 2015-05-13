@@ -176,14 +176,12 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
         // Note: FileTransferId is always generated to equal the associated msgId of a
         // FileTransfer invitation message.
         String msgId = getFileTransferId();
-        if (chatSession != null) {
+        if (chatSession != null && chatSession.isMediaEstablished()) {
             if (logActivated) {
                 mLogger.debug("Send file transfer info via an existing chat session");
             }
-            if (chatSession.isMediaEstablished()) {
-                setChatSessionID(chatSession.getSessionID());
-                setContributionID(chatSession.getContributionID());
-            }
+            setChatSessionID(chatSession.getSessionID());
+            setContributionID(chatSession.getContributionID());
 
             String networkContent;
             ImdnManager imdnManager = getImdnManager();
