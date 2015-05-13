@@ -177,18 +177,18 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 
         if (imdnManager.isRequestGroupDeliveryDisplayedReportsEnabled()) {
             networkContent = ChatUtils.buildCpimMessageWithImdn(from, ChatUtils.ANOMYNOUS_URI,
-                    msgId, mFileInfo, CpimMessage.MIME_TYPE, mTimestampSent);
+                    msgId, mFileInfo, FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);
         } else if (imdnManager.isDeliveryDeliveredReportsEnabled()) {
             networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from,
-                    ChatUtils.ANOMYNOUS_URI, msgId, mFileInfo, CpimMessage.MIME_TYPE,
-                    mTimestampSent);
+                    ChatUtils.ANOMYNOUS_URI, msgId, mFileInfo,
+                    FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);
         } else {
             networkContent = ChatUtils.buildCpimMessage(from, ChatUtils.ANOMYNOUS_URI, mFileInfo,
-                    CpimMessage.MIME_TYPE, mTimestampSent);
+                    FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);
         }
 
         mChatSession.sendDataChunks(IdGenerator.generateMessageID(), networkContent,
-                CpimMessage.MIME_TYPE, TypeMsrpChunk.FileSharing);
+                CpimMessage.MIME_TYPE, TypeMsrpChunk.HttpFileSharing);
     }
 
     /**
