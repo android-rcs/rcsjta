@@ -417,7 +417,7 @@ public class ContactUtil {
          * required to validate its format.
          */
         if (mCountryCode == null) {
-            getCountryAndAreaCodes();
+            tryToDetermineAndCacheCountryAndAreaCodes();
         }
         /* At this point, the mobile country and area codes are resolved */
         if (TextUtils.isEmpty(mCountryAreaCode)) {
@@ -460,7 +460,7 @@ public class ContactUtil {
          * validate its format.
          */
         if (mCountryCode == null) {
-            getCountryAndAreaCodes();
+            tryToDetermineAndCacheCountryAndAreaCodes();
         }
         /* Local numbering ? */
         if (TextUtils.isEmpty(mCountryAreaCode)) {
@@ -478,7 +478,7 @@ public class ContactUtil {
                 .append(mCountryAreaCode).append(")").toString());
     }
 
-    private void getCountryAndAreaCodes() throws RcsPermissionDeniedException {
+    private void tryToDetermineAndCacheCountryAndAreaCodes() throws RcsPermissionDeniedException {
         synchronized (ContactUtil.class) {
             if (mCountryCode != null) {
                 return;
@@ -510,7 +510,7 @@ public class ContactUtil {
      */
     public String getMyCountryCode() throws RcsPermissionDeniedException {
         if (mCountryCode == null) {
-            getCountryAndAreaCodes();
+            tryToDetermineAndCacheCountryAndAreaCodes();
         }
         return mCountryCode;
     }
@@ -523,7 +523,7 @@ public class ContactUtil {
      */
     public String getMyCountryAreaCode() throws RcsPermissionDeniedException {
         if (mCountryCode == null) {
-            getCountryAndAreaCodes();
+            tryToDetermineAndCacheCountryAndAreaCodes();
         }
         return mCountryAreaCode;
     }

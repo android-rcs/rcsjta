@@ -258,8 +258,7 @@ public class GroupChatLog implements IGroupChatLog {
              */
             String errorMessage = new StringBuilder("Failed to get group chat info for chatId '")
                     .append(chatId).append("'!").toString();
-            sLogger.error(errorMessage);
-            throw new IllegalStateException(errorMessage);
+            throw new IllegalStateException(errorMessage, e);
         } finally {
             CursorUtil.close(cursor);
         }
@@ -283,8 +282,7 @@ public class GroupChatLog implements IGroupChatLog {
             String errorMessage = new StringBuilder(
                     "Failed to get group chat participants for chatId '").append(chatId)
                     .append("'!").toString();
-            sLogger.error(errorMessage);
-            throw new IllegalStateException(errorMessage);
+            throw new IllegalStateException(errorMessage, e);
         }
 
     }

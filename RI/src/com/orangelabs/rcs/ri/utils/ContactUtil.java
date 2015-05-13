@@ -55,8 +55,7 @@ public class ContactUtil {
              */
             String errorMessage = new StringBuilder("Failed to convert phone number '")
                     .append(contact).append("' into contactId!").toString();
-            Log.e(LOGTAG, errorMessage);
-            throw new IllegalStateException(errorMessage);
+            throw new IllegalStateException(errorMessage,e);
         }
     }
 

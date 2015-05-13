@@ -107,10 +107,8 @@ public class ContactUtil {
                 return new PhoneNumber(contact);
             }
         } catch (RcsPermissionDeniedException e) {
-            if (sLogger.isActivated()) {
-                sLogger.error(new StringBuilder("Failed to validate phone number from Android '")
-                        .append(contact).append(("'!")).toString(), e);
-            }
+            sLogger.error(new StringBuilder("Failed to validate phone number from Android '")
+                    .append(contact).append(("'!")).toString(), e);
         }
         return null;
     }
@@ -138,8 +136,7 @@ public class ContactUtil {
              */
             String errorMessage = new StringBuilder("Phone number '").append(phoneNumber)
                     .append("' cannot be converted into contactId!").toString();
-            sLogger.error(errorMessage);
-            throw new IllegalStateException(errorMessage);
+            throw new IllegalStateException(errorMessage, e);
         }
     }
 
@@ -167,8 +164,7 @@ public class ContactUtil {
              */
             String errorMessage = new StringBuilder("Failed to convert phone number '")
                     .append(phoneNumber).append("' into contactId!").toString();
-            sLogger.error(errorMessage);
-            throw new IllegalStateException(errorMessage);
+            throw new IllegalStateException(errorMessage, e);
         }
     }
 
