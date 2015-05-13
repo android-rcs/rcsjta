@@ -25,55 +25,54 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.DequeueTask;
 import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.rcs.service.api.OneToOneChatImpl;
+import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.database.Cursor;
 
 /**
- * OneToOneChatMessageDequeueTask tries to dequeues and sends the queued one-one chat messages of a
- * specific contact.
+ * AllOneToOneChatMessageDequeueTask tries to dequeues and sends all queued one-one chat messages.
  */
-public class OneToOneChatMessageDequeueTask extends DequeueTask {
-
-    private final ContactId mContact;
+public class AllOneToOneChatMessageDequeueTask extends DequeueTask {
 
     private final ChatServiceImpl mChatService;
 
-    public OneToOneChatMessageDequeueTask(Object lock, ContactId contact,
-            InstantMessagingService imService, MessagingLog messagingLog,
-            ChatServiceImpl chatService, RcsSettings rcsSettings, ContactManager contactManager) {
+    public AllOneToOneChatMessageDequeueTask(Object lock, InstantMessagingService imService,
+            MessagingLog messagingLog, ChatServiceImpl chatService, RcsSettings rcsSettings,
+            ContactManager contactManager) {
         super(lock, imService, contactManager, messagingLog, rcsSettings);
-        mContact = contact;
         mChatService = chatService;
     }
 
     public void run() {
         boolean logActivated = mLogger.isActivated();
         if (logActivated) {
-            mLogger.debug("Execute task to dequeue one-to-one chat messages for contact "
-                    .concat(mContact.toString()));
+            mLogger.debug("Execute task to dequeue one-to-one chat messages.");
         }
         Cursor cursor = null;
         try {
             synchronized (mLock) {
-                cursor = mMessagingLog.getQueuedOneToOneChatMessages(mContact);
-                /* TODO: Handle cursor when null. */
+                cursor = mMessagingLog.getAllQueuedOneToOneChatMessages();
                 int msgIdIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_MESSAGE_ID);
                 int contentIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_CONTENT);
                 int mimeTypeIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_MIME_TYPE);
-                OneToOneChatImpl oneToOneChat = mChatService.getOrCreateOneToOneChat(mContact);
+                int contactIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_CONTACT);
                 while (cursor.moveToNext()) {
                     String msgId = cursor.getString(msgIdIdx);
                     String content = cursor.getString(contentIdx);
                     String mimeType = cursor.getString(mimeTypeIdx);
                     long timestamp = System.currentTimeMillis();
+                    ContactId contact = ContactUtil.createContactIdFromTrustedData(cursor
+                            .getString(contactIdx));
                     /* For outgoing message, timestampSent = timestamp */
                     ChatMessage message = ChatUtils.createChatMessage(msgId, mimeType, content,
-                            mContact, null, timestamp, timestamp);
+                            contact, null, timestamp, timestamp);
                     try {
-                        if (isAllowedToDequeueOneToOneChatMessage(mContact)) {
+                        if (isAllowedToDequeueOneToOneChatMessage(contact)) {
+                            OneToOneChatImpl oneToOneChat = mChatService
+                                    .getOrCreateOneToOneChat(contact);
                             OneToOneChatSession session = mImService
-                                    .getOneToOneChatSession(mContact);
+                                    .getOneToOneChatSession(contact);
                             if (session == null) {
                                 oneToOneChat.dequeueChatMessageInNewSession(message);
                             } else if (session.isMediaEstablished()) {
@@ -94,8 +93,8 @@ public class OneToOneChatMessageDequeueTask extends DequeueTask {
                             mLogger.error(
                                     new StringBuilder(
                                             "Exception occured while dequeueing one-to-one chat message with msgId '")
-                                            .append(msgId).append("'for contact '")
-                                            .append(mContact).append("' ").toString(), e);
+                                            .append(msgId).append("'for contact '").append(contact)
+                                            .append("' ").toString(), e);
                         }
                     }
                 }

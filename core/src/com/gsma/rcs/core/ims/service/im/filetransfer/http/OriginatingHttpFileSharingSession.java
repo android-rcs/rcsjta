@@ -30,6 +30,7 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
+import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
@@ -208,17 +209,16 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
             long timestamp = getTimestamp();
             ChatMessage firstMsg = ChatUtils.createFileTransferMessage(getRemoteContact(),
                     fileInfo, false, msgId, timestamp, mTimestampSent);
-            try {
-                chatSession = mCore.getImService().initiateOneToOneChatSession(getRemoteContact(),
-                        firstMsg);
-            } catch (CoreException e) {
+            InstantMessagingService imService = mCore.getImService();
+            if (!imService.isChatSessionAvailable()) {
                 if (logActivated) {
-                    mLogger.debug("Couldn't initiate One to one session :" + e);
+                    mLogger.debug("Couldn't initiate One to one session as max chat sessions reached.");
                 }
                 // Upload error
                 handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED));
                 return;
             }
+            chatSession = imService.initiateOneToOneChatSession(getRemoteContact(), firstMsg);
             setChatSessionID(chatSession.getSessionID());
             setContributionID(chatSession.getContributionID());
 

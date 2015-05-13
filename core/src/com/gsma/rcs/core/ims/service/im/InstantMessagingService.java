@@ -866,19 +866,15 @@ public class InstantMessagingService extends ImsService {
      * @param contact Remote contact identifier
      * @param firstMsg First message
      * @return IM session
-     * @throws CoreException
      */
-    public OneToOneChatSession initiateOneToOneChatSession(ContactId contact, ChatMessage firstMsg)
-            throws CoreException {
+    public OneToOneChatSession initiateOneToOneChatSession(ContactId contact, ChatMessage firstMsg) {
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("Initiate 1-1 chat session with ").append(contact)
                     .append(".").toString());
         }
-        assertAvailableChatSession("Max chat sessions achieved");
         long timestamp = firstMsg.getTimestamp();
-        OriginatingOneToOneChatSession session = new OriginatingOneToOneChatSession(this, contact,
-                firstMsg, mRcsSettings, mMessagingLog, timestamp, mContactManager);
-        return session;
+        return new OriginatingOneToOneChatSession(this, contact, firstMsg, mRcsSettings,
+                mMessagingLog, timestamp, mContactManager);
     }
 
     /**

@@ -209,13 +209,20 @@ public interface IMessageLog {
     public String getChatMessageContent(String msgId);
 
     /**
-     * Get all one-to-one and group chat messages that are in queued state in ascending order of
-     * timestamp
+     * Get all one-to-one chat messages for specific contact that are in queued state in ascending
+     * order of timestamp
      * 
      * @param contact
      * @return Cursor
      */
     public Cursor getQueuedOneToOneChatMessages(ContactId contact);
+
+    /**
+     * Get all one-to-one chat messages that are in queued state in ascending order of timestamp
+     * 
+     * @return Cursor
+     */
+    public Cursor getAllQueuedOneToOneChatMessages();
 
     /**
      * Dequeue chat message
@@ -298,4 +305,18 @@ public interface IMessageLog {
      * @return ChatId
      */
     public String getMessageChatId(String msgId);
+
+    /**
+     * Update chat message status and timestamps during resend operation.
+     * 
+     * @param msg Chat message
+     */
+    public void resendChatMessage(ChatMessage msg);
+
+    /**
+     * Update chat message status and timestamps during re-queueing operation.
+     * 
+     * @param msg Chat message
+     */
+    public void requeueChatMessage(ChatMessage msg);
 }

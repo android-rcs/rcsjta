@@ -440,13 +440,20 @@ public interface CoreListener {
             InstantMessagingService imService);
 
     /**
-     * Try to dequeue of one-to-one chat messages
+     * Try to dequeue of one-to-one chat messages for specific contact
      * 
      * @param contact
      * @param imService
      */
     public void tryToDequeueOneToOneChatMessages(ContactId contact,
             InstantMessagingService imService);
+
+    /**
+     * Try to dequeue of one-to-one chat messages
+     * 
+     * @param imService
+     */
+    public void tryToDequeueAllOneToOneChatMessages(InstantMessagingService imService);
 
     /**
      * Try to dequeue one-to-one and group file transfers

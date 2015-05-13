@@ -118,17 +118,12 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     }
 
     private void sendChatMessageInNewSession(ChatMessage msg) {
-        try {
-            final OneToOneChatSession newSession = mImService.initiateOneToOneChatSession(mContact,
-                    msg);
-            newSession.addListener(this);
-            mChatService.addOneToOneChat(mContact, this);
-            newSession.startSession();
-            handleMessageSent(msg.getMessageId(), msg.getMimeType());
-
-        } catch (CoreException e) {
-            handleMessageFailedSend(msg.getMessageId(), msg.getMimeType());
-        }
+        final OneToOneChatSession newSession = mImService
+                .initiateOneToOneChatSession(mContact, msg);
+        newSession.addListener(this);
+        mChatService.addOneToOneChat(mContact, this);
+        newSession.startSession();
+        handleMessageSent(msg.getMessageId(), msg.getMimeType());
     }
 
     private void sendChatMessageWithinSession(final OneToOneChatSession session, ChatMessage msg) {
@@ -157,6 +152,13 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             }
             final OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
             if (session == null) {
+                if (!mImService.isChatSessionAvailable()) {
+                    if (logger.isActivated()) {
+                        logger.debug("Cannot start new session since to limit of sessions is reached; queue message.");
+                    }
+                    addOutgoingChatMessage(msg, Status.QUEUED);
+                    return;
+                }
                 if (loggerActivated) {
                     logger.debug("Core session is not yet established: initiate a new session to send the message.");
                 }
@@ -180,6 +182,13 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                 addOutgoingChatMessage(msg, Status.QUEUED);
                 acceptPendingSession(session);
             } else {
+                if (!mImService.isChatSessionAvailable()) {
+                    if (logger.isActivated()) {
+                        logger.debug("Cannot start new session since to limit of sessions is reached; queue message.");
+                    }
+                    addOutgoingChatMessage(msg, Status.QUEUED);
+                    return;
+                }
                 addOutgoingChatMessage(msg, Status.SENDING);
                 sendChatMessageInNewSession(msg);
             }
@@ -203,19 +212,16 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             if (session == null) {
                 if (!mImService.isChatSessionAvailable()) {
                     if (logger.isActivated()) {
-                        logger.debug("Session does not exist. Cannot start new session since to limit of sessions is reached. MessageId="
+                        logger.debug("Cannot start new session since to limit of sessions is reached. MessageId="
                                 .concat(msgId));
                     }
-                    updateChatMessageTimestamp(msgId, msg.getTimestamp(), msg.getTimestampSent());
-                    setChatMessageStatus(msgId, mimeType, Status.QUEUED);
+                    mMessagingLog.requeueChatMessage(msg);
                     return;
                 }
-
                 if (logger.isActivated()) {
                     logger.debug("Core session is not yet established: initiate a new session to send the message");
                 }
-                updateChatMessageTimestamp(msgId, msg.getTimestamp(), msg.getTimestampSent());
-                setChatMessageStatus(msgId, mimeType, Status.SENDING);
+                mMessagingLog.resendChatMessage(msg);
                 sendChatMessageInNewSession(msg);
                 return;
             }
@@ -223,18 +229,28 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                 if (logger.isActivated()) {
                     logger.debug("Core session is established: use existing one to send the message");
                 }
-                updateChatMessageTimestamp(msgId, msg.getTimestamp(), msg.getTimestampSent());
-                setChatMessageStatus(msgId, mimeType, Status.SENDING);
+                mMessagingLog.resendChatMessage(msg);
                 sendChatMessageWithinSession(session, msg);
                 return;
             }
             /*
-             * TODO : If session is originated by remote, then queue the message and accept the
-             * pending session as part of this re-send operation
+             * If session is originated by remote, then queue the message and accept the pending
+             * session as part of this re-send operation
              */
-            setChatMessageStatus(msgId, mimeType, Status.QUEUED);
             if (session.isInitiatedByRemote()) {
+                mMessagingLog.requeueChatMessage(msg);
                 acceptPendingSession(session);
+            } else {
+                if (!mImService.isChatSessionAvailable()) {
+                    if (logger.isActivated()) {
+                        logger.debug("Cannot start new session since to limit of sessions is reached. MessageId="
+                                .concat(msgId));
+                    }
+                    mMessagingLog.requeueChatMessage(msg);
+                    return;
+                }
+                mMessagingLog.resendChatMessage(msg);
+                sendChatMessageInNewSession(msg);
             }
         }
     }
@@ -703,6 +719,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         synchronized (lock) {
             mChatService.removeOneToOneChat(mContact);
         }
+        mCore.getListener().tryToDequeueAllOneToOneChatMessages(mImService);
     }
 
     /*
@@ -776,6 +793,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                     break;
             }
         }
+        mCore.getListener().tryToDequeueAllOneToOneChatMessages(mImService);
     }
 
     @Override
@@ -884,6 +902,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         synchronized (lock) {
             mChatService.removeOneToOneChat(mContact);
         }
+        mCore.getListener().tryToDequeueAllOneToOneChatMessages(mImService);
     }
 
     @Override

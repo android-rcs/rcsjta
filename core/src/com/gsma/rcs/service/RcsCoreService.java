@@ -61,6 +61,7 @@ import com.gsma.rcs.provider.history.GroupChatTerminalExceptionTask;
 import com.gsma.rcs.provider.history.HistoryLog;
 import com.gsma.rcs.provider.history.OneToOneChatDequeueTask;
 import com.gsma.rcs.provider.ipcall.IPCallHistory;
+import com.gsma.rcs.provider.messaging.AllOneToOneChatMessageDequeueTask;
 import com.gsma.rcs.provider.messaging.DelayedDisplayNotificationDispatcher;
 import com.gsma.rcs.provider.messaging.FileTransferDequeueTask;
 import com.gsma.rcs.provider.messaging.MessagingLog;
@@ -1033,6 +1034,12 @@ public class RcsCoreService extends Service implements CoreListener {
             InstantMessagingService imService) {
         mImOperationExecutor.execute(new OneToOneChatMessageDequeueTask(mOperationLock, contact,
                 imService, mMessagingLog, mChatApi, mRcsSettings, mContactManager));
+    }
+
+    @Override
+    public void tryToDequeueAllOneToOneChatMessages(InstantMessagingService imService) {
+        mImOperationExecutor.execute(new AllOneToOneChatMessageDequeueTask(mOperationLock, imService,
+                mMessagingLog, mChatApi, mRcsSettings, mContactManager));
     }
 
     @Override

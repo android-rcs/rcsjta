@@ -475,6 +475,11 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
+    public Cursor getAllQueuedOneToOneChatMessages() {
+        return mMessageLog.getAllQueuedOneToOneChatMessages();
+    }
+
+    @Override
     public Cursor getQueuedFileTransfers() {
         return mFileTransferLog.getQueuedFileTransfers();
     }
@@ -597,5 +602,15 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     @Override
     public String getMessageChatId(String msgId) {
         return mMessageLog.getMessageChatId(msgId);
+    }
+
+    @Override
+    public void resendChatMessage(ChatMessage msg) {
+        mMessageLog.resendChatMessage(msg);
+    }
+
+    @Override
+    public void requeueChatMessage(ChatMessage msg) {
+        mMessageLog.requeueChatMessage(msg);
     }
 }

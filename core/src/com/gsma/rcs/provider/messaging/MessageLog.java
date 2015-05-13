@@ -85,6 +85,10 @@ public class MessageLog implements IMessageLog {
             MessageData.KEY_CHAT_ID).append("=? AND ").append(MessageData.KEY_STATUS).append("=")
             .append(Status.QUEUED.toInt()).toString();
 
+    private static final String SELECTION_ALL_QUEUED_ONETOONE_CHAT_MESSAGES = new StringBuilder(
+            MessageData.KEY_CHAT_ID).append("=").append(MessageData.KEY_CONTACT).append(" AND ")
+            .append(MessageData.KEY_STATUS).append("=").append(Status.QUEUED.toInt()).toString();
+
     private static final String SELECTION_BY_MULTIPLE_MSG_IDS = new StringBuilder(
             MessageData.KEY_MESSAGE_ID).append(" IN(").append("=?)").toString();
 
@@ -584,6 +588,14 @@ public class MessageLog implements IMessageLog {
     }
 
     @Override
+    public Cursor getAllQueuedOneToOneChatMessages() {
+        Cursor cursor = mLocalContentResolver.query(MessageData.CONTENT_URI, null,
+                SELECTION_ALL_QUEUED_ONETOONE_CHAT_MESSAGES, null, ORDER_BY_TIMESTAMP_ASC);
+        CursorUtil.assertCursorIsNotNull(cursor, MessageData.CONTENT_URI);
+        return cursor;
+    }
+
+    @Override
     public void dequeueChatMessage(ChatMessage message) {
         ContentValues values = new ContentValues();
         values.put(MessageData.KEY_STATUS, Status.SENDING.toInt());
@@ -720,4 +732,41 @@ public class MessageLog implements IMessageLog {
         return cursor;
     }
 
+    @Override
+    public void resendChatMessage(ChatMessage msg) {
+        String msgId = msg.getMessageId();
+        long timestamp = msg.getTimestamp();
+        long timestampSent = msg.getTimestampSent();
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder(
+                    "Update chat message timestamp while resending message with msgId=")
+                    .append(msgId).append(", timestamp=").append(timestamp)
+                    .append(", timestampSent=").append(timestampSent).toString());
+        }
+        ContentValues values = new ContentValues();
+        values.put(MessageData.KEY_STATUS, Status.SENDING.toInt());
+        values.put(MessageData.KEY_TIMESTAMP, timestamp);
+        values.put(MessageData.KEY_TIMESTAMP_SENT, timestampSent);
+        mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), values,
+                null, null);
+    }
+
+    @Override
+    public void requeueChatMessage(ChatMessage msg) {
+        String msgId = msg.getMessageId();
+        long timestamp = msg.getTimestamp();
+        long timestampSent = msg.getTimestampSent();
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder(
+                    "Update chat message timestamp while re-queueing message with msgId=")
+                    .append(msgId).append(", timestamp=").append(timestamp)
+                    .append(", timestampSent=").append(timestampSent).toString());
+        }
+        ContentValues values = new ContentValues();
+        values.put(MessageData.KEY_STATUS, Status.QUEUED.toInt());
+        values.put(MessageData.KEY_TIMESTAMP, timestamp);
+        values.put(MessageData.KEY_TIMESTAMP_SENT, timestampSent);
+        mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), values,
+                null, null);
+    }
 }
