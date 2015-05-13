@@ -265,7 +265,9 @@ public class RichCallHistory {
         ContentValues values = new ContentValues();
         values.put(VideoSharingData.KEY_STATE, state.toInt());
         values.put(VideoSharingData.KEY_REASON_CODE, reasonCode.toInt());
-        values.put(VideoSharingData.KEY_DURATION, duration);
+        if (duration > 0) {
+            values.put(VideoSharingData.KEY_DURATION, duration);
+        }
         return mLocalContentResolver.update(
                 Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId), values, null, null) > 0;
     }
