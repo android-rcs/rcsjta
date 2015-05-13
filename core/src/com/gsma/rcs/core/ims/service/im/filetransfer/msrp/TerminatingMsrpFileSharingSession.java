@@ -528,14 +528,21 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * Prepare media session
      */
     public void prepareMediaSession() {
-        // Nothing to do in terminating side
+        /* Nothing to do in terminating side */
     }
 
     /**
-     * Start media session
+     * Open media session
      */
-    public void startMediaSession() {
-        // Nothing to do in terminating side
+    public void openMediaSession() {
+        /* Nothing to do in terminating side */
+    }
+
+    /**
+     * Start media transfer
+     */
+    public void startMediaTransfer() {
+        /* Nothing to do in terminating side */
     }
 
     /**

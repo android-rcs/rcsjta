@@ -123,7 +123,7 @@ public class TerminatingIPCallSession extends IPCallSession {
                         logger.debug("Session has been rejected on timeout");
                     }
 
-                    // Ringing period timeout
+                    /* Ringing period timeout */
                     send603Decline(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
                     removeSession();
@@ -163,7 +163,6 @@ public class TerminatingIPCallSession extends IPCallSession {
                     return;
             }
 
-            // Check if a renderer has been set
             if (getRenderer() == null) {
                 if (logger.isActivated()) {
                     logger.debug("Renderer not initialized");
@@ -172,7 +171,6 @@ public class TerminatingIPCallSession extends IPCallSession {
                 return;
             }
 
-            // Check if a player has been set
             if (getPlayer() == null) {
                 if (logger.isActivated()) {
                     logger.debug("Player not initialized");
@@ -181,7 +179,6 @@ public class TerminatingIPCallSession extends IPCallSession {
                 return;
             }
 
-            // Test if the session should be interrupted
             if (isInterrupted()) {
                 if (logger.isActivated()) {
                     logger.debug("Session has been interrupted: end of processing");
@@ -189,58 +186,49 @@ public class TerminatingIPCallSession extends IPCallSession {
                 return;
             }
 
-            // Build SDP response
             String sdp = buildSdpAnswer();
 
-            // Set the local SDP in the dialog path
             getDialogPath().setLocalContent(sdp);
 
-            // Prepare media session
             prepareMediaSession();
 
-            // Create a 200 OK response
             if (logger.isActivated()) {
                 logger.info("Send 200 OK");
             }
             SipResponse resp = null;
             if ((getPlayer().getVideoCodec() != null) && (getRenderer().getVideoCodec() != null)) {
-                // Visio Call
+                /* Video Call */
                 resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
                         IPCallService.FEATURE_TAGS_IP_VIDEO_CALL, sdp);
             } else {
-                // Audio Call
+                /* Audio Call */
                 resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
                         IPCallService.FEATURE_TAGS_IP_VOICE_CALL, sdp);
             }
 
-            // The signalisation is established
             getDialogPath().sigEstablished();
 
-            // Send response
+            /* Send response */
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
                     .sendSipMessageAndWait(resp);
 
-            // Analyze the received response
+            /* Analyze the received response */
             if (ctx.isSipAck()) {
-                // ACK received
                 if (logger.isActivated()) {
                     logger.info("ACK request received");
                 }
 
-                // The session is established
                 getDialogPath().sessionEstablished();
 
-                // Start media
-                startMediaSession();
+                startMediaTransfer();
 
-                // Start session timer
+                /* Start session timer */
                 SessionTimerManager sessionTimerManager = getSessionTimerManager();
                 if (sessionTimerManager.isSessionTimerActivated(resp)) {
                     sessionTimerManager.start(SessionTimerManager.UAS_ROLE, getDialogPath()
                             .getSessionExpireTime());
                 }
 
-                // Notify listeners
                 for (int i = 0; i < getListeners().size(); i++) {
                     getListeners().get(i).handleSessionStarted(contact);
                 }
@@ -249,15 +237,13 @@ public class TerminatingIPCallSession extends IPCallSession {
                     logger.debug("No ACK received for INVITE");
                 }
 
-                // No response received: timeout
+                /* No response received: timeout */
                 handleError(new IPCallError(IPCallError.SESSION_INITIATION_FAILED));
             }
         } catch (Exception e) {
             if (logger.isActivated()) {
                 logger.error("Session initiation has failed", e);
             }
-
-            // Unexpected error
             handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
         }
     }

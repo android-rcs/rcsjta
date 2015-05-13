@@ -237,21 +237,28 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * Prepare media session
      */
     public void prepareMediaSession() {
-        // Not used here
+        /* Not used here */
     }
 
     /**
-     * Start media session
+     * Open media session
      */
-    public void startMediaSession() {
-        // Not used here
+    public void openMediaSession() {
+        /* Not used here */
+    }
+
+    /**
+     * Start media transfer
+     */
+    public void startMediaTransfer() {
+        /* Not used here */
     }
 
     /**
      * Close media session
      */
     public void closeMediaSession() {
-        // Not used here
+        /* Not used here */
     }
 
     /**

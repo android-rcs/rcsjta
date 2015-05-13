@@ -168,12 +168,20 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
     }
 
     /**
-     * Start media session
+     * Start media transfer
      * 
      * @throws IOException
      */
-    public void startMediaSession() throws IOException {
-        // Open the MSRP session
+    public void startMediaTransfer() throws IOException {
+        // Not to be used here
+    }
+
+    /**
+     * Open media session
+     * 
+     * @throws IOException
+     */
+    public void openMediaSession() throws IOException {
         getMsrpMgr().openMsrpSession();
     }
 
@@ -191,7 +199,7 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
 
     /**
      * Sends a message in real time
-     *
+     * 
      * @param content Message content
      * @throws MsrpException
      */

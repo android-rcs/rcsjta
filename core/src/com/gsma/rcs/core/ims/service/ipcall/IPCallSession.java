@@ -327,11 +327,20 @@ public abstract class IPCallSession extends ImsServiceSession {
     }
 
     /**
-     * Start media session
+     * Open media session
      * 
      * @throws MediaException
      */
-    public void startMediaSession() throws MediaException {
+    public void openMediaSession() throws MediaException {
+        /* Not used here */
+    }
+
+    /**
+     * Start media transfer
+     * 
+     * @throws MediaException
+     */
+    public void startMediaTransfer() throws MediaException {
         try {
             if (getPlayer() != null) {
                 if (logger.isActivated()) {

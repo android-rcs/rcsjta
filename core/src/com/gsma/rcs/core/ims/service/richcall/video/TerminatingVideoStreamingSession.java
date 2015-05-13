@@ -336,21 +336,28 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
      * Prepare media session
      */
     public void prepareMediaSession() {
-        // Nothing to do in case of external codec
+        /* Nothing to do in case of external codec */
     }
 
     /**
-     * Start media session
+     * Open media session
      */
-    public void startMediaSession() {
-        // Nothing to do in case of external codec
+    public void openMediaSession() {
+        /* Nothing to do in case of external codec */
+    }
+
+    /**
+     * Start media transfer
+     */
+    public void startMediaTransfer() {
+        /* Nothing to do in case of external codec */
     }
 
     /**
      * Close media session
      */
     public void closeMediaSession() {
-        // Nothing to do in case of external codec
+        /* Nothing to do in case of external codec */
     }
 
     @Override

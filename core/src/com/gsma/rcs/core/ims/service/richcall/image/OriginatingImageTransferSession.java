@@ -221,37 +221,43 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
      */
     public void prepareMediaSession() throws MsrpException {
         // Changed by Deutsche Telekom
-        // Get the remote SDP part
+        /* Get the remote SDP part */
         byte[] sdp = getDialogPath().getRemoteContent().getBytes(UTF8);
 
         // Changed by Deutsche Telekom
-        // Create the MSRP session
         MsrpSession session = msrpMgr.createMsrpSession(sdp, this);
 
         session.setFailureReportOption(true);
         session.setSuccessReportOption(false);
         // Changed by Deutsche Telekom
-        // Do not use right now the mapping to do not increase memory and cpu consumption
+        /* Do not use right now the mapping to do not increase memory and cpu consumption */
         session.setMapMsgIdFromTransationId(false);
     }
 
     /**
-     * Start media session
+     * Open media session
      * 
      * @throws IOException
      */
-    public void startMediaSession() throws IOException {
-        // Open the MSRP session
+    public void openMediaSession() throws IOException {
         msrpMgr.openMsrpSession();
-        // Start sending data chunks
+    }
+
+    /**
+     * Start media transfer
+     * 
+     * @throws IOException
+     */
+    public void startMediaTransfer() throws IOException {
+        /* Start sending data chunks */
         byte[] data = getContent().getData();
         InputStream stream;
         if (data == null) {
-            // Load data from Uri
+            /* Load data from Uri */
             stream = AndroidFactory.getApplicationContext().getContentResolver()
                     .openInputStream(getContent().getUri());
         } else {
-            // Load data from memory
+            /* Load data from memory */
             stream = new ByteArrayInputStream(data);
         }
 

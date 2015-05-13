@@ -216,8 +216,8 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                 // The session is established
                 getDialogPath().sessionEstablished();
 
-                // Start Media Session
-                startMediaSession();
+                /* Start Media transfer */
+                startMediaTransfer();
 
                 // Start session timer
                 SessionTimerManager sessionTimerManager = getSessionTimerManager();

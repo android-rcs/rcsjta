@@ -194,13 +194,20 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
     }
 
     /**
-     * Start media session
+     * Open media session
      * 
      * @throws IOException
      */
-    public void startMediaSession() throws IOException {
-        /* Open the MSRP session */
+    public void openMediaSession() throws IOException {
         msrpMgr.openMsrpSession();
+    }
+
+    /**
+     * Start media transfer
+     * 
+     * @throws IOException
+     */
+    public void startMediaTransfer() throws IOException {
         /* Start sending data chunks */
         byte[] data = getContent().getData();
         InputStream stream = new ByteArrayInputStream(data);

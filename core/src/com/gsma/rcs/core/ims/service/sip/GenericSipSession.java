@@ -147,11 +147,11 @@ public abstract class GenericSipSession extends ImsServiceSession {
     public abstract void prepareMediaSession() throws IOException;
 
     /**
-     * Start media session
+     * Start media transfer
      * 
      * @throws IOException
      */
-    public abstract void startMediaSession() throws IOException;
+    public abstract void startMediaTransfer() throws IOException;
 
     /**
      * Close media session

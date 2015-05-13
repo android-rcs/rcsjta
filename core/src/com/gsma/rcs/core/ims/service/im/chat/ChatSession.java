@@ -1028,16 +1028,22 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     }
 
     /**
-     * Start media session
+     * Open media session
      * 
      * @throws IOException
      */
-    public void startMediaSession() throws IOException {
-        // Open the MSRP session
+    public void openMediaSession() throws IOException {
         getMsrpMgr().openMsrpSession();
-
-        // Send an empty packet
         sendEmptyDataChunk();
+    }
+
+    /**
+     * Start media transfer
+     * 
+     * @throws IOException
+     */
+    public void startMediaTransfer() throws IOException {
+        /* Not used here */
     }
 
     /**

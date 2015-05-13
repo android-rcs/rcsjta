@@ -757,11 +757,18 @@ public abstract class ImsServiceSession extends Thread {
     public abstract void prepareMediaSession() throws IOException;
 
     /**
-     * Start media session
+     * Open media session
      * 
      * @throws IOException
      */
-    public abstract void startMediaSession() throws IOException;
+    public abstract void openMediaSession() throws IOException;
+
+    /**
+     * Start media transfer
+     * 
+     * @throws IOException
+     */
+    public abstract void startMediaTransfer() throws IOException;
 
     /**
      * Close media session
@@ -1063,58 +1070,49 @@ public abstract class ImsServiceSession extends Thread {
      */
     public void handle200OK(SipResponse resp) throws SipException {
         try {
-            // 200 OK received
             if (sLogger.isActivated()) {
                 sLogger.info("200 OK response received");
             }
-
-            // The signaling is established
             getDialogPath().sigEstablished();
 
-            // Set the remote tag
             getDialogPath().setRemoteTag(resp.getToTag());
 
-            // Set the target
             getDialogPath().setTarget(resp.getContactURI());
 
-            // Set the route path with the Record-Route header
+            /* Set the route path with the Record-Route header */
             Vector<String> newRoute = SipUtils.routeProcessing(resp, true);
             getDialogPath().setRoute(newRoute);
 
-            // Set the remote SDP part
+            /* Set the remote SDP part */
             getDialogPath().setRemoteContent(resp.getContent());
 
-            // Set the remote SIP instance ID
+            /* Set the remote SIP instance ID */
             ContactHeader remoteContactHeader = (ContactHeader) resp.getHeader(ContactHeader.NAME);
             if (remoteContactHeader != null) {
                 getDialogPath().setRemoteSipInstance(
                         remoteContactHeader.getParameter(SipUtils.SIP_INSTANCE_PARAM));
             }
 
-            // Prepare Media Session
             prepareMediaSession();
 
-            // Send ACK request
             if (sLogger.isActivated()) {
                 sLogger.info("Send ACK");
             }
             getImsService().getImsModule().getSipManager().sendSipAck(getDialogPath());
 
-            // The session is established
             getDialogPath().sessionEstablished();
 
-            // Start Media Session
-            startMediaSession();
+            openMediaSession();
 
-            // Notify listeners
             for (int i = 0; i < getListeners().size(); i++) {
                 getListeners().get(i).handleSessionStarted(mContact);
             }
 
-            // Start session timer
+            /* Start session timer */
             if (mSessionTimer.isSessionTimerActivated(resp)) {
                 mSessionTimer.start(resp.getSessionTimerRefresher(), resp.getSessionTimerExpire());
             }
+            startMediaTransfer();
         } catch (IOException e) {
             throw new SipException("Session initiation has failed!", e);
         }

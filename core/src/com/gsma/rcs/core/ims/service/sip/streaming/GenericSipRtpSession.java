@@ -173,26 +173,32 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
      * @throws MediaException
      */
     public void prepareMediaSession() throws MediaException {
-        // Parse the remote SDP part
         SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(UTF8));
         MediaDescription mediaApp = parser.getMediaDescription("application");
         String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaApp);
         int remotePort = mediaApp.port;
 
-        // Prepare media
         mRtpReceiver.prepareSession(remoteHost, remotePort, mDataReceiver, mFormat, this);
         mRtpSender.prepareSession(mDataSender, remoteHost, remotePort,
                 mRtpReceiver.getInputStream(), this);
     }
 
     /**
-     * Start media session
+     * Open media session
      * 
      * @throws IOException
      */
-    public void startMediaSession() throws IOException {
+    public void openMediaSession() throws IOException {
+        /* Not to be used here */
+    }
+
+    /**
+     * Start media transfer
+     * 
+     * @throws IOException
+     */
+    public void startMediaTransfer() throws IOException {
         synchronized (this) {
-            // Start media
             mRtpReceiver.startSession();
             mRtpSender.startSession();
 
@@ -207,7 +213,6 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
         synchronized (this) {
             mMediaSessionStarted = false;
 
-            // Stop media
             mRtpSender.stopSession();
             mRtpReceiver.stopSession();
         }

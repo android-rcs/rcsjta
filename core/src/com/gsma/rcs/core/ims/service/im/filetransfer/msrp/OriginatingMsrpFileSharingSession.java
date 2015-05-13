@@ -60,7 +60,6 @@ import android.net.Uri;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
 
 import javax2.sip.InvalidArgumentException;
 import javax2.sip.header.ContentDispositionHeader;
@@ -249,13 +248,21 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
     }
 
     /**
-     * Start media session
+     * Open media session
      * 
      * @throws IOException
      */
-    public void startMediaSession() throws IOException {
+    public void openMediaSession() throws IOException {
+        msrpMgr.openMsrpSession();
+    }
+
+    /**
+     * Start media transfer
+     * 
+     * @throws IOException
+     */
+    public void startMediaTransfer() throws IOException {
         try {
-            msrpMgr.openMsrpSession();
             /* Start sending data chunks */
             byte[] data = getContent().getData();
             InputStream stream;
