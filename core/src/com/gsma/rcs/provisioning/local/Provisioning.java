@@ -18,6 +18,7 @@
 
 package com.gsma.rcs.provisioning.local;
 
+import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.settings.RcsSettings;
 
@@ -36,14 +37,13 @@ import android.widget.TabHost;
  */
 @SuppressWarnings("deprecation")
 public class Provisioning extends TabActivity {
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Instantiate the settings manager
         LocalContentResolver localContentResolver = new LocalContentResolver(
                 getApplicationContext());
-        RcsSettings.createInstance(localContentResolver);
+        AndroidFactory.setApplicationContext(this, RcsSettings.createInstance(localContentResolver));
 
         // Set tabs
         final TabHost tabHost = getTabHost();

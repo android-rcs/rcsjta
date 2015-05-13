@@ -1919,11 +1919,6 @@ public class ProvisioningParser {
     private String getValueByParamName(String paramName, Node node, int type) {
         Node nameNode = null;
         Node valueNode = null;
-
-        if (logger.isActivated()) {
-            logger.debug("Get parameter " + paramName + ", node " + node);
-        }
-
         if ((node == null)
                 || !(node.getNodeName().equals("parm") || node.getNodeName().equals("param"))) {
             return null;
@@ -1940,11 +1935,6 @@ public class ProvisioningParser {
             }
             if (nameNode.getNodeValue().equalsIgnoreCase(paramName)) {
                 String value = valueNode.getNodeValue();
-                if (logger.isActivated()) {
-                    // logger.debug("Read parameter " + paramName + ": " + value);
-                    logger.debug("Read parameter " + paramName);
-                }
-
                 // Check type
                 if (type == TYPE_INT) {
                     try {
