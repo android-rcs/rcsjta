@@ -393,7 +393,7 @@ public class ContactUtil {
      * @param contact the contact number.
      * @return Returns true if the given contactId have the syntax of valid RCS contactId. If the
      *         string is too short (1 digit at least), too long (more than 15 digits) or contains
-     *         illegal characters (valid characters are digits, space, ‘-‘, leading ‘+’) then it
+     *         illegal characters (valid characters are digits, space, '-', leading '+') then it
      *         returns false.
      * @throws RcsPermissionDeniedException if the mobile country code failed to be read and is
      *             required to validate the contact.
