@@ -600,9 +600,9 @@ public class SipInterface implements SipListener {
      * Returns the local via path
      * 
      * @return List of headers
-     * @throws SipException
+     * @throws SipPayloadException
      */
-    public ArrayList<ViaHeader> getViaHeaders() throws SipException {
+    public ArrayList<ViaHeader> getViaHeaders() throws SipPayloadException {
         try {
             ArrayList<ViaHeader> viaHeaders = new ArrayList<ViaHeader>();
             ViaHeader via = SipUtils.HEADER_FACTORY.createViaHeader(mLocalIpAddress,
@@ -611,10 +611,10 @@ public class SipInterface implements SipListener {
             return viaHeaders;
 
         } catch (ParseException e) {
-            throw new SipException("Can't create Via headers!", e);
+            throw new SipPayloadException("Can't create Via headers!", e);
 
         } catch (InvalidArgumentException e) {
-            throw new SipException("Can't create Via headers!", e);
+            throw new SipPayloadException("Can't create Via headers!", e);
         }
     }
 
@@ -632,13 +632,15 @@ public class SipInterface implements SipListener {
      * Get local contact
      * 
      * @return Header
-     * @throws SipException
+     * @throws SipPayloadException
      */
-    public ContactHeader getLocalContact() throws SipException {
+    public ContactHeader getLocalContact() throws SipPayloadException {
         try {
             // Set the contact with the terminal IP address, port and transport
             SipURI contactURI = (SipURI) SipUtils.ADDR_FACTORY.createSipURI(null, mLocalIpAddress);
+
             contactURI.setPort(mListeningPort);
+
             contactURI.setParameter("transport", mDefaultProtocol);
 
             // Create the Contact header
@@ -649,10 +651,12 @@ public class SipInterface implements SipListener {
             return contactHeader;
 
         } catch (ParseException e) {
-            throw new SipException("Can't create local contact!", e);
+            throw new SipPayloadException("Unable to create SIP URI : ".concat(mLocalIpAddress), e);
 
         } catch (InvalidArgumentException e) {
-            throw new SipException("Can't create local contact!", e);
+            throw new SipPayloadException(new StringBuilder("Unable to set port : ")
+                    .append(mListeningPort).append(" for contact with ip address : ")
+                    .append(mLocalIpAddress).toString(), e);
         }
     }
 
@@ -661,26 +665,31 @@ public class SipInterface implements SipListener {
      * 
      * @return Header
      * @throws ParseException
-     * @throws SipException
+     * @throws InvalidArgumentException
      */
-    public ContactHeader getContact() throws ParseException, SipException {
-        ContactHeader contactHeader;
-        if (mPublicGruu != null) {
-            // Create a contact with GRUU
-            SipURI contactURI = (SipURI) SipUtils.ADDR_FACTORY.createSipURI(mPublicGruu);
-            // Changed by Deutsche Telekom
-            contactURI.setTransportParam(mDefaultProtocol);
-            Address contactAddress = SipUtils.ADDR_FACTORY.createAddress(contactURI);
-            contactHeader = SipUtils.HEADER_FACTORY.createContactHeader(contactAddress);
-        } else if (mInstanceId != null) {
-            // Create a local contact with an instance ID
-            contactHeader = getLocalContact();
-            contactHeader.setParameter(SipUtils.SIP_INSTANCE_PARAM, mInstanceId);
-        } else {
-            // Create a local contact
-            contactHeader = getLocalContact();
+    public ContactHeader getContact() throws SipPayloadException {
+        try {
+            ContactHeader contactHeader;
+            if (mPublicGruu != null) {
+                // Create a contact with GRUU
+                SipURI contactURI = (SipURI) SipUtils.ADDR_FACTORY.createSipURI(mPublicGruu);
+                // Changed by Deutsche Telekom
+                contactURI.setTransportParam(mDefaultProtocol);
+                Address contactAddress = SipUtils.ADDR_FACTORY.createAddress(contactURI);
+                contactHeader = SipUtils.HEADER_FACTORY.createContactHeader(contactAddress);
+            } else if (mInstanceId != null) {
+                // Create a local contact with an instance ID
+                contactHeader = getLocalContact();
+                contactHeader.setParameter(SipUtils.SIP_INSTANCE_PARAM, mInstanceId);
+            } else {
+                // Create a local contact
+                contactHeader = getLocalContact();
+            }
+            return contactHeader;
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Unable to create SIP URI : ".concat(mPublicGruu), e);
         }
-        return contactHeader;
     }
 
     /**

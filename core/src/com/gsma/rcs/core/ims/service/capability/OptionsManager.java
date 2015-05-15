@@ -210,18 +210,13 @@ public class OptionsManager implements DiscoveryManager {
         String ipAddress = mImsModule.getCurrentNetworkInterface().getNetworkAccess()
                 .getIpAddress();
         boolean richcall = mImsModule.getRichcallService().isCallConnectedWith(contact);
-        try {
-            SipResponse resp = SipMessageFactory.create200OkOptionsResponse(options, mImsModule
-                    .getSipManager().getSipStack().getContact(),
-                    CapabilityUtils.getSupportedFeatureTags(richcall, mRcsSettings),
-                    CapabilityUtils.buildSdp(ipAddress, richcall, mRcsSettings));
+        SipResponse resp = SipMessageFactory.create200OkOptionsResponse(options, mImsModule
+                .getSipManager().getSipStack().getContact(),
+                CapabilityUtils.getSupportedFeatureTags(richcall, mRcsSettings),
+                CapabilityUtils.buildSdp(ipAddress, richcall, mRcsSettings));
 
-            // Send 200 OK response
-            mImsModule.getSipManager().sendSipResponse(resp);
-        } catch (ParseException e) {
-            throw new SipException("Can't send 200 OK for OPTIONS! CallId=".concat(options
-                    .getCallId()), e);
-        }
+        // Send 200 OK response
+        mImsModule.getSipManager().sendSipResponse(resp);
         // Read features tag in the request
         Capabilities capabilities = CapabilityUtils.extractCapabilities(options);
 

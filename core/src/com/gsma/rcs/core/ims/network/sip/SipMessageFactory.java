@@ -26,13 +26,12 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.utils.IdGenerator;
-import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
 import gov2.nist.core.NameValue;
@@ -46,6 +45,7 @@ import java.util.Vector;
 
 import javax2.sip.ClientTransaction;
 import javax2.sip.InvalidArgumentException;
+import javax2.sip.SipException;
 import javax2.sip.address.Address;
 import javax2.sip.address.URI;
 import javax2.sip.header.AcceptHeader;
@@ -84,11 +84,6 @@ public class SipMessageFactory {
     private static final long SECONDS_TO_MILLISECONDS_CONVERSION_RATE = 1000;
 
     /**
-     * The logger
-     */
-    private static Logger logger = Logger.getLogger(SipMessageFactory.class.getName());
-
-    /**
      * Create a SIP REGISTER request
      * 
      * @param dialog SIP dialog path
@@ -96,10 +91,10 @@ public class SipMessageFactory {
      * @param expirePeriod Expiration period in milliseconds
      * @param instanceId UA SIP instance ID
      * @return SIP request
-     * @throws SipException
+     * @throws SipPayloadException
      */
     public static SipRequest createRegister(SipDialogPath dialog, String[] featureTags,
-            long expirePeriod, String instanceId) throws SipException {
+            long expirePeriod, String instanceId) throws SipPayloadException {
         try {
             // Set request line header
             URI requestURI = SipUtils.ADDR_FACTORY.createURI(dialog.getTarget());
@@ -172,11 +167,14 @@ public class SipMessageFactory {
             viaHeader.setRPort();
 
             return new SipRequest(register);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create SIP message", e);
-            }
-            throw new SipException("Can't create SIP REGISTER message");
+
+        } catch (ParseException e) {
+            throw new SipPayloadException(
+                    "Can't create SIP message for instanceId : ".concat(instanceId), e);
+
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException(
+                    "Can't create SIP message for instanceId : ".concat(instanceId), e);
         }
     }
 
@@ -186,10 +184,10 @@ public class SipMessageFactory {
      * @param dialog SIP dialog path
      * @param expirePeriod Expiration period in milliseconds
      * @return SIP request
-     * @throws SipException
+     * @throws SipPayloadException
      */
     public static SipRequest createSubscribe(SipDialogPath dialog, long expirePeriod)
-            throws SipException {
+            throws SipPayloadException {
         try {
             // Set request line header
             URI requestURI = SipUtils.ADDR_FACTORY.createURI(dialog.getTarget());
@@ -244,11 +242,12 @@ public class SipMessageFactory {
             viaHeader.setRPort();
 
             return new SipRequest(subscribe);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create SIP message", e);
-            }
-            throw new SipException("Can't create SIP SUBSCRIBE message");
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Can't create SIP message!", e);
+
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException("Can't create SIP message!", e);
         }
     }
 
@@ -259,10 +258,10 @@ public class SipMessageFactory {
      * @param contentType Content type
      * @param content Content
      * @return SIP request
-     * @throws SipException
+     * @throws SipPayloadException
      */
     public static SipRequest createMessage(SipDialogPath dialog, String contentType, String content)
-            throws SipException {
+            throws SipPayloadException {
         return createMessage(dialog, null, contentType, content.getBytes(UTF8));
     }
 
@@ -274,10 +273,10 @@ public class SipMessageFactory {
      * @param contentType Content type
      * @param content Content
      * @return SIP request
-     * @throws SipException
+     * @throws SipPayloadException
      */
     public static SipRequest createMessage(SipDialogPath dialog, String featureTag,
-            String contentType, byte[] content) throws SipException {
+            String contentType, byte[] content) throws SipPayloadException {
         try {
             // Set request line header
             URI requestURI = SipUtils.ADDR_FACTORY.createURI(dialog.getTarget());
@@ -356,11 +355,16 @@ public class SipMessageFactory {
             }
 
             return new SipRequest(message);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create SIP message", e);
-            }
-            throw new SipException("Can't create SIP MESSAGE message");
+
+        } catch (ParseException e) {
+            throw new SipPayloadException(new StringBuilder(
+                    "Can't create SIP message for featureTag : ").append(featureTag)
+                    .append(" with contentType : ").append(contentType).toString(), e);
+
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException(new StringBuilder(
+                    "Can't create SIP message for featureTag : ").append(featureTag)
+                    .append(" with contentType : ").append(contentType).toString(), e);
         }
     }
 
@@ -372,10 +376,10 @@ public class SipMessageFactory {
      * @param entityTag Entity tag
      * @param sdp SDP part
      * @return SIP request
-     * @throws SipException
+     * @throws SipPayloadException
      */
     public static SipRequest createPublish(SipDialogPath dialog, long expirePeriod,
-            String entityTag, String sdp) throws SipException {
+            String entityTag, String sdp) throws SipPayloadException {
         try {
             // Set request line header
             URI requestURI = SipUtils.ADDR_FACTORY.createURI(dialog.getTarget());
@@ -447,11 +451,12 @@ public class SipMessageFactory {
             viaHeader.setRPort();
 
             return new SipRequest(publish);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create SIP message", e);
-            }
-            throw new SipException("Can't create SIP PUBLISH message");
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Can't create SIP message", e);
+
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException("Can't create SIP message", e);
         }
     }
 
@@ -462,10 +467,10 @@ public class SipMessageFactory {
      * @param featureTags Feature tags
      * @param sdp SDP part
      * @return SIP request
-     * @throws SipException
+     * @throws SipPayloadException
      */
     public static SipRequest createInvite(SipDialogPath dialog, String[] featureTags, String sdp)
-            throws SipException {
+            throws SipPayloadException {
         return createInvite(dialog, featureTags, featureTags, sdp);
     }
 
@@ -477,10 +482,10 @@ public class SipMessageFactory {
      * @param acceptTags Feature tags
      * @param sdp SDP part
      * @return SIP request
-     * @throws SipException
+     * @throws SipPayloadException
      */
     public static SipRequest createInvite(SipDialogPath dialog, String[] featureTags,
-            String[] acceptTags, String sdp) throws SipException {
+            String[] acceptTags, String sdp) throws SipPayloadException {
         try {
             // Create the content type
             ContentTypeHeader contentType = SipUtils.HEADER_FACTORY.createContentTypeHeader(
@@ -488,11 +493,9 @@ public class SipMessageFactory {
 
             // Create the request
             return createInvite(dialog, featureTags, acceptTags, sdp, contentType);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create SIP message", e);
-            }
-            throw new SipException("Can't create SIP INVITE message");
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Can't create SIP message with SDP : ".concat(sdp), e);
         }
     }
 
@@ -504,10 +507,10 @@ public class SipMessageFactory {
      * @param multipart Multipart
      * @param boundary Boundary tag
      * @return SIP request
-     * @throws SipException
+     * @throws SipPayloadException
      */
     public static SipRequest createMultipartInvite(SipDialogPath dialog, String[] featureTags,
-            String multipart, String boundary) throws SipException {
+            String multipart, String boundary) throws SipPayloadException {
         return createMultipartInvite(dialog, featureTags, featureTags, multipart, boundary);
     }
 
@@ -520,10 +523,10 @@ public class SipMessageFactory {
      * @param multipart Multipart
      * @param boundary Boundary tag
      * @return SIP request
-     * @throws SipException
+     * @throws SipPayloadException
      */
     public static SipRequest createMultipartInvite(SipDialogPath dialog, String[] featureTags,
-            String[] acceptTags, String multipart, String boundary) throws SipException {
+            String[] acceptTags, String multipart, String boundary) throws SipPayloadException {
         try {
             // Create the content type
             ContentTypeHeader contentType = SipUtils.HEADER_FACTORY.createContentTypeHeader(
@@ -534,7 +537,8 @@ public class SipMessageFactory {
             return createInvite(dialog, featureTags, acceptTags, multipart, contentType);
 
         } catch (ParseException e) {
-            throw new SipException("Can't create multipart for a SIP INVITE!", e);
+            throw new SipPayloadException(
+                    "Can't create SIP message with multipart : ".concat(multipart), e);
         }
     }
 
@@ -547,10 +551,11 @@ public class SipMessageFactory {
      * @param content Content
      * @param contentType Content type
      * @return SIP request
-     * @throws SipException
+     * @throws SipPayloadException
      */
     public static SipRequest createInvite(SipDialogPath dialog, String[] featureTags,
-            String[] acceptTags, String content, ContentTypeHeader contentType) throws SipException {
+            String[] acceptTags, String content, ContentTypeHeader contentType)
+            throws SipPayloadException {
         try {
             // Set request line header
             URI requestURI = SipUtils.ADDR_FACTORY.createURI(dialog.getTarget());
@@ -640,10 +645,12 @@ public class SipMessageFactory {
             return new SipRequest(invite);
 
         } catch (ParseException e) {
-            throw new SipException("Can't create SIP INVITE message!", e);
+            throw new SipPayloadException(
+                    "Can't create SIP message with content : ".concat(content), e);
 
         } catch (InvalidArgumentException e) {
-            throw new SipException("Can't create SIP INVITE message!", e);
+            throw new SipPayloadException(
+                    "Can't create SIP message with content : ".concat(content), e);
         }
     }
 
@@ -654,10 +661,10 @@ public class SipMessageFactory {
      * @param featureTags Feature tags
      * @param sdp SDP part
      * @return SIP response
-     * @throws SipException
+     * @throws SipPayloadException
      */
     public static SipResponse create200OkInviteResponse(SipDialogPath dialog, String[] featureTags,
-            String sdp) throws SipException {
+            String sdp) throws SipPayloadException {
         return create200OkInviteResponse(dialog, featureTags, featureTags, sdp);
     }
 
@@ -669,10 +676,10 @@ public class SipMessageFactory {
      * @param acceptContactTags Feature tags
      * @param sdp SDP part
      * @return SIP response
-     * @throws SipException
+     * @throws SipPayloadException
      */
     public static SipResponse create200OkInviteResponse(SipDialogPath dialog, String[] featureTags,
-            String[] acceptContactTags, String sdp) throws SipException {
+            String[] acceptContactTags, String sdp) throws SipPayloadException {
         try {
             // Create the response
             Response response = SipUtils.MSG_FACTORY.createResponse(200, (Request) dialog
@@ -723,11 +730,12 @@ public class SipMessageFactory {
             SipResponse resp = new SipResponse(response);
             resp.setStackTransaction(dialog.getInvite().getStackTransaction());
             return resp;
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create SIP message", e);
-            }
-            throw new SipException("Can't create SIP response");
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Can't create SIP response with SDP : ".concat(sdp), e);
+
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException("Can't create SIP response with SDP : ".concat(sdp), e);
         }
     }
 
@@ -736,9 +744,9 @@ public class SipMessageFactory {
      * 
      * @param dialog SIP dialog path
      * @return SIP request
-     * @throws SipException
+     * @throws SipPayloadException
      */
-    public static SipRequest createAck(SipDialogPath dialog) throws SipException {
+    public static SipRequest createAck(SipDialogPath dialog) throws SipPayloadException {
         try {
             Request ack = null;
 
@@ -793,11 +801,12 @@ public class SipMessageFactory {
             viaHeader.setRPort();
 
             return new SipRequest(ack);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create SIP message", e);
-            }
-            throw new SipException("Can't create SIP ACK message");
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Can't create SIP message!", e);
+
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException("Can't create SIP message!", e);
         }
     }
 
@@ -807,9 +816,10 @@ public class SipMessageFactory {
      * @param request SIP request
      * @param code Response code
      * @return SIP response
-     * @throws SipException
+     * @throws SipPayloadException
      */
-    public static SipResponse createResponse(SipRequest request, int code) throws SipException {
+    public static SipResponse createResponse(SipRequest request, int code)
+            throws SipPayloadException {
         try {
             // Create the response
             Response response = SipUtils.MSG_FACTORY.createResponse(code,
@@ -817,11 +827,9 @@ public class SipMessageFactory {
             SipResponse resp = new SipResponse(response);
             resp.setStackTransaction(request.getStackTransaction());
             return resp;
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create SIP message", e);
-            }
-            throw new SipException("Can't create SIP response");
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Can't create SIP response", e);
         }
     }
 
@@ -833,7 +841,7 @@ public class SipMessageFactory {
      *      warning)
      */
     public static SipResponse createResponse(SipRequest request, String localTag, int code)
-            throws SipException {
+            throws SipPayloadException {
         return createResponse(request, localTag, code, null);
     }
 
@@ -844,9 +852,10 @@ public class SipMessageFactory {
      * @param localTag the Local tag
      * @param warning the warning message
      * @return the SIP response
+     * @throws SipPayloadException
      */
     public static SipResponse createResponse(SipRequest request, String localTag, int code,
-            String warning) throws SipException {
+            String warning) throws SipPayloadException {
         try {
             // Create the response
             Response response = SipUtils.MSG_FACTORY.createResponse(code,
@@ -865,11 +874,14 @@ public class SipMessageFactory {
             SipResponse resp = new SipResponse(response);
             resp.setStackTransaction(request.getStackTransaction());
             return resp;
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create SIP message: ", e);
-            }
-            throw new SipException("Can't create SIP response");
+
+        } catch (ParseException e) {
+            throw new SipPayloadException(
+                    "Can't create SIP message for localTag : ".concat(localTag), e);
+
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException(
+                    "Can't create SIP message for localTag : ".concat(localTag), e);
         }
     }
 
@@ -878,9 +890,9 @@ public class SipMessageFactory {
      * 
      * @param dialog SIP dialog path
      * @return SIP request
-     * @throws SipException
+     * @throws SipPayloadException
      */
-    public static SipRequest createBye(SipDialogPath dialog) throws SipException {
+    public static SipRequest createBye(SipDialogPath dialog) throws SipPayloadException {
         try {
             // Create the request
             Request bye = dialog.getStackDialog().createRequest(Request.BYE);
@@ -898,11 +910,15 @@ public class SipMessageFactory {
             viaHeader.setRPort();
 
             return new SipRequest(bye);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create SIP message", e);
-            }
-            throw new SipException("Can't create SIP BYE message");
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Can't create SIP message!", e);
+
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException("Can't create SIP message!", e);
+
+        } catch (SipException e) {
+            throw new SipPayloadException("Can't create SIP message!", e);
         }
     }
 
@@ -911,9 +927,9 @@ public class SipMessageFactory {
      * 
      * @param dialog SIP dialog path
      * @return SIP request
-     * @throws SipException
+     * @throws SipPayloadException
      */
-    public static SipRequest createCancel(SipDialogPath dialog) throws SipException {
+    public static SipRequest createCancel(SipDialogPath dialog) throws SipPayloadException {
         try {
             // Create the request
             ClientTransaction transaction = (ClientTransaction) dialog.getInvite()
@@ -933,11 +949,15 @@ public class SipMessageFactory {
             viaHeader.setRPort();
 
             return new SipRequest(cancel);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create SIP message", e);
-            }
-            throw new SipException("Can't create SIP BYE message");
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Can't create SIP message!", e);
+
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException("Can't create SIP message!", e);
+
+        } catch (SipException e) {
+            throw new SipPayloadException("Can't create SIP message!", e);
         }
     }
 
@@ -947,10 +967,10 @@ public class SipMessageFactory {
      * @param dialog SIP dialog path
      * @param featureTags Feature tags
      * @return SIP request
-     * @throws SipException
+     * @throws SipPayloadException
      */
     public static SipRequest createOptions(SipDialogPath dialog, String[] featureTags)
-            throws SipException {
+            throws SipPayloadException {
         try {
             // Set request line header
             URI requestURI = SipUtils.ADDR_FACTORY.createURI(dialog.getTarget());
@@ -1015,11 +1035,12 @@ public class SipMessageFactory {
             viaHeader.setRPort();
 
             return new SipRequest(options);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create SIP message", e);
-            }
-            throw new SipException("Can't create SIP OPTIONS message");
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Can't create SIP message!", e);
+
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException("Can't create SIP message!", e);
         }
     }
 
@@ -1031,10 +1052,10 @@ public class SipMessageFactory {
      * @param featureTags Feature tags
      * @param sdp SDP part
      * @return SIP response
-     * @throws SipException
+     * @throws SipPayloadException
      */
     public static SipResponse create200OkOptionsResponse(SipRequest options, ContactHeader contact,
-            String[] featureTags, String sdp) throws SipException {
+            String[] featureTags, String sdp) throws SipPayloadException {
         try {
             // Create the response
             Response response = SipUtils.MSG_FACTORY.createResponse(200,
@@ -1072,11 +1093,12 @@ public class SipMessageFactory {
             SipResponse resp = new SipResponse(response);
             resp.setStackTransaction(options.getStackTransaction());
             return resp;
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create SIP message", e);
-            }
-            throw new SipException("Can't create SIP response");
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Can't create SIP response for SDP : ".concat(sdp), e);
+
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException("Can't create SIP response for SDP : ".concat(sdp), e);
         }
     }
 
@@ -1088,10 +1110,10 @@ public class SipMessageFactory {
      * @param subject Subject
      * @param contributionId Contribution ID
      * @return SIP request
-     * @throws SipException
+     * @throws SipPayloadException
      */
     public static SipRequest createRefer(SipDialogPath dialog, String toContact, String subject,
-            String contributionId) throws SipException {
+            String contributionId) throws SipPayloadException {
         try {
             // Create the request
             Request refer = dialog.getStackDialog().createRequest(Request.REFER);
@@ -1144,11 +1166,16 @@ public class SipMessageFactory {
             }
 
             return new SipRequest(refer);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create SIP message", e);
-            }
-            throw new SipException("Can't create SIP REFER message");
+
+        } catch (ParseException e) {
+            throw new SipPayloadException(new StringBuilder("Can't create SIP REFER for contact '")
+                    .append(toContact).append("' with contributionId : ").append(contributionId)
+                    .toString(), e);
+
+        } catch (SipException e) {
+            throw new SipPayloadException(new StringBuilder("Can't create SIP REFER for contact '")
+                    .append(toContact).append("' with contributionId : ").append(contributionId)
+                    .toString(), e);
         }
     }
 
@@ -1160,10 +1187,10 @@ public class SipMessageFactory {
      * @param subject Subject
      * @param contributionId Contribution ID
      * @return SIP request
-     * @throws SipException
+     * @throws SipPayloadException
      */
     public static SipRequest createRefer(SipDialogPath dialog, Set<ContactId> participants,
-            String subject, String contributionId) throws SipException {
+            String subject, String contributionId) throws SipPayloadException {
         try {
             // Create the request
             Request refer = dialog.getStackDialog().createRequest(Request.REFER);
@@ -1249,11 +1276,14 @@ public class SipMessageFactory {
             }
 
             return new SipRequest(refer);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create SIP message", e);
-            }
-            throw new SipException("Can't create SIP REFER message");
+
+        } catch (ParseException e) {
+            throw new SipPayloadException(
+                    "Can't create SIP REFER for contributionId : ".concat(contributionId), e);
+
+        } catch (SipException e) {
+            throw new SipPayloadException(
+                    "Can't create SIP REFER for contributionId : ".concat(contributionId), e);
         }
     }
 
@@ -1262,9 +1292,9 @@ public class SipMessageFactory {
      * 
      * @param dialog SIP dialog path
      * @return SIP request
-     * @throws SipException
+     * @throws SipPayloadException
      */
-    public static SipRequest createReInvite(SipDialogPath dialog) throws SipException {
+    public static SipRequest createReInvite(SipDialogPath dialog) throws SipPayloadException {
         try {
             // Build the request
             Request reInvite = dialog.getStackDialog().createRequest(Request.INVITE);
@@ -1312,11 +1342,12 @@ public class SipMessageFactory {
             }
 
             return new SipRequest(reInvite);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create SIP message", e);
-            }
-            throw new SipException("Can't create SIP RE-INVITE message");
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Can't create SIP message!", e);
+
+        } catch (SipException e) {
+            throw new SipPayloadException("Can't create SIP message!", e);
         }
     }
 
@@ -1327,10 +1358,10 @@ public class SipMessageFactory {
      * @param featureTags featureTags to set in request
      * @param content sdp content
      * @return SIP request
-     * @throws SipException
+     * @throws SipPayloadException
      */
     public static SipRequest createReInvite(SipDialogPath dialog, String[] featureTags,
-            String content) throws SipException {
+            String content) throws SipPayloadException {
         try {
             // Build the request
             Request reInvite = dialog.getStackDialog().createRequest(Request.INVITE);
@@ -1405,11 +1436,14 @@ public class SipMessageFactory {
                     .createContentLengthHeader(content.getBytes(UTF8).length);
             reInvite.setContentLength(contentLengthHeader);
             return new SipRequest(reInvite);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create SIP message", e);
-            }
-            throw new SipException("Can't create SIP RE-INVITE message");
+
+        } catch (ParseException e) {
+            throw new SipPayloadException(
+                    "Can't create SIP message with content : ".concat(content), e);
+
+        } catch (SipException e) {
+            throw new SipPayloadException(
+                    "Can't create SIP message with content : ".concat(content), e);
         }
 
     }
@@ -1420,10 +1454,10 @@ public class SipMessageFactory {
      * @param dialog Dialog path SIP request
      * @param request SIP request
      * @return SIP response
-     * @throws SipException
+     * @throws SipPayloadException
      */
     public static SipResponse create200OkReInviteResponse(SipDialogPath dialog, SipRequest request)
-            throws SipException {
+            throws SipPayloadException {
         try {
             // Create the response
             Response response = SipUtils.MSG_FACTORY.createResponse(200,
@@ -1449,11 +1483,9 @@ public class SipMessageFactory {
             SipResponse resp = new SipResponse(response);
             resp.setStackTransaction(request.getStackTransaction());
             return resp;
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create SIP message", e);
-            }
-            throw new SipException("Can't create SIP response");
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Can't create response for re-invite!", e);
         }
     }
 
@@ -1465,10 +1497,10 @@ public class SipMessageFactory {
      * @param featureTags featureTags to set in request
      * @param content SDP content
      * @return SIP response
-     * @throws SipException
+     * @throws SipPayloadException
      */
     public static SipResponse create200OkReInviteResponse(SipDialogPath dialog, SipRequest request,
-            String[] featureTags, String content) throws SipException {
+            String[] featureTags, String content) throws SipPayloadException {
         try {
             // Create the response
             Response response = SipUtils.MSG_FACTORY.createResponse(200,
@@ -1517,11 +1549,14 @@ public class SipMessageFactory {
             SipResponse resp = new SipResponse(response);
             resp.setStackTransaction(request.getStackTransaction());
             return resp;
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create SIP message", e);
-            }
-            throw new SipException("Can't create SIP response");
+
+        } catch (ParseException e) {
+            throw new SipPayloadException(
+                    "Can't create response for re-invite with content : ".concat(content), e);
+
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException(
+                    "Can't create response for re-invite with content : ".concat(content), e);
         }
     }
 
@@ -1530,9 +1565,9 @@ public class SipMessageFactory {
      * 
      * @param dialog SIP dialog path
      * @return SIP request
-     * @throws SipException
+     * @throws SipPayloadException
      */
-    public static SipRequest createUpdate(SipDialogPath dialog) throws SipException {
+    public static SipRequest createUpdate(SipDialogPath dialog) throws SipPayloadException {
         try {
             // Create the request
             Request update = dialog.getStackDialog().createRequest(Request.UPDATE);
@@ -1552,11 +1587,12 @@ public class SipMessageFactory {
             viaHeader.setRPort();
 
             return new SipRequest(update);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create SIP message", e);
-            }
-            throw new SipException("Can't create SIP UPDATE message");
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Can't create SIP message!", e);
+
+        } catch (SipException e) {
+            throw new SipPayloadException("Can't create SIP message!", e);
         }
     }
 
@@ -1566,10 +1602,10 @@ public class SipMessageFactory {
      * @param dialog Dialog path SIP request
      * @param request SIP request
      * @return SIP response
-     * @throws SipException
+     * @throws SipPayloadException
      */
     public static SipResponse create200OkUpdateResponse(SipDialogPath dialog, SipRequest request)
-            throws SipException {
+            throws SipPayloadException {
         try {
             // Create the response
             Response response = SipUtils.MSG_FACTORY.createResponse(200,
@@ -1595,11 +1631,9 @@ public class SipMessageFactory {
             SipResponse resp = new SipResponse(response);
             resp.setStackTransaction(request.getStackTransaction());
             return resp;
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create SIP message", e);
-            }
-            throw new SipException("Can't create SIP response");
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Can't create SIP message!", e);
         }
     }
 }
