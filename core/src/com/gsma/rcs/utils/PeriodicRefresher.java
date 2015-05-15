@@ -31,6 +31,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Periodic refresher
@@ -38,6 +42,15 @@ import android.content.IntentFilter;
  * @author JM. Auffret
  */
 public abstract class PeriodicRefresher {
+
+    private static final int KITKAT_VERSION_CODE = 19;
+
+    private static final String SET_EXACT_METHOD_NAME = "setExact";
+
+    private static final Class[] SET_EXACT_METHOD_PARAM = new Class[] {
+            int.class, long.class, PendingIntent.class
+    };
+
     /**
      * Keep alive manager
      */
@@ -80,6 +93,7 @@ public abstract class PeriodicRefresher {
 
     /**
      * Start the timer
+     * 
      * @param currentTime Time from when the timer has to be started
      * @param expirePeriod Expiration period in milliseconds
      */
@@ -89,6 +103,7 @@ public abstract class PeriodicRefresher {
 
     /**
      * Start the timer
+     * 
      * @param currentTime Time from when the timer has to be started
      * @param expirePeriod Expiration period in milliseconds
      * @param delta Delta to apply on the expire period in percentage
@@ -110,17 +125,30 @@ public abstract class PeriodicRefresher {
                     .append("ms (expiration=").append(expirePeriod).append("ms)").toString());
         }
 
-        // Register the alarm receiver
-        AndroidFactory.getApplicationContext().registerReceiver(mAlarmReceiver,
-                new IntentFilter(mAction));
+        final Context ctx = AndroidFactory.getApplicationContext();
+        ctx.registerReceiver(mAlarmReceiver, new IntentFilter(mAction));
+        AlarmManager alarmManager = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
+        if (Build.VERSION.SDK_INT < KITKAT_VERSION_CODE) {
+            alarmManager.set(AlarmManager.RTC_WAKEUP, currentTime + pollingPeriod, mAlarmIntent);
+            mTimerStarted = true;
+        } else {
+            try {
+                Method setExactMethod = alarmManager.getClass().getDeclaredMethod(
+                        SET_EXACT_METHOD_NAME, SET_EXACT_METHOD_PARAM);
+                setExactMethod.invoke(alarmManager, AlarmManager.RTC_WAKEUP, currentTime
+                        + pollingPeriod, mAlarmIntent);
+                mTimerStarted = true;
+            } catch (NoSuchMethodException e) {
+                throw new UnsupportedOperationException("Failed to get setExact method!", e);
 
-        // Start alarm from now to the expire value
-        AlarmManager am = (AlarmManager) AndroidFactory.getApplicationContext().getSystemService(
-                Context.ALARM_SERVICE);
-        am.set(AlarmManager.RTC_WAKEUP, currentTime + pollingPeriod, mAlarmIntent);
+            } catch (IllegalAccessException e) {
+                throw new UnsupportedOperationException(
+                        "No access to the definition of setExact method!", e);
 
-        // The timer is started
-        mTimerStarted = true;
+            } catch (InvocationTargetException e) {
+                throw new UnsupportedOperationException("Can't invoke setExact method!", e);
+            }
+        }
     }
 
     /**
@@ -159,8 +187,16 @@ public abstract class PeriodicRefresher {
         public void onReceive(Context context, Intent intent) {
             Thread t = new Thread() {
                 public void run() {
-                    // Processing
-                    periodicProcessing();
+                    try {
+                        periodicProcessing();
+                    } catch (RuntimeException e) {
+                        /*
+                         * Intentionally catch runtime exceptions as else it will abruptly end the
+                         * thread and eventually bring the whole system down, which is not intended.
+                         */
+                        mLogger.error("Failed to initiate start timer!", e);
+                        stopTimer();
+                    }
                 }
             };
             t.start();
