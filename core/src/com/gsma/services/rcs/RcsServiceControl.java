@@ -252,13 +252,13 @@ public class RcsServiceControl {
      * Returns true if the RCS stack de-activation/activation is allowed by the client.
      * 
      * @return boolean true if the RCS stack de-activation/activation is allowed by the client.
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public boolean isActivationModeChangeable() throws RcsServiceException {
+    public boolean isActivationModeChangeable() throws RcsGenericException {
         Bundle resultExtraData = queryRcsStackByIntent(Intents.Service.ACTION_GET_ACTIVATION_MODE_CHANGEABLE);
         if (resultExtraData == null) {
             // No response
-            throw new RcsServiceException("Failed to read stack activation mode changeable");
+            throw new RcsGenericException("Failed to read stack activation mode changeable");
         }
         return resultExtraData.getBoolean(Intents.Service.EXTRA_GET_ACTIVATION_MODE_CHANGEABLE,
                 false);
@@ -268,13 +268,13 @@ public class RcsServiceControl {
      * Returns true if the RCS stack is marked as active on the device.
      * 
      * @return boolean true if the RCS stack is marked as active on the device.
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      */
-    public boolean isActivated() throws RcsServiceException {
+    public boolean isActivated() throws RcsGenericException {
         Bundle resultExtraData = queryRcsStackByIntent(Intents.Service.ACTION_GET_ACTIVATION_MODE);
         if (resultExtraData == null) {
             // No response
-            throw new RcsServiceException("Failed to read stack activation mode");
+            throw new RcsGenericException("Failed to read stack activation mode");
         }
         return resultExtraData.getBoolean(Intents.Service.EXTRA_GET_ACTIVATION_MODE, false);
     }
@@ -314,10 +314,10 @@ public class RcsServiceControl {
      * @param service the RCS service
      * @return boolean true if the client RCS stack and RCS API are compatible for the given
      *         service.
-     * @throws RcsServiceException
+     * @throws RcsGenericException
      * @hide
      */
-    public boolean isCompatible(RcsService service) throws RcsServiceException {
+    public boolean isCompatible(RcsService service) throws RcsGenericException {
         String serviceName = service.getClass().getSimpleName();
         Intent intent = new Intent(Intents.Service.ACTION_GET_COMPATIBILITY);
         intent.putExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_SERVICE, serviceName);
@@ -330,7 +330,7 @@ public class RcsServiceControl {
         Bundle resultExtraData = queryRcsStackByIntent(intent);
         if (resultExtraData == null) {
             // No response
-            throw new RcsServiceException(
+            throw new RcsGenericException(
                     "Failed to check client RCS API compatibility for service " + serviceName
                             + " !");
         }

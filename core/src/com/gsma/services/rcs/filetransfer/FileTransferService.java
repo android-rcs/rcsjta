@@ -325,12 +325,12 @@ public final class FileTransferService extends RcsService {
      * the UI).
      * 
      * @param transferId
-     * @throws RcsPersistentStorageException
      * @throws RcsServiceNotAvailableException
+     * @throws RcsPersistentStorageException
      * @throws RcsGenericException
      */
-    public void markFileTransferAsRead(String transferId) throws RcsPersistentStorageException,
-            RcsServiceNotAvailableException, RcsGenericException {
+    public void markFileTransferAsRead(String transferId) throws RcsServiceNotAvailableException,
+            RcsPersistentStorageException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -584,10 +584,12 @@ public final class FileTransferService extends RcsService {
      * 
      * @param transferIds
      * @throws RcsServiceNotAvailableException
+     * @throws RcsPersistentStorageException
      * @throws RcsGenericException
      */
     public void clearFileTransferDeliveryExpiration(Set<String> transferIds)
-            throws RcsServiceNotAvailableException, RcsGenericException {
+            throws RcsServiceNotAvailableException, RcsPersistentStorageException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -595,6 +597,7 @@ public final class FileTransferService extends RcsService {
             mApi.clearFileTransferDeliveryExpiration(new ArrayList<String>(transferIds));
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
             throw new RcsGenericException(e);
         }
     }

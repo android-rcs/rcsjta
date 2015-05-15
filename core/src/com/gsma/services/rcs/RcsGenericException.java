@@ -32,6 +32,15 @@ public class RcsGenericException extends RcsServiceException {
     static final long serialVersionUID = 1L;
 
     /**
+     * Constructor
+     * 
+     * @param message Error message obtained either from a constant string or through e.getMessage()
+     */
+    public RcsGenericException(String message) {
+        super(message);
+    }
+
+    /**
      * Constructs a new Exception with the current stack trace and the specified cause.
      * 
      * @param cause the cause (which is saved for later retrieval by the Throwable.getCause()

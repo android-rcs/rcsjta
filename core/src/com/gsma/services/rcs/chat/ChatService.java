@@ -401,10 +401,12 @@ public final class ChatService extends RcsService {
      * 
      * @param msgIds
      * @throws RcsServiceNotAvailableException
+     * @throws RcsPersistentStorageException
      * @throws RcsGenericException
      */
     public void clearMessageDeliveryExpiration(Set<String> msgIds)
-            throws RcsServiceNotAvailableException, RcsGenericException {
+            throws RcsServiceNotAvailableException, RcsPersistentStorageException,
+            RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -412,6 +414,7 @@ public final class ChatService extends RcsService {
             mApi.clearMessageDeliveryExpiration(new ArrayList<String>(msgIds));
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
             throw new RcsGenericException(e);
         }
     }
@@ -421,10 +424,11 @@ public final class ChatService extends RcsService {
      * 
      * @param msgId Message id
      * @throws RcsServiceNotAvailableException
+     * @throws RcsPersistentStorageException
      * @throws RcsGenericException
      */
     public void markMessageAsRead(String msgId) throws RcsServiceNotAvailableException,
-            RcsGenericException {
+            RcsPersistentStorageException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
@@ -432,6 +436,7 @@ public final class ChatService extends RcsService {
             mApi.markMessageAsRead(msgId);
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
             throw new RcsGenericException(e);
         }
     }
