@@ -72,6 +72,8 @@ public class ProvisioningParser {
 
     private static final String UUID_VALUE = "uuid_Value";
 
+    private static final String PROTOCOL_HTTPS = "https";
+
     /**
      * Provisioning info
      */
@@ -998,6 +1000,22 @@ public class ProvisioningParser {
 
                 if (ftHttpCsUri == null) {
                     if ((ftHttpCsUri = getValueByParamName("ftHTTPCSURI", childnode, TYPE_TXT)) != null) {
+                        /*
+                         * According to "Rich Communication Suite 5.1 Advanced Communications
+                         * Services and Client Specification Version 4.0" 3.5.4.8.3 File transfer
+                         * procedure 3.5.4.8.3.1 Sender procedures This specification uses the term
+                         * “HTTP POST” and “HTTP GET” as a generic reference to the action of using
+                         * the POST or GET method. However, it is strongly recommended that whenever
+                         * the POST action contains sensitive information such as a user ID or
+                         * password, the action should take place over a secure connection and/or
+                         * via HTTPS explicitly.
+                         */
+                        if (!ftHttpCsUri.startsWith(PROTOCOL_HTTPS)) {
+                            logger.error(new StringBuilder(ftHttpCsUri)
+                                    .append(" is not a secure protocol, hence disabling ftHttp capability.")
+                                    .toString());
+                            continue;
+                        }
                         mRcsSettings.setFtHttpServer(ftHttpCsUri);
                         continue;
                     }
