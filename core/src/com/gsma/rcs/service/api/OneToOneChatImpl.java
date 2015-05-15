@@ -870,6 +870,9 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                 case TERMINATION_BY_TIMEOUT:
                     logger.info("Session rejected by timeout.");
                     break;
+                case TERMINATION_BY_INACTIVITY:
+                    logger.info("Session rejected by inactivity.");
+                    break;
                 case TERMINATION_BY_REMOTE:
                     logger.info("Session rejected by remote.");
                     break;
