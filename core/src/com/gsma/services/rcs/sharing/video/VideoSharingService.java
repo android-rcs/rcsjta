@@ -237,6 +237,9 @@ public final class VideoSharingService extends RcsService {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
+        if (listener == null) {
+            throw new RcsIllegalArgumentException("listener must not be null!");
+        }
         try {
             IVideoSharingListener rcsListener = new VideoSharingListenerImpl(listener);
             mVideoSharingListeners.put(listener, new WeakReference<IVideoSharingListener>(

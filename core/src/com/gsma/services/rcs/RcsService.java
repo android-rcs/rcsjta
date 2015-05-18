@@ -372,6 +372,9 @@ public abstract class RcsService {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
+        if (listener == null) {
+            throw new RcsIllegalArgumentException("listener must not be null!");
+        }
         try {
             IRcsServiceRegistrationListener rcsListener = new RcsServiceRegistrationListenerImpl(
                     listener);

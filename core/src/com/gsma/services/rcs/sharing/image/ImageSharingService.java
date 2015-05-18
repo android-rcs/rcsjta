@@ -262,6 +262,9 @@ public final class ImageSharingService extends RcsService {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
+        if (listener == null) {
+            throw new RcsIllegalArgumentException("listener must not be null!");
+        }
         try {
             IImageSharingListener rcsListener = new ImageSharingListenerImpl(listener);
             mImageSharingListeners.put(listener, new WeakReference<IImageSharingListener>(

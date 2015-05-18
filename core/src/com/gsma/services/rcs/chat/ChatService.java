@@ -453,6 +453,9 @@ public final class ChatService extends RcsService {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
+        if (listener == null) {
+            throw new RcsIllegalArgumentException("listener must not be null!");
+        }
         try {
             IGroupChatListener rcsListener = new GroupChatListenerImpl(listener);
             mGroupChatListeners.put(listener, new WeakReference<IGroupChatListener>(rcsListener));
@@ -501,6 +504,9 @@ public final class ChatService extends RcsService {
             throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
+        }
+        if (listener == null) {
+            throw new RcsIllegalArgumentException("listener must not be null!");
         }
         try {
             IOneToOneChatListener rcsListener = new OneToOneChatListenerImpl(listener);

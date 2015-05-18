@@ -369,6 +369,9 @@ public final class MultimediaSessionService extends RcsService {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
+        if (listener == null) {
+            throw new RcsIllegalArgumentException("listener must not be null!");
+        }
         try {
             IMultimediaMessagingSessionListener multimediaMessagingSessionListener = new MultimediaMessagingSessionListenerImpl(
                     listener);
@@ -421,6 +424,9 @@ public final class MultimediaSessionService extends RcsService {
             throws RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
+        }
+        if (listener == null) {
+            throw new RcsIllegalArgumentException("listener must not be null!");
         }
         try {
             IMultimediaStreamingSessionListener multimediaStreamingSessionListener = new MultimediaStreamingSessionListenerImpl(

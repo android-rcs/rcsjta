@@ -278,6 +278,9 @@ public final class GeolocSharingService extends RcsService {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
+        if (listener == null) {
+            throw new RcsIllegalArgumentException("listener must not be null!");
+        }
         try {
             IGeolocSharingListener rcsListener = new GeolocSharingListenerImpl(listener);
             mGeolocSharingListeners.put(listener, new WeakReference<IGeolocSharingListener>(
