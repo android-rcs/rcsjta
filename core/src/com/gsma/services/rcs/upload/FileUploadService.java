@@ -304,11 +304,11 @@ public final class FileUploadService extends RcsService {
      */
     public void addEventListener(FileUploadListener listener)
             throws RcsServiceNotAvailableException, RcsGenericException {
-        if (mApi == null) {
-            throw new RcsServiceNotAvailableException();
-        }
         if (listener == null) {
             throw new RcsIllegalArgumentException("listener must not be null!");
+        }
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
         }
         try {
             IFileUploadListener fileUploadListener = new FileUploadListenerImpl(listener);

@@ -366,11 +366,11 @@ public final class MultimediaSessionService extends RcsService {
      */
     public void addEventListener(MultimediaMessagingSessionListener listener)
             throws RcsServiceNotAvailableException, RcsGenericException {
-        if (mApi == null) {
-            throw new RcsServiceNotAvailableException();
-        }
         if (listener == null) {
             throw new RcsIllegalArgumentException("listener must not be null!");
+        }
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
         }
         try {
             IMultimediaMessagingSessionListener multimediaMessagingSessionListener = new MultimediaMessagingSessionListenerImpl(
@@ -422,11 +422,11 @@ public final class MultimediaSessionService extends RcsService {
      */
     public void addEventListener(MultimediaStreamingSessionListener listener)
             throws RcsServiceNotAvailableException, RcsGenericException {
-        if (mApi == null) {
-            throw new RcsServiceNotAvailableException();
-        }
         if (listener == null) {
             throw new RcsIllegalArgumentException("listener must not be null!");
+        }
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
         }
         try {
             IMultimediaStreamingSessionListener multimediaStreamingSessionListener = new MultimediaStreamingSessionListenerImpl(

@@ -369,11 +369,11 @@ public abstract class RcsService {
      */
     public void addEventListener(RcsServiceRegistrationListener listener)
             throws RcsServiceNotAvailableException, RcsGenericException {
-        if (mApi == null) {
-            throw new RcsServiceNotAvailableException();
-        }
         if (listener == null) {
             throw new RcsIllegalArgumentException("listener must not be null!");
+        }
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
         }
         try {
             IRcsServiceRegistrationListener rcsListener = new RcsServiceRegistrationListenerImpl(

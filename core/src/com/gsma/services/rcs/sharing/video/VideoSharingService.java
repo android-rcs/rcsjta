@@ -234,11 +234,11 @@ public final class VideoSharingService extends RcsService {
      */
     public void addEventListener(VideoSharingListener listener)
             throws RcsServiceNotAvailableException, RcsGenericException {
-        if (mApi == null) {
-            throw new RcsServiceNotAvailableException();
-        }
         if (listener == null) {
             throw new RcsIllegalArgumentException("listener must not be null!");
+        }
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
         }
         try {
             IVideoSharingListener rcsListener = new VideoSharingListenerImpl(listener);

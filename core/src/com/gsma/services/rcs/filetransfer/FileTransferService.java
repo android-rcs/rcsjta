@@ -381,11 +381,11 @@ public final class FileTransferService extends RcsService {
      */
     public void addEventListener(OneToOneFileTransferListener listener)
             throws RcsServiceNotAvailableException, RcsGenericException {
-        if (mApi == null) {
-            throw new RcsServiceNotAvailableException();
-        }
         if (listener == null) {
             throw new RcsIllegalArgumentException("listener must not be null!");
+        }
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
         }
         try {
             IOneToOneFileTransferListener rcsListener = new OneToOneFileTransferListenerImpl(
@@ -436,11 +436,11 @@ public final class FileTransferService extends RcsService {
      */
     public void addEventListener(GroupFileTransferListener listener)
             throws RcsServiceNotAvailableException, RcsGenericException {
-        if (mApi == null) {
-            throw new RcsServiceNotAvailableException();
-        }
         if (listener == null) {
             throw new RcsIllegalArgumentException("listener must not be null!");
+        }
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
         }
         try {
             IGroupFileTransferListener rcsListener = new GroupFileTransferListenerImpl(listener);

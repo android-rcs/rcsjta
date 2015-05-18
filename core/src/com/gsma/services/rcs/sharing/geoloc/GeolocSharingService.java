@@ -275,11 +275,11 @@ public final class GeolocSharingService extends RcsService {
      */
     public void addEventListener(GeolocSharingListener listener)
             throws RcsServiceNotAvailableException, RcsGenericException {
-        if (mApi == null) {
-            throw new RcsServiceNotAvailableException();
-        }
         if (listener == null) {
             throw new RcsIllegalArgumentException("listener must not be null!");
+        }
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
         }
         try {
             IGeolocSharingListener rcsListener = new GeolocSharingListenerImpl(listener);

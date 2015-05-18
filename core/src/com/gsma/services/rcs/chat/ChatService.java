@@ -450,11 +450,11 @@ public final class ChatService extends RcsService {
      */
     public void addEventListener(GroupChatListener listener)
             throws RcsServiceNotAvailableException, RcsGenericException {
-        if (mApi == null) {
-            throw new RcsServiceNotAvailableException();
-        }
         if (listener == null) {
             throw new RcsIllegalArgumentException("listener must not be null!");
+        }
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
         }
         try {
             IGroupChatListener rcsListener = new GroupChatListenerImpl(listener);
@@ -502,11 +502,11 @@ public final class ChatService extends RcsService {
      */
     public void addEventListener(OneToOneChatListener listener)
             throws RcsServiceNotAvailableException, RcsGenericException {
-        if (mApi == null) {
-            throw new RcsServiceNotAvailableException();
-        }
         if (listener == null) {
             throw new RcsIllegalArgumentException("listener must not be null!");
+        }
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
         }
         try {
             IOneToOneChatListener rcsListener = new OneToOneChatListenerImpl(listener);
