@@ -9,6 +9,7 @@ import com.gsma.services.rcs.history.HistoryLog;
 
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.history.HistoryListView;
+import com.orangelabs.rcs.ri.messaging.filetransfer.multi.SendMultiFile;
 
 import android.app.Activity;
 import android.content.Context;
@@ -21,6 +22,8 @@ import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -65,6 +68,8 @@ public class MessagingListView extends HistoryListView {
 
     private final List<MessagingLogInfos> mMessagingLogInfos = new ArrayList<MessagingLogInfos>();
 
+    private boolean mSendFile = false;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,6 +87,10 @@ public class MessagingListView extends HistoryListView {
                 getString(R.string.label_history_log_menu_file_transfer));
         setProviders(sProviders);
 
+        mSendFile = getIntent().getAction() != null;
+        if (mSendFile) {
+            view.setOnItemClickListener(getOnItemClickListener());
+        }
         startQuery();
     }
 
@@ -253,18 +262,18 @@ public class MessagingListView extends HistoryListView {
                 }
             }
 
-            if (getSelectedProviderIds().contains(ChatLog.Message.HISTORYLOG_MEMBER_ID)) {
-                for (Entry<String, MessagingLogInfos> groupChat : mGroupChatMap.entrySet()) {
-                    String chatId = groupChat.getKey();
-                    MessagingLogInfos groupChatInfos = groupChat.getValue();
-                    MessagingLogInfos messageInfos = dataMap.get(chatId);
-                    if (messageInfos == null) {
+            for (Entry<String, MessagingLogInfos> groupChat : mGroupChatMap.entrySet()) {
+                String chatId = groupChat.getKey();
+                MessagingLogInfos groupChatInfos = groupChat.getValue();
+                MessagingLogInfos messageInfos = dataMap.get(chatId);
+                if (messageInfos == null) {
+                    if (mSendFile) {
                         /* Add group chat entries if there is no associated message */
                         dataMap.put(chatId, groupChatInfos);
-                    } else {
-                        /* update subject if message exists */
-                        messageInfos.setSubject(groupChatInfos.getSubject());
                     }
+                } else {
+                    /* update subject if message exists */
+                    messageInfos.setSubject(groupChatInfos.getSubject());
                 }
             }
         }
@@ -304,29 +313,78 @@ public class MessagingListView extends HistoryListView {
         }
     }
 
-    private class MessagingLogInfos implements Comparable<MessagingLogInfos> {
+    private OnItemClickListener getOnItemClickListener() {
+        return new OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View v, int pos, long id) {
+                if (!mSendFile) {
+                    return;
+                }
+                // Get selected item
+                MessagingLogInfos messagingLogInfos = (MessagingLogInfos) (parent.getAdapter())
+                        .getItem(pos);
+                boolean singleChat = false;
+                String chatId = messagingLogInfos.getChatId();
+                if (chatId.equals(messagingLogInfos.getContact())) {
+                    singleChat = true;
+                }
+                // Open multiple file transfer
+                SendMultiFile
+                        .startActivity(MessagingListView.this, getIntent(), singleChat, chatId);
+            }
+        };
+    }
 
-        private int mProviderId;
-        private long mTimestamp;
-        private int mStatus;
-        private Direction mDirection;
-        private String mContact;
-        private String mChatId;
-        private String mContent;
-        private String mFilename;
+    /**
+     * A POJO class to hold the messaging log information.
+     */
+    public class MessagingLogInfos implements Comparable<MessagingLogInfos> {
+
+        private final int mProviderId;
+        private final long mTimestamp;
+        private final int mStatus;
+        private final Direction mDirection;
+        private final String mContact;
+        private final String mChatId;
+        private final String mContent;
+        private final String mFilename;
         private String mSubject;
 
-        public MessagingLogInfos(long timestamp, int status, Direction direction, String chatId,
+        /**
+         * Constructor for group chat information
+         * 
+         * @param timestamp the timestamp
+         * @param state the group chat state
+         * @param direction the direction
+         * @param chatId the chat ID
+         * @param subject the subject (or null if not defined)
+         */
+        public MessagingLogInfos(long timestamp, int state, Direction direction, String chatId,
                 String subject) {
             super();
             mTimestamp = timestamp;
-            mStatus = status;
+            mStatus = state;
             mDirection = direction;
             mChatId = chatId;
             mSubject = subject;
             mProviderId = ChatLog.Message.HISTORYLOG_MEMBER_ID;
+            mContact = null;
+            mContent = null;
+            mFilename = null;
         }
 
+        /**
+         * Constructor for chat or file transfer message
+         * 
+         * @param providerId the provider ID
+         * @param timestamp the timestamp
+         * @param status the message status
+         * @param direction the direction
+         * @param contact the contact ID (may be null)
+         * @param chatId the chat ID
+         * @param content the message content
+         * @param filename the filename
+         */
         public MessagingLogInfos(int providerId, long timestamp, int status, Direction direction,
                 String contact, String chatId, String content, String filename) {
             super();
@@ -340,45 +398,92 @@ public class MessagingListView extends HistoryListView {
             mFilename = filename;
         }
 
+        /**
+         * Gets the provide ID
+         * 
+         * @return the provide ID
+         */
         public int getProviderId() {
             return mProviderId;
         }
 
+        /**
+         * Gets the timestamp
+         * 
+         * @return the timestamp
+         */
         public long getTimestamp() {
             return mTimestamp;
         }
 
+        /**
+         * Gets the message / gc status
+         * 
+         * @return the message / gc status
+         */
         public int getStatus() {
             return mStatus;
         }
 
+        /**
+         * Gets the direction
+         * 
+         * @return the direction
+         */
         public Direction getDirection() {
             return mDirection;
         }
 
+        /**
+         * Gets the contact ID
+         * 
+         * @return the contact ID
+         */
         public String getContact() {
             return mContact;
         }
 
+        /**
+         * Gets the chat ID
+         * 
+         * @return the chat ID
+         */
         public String getChatId() {
             return mChatId;
         }
 
+        /**
+         * Gets the message content
+         * 
+         * @return the message content
+         */
         public String getContent() {
             return mContent;
         }
 
+        /**
+         * Gets the file name
+         * 
+         * @return the file name
+         */
         public String getFilename() {
             return mFilename;
         }
 
         /**
-         * @return the mSubject
+         * Gets the group chat subject
+         * 
+         * @return the group chat subject
          */
         public String getSubject() {
             return mSubject;
         }
 
+        /**
+         * Sets the group chat subject
+         * 
+         * @param subject the group chat subject
+         */
         public void setSubject(String subject) {
             mSubject = subject;
         }

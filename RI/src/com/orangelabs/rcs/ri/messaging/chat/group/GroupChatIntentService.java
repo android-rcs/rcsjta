@@ -18,7 +18,17 @@
 
 package com.orangelabs.rcs.ri.messaging.chat.group;
 
-import java.util.Calendar;
+import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.GroupChat;
+import com.gsma.services.rcs.chat.GroupChatIntent;
+import com.gsma.services.rcs.contact.ContactId;
+
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.messaging.chat.ChatMessageDAO;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.IntentService;
 import android.app.Notification;
@@ -30,17 +40,7 @@ import android.media.RingtoneManager;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
-
-import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.chat.GroupChat;
-import com.gsma.services.rcs.chat.GroupChatIntent;
-import com.gsma.services.rcs.contact.ContactId;
-import com.orangelabs.rcs.ri.ConnectionManager;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.messaging.chat.ChatMessageDAO;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
-import com.orangelabs.rcs.ri.utils.Utils;
+import android.util.LruCache;
 
 /**
  * File transfer intent service
@@ -49,26 +49,44 @@ import com.orangelabs.rcs.ri.utils.Utils;
  */
 public class GroupChatIntentService extends IntentService {
 
-    /**
-     * The log tag for this class
+    private static final int MAX_GC_HAVING_PENDING_MESSAGE = 5;
+
+    /*
+     * A cache of notification ID associated with each group chat having pending message. The key is
+     * the chat ID and the value is the notification ID.
      */
+    private static LruCache<String, Integer> sChatIdMessagePendingNotificationIdCache;
+
+    private NotificationManager mNotifManager;
+
     private static final String LOGTAG = LogUtils.getTag(GroupChatIntentService.class
             .getSimpleName());
 
     /**
      * Creates an IntentService.
-     * 
-     * @param name of the thread
-     */
-    public GroupChatIntentService(String name) {
-        super(name);
-    }
-
-    /**
-     * Constructor
      */
     public GroupChatIntentService() {
         super("GroupChatIntentService");
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mNotifManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (sChatIdMessagePendingNotificationIdCache == null) {
+            sChatIdMessagePendingNotificationIdCache = new LruCache<String, Integer>(
+                    MAX_GC_HAVING_PENDING_MESSAGE) {
+
+                @Override
+                protected void entryRemoved(boolean evicted, String key, Integer oldValue,
+                        Integer newValue) {
+                    super.entryRemoved(evicted, key, oldValue, newValue);
+                    if (evicted) {
+                        mNotifManager.cancel(oldValue);
+                    }
+                }
+            };
+        }
     }
 
     @Override
@@ -81,10 +99,10 @@ public class GroupChatIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        if (intent == null || intent.getAction() == null) {
+        String action;
+        if ((action = intent.getAction()) == null) {
             return;
         }
-        String action = intent.getAction();
         if (GroupChatMessageReceiver.ACTION_NEW_GC_MSG.equals(action)) {
             // Gets message ID from the incoming Intent
             String messageId = intent.getStringExtra(GroupChatIntent.EXTRA_MESSAGE_ID);
@@ -165,25 +183,43 @@ public class GroupChatIntentService extends IntentService {
      * @param message message
      */
     private void forwardGCMessage2UI(ChatMessageDAO message) {
-        // Create intent
         Intent intent = GroupChatView.forgeIntentNewMessage(this, message);
         String chatId = message.getChatId();
         String content = message.getContent();
-        String mimeType = message.getMimeType();
-        // Do not display notification if activity is on foreground for this
-        // ChatID
+
+        /*
+         * Do not display notification if activity is on foreground for this ChatID.
+         */
         if (GroupChatView.isDisplayed() && chatId.equals(GroupChatView.chatIdOnForeground)) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG,
                         new StringBuilder("New message '").append(content).append("' for chatId ")
                                 .append(chatId).toString());
             }
+            Integer uniqueId = sChatIdMessagePendingNotificationIdCache.get(chatId);
+            if (uniqueId != null) {
+                sChatIdMessagePendingNotificationIdCache.remove(chatId);
+                mNotifManager.cancel(uniqueId);
+            }
+            /* This will trigger onNewIntent for the target activity */
             startActivity(intent);
         } else {
-            // Create pending intent
-            PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent,
+            /*
+             * If the PendingIntent has the same operation, action, data, categories, components,
+             * and flags it will be replaced. Invitation should be notified individually so we use a
+             * random generator to provide a unique request code and reuse it for the notification.
+             */
+            Integer uniqueId = sChatIdMessagePendingNotificationIdCache.get(chatId);
+            if (uniqueId == null) {
+                uniqueId = Utils.getUniqueIdForPendingIntent();
+                sChatIdMessagePendingNotificationIdCache.put(chatId, uniqueId);
+            }
+            PendingIntent contentIntent = PendingIntent.getActivity(this, uniqueId, intent,
                     PendingIntent.FLAG_UPDATE_CURRENT);
+
+            /* Create notification */
             ContactId contact = message.getContact();
+            String mimeType = message.getMimeType();
             String displayName = RcsDisplayName.getInstance(this).getDisplayName(contact);
             String title = getString(R.string.title_recv_chat, displayName);
 
@@ -200,13 +236,10 @@ public class GroupChatIntentService extends IntentService {
                 }
                 return;
             }
-
-            // Create notification
             Notification notif = buildNotification(contentIntent, title, msg);
 
-            // Send notification
-            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.notify(chatId, Utils.NOTIF_ID_GROUP_CHAT, notif);
+            /* Send notification */
+            mNotifManager.notify(uniqueId, notif);
         }
     }
 
@@ -217,32 +250,38 @@ public class GroupChatIntentService extends IntentService {
      * @param groupChat Group Chat DAO
      */
     public void forwardGCInvitation2UI(String chatId, GroupChatDAO groupChat) {
-        // Get subject
+        /* Create pending intent */
+        Intent intent = GroupChatView.forgeIntentInvitation(this, chatId, groupChat);
+        /*
+         * If the PendingIntent has the same operation, action, data, categories, components, and
+         * flags it will be replaced. Invitation should be notified individually so we use a random
+         * generator to provide a unique request code and reuse it for the notification.
+         */
+        Integer uniqueId = sChatIdMessagePendingNotificationIdCache.get(chatId);
+        if (uniqueId == null) {
+            uniqueId = Utils.getUniqueIdForPendingIntent();
+            sChatIdMessagePendingNotificationIdCache.put(chatId, uniqueId);
+        }
+        PendingIntent contentIntent = PendingIntent.getActivity(this, uniqueId, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        /* Create notification */
+        String title = getString(R.string.title_group_chat);
+        /* Try to retrieve display name of remote contact */
+        String displayName = getGcDisplayNameOfRemoteContact(groupChat.getChatId());
+        if (displayName != null) {
+            title = getString(R.string.title_recv_group_chat, displayName);
+        }
         String subject = groupChat.getSubject();
         if (TextUtils.isEmpty(subject)) {
             subject = new StringBuilder("<").append(getString(R.string.label_no_subject))
                     .append(">").toString();
         }
-        // Create intent
-        Intent intent = GroupChatView.forgeIntentInvitation(this, chatId, groupChat);
-        // Create pending intent
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-
-        String title = getString(R.string.title_group_chat);
-        // Try to retrieve display name of remote contact
-        String displayName = getGcDisplayNameOfRemoteContact(groupChat.getChatId());
-        if (displayName != null) {
-            title = getString(R.string.title_recv_group_chat, displayName);
-        }
         String msg = getString(R.string.label_subject_notif, subject);
-
-        // Create notification
         Notification notif = buildNotification(contentIntent, title, msg);
 
-        // Send notification
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(chatId, Utils.NOTIF_ID_GROUP_CHAT, notif);
+        /* Send notification */
+        mNotifManager.notify(uniqueId, notif);
     }
 
     /**
@@ -279,7 +318,7 @@ public class GroupChatIntentService extends IntentService {
         NotificationCompat.Builder notif = new NotificationCompat.Builder(this);
         notif.setContentIntent(invitation);
         notif.setSmallIcon(R.drawable.ri_notif_chat_icon);
-        notif.setWhen(Calendar.getInstance().getTimeInMillis());
+        notif.setWhen(System.currentTimeMillis());
         notif.setAutoCancel(true);
         notif.setOnlyAlertOnce(true);
         notif.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));

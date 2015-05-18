@@ -5,7 +5,21 @@
 
 package com.orangelabs.rcs.ri.extension;
 
-import java.util.Calendar;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.extension.MultimediaMessagingSession;
+import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
+import com.gsma.services.rcs.extension.MultimediaStreamingSession;
+import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
+
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.extension.messaging.MessagingSessionView;
+import com.orangelabs.rcs.ri.extension.streaming.StreamingSessionView;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.IntentService;
 import android.app.Notification;
@@ -17,21 +31,6 @@ import android.media.RingtoneManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.extension.MultimediaMessagingSession;
-import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
-import com.gsma.services.rcs.extension.MultimediaStreamingSession;
-import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
-import com.orangelabs.rcs.ri.ConnectionManager;
-import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.extension.messaging.MessagingSessionView;
-import com.orangelabs.rcs.ri.extension.streaming.StreamingSessionView;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
-import com.orangelabs.rcs.ri.utils.Utils;
-
 /**
  * Process the MultiMedia Session invitation<br>
  * Purpose is to retrieve the contactId from the service to build the notification.
@@ -40,14 +39,14 @@ import com.orangelabs.rcs.ri.utils.Utils;
  */
 public class MultiMediaSessionIntentService extends IntentService {
 
-    /**
-     * Creates an IntentService.
-     * 
-     * @param name of the thread
-     */
-    public MultiMediaSessionIntentService(String name) {
-        super(name);
-    }
+    private String mSessionId;
+
+    private boolean mMultimediaMessagingSession = false;
+
+    private ConnectionManager mCnxManager;
+
+    private static final String LOGTAG = LogUtils.getTag(MultiMediaSessionIntentService.class
+            .getSimpleName());
 
     /**
      * Constructor
@@ -56,86 +55,65 @@ public class MultiMediaSessionIntentService extends IntentService {
         super("MultiMediaSessionIntentService");
     }
 
-    /**
-     * MM session API
-     */
-    private String sessionId;
-
-    private boolean actionMultimediaMessagingSession = false;
-
-    /**
-     * API connection manager
-     */
-    private ConnectionManager connectionManager;
-
-    /**
-     * The log tag for this class
-     */
-    private static final String LOGTAG = LogUtils.getTag(MultiMediaSessionIntentService.class
-            .getSimpleName());
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        // We want this service to stop running if forced stop
-        // so return not sticky.
+        /*
+         * We want this service to stop running if forced stop so return not sticky.
+         */
         return START_NOT_STICKY;
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        if (intent == null || intent.getAction() == null) {
+        String action;
+        if ((action = intent.getAction()) == null) {
             return;
         }
 
-        if (intent.getAction().equalsIgnoreCase(
-                MultimediaMessagingSessionIntent.ACTION_NEW_INVITATION)) {
-            actionMultimediaMessagingSession = true;
+        if (MultimediaMessagingSessionIntent.ACTION_NEW_INVITATION.equals(action)) {
+            mMultimediaMessagingSession = true;
         } else {
-            if (!intent.getAction().equalsIgnoreCase(
-                    MultimediaStreamingSessionIntent.ACTION_NEW_INVITATION)) {
+            if (!MultimediaStreamingSessionIntent.ACTION_NEW_INVITATION.equals(action)) {
                 if (LogUtils.isActive) {
-                    Log.d(LOGTAG, "onCreate invalid action=" + intent.getAction());
+                    Log.d(LOGTAG, "Unknown action=".concat(action));
                 }
                 return;
             }
         }
-        // Register to API connection manager
-        connectionManager = ConnectionManager.getInstance(this);
-        if (connectionManager == null
-                || !connectionManager.isServiceConnected(RcsServiceName.MULTIMEDIA)) {
+        /* Since there is no provider associated to multimedia sessions, we must connect to the API */
+        mCnxManager = ConnectionManager.getInstance(this);
+        if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.MULTIMEDIA)) {
             return;
         }
         // Get invitation info
-        sessionId = intent.getStringExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID);
+        mSessionId = intent.getStringExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID);
         if (LogUtils.isActive) {
-            Log.d(LOGTAG, "onHandleIntent sessionId=" + sessionId);
+            Log.d(LOGTAG, "onHandleIntent sessionId=".concat(mSessionId));
         }
-        initiateSession();
+        initiateSession(intent);
     }
 
-    private void initiateSession() {
+    private void initiateSession(Intent intent) {
         try {
-            if (actionMultimediaMessagingSession) {
-                MultimediaMessagingSession mms = connectionManager.getMultimediaSessionApi()
-                        .getMessagingSession(sessionId);
+            if (mMultimediaMessagingSession) {
+                MultimediaMessagingSession mms = mCnxManager.getMultimediaSessionApi()
+                        .getMessagingSession(mSessionId);
                 if (mms != null) {
-                    ContactId contact = mms.getRemoteContact();
-                    addSessionInvitationNotification(sessionId, contact, true);
+                    addSessionInvitationNotification(intent, mms.getRemoteContact());
                 } else {
                     if (LogUtils.isActive) {
-                        Log.w(LOGTAG, "Cannot get messaging session for ID " + sessionId);
+                        Log.w(LOGTAG, "Cannot get messaging session for ID ".concat(mSessionId));
                     }
                 }
             } else {
-                MultimediaStreamingSession mss = connectionManager.getMultimediaSessionApi()
-                        .getStreamingSession(sessionId);
+                MultimediaStreamingSession mss = mCnxManager.getMultimediaSessionApi()
+                        .getStreamingSession(mSessionId);
                 if (mss != null) {
-                    ContactId contact = mss.getRemoteContact();
-                    addSessionInvitationNotification(sessionId, contact, false);
+                    addSessionInvitationNotification(intent, mss.getRemoteContact());
                 } else {
                     if (LogUtils.isActive) {
-                        Log.w(LOGTAG, "Cannot get streaming session for ID " + sessionId);
+                        Log.w(LOGTAG, "Cannot get streaming session for ID ".concat(mSessionId));
                     }
                 }
             }
@@ -146,25 +124,11 @@ public class MultiMediaSessionIntentService extends IntentService {
         }
     }
 
-    /**
-     * Add session invitation notification
-     * 
-     * @param sessionId
-     * @param contact
-     * @param mms True is messaging session
-     */
-    private void addSessionInvitationNotification(String sessionId, ContactId contact, boolean mms) {
-        // Get remote contact and session
-        if (contact == null) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "addSessionInvitationNotification failed: cannot parse contact");
-            }
-            return;
-        }
-        // Create notification
-        Intent invitation = new Intent();
+    private void addSessionInvitationNotification(Intent intent, ContactId contact) {
+        /* Create pending intent */
+        Intent invitation = new Intent(intent);
         String title;
-        if (mms) {
+        if (mMultimediaMessagingSession) {
             invitation.setClass(this, MessagingSessionView.class);
             title = getString(R.string.title_recv_messaging_session);
         } else {
@@ -172,19 +136,22 @@ public class MultiMediaSessionIntentService extends IntentService {
             title = getString(R.string.title_recv_streaming_session);
         }
         invitation.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        invitation.setAction(sessionId);
-        invitation.putExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID, sessionId);
-
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, invitation,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+        /*
+         * If the PendingIntent has the same operation, action, data, categories, components, and
+         * flags it will be replaced. Invitation should be notified individually so we use a random
+         * generator to provide a unique request code and reuse it for the notification.
+         */
+        int uniqueId = Utils.getUniqueIdForPendingIntent();
+        PendingIntent contentIntent = PendingIntent.getActivity(this, uniqueId, invitation,
+                PendingIntent.FLAG_ONE_SHOT);
 
         String displayName = RcsDisplayName.getInstance(this).getDisplayName(contact);
 
-        // Create notification
+        /* Create notification */
         NotificationCompat.Builder notif = new NotificationCompat.Builder(this);
         notif.setContentIntent(contentIntent);
         notif.setSmallIcon(R.drawable.ri_notif_mm_session_icon);
-        notif.setWhen(Calendar.getInstance().getTimeInMillis());
+        notif.setWhen(System.currentTimeMillis());
         notif.setAutoCancel(true);
         notif.setOnlyAlertOnce(true);
         notif.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
@@ -192,9 +159,9 @@ public class MultiMediaSessionIntentService extends IntentService {
         notif.setContentTitle(title);
         notif.setContentText(getString(R.string.label_from_args, displayName));
 
-        // Send notification
+        /* Send notification */
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(sessionId, Utils.NOTIF_ID_MM_SESSION, notif.build());
+        notificationManager.notify(uniqueId, notif.build());
     }
 
 }

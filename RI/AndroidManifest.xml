@@ -5,7 +5,7 @@
     android:versionName="3.1.1" >
 
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="12"
         android:targetSdkVersion="19" />
 
     <uses-permission android:name="android.permission.GET_TASKS" />
@@ -119,7 +119,6 @@
         </activity>
         <activity
             android:name="com.orangelabs.rcs.ri.messaging.filetransfer.InitiateFileTransfer"
-            android:exported="true"
             android:icon="@drawable/ri_quick_ft_icon"
             android:label="@string/menu_transfer_file" >
             <intent-filter>
@@ -150,8 +149,8 @@
 
         <activity
             android:name="com.orangelabs.rcs.ri.messaging.filetransfer.ReceiveFileTransfer"
-            android:exported="true"
-            android:label="@string/title_file_transfer" />
+            android:label="@string/title_file_transfer"
+            android:launchMode="singleTop" />
         <activity
             android:name="com.orangelabs.rcs.ri.messaging.filetransfer.FileTransferList"
             android:label="@string/menu_file_transfer_log" />
@@ -163,6 +162,14 @@
         <service
             android:name="com.orangelabs.rcs.ri.messaging.filetransfer.FileTransferIntentService"
             android:exported="false" />
+
+        <!-- Multiple files transfer -->
+        <activity
+            android:name="com.orangelabs.rcs.ri.messaging.filetransfer.multi.SendMultiFileGroupChat"
+            android:label="@string/title_multi_file_transfer" />
+        <activity
+            android:name="com.orangelabs.rcs.ri.messaging.filetransfer.multi.SendMultiFileSingleChat"
+            android:label="@string/title_multi_file_transfer" />
 
         <!-- Chat API -->
 
@@ -420,22 +427,35 @@
             android:name=".upload.InitiateFileUpload"
             android:label="@string/title_initiate_upload" />
 
-        
         <!-- History API -->
         <activity
             android:name="com.orangelabs.rcs.ri.history.TestHistoryLogApi"
             android:label="@string/title_history_log" />
         <activity
             android:name="com.orangelabs.rcs.ri.history.messaging.MessagingListView"
-            android:label="@string/title_history_log_messaging" />
+            android:label="@string/title_history_log_messaging" >
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="application/*" />
+                <data android:mimeType="audio/*" />
+                <data android:mimeType="image/*" />
+                <data android:mimeType="message/*" />
+                <data android:mimeType="multipart/*" />
+                <data android:mimeType="text/*" />
+                <data android:mimeType="video/*" />
+            </intent-filter>
+        </activity>
         <activity
             android:name="com.orangelabs.rcs.ri.history.sharing.SharingListView"
-            android:label="@string/title_history_log_sharing" />        
+            android:label="@string/title_history_log_sharing" />
         <activity
             android:name="com.orangelabs.rcs.ri.history.sharing.SharingDetailView"
             android:label="@string/title_history_log_item" />
-        
-        
+
         <!-- RCS settings application -->
 
         <activity

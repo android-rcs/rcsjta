@@ -42,6 +42,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
@@ -91,56 +92,26 @@ public class MessagingSessionView extends Activity {
      */
     public final static String EXTRA_CONTACT = "contact";
 
-    /**
-     * UI handler
-     */
     private final Handler mHandler = new Handler();
 
-    /**
-     * Session ID
-     */
     private String mSessionId;
 
-    /**
-     * Remote contact
-     */
     private ContactId mContact;
 
-    /**
-     * Service ID
-     */
     private String mServiceId = MessagingSessionUtils.SERVICE_ID;
 
-    /**
-     * Session
-     */
     private MultimediaMessagingSession mSession;
 
-    /**
-     * Progress dialog
-     */
     private Dialog mProgressDialog;
 
-    /**
-     * A locker to exit only once
-     */
     private LockAccess mExitOnce = new LockAccess();
 
-    /**
-     * API connection manager
-     */
     private ConnectionManager mCnxManager;
 
-    /**
-     * The log tag for this class
-     */
     private static final String LOGTAG = LogUtils
             .getTag(MessagingSessionView.class.getSimpleName());
 
-    /**
-     * Session listener
-     */
-    private MultimediaMessagingSessionListener serviceListener = new MultimediaMessagingSessionListener() {
+    private MultimediaMessagingSessionListener mServiceListener = new MultimediaMessagingSessionListener() {
 
         @Override
         public void onStateChanged(ContactId contact, String sessionId,
@@ -252,9 +223,9 @@ public class MessagingSessionView extends Activity {
                 RcsServiceName.CONTACT);
         try {
             // Add service listener
-            mCnxManager.getMultimediaSessionApi().addEventListener(serviceListener);
+            mCnxManager.getMultimediaSessionApi().addEventListener(mServiceListener);
 
-            initialiseMessagingSession();
+            initialiseMessagingSession(getIntent());
         } catch (RcsServiceException e) {
             if (LogUtils.isActive) {
                 Log.e(LOGTAG, "Failed to add listener", e);
@@ -273,7 +244,7 @@ public class MessagingSessionView extends Activity {
         if (mCnxManager.isServiceConnected(RcsServiceName.MULTIMEDIA)) {
             // Remove listener
             try {
-                mCnxManager.getMultimediaSessionApi().removeEventListener(serviceListener);
+                mCnxManager.getMultimediaSessionApi().removeEventListener(mServiceListener);
             } catch (Exception e) {
                 if (LogUtils.isActive) {
                     Log.e(LOGTAG, "Failed to remove listener", e);
@@ -307,15 +278,15 @@ public class MessagingSessionView extends Activity {
         }
     }
 
-    private void initialiseMessagingSession() {
+    private void initialiseMessagingSession(Intent intent) {
         MultimediaSessionService sessionApi = mCnxManager.getMultimediaSessionApi();
         try {
             MultimediaSessionServiceConfiguration config = sessionApi.getConfiguration();
             if (LogUtils.isActive) {
-                Log.d(LOGTAG, "MessageMaxLength: ".concat(Integer.valueOf(
-                        config.getMessageMaxLength()).toString()));
+                Log.d(LOGTAG,
+                        "MessageMaxLength: ".concat(Integer.toString(config.getMessageMaxLength())));
             }
-            int mode = getIntent().getIntExtra(MessagingSessionView.EXTRA_MODE, -1);
+            int mode = intent.getIntExtra(MessagingSessionView.EXTRA_MODE, -1);
             if (mode == MessagingSessionView.MODE_OUTGOING) {
                 // Outgoing session
 
@@ -327,7 +298,7 @@ public class MessagingSessionView extends Activity {
                 }
 
                 // Get remote contact
-                mContact = getIntent().getParcelableExtra(MessagingSessionView.EXTRA_CONTACT);
+                mContact = intent.getParcelableExtra(MessagingSessionView.EXTRA_CONTACT);
 
                 // Initiate session
                 startSession();
@@ -335,7 +306,7 @@ public class MessagingSessionView extends Activity {
                 // Open an existing session
 
                 // Incoming session
-                mSessionId = getIntent().getStringExtra(MessagingSessionView.EXTRA_SESSION_ID);
+                mSessionId = intent.getStringExtra(MessagingSessionView.EXTRA_SESSION_ID);
 
                 // Get the session
                 mSession = sessionApi.getMessagingSession(mSessionId);
@@ -350,8 +321,8 @@ public class MessagingSessionView extends Activity {
                 mContact = mSession.getRemoteContact();
             } else {
                 // Incoming session from its Intent
-                mSessionId = getIntent().getStringExtra(
-                        MultimediaMessagingSessionIntent.EXTRA_SESSION_ID);
+                mSessionId = intent
+                        .getStringExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID);
 
                 // Get the session
                 mSession = sessionApi.getMessagingSession(mSessionId);

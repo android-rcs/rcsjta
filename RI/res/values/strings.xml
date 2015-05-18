@@ -52,7 +52,8 @@
     <string name="label_state_delivered_at">Delivered at %s</string>
     <string name="label_state_displayed_at">Displayed at %s</string>
     <string name="label_status">Status: %s</string>
-    <string name="label_reason_code">Reason: %s</string>
+    <string name="label_reason_code_args">Reason: %s</string>
+    <string name="label_reason_code">Reason:</string>
     <string name="label_state_queued">queued</string>
     <string name="label_session_state">State: %s</string>
     <string name="label_session_date">Date: %s</string>
@@ -125,7 +126,7 @@
     <string name="label_capabilities_timestamp">Last refresh:</string>
     <string name="label_capabilities_valid">Valid:</string>
     <string name="label_no_capabilities">No capabilities for %s</string>
-    
+
     <!-- Messaging menu -->
     <string name="menu_messaging">Messaging</string>
     <string name="menu_file_transfer">File transfer</string>
@@ -162,7 +163,11 @@
     <string name="label_resend_failed">Transfer resend failed</string>
     <string name="label_expiration">Expiration:</string>
     <string name="label_expiration_args">Expiration: %s</string>
-    
+    <string name="label_ft_start_file_transfer">Start transfer</string>
+    <string name="label_ft_filesize">Size:</string>
+    <string name="label_ft_not_allowed">Not allowed to transfer file(s)</string>
+ 	<string name="title_multi_file_transfer">Multiple file transfer</string>
+ 
     <!-- Chat menu -->
     <string name="menu_initiate_chat">Initiate single chat</string>
     <string name="menu_initiate_group_chat">Initiate group chat</string>
@@ -222,7 +227,7 @@
     <string name="label_GroupChatSupported">GC supported:</string>
     <string name="label_ChatTimeout">Chat timeout</string>
     <string name="label_NotAllowedToInitiateGroupChat">Not allowed to initiate Group Chat</string>
-    
+
     <!-- Sharing menu -->
     <string name="menu_sharing">Sharing</string>
     <string name="menu_image_sharing">Image sharing</string>
@@ -332,9 +337,8 @@
     <string name="label_service_activate_unchangeable">Unchangeable</string>
     <string name="label_service_activate_changeable">Changeable</string>
     <string name="text_service_activate_unchangeable">RCS activation cannot be changed</string>
-    
     <string name="ims_connected">Connected to RCS platform</string>
-	<string name="ims_disconnected">Disconnected from RCS platform</string>
+    <string name="ims_disconnected">Disconnected from RCS platform</string>
     <string name="ims_battery_disconnected">Disconnected from RCS platform (Battery low)</string>
 
     <!-- File upload menu -->

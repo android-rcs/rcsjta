@@ -43,6 +43,7 @@ import android.widget.Toast;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
+
 import com.orangelabs.rcs.ri.ConnectionManager;
 import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
@@ -95,7 +96,7 @@ public abstract class SendFile extends Activity implements ISendFile {
     /**
      * File transfer
      */
-    protected FileTransfer fileTransfer;
+    protected FileTransfer mFileTransfer;
 
     /**
      * Progress dialog
@@ -169,7 +170,7 @@ public abstract class SendFile extends Activity implements ISendFile {
                 e.printStackTrace();
             }
 
-            if ((warnSize > 0) && (filesize >= warnSize)) {
+            if (warnSize > 0 && filesize >= warnSize) {
                 // Display a warning message
                 AlertDialog.Builder builder = new AlertDialog.Builder(SendFile.this);
                 builder.setMessage(getString(R.string.label_sharing_warn_size, filesize));
@@ -280,20 +281,9 @@ public abstract class SendFile extends Activity implements ISendFile {
     protected void updateProgressBar(long currentSize, long totalSize) {
         TextView statusView = (TextView) findViewById(R.id.progress_status);
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-
-        String value = "" + (currentSize / 1024);
-        if (totalSize != 0) {
-            value += "/" + (totalSize / 1024);
-        }
-        value += " Kb";
-        statusView.setText(value);
-
-        if (currentSize != 0) {
-            double position = ((double) currentSize / (double) totalSize) * 100.0;
-            progressBar.setProgress((int) position);
-        } else {
-            progressBar.setProgress(0);
-        }
+        statusView.setText(Utils.getProgressLabel(currentSize, totalSize));
+        double position = ((double) currentSize / (double) totalSize) * 100.0;
+        progressBar.setProgress((int) position);
     }
 
     /**
@@ -302,13 +292,13 @@ public abstract class SendFile extends Activity implements ISendFile {
     private void quitSession() {
         // Stop session
         try {
-            if (fileTransfer != null) {
-                fileTransfer.abortTransfer();
+            if (mFileTransfer != null) {
+                mFileTransfer.abortTransfer();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        fileTransfer = null;
+        mFileTransfer = null;
 
         // Exit activity
         finish();

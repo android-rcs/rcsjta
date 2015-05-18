@@ -24,6 +24,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
@@ -44,6 +45,7 @@ import com.gsma.services.rcs.extension.MultimediaSessionService;
 import com.gsma.services.rcs.extension.MultimediaStreamingSession;
 import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
 import com.gsma.services.rcs.extension.MultimediaStreamingSessionListener;
+
 import com.orangelabs.rcs.ri.ConnectionManager;
 import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
@@ -90,56 +92,26 @@ public class StreamingSessionView extends Activity {
      */
     public final static String EXTRA_CONTACT = "contact";
 
-    /**
-     * UI handler
-     */
     private final Handler handler = new Handler();
 
-    /**
-     * Session ID
-     */
     private String mSessionId;
 
-    /**
-     * Remote contact
-     */
     private ContactId mContact;
 
-    /**
-     * Service ID
-     */
     private String mServiceId = StreamingSessionUtils.SERVICE_ID;
 
-    /**
-     * Session
-     */
     private MultimediaStreamingSession mSession;
 
-    /**
-     * Progress dialog
-     */
     private Dialog mProgressDialog;
 
-    /**
-     * A locker to exit only once
-     */
     private LockAccess mExitOnce = new LockAccess();
 
-    /**
-     * API connection manager
-     */
     private ConnectionManager connectionManager;
 
-    /**
-     * The log tag for this class
-     */
     private static final String LOGTAG = LogUtils
             .getTag(StreamingSessionView.class.getSimpleName());
 
-    /**
-     * Session listener
-     */
-    private MultimediaStreamingSessionListener serviceListener = new MultimediaStreamingSessionListener() {
+    private MultimediaStreamingSessionListener mServiceListener = new MultimediaStreamingSessionListener() {
 
         @Override
         public void onStateChanged(ContactId contact, String sessionId,
@@ -252,8 +224,8 @@ public class StreamingSessionView extends Activity {
                 RcsServiceName.CONTACT);
         try {
             // Add service listener
-            connectionManager.getMultimediaSessionApi().addEventListener(serviceListener);
-            initialiseStreamingSession();
+            connectionManager.getMultimediaSessionApi().addEventListener(mServiceListener);
+            initialiseStreamingSession(getIntent());
         } catch (RcsServiceException e) {
             if (LogUtils.isActive) {
                 Log.e(LOGTAG, "Failed to add listener", e);
@@ -272,7 +244,7 @@ public class StreamingSessionView extends Activity {
         if (connectionManager.isServiceConnected(RcsServiceName.MULTIMEDIA)) {
             // Remove listener
             try {
-                connectionManager.getMultimediaSessionApi().removeEventListener(serviceListener);
+                connectionManager.getMultimediaSessionApi().removeEventListener(mServiceListener);
             } catch (Exception e) {
                 if (LogUtils.isActive) {
                     Log.e(LOGTAG, "Failed to remove listener", e);
@@ -306,10 +278,10 @@ public class StreamingSessionView extends Activity {
         }
     }
 
-    private void initialiseStreamingSession() {
+    private void initialiseStreamingSession(Intent intent) {
         MultimediaSessionService sessionApi = connectionManager.getMultimediaSessionApi();
         try {
-            int mode = getIntent().getIntExtra(StreamingSessionView.EXTRA_MODE, -1);
+            int mode = intent.getIntExtra(StreamingSessionView.EXTRA_MODE, -1);
             if (mode == StreamingSessionView.MODE_OUTGOING) {
                 // Outgoing session
 
@@ -321,7 +293,7 @@ public class StreamingSessionView extends Activity {
                 }
 
                 // Get remote contact
-                mContact = getIntent().getParcelableExtra(StreamingSessionView.EXTRA_CONTACT);
+                mContact = intent.getParcelableExtra(StreamingSessionView.EXTRA_CONTACT);
 
                 // Initiate session
                 startSession();
@@ -330,7 +302,7 @@ public class StreamingSessionView extends Activity {
                     // Open an existing session
 
                     // Incoming session
-                    mSessionId = getIntent().getStringExtra(StreamingSessionView.EXTRA_SESSION_ID);
+                    mSessionId = intent.getStringExtra(StreamingSessionView.EXTRA_SESSION_ID);
 
                     // Get the session
                     mSession = sessionApi.getStreamingSession(mSessionId);
@@ -345,8 +317,8 @@ public class StreamingSessionView extends Activity {
                     mContact = mSession.getRemoteContact();
                 } else {
                     // Incoming session from its Intent
-                    mSessionId = getIntent().getStringExtra(
-                            MultimediaStreamingSessionIntent.EXTRA_SESSION_ID);
+                    mSessionId = intent
+                            .getStringExtra(MultimediaStreamingSessionIntent.EXTRA_SESSION_ID);
 
                     // Get the session
                     mSession = sessionApi.getStreamingSession(mSessionId);

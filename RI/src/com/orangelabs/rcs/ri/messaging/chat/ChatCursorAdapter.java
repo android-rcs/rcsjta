@@ -58,13 +58,11 @@ public class ChatCursorAdapter extends CursorAdapter {
     /**
      * Constructor
      * 
-     * @param context
-     * @param cursor
-     * @param flags
-     * @param isSingleChat
+     * @param context The context
+     * @param isSingleChat True if single chat
      */
-    public ChatCursorAdapter(Context context, Cursor cursor, int flags, boolean isSingleChat) {
-        super(context, cursor, flags);
+    public ChatCursorAdapter(Context context, boolean isSingleChat) {
+        super(context, null, 0);
         mInflater = LayoutInflater.from(context);
         mIsSingleChat = isSingleChat;
         mSmileyResources = new Smileys(context);

@@ -19,7 +19,6 @@
 package com.orangelabs.rcs.ri.messaging.chat.group;
 
 import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
@@ -153,7 +152,7 @@ public class GroupChatView extends ChatView {
         public void onMessageStatusChanged(String chatId, String mimeType, String msgId,
                 Content.Status status, Content.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
-                Log.w(LOGTAG, new StringBuilder("onMessageStatusChanged chatId=").append(chatId)
+                Log.i(LOGTAG, new StringBuilder("onMessageStatusChanged chatId=").append(chatId)
                         .append(" mime-type=").append(mimeType).append(" msgId=").append(msgId)
                         .append(" status=").append(status).append(" reason=").append(reasonCode)
                         .toString());
@@ -245,14 +244,14 @@ public class GroupChatView extends ChatView {
         @Override
         public void onDeleted(Set<String> chatIds) {
             if (LogUtils.isActive) {
-                Log.w(LOGTAG, new StringBuilder("onDeleted chatIds=").append(chatIds).toString());
+                Log.i(LOGTAG, new StringBuilder("onDeleted chatIds=").append(chatIds).toString());
             }
         }
 
         @Override
         public void onMessagesDeleted(String chatId, Set<String> msgIds) {
             if (LogUtils.isActive) {
-                Log.w(LOGTAG,
+                Log.i(LOGTAG,
                         new StringBuilder("onMessagesDeleted chatId=").append(chatId)
                                 .append(" msgIds=").append(msgIds).toString());
             }
@@ -326,11 +325,14 @@ public class GroupChatView extends ChatView {
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "onDestroy");
         }
-        try {
-            mGroupChat.onComposing(false);
-        } catch (Exception e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "onComposing failed", e);
+        if (mGroupChat != null) {
+            try {
+
+                mGroupChat.onComposing(false);
+            } catch (Exception e) {
+                if (LogUtils.isActive) {
+                    Log.e(LOGTAG, "onComposing failed", e);
+                }
             }
         }
         super.onDestroy();
@@ -489,10 +491,10 @@ public class GroupChatView extends ChatView {
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle arg) {
         // Create a new CursorLoader with the following query parameters.
-        CursorLoader loader = new CursorLoader(this, Message.CONTENT_URI, PROJECTION, WHERE_CLAUSE,
-                new String[] {
+        CursorLoader loader = new CursorLoader(this, Message.CONTENT_URI, PROJ_CHAT_MSG,
+                WHERE_CLAUSE, new String[] {
                     mChatId
-                }, QUERY_SORT_ORDER);
+                }, ORDER_CHAT_MSG);
         return loader;
     }
 
@@ -823,8 +825,8 @@ public class GroupChatView extends ChatView {
     /**
      * Open a Group Chat
      *
-     * @param context
-     * @param chatId
+     * @param context The context.
+     * @param chatId The chat ID.
      */
     public static void openGroupChat(Context context, String chatId) {
         Intent intent = new Intent(context, GroupChatView.class);
@@ -837,8 +839,8 @@ public class GroupChatView extends ChatView {
     /**
      * Forge intent to notify Group Chat message
      *
-     * @param context
-     * @param chatMessageDAO the chat message from provider
+     * @param context The context.
+     * @param chatMessageDAO The chat message from provider.
      * @return intent
      */
     public static Intent forgeIntentNewMessage(Context context, ChatMessageDAO chatMessageDAO) {
@@ -854,9 +856,9 @@ public class GroupChatView extends ChatView {
     /**
      * Forge intent to notify new Group Chat
      *
-     * @param context
-     * @param chatId the chat ID
-     * @param groupChatDAO the Group Chat session from provider
+     * @param context The context.
+     * @param chatId The chat ID.
+     * @param groupChatDAO The Group Chat session from provider.
      * @return intent
      */
     public static Intent forgeIntentInvitation(Context context, String chatId,

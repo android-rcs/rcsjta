@@ -177,8 +177,8 @@ public class SendGroupFile extends SendFile {
     /**
      * Start SendGroupFile activity
      * 
-     * @param context
-     * @param chatId
+     * @param context The context
+     * @param chatId The chat ID
      */
     public static void startActivity(Context context, String chatId) {
         Intent intent = new Intent(context, SendGroupFile.class);
@@ -196,9 +196,9 @@ public class SendGroupFile extends SendFile {
             /* Only take persistable permission for content Uris */
             FileUtils.tryToTakePersistableContentUriPermission(getApplicationContext(), file);
             // Initiate transfer
-            fileTransfer = mCnxManager.getFileTransferApi().transferFileToGroupChat(mChatId, file,
+            mFileTransfer = mCnxManager.getFileTransferApi().transferFileToGroupChat(mChatId, file,
                     fileicon);
-            mTransferId = fileTransfer.getTransferId();
+            mTransferId = mFileTransfer.getTransferId();
             return true;
         } catch (Exception e) {
             hideProgressDialog();

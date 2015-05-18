@@ -18,12 +18,7 @@
 
 package com.orangelabs.rcs.ri.utils;
 
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Set;
+import com.orangelabs.rcs.ri.R;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -37,7 +32,13 @@ import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.orangelabs.rcs.ri.R;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Set;
 
 /**
  * Utility functions
@@ -45,49 +46,18 @@ import com.orangelabs.rcs.ri.R;
  * @author Jean-Marc AUFFRET
  */
 public class Utils {
-    /**
-     * Notification ID for single chat
-     */
-    public static int NOTIF_ID_SINGLE_CHAT = 1000;
+
+    private static final Random sPendingIntentIdGenerator = new Random();
 
     /**
-     * Notification ID for chat
+     * Gets a unique ID for pending intent
+     * 
+     * @return unique ID for pending intent
      */
-    public static int NOTIF_ID_GROUP_CHAT = 1001;
+    public static int getUniqueIdForPendingIntent() {
+        return sPendingIntentIdGenerator.nextInt();
+    }
 
-    /**
-     * Notification ID for file transfer
-     */
-    public static int NOTIF_ID_FT = 1002;
-
-    /**
-     * Notification ID for image share
-     */
-    public static int NOTIF_ID_IMAGE_SHARE = 1003;
-
-    /**
-     * Notification ID for video share
-     */
-    public static int NOTIF_ID_VIDEO_SHARE = 1004;
-
-    /**
-     * Notification ID for MM session
-     */
-    public static int NOTIF_ID_MM_SESSION = 1005;
-
-    /**
-     * Notification ID for geoloc share
-     */
-    public static int NOTIF_ID_GEOLOC_SHARE = 1006;
-
-    /**
-     * Notification ID for IP call
-     */
-    public static int NOTIF_ID_IP_CALL = 1007;
-
-    /**
-     * The log tag for this class
-     */
     private static final String LOGTAG = LogUtils.getTag(Utils.class.getSimpleName());
 
     /**
@@ -139,9 +109,9 @@ public class Utils {
     /**
      * Show a message and exit activity
      * 
-     * @param activity
-     * @param msg
-     * @param locker
+     * @param activity the activity.
+     * @param msg the message
+     * @param locker the locker
      */
     public static void showMessageAndExit(final Activity activity, String msg, LockAccess locker) {
         showMessageAndExit(activity, msg, locker, null);
@@ -153,7 +123,7 @@ public class Utils {
      * @param activity Activity
      * @param msg Message to be displayed
      * @param locker a locker to only execute once
-     * @param e
+     * @param e the exception
      */
     public static void showMessageAndExit(final Activity activity, String msg, LockAccess locker,
             Exception e) {
@@ -341,6 +311,24 @@ public class Utils {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    /**
+     * Gets the label to show the progress status
+     * 
+     * @param currentSize Current size in bytes transferred
+     * @param totalSize Total size in bytes to be transferred
+     * @return progress label
+     */
+    public static String getProgressLabel(long currentSize, long totalSize) {
+        StringBuilder value = new StringBuilder();
+        value.append(currentSize / 1024);
+        if (totalSize != 0) {
+            value.append('/');
+            value.append(totalSize / 1024);
+        }
+        value.append(" Kb");
+        return value.toString();
     }
 
 }

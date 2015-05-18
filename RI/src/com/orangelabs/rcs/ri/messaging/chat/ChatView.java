@@ -105,13 +105,13 @@ public abstract class ChatView extends FragmentActivity implements
      */
     protected Handler handler = new Handler();
 
-    /**
-     * The log tag for this class
-     */
     private static final String LOGTAG = LogUtils.getTag(ChatView.class.getSimpleName());
 
+    /**
+     * Chat message projection
+     */
     // @formatter:off
-    protected static final String[] PROJECTION = new String[] {
+    protected static final String[] PROJ_CHAT_MSG = new String[] {
         Message.BASECOLUMN_ID, 
         Message.MESSAGE_ID, 
         Message.MIME_TYPE, 
@@ -123,7 +123,10 @@ public abstract class ChatView extends FragmentActivity implements
     };
     // @formatter:on
 
-    protected final static String QUERY_SORT_ORDER = new StringBuilder(Message.TIMESTAMP).append(
+    /**
+     * Query sort order
+     */
+    protected final static String ORDER_CHAT_MSG = new StringBuilder(Message.TIMESTAMP).append(
             " ASC").toString();
 
     @Override
@@ -186,7 +189,7 @@ public abstract class ChatView extends FragmentActivity implements
         });
 
         // Initialize the adapter.
-        mAdapter = new ChatCursorAdapter(this, null, 0, isSingleChat());
+        mAdapter = new ChatCursorAdapter(this, isSingleChat());
 
         // Associate the list adapter with the ListView.
         ListView listView = (ListView) findViewById(android.R.id.list);
@@ -374,7 +377,7 @@ public abstract class ChatView extends FragmentActivity implements
     /**
      * Display composing event for contact
      * 
-     * @param contact
+     * @param contact the contact ID
      * @param status True if contact is composing
      */
     protected void displayComposingEvent(final ContactId contact, final boolean status) {

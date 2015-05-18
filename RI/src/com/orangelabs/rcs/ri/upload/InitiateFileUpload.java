@@ -344,20 +344,9 @@ public class InitiateFileUpload extends Activity {
     private void updateProgressBar(long currentSize, long totalSize) {
         TextView statusView = (TextView) findViewById(R.id.progress_status);
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-
-        String value = "" + Math.min(currentSize / 1024, totalSize);
-        if (totalSize != 0) {
-            value += "/" + (totalSize / 1024);
-        }
-        value += " Kb";
-        statusView.setText(value);
-
-        if (currentSize != 0) {
-            double position = ((double) currentSize / (double) totalSize) * 100.0;
-            progressBar.setProgress((int) position);
-        } else {
-            progressBar.setProgress(0);
-        }
+        statusView.setText(Utils.getProgressLabel(currentSize, totalSize));
+        double position = ((double) currentSize / (double) totalSize) * 100.0;
+        progressBar.setProgress((int) position);
     }
 
     /**

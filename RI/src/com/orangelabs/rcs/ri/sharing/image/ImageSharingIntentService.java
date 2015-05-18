@@ -18,7 +18,14 @@
 
 package com.orangelabs.rcs.ri.sharing.image;
 
-import java.util.Calendar;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.sharing.image.ImageSharing;
+import com.gsma.services.rcs.sharing.image.ImageSharingIntent;
+
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.IntentService;
 import android.app.Notification;
@@ -31,15 +38,6 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.sharing.image.ImageSharing;
-import com.gsma.services.rcs.sharing.image.ImageSharingIntent;
-
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
-import com.orangelabs.rcs.ri.utils.Utils;
-
 /**
  * Image sharing intent service
  * 
@@ -47,9 +45,6 @@ import com.orangelabs.rcs.ri.utils.Utils;
  */
 public class ImageSharingIntentService extends IntentService {
 
-    /**
-     * The log tag for this class
-     */
     private static final String LOGTAG = LogUtils.getTag(ImageSharingIntentService.class
             .getSimpleName());
 
@@ -81,18 +76,16 @@ public class ImageSharingIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        if (intent == null || intent.getAction() == null) {
+        String action;
+        if ((action = intent.getAction()) == null) {
             return;
-
         }
-        String action = intent.getAction();
         // Check action from incoming intent
         if (!ImageSharingIntent.ACTION_NEW_INVITATION.equals(action)) {
             if (LogUtils.isActive) {
                 Log.e(LOGTAG, "Unknown action ".concat(action));
             }
             return;
-
         }
         // Gets data from the incoming Intent
         String sharingId = intent.getStringExtra(ImageSharingIntent.EXTRA_SHARING_ID);
@@ -101,7 +94,6 @@ public class ImageSharingIntentService extends IntentService {
                 Log.e(LOGTAG, "Cannot read sharing ID");
             }
             return;
-
         }
         // Get Image sharing from provider
         ImageSharingDAO ishDao = ImageSharingDAO.getImageSharingDAO(this, sharingId);
@@ -134,21 +126,27 @@ public class ImageSharingIntentService extends IntentService {
             }
             return;
         }
-        // Create notification
+        /* Create pending intent */
         Intent intent = new Intent(invitation);
         intent.setClass(this, ReceiveImageSharing.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+        /*
+         * If the PendingIntent has the same operation, action, data, categories, components, and
+         * flags it will be replaced. Invitation should be notified individually so we use a random
+         * generator to provide a unique request code and reuse it for the notification.
+         */
+        int uniqueId = Utils.getUniqueIdForPendingIntent();
+        PendingIntent contentIntent = PendingIntent.getActivity(this, uniqueId, intent,
+                PendingIntent.FLAG_ONE_SHOT);
 
         String displayName = RcsDisplayName.getInstance(this).getDisplayName(contact);
         String title = getString(R.string.title_recv_image_sharing);
 
-        // Create notification
+        /* Create notification */
         NotificationCompat.Builder notif = new NotificationCompat.Builder(this);
         notif.setContentIntent(contentIntent);
         notif.setSmallIcon(R.drawable.ri_notif_csh_icon);
-        notif.setWhen(Calendar.getInstance().getTimeInMillis());
+        notif.setWhen(System.currentTimeMillis());
         notif.setAutoCancel(true);
         notif.setOnlyAlertOnce(true);
         notif.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
@@ -156,9 +154,8 @@ public class ImageSharingIntentService extends IntentService {
         notif.setContentTitle(title);
         notif.setContentText(getString(R.string.label_from_args, displayName));
 
-        // Send notification
+        /* Send notification */
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager
-                .notify(ishDao.getSharingId(), Utils.NOTIF_ID_IMAGE_SHARE, notif.build());
+        notificationManager.notify(uniqueId, notif.build());
     }
 }

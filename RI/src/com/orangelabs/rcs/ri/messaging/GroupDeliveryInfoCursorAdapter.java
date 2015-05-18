@@ -35,12 +35,10 @@ public class GroupDeliveryInfoCursorAdapter extends CursorAdapter {
     /**
      * Constructor
      * 
-     * @param context
-     * @param cursor
-     * @param flags
+     * @param context The context
      */
-    public GroupDeliveryInfoCursorAdapter(Context context, Cursor cursor, int flags) {
-        super(context, cursor, flags);
+    public GroupDeliveryInfoCursorAdapter(Context context) {
+        super(context, null, 0);
         mInflater = LayoutInflater.from(context);
         mContext = context;
     }
@@ -89,7 +87,7 @@ public class GroupDeliveryInfoCursorAdapter extends CursorAdapter {
                 RiApplication.sDeliveryStatuses[status.toInt()]);
         holder.statusText.setText(_status);
         if (reason != GroupDeliveryInfo.ReasonCode.UNSPECIFIED) {
-            String _reason = mContext.getString(R.string.label_reason_code,
+            String _reason = mContext.getString(R.string.label_reason_code_args,
                     RiApplication.sDeliveryReasonCode[reason.toInt()]);
             holder.reasonText.setText(_reason);
         } else {

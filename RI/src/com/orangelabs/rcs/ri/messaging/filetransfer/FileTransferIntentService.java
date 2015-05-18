@@ -18,7 +18,16 @@
 
 package com.orangelabs.rcs.ri.messaging.filetransfer;
 
-import java.util.Calendar;
+import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.services.rcs.filetransfer.FileTransferIntent;
+
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.messaging.chat.group.GroupChatDAO;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.IntentService;
 import android.app.Notification;
@@ -31,16 +40,6 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.filetransfer.FileTransfer;
-import com.gsma.services.rcs.filetransfer.FileTransferIntent;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.messaging.chat.group.GroupChatDAO;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
-import com.orangelabs.rcs.ri.utils.Utils;
-
 /**
  * File transfer intent service
  * 
@@ -48,24 +47,12 @@ import com.orangelabs.rcs.ri.utils.Utils;
  */
 public class FileTransferIntentService extends IntentService {
 
-    /**
-     * The log tag for this class
-     */
     private static final String LOGTAG = LogUtils.getTag(FileTransferIntentService.class
             .getSimpleName());
 
     /* package private */static final String BUNDLE_FTDAO_ID = "ftdao";
 
     /* package private */static final String EXTRA_GROUP_FILE = "group_file";
-
-    /**
-     * Constructor
-     * 
-     * @param name
-     */
-    public FileTransferIntentService(String name) {
-        super(name);
-    }
 
     /**
      * Constructor
@@ -132,8 +119,6 @@ public class FileTransferIntentService extends IntentService {
                 Log.d(LOGTAG, "File Transfer invitation filename=" + ftDao.getFilename() + " size="
                         + ftDao.getSize());
             }
-            // TODO check File Transfer state to know if rejected
-            // TODO check validity of direction, etc ...
             addFileTransferInvitationNotification(intent, ftDao);
         } else {
             if (LogUtils.isActive) {
@@ -146,7 +131,6 @@ public class FileTransferIntentService extends IntentService {
                 intentLocal.setClass(this, InitiateFileTransfer.class);
             }
             intentLocal.addFlags(Intent.FLAG_FROM_BACKGROUND);
-            intentLocal.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
             intentLocal.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intentLocal.setAction(FileTransferResumeReceiver.ACTION_FT_RESUME);
             startActivity(intentLocal);
@@ -169,21 +153,27 @@ public class FileTransferIntentService extends IntentService {
             return;
         }
 
-        // Create notification
+        /* Create pending intent */
         Intent intent = new Intent(invitation);
         intent.setClass(this, ReceiveFileTransfer.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        /*
+         * If the PendingIntent has the same operation, action, data, categories, components, and
+         * flags it will be replaced. Invitation should be notified individually so we use a random
+         * generator to provide a unique request code and reuse it for the notification.
+         */
+        int uniqueId = Utils.getUniqueIdForPendingIntent();
+        PendingIntent contentIntent = PendingIntent.getActivity(this, uniqueId, intent,
+                PendingIntent.FLAG_ONE_SHOT);
 
         String displayName = RcsDisplayName.getInstance(this).getDisplayName(contact);
         String title = getString(R.string.title_recv_file_transfer);
 
-        // Create notification
+        /* Create notification */
         NotificationCompat.Builder notif = new NotificationCompat.Builder(this);
         notif.setContentIntent(contentIntent);
         notif.setSmallIcon(R.drawable.ri_notif_file_transfer_icon);
-        notif.setWhen(Calendar.getInstance().getTimeInMillis());
+        notif.setWhen(System.currentTimeMillis());
         notif.setAutoCancel(true);
         notif.setOnlyAlertOnce(true);
         notif.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
@@ -191,9 +181,9 @@ public class FileTransferIntentService extends IntentService {
         notif.setContentTitle(title);
         notif.setContentText(getString(R.string.label_from_args, displayName));
 
-        // Send notification
+        /* Send notification */
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(ftDao.getTransferId(), Utils.NOTIF_ID_FT, notif.build());
+        notificationManager.notify(uniqueId, notif.build());
     }
 
 }

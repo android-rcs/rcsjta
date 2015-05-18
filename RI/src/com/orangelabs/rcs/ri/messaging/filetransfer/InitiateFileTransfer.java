@@ -23,6 +23,7 @@ import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
+import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
 
 import com.orangelabs.rcs.ri.ConnectionManager;
@@ -185,9 +186,10 @@ public class InitiateFileTransfer extends Activity {
             return;
         }
         mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.FILE_TRANSFER);
+        FileTransferService fileTransferService = mCnxManager.getFileTransferApi();
         try {
             // Add service listener
-            mCnxManager.getFileTransferApi().addEventListener(ftListener);
+            fileTransferService.addEventListener(ftListener);
             if (mResuming) {
                 // Get resuming info
                 FileTransferDAO ftdao = (FileTransferDAO) (getIntent().getExtras()
@@ -213,7 +215,7 @@ public class InitiateFileTransfer extends Activity {
                 sizeEdit.setText((mFilesize / 1024) + " KB");
                 uriEdit.setText(mFilename);
                 // Check if session still exists
-                if (mCnxManager.getFileTransferApi().getFileTransfer(mFtId) == null) {
+                if (fileTransferService.getFileTransfer(mFtId) == null) {
                     // Session not found or expired
                     Utils.showMessageAndExit(this,
                             getString(R.string.label_transfer_session_has_expired), mExitOnce);
@@ -268,13 +270,19 @@ public class InitiateFileTransfer extends Activity {
      */
     private OnClickListener btnInviteListener = new OnClickListener() {
         public void onClick(View v) {
-            long warnSize = 0;
-            try {
-                warnSize = mCnxManager.getFileTransferApi().getConfiguration().getWarnSize();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
+            String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
+            final ContactId remote = ContactUtil.formatContact(phoneNumber);
 
+            long warnSize = 0;
+            FileTransferService fileTransferService = mCnxManager.getFileTransferApi();
+            try {
+                warnSize = fileTransferService.getConfiguration().getWarnSize();
+            } catch (Exception e) {
+                Utils.showMessageAndExit(InitiateFileTransfer.this,
+                        getString(R.string.label_api_failed), mExitOnce, e);
+                return;
+            }
             if ((warnSize > 0) && (mFilesize >= warnSize)) {
                 // Display a warning message
                 AlertDialog.Builder builder = new AlertDialog.Builder(InitiateFileTransfer.this);
@@ -283,37 +291,27 @@ public class InitiateFileTransfer extends Activity {
                 builder.setPositiveButton(getString(R.string.label_yes),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int position) {
-                                initiateTransfer();
+                                initiateTransfer(remote);
                             }
                         });
                 builder.setNegativeButton(getString(R.string.label_no), null);
                 AlertDialog alert = builder.create();
                 alert.show();
             } else {
-                initiateTransfer();
+                initiateTransfer(remote);
             }
         }
     };
 
-    /**
-     * Initiate transfer
-     */
-    private void initiateTransfer() {
-        // get selected phone number
-        ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
-        String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
-        ContactId remote = ContactUtil.formatContact(phoneNumber);
-
+    private void initiateTransfer(ContactId remote) {
         // Get thumbnail option
         CheckBox ftThumb = (CheckBox) findViewById(R.id.ft_thumb);
-
+        boolean tryToSendFileicon = ftThumb.isChecked();
+        String mimeType = getContentResolver().getType(mFile);
+        if (tryToSendFileicon && mimeType != null && !mimeType.toLowerCase().startsWith("image")) {
+            tryToSendFileicon = false;
+        }
         try {
-            boolean tryToSendFileicon = ftThumb.isChecked();
-            String mimeType = getContentResolver().getType(mFile);
-            if (tryToSendFileicon && mimeType != null
-                    && !mimeType.toLowerCase().startsWith("image")) {
-                tryToSendFileicon = false;
-            }
             /* Only take persistable permission for content Uris */
             FileUtils.tryToTakePersistableContentUriPermission(getApplicationContext(), mFile);
 
@@ -450,20 +448,9 @@ public class InitiateFileTransfer extends Activity {
     private void updateProgressBar(long currentSize, long totalSize) {
         TextView statusView = (TextView) findViewById(R.id.progress_status);
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-
-        String value = "" + (currentSize / 1024);
-        if (totalSize != 0) {
-            value += "/" + (totalSize / 1024);
-        }
-        value += " Kb";
-        statusView.setText(value);
-
-        if (currentSize != 0) {
-            double position = ((double) currentSize / (double) totalSize) * 100.0;
-            progressBar.setProgress((int) position);
-        } else {
-            progressBar.setProgress(0);
-        }
+        statusView.setText(Utils.getProgressLabel(currentSize, totalSize));
+        double position = ((double) currentSize / (double) totalSize) * 100.0;
+        progressBar.setProgress((int) position);
     }
 
     /**

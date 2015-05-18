@@ -161,8 +161,8 @@ public class SendSingleFile extends SendFile {
     /**
      * Start SendFile activity
      * 
-     * @param context
-     * @param contact
+     * @param context The context
+     * @param contact The contact ID
      */
     public static void startActivity(Context context, ContactId contact) {
         Intent intent = new Intent(context, SendSingleFile.class);
@@ -179,8 +179,8 @@ public class SendSingleFile extends SendFile {
             /* Only take persistable permission for content Uris */
             FileUtils.tryToTakePersistableContentUriPermission(getApplicationContext(), file);
             // Initiate transfer
-            fileTransfer = mCnxManager.getFileTransferApi().transferFile(mContact, file, fileicon);
-            mTransferId = fileTransfer.getTransferId();
+            mFileTransfer = mCnxManager.getFileTransferApi().transferFile(mContact, file, fileicon);
+            mTransferId = mFileTransfer.getTransferId();
             return true;
         } catch (Exception e) {
             hideProgressDialog();

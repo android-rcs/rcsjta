@@ -18,7 +18,6 @@
 
 package com.orangelabs.rcs.ri.messaging;
 
-import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfoLog;
 
 import com.orangelabs.rcs.ri.R;
@@ -89,7 +88,7 @@ public class GroupDeliveryInfoList extends FragmentActivity implements
         setContentView(R.layout.delivery_info_list);
         mMessageId = getIntent().getStringExtra(EXTRA_MESSAGE_ID);
         // Initialize the adapter.
-        mAdapter = new GroupDeliveryInfoCursorAdapter(this, null, 0);
+        mAdapter = new GroupDeliveryInfoCursorAdapter(this);
 
         // Associate the list adapter with the ListView.
         ListView listView = (ListView) findViewById(android.R.id.list);
@@ -104,8 +103,8 @@ public class GroupDeliveryInfoList extends FragmentActivity implements
     /**
      * Start GroupDeliveryInfoList activity
      * 
-     * @param context
-     * @param messageId
+     * @param context The context
+     * @param messageId the message ID for which Group Delivery information list is requested
      */
     public static void startActivity(Context context, String messageId) {
         Intent intent = new Intent(context, GroupDeliveryInfoList.class);

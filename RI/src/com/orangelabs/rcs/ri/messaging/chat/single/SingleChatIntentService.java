@@ -18,7 +18,15 @@
 
 package com.orangelabs.rcs.ri.messaging.chat.single;
 
-import java.util.Calendar;
+import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.OneToOneChatIntent;
+import com.gsma.services.rcs.contact.ContactId;
+
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.messaging.chat.ChatMessageDAO;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.IntentService;
 import android.app.Notification;
@@ -29,15 +37,7 @@ import android.content.Intent;
 import android.media.RingtoneManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-
-import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.chat.OneToOneChatIntent;
-import com.gsma.services.rcs.contact.ContactId;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.messaging.chat.ChatMessageDAO;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
-import com.orangelabs.rcs.ri.utils.Utils;
+import android.util.LruCache;
 
 /**
  * File transfer intent service
@@ -46,26 +46,45 @@ import com.orangelabs.rcs.ri.utils.Utils;
  */
 public class SingleChatIntentService extends IntentService {
 
-    /**
-     * The log tag for this class
+    private static final int MAX_1TO1_CHAT_HAVING_PENDING_MESSAGE = 5;
+
+    /*
+     * A cache of notification ID associated with each contact having pending message. The key is
+     * the contact ID and the value is the notification ID.
      */
+    private static LruCache<ContactId, Integer> sContactMessagePendingNotificationIdCache;
+
+    private NotificationManager mNotifManager;
+
     private static final String LOGTAG = LogUtils.getTag(SingleChatIntentService.class
             .getSimpleName());
-
-    /**
-     * Creates an IntentService.
-     * 
-     * @param name of the thread
-     */
-    public SingleChatIntentService(String name) {
-        super(name);
-    }
 
     /**
      * Creates an IntentService.
      */
     public SingleChatIntentService() {
         super("SingleChatIntentService");
+
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mNotifManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (sContactMessagePendingNotificationIdCache == null) {
+            sContactMessagePendingNotificationIdCache = new LruCache<ContactId, Integer>(
+                    MAX_1TO1_CHAT_HAVING_PENDING_MESSAGE) {
+
+                @Override
+                protected void entryRemoved(boolean evicted, ContactId key, Integer oldValue,
+                        Integer newValue) {
+                    super.entryRemoved(evicted, key, oldValue, newValue);
+                    if (evicted) {
+                        mNotifManager.cancel(oldValue);
+                    }
+                }
+            };
+        }
     }
 
     @Override
@@ -78,10 +97,10 @@ public class SingleChatIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        if (intent == null || intent.getAction() == null) {
+        String action;
+        if ((action = intent.getAction()) == null) {
             return;
         }
-        String action = intent.getAction();
         if (SingleChatInvitationReceiver.ACTION_NEW_121_CHAT_MSG.equals(action)) {
             handleNewOneToOneChatMessage(intent);
         } else {
@@ -137,24 +156,40 @@ public class SingleChatIntentService extends IntentService {
             }
             return;
         }
-        String mimeType = message.getMimeType();
         String content = message.getContent();
         Intent intent = SingleChatView.forgeIntentToStart(context, contact);
-        // Do not display notification if activity is on foreground for this
-        // contact
+        /*
+         * Do not display notification if activity is on foreground for this contact
+         */
         if (SingleChatView.isDisplayed() && contact.equals(SingleChatView.contactOnForeground)) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG,
                         new StringBuilder("New message '").append(content).append("' for contact ")
                                 .append(contact.toString()).toString());
             }
-            context.startActivity(intent);
+            Integer pendingIntentId = sContactMessagePendingNotificationIdCache.get(contact);
+            if (pendingIntentId != null) {
+                sContactMessagePendingNotificationIdCache.remove(contact);
+                mNotifManager.cancel(pendingIntentId);
+            }
+            /* This will trigger onNewIntent for the target activity */
+            startActivity(intent);
         } else {
-            // Create notification
-            PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent,
+            /*
+             * If the PendingIntent has the same operation, action, data, categories, components,
+             * and flags it will be replaced. Invitation should be notified individually so we use a
+             * random generator to provide a unique request code and reuse it for the notification.
+             */
+            Integer uniqueId = sContactMessagePendingNotificationIdCache.get(contact);
+            if (uniqueId == null) {
+                uniqueId = Utils.getUniqueIdForPendingIntent();
+                sContactMessagePendingNotificationIdCache.put(contact, uniqueId);
+            }
+            PendingIntent contentIntent = PendingIntent.getActivity(context, uniqueId, intent,
                     PendingIntent.FLAG_UPDATE_CURRENT);
             String displayName = RcsDisplayName.getInstance(this).getDisplayName(contact);
             String title = context.getString(R.string.title_recv_chat, displayName);
+            String mimeType = message.getMimeType();
             String msg;
             if (ChatLog.Message.MimeType.GEOLOC_MESSAGE.equals(mimeType)) {
                 msg = context.getString(R.string.label_geoloc_msg);
@@ -170,9 +205,7 @@ public class SingleChatIntentService extends IntentService {
             Notification notif = buildNotification(contentIntent, title, msg);
 
             // Send notification
-            NotificationManager notificationManager = (NotificationManager) context
-                    .getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.notify(contact.toString(), Utils.NOTIF_ID_SINGLE_CHAT, notif);
+            mNotifManager.notify(uniqueId, notif);
         }
     }
 
@@ -189,7 +222,7 @@ public class SingleChatIntentService extends IntentService {
         NotificationCompat.Builder notif = new NotificationCompat.Builder(this);
         notif.setContentIntent(invitation);
         notif.setSmallIcon(R.drawable.ri_notif_chat_icon);
-        notif.setWhen(Calendar.getInstance().getTimeInMillis());
+        notif.setWhen(System.currentTimeMillis());
         notif.setAutoCancel(true);
         notif.setOnlyAlertOnce(true);
         notif.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));

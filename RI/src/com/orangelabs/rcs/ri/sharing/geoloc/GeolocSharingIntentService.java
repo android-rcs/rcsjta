@@ -18,7 +18,17 @@
 
 package com.orangelabs.rcs.ri.sharing.geoloc;
 
-import java.util.Calendar;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharingIntent;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharingService;
+
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.IntentService;
 import android.app.Notification;
@@ -31,17 +41,6 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
-import com.gsma.services.rcs.sharing.geoloc.GeolocSharingIntent;
-import com.gsma.services.rcs.sharing.geoloc.GeolocSharingService;
-import com.orangelabs.rcs.ri.ConnectionManager;
-import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
-import com.orangelabs.rcs.ri.utils.Utils;
-
 /**
  * Geoloc sharing intent service
  * 
@@ -49,22 +48,10 @@ import com.orangelabs.rcs.ri.utils.Utils;
  */
 public class GeolocSharingIntentService extends IntentService {
 
-    /**
-     * The log tag for this class
-     */
     private static final String LOGTAG = LogUtils.getTag(GeolocSharingIntentService.class
             .getSimpleName());
 
     static final String BUNDLE_GSH_ID = "bundle_gsh";
-
-    /**
-     * Creates an IntentService.
-     * 
-     * @param name of the thread
-     */
-    public GeolocSharingIntentService(String name) {
-        super(name);
-    }
 
     /**
      * Creates an IntentService.
@@ -83,10 +70,10 @@ public class GeolocSharingIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        if (intent == null || intent.getAction() == null) {
+        String action;
+        if ((action = intent.getAction()) == null) {
             return;
         }
-        String action = intent.getAction();
         // Check action from incoming intent
         if (!GeolocSharingIntent.ACTION_NEW_INVITATION.equals(action)) {
             if (LogUtils.isActive) {
@@ -154,21 +141,27 @@ public class GeolocSharingIntentService extends IntentService {
      */
     private void addGeolocSharingInvitationNotification(Intent invitation, String sharingId,
             ContactId contact) {
-        // Create notification
+        /* Create pending intent */
         Intent intent = new Intent(invitation);
         intent.setClass(this, ReceiveGeolocSharing.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+        /*
+         * If the PendingIntent has the same operation, action, data, categories, components, and
+         * flags it will be replaced. Invitation should be notified individually so we use a random
+         * generator to provide a unique request code and reuse it for the notification.
+         */
+        int uniqueId = Utils.getUniqueIdForPendingIntent();
+        PendingIntent contentIntent = PendingIntent.getActivity(this, uniqueId, intent,
+                PendingIntent.FLAG_ONE_SHOT);
 
         String displayName = RcsDisplayName.getInstance(this).getDisplayName(contact);
         String title = getString(R.string.title_recv_geoloc_sharing);
 
-        // Create notification
+        /* Create notification */
         NotificationCompat.Builder notif = new NotificationCompat.Builder(this);
         notif.setContentIntent(contentIntent);
         notif.setSmallIcon(R.drawable.ri_notif_csh_icon);
-        notif.setWhen(Calendar.getInstance().getTimeInMillis());
+        notif.setWhen(System.currentTimeMillis());
         notif.setAutoCancel(true);
         notif.setOnlyAlertOnce(true);
         notif.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
@@ -176,8 +169,8 @@ public class GeolocSharingIntentService extends IntentService {
         notif.setContentTitle(title);
         notif.setContentText(getString(R.string.label_from_args, displayName));
 
-        // Send notification
+        /* Send notification */
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(sharingId, Utils.NOTIF_ID_GEOLOC_SHARE, notif.build());
+        notificationManager.notify(uniqueId, notif.build());
     }
 }

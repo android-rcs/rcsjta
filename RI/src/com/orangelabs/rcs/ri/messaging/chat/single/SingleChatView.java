@@ -152,7 +152,7 @@ public class SingleChatView extends ChatView {
         @Override
         public void onMessagesDeleted(ContactId contact, Set<String> msgIds) {
             if (LogUtils.isActive) {
-                Log.w(LOGTAG,
+                Log.i(LOGTAG,
                         new StringBuilder("onDeleted contact=").append(contact).append(" msgIds=")
                                 .append(msgIds).toString());
             }
@@ -190,11 +190,13 @@ public class SingleChatView extends ChatView {
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "onDestroy");
         }
-        try {
-            mChat.onComposing(false);
-        } catch (Exception e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "onComposing failed", e);
+        if (mChat != null) {
+            try {
+                mChat.onComposing(false);
+            } catch (Exception e) {
+                if (LogUtils.isActive) {
+                    Log.e(LOGTAG, "onComposing failed", e);
+                }
             }
         }
         super.onDestroy();
@@ -259,9 +261,9 @@ public class SingleChatView extends ChatView {
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         // Create a new CursorLoader with the following query parameters.
         Uri uri = Message.CONTENT_URI;
-        return new CursorLoader(this, uri, PROJECTION, WHERE_CLAUSE, new String[] {
+        return new CursorLoader(this, uri, PROJ_CHAT_MSG, WHERE_CLAUSE, new String[] {
             mContact.toString()
-        }, QUERY_SORT_ORDER);
+        }, ORDER_CHAT_MSG);
     }
 
     @Override
@@ -324,8 +326,8 @@ public class SingleChatView extends ChatView {
     /**
      * Forge intent to start SingleChatView activity
      * 
-     * @param context
-     * @param contact
+     * @param context The context
+     * @param contact The contact ID
      * @return intent
      */
     public static Intent forgeIntentToStart(Context context, ContactId contact) {
@@ -350,7 +352,7 @@ public class SingleChatView extends ChatView {
         Cursor cursor = null;
         try {
             cursor = getContentResolver().query(Message.CONTENT_URI, PROJECTION_MSG_ID,
-                    UNREADS_WHERE_CLAUSE, where_args, QUERY_SORT_ORDER);
+                    UNREADS_WHERE_CLAUSE, where_args, ORDER_CHAT_MSG);
             int columIndex = cursor.getColumnIndexOrThrow(Message.MESSAGE_ID);
             while (cursor.moveToNext()) {
                 unReadMessageIDs.add(cursor.getString(columIndex));
