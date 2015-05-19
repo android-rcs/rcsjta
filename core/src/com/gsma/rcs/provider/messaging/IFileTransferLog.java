@@ -34,6 +34,7 @@ import android.database.Cursor;
 import android.net.Uri;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Interface for the ft table
@@ -79,8 +80,8 @@ public interface IFileTransferLog {
      * @param timestampSent Timestamp sent in payload for outgoing file transfer for a group chat
      */
     public void addOutgoingGroupFileTransfer(String fileTransferId, String chatId,
-            MmContent content, MmContent fileIcon, State state, ReasonCode reasonCode,
-            long timestamp, long timestampSent);
+            MmContent content, MmContent fileIcon, Set<ContactId> recipients, State state,
+            ReasonCode reasonCode, long timestamp, long timestampSent);
 
     /**
      * Add incoming group file transfer

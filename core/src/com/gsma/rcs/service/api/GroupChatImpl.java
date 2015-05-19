@@ -95,6 +95,14 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     private boolean mGroupChatRejoinedAsPartOfSendOperation = false;
 
+    private static final Set<ParticipantStatus> RECIPIENT_STATUSES = new HashSet<ParticipantStatus>();
+    static {
+        RECIPIENT_STATUSES.add(ParticipantStatus.INVITE_QUEUED);
+        RECIPIENT_STATUSES.add(ParticipantStatus.INVITING);
+        RECIPIENT_STATUSES.add(ParticipantStatus.INVITED);
+        RECIPIENT_STATUSES.add(ParticipantStatus.CONNECTED);
+        RECIPIENT_STATUSES.add(ParticipantStatus.DISCONNECTED);
+    }
     /**
      * Lock used for synchronization
      */
@@ -368,6 +376,41 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             return false;
         }
         return true;
+    }
+
+    private void addOutgoingGroupChatMessage(ChatMessage msg, Status status,
+            Content.ReasonCode reasonCode) {
+        Set<ContactId> recipients = getRecipients();
+        if (recipients == null) {
+            throw new ServerApiPersistentStorageException(
+                    "Unable to determine recipients of the group chat " + mChatId
+                            + " to set as recipients for the the group chat message "
+                            + msg.getMessageId() + "!");
+        }
+        mPersistentStorage.addOutgoingGroupChatMessage(msg, recipients, status, reasonCode);
+    }
+
+    /**
+     * Get the participants of a group chat matching any of the specified statuses
+     * 
+     * @param statuses PatricipantStatues to match
+     * @return Set of ContactIds
+     */
+    public Map<ContactId, ParticipantStatus> getParticipants(Set<ParticipantStatus> statuses) {
+        GroupChatSession session = mImService.getGroupChatSession(mChatId);
+        if (session == null) {
+            return mPersistentStorage.getParticipants(statuses);
+        }
+        return session.getParticipants(statuses);
+    }
+
+    /**
+     * Get the recipients of a group chat message or a group file transfer in this group chat
+     * 
+     * @return Set of ContactIds
+     */
+    public Set<ContactId> getRecipients() {
+        return getParticipants(RECIPIENT_STATUSES).keySet();
     }
 
     /**
@@ -893,8 +936,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
              * If groupChatSession is not established, queue message and try to rejoin group chat
              * session
              */
-            mPersistentStorage.addOutgoingGroupChatMessage(msg, Content.Status.QUEUED,
-                    Content.ReasonCode.UNSPECIFIED);
+            addOutgoingGroupChatMessage(msg, Content.Status.QUEUED, Content.ReasonCode.UNSPECIFIED);
             try {
                 setRejoinedAsPartOfSendOperation(true);
                 rejoinGroupChat();
@@ -915,13 +957,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         }
         SipDialogPath chatSessionDialogPath = groupChatSession.getDialogPath();
         if (chatSessionDialogPath.isSessionEstablished()) {
-            mPersistentStorage.addOutgoingGroupChatMessage(msg, Content.Status.SENDING,
-                    Content.ReasonCode.UNSPECIFIED);
+            addOutgoingGroupChatMessage(msg, Content.Status.SENDING, Content.ReasonCode.UNSPECIFIED);
             groupChatSession.sendChatMessage(msg);
             return;
         }
-        mPersistentStorage.addOutgoingGroupChatMessage(msg, Content.Status.QUEUED,
-                Content.ReasonCode.UNSPECIFIED);
+        addOutgoingGroupChatMessage(msg, Content.Status.QUEUED, Content.ReasonCode.UNSPECIFIED);
         if (!groupChatSession.isInitiatedByRemote()) {
             return;
         }
@@ -1050,7 +1090,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 sendChatMessage(msg);
             } else {
                 /* If the IMS is NOT connected at this time then queue message. */
-                mPersistentStorage.addOutgoingGroupChatMessage(msg, Content.Status.QUEUED,
+                addOutgoingGroupChatMessage(msg, Content.Status.QUEUED,
                         Content.ReasonCode.UNSPECIFIED);
             }
             return new ChatMessageImpl(persistentStorage);
@@ -1107,7 +1147,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 sendChatMessage(geolocMsg);
             } else {
                 /* If the IMS is NOT connected at this time then queue message. */
-                mPersistentStorage.addOutgoingGroupChatMessage(geolocMsg, Content.Status.QUEUED,
+                addOutgoingGroupChatMessage(geolocMsg, Content.Status.QUEUED,
                         Content.ReasonCode.UNSPECIFIED);
             }
             return new ChatMessageImpl(persistentStorage);

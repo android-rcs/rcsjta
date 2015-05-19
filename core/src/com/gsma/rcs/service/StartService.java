@@ -114,7 +114,7 @@ public class StartService extends Service {
         ContentResolver contentResolver = context.getContentResolver();
         mLocalContentResolver = new LocalContentResolver(context);
         mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
-        mMessagingLog = MessagingLog.createInstance(context, mLocalContentResolver, mRcsSettings);
+        mMessagingLog = MessagingLog.createInstance(mLocalContentResolver, mRcsSettings);
 
         mContactManager = ContactManager.createInstance(context, contentResolver,
                 mLocalContentResolver, mRcsSettings);

@@ -32,6 +32,7 @@ import android.database.Cursor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Interface for the message table
@@ -84,8 +85,8 @@ public interface IMessageLog {
      * @param status Message status
      * @param reasonCode Status reason code
      */
-    public void addOutgoingGroupChatMessage(String chatId, ChatMessage msg, Status status,
-            ReasonCode reasonCode);
+    public void addOutgoingGroupChatMessage(String chatId, ChatMessage msg,
+            Set<ContactId> recipients, Status status, ReasonCode reasonCode);
 
     /**
      * Add group chat system message

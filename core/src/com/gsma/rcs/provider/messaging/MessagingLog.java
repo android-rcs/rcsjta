@@ -41,7 +41,6 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
-import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 
@@ -79,14 +78,14 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      * @param rcsSettings
      * @return singleton instance
      */
-    public static MessagingLog createInstance(Context context,
-            LocalContentResolver localContentResolver, RcsSettings rcsSettings) {
+    public static MessagingLog createInstance(LocalContentResolver localContentResolver,
+            RcsSettings rcsSettings) {
         if (sInstance != null) {
             return sInstance;
         }
         synchronized (MessagingLog.class) {
             if (sInstance == null) {
-                sInstance = new MessagingLog(context, localContentResolver, rcsSettings);
+                sInstance = new MessagingLog(localContentResolver, rcsSettings);
             }
             return sInstance;
         }
@@ -99,10 +98,9 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      * @param localContentResolver Local content provider
      * @param rcsSettings
      */
-    private MessagingLog(Context context, LocalContentResolver localContentResolver,
-            RcsSettings rcsSettings) {
+    private MessagingLog(LocalContentResolver localContentResolver, RcsSettings rcsSettings) {
         mLocalContentResolver = localContentResolver;
-        mGroupChatLog = new GroupChatLog(context, localContentResolver);
+        mGroupChatLog = new GroupChatLog(localContentResolver);
         mGroupChatDeliveryInfoLog = new GroupDeliveryInfoLog(localContentResolver);
         mMessageLog = new MessageLog(mLocalContentResolver, mGroupChatLog,
                 mGroupChatDeliveryInfoLog, rcsSettings);
@@ -167,9 +165,9 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public void addOutgoingGroupChatMessage(String chatId, ChatMessage msg, Status status,
-            Content.ReasonCode reasonCode) {
-        mMessageLog.addOutgoingGroupChatMessage(chatId, msg, status, reasonCode);
+    public void addOutgoingGroupChatMessage(String chatId, ChatMessage msg,
+            Set<ContactId> recipients, Status status, Content.ReasonCode reasonCode) {
+        mMessageLog.addOutgoingGroupChatMessage(chatId, msg, recipients, status, reasonCode);
     }
 
     @Override
@@ -221,10 +219,11 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 
     @Override
     public void addOutgoingGroupFileTransfer(String fileTransferId, String chatId,
-            MmContent content, MmContent thumbnail, FileTransfer.State state,
-            FileTransfer.ReasonCode reasonCode, long timestamp, long timestampSent) {
+            MmContent content, MmContent thumbnail, Set<ContactId> recipients,
+            FileTransfer.State state, FileTransfer.ReasonCode reasonCode, long timestamp,
+            long timestampSent) {
         mFileTransferLog.addOutgoingGroupFileTransfer(fileTransferId, chatId, content, thumbnail,
-                state, reasonCode, timestamp, timestampSent);
+                recipients, state, reasonCode, timestamp, timestampSent);
     }
 
     @Override
@@ -400,6 +399,12 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
+    public Map<ContactId, ParticipantStatus> getParticipants(String chatId,
+            Set<ParticipantStatus> statuses) {
+        return mGroupChatLog.getParticipants(chatId, statuses);
+    }
+
+    @Override
     public boolean isGroupFileTransfer(String fileTransferId) {
         return mFileTransferLog.isGroupFileTransfer(fileTransferId);
     }
@@ -492,11 +497,6 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     @Override
     public void dequeueFileTransfer(String fileTransferId, long timestamp, long timestampSent) {
         mFileTransferLog.dequeueFileTransfer(fileTransferId, timestamp, timestampSent);
-    }
-
-    @Override
-    public Set<ContactId> getGroupChatParticipantsToBeInvited(String chatId) {
-        return mGroupChatLog.getGroupChatParticipantsToBeInvited(chatId);
     }
 
     @Override
@@ -613,4 +613,5 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     public void requeueChatMessage(ChatMessage msg) {
         mMessageLog.requeueChatMessage(msg);
     }
+
 }

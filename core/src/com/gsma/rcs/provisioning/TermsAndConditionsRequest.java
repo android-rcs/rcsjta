@@ -70,7 +70,7 @@ public class TermsAndConditionsRequest extends Activity {
         final LocalContentResolver localContentResolver = new LocalContentResolver(ctx);
 
         final RcsSettings rcsSettings = RcsSettings.createInstance(localContentResolver);
-        final MessagingLog messaginLog = MessagingLog.createInstance(ctx, localContentResolver,
+        final MessagingLog messaginLog = MessagingLog.createInstance(localContentResolver,
                 rcsSettings);
         final ContactManager contactManager = ContactManager.createInstance(ctx,
                 ctx.getContentResolver(), localContentResolver, rcsSettings);

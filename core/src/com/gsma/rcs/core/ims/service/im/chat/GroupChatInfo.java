@@ -32,10 +32,6 @@ import java.util.Map;
  * @author Jean-Marc AUFFRET
  */
 public class GroupChatInfo {
-    /**
-     * Session ID
-     */
-    private String mSessionId;
 
     /**
      * Rejoin ID
@@ -65,30 +61,19 @@ public class GroupChatInfo {
     /**
      * Constructor
      * 
-     * @param sessionId Session ID
      * @param rejoindId Rejoin ID
      * @param contributionId Contribution ID
      * @param particpants Participants
      * @param subject Subject
      * @param timestamp Local timestamp
      */
-    public GroupChatInfo(String sessionId, String rejoinId, String contributionId,
+    public GroupChatInfo(String rejoinId, String contributionId,
             Map<ContactId, ParticipantStatus> participants, String subject, long timestamp) {
-        mSessionId = sessionId;
         mRejoinId = rejoinId;
         mContributionId = contributionId;
         mParticipants = participants;
         mSubject = subject;
         mTimestamp = timestamp;
-    }
-
-    /**
-     * Returns the session ID
-     * 
-     * @return ID
-     */
-    public String getSessionId() {
-        return mSessionId;
     }
 
     /**
@@ -142,8 +127,7 @@ public class GroupChatInfo {
      * @return String
      */
     public String toString() {
-        return "Session ID=" + mSessionId + ", Contribution ID=" + mContributionId + ", Rejoin ID="
-                + mRejoinId + ", Subject=" + mSubject + ", Participants=" + mParticipants.size()
-                + ", Timestamp=" + mTimestamp;
+        return "Contribution ID=" + mContributionId + ", Rejoin ID=" + mRejoinId + ", Subject="
+                + mSubject + ", Participants=" + mParticipants.size() + ", Timestamp=" + mTimestamp;
     }
 }

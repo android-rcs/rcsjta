@@ -36,7 +36,6 @@ import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
-import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
@@ -46,7 +45,6 @@ import android.net.Uri;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -225,7 +223,7 @@ public class MessageLog implements IMessageLog {
             boolean imdnDisplayedRequested) {
         Status chatMessageStatus = imdnDisplayedRequested ? Status.DISPLAY_REPORT_REQUESTED
                 : Status.RECEIVED;
-        addGroupChatMessage(chatId, msg, Direction.INCOMING, chatMessageStatus,
+        addGroupChatMessage(chatId, msg, Direction.INCOMING, null, chatMessageStatus,
                 ReasonCode.UNSPECIFIED);
     }
 
@@ -238,9 +236,9 @@ public class MessageLog implements IMessageLog {
      * @param reasonCode Reason code
      */
     @Override
-    public void addOutgoingGroupChatMessage(String chatId, ChatMessage msg, Status status,
-            ReasonCode reasonCode) {
-        addGroupChatMessage(chatId, msg, Direction.OUTGOING, status, reasonCode);
+    public void addOutgoingGroupChatMessage(String chatId, ChatMessage msg,
+            Set<ContactId> recipients, Status status, ReasonCode reasonCode) {
+        addGroupChatMessage(chatId, msg, Direction.OUTGOING, recipients, status, reasonCode);
     }
 
     /**
@@ -253,7 +251,7 @@ public class MessageLog implements IMessageLog {
      * @param reasonCode Reason code
      */
     private void addGroupChatMessage(String chatId, ChatMessage msg, Direction direction,
-            Status status, ReasonCode reasonCode) {
+            Set<ContactId> recipients, Status status, ReasonCode reasonCode) {
         String msgId = msg.getMessageId();
         ContactId contact = msg.getRemoteContact();
         if (sLogger.isActivated()) {
@@ -289,22 +287,6 @@ public class MessageLog implements IMessageLog {
                 if (mRcsSettings.isAlbatrosRelease()) {
                     deliveryStatus = GroupDeliveryInfo.Status.UNSUPPORTED;
                 }
-
-                Set<ContactId> recipients = new HashSet<ContactId>();
-                for (Map.Entry<ContactId, ParticipantStatus> participant : mGroupChatLog
-                        .getParticipants(chatId).entrySet()) {
-                    switch (participant.getValue()) {
-                        case INVITE_QUEUED:
-                        case INVITING:
-                        case INVITED:
-                        case CONNECTED:
-                        case DISCONNECTED:
-                            recipients.add(participant.getKey());
-                        default:
-                            break;
-                    }
-                }
-
                 for (ContactId recipient : recipients) {
                     /* Add entry with delivered and displayed timestamps set to 0. */
                     mGroupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId, recipient,

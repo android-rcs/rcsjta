@@ -33,6 +33,7 @@ import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 import android.database.Cursor;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * GroupChatPersistedStorageAccessor helps in retrieving persisted data related to a group chat from
@@ -166,6 +167,10 @@ public class GroupChatPersistedStorageAccessor {
         return mMessagingLog.getParticipants(mChatId);
     }
 
+    public Map<ContactId, ParticipantStatus> getParticipants(Set<ParticipantStatus> statuses) {
+        return mMessagingLog.getParticipants(mChatId, statuses);
+    }
+
     public int getMaxParticipants() {
         return mRcsSettings.getMaxChatParticipants();
     }
@@ -227,9 +232,9 @@ public class GroupChatPersistedStorageAccessor {
         mMessagingLog.addIncomingGroupChatMessage(mChatId, msg, imdnDisplayedRequested);
     }
 
-    public void addOutgoingGroupChatMessage(ChatMessage msg, Status status,
-            Content.ReasonCode reasonCode) {
-        mMessagingLog.addOutgoingGroupChatMessage(mChatId, msg, status, reasonCode);
+    public void addOutgoingGroupChatMessage(ChatMessage msg, Set<ContactId> recipients,
+            Status status, Content.ReasonCode reasonCode) {
+        mMessagingLog.addOutgoingGroupChatMessage(mChatId, msg, recipients, status, reasonCode);
     }
 
     public boolean setRejectNextGroupChatNextInvitation() {
@@ -257,4 +262,5 @@ public class GroupChatPersistedStorageAccessor {
         return mMessagingLog.setGroupChatDeliveryInfoDisplayed(chatId, contact, msgId,
                 timestampDisplayed);
     }
+
 }

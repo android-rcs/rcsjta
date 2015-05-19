@@ -177,22 +177,39 @@ public abstract class GroupChatSession extends ChatSession {
     }
 
     /**
-     * Returns participants with ParticipantStatus status.
+     * Returns participants with specified status.
      * 
      * @param status of participants to be returned.
      * @return Set of participants with status participantStatus.
      */
     public Map<ContactId, ParticipantStatus> getParticipants(ParticipantStatus status) {
         synchronized (mParticipants) {
-            Map<ContactId, ParticipantStatus> matcingParticipants = new HashMap<ContactId, ParticipantStatus>();
-
+            Map<ContactId, ParticipantStatus> matchingParticipants = new HashMap<ContactId, ParticipantStatus>();
             for (Map.Entry<ContactId, ParticipantStatus> participant : mParticipants.entrySet()) {
-                if (participant.getValue() == status) {
-                    matcingParticipants.put(participant.getKey(), participant.getValue());
+                ParticipantStatus participantStatus = participant.getValue();
+                if (participantStatus == status) {
+                    matchingParticipants.put(participant.getKey(), participantStatus);
                 }
             }
+            return matchingParticipants;
+        }
+    }
 
-            return matcingParticipants;
+    /**
+     * Returns participants that matches any of the specified statues.
+     * 
+     * @param status of participants to be returned.
+     * @return Set of participants which has any one the statuses specified.
+     */
+    public Map<ContactId, ParticipantStatus> getParticipants(Set<ParticipantStatus> statuses) {
+        synchronized (mParticipants) {
+            Map<ContactId, ParticipantStatus> matchingParticipants = new HashMap<ContactId, ParticipantStatus>();
+            for (Map.Entry<ContactId, ParticipantStatus> participant : mParticipants.entrySet()) {
+                if (statuses.contains(participant.getValue())) {
+                    matchingParticipants.put(participant.getKey(), participant.getValue());
+                }
+            }
+            return matchingParticipants;
         }
     }
 

@@ -33,7 +33,6 @@ import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
-import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
@@ -46,9 +45,7 @@ import android.net.Uri;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -171,8 +168,8 @@ public class FileTransferLog implements IFileTransferLog {
 
     @Override
     public void addOutgoingGroupFileTransfer(String fileTransferId, String chatId,
-            MmContent content, MmContent thumbnail, State state, ReasonCode reasonCode,
-            long timestamp, long timestampSent) {
+            MmContent content, MmContent thumbnail, Set<ContactId> recipients, State state,
+            ReasonCode reasonCode, long timestamp, long timestampSent) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("addOutgoingGroupFileTransfer: Id=")
                     .append(fileTransferId).append(", chatId=").append(chatId).append(" filename=")
@@ -210,21 +207,6 @@ public class FileTransferLog implements IFileTransferLog {
         mLocalContentResolver.insert(FileTransferData.CONTENT_URI, values);
 
         try {
-            Set<ContactId> recipients = new HashSet<ContactId>();
-            for (Map.Entry<ContactId, ParticipantStatus> participant : mGroupChatLog
-                    .getParticipants(chatId).entrySet()) {
-                switch (participant.getValue()) {
-                    case INVITE_QUEUED:
-                    case INVITING:
-                    case INVITED:
-                    case CONNECTED:
-                    case DISCONNECTED:
-                        recipients.add(participant.getKey());
-                    default:
-                        break;
-                }
-            }
-
             for (ContactId contact : recipients) {
                 /* Add entry with delivered and displayed timestamps set to 0. */
                 mGroupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId, contact,

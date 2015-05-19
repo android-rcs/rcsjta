@@ -243,7 +243,7 @@ public class RcsCoreService extends Service implements CoreListener {
         mContentResolver = mContext.getContentResolver();
         mLocalContentResolver = new LocalContentResolver(mContentResolver);
         mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
-        mMessagingLog = MessagingLog.createInstance(mContext, mLocalContentResolver, mRcsSettings);
+        mMessagingLog = MessagingLog.createInstance(mLocalContentResolver, mRcsSettings);
         RichCallHistory.createInstance(mLocalContentResolver);
         mRichCallHistory = RichCallHistory.getInstance();
         mContactManager = ContactManager.createInstance(mContext, mContentResolver,
@@ -333,12 +333,12 @@ public class RcsCoreService extends Service implements CoreListener {
             IPCallService ipCallService = core.getIPCallService();
             SipService sipService = core.getSipService();
 
-            mFtApi = new FileTransferServiceImpl(imService, mMessagingLog, mRcsSettings,
-                    mContactManager, core, mLocalContentResolver, mImOperationExecutor,
-                    mOperationLock, mOneToOneUndeliveredImManager);
             mChatApi = new ChatServiceImpl(imService, mMessagingLog, mRcsSettings, mContactManager,
                     core, mLocalContentResolver, mImOperationExecutor, mOperationLock, mFtApi,
                     mOneToOneUndeliveredImManager);
+            mFtApi = new FileTransferServiceImpl(imService, mChatApi, mMessagingLog, mRcsSettings,
+                    mContactManager, core, mLocalContentResolver, mImOperationExecutor,
+                    mOperationLock, mOneToOneUndeliveredImManager);
             mVshApi = new VideoSharingServiceImpl(richCallService, mRichCallHistory, mRcsSettings,
                     mContactManager, core, mLocalContentResolver, mRcOperationExecutor,
                     mOperationLock);
@@ -1013,7 +1013,7 @@ public class RcsCoreService extends Service implements CoreListener {
     public void tryToInviteQueuedGroupChatParticipantInvitations(String chatId,
             InstantMessagingService imService) {
         mImOperationExecutor.execute(new GroupChatInviteQueuedParticipants(chatId, mChatApi,
-                mMessagingLog, imService));
+                imService));
     }
 
     @Override
@@ -1038,8 +1038,8 @@ public class RcsCoreService extends Service implements CoreListener {
 
     @Override
     public void tryToDequeueAllOneToOneChatMessages(InstantMessagingService imService) {
-        mImOperationExecutor.execute(new AllOneToOneChatMessageDequeueTask(mOperationLock, imService,
-                mMessagingLog, mChatApi, mRcsSettings, mContactManager));
+        mImOperationExecutor.execute(new AllOneToOneChatMessageDequeueTask(mOperationLock,
+                imService, mMessagingLog, mChatApi, mRcsSettings, mContactManager));
     }
 
     @Override

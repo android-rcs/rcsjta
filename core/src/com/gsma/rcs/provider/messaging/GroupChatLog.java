@@ -25,17 +25,15 @@ package com.gsma.rcs.provider.messaging;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.LocalContentResolver;
+import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.chat.ChatLog.GroupChat;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.util.SparseArray;
@@ -50,7 +48,9 @@ import java.util.Set;
  */
 public class GroupChatLog implements IGroupChatLog {
 
-    private final Context mCtx;
+    private static final String PARTICIPANT_INFO_PARTICIPANT_SEPARATOR = ",";
+
+    private static final String PARTICIPANT_INFO_STATUS_SEPARATOR = "=";
 
     private final LocalContentResolver mLocalContentResolver;
 
@@ -109,8 +109,7 @@ public class GroupChatLog implements IGroupChatLog {
      * 
      * @param localContentResolver Local content resolver
      */
-    /* package private */GroupChatLog(Context ctx, LocalContentResolver localContentResolver) {
-        mCtx = ctx;
+    /* package private */GroupChatLog(LocalContentResolver localContentResolver) {
         mLocalContentResolver = localContentResolver;
     }
 
@@ -120,26 +119,46 @@ public class GroupChatLog implements IGroupChatLog {
      * @param participants the participants
      * @return the string with comma separated values of key pairs formatted as follows: "key=value"
      */
-    private static String convert(Map<ContactId, ParticipantStatus> participants) {
+    private String generateEncodedParticipantInfos(Map<ContactId, ParticipantStatus> participants) {
         StringBuilder builder = new StringBuilder();
         int size = participants.size();
-
         for (Map.Entry<ContactId, ParticipantStatus> participant : participants.entrySet()) {
             builder.append(participant.getKey());
-            builder.append('=');
+            builder.append(PARTICIPANT_INFO_STATUS_SEPARATOR);
             builder.append(participant.getValue().toInt());
             if (--size != 0) {
-                builder.append(',');
+                builder.append(PARTICIPANT_INFO_PARTICIPANT_SEPARATOR);
             }
         }
         return builder.toString();
+    }
+
+    /**
+     * Convert string representation of participants into participants
+     * 
+     * @param participants the participants
+     * @return the participants and their individual status
+     */
+    private Map<ContactId, ParticipantStatus> parseEncodedParticipantInfos(String participants) {
+        String[] encodedParticipantInfos = participants
+                .split(PARTICIPANT_INFO_PARTICIPANT_SEPARATOR);
+        Map<ContactId, ParticipantStatus> participantInfos = new HashMap<ContactId, ParticipantStatus>();
+        for (String encodedParticipantInfo : encodedParticipantInfos) {
+            String[] participantInfo = encodedParticipantInfo
+                    .split(PARTICIPANT_INFO_STATUS_SEPARATOR);
+            ContactId participant = ContactUtil.createContactIdFromTrustedData(participantInfo[0]);
+            ParticipantStatus status = ParticipantStatus.valueOf(Integer
+                    .parseInt(participantInfo[1]));
+            participantInfos.put(participant, status);
+        }
+        return participantInfos;
     }
 
     @Override
     public void addGroupChat(String chatId, ContactId contact, String subject,
             Map<ContactId, ParticipantStatus> participants, State state, ReasonCode reasonCode,
             Direction direction, long timestamp) {
-        String encodedParticipants = convert(participants);
+        String encodedParticipants = generateEncodedParticipantInfos(participants);
         if (sLogger.isActivated()) {
             sLogger.debug(new StringBuilder("addGroupChat; chatID=").append(chatId)
                     .append(", subject=").append(subject).append(", state=").append(state)
@@ -177,7 +196,7 @@ public class GroupChatLog implements IGroupChatLog {
     @Override
     public boolean setGroupChatParticipantsStateAndReasonCode(String chatId,
             Map<ContactId, ParticipantStatus> participants, State state, ReasonCode reasonCode) {
-        String encodedParticipants = convert(participants);
+        String encodedParticipants = generateEncodedParticipantInfos(participants);
         if (sLogger.isActivated()) {
             sLogger.debug("setGCParticipantsStateAndReasonCode (chatId=" + chatId
                     + ") (participants=" + encodedParticipants + ") (state=" + state
@@ -207,7 +226,7 @@ public class GroupChatLog implements IGroupChatLog {
     @Override
     public boolean setGroupChatParticipants(String chatId,
             Map<ContactId, ParticipantStatus> participants) {
-        String encodedParticipants = convert(participants);
+        String encodedParticipants = generateEncodedParticipantInfos(participants);
         if (sLogger.isActivated()) {
             sLogger.debug("updateGroupChatParticipant (chatId=" + chatId + ") (participants="
                     + encodedParticipants + ")");
@@ -240,25 +259,16 @@ public class GroupChatLog implements IGroupChatLog {
             if (!cursor.moveToNext()) {
                 return null;
             }
-            int columnIdxChatId = cursor.getColumnIndexOrThrow(GroupChatData.KEY_CHAT_ID);
-            int columnIdxRejoinId = cursor.getColumnIndexOrThrow(GroupChatData.KEY_REJOIN_ID);
-            int columnIdxParticipants = cursor
-                    .getColumnIndexOrThrow(GroupChatData.KEY_PARTICIPANTS);
-            int columnIdxSubject = cursor.getColumnIndexOrThrow(GroupChatData.KEY_SUBJECT);
-            int columnIdxTimestamp = cursor.getColumnIndexOrThrow(GroupChatData.KEY_TIMESTAMP);
-            Map<ContactId, ParticipantStatus> participants = GroupChat.getParticipants(mCtx,
-                    cursor.getString(columnIdxParticipants));
-            return new GroupChatInfo(cursor.getString(columnIdxChatId),
-                    cursor.getString(columnIdxRejoinId), chatId, participants,
-                    cursor.getString(columnIdxSubject), cursor.getLong(columnIdxTimestamp));
-        } catch (RcsPermissionDeniedException e) {
-            /*
-             * This exception should not occur since core stack cannot be started if country code
-             * failed to be resolved.
-             */
-            String errorMessage = new StringBuilder("Failed to get group chat info for chatId '")
-                    .append(chatId).append("'!").toString();
-            throw new IllegalStateException(errorMessage, e);
+            long timestamp = cursor.getLong(cursor
+                    .getColumnIndexOrThrow(GroupChatData.KEY_TIMESTAMP));
+            String subject = cursor.getString(cursor
+                    .getColumnIndexOrThrow(GroupChatData.KEY_SUBJECT));
+            String rejoinId = cursor.getString(cursor
+                    .getColumnIndexOrThrow(GroupChatData.KEY_REJOIN_ID));
+            Map<ContactId, ParticipantStatus> participants = parseEncodedParticipantInfos(cursor
+                    .getString(cursor.getColumnIndexOrThrow(GroupChatData.KEY_PARTICIPANTS)));
+            return new GroupChatInfo(rejoinId, chatId, participants, subject, timestamp);
+
         } finally {
             CursorUtil.close(cursor);
         }
@@ -266,25 +276,28 @@ public class GroupChatLog implements IGroupChatLog {
 
     @Override
     public Map<ContactId, ParticipantStatus> getParticipants(String chatId) {
-        Map<ContactId, ParticipantStatus> participants;
-        try {
-            participants = GroupChat.getParticipants(mCtx,
-                    getDataAsString(getGroupChatData(GroupChatData.KEY_PARTICIPANTS, chatId)));
-            if (participants == null) {
-                return new HashMap<ContactId, ParticipantStatus>();
-            }
-            return participants;
-        } catch (RcsPermissionDeniedException e) {
-            /*
-             * This exception should not occur since core stack cannot be started if country code
-             * failed to be resolved.
-             */
-            String errorMessage = new StringBuilder(
-                    "Failed to get group chat participants for chatId '").append(chatId)
-                    .append("'!").toString();
-            throw new IllegalStateException(errorMessage, e);
+        Cursor cursor = getGroupChatData(GroupChatData.KEY_PARTICIPANTS, chatId);
+        if (cursor == null) {
+            return null;
         }
+        return parseEncodedParticipantInfos(getDataAsString(cursor));
+    }
 
+    @Override
+    public Map<ContactId, ParticipantStatus> getParticipants(String chatId,
+            Set<ParticipantStatus> statuses) {
+        Map<ContactId, ParticipantStatus> participants = getParticipants(chatId);
+        if (participants == null) {
+            return null;
+        }
+        Map<ContactId, ParticipantStatus> matchingParticipants = new HashMap<ContactId, ParticipantStatus>();
+        for (Map.Entry<ContactId, ParticipantStatus> participant : participants.entrySet()) {
+            ParticipantStatus status = participant.getValue();
+            if (statuses.contains(status)) {
+                matchingParticipants.put(participant.getKey(), status);
+            }
+        }
+        return matchingParticipants;
     }
 
     @Override
@@ -385,18 +398,6 @@ public class GroupChatLog implements IGroupChatLog {
         Cursor cursor = mLocalContentResolver.query(contentUri, null, null, null, null);
         CursorUtil.assertCursorIsNotNull(cursor, contentUri);
         return cursor;
-    }
-
-    @Override
-    public Set<ContactId> getGroupChatParticipantsToBeInvited(String chatId) {
-        Set<ContactId> participantsToBeInvited = new HashSet<ContactId>();
-        Map<ContactId, ParticipantStatus> participants = getParticipants(chatId);
-        for (Map.Entry<ContactId, ParticipantStatus> participant : participants.entrySet()) {
-            if (ParticipantStatus.INVITE_QUEUED == participant.getValue()) {
-                participantsToBeInvited.add(participant.getKey());
-            }
-        }
-        return participantsToBeInvited;
     }
 
     @Override

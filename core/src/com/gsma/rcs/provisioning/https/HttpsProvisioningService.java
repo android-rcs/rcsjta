@@ -99,7 +99,7 @@ public class HttpsProvisioningService extends Service {
         ContentResolver contentResolver = mContext.getContentResolver();
         mLocalContentResolver = new LocalContentResolver(contentResolver);
         mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
-        mMessagingLog = MessagingLog.createInstance(mContext, mLocalContentResolver, mRcsSettings);
+        mMessagingLog = MessagingLog.createInstance(mLocalContentResolver, mRcsSettings);
         mRetryIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_RETRY), 0);
         mContactManager = ContactManager.createInstance(mContext, contentResolver,
                 mLocalContentResolver, mRcsSettings);

@@ -154,6 +154,16 @@ public interface IGroupChatLog {
     public Map<ContactId, ParticipantStatus> getParticipants(String chatId);
 
     /**
+     * Get group chat participants from its chat ID
+     * 
+     * @param chatId Chat ID of the group chat
+     * @param status participant status to match
+     * @return all group chat participants matching any of the specified participant statuses
+     */
+    public Map<ContactId, ParticipantStatus> getParticipants(String chatId,
+            Set<ParticipantStatus> statuses);
+
+    /**
      * Get group chat data from its chat ID
      * 
      * @param chatId
@@ -167,14 +177,6 @@ public interface IGroupChatLog {
      * @return Set of chat IDs of those group chats that has to be auto-rejoined
      */
     public Set<String> getChatIdsOfActiveGroupChatsForAutoRejoin();
-
-    /**
-     * Get group chat participants to be invited
-     * 
-     * @param chatId
-     * @return Set of participants
-     */
-    public Set<ContactId> getGroupChatParticipantsToBeInvited(String chatId);
 
     /**
      * Checks if group chat is persisted

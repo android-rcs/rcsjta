@@ -94,6 +94,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     private final InstantMessagingService mImService;
 
+    private final ChatServiceImpl mChatService;
+
     private final MessagingLog mMessagingLog;
 
     private final RcsSettings mRcsSettings;
@@ -135,14 +137,16 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param mLocalContentResolver
      * @param oneToOneUndeliveredImManager
      */
-    public FileTransferServiceImpl(InstantMessagingService imService, MessagingLog messagingLog,
-            RcsSettings rcsSettings, ContactManager contactManager, Core core,
-            LocalContentResolver localContentResolver, ExecutorService imOperationExecutor,
-            Object imsLock, OneToOneUndeliveredImManager oneToOneUndeliveredImManager) {
+    public FileTransferServiceImpl(InstantMessagingService imService, ChatServiceImpl chatService,
+            MessagingLog messagingLog, RcsSettings rcsSettings, ContactManager contactManager,
+            Core core, LocalContentResolver localContentResolver,
+            ExecutorService imOperationExecutor, Object imsLock,
+            OneToOneUndeliveredImManager oneToOneUndeliveredImManager) {
         if (sLogger.isActivated()) {
             sLogger.info("File transfer service API is loaded");
         }
         mImService = imService;
+        mChatService = chatService;
         mMessagingLog = messagingLog;
         mRcsSettings = rcsSettings;
         mContactManager = contactManager;
@@ -151,13 +155,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         mImOperationExecutor = imOperationExecutor;
         mImsLock = imsLock;
         mOneToOneUndeliveredImManager = oneToOneUndeliveredImManager;
-    }
-
-    public void ensureThumbnailIsDeleted(String transferId) {
-        String icon = mMessagingLog.getFileTransferIcon(transferId);
-        if (icon != null) {
-            new File(icon).delete();
-        }
     }
 
     private ReasonCode imdnToFileTransferFailedReasonCode(ImdnDocument imdn) {
@@ -172,6 +169,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         throw new IllegalArgumentException(new StringBuilder(
                 "Received invalid imdn notification type:'").append(notificationType).append("'")
                 .toString());
+    }
+
+    public void ensureThumbnailIsDeleted(String transferId) {
+        String icon = mMessagingLog.getFileTransferIcon(transferId);
+        if (icon != null) {
+            new File(icon).delete();
+        }
     }
 
     /**
@@ -379,8 +383,15 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      */
     private void addOutgoingGroupFileTransfer(String fileTransferId, String chatId,
             MmContent content, MmContent fileicon, State state, long timestamp, long timestampSent) {
+        Set<ContactId> recipients = mChatService.getOrCreateGroupChat(chatId).getRecipients();
+        if (recipients == null) {
+            throw new ServerApiPersistentStorageException(
+                    "Unable to determine recipients of the group chat " + chatId
+                            + " to set as recipients for the the group file transfer "
+                            + fileTransferId + "!");
+        }
         mMessagingLog.addOutgoingGroupFileTransfer(fileTransferId, chatId, content, fileicon,
-                state, FileTransfer.ReasonCode.UNSPECIFIED, timestamp, timestampSent);
+                recipients, state, FileTransfer.ReasonCode.UNSPECIFIED, timestamp, timestampSent);
     }
 
     private FileTransferProtocol getFileTransferProtocolForOneToOneFileTransfer(ContactId contact) {
@@ -813,9 +824,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param fileTransferId
      */
     private IFileTransfer sendGroupFile(MmContent content, MmContent fileIcon, String chatId,
-            String fileTransferId) {
+            String fileTransferId, long timestamp) {
         long fileSize = content.getSize();
-        long timestamp = System.currentTimeMillis();
         /* For outgoing file transfer, timestampSent = timestamp */
         long timestampSent = timestamp;
         mImService.assertFileSizeNotExceedingMaxLimit(fileSize, "File exceeds max size.");
@@ -838,6 +848,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         String chatSessionId = groupChatSession != null ? groupChatSession.getSessionID() : null;
         /* If groupChatSession is established send this group file transfer. */
         if (chatSessionId != null && groupChatSession.isMediaEstablished()) {
+
             addOutgoingGroupFileTransfer(fileTransferId, chatId, content, fileIcon,
                     State.INITIATING, timestamp, timestampSent);
             final FileSharingSession session = mImService.initiateGroupFileTransferSession(
@@ -958,12 +969,12 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                         fileTransferId, mRcsSettings);
             }
 
+            long timestamp = System.currentTimeMillis();
             /* If the IMS is connected at this time then send this group file. */
             if (ServerApiUtils.isImsConnected()) {
-                return sendGroupFile(content, fileIconContent, chatId, fileTransferId);
+                return sendGroupFile(content, fileIconContent, chatId, fileTransferId, timestamp);
             }
             /* If the IMS is NOT connected at this time then queue this group file. */
-            long timestamp = System.currentTimeMillis();
             /* For outgoing file transfer, timestampSent = timestamp */
             addOutgoingGroupFileTransfer(fileTransferId, chatId, content, fileIconContent,
                     State.QUEUED, timestamp, timestamp);
