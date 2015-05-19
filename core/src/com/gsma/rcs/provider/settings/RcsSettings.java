@@ -950,9 +950,10 @@ public class RcsSettings {
     public ImSessionStartMode getImSessionStartMode() {
         return ImSessionStartMode.valueOf(readInteger(RcsSettingsData.IM_SESSION_START));
     }
-    
+
     /**
      * Set IM session start mode
+     * 
      * @param mode IM session start mode
      */
     public void setImSessionStartMode(ImSessionStartMode mode) {
@@ -2205,4 +2206,47 @@ public class RcsSettings {
     public int getMaxAllowedDisplayNameChars() {
         return readInteger(RcsSettingsData.MAX_ALLOWED_DISPLAY_NAME_CHARS);
     }
+
+    /**
+     * Sets the user message content
+     * 
+     * @param message the user message content
+     */
+    public void setProvisioningUserMessageContent(String message) {
+        if (message == null) {
+            message = RcsSettingsData.DEFAULT_PROV_USER_MSG_CONTENT;
+        }
+        writeParameter(RcsSettingsData.PROV_USER_MSG_CONTENT, message);
+    }
+
+    /**
+     * Gets the user message content
+     * 
+     * @return the user message content
+     */
+    public String getProvisioningUserMessageContent() {
+        return readString(RcsSettingsData.PROV_USER_MSG_CONTENT);
+    }
+
+    /**
+     * Sets the user message title
+     * 
+     * @param title the user message title
+     */
+    public void setProvisioningUserMessageTitle(String title) {
+        if (title == null) {
+            title = RcsSettingsData.DEFAULT_PROV_USER_MSG_TITLE;
+        }
+        writeParameter(RcsSettingsData.PROV_USER_MSG_TITLE, title);
+    }
+
+    /**
+     * Gets the user message title
+     * 
+     * @return the user message title
+     */
+    public String getProvisioningUserMessageTitle() {
+        return readString(RcsSettingsData.PROV_USER_MSG_TITLE);
+    }
+
 }

@@ -110,8 +110,8 @@ public class ProvisioningParser {
     /**
      * Constructor
      * 
-     * @param content Content
-     * @param rcsSettings
+     * @param content The content to be parsed.
+     * @param rcsSettings the RCS settings.
      */
     public ProvisioningParser(String content, RcsSettings rcsSettings) {
         mContent = content;
@@ -131,7 +131,7 @@ public class ProvisioningParser {
      * Parse the provisioning document
      * 
      * @param release The GSMA release (Albatros, Blackbird, Crane...) before parsing
-     * @param messagingMode
+     * @param messagingMode the messaging mode
      * @param first True if it is a first provisioning
      * @return Boolean result
      *         <p>
@@ -336,12 +336,14 @@ public class ProvisioningParser {
             do {
                 if (title == null) {
                     if ((title = getValueByParamName("title", childnode, TYPE_TXT)) != null) {
+                        mRcsSettings.setProvisioningUserMessageTitle(title);
                         provisioningInfo.setTitle(title);
                         continue;
                     }
                 }
                 if (message == null) {
                     if ((message = getValueByParamName("message", childnode, TYPE_TXT)) != null) {
+                        mRcsSettings.setProvisioningUserMessageContent(message);
                         provisioningInfo.setMessage(message);
                         continue;
                     }
@@ -1004,10 +1006,10 @@ public class ProvisioningParser {
                          * According to "Rich Communication Suite 5.1 Advanced Communications
                          * Services and Client Specification Version 4.0" 3.5.4.8.3 File transfer
                          * procedure 3.5.4.8.3.1 Sender procedures This specification uses the term
-                         * “HTTP POST” and “HTTP GET” as a generic reference to the action of using
-                         * the POST or GET method. However, it is strongly recommended that whenever
-                         * the POST action contains sensitive information such as a user ID or
-                         * password, the action should take place over a secure connection and/or
+                         * 'HTTP POST' and 'HTTP GET' as a generic reference to the action
+                         * of using the POST or GET method. However, it is strongly recommended that
+                         * whenever the POST action contains sensitive information such as a user ID
+                         * or password, the action should take place over a secure connection and/or
                          * via HTTPS explicitly.
                          */
                         if (!ftHttpCsUri.startsWith(PROTOCOL_HTTPS)) {

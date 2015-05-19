@@ -20,6 +20,8 @@
     <string name="SIP_traces_file">SIP traces file:</string>
     <string name="Trace_level">Trace level:</string>
     <!-- rcs_provisioning_profile.xml -->
+    <string name="user_msg_title">User message title:</string>
+    <string name="user_msg_content">User message content:</string>
     <string name="GSMA_release">GSMA release:</string>
     <string name="IMS_authentication_procedure_for_Mobile_access">IMS authentication procedure for Mobile access:</string>
     <string name="IMS_authentication_procedure_for_Wi_Fi_access">IMS authentication procedure for Wi-Fi access:</string>

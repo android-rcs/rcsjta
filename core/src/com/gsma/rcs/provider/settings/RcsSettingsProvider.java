@@ -76,7 +76,7 @@ public class RcsSettingsProvider extends ContentProvider {
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 111;
+        private static final int DATABASE_VERSION = 112;
 
         /**
          * Add a parameter in the db
@@ -385,6 +385,10 @@ public class RcsSettingsProvider extends ContentProvider {
                     RcsSettingsData.DEFAULT_REQUEST_AND_RESPOND_TO_GROUP_DISPLAY_REPORTS);
             addParameter(db, RcsSettingsData.MAX_ALLOWED_DISPLAY_NAME_CHARS,
                     RcsSettingsData.DEFAULT_MAX_ALLOWED_DISPLAY_NAME_CHARS);
+            addParameter(db, RcsSettingsData.PROV_USER_MSG_CONTENT,
+                    RcsSettingsData.DEFAULT_PROV_USER_MSG_CONTENT);
+            addParameter(db, RcsSettingsData.PROV_USER_MSG_TITLE,
+                    RcsSettingsData.DEFAULT_PROV_USER_MSG_TITLE);
         }
 
         @Override

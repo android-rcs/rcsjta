@@ -1311,4 +1311,17 @@ public class RcsSettingsData {
     public static final String MAX_ALLOWED_DISPLAY_NAME_CHARS = "MaxAllowedDisplayNameChars";
     /* package private */static final int DEFAULT_MAX_ALLOWED_DISPLAY_NAME_CHARS = 256;
 
+    /**
+     * Provisioning optional user message content associated with the result of the configuration
+     * server response
+     */
+    /* package private */static final String PROV_USER_MSG_CONTENT = "message";
+    /* package private */static final String DEFAULT_PROV_USER_MSG_CONTENT = "";
+
+    /**
+     * Provisioning optional user message title associated with the result of the configuration
+     * server response
+     */
+    /* package private */static final String PROV_USER_MSG_TITLE = "title";
+    /* package private */static final String DEFAULT_PROV_USER_MSG_TITLE = "";
 }

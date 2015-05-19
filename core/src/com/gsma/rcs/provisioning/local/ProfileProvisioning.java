@@ -196,6 +196,11 @@ public class ProfileProvisioning extends Activity {
         setCheckBoxParam(R.id.sip_automata, RcsSettingsData.CAPABILITY_SIP_AUTOMATA, helper);
         TextView txt = (TextView) findViewById(R.id.release);
         txt.setText(mRcsSettings.getGsmaRelease().name());
+        txt = (TextView) findViewById(R.id.user_msg_title);
+        txt.setText(mRcsSettings.getProvisioningUserMessageTitle());
+        txt = (TextView) findViewById(R.id.user_msg_content);
+        txt.setText(mRcsSettings.getProvisioningUserMessageContent());
+
     }
 
     /**
