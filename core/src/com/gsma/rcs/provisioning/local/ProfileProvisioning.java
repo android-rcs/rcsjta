@@ -66,6 +66,13 @@ import java.io.IOException;
  * @author jexa7410
  */
 public class ProfileProvisioning extends Activity {
+
+    /**
+     * The XML provisioning file loaded manually contains a MSISDN token which must be replaced by
+     * the actual value
+     */
+    private static final String TOKEN_MSISDN = "__s__MSISDN__e__";
+
     /**
      * IMS authentication for mobile access
      */
@@ -448,12 +455,15 @@ public class ProfileProvisioning extends Activity {
         /**
          * Parse the provisioning data then save it into RCS settings provider
          * 
-         * @param mXMLFileContent the XML file containing provisioning data
+         * @param xmlFileContent the XML file containing provisioning data
          * @param myContact the user phone number
          * @return true if loading the provisioning is successful
          */
-        private boolean createProvisioning(String mXMLFileContent, ContactId myContact) {
-            ProvisioningParser parser = new ProvisioningParser(mXMLFileContent, mRcsSettings);
+        private boolean createProvisioning(String xmlFileContent, ContactId myContact) {
+            String phoneNumber = myContact.toString();
+            String configToParse = xmlFileContent
+                    .replaceAll(TOKEN_MSISDN, phoneNumber.substring(1));
+            ProvisioningParser parser = new ProvisioningParser(configToParse, mRcsSettings);
             // Save GSMA release set into the provider
             GsmaRelease release = mRcsSettings.getGsmaRelease();
             // Save client Messaging Mode set into the provider
@@ -465,15 +475,8 @@ public class ProfileProvisioning extends Activity {
             mRcsSettings.setMessagingMode(MessagingMode.NONE);
 
             if (parser.parse(release, messagingMode, true)) {
-                /* Customize provisioning data with user phone number */
-                mRcsSettings.setUserProfileImsUserName(myContact);
-                String userPhoneNumber = myContact.toString();
-                mRcsSettings.setUserProfileImsDisplayName(userPhoneNumber);
-                String homeDomain = mRcsSettings
-                        .readParameter(RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN);
-                String sipUri = userPhoneNumber + "@" + homeDomain;
-                mRcsSettings.writeParameter(RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID, sipUri);
-                mRcsSettings.writeParameter(RcsSettingsData.FT_HTTP_LOGIN, sipUri);
+                /* Customize display name with user phone number */
+                mRcsSettings.setUserProfileImsDisplayName(phoneNumber);
                 mRcsSettings
                         .setFileTransferHttpSupported(mRcsSettings.getFtHttpServer().length() > 0
                                 && mRcsSettings.getFtHttpLogin().length() > 0
