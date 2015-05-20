@@ -22,7 +22,6 @@
 
 package com.gsma.rcs.core.ims.service;
 
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.registration.HttpDigestRegistrationProcedure;
 import com.gsma.rcs.core.ims.network.registration.RegistrationProcedure;
@@ -74,43 +73,32 @@ public class SessionAuthenticationAgent {
      * Set the proxy authorization header on the INVITE request
      * 
      * @param request SIP request
-     * @throws CoreException
+     * @throws InvalidArgumentException
      */
-    public void setProxyAuthorizationHeader(SipRequest request) throws CoreException {
+    public void setProxyAuthorizationHeader(SipRequest request) throws InvalidArgumentException {
         if ((digest.getRealm() == null) || (digest.getNextnonce() == null)) {
             return;
         }
+        digest.updateNonceParameters();
+        String user = ImsModule.IMS_USER_PROFILE.getPrivateID();
+        String password = ImsModule.IMS_USER_PROFILE.getPassword();
+        String response = digest.calculateResponse(user, password, request.getMethod(),
+                request.getRequestURI(), digest.buildNonceCounter(), request.getContent());
 
-        try {
-            // Update nonce parameters
-            digest.updateNonceParameters();
+        /* Build the Proxy-Authorization header */
+        StringBuilder auth = new StringBuilder("Digest username=\"")
+                .append(ImsModule.IMS_USER_PROFILE.getPrivateID()).append("\"").append(",uri=\"")
+                .append(request.getRequestURI()).append("\"").append(",algorithm=MD5")
+                .append(",realm=\"").append(digest.getRealm()).append("\"").append(",nc=")
+                .append(digest.buildNonceCounter()).append(",nonce=\"").append(digest.getNonce())
+                .append("\"").append(",response=\"").append(response).append("\"")
+                .append(",cnonce=\"").append(digest.getCnonce()).append("\"");
 
-            // Calculate response
-            String user = ImsModule.IMS_USER_PROFILE.getPrivateID();
-            String password = ImsModule.IMS_USER_PROFILE.getPassword();
-            String response = digest.calculateResponse(user, password, request.getMethod(),
-                    request.getRequestURI(), digest.buildNonceCounter(), request.getContent());
-
-            // Build the Proxy-Authorization header
-            String auth = "Digest username=\"" + ImsModule.IMS_USER_PROFILE.getPrivateID() + "\""
-                    + ",uri=\"" + request.getRequestURI() + "\"" + ",algorithm=MD5" + ",realm=\""
-                    + digest.getRealm() + "\"" + ",nc=" + digest.buildNonceCounter() + ",nonce=\""
-                    + digest.getNonce() + "\"" + ",response=\"" + response + "\"" + ",cnonce=\""
-                    + digest.getCnonce() + "\"";
-            String qop = digest.getQop();
-            if (qop != null) {
-                auth += ",qop=" + qop;
-            }
-
-            // Set header in the SIP message
-            request.addHeader(ProxyAuthorizationHeader.NAME, auth);
-
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create the proxy authorization header", e);
-            }
-            throw new CoreException("Can't create the proxy authorization header");
+        String qop = digest.getQop();
+        if (qop != null) {
+            auth.append(",qop=").append(qop);
         }
+        request.addHeader(ProxyAuthorizationHeader.NAME, auth.toString());
     }
 
     /**

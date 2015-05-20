@@ -22,6 +22,8 @@
 
 package com.gsma.rcs.utils;
 
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -88,8 +90,11 @@ public abstract class PeriodicRefresher {
 
     /**
      * Periodic processing
+     * 
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public abstract void periodicProcessing();
+    public abstract void periodicProcessing() throws SipPayloadException, SipNetworkException;
 
     /**
      * Start the timer
@@ -189,6 +194,11 @@ public abstract class PeriodicRefresher {
                 public void run() {
                     try {
                         periodicProcessing();
+                    } catch (SipPayloadException e) {
+                        mLogger.error("Failed to initiate start timer!", e);
+                        stopTimer();
+                    } catch (SipNetworkException e) {
+                        stopTimer();
                     } catch (RuntimeException e) {
                         /*
                          * Intentionally catch runtime exceptions as else it will abruptly end the

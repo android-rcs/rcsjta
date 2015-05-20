@@ -26,6 +26,7 @@ import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
@@ -98,9 +99,9 @@ public abstract class GenericSipSession extends ImsServiceSession {
      * Create an INVITE request
      * 
      * @return Request
-     * @throws SipException
+     * @throws SipPayloadException
      */
-    public SipRequest createInvite() throws SipException {
+    public SipRequest createInvite() throws SipPayloadException {
         String ext = new StringBuilder(FeatureTags.FEATURE_3GPP).append("=\"")
                 .append(FeatureTags.FEATURE_3GPP_EXTENSION).append("\"").toString();
         SipRequest invite = SipMessageFactory.createInvite(getDialogPath(), new String[] {
@@ -114,7 +115,7 @@ public abstract class GenericSipSession extends ImsServiceSession {
                     PPreferredServiceHeader.NAME, FeatureTags.FEATURE_3GPP_SERVICE_EXTENSION);
             invite.getStackMessage().addHeader(header);
         } catch (ParseException e) {
-            throw new SipException(
+            throw new SipPayloadException(
                     "Can't add SIP headertype ".concat(FeatureTags.FEATURE_3GPP_SERVICE_EXTENSION),
                     e);
         }

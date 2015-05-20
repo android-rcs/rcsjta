@@ -22,10 +22,24 @@
 
 package com.gsma.rcs.core.ims.network;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
-import javax2.sip.ListeningPoint;
+import com.gsma.rcs.core.CoreException;
+import com.gsma.rcs.core.access.NetworkAccess;
+import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.registration.GibaRegistrationProcedure;
+import com.gsma.rcs.core.ims.network.registration.HttpDigestRegistrationProcedure;
+import com.gsma.rcs.core.ims.network.registration.RegistrationManager;
+import com.gsma.rcs.core.ims.network.registration.RegistrationProcedure;
+import com.gsma.rcs.core.ims.network.sip.SipManager;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.userprofile.GibaUserProfileInterface;
+import com.gsma.rcs.core.ims.userprofile.SettingsUserProfileInterface;
+import com.gsma.rcs.core.ims.userprofile.UserProfile;
+import com.gsma.rcs.core.ims.userprofile.UserProfileInterface;
+import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.settings.RcsSettingsData.AuthenticationProcedure;
+import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.RcsServiceRegistration;
 
 import org.xbill.DNS.Cache;
 import org.xbill.DNS.ExtendedResolver;
@@ -37,23 +51,10 @@ import org.xbill.DNS.SRVRecord;
 import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 
-import com.gsma.rcs.core.CoreException;
-import com.gsma.rcs.core.access.NetworkAccess;
-import com.gsma.rcs.core.ims.ImsModule;
-import com.gsma.rcs.core.ims.network.registration.GibaRegistrationProcedure;
-import com.gsma.rcs.core.ims.network.registration.HttpDigestRegistrationProcedure;
-import com.gsma.rcs.core.ims.network.registration.RegistrationManager;
-import com.gsma.rcs.core.ims.network.registration.RegistrationProcedure;
-import com.gsma.rcs.core.ims.network.sip.SipManager;
-import com.gsma.rcs.core.ims.protocol.sip.SipException;
-import com.gsma.rcs.core.ims.userprofile.GibaUserProfileInterface;
-import com.gsma.rcs.core.ims.userprofile.SettingsUserProfileInterface;
-import com.gsma.rcs.core.ims.userprofile.UserProfile;
-import com.gsma.rcs.core.ims.userprofile.UserProfileInterface;
-import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.provider.settings.RcsSettingsData.AuthenticationProcedure;
-import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsServiceRegistration;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+import javax2.sip.ListeningPoint;
 
 /**
  * Abstract IMS network interface
@@ -553,7 +554,7 @@ public abstract class ImsNetworkInterface {
 
     /**
      * Get the SRV Query
-     *
+     * 
      * @return constructed srv query
      */
     private String getSrvQuery(String sipService) {
@@ -571,8 +572,11 @@ public abstract class ImsNetworkInterface {
      * Get the DNS resolved fields.
      * 
      * @return The {@link DnsResolvedFields} object containing the DNS resolved fields.
+     * @throws SipPayloadException
+     * @throws UnknownHostException
      */
-    protected DnsResolvedFields getDnsResolvedFields() throws Exception {
+    protected DnsResolvedFields getDnsResolvedFields() throws SipPayloadException,
+            UnknownHostException {
         // Changed by Deutsche Telekom
         DnsResolvedFields dnsResolvedFields;
         boolean useDns = true;
@@ -588,17 +592,18 @@ public abstract class ImsNetworkInterface {
         }
 
         if (useDns) {
-            // Set DNS resolver
             ResolverConfig.refresh();
             ExtendedResolver resolver = new ExtendedResolver();
 
-            // Resolve the IMS proxy configuration: first try to resolve via
-            // a NAPTR query, then a SRV query and finally via A query
+            /*
+             * Resolve the IMS proxy configuration: first try to resolve via a NAPTR query, then a
+             * SRV query and finally via A query
+             */
             if (logger.isActivated()) {
-                logger.debug("Resolve IMS proxy address " + mImsProxyAddr);
+                logger.debug("Resolve IMS proxy address ".concat(mImsProxyAddr));
             }
 
-            // DNS NAPTR lookup
+            /* DNS NAPTR lookup */
             String service;
             if (mImsProxyProtocol.equalsIgnoreCase(ListeningPoint.UDP)) {
                 service = DNS_SIP_UDP_SERVICE;
@@ -607,23 +612,24 @@ public abstract class ImsNetworkInterface {
             } else if (mImsProxyProtocol.equalsIgnoreCase(ListeningPoint.TLS)) {
                 service = DNS_SIP_TLS_SERVICE;
             } else {
-                throw new SipException("Unkown SIP protocol");
+                throw new SipPayloadException("Unkown SIP protocol : ".concat(mImsProxyProtocol));
             }
 
             boolean resolved = false;
             Record[] naptrRecords = getDnsRequest(mImsProxyAddr, resolver, Type.NAPTR);
             if ((naptrRecords != null) && (naptrRecords.length > 0)) {
-                // First try with NAPTR
+                /* First try with NAPTR */
                 if (logger.isActivated()) {
-                    logger.debug("NAPTR records found: " + naptrRecords.length);
+                    logger.debug(new StringBuilder("NAPTR records found: ").append(
+                            naptrRecords.length).toString());
                 }
                 for (int i = 0; i < naptrRecords.length; i++) {
                     NAPTRRecord naptr = (NAPTRRecord) naptrRecords[i];
                     if (logger.isActivated()) {
-                        logger.debug("NAPTR record: " + naptr.toString());
+                        logger.debug("NAPTR record: ".concat(naptr.toString()));
                     }
                     if ((naptr != null) && naptr.getService().equalsIgnoreCase(service)) {
-                        // DNS SRV lookup
+                        /* DNS SRV lookup */
                         Record[] srvRecords = getDnsRequest(naptr.getReplacement().toString(),
                                 resolver, Type.SRV);
                         if ((srvRecords != null) && (srvRecords.length > 0)) {
@@ -631,7 +637,7 @@ public abstract class ImsNetworkInterface {
                             dnsResolvedFields.mIpAddress = getDnsA(srvRecord.getTarget().toString());
                             dnsResolvedFields.mPort = srvRecord.getPort();
                         } else {
-                            // Direct DNS A lookup
+                            /* Direct DNS A lookup */
                             dnsResolvedFields.mIpAddress = getDnsA(mImsProxyAddr);
                         }
                         resolved = true;
@@ -640,7 +646,7 @@ public abstract class ImsNetworkInterface {
             }
 
             if (!resolved) {
-                // If no NAPTR: direct DNS SRV lookup
+                /* If no NAPTR: direct DNS SRV lookup */
                 if (logger.isActivated()) {
                     logger.debug("No NAPTR record found: use DNS SRV instead");
                 }
@@ -660,7 +666,7 @@ public abstract class ImsNetworkInterface {
                 }
 
                 if (!resolved) {
-                    // If not resolved: direct DNS A lookup
+                    /* If not resolved: direct DNS A lookup */
                     if (logger.isActivated()) {
                         logger.debug("No SRV record found: use DNS A instead");
                     }
@@ -671,20 +677,21 @@ public abstract class ImsNetworkInterface {
 
         if (dnsResolvedFields.mIpAddress == null) {
             // Changed by Deutsche Telekom
-            // Try to use IMS proxy address as a fallback
+            /* Try to use IMS proxy address as a fallback */
             String imsProxyAddrResolved = getDnsA(mImsProxyAddr);
-            if (imsProxyAddrResolved != null) {
-                dnsResolvedFields = new DnsResolvedFields(imsProxyAddrResolved, mImsProxyPort);
-            } else {
-                throw new SipException("Proxy IP address not found");
+            if (imsProxyAddrResolved == null) {
+                throw new SipPayloadException(new StringBuilder("Proxy IP address : ")
+                        .append(mImsProxyAddr).append(" not found!").toString());
             }
+            dnsResolvedFields = new DnsResolvedFields(imsProxyAddrResolved, mImsProxyPort);
         }
 
         if (logger.isActivated()) {
-            logger.debug("SIP outbound proxy configuration: " + dnsResolvedFields.mIpAddress + ":"
-                    + dnsResolvedFields.mPort + ";" + mImsProxyProtocol);
+            logger.debug(new StringBuilder("SIP outbound proxy configuration: ")
+                    .append(dnsResolvedFields.mIpAddress).append(":")
+                    .append(dnsResolvedFields.mPort).append(";").append(mImsProxyProtocol)
+                    .toString());
         }
-
         return dnsResolvedFields;
     }
 
@@ -707,19 +714,24 @@ public abstract class ImsNetworkInterface {
                 dnsResolvedFields = getDnsResolvedFields();
             }
 
-            // Initialize the SIP stack
             // Changed by Deutsche Telekom
             mSip.initStack(mAccess.getIpAddress(), dnsResolvedFields.mIpAddress,
                     dnsResolvedFields.mPort, mImsProxyProtocol, mTcpFallback, getType());
             mSip.getSipStack().addSipEventListener(mImsModule);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't instanciate the SIP stack", e);
-            }
+        } catch (SipPayloadException e) {
+            // TODO: This is a temporary way of handling the sip network exception. Eventually this
+            // logic of returning boolean will be removed as this goes against the policies of
+            // proper exception handling·
+            mSip.closeStack();
+            return false;
+
+        } catch (UnknownHostException e) {
+            // TODO: This is a temporary way of handling the errors. Eventually this
+            // logic of returning boolean will be removed as this goes against the policies of
+            // proper exception handling·
             return false;
         }
 
-        // Register to IMS
         boolean registered = mRegistration.registration();
         if (registered) {
             if (logger.isActivated()) {
@@ -739,7 +751,6 @@ public abstract class ImsNetworkInterface {
                 logger.debug("IMS registration has failed");
             }
         }
-
         return registered;
     }
 

@@ -24,12 +24,13 @@ package com.gsma.rcs.core.ims.service.im.chat;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -64,6 +65,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax2.sip.InvalidArgumentException;
 import javax2.sip.header.ExtensionHeader;
 
 /**
@@ -597,15 +599,13 @@ public abstract class GroupChatSession extends ChatSession {
 
                 updateParticipants(contacts, ParticipantStatus.FAILED);
             }
-        } catch (SipException e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("REFER request has failed", e);
-            }
+        } catch (InvalidArgumentException e) {
+            sLogger.error("REFER request has failed for contacts : " + contacts, e);
             updateParticipants(contacts, ParticipantStatus.FAILED);
-        } catch (CoreException e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("REFER request has failed", e);
-            }
+        } catch (SipPayloadException e) {
+            sLogger.error("REFER request has failed for contacts : " + contacts, e);
+            updateParticipants(contacts, ParticipantStatus.FAILED);
+        } catch (SipNetworkException e) {
             updateParticipants(contacts, ParticipantStatus.FAILED);
         }
     }

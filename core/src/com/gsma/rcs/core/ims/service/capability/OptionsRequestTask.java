@@ -22,11 +22,12 @@
 
 package com.gsma.rcs.core.ims.service.capability;
 
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -39,6 +40,8 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
+
+import javax2.sip.InvalidArgumentException;
 
 /**
  * Options request task
@@ -140,10 +143,6 @@ public class OptionsRequestTask implements Runnable {
         } catch (SipException e) {
             logger.error("OPTIONS request has failed! Contact=".concat(mContact.toString()), e);
             handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, e));
-        } catch (CoreException e) {
-            /* TODO: Remove CoreException in the future because it is too generic. */
-            logger.error("OPTIONS request has failed! Contact=".concat(mContact.toString()), e);
-            handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, e));
         }
     }
 
@@ -151,10 +150,10 @@ public class OptionsRequestTask implements Runnable {
      * Send OPTIONS message
      * 
      * @param options SIP OPTIONS
-     * @throws CoreException
-     * @throws SipException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void sendOptions(SipRequest options) throws SipException, CoreException {
+    private void sendOptions(SipRequest options) throws SipPayloadException, SipNetworkException {
         if (logger.isActivated()) {
             logger.info("Send OPTIONS");
         }
@@ -289,35 +288,34 @@ public class OptionsRequestTask implements Runnable {
      * Handle 407 response
      * 
      * @param ctx SIP transaction context
-     * @throws SipException
-     * @throws CoreException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void handle407Authentication(SipTransactionContext ctx) throws SipException,
-            CoreException {
-        // 407 response received
-        if (logger.isActivated()) {
-            logger.info("407 response received");
+    private void handle407Authentication(SipTransactionContext ctx) throws SipPayloadException,
+            SipNetworkException {
+        try {
+            if (logger.isActivated()) {
+                logger.info("407 response received");
+            }
+
+            SipResponse resp = ctx.getSipResponse();
+
+            mAuthenticationAgent.readProxyAuthenticateHeader(resp);
+
+            mDialogPath.incrementCseq();
+
+            /* Create a second OPTIONS request with the right token */
+            if (logger.isActivated()) {
+                logger.info("Send second OPTIONS");
+            }
+            SipRequest options = SipMessageFactory.createOptions(mDialogPath, mFeatureTags);
+
+            mAuthenticationAgent.setProxyAuthorizationHeader(options);
+
+            sendOptions(options);
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException("Unable to fetch Authorization header!", e);
         }
-
-        SipResponse resp = ctx.getSipResponse();
-
-        // Set the Proxy-Authorization header
-        mAuthenticationAgent.readProxyAuthenticateHeader(resp);
-
-        // Increment the Cseq number of the dialog path
-        mDialogPath.incrementCseq();
-
-        // Create a second OPTIONS request with the right token
-        if (logger.isActivated()) {
-            logger.info("Send second OPTIONS");
-        }
-        SipRequest options = SipMessageFactory.createOptions(mDialogPath, mFeatureTags);
-
-        // Set the Authorization header
-        mAuthenticationAgent.setProxyAuthorizationHeader(options);
-
-        // Send OPTIONS request
-        sendOptions(options);
     }
 
     /**

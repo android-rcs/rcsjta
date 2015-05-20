@@ -28,6 +28,8 @@ import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipInterface;
 import com.gsma.rcs.core.ims.protocol.sip.SipMessage;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -134,14 +136,13 @@ public class SipManager {
      * @param protocol
      * @param tcpFallback TCP fallback according to RFC3261 chapter 18.1.1
      * @param networkType type of network
-     * @throws SipException
+     * @throws SipPayloadException
      */
     public synchronized void initStack(String localAddr, String proxyAddr, int proxyPort,
-            String protocol, boolean tcpFallback, int networkType) throws SipException {
-        // Close the stack if necessary
+            String protocol, boolean tcpFallback, int networkType) throws SipPayloadException {
+
         closeStack();
 
-        // Create the SIP stack
         sipstack = new SipInterface(localAddr, proxyAddr, proxyPort, protocol, tcpFallback,
                 networkType, mRcsSettings);
     }
@@ -171,9 +172,11 @@ public class SipManager {
      * 
      * @param message SIP message
      * @return Transaction context
-     * @throws SipException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public SipTransactionContext sendSipMessageAndWait(SipMessage message) throws SipException {
+    public SipTransactionContext sendSipMessageAndWait(SipMessage message)
+            throws SipPayloadException, SipNetworkException {
         return sendSipMessageAndWait(message, SipManager.TIMEOUT);
     }
 
@@ -184,22 +187,17 @@ public class SipManager {
      * @param timeout in milliseconds
      * @param callback callback to handle provisional response
      * @return SIP transaction context
-     * @throws SipException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     public SipTransactionContext sendSipMessageAndWait(SipMessage message, long timeout,
-            SipTransactionContext.INotifySipProvisionalResponse callback) throws SipException {
-        if (sipstack == null) {
-            throw new SipException("Stack not initialized");
-        }
+            SipTransactionContext.INotifySipProvisionalResponse callback)
+            throws SipNetworkException, SipPayloadException {
         SipTransactionContext ctx = sipstack.sendSipMessageAndWait(message, callback);
-
-        // wait the response
         ctx.waitResponse(timeout);
 
         if (!(message instanceof SipRequest) || !ctx.isSipResponse()) {
-            // Return the transaction context
             return ctx;
-
         }
         String method = ((SipRequest) message).getMethod();
         SipResponse response = ctx.getSipResponse();
@@ -207,18 +205,13 @@ public class SipManager {
             return ctx;
 
         }
-        // Analyze the received response
+        /* Analyze the received response */
         if (!Request.REGISTER.equals(method)) {
-            // Check if not registered and warning header
+            /* Check if not registered and warning header */
             WarningHeader warn = (WarningHeader) response.getHeader(WarningHeader.NAME);
             if (Response.FORBIDDEN == ctx.getStatusCode() && warn == null) {
-                // Launch new registration
+                /* Launch new registration */
                 mNetworkInterface.getRegistrationManager().restart();
-
-                if (callback == null) {
-                    throw new SipException("Not registered");
-
-                }
             }
         }
         if (!Request.INVITE.equals(method) && !Request.REGISTER.equals(method)) {
@@ -233,40 +226,33 @@ public class SipManager {
 
         }
 
-        // Message is a response to INVITE or REGISTER: analyze "keep" flag of "Via" header
-        int viaKeep = -1;
+        /* Message is a response to INVITE or REGISTER: analyze "keep" flag of "Via" header */
         ListIterator<ViaHeader> iterator = response.getViaHeaders();
         if (!iterator.hasNext()) {
             keepAliveManager.setPeriod(mRcsSettings.getSipKeepAlivePeriod());
             return ctx;
-
         }
         ViaHeader respViaHeader = iterator.next();
         String keepStr = respViaHeader.getParameter("keep");
         if (keepStr == null) {
             keepAliveManager.setPeriod(mRcsSettings.getSipKeepAlivePeriod());
             return ctx;
-
         }
         try {
-            viaKeep = Integer.parseInt(keepStr);
+            long viaKeep = Integer.parseInt(keepStr) * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
             if (viaKeep > 0) {
-                // If "keep" value is valid, set keep alive period
-                keepAliveManager.setPeriod(viaKeep * SECONDS_TO_MILLISECONDS_CONVERSION_RATE);
+                keepAliveManager.setPeriod(viaKeep);
             } else {
-                if (sLogger.isActivated())
-                    sLogger.warn("Non positive keep value \"" + keepStr + "\"");
+                /* Set Default Value fetched from provisioning settings */
+                keepAliveManager.setPeriod(mRcsSettings.getSipKeepAlivePeriod());
             }
         } catch (NumberFormatException e) {
-            if (sLogger.isActivated())
-                sLogger.warn("Non-numeric keep value \"" + keepStr + "\"");
-        }
-        // If "keep" value is invalid or not present, set keep alive period to default value
-        if (viaKeep <= 0) {
+            /*
+             * If "keep" value is invalid or not present, Set Default Value fetched from
+             * provisioning settings
+             */
             keepAliveManager.setPeriod(mRcsSettings.getSipKeepAlivePeriod());
         }
-
-        // Return the transaction context
         return ctx;
     }
 
@@ -276,10 +262,11 @@ public class SipManager {
      * @param message SIP message
      * @param timeout SIP timeout in milliseconds
      * @return Transaction context
-     * @throws SipException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     public SipTransactionContext sendSipMessageAndWait(SipMessage message, long timeout)
-            throws SipException {
+            throws SipPayloadException, SipNetworkException {
         return sendSipMessageAndWait(message, timeout, null);
     }
 
@@ -287,56 +274,44 @@ public class SipManager {
      * Send a SIP response
      * 
      * @param response SIP response
-     * @throws SipException
+     * @throws SipNetworkException
      */
-    public void sendSipResponse(SipResponse response) throws SipException {
-        if (sipstack != null) {
-            sipstack.sendSipResponse(response);
-        } else {
-            throw new SipException("Stack not initialized");
-        }
+    public void sendSipResponse(SipResponse response) throws SipNetworkException {
+        sipstack.sendSipResponse(response);
     }
 
     /**
      * Send a SIP ACK
      * 
      * @param dialog Dialog path
-     * @throws SipException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void sendSipAck(SipDialogPath dialog) throws SipException {
-        if (sipstack != null) {
-            sipstack.sendSipAck(dialog);
-        } else {
-            throw new SipException("Stack not initialized");
-        }
+    public void sendSipAck(SipDialogPath dialog) throws SipPayloadException, SipNetworkException {
+        sipstack.sendSipAck(dialog);
     }
 
     /**
      * Send a SIP BYE
      * 
      * @param dialog Dialog path
-     * @throws SipException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void sendSipBye(SipDialogPath dialog) throws SipException {
-        if (sipstack != null) {
-            sipstack.sendSipBye(dialog);
-        } else {
-            throw new SipException("Stack not initialized");
-        }
+    public void sendSipBye(SipDialogPath dialog) throws SipPayloadException, SipNetworkException {
+        sipstack.sendSipBye(dialog);
     }
 
     /**
      * Send a SIP CANCEL
      * 
      * @param dialog Dialog path
-     * @throws SipException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void sendSipCancel(SipDialogPath dialog) throws SipException {
-        if (sipstack != null) {
-            sipstack.sendSipCancel(dialog);
-        } else {
-            throw new SipException("Stack not initialized");
-        }
+    public void sendSipCancel(SipDialogPath dialog) throws SipPayloadException, SipNetworkException {
+        sipstack.sendSipCancel(dialog);
+
     }
 
     /**
@@ -348,7 +323,7 @@ public class SipManager {
      * @throws SipException
      */
     public SipTransactionContext sendSubsequentRequest(SipDialogPath dialog, SipRequest request)
-            throws SipException {
+            throws SipNetworkException, SipPayloadException {
         return sendSubsequentRequest(dialog, request, SipManager.TIMEOUT);
     }
 
@@ -359,33 +334,25 @@ public class SipManager {
      * @param request Request
      * @param timeout SIP timeout in milliseconds
      * @return SipTransactionContext
-     * @throws SipException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     private SipTransactionContext sendSubsequentRequest(SipDialogPath dialog, SipRequest request,
-            long timeout) throws SipException {
-        if (sipstack != null) {
-            SipTransactionContext ctx = sipstack.sendSubsequentRequest(dialog, request);
+            long timeout) throws SipNetworkException, SipPayloadException {
+        SipTransactionContext ctx = sipstack.sendSubsequentRequest(dialog, request);
+        ctx.waitResponse(timeout);
 
-            // wait the response
-            ctx.waitResponse(timeout);
-
-            // Analyze the received response
-            if (ctx.isSipResponse()) {
-                int code = ctx.getStatusCode();
-                // Check if not registered and warning header
-                WarningHeader warn = (WarningHeader) ctx.getSipResponse().getHeader(
-                        WarningHeader.NAME);
-                if ((code == 403) && (warn == null)) {
-                    // Launch new registration
-                    mNetworkInterface.getRegistrationManager().restart();
-
-                    // Throw not registered exception
-                    throw new SipException("Not registered");
-                }
+        if (ctx.isSipResponse()) {
+            int code = ctx.getStatusCode();
+            /* Check if not registered and warning header */
+            WarningHeader warn = (WarningHeader) ctx.getSipResponse().getHeader(WarningHeader.NAME);
+            if ((Response.FORBIDDEN == code) && (warn == null)) {
+                mNetworkInterface.getRegistrationManager().restart();
+                throw new SipPayloadException(
+                        "Stack not properly registered with status code : ".concat(Integer
+                                .toString(code)));
             }
-            return ctx;
-        } else {
-            throw new SipException("Stack not initialized");
         }
+        return ctx;
     }
 }

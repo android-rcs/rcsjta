@@ -22,11 +22,11 @@
 
 package com.gsma.rcs.core.ims.service;
 
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipMessage;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -36,6 +36,8 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
 import javax2.sip.Dialog;
+import javax2.sip.InvalidArgumentException;
+import javax2.sip.message.Response;
 
 /**
  * Session timer manager (see RFC 4028)
@@ -167,8 +169,11 @@ public class SessionTimerManager extends PeriodicRefresher {
 
     /**
      * Periodic session timer processing
+     * 
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void periodicProcessing() {
+    public void periodicProcessing() throws SipPayloadException, SipNetworkException {
         if (UAC_ROLE.equals(mRefresher)) {
             // Refresher role
             sessionRefreshForUAC();
@@ -181,8 +186,11 @@ public class SessionTimerManager extends PeriodicRefresher {
     /**
      * Session refresh processing for UAC role. If the refresher never sends a session refresh
      * request then the session should be terminated.
+     * 
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void sessionRefreshForUAC() {
+    private void sessionRefreshForUAC() throws SipPayloadException, SipNetworkException {
         try {
             if (mLogger.isActivated()) {
                 mLogger.debug("Session timer refresh (UAC role)");
@@ -199,10 +207,8 @@ public class SessionTimerManager extends PeriodicRefresher {
 
             // Send RE-INVITE request
             sendReInvite(reInvite);
-        } catch (Exception e) {
-            if (mLogger.isActivated()) {
-                mLogger.error("Session timer refresh has failed", e);
-            }
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException("Unable to set authorization header for re-invite!", e);
         }
     }
 
@@ -210,86 +216,89 @@ public class SessionTimerManager extends PeriodicRefresher {
      * Send RE-INVITE message
      * 
      * @param reInvite SIP RE-INVITE
-     * @throws SipException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void sendReInvite(SipRequest reInvite) throws SipException, CoreException {
-        if (mLogger.isActivated()) {
-            mLogger.debug("Send RE-INVITE");
-        }
-        // Send RE-INVITE request
-        SipTransactionContext ctx = mSession.getImsService().getImsModule().getSipManager()
-                .sendSipMessageAndWait(reInvite, mSession.getResponseTimeout());
-
-        // Analyze the received response
-        if (ctx.isSipResponse()) {
-            // A response has been received
-            if (ctx.getStatusCode() == 200) {
-                // Success
-                if (mLogger.isActivated()) {
-                    mLogger.debug("Session timer refresh with success");
-                }
-
-                // The signalisation is established
-                mSession.getDialogPath().sigEstablished();
-
-                // Update last session refresh time
-                mLastSessionRefresh = System.currentTimeMillis();
-
-                // Send ACK request
-                if (mLogger.isActivated()) {
-                    mLogger.debug("Send ACK");
-                }
-                mSession.getImsService().getImsModule().getSipManager()
-                        .sendSipAck(mSession.getDialogPath());
-
-                // The session is established
-                mSession.getDialogPath().sessionEstablished();
-
-                // Increment internal stack CSeq (NIST stack issue?)
-                Dialog dlg = mSession.getDialogPath().getStackDialog();
-                if (dlg != null) {
-                    dlg.incrementLocalSequenceNumber();
-                }
-
-                // Restart processing the session timer
-                startProcessing();
-            } else if (ctx.getStatusCode() == 405) {
-                if (mLogger.isActivated()) {
-                    mLogger.debug("Session timer refresh not supported");
-                }
-            } else if (ctx.getStatusCode() == 407) {
-                // 407 Proxy Authentication Required
-                if (mLogger.isActivated()) {
-                    mLogger.info("407 response received. Send second RE-INVITE");
-                }
-                // Increment the Cseq number of the dialog path
-                mSession.getDialogPath().incrementCseq();
-
-                // Create new RE-INVITE request
-                SipRequest newReInvite = SipMessageFactory.createReInvite(mSession.getDialogPath());
-
-                // Update the authentication agent
-                mSession.getAuthenticationAgent().readProxyAuthenticateHeader(ctx.getSipResponse());
-
-                // Set the Proxy-Authorization header
-                mSession.getAuthenticationAgent().setProxyAuthorizationHeader(newReInvite);
-
-                // Send RE-INVITE request
-                sendReInvite(newReInvite);
-            } else {
-                if (mLogger.isActivated()) {
-                    mLogger.debug("Session timer refresh has failed: close the session");
-                }
-
-                mSession.terminateSession(TerminationReason.TERMINATION_BY_TIMEOUT);
-
-                ContactId contact = mSession.getRemoteContact();
-                mSession.getImsService().getImsModule().getCapabilityService()
-                        .requestContactCapabilities(contact);
+    private void sendReInvite(SipRequest reInvite) throws SipPayloadException, SipNetworkException {
+        try {
+            if (mLogger.isActivated()) {
+                mLogger.debug("Send RE-INVITE");
             }
-        } else {
-            // No response received: timeout
-            throw new SipException("No response received: timeout");
+            // Send RE-INVITE request
+            SipTransactionContext ctx = mSession.getImsService().getImsModule().getSipManager()
+                    .sendSipMessageAndWait(reInvite, mSession.getResponseTimeout());
+
+            // Analyze the received response
+            if (ctx.isSipResponse()) {
+                // A response has been received
+                switch (ctx.getStatusCode()) {
+                    case Response.OK:
+                        if (mLogger.isActivated()) {
+                            mLogger.debug("Session timer refresh with success");
+                        }
+
+                        mSession.getDialogPath().sigEstablished();
+                        mLastSessionRefresh = System.currentTimeMillis();
+
+                        if (mLogger.isActivated()) {
+                            mLogger.debug("Send ACK");
+                        }
+                        mSession.getImsService().getImsModule().getSipManager()
+                                .sendSipAck(mSession.getDialogPath());
+
+                        mSession.getDialogPath().sessionEstablished();
+
+                        /* Increment internal stack CSeq (NIST stack issue?) */
+                        Dialog dlg = mSession.getDialogPath().getStackDialog();
+                        if (dlg != null) {
+                            dlg.incrementLocalSequenceNumber();
+                        }
+
+                        /* Restart processing the session timer */
+                        startProcessing();
+                        break;
+
+                    case Response.METHOD_NOT_ALLOWED:
+                        if (mLogger.isActivated()) {
+                            mLogger.debug("Session timer refresh not supported");
+                        }
+                        break;
+
+                    case Response.PROXY_AUTHENTICATION_REQUIRED:
+                        if (mLogger.isActivated()) {
+                            mLogger.info("407 response received. Send second RE-INVITE");
+                        }
+                        mSession.getDialogPath().incrementCseq();
+                        SipRequest newReInvite = SipMessageFactory.createReInvite(mSession
+                                .getDialogPath());
+
+                        /* Update the authentication agent */
+                        mSession.getAuthenticationAgent().readProxyAuthenticateHeader(
+                                ctx.getSipResponse());
+
+                        mSession.getAuthenticationAgent().setProxyAuthorizationHeader(newReInvite);
+
+                        sendReInvite(newReInvite);
+                        break;
+
+                    default:
+                        if (mLogger.isActivated()) {
+                            mLogger.debug("Session timer refresh has failed: close the session");
+                        }
+
+                        mSession.terminateSession(TerminationReason.TERMINATION_BY_TIMEOUT);
+
+                        ContactId contact = mSession.getRemoteContact();
+                        mSession.getImsService().getImsModule().getCapabilityService()
+                                .requestContactCapabilities(contact);
+                        break;
+                }
+            } else {
+                /* No response received: timeout */
+                throw new SipPayloadException("No response received: timeout!");
+            }
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException("Unable to fetch Authorization header!", e);
         }
     }
 

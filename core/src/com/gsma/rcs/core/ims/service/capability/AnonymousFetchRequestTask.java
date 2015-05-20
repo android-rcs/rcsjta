@@ -22,12 +22,13 @@
 
 package com.gsma.rcs.core.ims.service.capability;
 
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -43,6 +44,7 @@ import com.gsma.services.rcs.contact.ContactId;
 
 import java.util.Vector;
 
+import javax2.sip.InvalidArgumentException;
 import javax2.sip.header.AcceptHeader;
 import javax2.sip.header.EventHeader;
 import javax2.sip.message.Response;
@@ -145,10 +147,6 @@ public class AnonymousFetchRequestTask {
         } catch (SipException e) {
             sLogger.error("Failed to send SUBSCRIBE request to".concat(mContact.toString()), e);
             handleError(new PresenceError(PresenceError.SUBSCRIBE_FAILED, e));
-        } catch (CoreException e) {
-            /* TODO: Remove CoreException in the future because it is too generic. */
-            sLogger.error("Failed to send SUBSCRIBE request to".concat(mContact.toString()), e);
-            handleError(new PresenceError(PresenceError.SUBSCRIBE_FAILED, e));
         }
     }
 
@@ -156,10 +154,9 @@ public class AnonymousFetchRequestTask {
      * Create a SUBSCRIBE request
      * 
      * @return SIP request
-     * @throws SipException
-     * @throws CoreException
+     * @throws SipPayloadException
      */
-    private SipRequest createSubscribe() throws SipException, CoreException {
+    private SipRequest createSubscribe() throws SipPayloadException {
         SipRequest subscribe = SipMessageFactory.createSubscribe(mDialogPath, 0);
 
         /* Set the Privacy header */
@@ -178,10 +175,11 @@ public class AnonymousFetchRequestTask {
      * Send SUBSCRIBE message
      * 
      * @param subscribe SIP SUBSCRIBE
-     * @throws SipException
-     * @throws CoreException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void sendSubscribe(SipRequest subscribe) throws SipException, CoreException {
+    private void sendSubscribe(SipRequest subscribe) throws SipPayloadException,
+            SipNetworkException {
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("Send SUBSCRIBE, expire=")
                     .append(subscribe.getExpires()).append("ms").toString());
@@ -232,33 +230,37 @@ public class AnonymousFetchRequestTask {
      * Handle 407 response
      * 
      * @param ctx SIP transaction context
-     * @throws SipException
-     * @throws CoreException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void handle407Authentication(SipTransactionContext ctx) throws SipException,
-            CoreException {
-        if (sLogger.isActivated()) {
-            sLogger.info("407 response received");
+    private void handle407Authentication(SipTransactionContext ctx) throws SipPayloadException,
+            SipNetworkException {
+        try {
+            if (sLogger.isActivated()) {
+                sLogger.info("407 response received");
+            }
+
+            SipResponse resp = ctx.getSipResponse();
+
+            /* Set the Proxy-Authorization header */
+            mAuthenticationAgent.readProxyAuthenticateHeader(resp);
+
+            /* Increment the Cseq number of the dialog path */
+            mDialogPath.incrementCseq();
+
+            /* Create a second SUBSCRIBE request with the right token */
+            if (sLogger.isActivated()) {
+                sLogger.info("Send second SUBSCRIBE");
+            }
+            SipRequest subscribe = createSubscribe();
+
+            /* Set the Authorization header */
+            mAuthenticationAgent.setProxyAuthorizationHeader(subscribe);
+
+            sendSubscribe(subscribe);
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException("Unable to fetch Authorization header!", e);
         }
-
-        SipResponse resp = ctx.getSipResponse();
-
-        /* Set the Proxy-Authorization header */
-        mAuthenticationAgent.readProxyAuthenticateHeader(resp);
-
-        /* Increment the Cseq number of the dialog path */
-        mDialogPath.incrementCseq();
-
-        /* Create a second SUBSCRIBE request with the right token */
-        if (sLogger.isActivated()) {
-            sLogger.info("Send second SUBSCRIBE");
-        }
-        SipRequest subscribe = createSubscribe();
-
-        /* Set the Authorization header */
-        mAuthenticationAgent.setProxyAuthorizationHeader(subscribe);
-
-        sendSubscribe(subscribe);
     }
 
     /**

@@ -22,7 +22,6 @@
 
 package com.gsma.rcs.core.ims.service;
 
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
@@ -126,10 +125,7 @@ public class UpdateSessionManager {
             mSession.handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
         } catch (SipException e) {
             mSession.handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
-        } catch (CoreException e) {
-            mSession.handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
         }
-
         return reInvite;
     }
 
