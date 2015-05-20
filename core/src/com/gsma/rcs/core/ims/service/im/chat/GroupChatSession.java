@@ -638,9 +638,6 @@ public abstract class GroupChatSession extends ChatSession {
         super.handle200OK(resp);
 
         mConferenceSubscriber.subscribe();
-
-        /* Start the activity manager. */
-        getActivityManager().start();
     }
 
     private boolean isDisplayReportRequested(String dispositionNotification) {
