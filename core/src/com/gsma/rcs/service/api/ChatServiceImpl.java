@@ -547,6 +547,10 @@ public class ChatServiceImpl extends IChatService.Stub {
             throw new ServerApiIllegalArgumentException(
                     "GroupChat participants list must not be null or empty!");
         }
+        if (contacts.size() > mRcsSettings.getMaxChatParticipants() - 1) {
+            throw new ServerApiIllegalArgumentException(
+                    "Number of contacts exeeds maximum number that can be added to a group chat!");
+        }
         if (!mRcsSettings.isGroupChatActivated()) {
             throw new ServerApiPermissionDeniedException(
                     "The GroupChat feature is not activated on the connected IMS server!");
