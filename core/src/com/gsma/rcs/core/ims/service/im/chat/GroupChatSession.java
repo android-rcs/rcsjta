@@ -660,9 +660,6 @@ public abstract class GroupChatSession extends ChatSession {
             sLogger.info("Data received (type " + mimeType + ")");
         }
 
-        // Update the activity manager
-        getActivityManager().updateActivity();
-
         if (data == null || data.length == 0) {
             // By-pass empty data
             if (logActivated) {
