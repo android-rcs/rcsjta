@@ -57,7 +57,7 @@ public class MessageLogTest extends AndroidTestCase {
         mContentResolver = context.getContentResolver();
         mLocalContentResolver = new LocalContentResolver(mContentResolver);
         RcsSettings rcsSettings = RcsSettings.createInstance(mLocalContentResolver);
-        mMessagingLog = MessagingLog.createInstance(mContext, mLocalContentResolver, rcsSettings);
+        mMessagingLog = MessagingLog.createInstance(mLocalContentResolver, rcsSettings);
         ContactUtil contactUtils = ContactUtil.getInstance(new ContactUtilMockContext(mContext));
         mContact1 = contactUtils.formatContact("+339000000");
         mContact2 = contactUtils.formatContact("+339000001");

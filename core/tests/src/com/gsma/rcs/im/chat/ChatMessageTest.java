@@ -65,7 +65,7 @@ public class ChatMessageTest extends AndroidTestCase {
         mContentResolver = mContext.getContentResolver();
         mLocalContentResolver = new LocalContentResolver(mContentResolver);
         mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
-        mMessagingLog = MessagingLog.createInstance(mContext, mLocalContentResolver, mRcsSettings);
+        mMessagingLog = MessagingLog.createInstance(mLocalContentResolver, mRcsSettings);
         ContactUtil contactUtils = ContactUtil.getInstance(new ContactUtilMockContext(mContext));
         mContact = contactUtils.formatContact("+339000000");
         ImsModule.IMS_USER_PROFILE = new UserProfile(mContact, "homeDomain", "privateID",

@@ -43,8 +43,10 @@ import android.net.Uri;
 import android.test.AndroidTestCase;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 public class FileTransferLogTest extends AndroidTestCase {
 
@@ -77,7 +79,7 @@ public class FileTransferLogTest extends AndroidTestCase {
         mContentResolver = context.getContentResolver();
         mLocalContentResolver = new LocalContentResolver(mContentResolver);
         RcsSettings rcsSettings = RcsSettings.createInstance(mLocalContentResolver);
-        mMessagingLog = MessagingLog.createInstance(mContext, mLocalContentResolver, rcsSettings);
+        mMessagingLog = MessagingLog.createInstance(mLocalContentResolver, rcsSettings);
         ContactUtil contactUtils = ContactUtil.getInstance(new ContactUtilMockContext(mContext));
         mContact = contactUtils.formatContact("+339000000");
         mFileTransferId = Long.toString(mRandom.nextLong());
@@ -164,10 +166,12 @@ public class FileTransferLogTest extends AndroidTestCase {
         // Add entry
         Map<ContactId, GroupChat.ParticipantStatus> participants = new HashMap<ContactId, GroupChat.ParticipantStatus>();
         participants.put(mContact, GroupChat.ParticipantStatus.INVITING);
+        Set<ContactId> recipients = new HashSet<ContactId>();
+        recipients.add(mContact);
         mMessagingLog.addGroupChat(mChatId, null, null, participants, GroupChat.State.INITIATING,
                 GroupChat.ReasonCode.UNSPECIFIED, Direction.OUTGOING, mTimestamp);
         mMessagingLog.addOutgoingGroupFileTransfer(mFileTransferId, mChatId, CONTENT, ICON_CONTENT,
-                State.INITIATING, ReasonCode.UNSPECIFIED, mTimestamp, mTimestampSent);
+                recipients, State.INITIATING, ReasonCode.UNSPECIFIED, mTimestamp, mTimestampSent);
         // Read entry
         Uri uri = Uri.withAppendedPath(FileTransferLog.CONTENT_URI, mFileTransferId);
         Cursor cursor = mContentResolver.query(uri, null, null, null, null);

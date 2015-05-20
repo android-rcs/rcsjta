@@ -257,7 +257,7 @@ public class HistoryLogTest extends AndroidTestCase {
         if (sLocalContentResolver == null) {
             sLocalContentResolver = new LocalContentResolver(mockResolver);
         }
-        mMessagingLog = MessagingLog.createInstance(getContext(), sLocalContentResolver,
+        mMessagingLog = MessagingLog.createInstance(sLocalContentResolver,
                 RcsSettings.createInstance(sLocalContentResolver));
         RichCallHistory.createInstance(sLocalContentResolver);
         mRichCallHistory = RichCallHistory.getInstance();
