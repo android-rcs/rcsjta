@@ -92,6 +92,14 @@ public class ContactUtil {
      */
     private static final int COUNTRY_AREA_CODE_IDX = 1;
 
+    private static final int MCC_UNDEFINED = 0;
+
+    /**
+     * Action broadcasted by the Core stack to notify that mobile country code is defined (so
+     * ContactUtil can be used to format and validate local phone numbers) .
+     */
+    public static final String ACTION_CONTACT_UTIL_MCC_DEFINED = "com.gsma.services.rcs.action.CONTACT_UTIL_MCC_DEFINED";
+
     /**
      * A map between the ISO country code and an array of String containing first the County Code
      * and secondly the Area Code.<br>
@@ -513,6 +521,22 @@ public class ContactUtil {
             tryToDetermineAndCacheCountryAndAreaCodes();
         }
         return mCountryCode;
+    }
+
+    /**
+     * Checks if my country code is defined.
+     * 
+     * @return True if contact utility is ready.
+     */
+    public boolean isMyCountryCodeDefined() {
+        /*
+         * The 'mcc' is read from the Android configuration but it reflects the information of the
+         * SIM card. If undefined then the SIM card is either not inserted or not readable (pin code
+         * is not yet entered). 'mcc' information may be persisted by the Android kernel. So it can
+         * be defined in Android configuration even if the SIM card is not inserted. In this case
+         * 'mcc' reflects the information read from the last inserted SIM card.
+         */
+        return mCtx.getResources().getConfiguration().mcc != MCC_UNDEFINED;
     }
 
     /**

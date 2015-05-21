@@ -38,6 +38,7 @@ import com.gsma.rcs.provisioning.https.HttpsProvisioningService;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.contact.ContactUtil;
 
 import android.accounts.Account;
 import android.app.Activity;
@@ -108,6 +109,8 @@ public class StartService extends Service {
 
     private BroadcastReceiver mPollingTelephonyManagerReceiver;
 
+    private ContactUtil mContactUtil;
+
     @Override
     public void onCreate() {
         Context context = getApplicationContext();
@@ -118,6 +121,8 @@ public class StartService extends Service {
 
         mContactManager = ContactManager.createInstance(context, contentResolver,
                 mLocalContentResolver, mRcsSettings);
+
+        mContactUtil = ContactUtil.getInstance(context);
 
         ConfigurationMode mode = mRcsSettings.getConfigurationMode();
         if (sLogger.isActivated()) {
@@ -165,17 +170,21 @@ public class StartService extends Service {
                     mBoot = intent.getBooleanExtra(INTENT_KEY_BOOT, false);
                     mUser = intent.getBooleanExtra(INTENT_KEY_USER, false);
                 }
-                if (checkAccount(mLocalContentResolver)) {
+                boolean contactUtilReady = mContactUtil.isMyCountryCodeDefined();
+                if (contactUtilReady && checkAccount(mLocalContentResolver)) {
                     launchRcsService(mBoot, mUser);
                 } else {
-                    /* User account can't be initialized (no radio to read IMSI, .etc) */
+                    /*
+                     * Services cannot be started: IMSI cannot be read from Telephony Manager or mcc
+                     * from Android Configuration.
+                     */
                     if (logActivated) {
                         sLogger.warn("Can't create current user account: pool the telephony manager");
                     }
                     mPollingTelephonyManagerReceiver = getPollingTelephonyManagerReceiver();
                     registerReceiver(mPollingTelephonyManagerReceiver, new IntentFilter(
                             ACTION_POOL_TELEPHONY_MANAGER));
-                    retryPollingTelephonyManagerPooling();
+                    retryPollingTelephonyManagerPooling(contactUtilReady);
                 }
             }
         }.start();
@@ -259,10 +268,10 @@ public class StartService extends Service {
         mNetworkStateListener = null;
     }
 
-    private void broadcastServiceProvisioned() {
-        Intent serviceProvisioned = new Intent(RcsService.ACTION_SERVICE_PROVISIONING_DATA_CHANGED);
+    private void broadcastEvent(Context context, String action) {
+        Intent serviceProvisioned = new Intent(action);
         IntentUtils.tryToSetReceiverForegroundFlag(serviceProvisioned);
-        getApplicationContext().sendBroadcast(serviceProvisioned);
+        context.sendBroadcast(serviceProvisioned);
     }
 
     /**
@@ -274,20 +283,20 @@ public class StartService extends Service {
         Context ctx = getApplicationContext();
         AndroidFactory.setApplicationContext(ctx, mRcsSettings);
 
-        // Read the current and last end user account
+        /* Read the current and last end user accounts */
         mCurrentUserAccount = LauncherUtils.getCurrentUserAccount(ctx);
         mLastUserAccount = LauncherUtils.getLastUserAccount(ctx);
 
         boolean logActivated = sLogger.isActivated();
         if (logActivated) {
-            // Use StringBuilder since argument may be null
+            /* Use StringBuilder instead of concat since argument may be null */
             sLogger.info(new StringBuilder("Last user account is ").append(mLastUserAccount)
                     .toString());
             sLogger.info(new StringBuilder("Current user account is ").append(mCurrentUserAccount)
                     .toString());
         }
 
-        // Check the current SIM
+        /* Check the current SIM */
         if (mCurrentUserAccount == null) {
             if (isFirstLaunch()) {
                 // If it's a first launch the IMSI is necessary to initialize the service the first
@@ -301,12 +310,12 @@ public class StartService extends Service {
 
         // On the first launch and if SIM card has changed
         if (isFirstLaunch()) {
-            // Set new user flag
+            /* Set new user flag */
             setNewUserAccount(true);
         } else if (hasChangedAccount()) {
-            // keep a maximum of saved accounts
+            /* keep a maximum of saved accounts */
             BackupRestoreDb.cleanBackups(mCurrentUserAccount);
-            // Backup last account settings
+            /* Backup last account settings */
             if (mLastUserAccount != null) {
                 if (logActivated) {
                     sLogger.info("Backup ".concat(mLastUserAccount));
@@ -314,40 +323,41 @@ public class StartService extends Service {
                 BackupRestoreDb.backupAccount(mLastUserAccount);
             }
 
-            // Reset RCS account
+            /* Reset RCS account */
             LauncherUtils.resetRcsConfig(ctx, mLocalContentResolver, mRcsSettings, mMessagingLog,
                     mContactManager);
 
-            // Restore current account settings
+            /* Restore current account settings */
             if (logActivated) {
                 sLogger.info("Restore ".concat(mCurrentUserAccount));
             }
             BackupRestoreDb.restoreAccount(mCurrentUserAccount);
-            // Send service provisioned intent as the configuration settings
-            // are now loaded by means of restoring previous values that were backed
-            // up during SIM Swap.
-            broadcastServiceProvisioned();
+            /*
+             * Send service provisioned intent as the configuration settings are now loaded by means
+             * of restoring previous values that were backed up during SIM Swap.
+             */
+            broadcastEvent(ctx, RcsService.ACTION_SERVICE_PROVISIONING_DATA_CHANGED);
 
-            // Activate service if new account
+            /* Activate service if new account */
             mRcsSettings.setServiceActivationState(true);
 
-            // Set new user flag
+            /* Set new user flag */
             setNewUserAccount(true);
         } else {
-            // Set new user flag
+            /* Set new user flag */
             setNewUserAccount(false);
         }
 
-        // Check if the RCS account exists
+        /* Check if the RCS account exists */
         Account account = AuthenticationService.getAccount(ctx,
                 getString(R.string.rcs_core_account_username));
         if (account == null) {
-            // No account exists
+            /* No account exists */
             if (logActivated) {
                 sLogger.debug("The RCS account does not exist");
             }
             if (AccountChangedReceiver.isAccountResetByEndUser()) {
-                // It was manually destroyed by the user
+                /* It was manually destroyed by the user */
                 if (logActivated) {
                     sLogger.debug("It was manually destroyed by the user, we do not recreate it");
                 }
@@ -361,8 +371,10 @@ public class StartService extends Service {
                         mContactManager);
             }
         } else if (hasChangedAccount()) {
-            // Account has changed (i.e. new SIM card): delete the current account and create a
-            // new one
+            /*
+             * Account has changed (i.e. new SIM card): delete the current account and create a new
+             * one.
+             */
             if (logActivated) {
                 sLogger.debug(new StringBuilder("Deleting the old RCS account for ").append(
                         mLastUserAccount).toString());
@@ -379,7 +391,7 @@ public class StartService extends Service {
                     mContactManager);
         }
 
-        // Save the current end user account
+        /* Save the current end user account */
         LauncherUtils.setLastUserAccount(ctx, mCurrentUserAccount);
 
         return true;
@@ -400,6 +412,13 @@ public class StartService extends Service {
         }
 
         Context context = getApplicationContext();
+
+        /**
+         * This event is broadcasted to notify client application that 'mcc' read from the Android
+         * configuration is defined and then ContactUtil is ready to be used to validate and format
+         * local numbers.
+         */
+        broadcastEvent(context, ContactUtil.ACTION_CONTACT_UTIL_MCC_DEFINED);
 
         if (!ConfigurationMode.AUTO.equals(mode)) {
             // Manual provisioning: accept terms and conditions
@@ -513,9 +532,10 @@ public class StartService extends Service {
         context.startService(intent);
     }
 
-    private void retryPollingTelephonyManagerPooling() {
+    private void retryPollingTelephonyManagerPooling(boolean contactUtilReady) {
         if (sLogger.isActivated()) {
-            sLogger.debug("Retry polling telephony manager");
+            sLogger.debug("Retry polling telephony manager (mcc available=" + contactUtilReady
+                    + ")");
         }
         AlarmManager am = (AlarmManager) getApplicationContext().getSystemService(
                 Context.ALARM_SERVICE);
@@ -529,8 +549,12 @@ public class StartService extends Service {
             public void onReceive(Context context, Intent intent) {
                 new Thread() {
                     public void run() {
-                        if (checkAccount(mLocalContentResolver)) {
-                            /* Finally we succeed to read the IMSI from SIM card */
+                        boolean contactUtilReady = mContactUtil.isMyCountryCodeDefined();
+                        if (contactUtilReady && checkAccount(mLocalContentResolver)) {
+                            /*
+                             * Finally we succeed to read the IMSI from SIM card and the mcc from
+                             * the Android configuration.
+                             */
                             if (mPollingTelephonyManagerReceiver != null) {
                                 unregisterReceiver(mPollingTelephonyManagerReceiver);
                                 mPollingTelephonyManagerReceiver = null;
@@ -538,10 +562,10 @@ public class StartService extends Service {
                             launchRcsService(mBoot, mUser);
                         } else {
                             /*
-                             * User account can't be initialized: IMSI cannot be read from SIM card.
-                             * Retry pooling the telephony manager.
+                             * User account can't be initialized: IMSI and/or mcc cannot be read
+                             * from SIM card. Retry pooling the telephony manager.
                              */
-                            retryPollingTelephonyManagerPooling();
+                            retryPollingTelephonyManagerPooling(contactUtilReady);
                         }
                     }
                 }.start();
