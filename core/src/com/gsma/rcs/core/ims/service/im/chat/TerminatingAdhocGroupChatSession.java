@@ -45,6 +45,8 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
@@ -468,5 +470,45 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
         }
         imService.addSession(this);
         start();
+    }
+
+    /**
+     * Request capabilities to contact
+     * 
+     * @param contact
+     */
+    private void requestContactCapabilities(String contact) {
+        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(contact);
+        if (number != null) {
+            ContactId remote = ContactUtil.createContactIdFromValidatedData(number);
+            getImsService().getImsModule().getCapabilityService()
+                    .requestContactCapabilities(remote);
+        } else {
+            if (mLogger.isActivated()) {
+                mLogger.debug("Failed to request capabilities: invalid contact '" + contact + "'");
+            }
+        }
+    }
+
+    /**
+     * Receive BYE request
+     * 
+     * @param bye BYE request
+     */
+    public void receiveBye(SipRequest bye) {
+        super.receiveBye(bye);
+
+        requestContactCapabilities(getDialogPath().getRemoteParty());
+    }
+
+    /**
+     * Receive CANCEL request
+     * 
+     * @param cancel CANCEL request
+     */
+    public void receiveCancel(SipRequest cancel) {
+        super.receiveCancel(cancel);
+
+        requestContactCapabilities(getDialogPath().getRemoteParty());
     }
 }

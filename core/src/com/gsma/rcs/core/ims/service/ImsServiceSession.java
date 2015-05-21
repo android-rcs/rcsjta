@@ -671,8 +671,6 @@ public abstract class ImsServiceSession extends Thread {
             getListeners().get(i).handleSessionAborted(mContact,
                     TerminationReason.TERMINATION_BY_REMOTE);
         }
-
-        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(mContact);
     }
 
     /**
