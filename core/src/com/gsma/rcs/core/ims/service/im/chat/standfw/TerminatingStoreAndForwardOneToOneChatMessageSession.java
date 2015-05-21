@@ -287,6 +287,18 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
                 return;
             }
 
+            /* Create a 200 OK response */
+            if (logActivated) {
+                mLogger.info("Send 200 OK");
+            }
+            SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
+                    getFeatureTags(), sdp);
+            getDialogPath().sigEstablished();
+
+            /* Send response */
+            SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
+                    .sendSipMessage(resp);
+
             /* Create the MSRP server session */
             if (localSetup.equals("passive")) {
                 /* Passive mode: client wait a connection */
@@ -301,18 +313,17 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
                 sendEmptyDataChunk();
             }
 
-            /* Create a 200 OK response */
-            if (logActivated) {
-                mLogger.info("Send 200 OK");
+            /* wait a response */
+            getImsService().getImsModule().getSipManager().waitResponse(ctx);
+            
+            // Test if the session should be interrupted
+            if (isInterrupted()) {
+                if (mLogger.isActivated()) {
+                    mLogger.debug("Session has been interrupted: end of processing");
+                }
+                return;
             }
-            SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
-                    getFeatureTags(), sdp);
-            getDialogPath().sigEstablished();
-
-            /* Send response */
-            SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
-                    .sendSipMessageAndWait(resp);
-
+            
             /* Analyze the received response */
             if (ctx.isSipAck()) {
                 if (logActivated) {

@@ -264,18 +264,6 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                 return;
             }
 
-            // Create the MSRP server session
-            if (localSetup.equals("passive")) {
-                // Passive mode: client wait a connection
-                msrpMgr.createMsrpServerSession(remotePath, this);
-
-                /* Open the MSRP session */
-                msrpMgr.openMsrpSession(GeolocTransferSession.DEFAULT_SO_TIMEOUT);
-
-                /* Send an empty packet */
-                sendEmptyDataChunk();
-            }
-
             // Create a 200 OK response
             if (mLogger.isActivated()) {
                 mLogger.info("Send 200 OK");
@@ -288,7 +276,27 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
 
             // Send response
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
-                    .sendSipMessageAndWait(resp);
+                    .sendSipMessage(resp);
+            
+            // Create the MSRP server session
+            if (localSetup.equals("passive")) {
+                // Passive mode: client wait a connection
+                msrpMgr.createMsrpServerSession(remotePath, this);
+
+                /* Open the MSRP session */
+                msrpMgr.openMsrpSession(GeolocTransferSession.DEFAULT_SO_TIMEOUT);
+            }
+            
+            /* wait a response */
+            getImsService().getImsModule().getSipManager().waitResponse(ctx);
+            
+            // Test if the session should be interrupted
+            if (isInterrupted()) {
+                if (mLogger.isActivated()) {
+                    mLogger.debug("Session has been interrupted: end of processing");
+                }
+                return;
+            }
 
             // Analyze the received response
             if (ctx.isSipAck()) {

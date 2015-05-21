@@ -320,18 +320,14 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
             /* Set the local SDP part in the dialog path */
             getDialogPath().setLocalContent(sdp);
 
-            /* Create the MSRP server session */
-            if (localSetup.equals("passive")) {
-                /* Passive mode: client wait a connection */
-                /* Changed by Deutsche Telekom */
-                MsrpSession session = msrpMgr.createMsrpServerSession(remotePath, this);
-                /* Do not use right now the mapping to do not increase memory and cpu consumption */
-                session.setMapMsgIdFromTransationId(false);
-
-                msrpMgr.openMsrpSession(ImsFileSharingSession.DEFAULT_SO_TIMEOUT);
-                sendEmptyDataChunk();
+            // Test if the session should be interrupted
+            if (isInterrupted()) {
+                if (mLogger.isActivated()) {
+                    mLogger.debug("Session has been interrupted: end of processing");
+                }
+                return;
             }
-
+            
             /* Create a 200 OK response */
             if (mLogger.isActivated()) {
                 mLogger.info("Send 200 OK");
@@ -344,8 +340,31 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 
             /* Send response */
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
-                    .sendSipMessageAndWait(resp);
+                    .sendSipMessage(resp);
 
+            /* Create the MSRP server session */
+            if (localSetup.equals("passive")) {
+                /* Passive mode: client wait a connection */
+                /* Changed by Deutsche Telekom */
+                MsrpSession session = msrpMgr.createMsrpServerSession(remotePath, this);
+                /* Do not use right now the mapping to do not increase memory and cpu consumption */
+                session.setMapMsgIdFromTransationId(false);
+
+                msrpMgr.openMsrpSession(ImsFileSharingSession.DEFAULT_SO_TIMEOUT);
+                sendEmptyDataChunk();
+            }
+
+            /* wait a response */
+            getImsService().getImsModule().getSipManager().waitResponse(ctx);
+            
+            // Test if the session should be interrupted
+            if (isInterrupted()) {
+                if (mLogger.isActivated()) {
+                    mLogger.debug("Session has been interrupted: end of processing");
+                }
+                return;
+            }
+            
             /* Analyze the received response */
             if (ctx.isSipAck()) {
                 if (mLogger.isActivated()) {

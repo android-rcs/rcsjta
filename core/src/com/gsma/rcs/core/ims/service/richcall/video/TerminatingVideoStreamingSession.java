@@ -255,7 +255,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             // Send response
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
                     .sendSipMessageAndWait(resp);
-
+            
             // Analyze the received response
             if (ctx.isSipAck()) {
                 // ACK received

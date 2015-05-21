@@ -275,21 +275,6 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                 return;
             }
 
-            // Create the MSRP server session
-            if (localSetup.equals("passive")) {
-                // Passive mode: client wait a connection
-                // Changed by Deutsche Telekom
-                MsrpSession session = msrpMgr.createMsrpServerSession(remotePath, this);
-                // Do not use right now the mapping to do not increase memory and cpu consumption
-                session.setMapMsgIdFromTransationId(false);
-
-                /* Open the MSRP session */
-                msrpMgr.openMsrpSession(ImageTransferSession.DEFAULT_SO_TIMEOUT);
-
-                /* Send an empty packet */
-                sendEmptyDataChunk();
-            }
-
             // Create a 200 OK response
             if (mLogger.isActivated()) {
                 mLogger.info("Send 200 OK");
@@ -302,7 +287,33 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 
             // Send response
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
-                    .sendSipMessageAndWait(resp);
+                    .sendSipMessage(resp);
+
+            // Create the MSRP server session
+            if (localSetup.equals("passive")) {
+                // Passive mode: client wait a connection
+                // Changed by Deutsche Telekom
+                MsrpSession session = msrpMgr.createMsrpServerSession(remotePath, this);
+                // Do not use right now the mapping to do not increase memory and cpu consumption
+                session.setMapMsgIdFromTransationId(false);
+
+                /* Open the MSRP session */
+                msrpMgr.openMsrpSession(ImageTransferSession.DEFAULT_SO_TIMEOUT);
+                
+                /* Send an empty packet */
+                sendEmptyDataChunk();
+            }
+            
+            /* wait a response */
+            getImsService().getImsModule().getSipManager().waitResponse(ctx);
+           
+            // Test if the session should be interrupted
+            if (isInterrupted()) {
+                if (mLogger.isActivated()) {
+                    mLogger.debug("Session has been interrupted: end of processing");
+                }
+                return;
+            }
 
             // Analyze the received response
             if (ctx.isSipAck()) {
@@ -320,7 +331,6 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                     session.setMapMsgIdFromTransationId(false);
                     /* Open the MSRP session */
                     msrpMgr.openMsrpSession(ImageTransferSession.DEFAULT_SO_TIMEOUT);
-
                     /* Send an empty packet */
                     sendEmptyDataChunk();
                 }

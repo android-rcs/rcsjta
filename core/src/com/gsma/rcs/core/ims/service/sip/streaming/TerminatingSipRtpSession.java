@@ -182,14 +182,6 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                 return;
             }
 
-            // Test if the session should be interrupted
-            if (isInterrupted()) {
-                if (logActivated) {
-                    sLogger.debug("Session has been interrupted: end of processing");
-                }
-                return;
-            }
-
             // Prepare Media Session
             prepareMediaSession();
 
@@ -205,7 +197,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
             // Send response
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
                     .sendSipMessageAndWait(resp);
-
+            
             // Analyze the received response
             if (ctx.isSipAck()) {
                 // ACK received

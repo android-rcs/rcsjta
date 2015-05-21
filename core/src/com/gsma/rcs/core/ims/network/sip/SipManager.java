@@ -168,7 +168,7 @@ public class SipManager {
     }
 
     /**
-     * Send a SIP message and create a context to wait a response
+     * Send a SIP message and wait a response
      * 
      * @param message SIP message
      * @return Transaction context
@@ -181,7 +181,48 @@ public class SipManager {
     }
 
     /**
-     * Send a SIP message and create a context to wait for response
+     * Send a SIP message and create a context to wait a response
+     * 
+     * @param message SIP message
+     * @return Transaction context
+     * @throws SipPayloadException
+     * @throws SipNetworkException
+     */
+    public SipTransactionContext sendSipMessage(SipMessage message)
+            throws SipPayloadException, SipNetworkException {
+        return sendSipMessage(message, SipManager.TIMEOUT);
+    }
+    
+    /**
+     * Send a SIP message and wait a response
+     * 
+     * @param message SIP message
+     * @param timeout SIP timeout in milliseconds
+     * @return Transaction context
+     * @throws SipPayloadException
+     * @throws SipNetworkException
+     */
+    public SipTransactionContext sendSipMessageAndWait(SipMessage message, long timeout)
+            throws SipPayloadException, SipNetworkException {
+        return sendSipMessageAndWait(message, timeout, null);
+    }
+    
+    /**
+     * Send a SIP message and create a context to wait a response
+     * 
+     * @param message SIP message
+     * @param timeout SIP timeout in milliseconds
+     * @return Transaction context
+     * @throws SipPayloadException
+     * @throws SipNetworkException
+     */
+    public SipTransactionContext sendSipMessage(SipMessage message, long timeout)
+            throws SipPayloadException, SipNetworkException {
+        return sendSipMessage(message, timeout, null);
+    }    
+    
+    /**
+     * Send a SIP message and wait a response
      * 
      * @param message
      * @param timeout in milliseconds
@@ -259,17 +300,99 @@ public class SipManager {
     /**
      * Send a SIP message and create a context to wait a response
      * 
-     * @param message SIP message
-     * @param timeout SIP timeout in milliseconds
-     * @return Transaction context
+     * @param message
+     * @param timeout in milliseconds
+     * @param callback callback to handle provisional response
+     * @return SIP transaction context
      * @throws SipPayloadException
      * @throws SipNetworkException
      */
-    public SipTransactionContext sendSipMessageAndWait(SipMessage message, long timeout)
-            throws SipPayloadException, SipNetworkException {
-        return sendSipMessageAndWait(message, timeout, null);
+    public SipTransactionContext sendSipMessage(SipMessage message, long timeout,
+            SipTransactionContext.INotifySipProvisionalResponse callback)
+            throws SipNetworkException, SipPayloadException {
+        SipTransactionContext ctx = sipstack.sendSipMessageAndWait(message, callback);
+        return ctx;
     }
 
+    /**
+     * Wait a response
+     * 
+     * @param ctx SIP transaction context
+     */
+    public void waitResponse(SipTransactionContext ctx) {
+        ctx.waitResponse(SipManager.TIMEOUT);
+    }
+    
+    /**
+     * Wait a response
+     * 
+     * @param ctx SIP transaction context
+     * @param timeout in milliseconds
+     */
+    public void waitResponse(SipTransactionContext ctx, long timeout) {
+        ctx.waitResponse(timeout);
+
+        SipMessage message = ctx.getMessageReceived();
+        if (!(message instanceof SipRequest) || !ctx.isSipResponse()) {
+            return;
+        }
+        String method = ((SipRequest) message).getMethod();
+        SipResponse response = ctx.getSipResponse();
+        if (response == null) {
+            return;
+
+        }
+        /* Analyze the received response */
+        if (!Request.REGISTER.equals(method)) {
+            /* Check if not registered and warning header */
+            WarningHeader warn = (WarningHeader) response.getHeader(WarningHeader.NAME);
+            if (Response.FORBIDDEN == ctx.getStatusCode() && warn == null) {
+                /* Launch new registration */
+                mNetworkInterface.getRegistrationManager().restart();
+            }
+        }
+        if (!Request.INVITE.equals(method) && !Request.REGISTER.equals(method)) {
+            return;
+
+        }
+
+        KeepAliveManager keepAliveManager = mNetworkInterface.getSipManager().getSipStack()
+                .getKeepAliveManager();
+        if (keepAliveManager == null) {
+            return;
+
+        }
+
+        /* Message is a response to INVITE or REGISTER: analyze "keep" flag of "Via" header */
+        ListIterator<ViaHeader> iterator = response.getViaHeaders();
+        if (!iterator.hasNext()) {
+            keepAliveManager.setPeriod(mRcsSettings.getSipKeepAlivePeriod());
+            return;
+        }
+        ViaHeader respViaHeader = iterator.next();
+        String keepStr = respViaHeader.getParameter("keep");
+        if (keepStr == null) {
+            keepAliveManager.setPeriod(mRcsSettings.getSipKeepAlivePeriod());
+            return;
+        }
+        try {
+            long viaKeep = Integer.parseInt(keepStr) * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
+            if (viaKeep > 0) {
+                keepAliveManager.setPeriod(viaKeep);
+            } else {
+                /* Set Default Value fetched from provisioning settings */
+                keepAliveManager.setPeriod(mRcsSettings.getSipKeepAlivePeriod());
+            }
+        } catch (NumberFormatException e) {
+            /*
+             * If "keep" value is invalid or not present, Set Default Value fetched from
+             * provisioning settings
+             */
+            keepAliveManager.setPeriod(mRcsSettings.getSipKeepAlivePeriod());
+        }
+        return;
+    }
+    
     /**
      * Send a SIP response
      * 

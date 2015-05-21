@@ -170,6 +170,19 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
                 return;
             }
 
+            /* Create a 200 OK response */
+            if (logActivated) {
+                mLogger.info("Send 200 OK");
+            }
+            SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
+                    InstantMessagingService.CHAT_FEATURE_TAGS, sdp);
+
+            getDialogPath().sigEstablished();
+
+            /* Send response */
+            SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
+                    .sendSipMessage(resp);
+
             // Create the MSRP server session
             if (localSetup.equals("passive")) {
                 // Passive mode: client wait a connection
@@ -182,21 +195,18 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
                  * so enable the active endpoint to initiate a MSRP connection.
                  */
                 sendEmptyDataChunk();
-
             }
 
-            /* Create a 200 OK response */
-            if (logActivated) {
-                mLogger.info("Send 200 OK");
+            /* wait a response */
+            getImsService().getImsModule().getSipManager().waitResponse(ctx);
+            
+            // Test if the session should be interrupted
+            if (isInterrupted()) {
+                if (mLogger.isActivated()) {
+                    mLogger.debug("Session has been interrupted: end of processing");
+                }
+                return;
             }
-            SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
-                    InstantMessagingService.CHAT_FEATURE_TAGS, sdp);
-
-            getDialogPath().sigEstablished();
-
-            /* Send response */
-            SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
-                    .sendSipMessageAndWait(resp);
 
             /* Analyze the received response */
             if (ctx.isSipAck()) {
