@@ -48,7 +48,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.media.RingtoneManager;
 import android.os.Handler;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -568,6 +567,7 @@ public class ConnectionManager {
         String title = mContext.getString(R.string.notification_title_rcs_service);
         /* Create notification */
         Notification notif = buildImsConnectionNotification(contentIntent, title, label, iconId);
+        notif.flags = Notification.FLAG_NO_CLEAR | Notification.FLAG_FOREGROUND_SERVICE;
         /* Send notification */
         NotificationManager notificationManager = (NotificationManager) mContext
                 .getSystemService(Context.NOTIFICATION_SERVICE);
@@ -592,8 +592,6 @@ public class ConnectionManager {
         notif.setWhen(System.currentTimeMillis());
         notif.setAutoCancel(false);
         notif.setOnlyAlertOnce(true);
-        notif.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
-        notif.setDefaults(Notification.DEFAULT_VIBRATE);
         notif.setContentTitle(title);
         notif.setContentText(message);
         return notif.build();
