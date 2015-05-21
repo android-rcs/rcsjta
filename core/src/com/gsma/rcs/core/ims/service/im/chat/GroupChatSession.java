@@ -329,36 +329,14 @@ public abstract class GroupChatSession extends ChatSession {
     }
 
     /**
-     * Request capabilities to contact
-     * 
-     * @param contact
-     */
-    private void requestContactCapabilities(String contact) {
-        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(contact);
-        if (number != null) {
-            ContactId remote = ContactUtil.createContactIdFromValidatedData(number);
-            mImsModule.getCapabilityService().requestContactCapabilities(remote);
-        } else {
-            if (sLogger.isActivated()) {
-                sLogger.debug("Failed to request capabilities: invalid contact '" + contact + "'");
-            }
-        }
-    }
-
-    /**
      * Receive BYE request
      * 
      * @param bye BYE request
      */
     public void receiveBye(SipRequest bye) {
-        // Stop conference subscription
         mConferenceSubscriber.terminate();
 
-        // Receive BYE request
         super.receiveBye(bye);
-
-        // Request capabilities if remote contact is valid
-        requestContactCapabilities(getDialogPath().getRemoteParty());
     }
 
     /**
@@ -367,13 +345,9 @@ public abstract class GroupChatSession extends ChatSession {
      * @param cancel CANCEL request
      */
     public void receiveCancel(SipRequest cancel) {
-        // Stop conference subscription
         mConferenceSubscriber.terminate();
 
         super.receiveCancel(cancel);
-
-        // Request capabilities if remote contact is valid
-        requestContactCapabilities(getDialogPath().getRemoteParty());
     }
 
     /**

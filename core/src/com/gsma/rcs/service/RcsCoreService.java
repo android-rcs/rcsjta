@@ -551,6 +551,9 @@ public class RcsCoreService extends Service implements CoreListener {
         if (mChatApi != null) {
             mChatApi.notifyRegistration();
         }
+        if (mContactApi != null) {
+            mContactApi.notifyRegistration();
+        }
         if (mFtApi != null) {
             mFtApi.notifyRegistration();
         }
@@ -582,6 +585,9 @@ public class RcsCoreService extends Service implements CoreListener {
         }
         if (mChatApi != null) {
             mChatApi.notifyUnRegistration(reason);
+        }
+        if (mContactApi != null) {
+            mContactApi.notifyUnRegistration(reason);
         }
         if (mFtApi != null) {
             mFtApi.notifyUnRegistration(reason);

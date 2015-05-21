@@ -31,12 +31,14 @@ import com.orangelabs.rcs.ri.service.TestServiceApi;
 import com.orangelabs.rcs.ri.sharing.TestSharingApi;
 import com.orangelabs.rcs.ri.upload.InitiateFileUpload;
 import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.ListActivity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -48,9 +50,8 @@ import android.widget.ListView;
  */
 public class RI extends ListActivity {
 
-    /**
-     * A locker to exit only once
-     */
+    private static final String LOGTAG = LogUtils.getTag(RI.class.getSimpleName());
+
     private LockAccess mExitOnce = new LockAccess();
 
     @Override
@@ -73,7 +74,11 @@ public class RI extends ListActivity {
 
         ContactUtil contactUtil = ContactUtil.getInstance(this);
         try {
-            contactUtil.getMyCountryCode();
+            /* The country code must be read to check that ContactUtil is ready to be used */
+            String cc = contactUtil.getMyCountryCode();
+            if (LogUtils.isActive) {
+                Log.w(LOGTAG, "Country code is '" + cc + "'");
+            }
         } catch (RcsPermissionDeniedException e) {
             /* We should not be allowed to continue if this exception occurs */
             Utils.showMessageAndExit(this, getString(R.string.error_api_permission_denied),
