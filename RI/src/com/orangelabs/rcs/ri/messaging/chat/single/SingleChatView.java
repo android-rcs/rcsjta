@@ -227,14 +227,17 @@ public class SingleChatView extends ChatView {
             if (!newContact.equals(mContact) || mChat == null) {
                 boolean firstLoad = (mChat == null);
                 boolean switchConversation = (mContact != null && !newContact.equals(mContact));
-                // Save contact
+                /* Save contact */
                 mContact = newContact;
-                // Open chat
+                /*
+                 * Open chat so that if the parameter IM SESSION START is 0 then the session is
+                 * accepted now.
+                 */
                 mChat = chatService.getOneToOneChat(mContact);
                 if (firstLoad) {
-                    mChat.openChat();
-                    // Initialize the Loader with id '1' and callbacks
-                    // 'mCallbacks'.
+                    /*
+                     * Initialize the Loader with id '1' and callbacks 'mCallbacks'.
+                     */
                     getSupportLoaderManager().initLoader(LOADER_ID, null, this);
                 } else {
                     if (switchConversation) {
@@ -243,6 +246,13 @@ public class SingleChatView extends ChatView {
                     }
                 }
             }
+            /*
+             * Open chat to accept session if the parameter IM SESSION START is 0. Client
+             * application is not aware of the one to one chat session state nor of the IM session
+             * start mode so we call the method systematically.
+             */
+            mChat.openChat();
+
             contactOnForeground = mContact;
             // Set activity title with display name
             String from = RcsDisplayName.getInstance(this).getDisplayName(mContact);

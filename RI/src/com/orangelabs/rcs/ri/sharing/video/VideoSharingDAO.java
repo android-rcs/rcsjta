@@ -18,6 +18,14 @@
 
 package com.orangelabs.rcs.ri.sharing.video;
 
+import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.sharing.video.VideoSharing;
+import com.gsma.services.rcs.sharing.video.VideoSharingLog;
+
+import com.orangelabs.rcs.ri.utils.ContactUtil;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
@@ -26,15 +34,6 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
-
-import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.sharing.video.VideoSharing;
-import com.gsma.services.rcs.sharing.video.VideoSharingLog;
-
-import com.orangelabs.rcs.ri.sharing.image.ImageSharingDAO;
-import com.orangelabs.rcs.ri.utils.ContactUtil;
-import com.orangelabs.rcs.ri.utils.LogUtils;
 
 /**
  * Video Sharing Data Object
@@ -65,7 +64,7 @@ public class VideoSharingDAO implements Parcelable {
 
     private static ContentResolver sContentResolver;
 
-    private static final String LOGTAG = LogUtils.getTag(ImageSharingDAO.class.getSimpleName());
+    private static final String LOGTAG = LogUtils.getTag(VideoSharingDAO.class.getSimpleName());
 
     /**
      * Constructor

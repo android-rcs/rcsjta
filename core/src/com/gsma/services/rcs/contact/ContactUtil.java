@@ -526,7 +526,7 @@ public class ContactUtil {
     /**
      * Checks if my country code is defined.
      * 
-     * @return True if contact utility is ready.
+     * @return True if my country code is defined.
      */
     public boolean isMyCountryCodeDefined() {
         /*
