@@ -558,13 +558,10 @@ public class SipUtils {
         if (index == -1) {
             return null;
         }
-        try {
-            int begin = index + 4;
-            int end = msg.indexOf(SipUtils.CRLF, index + 2);
-            return msg.substring(begin, end).trim();
-        } catch (Exception e) {
-            return null;
-        }
+
+        int begin = index + 4;
+        int end = msg.indexOf(SipUtils.CRLF, index + 2);
+        return msg.substring(begin, end).trim();
     }
 
     /**

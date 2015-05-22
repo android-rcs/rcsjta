@@ -155,16 +155,9 @@ public class SipManager {
             // Already closed
             return;
         }
-
-        try {
-            // Close the SIP stack
-            sipstack.close();
-            sipstack = null;
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Can't close SIP stack properly", e);
-            }
-        }
+        // Close the SIP stack
+        sipstack.close();
+        sipstack = null;
     }
 
     /**

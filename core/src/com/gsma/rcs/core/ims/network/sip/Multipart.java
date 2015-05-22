@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.network.sip;
@@ -52,31 +56,24 @@ public class Multipart {
                 if ((trimmedFragment.length() > 0) && !BOUNDARY_DELIMITER.equals(trimmedFragment)) {
                     int begin = fragment.indexOf(SipUtils.CRLF + SipUtils.CRLF);
                     if (begin != -1) {
-                        try {
-                            // Extract content type
-                            String type = fragment.substring(0, begin).trim();
+                        /* Extract content type */
+                        String type = fragment.substring(0, begin).trim();
 
-                            // Extract content part
-                            String part = fragment.substring(begin).trim();
+                        /* Extract content part */
+                        String part = fragment.substring(begin).trim();
 
-                            // Extract MIME type from content type
-                            int beginType = type.indexOf(ContentTypeHeader.NAME);
-                            int endType = type.indexOf(SipUtils.CRLF, beginType);
-                            String mime;
-                            if (endType == -1) {
-                                mime = type.substring(
-                                        beginType + ContentTypeHeader.NAME.length() + 1).trim();
-                            } else {
-                                mime = type.substring(
-                                        beginType + ContentTypeHeader.NAME.length() + 1, endType)
-                                        .trim();
-                            }
-
-                            // Add part in lowercase
-                            parts.put(mime.toLowerCase(), part);
-                        } catch (Exception e) {
-                            // Nothing to do
+                        /* Extract MIME type from content type */
+                        int beginType = type.indexOf(ContentTypeHeader.NAME);
+                        int endType = type.indexOf(SipUtils.CRLF, beginType);
+                        String mime;
+                        if (endType == -1) {
+                            mime = type.substring(beginType + ContentTypeHeader.NAME.length() + 1)
+                                    .trim();
+                        } else {
+                            mime = type.substring(beginType + ContentTypeHeader.NAME.length() + 1,
+                                    endType).trim();
                         }
+                        parts.put(mime.toLowerCase(), part);
                     }
                 }
             }
