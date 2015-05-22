@@ -38,8 +38,8 @@ public class Intents {
         public static final String ACTION_GET_ACTIVATION_MODE_CHANGEABLE = "com.gsma.services.rcs.action.GET_ACTIVATION_MODE_CHANGEABLE";
 
         /**
-         * Used as an boolean extra field in ACTION_GET_ACTIVATION_MODE_CHANGEABLE intents to
-         * request the activation mode changeable.
+         * Used as an boolean extra field in ACTION_GET_ACTIVATION_MODE_CHANGEABLE intent to request
+         * the activation mode changeable.
          */
         public static final String EXTRA_GET_ACTIVATION_MODE_CHANGEABLE = "get_activation_mode_changeable";
 
@@ -49,7 +49,7 @@ public class Intents {
         public static final String ACTION_GET_ACTIVATION_MODE = "com.gsma.services.rcs.action.GET_ACTIVATION_MODE";
 
         /**
-         * Used as an boolean extra field in ACTION_GET_ACTIVATION_MODE intents to request the
+         * Used as an boolean extra field in ACTION_GET_ACTIVATION_MODE intent to request the
          * activation mode.
          */
         public static final String EXTRA_GET_ACTIVATION_MODE = "get_activation_mode";
@@ -60,8 +60,8 @@ public class Intents {
         public static final String ACTION_SET_ACTIVATION_MODE = "com.gsma.services.rcs.action.SET_ACTIVATION_MODE";
 
         /**
-         * Used as an boolean extra field in ACTION_SET_ACTIVATION_MODE intents to set the
-         * activation mode.
+         * Used as an boolean extra field in ACTION_SET_ACTIVATION_MODE intent to set the activation
+         * mode.
          */
         public static final String EXTRA_SET_ACTIVATION_MODE = "set_activation_mode";
 
@@ -95,6 +95,17 @@ public class Intents {
          * class name
          */
         public static final String EXTRA_GET_COMPATIBILITY_SERVICE = "get_compatibility_service";
+
+        /**
+         * Intent to check if RCS service is started.
+         */
+        public static final String ACTION_IS_SERVICE_STARTED = "com.gsma.services.rcs.action.IS_SERVICE_STARTED";
+
+        /**
+         * Used as an boolean extra field in ACTION_IS_SERVICE_UP intent to reply if RCS service is
+         * started.
+         */
+        public static final String EXTRA_IS_SERVICE_STARTED = "is_service_started";
 
         private Service() {
         }

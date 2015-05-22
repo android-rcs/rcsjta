@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.service;
 
+import com.gsma.rcs.core.Core;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.EnableRcseSwitch;
@@ -224,6 +225,18 @@ public class RcsServiceControlReceiver extends BroadcastReceiver {
                 sLogger.debug("Compatible " + servicename + ":" + compatible);
             }
             results.putBoolean(Intents.Service.EXTRA_GET_COMPATIBILITY_RESPONSE, compatible);
+            setResultExtras(results);
+        } else if (Intents.Service.ACTION_IS_SERVICE_STARTED.equals(action)) {
+            Bundle results = getResultExtras(true);
+            if (results == null) {
+                return;
+            }
+            Core core = Core.getInstance();
+            boolean started = core != null && core.isStarted();
+            if (sLogger.isActivated()) {
+                sLogger.debug("Service started ".concat(Boolean.toString(started)));
+            }
+            results.putBoolean(Intents.Service.EXTRA_IS_SERVICE_STARTED, started);
             setResultExtras(results);
         }
     }

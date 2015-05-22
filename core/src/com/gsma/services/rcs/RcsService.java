@@ -38,7 +38,7 @@ import java.util.WeakHashMap;
  */
 public abstract class RcsService {
     /**
-     * Action to broadcast when RCS service is up.
+     * Action broadcasted when RCS service is up.
      */
     public static final String ACTION_SERVICE_UP = "com.gsma.services.rcs.action.SERVICE_UP";
 

@@ -366,4 +366,24 @@ public class RcsServiceControl {
                     + "' failed in timeout!", e);
         }
     }
+    
+    /**
+     * Returns true if the RCS stack is started.
+     * 
+     * @return boolean true if the RCS stack is started.
+     * @throws RcsGenericException
+     */
+    public boolean isServiceStarted() throws RcsGenericException {
+        Log.d(LOG_TAG, "Query service started");
+        try {
+            Bundle resultExtraData = queryRcsStackByIntent(Intents.Service.ACTION_IS_SERVICE_STARTED);
+            if (resultExtraData == null) {
+                // No response
+                throw new RcsGenericException("Failed to query service started!");
+            }
+            return resultExtraData.getBoolean(Intents.Service.EXTRA_IS_SERVICE_STARTED, false);
+        } catch (RcsGenericException e) {
+            throw new RcsGenericException("Query service started failed in timeout!", e);
+        }
+    }
 }

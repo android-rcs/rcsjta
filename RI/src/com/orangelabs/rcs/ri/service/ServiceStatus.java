@@ -56,11 +56,13 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
 
     private RcsServiceControl mRcsServiceControl;
 
-    private TextView mServiceBindingStatus;
+    private TextView mServiceBound;
 
-    private TextView mServiceActivation;
+    private TextView mServiceActivated;
 
     private CheckBox mServiceActivationRefresh;
+
+    private TextView mServiceStarted;
 
     private static final String LOGTAG = LogUtils.getTag(ServiceStatus.class.getSimpleName());
 
@@ -73,15 +75,15 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.service_status);
 
-        mServiceBindingStatus = (TextView) findViewById(R.id.service_bound);
-        mServiceActivation = (TextView) findViewById(R.id.service_activated);
-        mServiceActivationRefresh = (CheckBox) findViewById(R.id.service_refresh_activation);
+        mServiceBound = (TextView) findViewById(R.id.service_bound);
+        mServiceActivated = (TextView) findViewById(R.id.service_activated);
+        mServiceStarted = (TextView) findViewById(R.id.service_started);
+        mServiceActivationRefresh = (CheckBox) findViewById(R.id.service_refresh_all);
         mServiceActivationRefresh.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                //for (int i = 0; i < 1000; i++) {
-                    displayServiceActivation();
-                //}
+                displayServiceActivation();
+                displayServiceStarted();
             }
 
         });
@@ -89,8 +91,9 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
         // Display service status by default
         displayServiceBinding(false);
 
-        // Display service status by default
         displayServiceActivation();
+        
+        displayServiceStarted();
 
         // Register service up event listener
         IntentFilter intentFilter = new IntentFilter();
@@ -111,10 +114,19 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
 
     private void displayServiceActivation() {
         try {
-            mServiceActivation.setText(Boolean.toString(mRcsServiceControl.isActivated()));
+            mServiceActivated.setText(Boolean.toString(mRcsServiceControl.isActivated()));
         } catch (RcsGenericException e) {
             Log.e(LOGTAG, "Failed to read service activation status", e);
-            mServiceActivation.setText(getString(R.string.error_service_activated));
+            mServiceActivated.setText(getString(R.string.error_service_activated));
+        }
+    }
+
+    private void displayServiceStarted() {
+        try {
+            mServiceStarted.setText(Boolean.toString(mRcsServiceControl.isServiceStarted()));
+        } catch (RcsGenericException e) {
+            Log.e(LOGTAG, "Failed to read service started", e);
+            mServiceActivated.setText(getString(R.string.error_service_started));
         }
     }
 
@@ -141,7 +153,7 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
      * API may be used.
      */
     public void onServiceConnected() {
-        // Display service status
+        // Display service binding status
         displayServiceBinding(true);
     }
 
@@ -152,7 +164,7 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
      * @param error Error
      */
     public void onServiceDisconnected(ReasonCode error) {
-        // Display service status
+        // Display service binding status
         displayServiceBinding(false);
     }
 
@@ -162,7 +174,7 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
      * @param status Status
      */
     private void displayServiceBinding(boolean status) {
-        mServiceBindingStatus.setText(String.valueOf(status));
+        mServiceBound.setText(String.valueOf(status));
     }
 
     /**
