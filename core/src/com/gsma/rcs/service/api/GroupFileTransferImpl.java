@@ -37,6 +37,7 @@ import com.gsma.rcs.provider.messaging.FileTransferStateAndReasonCode;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
+import com.gsma.rcs.service.broadcaster.GroupFileTransferBroadcaster;
 import com.gsma.rcs.service.broadcaster.IGroupFileTransferBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService.Direction;
@@ -124,7 +125,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
      * @param contactManager
      */
     public GroupFileTransferImpl(String transferId, String chatId,
-            IGroupFileTransferBroadcaster broadcaster, InstantMessagingService imService,
+            GroupFileTransferBroadcaster broadcaster, InstantMessagingService imService,
             FileTransferPersistedStorageAccessor storageAccessor,
             FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings, Core core,
             MessagingLog messagingLog, ContactManager contactManager) {
@@ -997,6 +998,17 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
+    /**
+     * Handle file transfer message dequeued
+     */
+    public void handleFileTransferMessageDequeued() {
+        synchronized (mLock) {
+            mFileTransferService.removeGroupFileTransfer(mFileTransferId);
+            setStateAndReasonCode(State.TRANSFERRED, ReasonCode.UNSPECIFIED);
+        }
+        mCore.getListener().tryToDequeueFileTransfers(mImService);
+    }
+
     /*
      * TODO : Fix reasoncode mapping in the switch.
      */
@@ -1037,7 +1049,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             sLogger.info("Session rejected; reasonCode=" + reasonCode + ".");
         }
         synchronized (mLock) {
-            mFileTransferService.removeFileTransfer(mFileTransferId);
+            mFileTransferService.removeGroupFileTransfer(mFileTransferId);
 
             setStateAndReasonCode(State.REJECTED, reasonCode);
         }
@@ -1062,7 +1074,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                     .toString());
         }
         synchronized (mLock) {
-            mFileTransferService.removeFileTransfer(mFileTransferId);
+            mFileTransferService.removeGroupFileTransfer(mFileTransferId);
             switch (reason) {
                 case TERMINATION_BY_TIMEOUT:
                 case TERMINATION_BY_SYSTEM:
@@ -1104,7 +1116,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             sLogger.info("Session terminated by remote");
         }
         synchronized (mLock) {
-            mFileTransferService.removeFileTransfer(mFileTransferId);
+            mFileTransferService.removeGroupFileTransfer(mFileTransferId);
             /*
              * TODO : Fix sending of SIP BYE by sender once transfer is completed and media session
              * is closed. Then this check of state can be removed. Also need to check if it is
@@ -1131,7 +1143,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         State state = stateAndReasonCode.getState();
         ReasonCode reasonCode = stateAndReasonCode.getReasonCode();
         synchronized (mLock) {
-            mFileTransferService.removeFileTransfer(mFileTransferId);
+            mFileTransferService.removeGroupFileTransfer(mFileTransferId);
             setStateAndReasonCode(state, reasonCode);
         }
         mCore.getListener().tryToDequeueFileTransfers(mImService);
@@ -1181,7 +1193,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             sLogger.info("Content transferred");
         }
         synchronized (mLock) {
-            mFileTransferService.removeFileTransfer(mFileTransferId);
+            mFileTransferService.removeGroupFileTransfer(mFileTransferId);
             long deliveryExpiration = 0;
             if (mPersistentStorage.setTransferred(content, fileExpiration, fileIconExpiration,
                     deliveryExpiration)) {
@@ -1214,7 +1226,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             sLogger.info("Transfer paused by system");
         }
         synchronized (mLock) {
-            mFileTransferService.removeFileTransfer(mFileTransferId);
+            mFileTransferService.removeGroupFileTransfer(mFileTransferId);
             setStateAndReasonCode(State.PAUSED, ReasonCode.PAUSED_BY_SYSTEM);
         }
     }

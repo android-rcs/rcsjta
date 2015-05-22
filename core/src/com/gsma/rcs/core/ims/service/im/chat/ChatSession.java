@@ -475,8 +475,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param msgId Message ID
      * @param data Received data
      * @param mimeType Data mime-type
+     * @throws MsrpException
      */
-    public void msrpDataReceived(String msgId, byte[] data, String mimeType) {
+    public void msrpDataReceived(String msgId, byte[] data, String mimeType) throws MsrpException {
         if (sLogger.isActivated()) {
             sLogger.info("Data received (type " + mimeType + ")");
         }
@@ -869,23 +870,14 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param data Data
      * @param mime MIME type
      * @param typeMsrpChunk Type of MSRP chunk
-     * @return Boolean result
+     * @throws MsrpException
      */
-    public boolean sendDataChunks(String msgId, String data, String mime,
-            TypeMsrpChunk typeMsrpChunk) {
-        // TODO Change exception handling
-        try {
-            byte[] bytes = data.getBytes(UTF8);
-            ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
-            mMsrpMgr.sendChunks(stream, msgId, mime, bytes.length, typeMsrpChunk);
-            return true;
-        } catch (Exception e) {
-            // Error
-            if (sLogger.isActivated()) {
-                sLogger.error("Problem while sending data chunks", e);
-            }
-            return false;
-        }
+    public void sendDataChunks(String msgId, String data, String mime, TypeMsrpChunk typeMsrpChunk)
+            throws MsrpException {
+        byte[] bytes = data.getBytes(UTF8);
+        ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
+        mMsrpMgr.sendChunks(stream, msgId, mime, bytes.length, typeMsrpChunk);
+
     }
 
     /**
@@ -913,15 +905,17 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * Send a chat message
      * 
      * @param msg Chat message
+     * @throws MsrpException
      */
-    public abstract void sendChatMessage(ChatMessage msg);
+    public abstract void sendChatMessage(ChatMessage msg) throws MsrpException;
 
     /**
      * Send is composing status
      * 
      * @param status Status
+     * @throws MsrpException
      */
-    public abstract boolean sendIsComposingStatus(boolean status);
+    public abstract void sendIsComposingStatus(boolean status) throws MsrpException;
 
     /**
      * Send message delivery status via MSRP
@@ -930,9 +924,10 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param msgId Message ID
      * @param status Status
      * @param timestamp Timestamp sent in payload for IMDN datetime
+     * @throws MsrpException
      */
     public void sendMsrpMessageDeliveryStatus(ContactId contact, String msgId, String status,
-            long timestamp) {
+            long timestamp) throws MsrpException {
         // Send status in CPIM + IMDN headers
         String from = ChatUtils.ANOMYNOUS_URI;
         String to = ChatUtils.ANOMYNOUS_URI;
@@ -947,9 +942,10 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param msgId Message ID
      * @param status Status
      * @param timestamp Timestamp sent in payload for IMDN datetime
+     * @throws MsrpException
      */
     public void sendMsrpMessageDeliveryStatus(String fromUri, String toUri, String msgId,
-            String status, long timestamp) {
+            String status, long timestamp) throws MsrpException {
 
         if (sLogger.isActivated()) {
             sLogger.debug("Send delivery status " + status + " for message " + msgId);
@@ -971,9 +967,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         }
 
         // Send data
-        boolean result = sendDataChunks(IdGenerator.generateMessageID(), content,
-                CpimMessage.MIME_TYPE, typeMsrpChunk);
-        if (result && ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
+        sendDataChunks(IdGenerator.generateMessageID(), content, CpimMessage.MIME_TYPE,
+                typeMsrpChunk);
+        if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
             if (mMessagingLog.isFileTransfer(msgId)) {
                 // TODO update file transfer status
             } else {

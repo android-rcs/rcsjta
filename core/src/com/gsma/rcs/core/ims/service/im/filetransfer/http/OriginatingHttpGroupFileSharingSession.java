@@ -27,6 +27,7 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
@@ -169,8 +170,10 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 
     /**
      * Send the file transfer information
+     * 
+     * @throws MsrpException
      */
-    private void sendFileTransferInfo() {
+    private void sendFileTransferInfo() throws MsrpException {
         String from = ImsModule.IMS_USER_PROFILE.getPublicAddress();
         String networkContent;
         String msgId = getFileTransferId();
@@ -196,8 +199,9 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
      * Prepare to send the info to terminating side
      * 
      * @param result byte[] which contains the result of the 200 OK from the content server
+     * @throws MsrpException
      */
-    private void sendResultToContact(byte[] result) {
+    private void sendResultToContact(byte[] result) throws MsrpException {
         if (mUploadManager.isCancelled()) {
             return;
         }

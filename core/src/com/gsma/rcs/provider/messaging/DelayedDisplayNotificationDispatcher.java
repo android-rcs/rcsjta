@@ -16,6 +16,7 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.service.api.ChatServiceImpl;
@@ -87,6 +88,11 @@ public class DelayedDisplayNotificationDispatcher implements Runnable {
                             timestampDisplayed, chatId);
                 }
             }
+        } catch (MsrpException e) {
+            /*
+             * Purposely ignoring exception since this method only makes an attempt to send report
+             * and in case of failure the report will be sent later as postponed delivery report.
+             */
         } finally {
             if (cursor != null) {
                 cursor.close();

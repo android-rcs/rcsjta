@@ -547,11 +547,9 @@ public class MsrpSession {
                 // Notify event listener
                 msrpEventListener.msrpDataTransfered(msgId);
             }
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Send chunk failed", e);
-            }
-            throw new MsrpException(e.getMessage());
+        } catch (IOException e) {
+            throw new MsrpException("Send chunk failed for msgId : ".concat(msgId), e);
+
         } finally {
             CloseableUtils.close(inputStream);
         }

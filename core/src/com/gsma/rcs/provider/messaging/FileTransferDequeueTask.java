@@ -81,8 +81,8 @@ public class FileTransferDequeueTask extends DequeueTask {
                             }
                         } else {
                             if (isAllowedToDequeueGroupFileTransfer(chatId)) {
-                                mFileTransferService.dequeueGroupFileTransfer(fileTransferId,
-                                        content, fileIconContent, chatId);
+                                mFileTransferService.dequeueGroupFileTransfer(chatId,
+                                        fileTransferId, content, fileIconContent);
                             }
                         }
                     } catch (SecurityException e) {

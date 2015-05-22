@@ -23,6 +23,7 @@
 package com.gsma.rcs.core.ims.service.im.chat;
 
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
@@ -128,32 +129,30 @@ public abstract class OneToOneChatSession extends ChatSession {
         String networkContent;
         String mimeType = msg.getMimeType();
         ImdnManager imdnManager = getImdnManager();
-        if (imdnManager.isRequestOneToOneDeliveryDisplayedReportsEnabled()) {
-            networkContent = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, msg.getContent(),
-                    mimeType, msg.getTimestampSent());
-        } else if (imdnManager.isDeliveryDeliveredReportsEnabled()) {
-            networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from, to, msgId,
-                    msg.getContent(), mimeType, msg.getTimestampSent());
-        } else {
-            networkContent = ChatUtils.buildCpimMessage(from, to, msg.getContent(), mimeType,
-                    msg.getTimestampSent());
-        }
+        try {
+            if (imdnManager.isRequestOneToOneDeliveryDisplayedReportsEnabled()) {
+                networkContent = ChatUtils.buildCpimMessageWithImdn(from, to, msgId,
+                        msg.getContent(), mimeType, msg.getTimestampSent());
+            } else if (imdnManager.isDeliveryDeliveredReportsEnabled()) {
+                networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from, to, msgId,
+                        msg.getContent(), mimeType, msg.getTimestampSent());
+            } else {
+                networkContent = ChatUtils.buildCpimMessage(from, to, msg.getContent(), mimeType,
+                        msg.getTimestampSent());
+            }
 
-        boolean sendOperationSucceeded = false;
-        if (ChatUtils.isGeolocType(mimeType)) {
-            sendOperationSucceeded = sendDataChunks(IdGenerator.generateMessageID(),
-                    networkContent, CpimMessage.MIME_TYPE, TypeMsrpChunk.GeoLocation);
-        } else {
-            sendOperationSucceeded = sendDataChunks(IdGenerator.generateMessageID(),
-                    networkContent, CpimMessage.MIME_TYPE, TypeMsrpChunk.TextMessage);
-        }
-
-        if (sendOperationSucceeded) {
+            if (ChatUtils.isGeolocType(mimeType)) {
+                sendDataChunks(IdGenerator.generateMessageID(), networkContent,
+                        CpimMessage.MIME_TYPE, TypeMsrpChunk.GeoLocation);
+            } else {
+                sendDataChunks(IdGenerator.generateMessageID(), networkContent,
+                        CpimMessage.MIME_TYPE, TypeMsrpChunk.TextMessage);
+            }
             for (ImsSessionListener listener : getListeners()) {
                 ((ChatSessionListener) listener).handleMessageSent(msgId,
                         ChatUtils.networkMimeTypeToApiMimeType(mimeType));
             }
-        } else {
+        } catch (MsrpException e) {
             for (ImsSessionListener listener : getListeners()) {
                 ((ChatSessionListener) listener).handleMessageFailedSend(msgId,
                         ChatUtils.networkMimeTypeToApiMimeType(mimeType));
@@ -165,11 +164,12 @@ public abstract class OneToOneChatSession extends ChatSession {
      * Send is composing status
      * 
      * @param status Status
+     * @throws MsrpException
      */
-    public boolean sendIsComposingStatus(boolean status) {
+    public void sendIsComposingStatus(boolean status) throws MsrpException {
         String content = IsComposingInfo.buildIsComposingInfo(status);
         String msgId = IdGenerator.generateMessageID();
-        return sendDataChunks(msgId, content, IsComposingInfo.MIME_TYPE,
+        sendDataChunks(msgId, content, IsComposingInfo.MIME_TYPE,
                 MsrpSession.TypeMsrpChunk.IsComposing);
     }
 

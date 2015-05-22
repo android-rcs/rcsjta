@@ -27,6 +27,7 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
@@ -51,6 +52,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDo
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.GroupFileTransferImpl;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.IdGenerator;
@@ -354,9 +356,10 @@ public abstract class GroupChatSession extends ChatSession {
      * Send a text message
      * 
      * @param msg Chat message
+     * @throws MsrpException
      */
     @Override
-    public void sendChatMessage(ChatMessage msg) {
+    public void sendChatMessage(ChatMessage msg) throws MsrpException {
         String from = ImsModule.IMS_USER_PROFILE.getPublicAddress();
         String to = ChatUtils.ANOMYNOUS_URI;
         String msgId = msg.getMessageId();
@@ -375,26 +378,16 @@ public abstract class GroupChatSession extends ChatSession {
                     msg.getTimestampSent());
         }
 
-        boolean sendOperationSucceeded = false;
         if (ChatUtils.isGeolocType(mimeType)) {
-            sendOperationSucceeded = sendDataChunks(IdGenerator.generateMessageID(),
-                    networkContent, CpimMessage.MIME_TYPE, TypeMsrpChunk.GeoLocation);
+            sendDataChunks(IdGenerator.generateMessageID(), networkContent, CpimMessage.MIME_TYPE,
+                    TypeMsrpChunk.GeoLocation);
         } else {
-            sendOperationSucceeded = sendDataChunks(IdGenerator.generateMessageID(),
-                    networkContent, CpimMessage.MIME_TYPE, TypeMsrpChunk.TextMessage);
+            sendDataChunks(IdGenerator.generateMessageID(), networkContent, CpimMessage.MIME_TYPE,
+                    TypeMsrpChunk.TextMessage);
         }
-
-        /* TODO:This will be redone with CR037 */
-        if (sendOperationSucceeded) {
-            for (ImsSessionListener listener : getListeners()) {
-                ((ChatSessionListener) listener).handleMessageSent(msgId,
-                        ChatUtils.networkMimeTypeToApiMimeType(mimeType));
-            }
-        } else {
-            for (ImsSessionListener listener : getListeners()) {
-                ((ChatSessionListener) listener).handleMessageFailedSend(msgId,
-                        ChatUtils.networkMimeTypeToApiMimeType(mimeType));
-            }
+        for (ImsSessionListener listener : getListeners()) {
+            ((ChatSessionListener) listener).handleMessageSent(msgId,
+                    ChatUtils.networkMimeTypeToApiMimeType(mimeType));
         }
     }
 
@@ -402,21 +395,22 @@ public abstract class GroupChatSession extends ChatSession {
      * Send is composing status
      * 
      * @param status Status on is-composing event
+     * @throws MsrpException
      */
     @Override
-    public boolean sendIsComposingStatus(boolean status) {
+    public void sendIsComposingStatus(boolean status) throws MsrpException {
         String from = ImsModule.IMS_USER_PROFILE.getPublicUri();
         String to = ChatUtils.ANOMYNOUS_URI;
         String msgId = IdGenerator.generateMessageID();
         String content = ChatUtils.buildCpimMessage(from, to,
                 IsComposingInfo.buildIsComposingInfo(status), IsComposingInfo.MIME_TYPE,
                 System.currentTimeMillis());
-        return sendDataChunks(msgId, content, CpimMessage.MIME_TYPE, TypeMsrpChunk.IsComposing);
+        sendDataChunks(msgId, content, CpimMessage.MIME_TYPE, TypeMsrpChunk.IsComposing);
     }
 
     @Override
     public void sendMsrpMessageDeliveryStatus(ContactId remote, String msgId, String status,
-            long timestamp) {
+            long timestamp) throws MsrpException {
         // Send status in CPIM + IMDN headers
         String to = (remote != null) ? remote.toString() : ChatUtils.ANOMYNOUS_URI;
         sendMsrpMessageDeliveryStatus(null, to, msgId, status, timestamp);
@@ -424,7 +418,7 @@ public abstract class GroupChatSession extends ChatSession {
 
     @Override
     public void sendMsrpMessageDeliveryStatus(String fromUri, String toUri, String msgId,
-            String status, long timestamp) {
+            String status, long timestamp) throws MsrpException {
         if (sLogger.isActivated()) {
             sLogger.debug("Send delivery status delivered for message " + msgId);
         }
@@ -438,6 +432,41 @@ public abstract class GroupChatSession extends ChatSession {
         // Send data
         sendDataChunks(IdGenerator.generateMessageID(), content, CpimMessage.MIME_TYPE,
                 TypeMsrpChunk.MessageDeliveredReport);
+    }
+
+    /**
+     * Send file transfer info on group chat session
+     * 
+     * @param fileTransfer
+     * @param transferId
+     * @param fileInfo
+     * @param displayedReportEnabled
+     * @param deliveredReportEnabled
+     * @throws MsrpException
+     */
+    public void sendFileTransferInfo(GroupFileTransferImpl fileTransfer, String transferId,
+            String fileInfo, boolean displayedReportEnabled, boolean deliveredReportEnabled)
+            throws MsrpException {
+        String from = ImsModule.IMS_USER_PROFILE.getPublicAddress();
+        String networkContent;
+        long timestamp = System.currentTimeMillis();
+        /* For outgoing file transfer, timestampSent = timestamp */
+        long timestampSent = timestamp;
+        mMessagingLog.setFileTransferTimestamps(transferId, timestamp, timestampSent);
+        if (displayedReportEnabled) {
+            networkContent = ChatUtils.buildCpimMessageWithImdn(from, ChatUtils.ANOMYNOUS_URI,
+                    transferId, fileInfo, FileTransferHttpInfoDocument.MIME_TYPE, timestampSent);
+        } else if (deliveredReportEnabled) {
+            networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from,
+                    ChatUtils.ANOMYNOUS_URI, transferId, fileInfo,
+                    FileTransferHttpInfoDocument.MIME_TYPE, timestampSent);
+        } else {
+            networkContent = ChatUtils.buildCpimMessage(from, ChatUtils.ANOMYNOUS_URI, fileInfo,
+                    FileTransferHttpInfoDocument.MIME_TYPE, timestampSent);
+        }
+        sendDataChunks(IdGenerator.generateMessageID(), networkContent, CpimMessage.MIME_TYPE,
+                TypeMsrpChunk.HttpFileSharing);
+        fileTransfer.handleFileTransferMessageDequeued();
     }
 
     /**
@@ -625,7 +654,7 @@ public abstract class GroupChatSession extends ChatSession {
      * byte[], java.lang.String)
      */
     @Override
-    public void msrpDataReceived(String msgId, byte[] data, String mimeType) {
+    public void msrpDataReceived(String msgId, byte[] data, String mimeType) throws MsrpException {
         boolean logActivated = sLogger.isActivated();
         if (logActivated) {
             sLogger.info("Data received (type " + mimeType + ")");

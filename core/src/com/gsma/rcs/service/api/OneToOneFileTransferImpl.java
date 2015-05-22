@@ -1156,7 +1156,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             sLogger.info("Session rejected; reasonCode=" + reasonCode + ".");
         }
         synchronized (mLock) {
-            mFileTransferService.removeFileTransfer(mFileTransferId);
+            mFileTransferService.removeOneToOneFileTransfer(mFileTransferId);
             setStateAndReasonCode(contact, State.REJECTED, reasonCode);
         }
         mCore.getListener().tryToDequeueFileTransfers(mImService);
@@ -1188,7 +1188,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                     .toString());
         }
         synchronized (mLock) {
-            mFileTransferService.removeFileTransfer(mFileTransferId);
+            mFileTransferService.removeOneToOneFileTransfer(mFileTransferId);
             switch (reason) {
                 case TERMINATION_BY_TIMEOUT:
                 case TERMINATION_BY_SYSTEM:
@@ -1229,7 +1229,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             sLogger.info("Session terminated by remote");
         }
         synchronized (mLock) {
-            mFileTransferService.removeFileTransfer(mFileTransferId);
+            mFileTransferService.removeOneToOneFileTransfer(mFileTransferId);
             /*
              * TODO : Fix sending of SIP BYE by sender once transfer is completed and media session
              * is closed. Then this check of state can be removed.
@@ -1256,7 +1256,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         State state = stateAndReasonCode.getState();
         ReasonCode reasonCode = stateAndReasonCode.getReasonCode();
         synchronized (mLock) {
-            mFileTransferService.removeFileTransfer(mFileTransferId);
+            mFileTransferService.removeOneToOneFileTransfer(mFileTransferId);
             setStateAndReasonCode(contact, state, reasonCode);
         }
         mCore.getListener().tryToDequeueFileTransfers(mImService);
@@ -1284,7 +1284,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
     @Override
     public void handleTransferNotAllowedToSend(ContactId contact) {
         synchronized (mLock) {
-            mFileTransferService.removeFileTransfer(mFileTransferId);
+            mFileTransferService.removeOneToOneFileTransfer(mFileTransferId);
             setStateAndReasonCode(contact, State.FAILED, ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
         }
         mCore.getListener().tryToDequeueFileTransfers(mImService);
@@ -1307,7 +1307,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
 
         synchronized (mLock) {
-            mFileTransferService.removeFileTransfer(mFileTransferId);
+            mFileTransferService.removeOneToOneFileTransfer(mFileTransferId);
             long deliveryExpiration = 0;
             if (FileTransferProtocol.HTTP == ftProtocol && !mRcsSettings.isFtHttpCapAlwaysOn()) {
                 long timeout = mRcsSettings.getMsgDeliveryTimeoutPeriod();
@@ -1350,7 +1350,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             sLogger.info("Transfer paused by system");
         }
         synchronized (mLock) {
-            mFileTransferService.removeFileTransfer(mFileTransferId);
+            mFileTransferService.removeOneToOneFileTransfer(mFileTransferId);
             setStateAndReasonCode(contact, State.PAUSED, ReasonCode.PAUSED_BY_SYSTEM);
         }
     }

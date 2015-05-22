@@ -17,10 +17,11 @@
 package com.gsma.rcs.provider.history;
 
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
-import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
+import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.FileTransferData;
@@ -31,6 +32,8 @@ import com.gsma.rcs.service.DequeueTask;
 import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
 import com.gsma.rcs.service.api.GroupChatImpl;
+import com.gsma.rcs.service.api.GroupFileTransferImpl;
+import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 
@@ -43,6 +46,8 @@ import android.net.Uri;
  */
 public class GroupChatDequeueTask extends DequeueTask {
 
+    private static final Logger sLogger = Logger.getLogger(GroupChatDequeueTask.class.getName());
+
     private final String mChatId;
 
     private final ChatServiceImpl mChatService;
@@ -50,6 +55,10 @@ public class GroupChatDequeueTask extends DequeueTask {
     private final FileTransferServiceImpl mFileTransferService;
 
     private final HistoryLog mHistoryLog;
+
+    private final boolean mDisplayedReportEnabled;
+
+    private final boolean mDeliveryReportEnabled;
 
     public GroupChatDequeueTask(Object lock, String chatId, InstantMessagingService imService,
             MessagingLog messagingLog, ChatServiceImpl chatService,
@@ -60,6 +69,9 @@ public class GroupChatDequeueTask extends DequeueTask {
         mChatService = chatService;
         mFileTransferService = fileTransferService;
         mHistoryLog = historyLog;
+        final ImdnManager imdnManager = mImService.getImdnManager();
+        mDisplayedReportEnabled = imdnManager.isRequestGroupDeliveryDisplayedReportsEnabled();
+        mDeliveryReportEnabled = imdnManager.isDeliveryDeliveredReportsEnabled();
     }
 
     public void run() {
@@ -86,45 +98,83 @@ public class GroupChatDequeueTask extends DequeueTask {
                     try {
                         switch (providerId) {
                             case MessageData.HISTORYLOG_MEMBER_ID:
-                                String content = cursor.getString(contentIdx);
-                                String mimeType = cursor.getString(mimeTypeIdx);
-                                long timestamp = System.currentTimeMillis();
-                                /* For outgoing message, timestampSent = timestamp */
-                                ChatMessage message = ChatUtils.createChatMessage(id, mimeType,
-                                        content, null, null, timestamp, timestamp);
-                                groupChat.dequeueChatMessage(message);
+                                try {
+                                    String content = cursor.getString(contentIdx);
+                                    String mimeType = cursor.getString(mimeTypeIdx);
+                                    long timestamp = System.currentTimeMillis();
+                                    /* For outgoing message, timestampSent = timestamp */
+                                    ChatMessage message = ChatUtils.createChatMessage(id, mimeType,
+                                            content, null, null, timestamp, timestamp);
+                                    groupChat.dequeueGroupChatMessage(message);
+
+                                } catch (MsrpException e) {
+                                    if (sLogger.isActivated()) {
+                                        sLogger.debug("Failed to dequeue group chat message " + id
+                                                + " message on group chat " + mChatId + "!");
+                                    }
+                                }
                                 break;
                             case FileTransferData.HISTORYLOG_MEMBER_ID:
                                 State state = State.valueOf(cursor.getInt(statusIdx));
                                 switch (state) {
                                     case QUEUED:
-                                        if (isAllowedToDequeueGroupFileTransfer(mChatId)) {
-                                            Uri file = Uri.parse(cursor.getString(contentIdx));
-                                            MmContent fileContent = FileTransferUtils
-                                                    .createMmContent(file);
-                                            MmContent fileIconContent = null;
-                                            String fileIcon = cursor.getString(fileIconIdx);
-                                            if (fileIcon != null) {
-                                                Uri fileIconUri = Uri.parse(fileIcon);
-                                                fileIconContent = FileTransferUtils
-                                                        .createMmContent(fileIconUri);
+                                        try {
+                                            if (isAllowedToDequeueGroupFileTransfer(mChatId)) {
+                                                Uri file = Uri.parse(cursor.getString(contentIdx));
+                                                MmContent fileContent = FileTransferUtils
+                                                        .createMmContent(file);
+                                                MmContent fileIconContent = null;
+                                                String fileIcon = cursor.getString(fileIconIdx);
+                                                if (fileIcon != null) {
+                                                    Uri fileIconUri = Uri.parse(fileIcon);
+                                                    fileIconContent = FileTransferUtils
+                                                            .createMmContent(fileIconUri);
+                                                }
+                                                mFileTransferService.dequeueGroupFileTransfer(
+                                                        mChatId, id, fileContent, fileIconContent);
                                             }
-                                            mFileTransferService.dequeueGroupFileTransfer(id,
-                                                    fileContent, fileIconContent, mChatId);
+
+                                        } catch (SecurityException e) {
+                                            if (logActivated) {
+                                                mLogger.error(new StringBuilder(
+                                                        "Security exception occured while dequeueing file transfer with transferId '")
+                                                        .append(id).append("', so mark as failed")
+                                                        .toString());
+                                            }
+                                            mFileTransferService
+                                                    .setGroupFileTransferStateAndReasonCode(id,
+                                                            mChatId, State.FAILED,
+                                                            ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
                                         }
                                         break;
                                     case STARTED:
-                                        String fileInfo = FileTransferUtils
-                                                .createHttpFileTransferXml(mMessagingLog
-                                                        .getGroupFileDownloadInfo(id));
-                                        GroupChatSession session = mImService
-                                                .getGroupChatSession(mChatId);
-                                        if (session != null && session.isMediaEstablished()) {
-                                            groupChat.sendFileTransferInfo(id, fileInfo, session);
+                                        try {
+                                            GroupFileTransferImpl groupFileTransfer = mFileTransferService
+                                                    .getOrCreateGroupFileTransfer(mChatId, id);
+                                            String fileInfo = FileTransferUtils
+                                                    .createHttpFileTransferXml(mMessagingLog
+                                                            .getGroupFileDownloadInfo(id));
+                                            groupChat.dequeueGroupFileTransferMessage(id, fileInfo,
+                                                    mDisplayedReportEnabled,
+                                                    mDeliveryReportEnabled, groupFileTransfer);
+
+                                        } catch (MsrpException e) {
+                                            if (sLogger.isActivated()) {
+                                                sLogger.debug("Failed to dequeue group file transfer message "
+                                                        + id + " on group chat " + mChatId + "!");
+                                            }
+
+                                        } catch (SecurityException e) {
+                                            if (logActivated) {
+                                                mLogger.error(new StringBuilder(
+                                                        "Security exception occured while dequeueing file transfer with transferId '")
+                                                        .append(id).append("', so mark as failed")
+                                                        .toString());
+                                            }
                                             mFileTransferService
                                                     .setGroupFileTransferStateAndReasonCode(id,
-                                                            mChatId, State.TRANSFERRED,
-                                                            ReasonCode.UNSPECIFIED);
+                                                            mChatId, State.FAILED,
+                                                            ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
                                         }
                                         break;
                                     default:
@@ -134,14 +184,6 @@ public class GroupChatDequeueTask extends DequeueTask {
                             default:
                                 break;
                         }
-                    } catch (SecurityException e) {
-                        if (logActivated) {
-                            mLogger.error(new StringBuilder(
-                                    "Security exception occured while dequeueing file transfer with transferId '")
-                                    .append(id).append("', so mark as failed").toString());
-                        }
-                        mFileTransferService.setGroupFileTransferStateAndReasonCode(id, mChatId,
-                                State.FAILED, ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
                     } catch (Exception e) { /*
                                              * Exceptions will be handled better in CR037 Break only
                                              * for terminal exception, in rest of the cases dequeue

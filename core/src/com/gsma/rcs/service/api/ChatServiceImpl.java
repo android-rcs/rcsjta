@@ -23,6 +23,7 @@
 package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.Core;
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
@@ -177,23 +178,18 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param msgId Message ID
      * @param contact Contact ID
      * @param timestamp Timestamp sent in payload for IMDN datetime
+     * @throws MsrpException
      */
     public void tryToSendOne2OneDisplayedDeliveryReport(String msgId, ContactId contact,
-            long timestamp) {
-        try {
-            OneToOneChatImpl chatImpl = mOneToOneChatCache.get(contact);
-            if (chatImpl != null) {
-                chatImpl.sendDisplayedDeliveryReport(contact, msgId, timestamp);
-                return;
-            }
-            mImService.getImdnManager().sendMessageDeliveryStatus(contact, msgId,
-                    ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp);
-        } catch (Exception ignore) {
-            /*
-             * Purposely ignoring exception since this method only makes an attempt to send report
-             * and in case of failure the report will be sent later as postponed delivery report.
-             */
+            long timestamp) throws MsrpException {
+
+        OneToOneChatImpl chatImpl = mOneToOneChatCache.get(contact);
+        if (chatImpl != null) {
+            chatImpl.sendDisplayedDeliveryReport(contact, msgId, timestamp);
+            return;
         }
+        mImService.getImdnManager().sendMessageDeliveryStatus(contact, msgId,
+                ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp);
     }
 
     /**
@@ -202,38 +198,28 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param msgId Message ID
      * @param contact Contact ID
      * @param timestamp Timestamp sent in payload for IMDN datetime
+     * @throws MsrpException
      */
     public void tryToSendGroupChatDisplayedDeliveryReport(final String msgId,
-            final ContactId contact, final long timestamp, String chatId) {
-        try {
-            final GroupChatSession session = mImService.getGroupChatSession(chatId);
+            final ContactId contact, final long timestamp, String chatId) throws MsrpException {
+        final GroupChatSession session = mImService.getGroupChatSession(chatId);
 
-            if (session == null || !session.isMediaEstablished()) {
-                if (sLogger.isActivated()) {
-                    sLogger.info("No suitable session found to send the delivery status for "
-                            + msgId + " : use SIP message");
-                }
-                mImService.getImdnManager().sendMessageDeliveryStatus(contact, msgId,
-                        ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp);
-                return;
-            }
-
+        if (session == null || !session.isMediaEstablished()) {
             if (sLogger.isActivated()) {
-                sLogger.info("Using the available session to send displayed for " + msgId);
+                sLogger.info("No suitable session found to send the delivery status for " + msgId
+                        + " : use SIP message");
             }
-
-            new Thread() {
-                public void run() {
-                    session.sendMsrpMessageDeliveryStatus(contact, msgId,
-                            ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp);
-                }
-            }.start();
-        } catch (Exception ignore) {
-            /*
-             * Purposely ignoring exception since this method only makes an attempt to send report
-             * and in case of failure the report will be sent later as postponed delivery report.
-             */
+            mImService.getImdnManager().sendMessageDeliveryStatus(contact, msgId,
+                    ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp);
+            return;
         }
+
+        if (sLogger.isActivated()) {
+            sLogger.info("Using the available session to send displayed for " + msgId);
+        }
+
+        session.sendMsrpMessageDeliveryStatus(contact, msgId,
+                ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp);
     }
 
     /**
@@ -446,12 +432,13 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     public OneToOneChatImpl getOrCreateOneToOneChat(ContactId contact) {
         OneToOneChatImpl oneToOneChat = mOneToOneChatCache.get(contact);
-        if (oneToOneChat != null) {
-            return oneToOneChat;
+        if (oneToOneChat == null) {
+            oneToOneChat = new OneToOneChatImpl(contact, mOneToOneChatEventBroadcaster, mImService,
+                    mMessagingLog, mRcsSettings, this, mContactManager, mCore,
+                    mOneToOneUndeliveredImManager);
+            mOneToOneChatCache.put(contact, oneToOneChat);
         }
-        return new OneToOneChatImpl(contact, mOneToOneChatEventBroadcaster, mImService,
-                mMessagingLog, mRcsSettings, this, mContactManager, mCore,
-                mOneToOneUndeliveredImManager);
+        return oneToOneChat;
     }
 
     /**
@@ -599,13 +586,14 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     public GroupChatImpl getOrCreateGroupChat(String chatId) {
         GroupChatImpl groupChat = mGroupChatCache.get(chatId);
-        if (groupChat != null) {
-            return groupChat;
+        if (groupChat == null) {
+            GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
+                    chatId, mMessagingLog, mRcsSettings);
+            groupChat = new GroupChatImpl(chatId, mGroupChatEventBroadcaster, mImService,
+                    storageAccessor, mRcsSettings, mContactManager, this, mMessagingLog, mCore);
+            mGroupChatCache.put(chatId, groupChat);
         }
-        GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
-                chatId, mMessagingLog, mRcsSettings);
-        return new GroupChatImpl(chatId, mGroupChatEventBroadcaster, mImService, storageAccessor,
-                mRcsSettings, mContactManager, this, mMessagingLog, mCore);
+        return groupChat;
     }
 
     /**

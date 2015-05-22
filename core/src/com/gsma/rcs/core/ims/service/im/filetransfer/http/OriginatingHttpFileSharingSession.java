@@ -25,8 +25,8 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.Core;
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
@@ -136,7 +136,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
         }
     }
 
-    protected void sendResultToContact(byte[] result) {
+    protected void sendResultToContact(byte[] result) throws MsrpException {
         // Check if upload has been cancelled
         if (mUploadManager.isCancelled()) {
             return;
