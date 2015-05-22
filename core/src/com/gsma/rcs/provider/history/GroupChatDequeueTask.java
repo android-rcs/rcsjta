@@ -20,6 +20,7 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
+import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.FileTransferData;
@@ -36,6 +37,10 @@ import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 import android.database.Cursor;
 import android.net.Uri;
 
+/**
+ * GroupChatDequeueTask tries to dequeue all group chat messages and file transfers that are in
+ * QUEUED state for a specific group chat.
+ */
 public class GroupChatDequeueTask extends DequeueTask {
 
     private final String mChatId;
@@ -73,6 +78,7 @@ public class GroupChatDequeueTask extends DequeueTask {
                 int contentIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_CONTENT);
                 int mimeTypeIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_MIME_TYPE);
                 int fileIconIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_FILEICON);
+                int statusIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_STATUS);
                 GroupChatImpl groupChat = mChatService.getOrCreateGroupChat(mChatId);
                 while (cursor.moveToNext()) {
                     int providerId = cursor.getInt(providerIdIdx);
@@ -89,18 +95,40 @@ public class GroupChatDequeueTask extends DequeueTask {
                                 groupChat.dequeueChatMessage(message);
                                 break;
                             case FileTransferData.HISTORYLOG_MEMBER_ID:
-                                if (isAllowedToDequeueGroupFileTransfer(mChatId)) {
-                                    Uri file = Uri.parse(cursor.getString(contentIdx));
-                                    MmContent fileContent = FileTransferUtils.createMmContent(file);
-                                    MmContent fileIconContent = null;
-                                    String fileIcon = cursor.getString(fileIconIdx);
-                                    if (fileIcon != null) {
-                                        Uri fileIconUri = Uri.parse(fileIcon);
-                                        fileIconContent = FileTransferUtils
-                                                .createMmContent(fileIconUri);
-                                    }
-                                    mFileTransferService.dequeueGroupFileTransfer(id, fileContent,
-                                            fileIconContent, mChatId);
+                                State state = State.valueOf(cursor.getInt(statusIdx));
+                                switch (state) {
+                                    case QUEUED:
+                                        if (isAllowedToDequeueGroupFileTransfer(mChatId)) {
+                                            Uri file = Uri.parse(cursor.getString(contentIdx));
+                                            MmContent fileContent = FileTransferUtils
+                                                    .createMmContent(file);
+                                            MmContent fileIconContent = null;
+                                            String fileIcon = cursor.getString(fileIconIdx);
+                                            if (fileIcon != null) {
+                                                Uri fileIconUri = Uri.parse(fileIcon);
+                                                fileIconContent = FileTransferUtils
+                                                        .createMmContent(fileIconUri);
+                                            }
+                                            mFileTransferService.dequeueGroupFileTransfer(id,
+                                                    fileContent, fileIconContent, mChatId);
+                                        }
+                                        break;
+                                    case STARTED:
+                                        String fileInfo = FileTransferUtils
+                                                .createHttpFileTransferXml(mMessagingLog
+                                                        .getGroupFileDownloadInfo(id));
+                                        GroupChatSession session = mImService
+                                                .getGroupChatSession(mChatId);
+                                        if (session != null && session.isMediaEstablished()) {
+                                            groupChat.sendFileTransferInfo(id, fileInfo, session);
+                                            mFileTransferService
+                                                    .setGroupFileTransferStateAndReasonCode(id,
+                                                            mChatId, State.TRANSFERRED,
+                                                            ReasonCode.UNSPECIFIED);
+                                        }
+                                        break;
+                                    default:
+                                        break;
                                 }
                                 break;
                             default:

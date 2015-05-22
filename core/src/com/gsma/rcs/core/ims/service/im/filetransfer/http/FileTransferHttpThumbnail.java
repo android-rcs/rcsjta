@@ -41,7 +41,7 @@ public class FileTransferHttpThumbnail {
 
     private String mMimeType;
 
-    private Uri mUri;
+    private Uri mFileIcon;
 
     private long mExpiration = FileTransferData.UNKNOWN_EXPIRATION;
 
@@ -54,6 +54,15 @@ public class FileTransferHttpThumbnail {
      */
     public FileTransferHttpThumbnail(RcsSettings rcsSettings) {
         mRcsSettings = rcsSettings;
+    }
+
+    public FileTransferHttpThumbnail(RcsSettings rcsSettings, Uri fileIcon, String mimeType,
+            int size, long expiration) {
+        mRcsSettings = rcsSettings;
+        mFileIcon = fileIcon;
+        mMimeType = mimeType;
+        mSize = size;
+        mExpiration = expiration;
     }
 
     /**
@@ -80,16 +89,16 @@ public class FileTransferHttpThumbnail {
      * @return URI
      */
     public Uri getUri() {
-        return mUri;
+        return mFileIcon;
     }
 
     /**
      * Sets URI
      * 
-     * @param uri URI
+     * @param fileIcon URI
      */
-    public void setUri(Uri uri) {
-        mUri = uri;
+    public void setUri(Uri fileIcon) {
+        mFileIcon = fileIcon;
     }
 
     /**

@@ -49,9 +49,18 @@ public class HistoryLog {
             .append(HistoryLogData.KEY_PROVIDER_ID).append("=")
             .append(FileTransferData.HISTORYLOG_MEMBER_ID).append(')').toString();
 
+    private static final String SELECTION_QUEUED_UPLOADED_FILETRANSFERS = new StringBuilder("(")
+            .append(HistoryLogData.KEY_PROVIDER_ID).append("=")
+            .append(FileTransferData.HISTORYLOG_MEMBER_ID).append(" AND ")
+            .append(HistoryLogData.KEY_STATUS).append("=")
+            .append(FileTransfer.State.STARTED.toInt()).append(" AND ")
+            .append(HistoryLogData.KEY_FILESIZE).append("=").append(HistoryLogData.KEY_TRANSFERRED)
+            .append(")").toString();
+
     private static final String SELECTION_QUEUED_GROUPCHATMESSAGES_AND_GROUPFILETRANSFERS = new StringBuilder(
             HistoryLogData.KEY_CHAT_ID).append("=? AND (")
-            .append(SELECTION_QUEUED_CHATMESSAGES_AND_FILETRANSFERS).append(')').toString();
+            .append(SELECTION_QUEUED_CHATMESSAGES_AND_FILETRANSFERS).append(" OR ")
+            .append(SELECTION_QUEUED_UPLOADED_FILETRANSFERS).append(')').toString();
 
     private static final String SELECTION_QUEUED_ONETOONECHATMESSAGES_AND_ONETOONE_FILETRANSFERS = new StringBuilder(
             HistoryLogData.KEY_CHAT_ID).append("=").append(HistoryLogData.KEY_CONTACT)

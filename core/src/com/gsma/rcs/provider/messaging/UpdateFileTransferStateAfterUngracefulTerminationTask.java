@@ -52,6 +52,8 @@ public class UpdateFileTransferStateAfterUngracefulTerminationTask implements Ru
             int stateIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_STATE);
             int fileExpirationIdx = cursor
                     .getColumnIndexOrThrow(FileTransferData.KEY_FILE_EXPIRATION);
+            int fileSizeIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FILESIZE);
+            int transferredIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_TRANSFERRED);
             while (cursor.moveToNext()) {
                 String fileTransferId = cursor.getString(fileTransferIdIdx);
                 String contactNumber = cursor.getString(contactIdx);
@@ -137,9 +139,11 @@ public class UpdateFileTransferStateAfterUngracefulTerminationTask implements Ru
                             break;
                         case STARTED:
                             if (groupFileTransfer) {
-                                mFileTransferService.setGroupFileTransferStateAndReasonCode(
-                                        fileTransferId, chatId, State.PAUSED,
-                                        ReasonCode.PAUSED_BY_SYSTEM);
+                                if (cursor.getLong(fileSizeIdx) != cursor.getLong(transferredIdx)) {
+                                    mFileTransferService.setGroupFileTransferStateAndReasonCode(
+                                            fileTransferId, chatId, State.PAUSED,
+                                            ReasonCode.PAUSED_BY_SYSTEM);
+                                }
                                 break;
                             }
                             mFileTransferService.setOneToOneFileTransferStateAndReasonCode(

@@ -23,6 +23,7 @@
 package com.gsma.rcs.core.ims.service.im.filetransfer;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
+import static com.gsma.rcs.utils.StringUtils.UTF8_STR;
 
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
@@ -32,6 +33,7 @@ import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoParser;
+import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpThumbnail;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.platform.file.FileDescription;
 import com.gsma.rcs.platform.file.FileFactory;
@@ -66,6 +68,10 @@ public class FileTransferUtils {
      * The logger
      */
     private static final Logger logger = Logger.getLogger(FileTransferUtils.class.getName());
+
+    private static final String FILEICON_INFO = "thumbnail";
+
+    private static final String FILE_INFO = "file";
 
     /**
      * Is a file transfer HTTP event type
@@ -272,5 +278,45 @@ public class FileTransferUtils {
             }
             return null;
         }
+    }
+
+    private static String getInfo(String fileType, Uri downloadUri, String name, String mimeType,
+            long size, long expiration) {
+        StringBuilder info = new StringBuilder("<file-info type=\"").append(fileType).append("\">");
+        if (size != 0) {
+            info.append("<file-size>").append(size).append("</file-size>");
+        }
+        if (name != null) {
+            info.append("<file-name>").append(name).append("</file-name>");
+        }
+        if (mimeType != null) {
+            info.append("<content-type>").append(mimeType).append("</content-type>");
+        }
+        info.append("<data url = \"").append(downloadUri.toString()).append("\"  until=\"")
+                .append(expiration).append("\"/></file-info>");
+        return info.toString();
+    }
+
+    /**
+     * Create HTTP file transfer info xml
+     * 
+     * @param fileTransferData
+     * @return String
+     */
+    public static String createHttpFileTransferXml(FileTransferHttpInfoDocument fileTransferData) {
+        FileTransferHttpThumbnail fileIcon = fileTransferData.getFileThumbnail();
+        StringBuilder info = new StringBuilder("<?xml version=\"1.0\" encoding=\"")
+                .append(UTF8_STR).append("\"?><file>");
+        if (fileIcon != null) {
+            String fileIconInfo = getInfo(FILEICON_INFO, fileIcon.getUri(), null,
+                    fileIcon.getMimeType(), fileIcon.getSize(), fileIcon.getExpiration());
+            info.append(fileIconInfo);
+        }
+        String fileInfo = getInfo(FILE_INFO, fileTransferData.getUri(),
+                fileTransferData.getFilename(), fileTransferData.getMimeType(),
+                fileTransferData.getSize(), fileTransferData.getExpiration());
+        info.append(fileInfo);
+        info.append("</file>");
+        return info.toString();
     }
 }

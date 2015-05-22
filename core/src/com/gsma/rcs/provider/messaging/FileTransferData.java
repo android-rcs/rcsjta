@@ -174,16 +174,26 @@ public class FileTransferData {
 
     /**
      * The remote SIP instance ID to fill the accept contact header of the SIP delivery
-     * notification.<br>
+     * notification (hidden field from client applications).<br>
      * Only application for incoming HTTP file transfers.
      */
     /* package private */static final String KEY_REMOTE_SIP_ID = "remote_sip_id";
 
     /**
      * Time when file delivery time out will expire or 0 if this file is not eligible for delivery
-     * expiration.
+     * expiration (hidden field from client applications).
      */
     /* package private */static final String KEY_DELIVERY_EXPIRATION = "delivery_expiration";
+
+    /**
+     * The download server address for fileicon (hidden field from client applications)
+     */
+    /* package private */static final String KEY_FILEICON_DOWNLOAD_URI = "fileicon_download_uri";
+
+    /**
+     * The fileicon size (hidden field from client applications)
+     */
+    /* package private */static final String KEY_FILEICON_SIZE = "fileicon_size";
 
     /**
      * @see FileTransferLog#UNKNOWN_EXPIRATION

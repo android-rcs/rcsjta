@@ -53,7 +53,7 @@ public class FileTransferHttpInfoDocument {
     /**
      * URI of the file
      */
-    private Uri mUri;
+    private Uri mFile;
 
     /**
      * Expiration of the file
@@ -63,7 +63,7 @@ public class FileTransferHttpInfoDocument {
     /**
      * File thumbnail
      */
-    private FileTransferHttpThumbnail mThumbnail;
+    private FileTransferHttpThumbnail mFileIcon;
 
     /**
      * Filename
@@ -81,13 +81,24 @@ public class FileTransferHttpInfoDocument {
         mRcsSettings = rcsSettings;
     }
 
+    public FileTransferHttpInfoDocument(RcsSettings rcsSettings, Uri file, String fileName,
+            int size, String mimeType, long expiration, FileTransferHttpThumbnail fileIcon) {
+        this(rcsSettings);
+        mFile = file;
+        mFileName = fileName;
+        mSize = size;
+        mMimeType = mimeType;
+        mExpiration = expiration;
+        mFileIcon = fileIcon;
+    }
+
     /**
      * Sets file thumbnail
      * 
      * @param thumbnail Thumbnail
      */
     public void setFileThumbnail(FileTransferHttpThumbnail thumbnail) {
-        mThumbnail = thumbnail;
+        mFileIcon = thumbnail;
     }
 
     /**
@@ -96,7 +107,7 @@ public class FileTransferHttpInfoDocument {
      * @return File thumbnail
      */
     public FileTransferHttpThumbnail getFileThumbnail() {
-        return mThumbnail;
+        return mFileIcon;
     }
 
     /**
@@ -123,7 +134,7 @@ public class FileTransferHttpInfoDocument {
      * @return File URI
      */
     public Uri getUri() {
-        return mUri;
+        return mFile;
     }
 
     /**
@@ -132,7 +143,7 @@ public class FileTransferHttpInfoDocument {
      * @param file
      */
     public void setUri(Uri file) {
-        mUri = file;
+        mFile = file;
     }
 
     /**

@@ -25,6 +25,8 @@ package com.gsma.rcs.service.api;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.CoreListener;
+import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
@@ -36,14 +38,19 @@ import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSessionListener;
+import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
+import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
+import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.ChatMessagePersistedStorageAccessor;
 import com.gsma.rcs.provider.messaging.GroupChatPersistedStorageAccessor;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ImSessionStartMode;
 import com.gsma.rcs.service.broadcaster.IGroupChatEventBroadcaster;
+import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsService.Direction;
@@ -57,6 +64,7 @@ import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.chat.IChatMessage;
 import com.gsma.services.rcs.chat.IGroupChat;
 import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
 import android.os.RemoteException;
@@ -1348,6 +1356,36 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      */
     public void setRejoinedAsPartOfSendOperation(boolean enable) {
         mGroupChatRejoinedAsPartOfSendOperation = enable;
+    }
+
+    /**
+     * Send file transfer info on group chat session
+     * 
+     * @param msgId
+     * @param fileInfo
+     */
+    public void sendFileTransferInfo(String msgId, String fileInfo, GroupChatSession session) {
+        String from = ImsModule.IMS_USER_PROFILE.getPublicAddress();
+        String networkContent;
+        ImdnManager imdnManager = mImService.getImdnManager();
+        long timestamp = System.currentTimeMillis();
+        /* For outgoing file transfer, timestampSent = timestamp */
+        long timestampSent = timestamp;
+        mMessagingLog.setFileTransferTimestamps(msgId, timestamp, timestampSent);
+        if (imdnManager.isRequestGroupDeliveryDisplayedReportsEnabled()) {
+            networkContent = ChatUtils.buildCpimMessageWithImdn(from, ChatUtils.ANOMYNOUS_URI,
+                    msgId, fileInfo, FileTransferHttpInfoDocument.MIME_TYPE, timestampSent);
+        } else if (imdnManager.isDeliveryDeliveredReportsEnabled()) {
+            networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from,
+                    ChatUtils.ANOMYNOUS_URI, msgId, fileInfo,
+                    FileTransferHttpInfoDocument.MIME_TYPE, timestampSent);
+        } else {
+            networkContent = ChatUtils.buildCpimMessage(from, ChatUtils.ANOMYNOUS_URI, fileInfo,
+                    FileTransferHttpInfoDocument.MIME_TYPE, timestampSent);
+        }
+
+        session.sendDataChunks(IdGenerator.generateMessageID(), networkContent,
+                CpimMessage.MIME_TYPE, TypeMsrpChunk.HttpFileSharing);
     }
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/

@@ -23,6 +23,7 @@
 package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.services.rcs.RcsService.Direction;
@@ -357,4 +358,30 @@ public interface IFileTransferLog {
      * @return boolean
      */
     public Boolean isFileTransferExpiredDelivery(String fileTransferId);
+
+    /**
+     * Set file transfer download info in DB
+     * 
+     * @param fileTransferId
+     * @param ftHttpInfo
+     */
+    public void setFileTransferDownloadInfo(String fileTransferId,
+            FileTransferHttpInfoDocument ftHttpInfo);
+
+    /**
+     * Get group file download info
+     * 
+     * @param fileTransferId
+     * @return FileTransferHttpInfoDocument
+     */
+    public FileTransferHttpInfoDocument getGroupFileDownloadInfo(String fileTransferId);
+
+    /**
+     * Set file transfer timestamp and timestampSent
+     * 
+     * @param fileTransferId File transfer ID
+     * @param timestamp New local timestamp for the file transfer
+     * @param timestampSent New timestamp sent in payload for the file transfer
+     */
+    public void setFileTransferTimestamps(String fileTransferId, long timestamp, long timestampSent);
 }

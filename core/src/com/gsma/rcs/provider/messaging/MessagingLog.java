@@ -25,6 +25,7 @@ package com.gsma.rcs.provider.messaging;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
+import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
@@ -105,7 +106,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
         mMessageLog = new MessageLog(mLocalContentResolver, mGroupChatLog,
                 mGroupChatDeliveryInfoLog, rcsSettings);
         mFileTransferLog = new FileTransferLog(localContentResolver, mGroupChatLog,
-                mGroupChatDeliveryInfoLog);
+                mGroupChatDeliveryInfoLog, rcsSettings);
     }
 
     @Override
@@ -614,4 +615,19 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
         mMessageLog.requeueChatMessage(msg);
     }
 
+    @Override
+    public void setFileTransferDownloadInfo(String fileTransferId,
+            FileTransferHttpInfoDocument ftHttpInfo) {
+        mFileTransferLog.setFileTransferDownloadInfo(fileTransferId, ftHttpInfo);
+    }
+
+    @Override
+    public FileTransferHttpInfoDocument getGroupFileDownloadInfo(String fileTransferId) {
+        return mFileTransferLog.getGroupFileDownloadInfo(fileTransferId);
+    }
+
+    @Override
+    public void setFileTransferTimestamps(String fileTransferId, long timestamp, long timestampSent) {
+        mFileTransferLog.setFileTransferTimestamps(fileTransferId, timestamp, timestampSent);
+    }
 }
