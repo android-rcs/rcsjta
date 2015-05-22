@@ -173,28 +173,39 @@ public class RcsServiceControlReceiver extends BroadcastReceiver {
         LocalContentResolver localContentResolver = new LocalContentResolver(context);
         mRcsSettings = RcsSettings.createInstance(localContentResolver);
         mContext = context;
-
-        if (Intents.Service.ACTION_GET_ACTIVATION_MODE_CHANGEABLE.equals(intent.getAction())) {
+        String action = intent.getAction();
+        if (Intents.Service.ACTION_GET_ACTIVATION_MODE_CHANGEABLE.equals(action)) {
             Bundle results = getResultExtras(true);
             if (results == null) {
                 return;
+            }
+            boolean activationChangeable = getActivationModeChangeable();
+            if (sLogger.isActivated()) {
+                sLogger.debug("Activation changeable=".concat(Boolean
+                        .toString(activationChangeable)));
             }
             results.putBoolean(Intents.Service.EXTRA_GET_ACTIVATION_MODE_CHANGEABLE,
-                    getActivationModeChangeable());
+                    activationChangeable);
             setResultExtras(results);
-        } else if (Intents.Service.ACTION_GET_ACTIVATION_MODE.equals(intent.getAction())) {
+        } else if (Intents.Service.ACTION_GET_ACTIVATION_MODE.equals(action)) {
             Bundle results = getResultExtras(true);
             if (results == null) {
                 return;
             }
-            results.putBoolean(Intents.Service.EXTRA_GET_ACTIVATION_MODE,
-                    getActivationMode(context));
+            boolean activationMode = getActivationMode(context);
+            if (sLogger.isActivated()) {
+                sLogger.debug("Get activation=".concat(Boolean.toString(activationMode)));
+            }
+            results.putBoolean(Intents.Service.EXTRA_GET_ACTIVATION_MODE, activationMode);
             setResultExtras(results);
-        } else if (Intents.Service.ACTION_SET_ACTIVATION_MODE.equals(intent.getAction())) {
+        } else if (Intents.Service.ACTION_SET_ACTIVATION_MODE.equals(action)) {
             boolean active = intent
                     .getBooleanExtra(Intents.Service.EXTRA_SET_ACTIVATION_MODE, true);
             setActivationMode(context, active);
-        } else if (Intents.Service.ACTION_GET_COMPATIBILITY.equals(intent.getAction())) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Set activation=".concat(Boolean.toString(active)));
+            }
+        } else if (Intents.Service.ACTION_GET_COMPATIBILITY.equals(action)) {
             Bundle results = getResultExtras(true);
             if (results == null) {
                 return;
@@ -208,10 +219,12 @@ public class RcsServiceControlReceiver extends BroadcastReceiver {
             int increment = intent.getIntExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_INCREMENT,
                     INVALID_EXTRA);
 
-            results.putBoolean(Intents.Service.EXTRA_GET_COMPATIBILITY_RESPONSE,
-                    isCompatible(servicename, codename, version, increment));
+            boolean compatible = isCompatible(servicename, codename, version, increment);
+            if (sLogger.isActivated()) {
+                sLogger.debug("Compatible " + servicename + ":" + compatible);
+            }
+            results.putBoolean(Intents.Service.EXTRA_GET_COMPATIBILITY_RESPONSE, compatible);
             setResultExtras(results);
         }
     }
-
 }

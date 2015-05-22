@@ -18,6 +18,18 @@
 
 package com.orangelabs.rcs.ri.service;
 
+import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.RcsPermissionDeniedException;
+import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsServiceControl;
+import com.gsma.services.rcs.RcsServiceListener;
+import com.gsma.services.rcs.capability.CapabilityService;
+
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.Utils;
+
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -25,16 +37,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.CheckBox;
 import android.widget.TextView;
-
-import com.gsma.services.rcs.RcsPermissionDeniedException;
-import com.gsma.services.rcs.RcsService;
-import com.gsma.services.rcs.RcsServiceListener;
-import com.gsma.services.rcs.capability.CapabilityService;
-
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.LockAccess;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Display and monitor the service status
@@ -42,23 +49,48 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author Jean-Marc AUFFRET
  */
 public class ServiceStatus extends Activity implements RcsServiceListener {
-    /**
-     * Service API
-     */
+
     private RcsService mApi;
 
     private LockAccess mExitOnce = new LockAccess();
+
+    private RcsServiceControl mRcsServiceControl;
+
+    private TextView mServiceBindingStatus;
+
+    private TextView mServiceActivation;
+
+    private CheckBox mServiceActivationRefresh;
+
+    private static final String LOGTAG = LogUtils.getTag(ServiceStatus.class.getSimpleName());
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mRcsServiceControl = RcsServiceControl.getInstance(this);
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.service_status);
 
+        mServiceBindingStatus = (TextView) findViewById(R.id.service_bound);
+        mServiceActivation = (TextView) findViewById(R.id.service_activated);
+        mServiceActivationRefresh = (CheckBox) findViewById(R.id.service_refresh_activation);
+        mServiceActivationRefresh.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //for (int i = 0; i < 1000; i++) {
+                    displayServiceActivation();
+                //}
+            }
+
+        });
+
         // Display service status by default
-        displayServiceStatus(false);
+        displayServiceBinding(false);
+
+        // Display service status by default
+        displayServiceActivation();
 
         // Register service up event listener
         IntentFilter intentFilter = new IntentFilter();
@@ -74,6 +106,15 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
         } catch (RcsPermissionDeniedException e) {
             mApi = null;
             Utils.showMessageAndExit(this, getString(R.string.label_api_not_compatible), mExitOnce);
+        }
+    }
+
+    private void displayServiceActivation() {
+        try {
+            mServiceActivation.setText(Boolean.toString(mRcsServiceControl.isActivated()));
+        } catch (RcsGenericException e) {
+            Log.e(LOGTAG, "Failed to read service activation status", e);
+            mServiceActivation.setText(getString(R.string.error_service_activated));
         }
     }
 
@@ -101,7 +142,7 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
      */
     public void onServiceConnected() {
         // Display service status
-        displayServiceStatus(true);
+        displayServiceBinding(true);
     }
 
     /**
@@ -109,11 +150,10 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
      * disconnected from the RCS service (e.g. service deactivated).
      * 
      * @param error Error
-     * @see RcsService.Error
      */
     public void onServiceDisconnected(ReasonCode error) {
         // Display service status
-        displayServiceStatus(false);
+        displayServiceBinding(false);
     }
 
     /**
@@ -121,9 +161,8 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
      * 
      * @param status Status
      */
-    private void displayServiceStatus(boolean status) {
-        TextView statusTxt = (TextView) findViewById(R.id.service_status);
-        statusTxt.setText(String.valueOf(status));
+    private void displayServiceBinding(boolean status) {
+        mServiceBindingStatus.setText(String.valueOf(status));
     }
 
     /**

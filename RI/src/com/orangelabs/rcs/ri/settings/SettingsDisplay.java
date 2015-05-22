@@ -20,6 +20,7 @@ package com.orangelabs.rcs.ri.settings;
 
 import com.gsma.services.rcs.CommonServiceConfiguration;
 import com.gsma.services.rcs.CommonServiceConfiguration.MinimumBatteryLevel;
+import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.RcsServiceControl;
 import com.gsma.services.rcs.RcsServiceException;
@@ -214,6 +215,8 @@ public class SettingsDisplay extends PreferenceActivity implements
                                             Utils.showMessage(
                                                     SettingsDisplay.this,
                                                     getString(R.string.text_service_activate_unchangeable));
+                                        } catch (RcsGenericException e) {
+                                            e.printStackTrace();
                                         }
                                     }
                                 }).setCancelable(true).create();

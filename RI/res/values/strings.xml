@@ -324,7 +324,10 @@
     <string name="menu_service_status">Service status</string>
     <string name="notification_title_rcs_service">RCS service</string>
     <string name="menu_registration_status">Registration status</string>
-    <string name="label_service_status">Service enabled:</string>
+    <string name="label_service_bound">Service bound:</string>
+    <string name="label_service_activated">Service activated:</string>
+    <string name="error_service_activated">Failed to read stack activation mode</string>
+    <string name="label_service_refresh_activation">Click to refresh stack activation mode</string>
     <string name="label_registration_status">Service registered:</string>
     <string name="menu_service_configuration">Service configuration</string>
     <string name="label_service_configuration_valid">Configuration valid:</string>

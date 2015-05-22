@@ -18,16 +18,56 @@
                 android:layout_marginRight="5dip"
                 android:gravity="left"
                 android:paddingTop="10dip"
-                android:text="@string/label_service_status" />
+                android:text="@string/label_service_bound" />
 
             <TextView
-                android:id="@+id/service_status"
+                android:id="@+id/service_bound"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dip"
                 android:layout_marginRight="5dip"
                 android:gravity="left"
                 android:paddingTop="10dip" />
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_service_activated" />
+
+            <TextView
+                android:id="@+id/service_activated"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip" />
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_service_refresh_activation" />
+
+            <CheckBox
+                android:id="@+id/service_refresh_activation"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip" />
         </TableRow>
     </TableLayout>
 
