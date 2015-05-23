@@ -352,7 +352,7 @@ public class ConnectionManager {
                     rcsService.connect();
                 } catch (Exception e) {
                     if (LogUtils.isActive) {
-                        Log.e(LOGTAG, "Cannot connect service ".concat(service.name()), e);
+                        Log.i(LOGTAG, "Cannot connect service ".concat(service.name()), e);
                     }
                     if (RcsServiceName.CAPABILITY == service) {
                         notifyImsDisconnection(RcsServiceRegistration.ReasonCode.CONNECTION_LOST);

@@ -59,7 +59,7 @@ public class RcsServiceControl {
 
     private static final long INTENT_RESPONSE_TIMEOUT = 2000;
 
-    private final static String LOG_TAG = "[RCS]["+RcsServiceControl.class.getSimpleName()+"]";
+    private final static String LOG_TAG = "[RCS][" + RcsServiceControl.class.getSimpleName() + "]";
 
     private RcsServiceControl(Context ctx) {
         mContext = ctx;
@@ -172,9 +172,9 @@ public class RcsServiceControl {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            synchronized (RcsServiceControl.this) {
+            synchronized (this) {
                 mHaveResult = true;
-                RcsServiceControl.this.notify();
+                notify();
             }
         }
     }
@@ -199,32 +199,31 @@ public class RcsServiceControl {
          */
         trySetIntentForActivePackageAndReceiverInForeground(broadcastIntent);
 
-        mContext.sendOrderedBroadcast(broadcastIntent, null, broadcastReceiver, mHandler,
-                Activity.RESULT_OK, null, null);
+        synchronized (broadcastReceiver) {
+            mContext.sendOrderedBroadcast(broadcastIntent, null, broadcastReceiver, mHandler,
+                    Activity.RESULT_OK, null, null);
 
-        long endTime = System.currentTimeMillis() + INTENT_RESPONSE_TIMEOUT;
+            long endTime = System.currentTimeMillis() + INTENT_RESPONSE_TIMEOUT;
 
-        synchronized (this) {
             while (!broadcastReceiver.mHaveResult) {
                 long delay = endTime - System.currentTimeMillis();
                 if (delay <= 0) {
-                    /* Timeout: exit loop */
+                    if (!broadcastReceiver.mHaveResult) {
+                        throw new RcsGenericException("No response to broadcast intent ".concat(intent
+                                .getAction()));
+                    }
                     break;
                 }
 
                 try {
                     /* Wait to receive callback response */
-                    wait(delay);
+                    broadcastReceiver.wait(delay);
                 } catch (InterruptedException e) {
                     /* do nothing */
                 }
             }
+            return broadcastReceiver.getResultExtras(false);
         }
-        if (!broadcastReceiver.mHaveResult) {
-            throw new RcsGenericException("No response to broadcast intent ".concat(intent
-                    .getAction()));
-        }
-        return broadcastReceiver.getResultExtras(false);
     }
 
     /**
@@ -366,7 +365,7 @@ public class RcsServiceControl {
                     + "' failed in timeout!", e);
         }
     }
-    
+
     /**
      * Returns true if the RCS stack is started.
      * 
