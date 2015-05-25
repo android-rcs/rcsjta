@@ -20,27 +20,27 @@
  * Modifications are licensed under the License.
  ******************************************************************************/
 
-package com.gsma.rcs.core.ims.service.im.chat;
+package com.gsma.rcs.core.ims.service;
 
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PeriodicRefresher;
 import com.gsma.rcs.utils.logger.Logger;
 
 /**
- * Chat activity manager which manages the idle state of the session. It maintains a timer that is
- * canceled and restarted when the session has activity, i.e. when MSRP chunks are received or
+ * Session activity manager which manages the idle state of the session. It maintains a timer that
+ * is canceled and restarted when the session has activity, i.e. when MSRP chunks are received or
  * emitted. If the timer expires, the session is aborted.
  */
-public class ChatActivityManager extends PeriodicRefresher {
+public class SessionActivityManager extends PeriodicRefresher {
     /**
      * Last activity timestamp
      */
     private long mActivityTimestamp = 0L;
 
     /**
-     * IM session
+     * ImsServiceSession
      */
-    private ChatSession mSession;
+    private ImsServiceSession mSession;
 
     /**
      * The logger
@@ -58,7 +58,7 @@ public class ChatActivityManager extends PeriodicRefresher {
      * @param session IM session
      * @param rcsSettings
      */
-    public ChatActivityManager(ChatSession session, RcsSettings rcsSettings) {
+    public SessionActivityManager(ImsServiceSession session, RcsSettings rcsSettings) {
         mSession = session;
         mRcsSettings = rcsSettings;
     }
@@ -117,7 +117,7 @@ public class ChatActivityManager extends PeriodicRefresher {
                 logger.debug(new StringBuilder("No activity on the session during ")
                         .append(timeout).append("ms: abort the session").toString());
             }
-            mSession.handleChatInactivityEvent();
+            mSession.handleInactivityEvent();
         } else {
             // Restart timer
             startTimer(System.currentTimeMillis(), remainingPeriod);

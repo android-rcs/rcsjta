@@ -40,11 +40,9 @@ import com.gsma.services.rcs.extension.MultimediaSession.State;
 import android.content.Intent;
 import android.os.RemoteException;
 
-import javax2.sip.message.Response;
-
 /**
  * Multimedia messaging session
- * 
+ *
  * @author Jean-Marc AUFFRET
  */
 public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.Stub implements
@@ -66,7 +64,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Constructor
-     * 
+     *
      * @param sessionId Session ID
      * @param broadcaster IMultimediaMessagingSessionEventBroadcaster
      * @param sipService SipService
@@ -111,7 +109,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Returns the session ID of the multimedia session
-     * 
+     *
      * @return Session ID
      */
     public String getSessionId() {
@@ -120,7 +118,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Returns the remote contact ID
-     * 
+     *
      * @return ContactId
      * @throws RemoteException
      */
@@ -146,7 +144,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Returns the state of the session
-     * 
+     *
      * @return State
      * @throws RemoteException
      */
@@ -182,7 +180,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Returns the reason code of the state of the multimedia messaging session
-     * 
+     *
      * @return ReasonCode
      * @throws RemoteException
      */
@@ -208,7 +206,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Returns the direction of the session (incoming or outgoing)
-     * 
+     *
      * @return Direction
      * @throws RemoteException
      * @see Direction
@@ -238,7 +236,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Returns the service ID
-     * 
+     *
      * @return Service ID
      * @throws RemoteException
      */
@@ -264,7 +262,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Accepts session invitation
-     * 
+     *
      * @throws RemoteException
      */
     public void acceptInvitation() throws RemoteException {
@@ -293,7 +291,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Rejects session invitation
-     * 
+     *
      * @throws RemoteException
      */
     public void rejectInvitation() throws RemoteException {
@@ -323,7 +321,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Aborts the session
-     * 
+     *
      * @throws RemoteException
      */
     public void abortSession() throws RemoteException {
@@ -357,7 +355,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Sends a message in real time
-     * 
+     *
      * @param content Message content
      * @throws RemoteException
      */
@@ -406,7 +404,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Session has been aborted
-     * 
+     *
      * @param reason Termination reason
      */
     public void handleSessionAborted(ContactId contact, TerminationReason reason) {
@@ -429,6 +427,9 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                 case TERMINATION_BY_REMOTE:
                     removeSession(contact, State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
                     break;
+                case TERMINATION_BY_INACTIVITY:
+                    removeSession(contact, State.ABORTED, ReasonCode.ABORTED_BY_INACTIVITY);
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown TerminationReason=".concat(String
                             .valueOf(reason)));
@@ -438,7 +439,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Session error
-     * 
+     *
      * @param contact Remote contact
      * @param error Error
      */
@@ -468,7 +469,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Receive data
-     * 
+     *
      * @param data Data
      * @param contact
      */

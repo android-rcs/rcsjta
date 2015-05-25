@@ -249,6 +249,13 @@ public abstract class FileSharingSession extends ImsServiceSession {
         return null;
     }
 
+    /**
+     * Session inactivity event
+     */
+    public void handleInactivityEvent() {
+        /* Not need in this class */
+    }
+
     @Override
     public void receiveCancel(SipRequest cancel) {
         super.receiveCancel(cancel);

@@ -39,6 +39,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
+import com.gsma.rcs.core.ims.service.SessionActivityManager;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimParser;
@@ -98,9 +99,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     private final IsComposingManager mIsComposingMgr = new IsComposingManager(this);
 
     /**
-     * Chat activity manager
+     * Session activity manager
      */
-    private final ChatActivityManager mActivityMgr;
+    private final SessionActivityManager mActivityMgr;
 
     /**
      * Contribution ID
@@ -193,7 +194,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         mImService = imService;
         mImdnManager = imService.getImdnManager();
         mMessagingLog = messagingLog;
-        mActivityMgr = new ChatActivityManager(this, rcsSettings);
+        mActivityMgr = new SessionActivityManager(this, rcsSettings);
 
         // Create the MSRP manager
         int localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort(rcsSettings);
@@ -293,7 +294,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param subject Subject
      */
     public void setSubject(String subject) {
-        this.mSubject = subject;
+        mSubject = subject;
     }
 
     /**
@@ -301,7 +302,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * 
      * @return Activity manager
      */
-    public ChatActivityManager getActivityManager() {
+    public SessionActivityManager getActivityManager() {
         return mActivityMgr;
     }
 
@@ -469,6 +470,18 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 
         // Update the activity manager
         mActivityMgr.updateActivity();
+    }
+
+    /**
+     * Session inactivity event
+     */
+    @Override
+    public void handleInactivityEvent() {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Session inactivity event");
+        }
+
+        terminateSession(TerminationReason.TERMINATION_BY_INACTIVITY);
     }
 
     /**
@@ -1093,17 +1106,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * Reject the session invitation
      */
     public abstract void rejectSession();
-
-    /**
-     * Chat inactivity event
-     */
-    public void handleChatInactivityEvent() {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Chat inactivity event");
-        }
-
-        terminateSession(TerminationReason.TERMINATION_BY_INACTIVITY);
-    }
 
     /**
      * Handle 200 0K response

@@ -34,7 +34,10 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
+import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
+import com.gsma.rcs.core.ims.service.SessionActivityManager;
 import com.gsma.rcs.core.ims.service.sip.GenericSipSession;
 import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.sip.SipSessionError;
@@ -78,6 +81,11 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
             .getSimpleName());
 
     /**
+     * Session activity manager
+     */
+    private final SessionActivityManager mActivityMgr;
+
+    /**
      * Constructor
      * 
      * @param parent IMS service
@@ -92,6 +100,7 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
         super(parent, contact, featureTag, rcsSettings, timestamp, contactManager);
 
         mMaxMsgSize = rcsSettings.getMaxMsrpLengthForExtensions();
+        mActivityMgr = new SessionActivityManager(this, rcsSettings);
 
         // Create the MSRP manager
         int localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort(rcsSettings);
@@ -116,6 +125,15 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
      */
     public MsrpManager getMsrpMgr() {
         return mMsrpMgr;
+    }
+
+    /**
+     * Returns the session activity manager
+     * 
+     * @return Activity manager
+     */
+    public SessionActivityManager getActivityManager() {
+        return mActivityMgr;
     }
 
     /**
@@ -189,12 +207,39 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
      * Close media session
      */
     public void closeMediaSession() {
+        getActivityManager().stop();
+
         if (mMsrpMgr != null) {
             mMsrpMgr.closeSession();
             if (logger.isActivated()) {
                 logger.debug("MSRP session has been closed");
             }
         }
+
+    }
+
+    /**
+     * Session inactivity event
+     */
+    @Override
+    public void handleInactivityEvent() {
+        if (logger.isActivated()) {
+            logger.debug("Session inactivity event");
+        }
+
+        terminateSession(TerminationReason.TERMINATION_BY_INACTIVITY);
+    }
+
+    /**
+     * Handle 200 0K response
+     * 
+     * @param resp 200 OK response
+     * @throws SipException
+     */
+    public void handle200OK(SipResponse resp) throws SipException {
+        super.handle200OK(resp);
+
+        getActivityManager().start();
     }
 
     /**
@@ -219,6 +264,8 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
         if (logger.isActivated()) {
             logger.info("Data transfered");
         }
+
+        mActivityMgr.updateActivity();
     }
 
     /**
@@ -232,6 +279,8 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
         if (logger.isActivated()) {
             logger.info("Data received (type " + mimeType + ")");
         }
+
+        mActivityMgr.updateActivity();
 
         if ((data == null) || (data.length == 0)) {
             // By-pass empty data

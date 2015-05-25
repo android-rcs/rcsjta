@@ -198,6 +198,13 @@ public abstract class ImageTransferSession extends ContentSharingSession {
         return null;
     }
 
+    /**
+     * Session inactivity event
+     */
+    public void handleInactivityEvent() {
+        /* Not need in this class */
+    }
+
     @Override
     public void startSession() {
         getImsService().getImsModule().getRichcallService().addSession(this);

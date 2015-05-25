@@ -564,6 +564,13 @@ public abstract class IPCallSession extends ImsServiceSession {
     }
 
     /**
+     * Session inactivity event
+     */
+    public void handleInactivityEvent() {
+        /* Not need in this class */
+    }
+
+    /**
      * Handle Sip Response to ReInvite / originating side
      * 
      * @param InvitationStatus invitationStatus response code

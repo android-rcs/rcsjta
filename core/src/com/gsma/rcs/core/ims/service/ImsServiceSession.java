@@ -640,7 +640,7 @@ public abstract class ImsServiceSession extends Thread {
         closeMediaSession();
 
         getDialogPath().setSessionTerminated();
-        
+
         mSessionTerminatedByRemote = true;
 
         removeSession();
@@ -1105,6 +1105,11 @@ public abstract class ImsServiceSession extends Thread {
             throw new SipNetworkException("Session initiation has failed!", e);
         }
     }
+
+    /**
+     * Session inactivity event
+     */
+    public abstract void handleInactivityEvent();
 
     /**
      * Handle default error

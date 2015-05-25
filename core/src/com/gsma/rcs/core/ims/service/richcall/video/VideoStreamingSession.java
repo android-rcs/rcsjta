@@ -164,6 +164,13 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
         }
     }
 
+    /**
+     * Session inactivity event
+     */
+    public void handleInactivityEvent() {
+        /* Not need in this class */
+    }
+
     @Override
     public void startSession() {
         getImsService().getImsModule().getRichcallService().addSession(this);

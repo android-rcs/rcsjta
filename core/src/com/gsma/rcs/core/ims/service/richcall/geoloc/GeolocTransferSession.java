@@ -125,6 +125,13 @@ public abstract class GeolocTransferSession extends ContentSharingSession {
     }
 
     /**
+     * Session inactivity event
+     */
+    public void handleInactivityEvent() {
+        /* Not need in this class */
+    }
+
+    /**
      * Handle error
      * 
      * @param error Error
