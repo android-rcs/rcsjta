@@ -36,7 +36,6 @@ import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ContributionIdGenerator;
@@ -89,7 +88,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * Constructor
      * 
      * @param fileTransferId File transfer Id
-     * @param parent IMS service
+     * @param imService InstantMessagingService
      * @param content Content to be shared
      * @param contact Remote contact identifier
      * @param fileIcon Content of fileicon
@@ -97,10 +96,11 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * @param timestamp Local timestamp for the session
      * @param contactManager
      */
-    public OriginatingMsrpFileSharingSession(String fileTransferId, ImsService parent,
-            MmContent content, ContactId contact, MmContent fileIcon, RcsSettings rcsSettings,
-            long timestamp, ContactManager contactManager) {
-        super(parent, content, contact, fileIcon, fileTransferId, rcsSettings, timestamp,
+    public OriginatingMsrpFileSharingSession(String fileTransferId,
+            InstantMessagingService imService, MmContent content, ContactId contact,
+            MmContent fileIcon, RcsSettings rcsSettings, long timestamp,
+            ContactManager contactManager) {
+        super(imService, content, contact, fileIcon, fileTransferId, rcsSettings, timestamp,
                 contactManager);
 
         if (mLogger.isActivated()) {

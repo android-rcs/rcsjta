@@ -37,7 +37,6 @@ import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatError;
@@ -80,7 +79,7 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
     /**
      * Constructor
      * 
-     * @param parent IMS service
+     * @param imService InstantMessagingService
      * @param invite Initial INVITE request
      * @param contact the remote ContactId
      * @param rcsSettings RCS settings
@@ -88,10 +87,11 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
      * @param timestamp Local timestamp for the session
      * @param contactManager
      */
-    public TerminatingStoreAndForwardOneToOneChatNotificationSession(ImsService parent,
-            SipRequest invite, ContactId contact, RcsSettings rcsSettings,
-            MessagingLog messagingLog, long timestamp, ContactManager contactManager) {
-        super(parent, contact, PhoneUtils.formatContactIdToUri(contact), null, rcsSettings,
+    public TerminatingStoreAndForwardOneToOneChatNotificationSession(
+            InstantMessagingService imService, SipRequest invite, ContactId contact,
+            RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
+            ContactManager contactManager) {
+        super(imService, contact, PhoneUtils.formatContactIdToUri(contact), null, rcsSettings,
                 messagingLog, timestamp, contactManager);
 
         // Create the MSRP manager
@@ -99,7 +99,7 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
         String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface()
                 .getNetworkAccess().getIpAddress();
         mMsrpMgr = new MsrpManager(localIpAddress, localMsrpPort, rcsSettings);
-        if (parent.getImsModule().isConnectedToWifiAccess()) {
+        if (imService.getImsModule().isConnectedToWifiAccess()) {
             mMsrpMgr.setSecured(rcsSettings.isSecureMsrpOverWifi());
         }
 
@@ -199,7 +199,7 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
 
             /* wait a response */
             getImsService().getImsModule().getSipManager().waitResponse(ctx);
-            
+
             // Test if the session should be interrupted
             if (isInterrupted()) {
                 if (mLogger.isActivated()) {

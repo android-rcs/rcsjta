@@ -27,7 +27,7 @@ import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
-import com.gsma.rcs.core.ims.service.ImsService;
+import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -52,17 +52,17 @@ public class RejoinGroupChatSession extends GroupChatSession {
     /**
      * Constructor
      * 
-     * @param parent IMS service
+     * @param imService InstantMessagingService
      * @param groupChatInfo Group Chat information
      * @param rcsSettings Rcs settings
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp for the session
      * @param contactManager
      */
-    public RejoinGroupChatSession(ImsService parent, GroupChatInfo groupChatInfo,
+    public RejoinGroupChatSession(InstantMessagingService imService, GroupChatInfo groupChatInfo,
             RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
             ContactManager contactManager) {
-        super(parent, null, groupChatInfo.getRejoinId(), groupChatInfo.getParticipants(),
+        super(imService, null, groupChatInfo.getRejoinId(), groupChatInfo.getParticipants(),
                 rcsSettings, messagingLog, timestamp, contactManager);
 
         if (!TextUtils.isEmpty(groupChatInfo.getSubject())) {

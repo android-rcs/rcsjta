@@ -37,7 +37,6 @@ import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -72,7 +71,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
     /**
      * Constructor
      * 
-     * @param parent IMS service
+     * @param imService InstantMessagingService
      * @param invite Initial INVITE request
      * @param contact remote contact
      * @param participantsFromInvite
@@ -82,11 +81,11 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
      * @param timestamp Local timestamp for the session
      * @param contactManager
      */
-    public TerminatingAdhocGroupChatSession(ImsService parent, SipRequest invite,
+    public TerminatingAdhocGroupChatSession(InstantMessagingService imService, SipRequest invite,
             ContactId contact, Map<ContactId, ParticipantStatus> participantsFromInvite,
             String remoteUri, RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
             ContactManager contactManager) {
-        super(parent, contact, remoteUri, participantsFromInvite, rcsSettings, messagingLog,
+        super(imService, contact, remoteUri, participantsFromInvite, rcsSettings, messagingLog,
                 timestamp, contactManager);
 
         mMessagingLog = messagingLog;
@@ -345,7 +344,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
             getDialogPath().sigEstablished();
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
                     .sendSipMessage(resp);
-            
+
             /* Create the MSRP server session */
             if (localSetup.equals("passive")) {
                 /* Passive mode: client wait a connection */
@@ -362,7 +361,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 
             /* wait a response */
             getImsService().getImsModule().getSipManager().waitResponse(ctx);
-            
+
             /* Test if the session should be interrupted */
             if (isInterrupted()) {
                 if (logActivated) {

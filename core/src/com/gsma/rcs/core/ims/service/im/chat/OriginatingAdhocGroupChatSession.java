@@ -30,7 +30,7 @@ import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
-import com.gsma.rcs.core.ims.service.ImsService;
+import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -65,7 +65,7 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
     /**
      * Constructor
      * 
-     * @param parent IMS service
+     * @param imService InstantMessagingService
      * @param conferenceId Conference ID
      * @param subject Subject associated to the session
      * @param participantsToInvite Map of participants to invite
@@ -74,10 +74,11 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
      * @param timestamp Local timestamp for the session
      * @param contactManager
      */
-    public OriginatingAdhocGroupChatSession(ImsService parent, String conferenceId, String subject,
-            Map<ContactId, ParticipantStatus> participantsToInvite, RcsSettings rcsSettings,
-            MessagingLog messagingLog, long timestamp, ContactManager contactManager) {
-        super(parent, null, conferenceId, participantsToInvite, rcsSettings, messagingLog,
+    public OriginatingAdhocGroupChatSession(InstantMessagingService imService, String conferenceId,
+            String subject, Map<ContactId, ParticipantStatus> participantsToInvite,
+            RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
+            ContactManager contactManager) {
+        super(imService, null, conferenceId, participantsToInvite, rcsSettings, messagingLog,
                 timestamp, contactManager);
 
         if (!TextUtils.isEmpty(subject)) {

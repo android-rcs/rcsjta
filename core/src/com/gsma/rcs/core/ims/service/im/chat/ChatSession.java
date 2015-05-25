@@ -34,7 +34,6 @@ import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
@@ -144,6 +143,10 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      */
     private final ChatMessage mFirstMsg;
 
+    protected final InstantMessagingService mImService;
+
+    protected final ImdnManager mImdnManager;
+
     /**
      * Receive chat message
      * 
@@ -167,7 +170,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     /**
      * Constructor
      * 
-     * @param parent IMS service
+     * @param imService InstantMessagingService
      * @param contact Remote contactId
      * @param remoteUri Remote URI
      * @param rcsSettings RCS settings
@@ -176,20 +179,22 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param timestamp Local timestamp for the session
      * @param contactManager
      */
-    public ChatSession(ImsService parent, ContactId contact, String remoteUri,
+    public ChatSession(InstantMessagingService imService, ContactId contact, String remoteUri,
             RcsSettings rcsSettings, MessagingLog messagingLog, ChatMessage firstMsg,
             long timestamp, ContactManager contactManager) {
-        super(parent, contact, remoteUri, rcsSettings, timestamp, contactManager);
+        super(imService, contact, remoteUri, rcsSettings, timestamp, contactManager);
 
+        mImService = imService;
+        mImdnManager = imService.getImdnManager();
         mMessagingLog = messagingLog;
         mActivityMgr = new ChatActivityManager(this, rcsSettings);
 
         // Create the MSRP manager
         int localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort(rcsSettings);
-        String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface()
+        String localIpAddress = mImService.getImsModule().getCurrentNetworkInterface()
                 .getNetworkAccess().getIpAddress();
-        mMsrpMgr = new MsrpManager(localIpAddress, localMsrpPort, parent, rcsSettings);
-        if (parent.getImsModule().isConnectedToWifiAccess()) {
+        mMsrpMgr = new MsrpManager(localIpAddress, localMsrpPort, imService, rcsSettings);
+        if (imService.getImsModule().isConnectedToWifiAccess()) {
             mMsrpMgr.setSecured(rcsSettings.isSecureMsrpOverWifi());
         }
         mFirstMsg = firstMsg;
@@ -283,15 +288,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      */
     public void setSubject(String subject) {
         this.mSubject = subject;
-    }
-
-    /**
-     * Returns the IMDN manager
-     * 
-     * @return IMDN manager
-     */
-    protected ImdnManager getImdnManager() {
-        return ((InstantMessagingService) getImsService()).getImdnManager();
     }
 
     /**
@@ -541,7 +537,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                         // There is no display notification in Group Chat
                         if (dispositionNotification != null
                                 && dispositionNotification.contains(ImdnDocument.DISPLAY)
-                                && getImdnManager().isSendOneToOneDeliveryDisplayedReportsEnabled()) {
+                                && mImdnManager.isSendOneToOneDeliveryDisplayedReportsEnabled()) {
                             imdnDisplayedRequested = true;
                         }
                     }
@@ -589,7 +585,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                         }
                     }
 
-                    if (!getImdnManager().isDeliveryDeliveredReportsEnabled()) {
+                    if (!mImdnManager.isDeliveryDeliveredReportsEnabled()) {
                         return;
                     }
 
@@ -669,7 +665,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             }
 
             // Send the delivered notification by SIP
-            getImdnManager().sendMessageDeliveryStatus(getRemoteContact(), msgId,
+            mImdnManager.sendMessageDeliveryStatus(getRemoteContact(), msgId,
                     ImdnDocument.DELIVERY_STATUS_DELIVERED, System.currentTimeMillis());
         } else if (TypeMsrpChunk.MessageDisplayedReport.equals(typeMsrpChunk)) {
             if (sLogger.isActivated()) {
@@ -678,7 +674,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             }
 
             // Send the displayed notification by SIP
-            getImdnManager().sendMessageDeliveryStatus(getRemoteContact(), msgId,
+            mImdnManager.sendMessageDeliveryStatus(getRemoteContact(), msgId,
                     ImdnDocument.DELIVERY_STATUS_DISPLAYED, System.currentTimeMillis());
         } else if ((msgId != null) && TypeMsrpChunk.TextMessage.equals(typeMsrpChunk)) {
             for (ImsSessionListener listener : getListeners()) {
@@ -771,7 +767,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             }
             MmContent fileIconContent = (fileTransferHttpThumbnail == null) ? null
                     : fileTransferHttpThumbnail.getLocalMmContent(msgId);
-            getImsService()
+            mImService
                     .getImsModule()
                     .getCoreListener()
                     .handleFileTransferInvitationRejected(contact,
@@ -794,7 +790,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             int errorCode = error.getErrorCode();
             switch (errorCode) {
                 case FileSharingError.MEDIA_SIZE_TOO_BIG:
-                    getImsService()
+                    mImService
                             .getImsModule()
                             .getCoreListener()
                             .handleFileTransferInvitationRejected(contact,
@@ -802,7 +798,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                                     ReasonCode.REJECTED_MAX_SIZE, timestamp, timestampSent);
                     break;
                 case FileSharingError.NOT_ENOUGH_STORAGE_SPACE:
-                    getImsService()
+                    mImService
                             .getImsModule()
                             .getCoreListener()
                             .handleFileTransferInvitationRejected(contact,
@@ -819,14 +815,14 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         }
 
         // Auto reject if number max of FT reached
-        if (!getImsService().getImsModule().getInstantMessagingService()
+        if (!mImService.getImsModule().getInstantMessagingService()
                 .isFileTransferSessionAvailable()) {
             if (sLogger.isActivated()) {
                 sLogger.debug("Max number of File Tranfer reached, reject the HTTP File transfer");
             }
             MmContent fileIconContent = (fileTransferHttpThumbnail == null) ? null
                     : fileTransferHttpThumbnail.getLocalMmContent(msgId);
-            getImsService()
+            mImService
                     .getImsModule()
                     .getCoreListener()
                     .handleFileTransferInvitationRejected(contact,
@@ -836,7 +832,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         }
 
         DownloadFromInviteFileSharingSession fileSession = new DownloadFromInviteFileSharingSession(
-                getImsService(), this, fileTransferInfo, msgId, contact, displayName, mRcsSettings,
+                mImService, this, fileTransferInfo, msgId, contact, displayName, mRcsSettings,
                 mMessagingLog, timestamp, timestampSent, mContactManager);
         if (fileTransferHttpThumbnail != null) {
             try {
@@ -846,7 +842,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                     sLogger.error("Failed to download file icon", e);
                 }
                 MmContent fileIconContent = fileTransferHttpThumbnail.getLocalMmContent(msgId);
-                getImsService()
+                mImService
                         .getImsModule()
                         .getCoreListener()
                         .handleFileTransferInvitationRejected(contact,
@@ -855,7 +851,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                 return;
             }
         }
-        getImsService()
+        mImService
                 .getImsModule()
                 .getCoreListener()
                 .handleFileTransferInvitation(fileSession, isGroupChat(), contact, displayName,

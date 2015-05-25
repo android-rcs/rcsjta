@@ -74,7 +74,7 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
     /**
      * Constructor
      * 
-     * @param parent IMS service
+     * @param imService InstantMessagingService
      * @param fileTransferId the File transfer Id
      * @param contact the remote contact Id
      * @param content
@@ -91,13 +91,13 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
      * @param remoteInstanceId
      * @param contactManager
      */
-    public TerminatingHttpFileSharingSession(ImsService parent, MmContent content,
+    public TerminatingHttpFileSharingSession(InstantMessagingService imService, MmContent content,
             long fileExpiration, MmContent fileIcon, long iconExpiration, ContactId contact,
             String chatSessionId, String chatContributionId, String fileTransferId,
             boolean isGroup, Uri httpServerAddress, RcsSettings rcsSettings,
             MessagingLog messagingLog, long timestamp, String remoteInstanceId,
             ContactManager contactManager) {
-        super(parent, content, contact, PhoneUtils.formatContactIdToUri(contact), fileIcon,
+        super(imService, content, contact, PhoneUtils.formatContactIdToUri(contact), fileIcon,
                 chatSessionId, chatContributionId, fileTransferId, rcsSettings, messagingLog,
                 timestamp, fileExpiration, iconExpiration, contactManager);
         mGroupFileTransfer = isGroup;
@@ -142,7 +142,7 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
             /* File transfered */
             handleFileTransfered();
 
-            if (getImdnManager().isSendOneToOneDeliveryDisplayedReportsEnabled()) {
+            if (mImdnManager.isSendOneToOneDeliveryDisplayedReportsEnabled()) {
                 sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
                         System.currentTimeMillis());
             }
@@ -232,7 +232,7 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
             chatSession.sendMsrpMessageDeliveryStatus(contact, msgId, status, timestamp);
         } else {
             // Send message delivery status via a SIP MESSAGE
-            getImdnManager().sendMessageDeliveryStatusImmediately(contact, msgId, status,
+            mImdnManager.sendMessageDeliveryStatusImmediately(contact, msgId, status,
                     mRemoteInstanceId, timestamp);
         }
     }
@@ -259,7 +259,7 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
 
                     handleFileTransfered();
 
-                    if (getImdnManager().isSendOneToOneDeliveryDisplayedReportsEnabled()) {
+                    if (mImdnManager.isSendOneToOneDeliveryDisplayedReportsEnabled()) {
                         sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
                                 System.currentTimeMillis());
                     }

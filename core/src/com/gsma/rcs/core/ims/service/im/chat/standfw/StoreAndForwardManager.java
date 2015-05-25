@@ -23,7 +23,7 @@
 package com.gsma.rcs.core.ims.service.im.chat.standfw;
 
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
-import com.gsma.rcs.core.ims.service.ImsService;
+import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -39,7 +39,7 @@ public class StoreAndForwardManager {
      */
     public final static String SERVICE_URI = "rcse-standfw@";
 
-    private ImsService mImsService;
+    private final InstantMessagingService mImService;
 
     private final RcsSettings mRcsSettings;
 
@@ -58,10 +58,10 @@ public class StoreAndForwardManager {
      * @param contactManager
      * @param messagingLog
      */
-    public StoreAndForwardManager(ImsService imsService, RcsSettings rcsSettings,
+    public StoreAndForwardManager(InstantMessagingService imService, RcsSettings rcsSettings,
             ContactManager contactManager, MessagingLog messagingLog) {
-        mImsService = imsService;
         mRcsSettings = rcsSettings;
+        mImService = imService;
         mContactManager = contactManager;
         mMessagingLog = messagingLog;
     }
@@ -78,10 +78,10 @@ public class StoreAndForwardManager {
             logger.debug("Receive stored messages");
         }
         TerminatingStoreAndForwardOneToOneChatMessageSession session = new TerminatingStoreAndForwardOneToOneChatMessageSession(
-                mImsService, invite, contact, mRcsSettings, mMessagingLog, timestamp,
+                mImService, invite, contact, mRcsSettings, mMessagingLog, timestamp,
                 mContactManager);
 
-        mImsService.getImsModule().getCore().getListener()
+        mImService.getImsModule().getCore().getListener()
                 .handleStoreAndForwardMsgSessionInvitation(session);
 
         session.startSession();
@@ -99,7 +99,7 @@ public class StoreAndForwardManager {
             logger.debug("Receive stored notifications");
         }
         TerminatingStoreAndForwardOneToOneChatNotificationSession session = new TerminatingStoreAndForwardOneToOneChatNotificationSession(
-                mImsService, invite, contact, mRcsSettings, mMessagingLog, timestamp,
+                mImService, invite, contact, mRcsSettings, mMessagingLog, timestamp,
                 mContactManager);
 
         session.startSession();

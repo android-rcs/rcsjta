@@ -24,8 +24,8 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
+import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
@@ -59,7 +59,7 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
     /**
      * Constructor
      * 
-     * @param parent IMS service
+     * @param imService InstantMessagingService
      * @param chatSession the chat session
      * @param fileTransferInfo the File transfer info document
      * @param fileTransferId the File transfer Id
@@ -71,14 +71,14 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
      * @param timestampSent
      * @param contactManager
      */
-    public DownloadFromInviteFileSharingSession(ImsService parent, ChatSession chatSession,
-            FileTransferHttpInfoDocument fileTransferInfo, String fileTransferId,
-            ContactId contact, String displayName, RcsSettings rcsSettings,
+    public DownloadFromInviteFileSharingSession(InstantMessagingService imService,
+            ChatSession chatSession, FileTransferHttpInfoDocument fileTransferInfo,
+            String fileTransferId, ContactId contact, String displayName, RcsSettings rcsSettings,
             MessagingLog messagingLog, long timestamp, long timestampSent,
             ContactManager contactManager) {
 
         // @formatter:off
-        super(parent,
+        super(imService,
                 fileTransferInfo.getLocalMmContent(),
                 fileTransferInfo.getExpiration(),
                 fileTransferInfo.getFileThumbnail() == null ? null : fileTransferInfo.getFileThumbnail().getLocalMmContent(fileTransferId),

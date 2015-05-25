@@ -24,7 +24,6 @@ package com.gsma.rcs.core.ims.service.im.filetransfer;
 
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
@@ -80,6 +79,8 @@ public abstract class FileSharingSession extends ImsServiceSession {
      */
     private String mFiletransferId;
 
+    protected final ImdnManager mImdnManager;
+
     /**
      * The logger
      */
@@ -89,7 +90,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
     /**
      * Constructor
      * 
-     * @param parent IMS service
+     * @param imService InstantMessagingService
      * @param content Content to be shared
      * @param contact Remote contactId
      * @param remoteUri the remote URI
@@ -99,14 +100,15 @@ public abstract class FileSharingSession extends ImsServiceSession {
      * @param timestamp Local timestamp for the session
      * @param contactManager
      */
-    public FileSharingSession(ImsService parent, MmContent content, ContactId contact,
-            String remoteUri, MmContent fileIcon, String filetransferId, RcsSettings rcsSettings,
-            long timestamp, ContactManager contactManager) {
-        super(parent, contact, remoteUri, rcsSettings, timestamp, contactManager);
+    public FileSharingSession(InstantMessagingService imService, MmContent content,
+            ContactId contact, String remoteUri, MmContent fileIcon, String filetransferId,
+            RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
+        super(imService, contact, remoteUri, rcsSettings, timestamp, contactManager);
 
         mContent = content;
         mFileIcon = fileIcon;
         mFiletransferId = filetransferId;
+        mImdnManager = imService.getImdnManager();
     }
 
     /**
@@ -245,15 +247,6 @@ public abstract class FileSharingSession extends ImsServiceSession {
             }
         }
         return null;
-    }
-
-    /**
-     * Returns the IMDN manager
-     * 
-     * @return IMDN manager
-     */
-    protected ImdnManager getImdnManager() {
-        return ((InstantMessagingService) getImsService()).getImdnManager();
     }
 
     @Override

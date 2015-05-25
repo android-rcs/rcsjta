@@ -37,9 +37,9 @@ import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
+import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatError;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
@@ -73,7 +73,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
     /**
      * Constructor
      * 
-     * @param parent IMS service
+     * @param imService InstantMessagingService
      * @param invite Initial INVITE request
      * @param contact the remote ContactId
      * @param rcsSettings RCS settings
@@ -81,11 +81,12 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
      * @param timestamp Local timestamp for the session
      * @param contactManager
      */
-    public TerminatingStoreAndForwardOneToOneChatMessageSession(ImsService parent,
+    public TerminatingStoreAndForwardOneToOneChatMessageSession(InstantMessagingService imService,
             SipRequest invite, ContactId contact, RcsSettings rcsSettings,
             MessagingLog messagingLog, long timestamp, ContactManager contactManager) {
-        super(parent, contact, PhoneUtils.formatContactIdToUri(contact), ChatUtils.getFirstMessage(
-                invite, timestamp), rcsSettings, messagingLog, timestamp, contactManager);
+        super(imService, contact, PhoneUtils.formatContactIdToUri(contact), ChatUtils
+                .getFirstMessage(invite, timestamp), rcsSettings, messagingLog, timestamp,
+                contactManager);
 
         // Set feature tags
         setFeatureTags(ChatUtils.getSupportedFeatureTagsForChat(rcsSettings));
@@ -130,14 +131,14 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
             }
 
             /* Send message delivery report if requested */
-            if (getImdnManager().isDeliveryDeliveredReportsEnabled()
+            if (mImdnManager.isDeliveryDeliveredReportsEnabled()
                     && ChatUtils.isImdnDeliveredRequested(getDialogPath().getInvite())) {
                 /* Check notification disposition */
                 String msgId = ChatUtils.getMessageId(getDialogPath().getInvite());
                 if (msgId != null) {
                     /* Send message delivery status via a SIP MESSAGE */
-                    getImdnManager().sendMessageDeliveryStatusImmediately(getRemoteContact(),
-                            msgId, ImdnDocument.DELIVERY_STATUS_DELIVERED,
+                    mImdnManager.sendMessageDeliveryStatusImmediately(getRemoteContact(), msgId,
+                            ImdnDocument.DELIVERY_STATUS_DELIVERED,
                             SipUtils.getRemoteInstanceID(getDialogPath().getInvite()),
                             getTimestamp());
                 }
@@ -315,7 +316,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
 
             /* wait a response */
             getImsService().getImsModule().getSipManager().waitResponse(ctx);
-            
+
             // Test if the session should be interrupted
             if (isInterrupted()) {
                 if (mLogger.isActivated()) {
@@ -323,7 +324,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
                 }
                 return;
             }
-            
+
             /* Analyze the received response */
             if (ctx.isSipAck()) {
                 if (logActivated) {

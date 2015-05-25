@@ -25,9 +25,9 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
+import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
@@ -77,7 +77,7 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
     /**
      * Constructor
      * 
-     * @param parent IMS service
+     * @param imService InstantMessagingService
      * @param content Content to share
      * @param contact Remote contact identifier
      * @param remoteUri the remote URI
@@ -92,11 +92,12 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * @param timestamp Local timestamp for the session
      * @param contactManager
      */
-    public HttpFileTransferSession(ImsService parent, MmContent content, ContactId contact,
-            String remoteUri, MmContent fileIcon, String chatSessionId, String chatContributionId,
-            String fileTransferId, RcsSettings rcsSettings, MessagingLog messagingLog,
-            long timestamp, long fileExpiration, long iconExpiration, ContactManager contactManager) {
-        super(parent, content, contact, remoteUri, fileIcon, fileTransferId, rcsSettings,
+    public HttpFileTransferSession(InstantMessagingService imService, MmContent content,
+            ContactId contact, String remoteUri, MmContent fileIcon, String chatSessionId,
+            String chatContributionId, String fileTransferId, RcsSettings rcsSettings,
+            MessagingLog messagingLog, long timestamp, long fileExpiration, long iconExpiration,
+            ContactManager contactManager) {
+        super(imService, content, contact, remoteUri, fileIcon, fileTransferId, rcsSettings,
                 timestamp, contactManager);
 
         mChatSessionId = chatSessionId;

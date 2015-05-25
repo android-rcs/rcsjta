@@ -23,7 +23,7 @@ w * Software Name : RCS IMS Stack
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import com.gsma.rcs.core.content.MmContent;
-import com.gsma.rcs.core.ims.service.ImsService;
+import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
@@ -50,7 +50,7 @@ public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSha
     /**
      * Constructor create instance of session object to resume download
      * 
-     * @param parent IMS service
+     * @param imService InstantMessagingService
      * @param content the content (url, mime-type and size)
      * @param resume the data object in DB
      * @param rcsSettings
@@ -58,11 +58,11 @@ public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSha
      * @param contactManager
      */
 
-    public DownloadFromResumeFileSharingSession(ImsService parent, MmContent content,
-            FtHttpResumeDownload resume, RcsSettings rcsSettings, MessagingLog messagingLog,
-            ContactManager contactManager) {
+    public DownloadFromResumeFileSharingSession(InstantMessagingService imService,
+            MmContent content, FtHttpResumeDownload resume, RcsSettings rcsSettings,
+            MessagingLog messagingLog, ContactManager contactManager) {
         // @formatter:off
-        super(parent,
+        super(imService,
                 content,
                 resume.getFileExpiration(),
                 resume.getFileicon() != null ? FileTransferUtils.createMmContent(resume.getFileicon()) : null,
@@ -106,7 +106,7 @@ public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSha
                 /* File transfered */
                 handleFileTransfered();
 
-                if (getImdnManager().isSendOneToOneDeliveryDisplayedReportsEnabled()) {
+                if (mImdnManager.isSendOneToOneDeliveryDisplayedReportsEnabled()) {
                     /* Send delivery report "displayed" */
                     sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
                             System.currentTimeMillis());

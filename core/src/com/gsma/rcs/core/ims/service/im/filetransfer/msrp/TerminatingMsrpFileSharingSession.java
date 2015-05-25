@@ -40,7 +40,6 @@ import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -89,7 +88,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
     /**
      * Constructor
      * 
-     * @param parent IMS service
+     * @param imService InstantMessagingService
      * @param invite Initial INVITE request
      * @param remote contact
      * @param rcsSettings RCS settings
@@ -97,10 +96,10 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * @param timestampSent the remote timestamp sent in payload for the file sharing
      * @param contactManager
      */
-    public TerminatingMsrpFileSharingSession(ImsService parent, SipRequest invite,
+    public TerminatingMsrpFileSharingSession(InstantMessagingService imService, SipRequest invite,
             ContactId remote, RcsSettings rcsSettings, long timestamp, long timestampSent,
             ContactManager contactManager) {
-        super(parent, ContentManager.createMmContentFromSdp(invite, rcsSettings), remote,
+        super(imService, ContentManager.createMmContentFromSdp(invite, rcsSettings), remote,
                 FileTransferUtils.extractFileIcon(invite, rcsSettings), IdGenerator
                         .generateMessageID(), rcsSettings, timestamp, contactManager);
         mTimestampSent = timestampSent;
@@ -327,7 +326,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                 }
                 return;
             }
-            
+
             /* Create a 200 OK response */
             if (mLogger.isActivated()) {
                 mLogger.info("Send 200 OK");
@@ -356,7 +355,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 
             /* wait a response */
             getImsService().getImsModule().getSipManager().waitResponse(ctx);
-            
+
             // Test if the session should be interrupted
             if (isInterrupted()) {
                 if (mLogger.isActivated()) {
@@ -364,7 +363,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                 }
                 return;
             }
-            
+
             /* Analyze the received response */
             if (ctx.isSipAck()) {
                 if (mLogger.isActivated()) {

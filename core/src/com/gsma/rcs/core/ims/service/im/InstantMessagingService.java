@@ -170,7 +170,7 @@ public class InstantMessagingService extends ImsService {
     /**
      * IMDN manager
      */
-    private ImdnManager mImdnMgr;
+    private final ImdnManager mImdnManager;
 
     /**
      * Store & Forward manager
@@ -203,6 +203,8 @@ public class InstantMessagingService extends ImsService {
         mMessagingLog = messagingLog;
         mStoreAndFwdMgr = new StoreAndForwardManager(this, mRcsSettings, mContactManager,
                 mMessagingLog);
+        mImdnManager = new ImdnManager(this, mRcsSettings, mMessagingLog);
+        mImdnManager.start();
     }
 
     private void handleFileTransferInvitationRejected(SipRequest invite, ContactId contact,
@@ -248,10 +250,6 @@ public class InstantMessagingService extends ImsService {
         }
         setServiceStarted(true);
 
-        // Start IMDN manager
-        mImdnMgr = new ImdnManager(this, mRcsSettings, mMessagingLog);
-        mImdnMgr.start();
-
         mCore.getListener().tryToStartImServiceTasks(this);
     }
 
@@ -265,9 +263,8 @@ public class InstantMessagingService extends ImsService {
         }
         setServiceStarted(false);
 
-        // Stop IMDN manager
-        mImdnMgr.terminate();
-        mImdnMgr.interrupt();
+        mImdnManager.terminate();
+        mImdnManager.interrupt();
     }
 
     /**
@@ -282,7 +279,7 @@ public class InstantMessagingService extends ImsService {
      * @return IMDN manager
      */
     public ImdnManager getImdnManager() {
-        return mImdnMgr;
+        return mImdnManager;
     }
 
     /**
@@ -960,7 +957,7 @@ public class InstantMessagingService extends ImsService {
             }
 
             // Send message delivery report if requested
-            if (getImdnManager().isDeliveryDeliveredReportsEnabled()
+            if (mImdnManager.isDeliveryDeliveredReportsEnabled()
                     && ChatUtils.isImdnDeliveredRequested(invite)) {
                 // Check notification disposition
                 String msgId = ChatUtils.getMessageId(invite);
@@ -973,7 +970,7 @@ public class InstantMessagingService extends ImsService {
                                 .getParameter(SipUtils.SIP_INSTANCE_PARAM);
                     }
                     // Send message delivery status via a SIP MESSAGE
-                    getImdnManager().sendMessageDeliveryStatusImmediately(remote, msgId,
+                    mImdnManager.sendMessageDeliveryStatusImmediately(remote, msgId,
                             ImdnDocument.DELIVERY_STATUS_DELIVERED, remoteInstanceId, timestamp);
                 }
             }
@@ -990,7 +987,7 @@ public class InstantMessagingService extends ImsService {
          * to the defined race conditions in the specification document.
          */
         if (firstMsg != null && !mMessagingLog.isMessagePersisted(firstMsg.getMessageId())) {
-            boolean imdnDisplayRequested = getImdnManager()
+            boolean imdnDisplayRequested = mImdnManager
                     .isSendOneToOneDeliveryDisplayedReportsEnabled()
                     && ChatUtils.isImdnDisplayedRequested(invite);
             mMessagingLog.addIncomingOneToOneChatMessage(firstMsg, imdnDisplayRequested);
@@ -1336,7 +1333,7 @@ public class InstantMessagingService extends ImsService {
          * to the defined race conditions in the specification document.
          */
         if (firstMsg != null && !mMessagingLog.isMessagePersisted(firstMsg.getMessageId())) {
-            boolean imdnDisplayRequested = getImdnManager()
+            boolean imdnDisplayRequested = mImdnManager
                     .isSendOneToOneDeliveryDisplayedReportsEnabled()
                     && ChatUtils.isImdnDisplayedRequested(invite);
             mMessagingLog.addIncomingOneToOneChatMessage(firstMsg, imdnDisplayRequested);

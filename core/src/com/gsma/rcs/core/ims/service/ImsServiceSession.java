@@ -70,7 +70,7 @@ public abstract class ImsServiceSession extends Thread {
     /**
      * IMS service
      */
-    private ImsService mImsService;
+    private final ImsService mImsService;
 
     /**
      * Session ID

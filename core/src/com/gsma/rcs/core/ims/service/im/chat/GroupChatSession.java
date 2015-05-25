@@ -35,16 +35,15 @@ import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionAuthenticationAgent;
+import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimIdentity;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimParser;
 import com.gsma.rcs.core.ims.service.im.chat.event.ConferenceEventSubscribeManager;
 import com.gsma.rcs.core.ims.service.im.chat.geoloc.GeolocInfoDocument;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
-import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnUtils;
 import com.gsma.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
@@ -105,7 +104,7 @@ public abstract class GroupChatSession extends ChatSession {
     /**
      * Constructor for originating side
      * 
-     * @param parent IMS service
+     * @param imService InstantMessagingService
      * @param contact remote contact identifier
      * @param conferenceId Conference id
      * @param participants Initial set of participants
@@ -114,10 +113,11 @@ public abstract class GroupChatSession extends ChatSession {
      * @param timestamp Local timestamp for the session
      * @param contactManager
      */
-    public GroupChatSession(ImsService parent, ContactId contact, String conferenceId,
-            Map<ContactId, ParticipantStatus> participants, RcsSettings rcsSettings,
-            MessagingLog messagingLog, long timestamp, ContactManager contactManager) {
-        super(parent, contact, conferenceId, rcsSettings, messagingLog, null, timestamp,
+    public GroupChatSession(InstantMessagingService imService, ContactId contact,
+            String conferenceId, Map<ContactId, ParticipantStatus> participants,
+            RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
+            ContactManager contactManager) {
+        super(imService, contact, conferenceId, rcsSettings, messagingLog, null, timestamp,
                 contactManager);
 
         mMaxParticipants = rcsSettings.getMaxChatParticipants();
@@ -126,7 +126,7 @@ public abstract class GroupChatSession extends ChatSession {
 
         mConferenceSubscriber = new ConferenceEventSubscribeManager(this, rcsSettings, messagingLog);
 
-        mImsModule = parent.getImsModule();
+        mImsModule = imService.getImsModule();
 
         setFeatureTags(ChatUtils.getSupportedFeatureTagsForGroupChat(rcsSettings));
 
@@ -365,12 +365,11 @@ public abstract class GroupChatSession extends ChatSession {
         String msgId = msg.getMessageId();
         String networkContent;
         String mimeType = msg.getMimeType();
-        ImdnManager imdnManager = getImdnManager();
 
-        if (imdnManager.isRequestGroupDeliveryDisplayedReportsEnabled()) {
+        if (mImdnManager.isRequestGroupDeliveryDisplayedReportsEnabled()) {
             networkContent = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, msg.getContent(),
                     mimeType, msg.getTimestampSent());
-        } else if (imdnManager.isDeliveryDeliveredReportsEnabled()) {
+        } else if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
             networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from, to, msgId,
                     msg.getContent(), mimeType, msg.getTimestampSent());
         } else {
@@ -773,7 +772,7 @@ public abstract class GroupChatSession extends ChatSession {
                 // TODO : else return error to Originating side
             }
 
-            if (getImdnManager().isDeliveryDeliveredReportsEnabled()) {
+            if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
                 // Process delivery request
                 sendMsrpMessageDeliveryStatus(remoteId, cpimMsgId,
                         ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);

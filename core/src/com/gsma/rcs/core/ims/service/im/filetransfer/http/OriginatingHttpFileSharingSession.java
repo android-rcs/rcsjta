@@ -28,14 +28,12 @@ import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
-import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.contact.ContactManager;
@@ -75,7 +73,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
      * Constructor
      * 
      * @param fileTransferId File transfer Id
-     * @param parent IMS service
+     * @param imService InstantMessagingService
      * @param content Content of file to share
      * @param contact Remote contact identifier
      * @param fileIcon Content of fileicon
@@ -87,12 +85,13 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
      * @param timestampSent the timestamp sent in payload for the file sharing
      * @param contactManager
      */
-    public OriginatingHttpFileSharingSession(String fileTransferId, ImsService parent,
-            MmContent content, ContactId contact, MmContent fileIcon, String tId, Core core,
-            MessagingLog messagingLog, RcsSettings rcsSettings, long timestamp, long timestampSent,
+    public OriginatingHttpFileSharingSession(String fileTransferId,
+            InstantMessagingService imService, MmContent content, ContactId contact,
+            MmContent fileIcon, String tId, Core core, MessagingLog messagingLog,
+            RcsSettings rcsSettings, long timestamp, long timestampSent,
             ContactManager contactManager) {
-        super(parent, content, contact, PhoneUtils.formatContactIdToUri(contact), fileIcon, null,
-                null, fileTransferId, rcsSettings, messagingLog, timestamp,
+        super(imService, content, contact, PhoneUtils.formatContactIdToUri(contact), fileIcon,
+                null, null, fileTransferId, rcsSettings, messagingLog, timestamp,
                 FileTransferData.UNKNOWN_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION,
                 contactManager);
         mCore = core;
@@ -185,13 +184,12 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
             setContributionID(chatSession.getContributionID());
 
             String networkContent;
-            ImdnManager imdnManager = getImdnManager();
 
-            if (imdnManager.isRequestOneToOneDeliveryDisplayedReportsEnabled()) {
+            if (mImdnManager.isRequestOneToOneDeliveryDisplayedReportsEnabled()) {
                 networkContent = ChatUtils.buildCpimMessageWithImdn(ChatUtils.ANOMYNOUS_URI,
                         ChatUtils.ANOMYNOUS_URI, msgId, fileInfo,
                         FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);
-            } else if (imdnManager.isDeliveryDeliveredReportsEnabled()) {
+            } else if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
                 networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(
                         ChatUtils.ANOMYNOUS_URI, ChatUtils.ANOMYNOUS_URI, msgId, fileInfo,
                         FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);

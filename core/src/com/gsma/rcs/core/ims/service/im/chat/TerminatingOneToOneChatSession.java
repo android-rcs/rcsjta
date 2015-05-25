@@ -37,7 +37,6 @@ import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -70,7 +69,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
     /**
      * Constructor
      * 
-     * @param parent IMS service
+     * @param imService InstantMessagingService
      * @param invite Initial INVITE request
      * @param contact the remote contactId
      * @param rcsSettings RCS settings
@@ -78,11 +77,12 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
      * @param timestamp Local timestamp for the session
      * @param contactManager
      */
-    public TerminatingOneToOneChatSession(ImsService parent, SipRequest invite, ContactId contact,
-            RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
+    public TerminatingOneToOneChatSession(InstantMessagingService imService, SipRequest invite,
+            ContactId contact, RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
             ContactManager contactManager) {
-        super(parent, contact, PhoneUtils.formatContactIdToUri(contact), ChatUtils.getFirstMessage(
-                invite, timestamp), rcsSettings, messagingLog, timestamp, contactManager);
+        super(imService, contact, PhoneUtils.formatContactIdToUri(contact), ChatUtils
+                .getFirstMessage(invite, timestamp), rcsSettings, messagingLog, timestamp,
+                contactManager);
 
         // Create dialog path
         createTerminatingDialogPath(invite);
@@ -124,14 +124,14 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
             }
             ContactId contact = getRemoteContact();
             /* Send message delivery report if requested */
-            if (getImdnManager().isDeliveryDeliveredReportsEnabled()
+            if (mImdnManager.isDeliveryDeliveredReportsEnabled()
                     && ((ChatUtils.isImdnDeliveredRequested(getDialogPath().getInvite())) || (ChatUtils
                             .isFileTransferOverHttp(getDialogPath().getInvite())))) {
                 /* Check notification disposition */
                 String msgId = ChatUtils.getMessageId(getDialogPath().getInvite());
                 if (msgId != null) {
                     /* Send message delivery status via a SIP MESSAGE */
-                    getImdnManager().sendMessageDeliveryStatusImmediately(contact, msgId,
+                    mImdnManager.sendMessageDeliveryStatusImmediately(contact, msgId,
                             ImdnDocument.DELIVERY_STATUS_DELIVERED,
                             SipUtils.getRemoteInstanceID(getDialogPath().getInvite()),
                             getTimestamp());
@@ -301,7 +301,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
             /* Send response */
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
                     .sendSipMessage(resp);
-            
+
             /* Create the MSRP server session */
             if (localSetup.equals("passive")) {
                 /* Passive mode: client wait a connection */
@@ -317,8 +317,8 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
             }
 
             /* wait a response */
-            getImsService().getImsModule().getSipManager().waitResponse(ctx);            
-            
+            getImsService().getImsModule().getSipManager().waitResponse(ctx);
+
             /* Test if the session should be interrupted */
             if (isInterrupted()) {
                 if (logActivated) {

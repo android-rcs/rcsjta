@@ -29,12 +29,11 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
+import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
-import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.contact.ContactManager;
@@ -90,7 +89,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
      * Constructor
      * 
      * @param fileTransferId File transfer Id
-     * @param parent IMS service
+     * @param imService InstantMessagingService
      * @param content The file content to share
      * @param fileIcon Content of fileicon
      * @param conferenceId Conference ID
@@ -104,12 +103,12 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
      * @param timestampSent the timestamp sent in payload for the group file sharing
      * @param contactManager
      */
-    public OriginatingHttpGroupFileSharingSession(String fileTransferId, ImsService parent,
-            MmContent content, MmContent fileIcon, String conferenceId, String chatSessionId,
-            String chatContributionId, String tId, Core core, RcsSettings rcsSettings,
-            MessagingLog messagingLog, long timestamp, long timestampSent,
-            ContactManager contactManager) {
-        super(parent, content, null, conferenceId, fileIcon, chatSessionId, chatContributionId,
+    public OriginatingHttpGroupFileSharingSession(String fileTransferId,
+            InstantMessagingService imService, MmContent content, MmContent fileIcon,
+            String conferenceId, String chatSessionId, String chatContributionId, String tId,
+            Core core, RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
+            long timestampSent, ContactManager contactManager) {
+        super(imService, content, null, conferenceId, fileIcon, chatSessionId, chatContributionId,
                 fileTransferId, rcsSettings, messagingLog, timestamp,
                 FileTransferData.UNKNOWN_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION,
                 contactManager);
@@ -177,12 +176,11 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
         String from = ImsModule.IMS_USER_PROFILE.getPublicAddress();
         String networkContent;
         String msgId = getFileTransferId();
-        ImdnManager imdnManager = getImdnManager();
 
-        if (imdnManager.isRequestGroupDeliveryDisplayedReportsEnabled()) {
+        if (mImdnManager.isRequestGroupDeliveryDisplayedReportsEnabled()) {
             networkContent = ChatUtils.buildCpimMessageWithImdn(from, ChatUtils.ANOMYNOUS_URI,
                     msgId, mFileInfo, FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);
-        } else if (imdnManager.isDeliveryDeliveredReportsEnabled()) {
+        } else if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
             networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from,
                     ChatUtils.ANOMYNOUS_URI, msgId, mFileInfo,
                     FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);

@@ -24,7 +24,7 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
-import com.gsma.rcs.core.ims.service.ImsService;
+import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.contact.ContactManager;
@@ -49,17 +49,17 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
     /**
      * Constructor create instance of session object to resume download
      * 
-     * @param parent IMS service
+     * @param imService InstantMessagingService
      * @param content the content (url, mime-type and size)
      * @param resumeUpload the data object in DB
      * @param rcsSettings
      * @param messagingLog
      * @param contactManager
      */
-    public ResumeUploadFileSharingSession(ImsService parent, MmContent content,
+    public ResumeUploadFileSharingSession(InstantMessagingService imService, MmContent content,
             FtHttpResumeUpload resumeUpload, RcsSettings rcsSettings, MessagingLog messagingLog,
             ContactManager contactManager) {
-        super(resumeUpload.getFileTransferId(), parent, content, resumeUpload.getContact(),
+        super(resumeUpload.getFileTransferId(), imService, content, resumeUpload.getContact(),
                 resumeUpload.getFileicon() != null ? FileTransferUtils.createMmContent(resumeUpload
                         .getFileicon()) : null, resumeUpload.getTId(), Core.getInstance(),
                 messagingLog, rcsSettings, resumeUpload.getTimestamp(), resumeUpload

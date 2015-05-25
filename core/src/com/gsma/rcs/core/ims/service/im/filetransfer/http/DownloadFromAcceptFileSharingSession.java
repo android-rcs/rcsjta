@@ -23,7 +23,7 @@
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import com.gsma.rcs.core.content.MmContent;
-import com.gsma.rcs.core.ims.service.ImsService;
+import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.contact.ContactManager;
@@ -43,19 +43,19 @@ public class DownloadFromAcceptFileSharingSession extends TerminatingHttpFileSha
     /**
      * Constructor
      * 
-     * @param parent IMS service
+     * @param imService InstantMessagingService
      * @param content the content to be transferred
      * @param resume the Data Object to access FT HTTP table in DB
      * @param rcsSettings
      * @param messagingLog
      * @param contactManager
      */
-    public DownloadFromAcceptFileSharingSession(ImsService parent, MmContent content,
-            FtHttpResumeDownload resume, RcsSettings rcsSettings, MessagingLog messagingLog,
-            ContactManager contactManager) {
+    public DownloadFromAcceptFileSharingSession(InstantMessagingService imService,
+            MmContent content, FtHttpResumeDownload resume, RcsSettings rcsSettings,
+            MessagingLog messagingLog, ContactManager contactManager) {
 
         // @formatter:off
-        super(parent,
+        super(imService,
                 content,
                 resume.getFileExpiration(),
                 resume.getFileicon() != null ? FileTransferUtils.createMmContent(resume.getFileicon()) : null,
