@@ -216,7 +216,7 @@ public abstract class ImsNetworkInterface {
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static Logger sLogger = Logger.getLogger(ImsNetworkInterface.class.getName());
 
     /**
      * Constructor
@@ -363,14 +363,14 @@ public abstract class ImsNetworkInterface {
     public void loadRegistrationProcedure() {
         switch (mImsAuthentMode) {
             case GIBA:
-                if (logger.isActivated()) {
-                    logger.debug("Load GIBA authentication procedure");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Load GIBA authentication procedure");
                 }
                 mRegistrationProcedure = new GibaRegistrationProcedure();
                 break;
             case DIGEST:
-                if (logger.isActivated()) {
-                    logger.debug("Load HTTP Digest authentication procedure");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Load HTTP Digest authentication procedure");
                 }
                 mRegistrationProcedure = new HttpDigestRegistrationProcedure();
                 break;
@@ -386,15 +386,15 @@ public abstract class ImsNetworkInterface {
         UserProfileInterface intf;
         switch (mImsAuthentMode) {
             case GIBA:
-                if (logger.isActivated()) {
-                    logger.debug("Load user profile derived from IMSI (GIBA)");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Load user profile derived from IMSI (GIBA)");
                 }
                 intf = new GibaUserProfileInterface(mRcsSettings);
                 break;
             case DIGEST:
             default:
-                if (logger.isActivated()) {
-                    logger.debug("Load user profile from RCS settings database");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Load user profile from RCS settings database");
                 }
                 intf = new SettingsUserProfileInterface(mRcsSettings);
                 break;
@@ -466,11 +466,11 @@ public abstract class ImsNetworkInterface {
      */
     private Record[] getDnsRequest(String domain, ExtendedResolver resolver, int type) {
         try {
-            if (logger.isActivated()) {
+            if (sLogger.isActivated()) {
                 if (type == Type.SRV) {
-                    logger.debug("DNS SRV lookup for " + domain);
+                    sLogger.debug("DNS SRV lookup for " + domain);
                 } else if (type == Type.NAPTR) {
-                    logger.debug("DNS NAPTR lookup for " + domain);
+                    sLogger.debug("DNS NAPTR lookup for " + domain);
                 }
             }
             Lookup lookup = new Lookup(domain, type);
@@ -482,19 +482,19 @@ public abstract class ImsNetworkInterface {
             Record[] result = lookup.run();
             int code = lookup.getResult();
             if (code != Lookup.SUCCESSFUL) {
-                if (logger.isActivated()) {
-                    logger.warn("Lookup error: " + code + "/" + lookup.getErrorString());
+                if (sLogger.isActivated()) {
+                    sLogger.warn("Lookup error: " + code + "/" + lookup.getErrorString());
                 }
             }
             return result;
         } catch (TextParseException e) {
-            if (logger.isActivated()) {
-                logger.debug("Not a valid DNS name");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Not a valid DNS name");
             }
             return null;
         } catch (IllegalArgumentException e) {
-            if (logger.isActivated()) {
-                logger.debug("Not a valid DNS type");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Not a valid DNS type");
             }
             return null;
         }
@@ -508,13 +508,13 @@ public abstract class ImsNetworkInterface {
      */
     private String getDnsA(String domain) {
         try {
-            if (logger.isActivated()) {
-                logger.debug("DNS A lookup for " + domain);
+            if (sLogger.isActivated()) {
+                sLogger.debug("DNS A lookup for " + domain);
             }
             return InetAddress.getByName(domain).getHostAddress();
         } catch (UnknownHostException e) {
-            if (logger.isActivated()) {
-                logger.debug("Unknown host for " + domain);
+            if (sLogger.isActivated()) {
+                sLogger.debug("Unknown host for " + domain);
             }
             return null;
         }
@@ -530,8 +530,8 @@ public abstract class ImsNetworkInterface {
         SRVRecord result = null;
         for (int i = 0; i < records.length; i++) {
             SRVRecord srv = (SRVRecord) records[i];
-            if (logger.isActivated()) {
-                logger.debug("SRV record: " + srv.toString());
+            if (sLogger.isActivated()) {
+                sLogger.debug("SRV record: " + srv.toString());
             }
             if (result == null) {
                 // First record
@@ -584,8 +584,8 @@ public abstract class ImsNetworkInterface {
             useDns = false;
             dnsResolvedFields = new DnsResolvedFields(mImsProxyAddr, mImsProxyPort);
 
-            if (logger.isActivated()) {
-                logger.warn("IP address found instead of FQDN!");
+            if (sLogger.isActivated()) {
+                sLogger.warn("IP address found instead of FQDN!");
             }
         } else {
             dnsResolvedFields = new DnsResolvedFields(null, mImsProxyPort);
@@ -599,8 +599,8 @@ public abstract class ImsNetworkInterface {
              * Resolve the IMS proxy configuration: first try to resolve via a NAPTR query, then a
              * SRV query and finally via A query
              */
-            if (logger.isActivated()) {
-                logger.debug("Resolve IMS proxy address ".concat(mImsProxyAddr));
+            if (sLogger.isActivated()) {
+                sLogger.debug("Resolve IMS proxy address ".concat(mImsProxyAddr));
             }
 
             /* DNS NAPTR lookup */
@@ -619,14 +619,14 @@ public abstract class ImsNetworkInterface {
             Record[] naptrRecords = getDnsRequest(mImsProxyAddr, resolver, Type.NAPTR);
             if ((naptrRecords != null) && (naptrRecords.length > 0)) {
                 /* First try with NAPTR */
-                if (logger.isActivated()) {
-                    logger.debug(new StringBuilder("NAPTR records found: ").append(
+                if (sLogger.isActivated()) {
+                    sLogger.debug(new StringBuilder("NAPTR records found: ").append(
                             naptrRecords.length).toString());
                 }
                 for (int i = 0; i < naptrRecords.length; i++) {
                     NAPTRRecord naptr = (NAPTRRecord) naptrRecords[i];
-                    if (logger.isActivated()) {
-                        logger.debug("NAPTR record: ".concat(naptr.toString()));
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("NAPTR record: ".concat(naptr.toString()));
                     }
                     if ((naptr != null) && naptr.getService().equalsIgnoreCase(service)) {
                         /* DNS SRV lookup */
@@ -647,8 +647,8 @@ public abstract class ImsNetworkInterface {
 
             if (!resolved) {
                 /* If no NAPTR: direct DNS SRV lookup */
-                if (logger.isActivated()) {
-                    logger.debug("No NAPTR record found: use DNS SRV instead");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("No NAPTR record found: use DNS SRV instead");
                 }
                 String srvQuery;
                 if (mImsProxyAddr.startsWith(DNS_SIP_PREFIX)
@@ -667,8 +667,8 @@ public abstract class ImsNetworkInterface {
 
                 if (!resolved) {
                     /* If not resolved: direct DNS A lookup */
-                    if (logger.isActivated()) {
-                        logger.debug("No SRV record found: use DNS A instead");
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("No SRV record found: use DNS A instead");
                     }
                     dnsResolvedFields.mIpAddress = getDnsA(mImsProxyAddr);
                 }
@@ -686,8 +686,8 @@ public abstract class ImsNetworkInterface {
             dnsResolvedFields = new DnsResolvedFields(imsProxyAddrResolved, mImsProxyPort);
         }
 
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("SIP outbound proxy configuration: ")
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("SIP outbound proxy configuration: ")
                     .append(dnsResolvedFields.mIpAddress).append(":")
                     .append(dnsResolvedFields.mPort).append(";").append(mImsProxyProtocol)
                     .toString());
@@ -701,14 +701,17 @@ public abstract class ImsNetworkInterface {
      * @param dnsResolvedFields The {@link DnsResolvedFields} object containing the DNS resolved
      *            fields.
      * @return Registration result
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     // Changed by Deutsche Telekom
-    public boolean register(DnsResolvedFields dnsResolvedFields) {
-        if (logger.isActivated()) {
-            logger.debug("Register to IMS");
-        }
-
+    public void register(DnsResolvedFields dnsResolvedFields) throws SipPayloadException,
+            SipNetworkException {
         try {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Register to IMS");
+            }
+
             // Changed by Deutsche Telekom
             if (dnsResolvedFields == null) {
                 dnsResolvedFields = getDnsResolvedFields();
@@ -718,24 +721,11 @@ public abstract class ImsNetworkInterface {
             mSip.initStack(mAccess.getIpAddress(), dnsResolvedFields.mIpAddress,
                     dnsResolvedFields.mPort, mImsProxyProtocol, mTcpFallback, getType());
             mSip.getSipStack().addSipEventListener(mImsModule);
-        } catch (SipPayloadException e) {
-            // TODO: This is a temporary way of handling the sip network exception. Eventually this
-            // logic of returning boolean will be removed as this goes against the policies of
-            // proper exception handling·
-            mSip.closeStack();
-            return false;
 
-        } catch (UnknownHostException e) {
-            // TODO: This is a temporary way of handling the errors. Eventually this
-            // logic of returning boolean will be removed as this goes against the policies of
-            // proper exception handling·
-            return false;
-        }
+            mRegistration.register();
 
-        boolean registered = mRegistration.registration();
-        if (registered) {
-            if (logger.isActivated()) {
-                logger.debug("IMS registration successful");
+            if (sLogger.isActivated()) {
+                sLogger.debug("IMS registration successful");
             }
 
             /**
@@ -746,22 +736,12 @@ public abstract class ImsNetworkInterface {
                     && !ListeningPoint.UDP.equalsIgnoreCase(mImsProxyProtocol)) {
                 mSip.getSipStack().getKeepAliveManager().start();
             }
-        } else {
-            if (logger.isActivated()) {
-                logger.debug("IMS registration has failed");
-            }
+        } catch (UnknownHostException e) {
+            throw new SipPayloadException(
+                    "Unable to register due to stack initialization failure for address : "
+                            .concat(mImsProxyAddr),
+                    e);
         }
-        return registered;
-    }
-
-    // Changed by Deutsche Telekom
-    /**
-     * Register to the IMS
-     * 
-     * @return Registration result
-     */
-    public boolean register() {
-        return register(null);
     }
 
     // Changed by Deutsche Telekom
@@ -778,20 +758,20 @@ public abstract class ImsNetworkInterface {
         DnsResolvedFields dnsResolvedFields = getDnsResolvedFields();
 
         if (mSip.getSipStack() == null) {
-            if (logger.isActivated()) {
-                logger.debug("Registration state has changed: sip stack not initialized yet.");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Registration state has changed: sip stack not initialized yet.");
             }
             return dnsResolvedFields;
         } else if (!mSip.getSipStack().getOutboundProxyAddr().equals(dnsResolvedFields.mIpAddress)) {
-            if (logger.isActivated()) {
-                logger.debug("Registration state has changed: proxy ip address has changed (old: "
+            if (sLogger.isActivated()) {
+                sLogger.debug("Registration state has changed: proxy ip address has changed (old: "
                         + mSip.getSipStack().getOutboundProxyAddr() + " - new: "
                         + dnsResolvedFields.mIpAddress + ").");
             }
             return dnsResolvedFields;
         } else if (mSip.getSipStack().getOutboundProxyPort() != dnsResolvedFields.mPort) {
-            if (logger.isActivated()) {
-                logger.debug("Registration state has changed: proxy port has changed (old: "
+            if (sLogger.isActivated()) {
+                sLogger.debug("Registration state has changed: proxy port has changed (old: "
                         + mSip.getSipStack().getOutboundProxyPort() + " - new: "
                         + dnsResolvedFields.mPort + ").");
             }
@@ -803,16 +783,17 @@ public abstract class ImsNetworkInterface {
 
     /**
      * Unregister from the IMS
+     * 
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void unregister() {
-        if (logger.isActivated()) {
-            logger.debug("Unregister from IMS");
+    public void unregister() throws SipPayloadException, SipNetworkException {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Unregister from IMS");
         }
 
-        // Unregister from IMS
-        mRegistration.unRegistration();
+        mRegistration.deRegister();
 
-        // Close the SIP stack
         mSip.closeStack();
     }
 
@@ -820,8 +801,8 @@ public abstract class ImsNetworkInterface {
      * Registration terminated
      */
     public void registrationTerminated() {
-        if (logger.isActivated()) {
-            logger.debug("Registration has been terminated");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Registration has been terminated");
         }
 
         // Stop registration

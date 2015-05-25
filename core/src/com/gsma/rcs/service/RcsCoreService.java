@@ -32,6 +32,8 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.ImsError;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatAutoRejoinTask;
@@ -277,7 +279,27 @@ public class RcsCoreService extends Service implements CoreListener {
              * Processing
              */
             public void run() {
-                stopCore();
+                // TODO : This logic of stopping core during onDestroy() needs to be refactored
+                // as it's not recommended to do such tasks in onDestroy() and as this method
+                // eventually will also perform a de-register to IMS so this needs to be moved to a
+                // much appropriate level.
+                try {
+                    stopCore();
+                } catch (SipPayloadException e) {
+                    sLogger.error("Unable to stop IMS core!", e);
+
+                } catch (SipNetworkException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(e.getMessage());
+                    }
+
+                } catch (RuntimeException e) {
+                    /*
+                     * Intentionally catch runtime exceptions as else it will abruptly end the
+                     * thread and eventually bring the whole system down, which is not intended.
+                     */
+                    sLogger.error("Unable to stop IMS core!", e);
+                }
             }
         }.start();
     }
@@ -410,8 +432,11 @@ public class RcsCoreService extends Service implements CoreListener {
 
     /**
      * Stop core
+     * 
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private synchronized void stopCore() {
+    private synchronized void stopCore() throws SipPayloadException, SipNetworkException {
         if (Core.getInstance() == null) {
             // Already stopped
             return;

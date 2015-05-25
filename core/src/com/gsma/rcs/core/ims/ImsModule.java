@@ -32,6 +32,8 @@ import com.gsma.rcs.core.ims.network.sip.SipManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpConnection;
 import com.gsma.rcs.core.ims.protocol.rtp.core.RtpSource;
 import com.gsma.rcs.core.ims.protocol.sip.SipEventListener;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.security.cert.KeyStoreManager;
 import com.gsma.rcs.core.ims.security.cert.KeyStoreManagerException;
@@ -255,8 +257,11 @@ public class ImsModule implements SipEventListener {
 
     /**
      * Stop the IMS module
+     * 
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void stop() {
+    public void stop() throws SipPayloadException, SipNetworkException {
         if (logger.isActivated()) {
             logger.info("Stop the IMS module");
         }

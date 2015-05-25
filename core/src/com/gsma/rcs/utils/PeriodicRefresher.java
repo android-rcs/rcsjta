@@ -76,7 +76,7 @@ public abstract class PeriodicRefresher {
     /**
      * The logger
      */
-    private Logger mLogger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(PeriodicRefresher.class.getName());
 
     /**
      * Constructor
@@ -117,16 +117,16 @@ public abstract class PeriodicRefresher {
         // Check expire period
         if (expirePeriod <= 0) {
             // Expire period is null
-            if (mLogger.isActivated()) {
-                mLogger.debug("Timer is deactivated");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Timer is deactivated");
             }
             return;
         }
 
         // Calculate the effective refresh period
         long pollingPeriod = (long) (expirePeriod * delta);
-        if (mLogger.isActivated()) {
-            mLogger.debug(new StringBuilder("Start timer at period=").append(pollingPeriod)
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("Start timer at period=").append(pollingPeriod)
                     .append("ms (expiration=").append(expirePeriod).append("ms)").toString());
         }
 
@@ -165,8 +165,8 @@ public abstract class PeriodicRefresher {
             return;
         }
 
-        if (mLogger.isActivated()) {
-            mLogger.debug("Stop timer");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Stop timer");
         }
 
         // The timer is stopped
@@ -195,16 +195,18 @@ public abstract class PeriodicRefresher {
                     try {
                         periodicProcessing();
                     } catch (SipPayloadException e) {
-                        mLogger.error("Failed to initiate start timer!", e);
-                        stopTimer();
+                        sLogger.error("IMS re-registration unsuccessful!", e);
                     } catch (SipNetworkException e) {
-                        stopTimer();
+                        /* Nothing to be handled here */
+                        if (sLogger.isActivated()) {
+                            sLogger.debug(e.getMessage());
+                        }
                     } catch (RuntimeException e) {
                         /*
                          * Intentionally catch runtime exceptions as else it will abruptly end the
                          * thread and eventually bring the whole system down, which is not intended.
                          */
-                        mLogger.error("Failed to initiate start timer!", e);
+                        sLogger.error("IMS re-registration unsuccessful!", e);
                         stopTimer();
                     }
                 }

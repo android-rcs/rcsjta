@@ -25,6 +25,8 @@ package com.gsma.rcs.core.ims.network;
 import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.ImsNetworkInterface.DnsResolvedFields;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.platform.network.NetworkFactory;
@@ -110,7 +112,7 @@ public class ImsConnectionManager implements Runnable {
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(ImsConnectionManager.class.getName());
 
     private final RcsSettings mRcsSettings;
 
@@ -215,17 +217,20 @@ public class ImsConnectionManager implements Runnable {
      */
     private void loadUserProfile() {
         ImsModule.IMS_USER_PROFILE = mCurrentNetworkInterface.getUserProfile();
-        if (logger.isActivated()) {
-            logger.debug("User profile has been reloaded");
+        if (sLogger.isActivated()) {
+            sLogger.debug("User profile has been reloaded");
         }
     }
 
     /**
      * Terminate the connection manager
+     * 
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void terminate() {
-        if (logger.isActivated()) {
-            logger.info("Terminate the IMS connection manager");
+    public void terminate() throws SipPayloadException, SipNetworkException {
+        if (sLogger.isActivated()) {
+            sLogger.info("Terminate the IMS connection manager");
         }
 
         // Unregister battery listener
@@ -248,8 +253,8 @@ public class ImsConnectionManager implements Runnable {
         // Unregister from the IMS
         mCurrentNetworkInterface.unregister();
 
-        if (logger.isActivated()) {
-            logger.info("IMS connection manager has been terminated");
+        if (sLogger.isActivated()) {
+            sLogger.info("IMS connection manager has been terminated");
         }
     }
 
@@ -286,8 +291,8 @@ public class ImsConnectionManager implements Runnable {
                 false);
         String reason = intent.getStringExtra(ConnectivityManager.EXTRA_REASON);
         boolean failover = intent.getBooleanExtra(ConnectivityManager.EXTRA_IS_FAILOVER, false);
-        if (logger.isActivated()) {
-            logger.debug("Connectivity event change: failover=" + failover + ", connectivity="
+        if (sLogger.isActivated()) {
+            sLogger.debug("Connectivity event change: failover=" + failover + ", connectivity="
                     + !connectivity + ", reason=" + reason);
         }
 
@@ -295,8 +300,8 @@ public class ImsConnectionManager implements Runnable {
         NetworkInfo networkInfo = mCnxManager.getActiveNetworkInfo();
         if (networkInfo == null) {
             // Disconnect from IMS network interface
-            if (logger.isActivated()) {
-                logger.debug("Disconnect from IMS: no network (e.g. air plane mode)");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Disconnect from IMS: no network (e.g. air plane mode)");
             }
             disconnectFromIms();
             return;
@@ -323,25 +328,25 @@ public class ImsConnectionManager implements Runnable {
         // Check if the network access type has changed
         if (networkInfo.getType() != mCurrentNetworkInterface.getType()) {
             // Network interface changed
-            if (logger.isActivated()) {
-                logger.info("Data connection state: NETWORK ACCESS CHANGED");
+            if (sLogger.isActivated()) {
+                sLogger.info("Data connection state: NETWORK ACCESS CHANGED");
             }
 
             // Disconnect from current IMS network interface
-            if (logger.isActivated()) {
-                logger.debug("Disconnect from IMS: network access has changed");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Disconnect from IMS: network access has changed");
             }
             disconnectFromIms();
 
             // Change current network interface
             if (networkInfo.getType() == ConnectivityManager.TYPE_MOBILE) {
-                if (logger.isActivated()) {
-                    logger.debug("Change the network interface to mobile");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Change the network interface to mobile");
                 }
                 mCurrentNetworkInterface = getMobileNetworkInterface();
             } else if (networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
-                if (logger.isActivated()) {
-                    logger.debug("Change the network interface to Wi-Fi");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Change the network interface to Wi-Fi");
                 }
                 mCurrentNetworkInterface = getWifiNetworkInterface();
             }
@@ -353,8 +358,8 @@ public class ImsConnectionManager implements Runnable {
             try {
                 mDnsResolvedFields = mCurrentNetworkInterface.getDnsResolvedFields();
             } catch (Exception e) {
-                if (logger.isActivated()) {
-                    logger.error(
+                if (sLogger.isActivated()) {
+                    sLogger.error(
                             "Resolving remote IP address to figure out initial local IP address failed!",
                             e);
                 }
@@ -371,8 +376,8 @@ public class ImsConnectionManager implements Runnable {
                     mDnsResolvedFields = mCurrentNetworkInterface.getDnsResolvedFields();
                 }
             } catch (Exception e) {
-                if (logger.isActivated()) {
-                    logger.error(
+                if (sLogger.isActivated()) {
+                    sLogger.error(
                             "Resolving remote IP address to figure out initial local IP address failed!",
                             e);
                 }
@@ -386,19 +391,19 @@ public class ImsConnectionManager implements Runnable {
                     // Changed by Deutsche Telekom
                     if (lastIpAddr != null) {
                         // Disconnect from current IMS network interface
-                        if (logger.isActivated()) {
-                            logger.debug("Disconnect from IMS: IP address has changed");
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("Disconnect from IMS: IP address has changed");
                         }
                         disconnectFromIms();
                     } else {
-                        if (logger.isActivated()) {
-                            logger.debug("IP address available (again)");
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("IP address available (again)");
                         }
                     }
                 } else {
                     // Changed by Deutsche Telekom
-                    if (logger.isActivated()) {
-                        logger.debug("Neither interface nor IP address has changed; nothing to do.");
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Neither interface nor IP address has changed; nothing to do.");
                     }
                     return;
                 }
@@ -414,16 +419,16 @@ public class ImsConnectionManager implements Runnable {
                 remoteAddress = new String("unresolved");
             }
 
-            if (logger.isActivated()) {
-                logger.info("Data connection state: CONNECTED to " + networkInfo.getTypeName()
+            if (sLogger.isActivated()) {
+                sLogger.info("Data connection state: CONNECTED to " + networkInfo.getTypeName()
                         + " with local IP " + localIpAddr + " valid for " + remoteAddress);
             }
 
             // Test network access type
             if (!NetworkAccessType.ANY.equals(mNetwork)
                     && (mNetwork.toInt() != networkInfo.getType())) {
-                if (logger.isActivated()) {
-                    logger.warn("Network access " + networkInfo.getTypeName()
+                if (sLogger.isActivated()) {
+                    sLogger.warn("Network access " + networkInfo.getTypeName()
                             + " is not authorized");
                 }
                 return;
@@ -434,33 +439,34 @@ public class ImsConnectionManager implements Runnable {
                     .getSystemService(Context.TELEPHONY_SERVICE);
             String currentOpe = tm.getSimOperatorName();
             if ((mOperator.length() > 0) && !currentOpe.equalsIgnoreCase(mOperator)) {
-                if (logger.isActivated()) {
-                    logger.warn("Operator not authorized");
+                if (sLogger.isActivated()) {
+                    sLogger.warn("Operator not authorized");
                 }
                 return;
             }
 
             // Test the configuration
             if (!mCurrentNetworkInterface.isInterfaceConfigured()) {
-                if (logger.isActivated()) {
-                    logger.warn("IMS network interface not well configured");
+                if (sLogger.isActivated()) {
+                    sLogger.warn("IMS network interface not well configured");
                 }
                 return;
             }
 
             // Connect to IMS network interface
-            if (logger.isActivated()) {
-                logger.debug("Connect to IMS");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Connect to IMS");
             }
             connectToIms(localIpAddr);
         } else {
-            if (logger.isActivated()) {
-                logger.info("Data connection state: DISCONNECTED from " + networkInfo.getTypeName());
+            if (sLogger.isActivated()) {
+                sLogger.info("Data connection state: DISCONNECTED from "
+                        + networkInfo.getTypeName());
             }
 
             // Disconnect from IMS network interface
-            if (logger.isActivated()) {
-                logger.debug("Disconnect from IMS: IP connection lost");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Disconnect from IMS: IP connection lost");
             }
             disconnectFromIms();
         }
@@ -503,8 +509,8 @@ public class ImsConnectionManager implements Runnable {
         }
 
         // Set the connection flag
-        if (logger.isActivated()) {
-            logger.info("Start the IMS connection manager");
+        if (sLogger.isActivated()) {
+            sLogger.info("Start the IMS connection manager");
         }
 
         // Start background polling thread
@@ -513,8 +519,8 @@ public class ImsConnectionManager implements Runnable {
             mImsPollingThreadId = mImsPollingThread.getId();
             mImsPollingThread.start();
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Internal exception while starting IMS polling thread", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Internal exception while starting IMS polling thread", e);
             }
         }
     }
@@ -529,8 +535,8 @@ public class ImsConnectionManager implements Runnable {
         }
 
         // Set the connection flag
-        if (logger.isActivated()) {
-            logger.info("Stop the IMS connection manager");
+        if (sLogger.isActivated()) {
+            sLogger.info("Stop the IMS connection manager");
         }
         mImsPollingThreadId = -1;
 
@@ -539,8 +545,8 @@ public class ImsConnectionManager implements Runnable {
             mImsPollingThread.interrupt();
             mImsPollingThread = null;
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Internal exception while stopping IMS polling thread", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Internal exception while stopping IMS polling thread", e);
             }
         }
 
@@ -555,8 +561,8 @@ public class ImsConnectionManager implements Runnable {
      * Background processing
      */
     public void run() {
-        if (logger.isActivated()) {
-            logger.debug("Start polling of the IMS connection");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Start polling of the IMS connection");
         }
 
         long servicePollingPeriod = mRcsSettings.getImsServicePollingPeriod();
@@ -566,82 +572,80 @@ public class ImsConnectionManager implements Runnable {
         int nbFailures = 0;
 
         while (mImsPollingThreadId == Thread.currentThread().getId()) {
-            if (logger.isActivated()) {
-                logger.debug("Polling: check IMS connection");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Polling: check IMS connection");
             }
 
             // Connection management
             try {
                 // Test IMS registration
                 if (!mCurrentNetworkInterface.isRegistered()) {
-                    if (logger.isActivated()) {
-                        logger.debug("Not yet registered to IMS: try registration");
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Not yet registered to IMS: try registration");
                     }
 
                     // Try to register to IMS
-                    if (mCurrentNetworkInterface.register(mDnsResolvedFields)) {
-                        // InterruptedException thrown by stopImsConnection() may be caught by one
-                        // of the methods used in currentNetworkInterface.register() above
-                        if (mImsPollingThreadId != Thread.currentThread().getId()) {
-                            if (logger.isActivated()) {
-                                logger.debug("IMS connection polling thread race condition");
-                            }
-                            break;
-                        } else {
-                            if (logger.isActivated()) {
-                                logger.debug("Registered to the IMS with success: start IMS services");
-                            }
-                            if (mImsModule.isInitializationFinished() && !mImsServicesStarted) {
-                                mImsModule.startImsServices();
-                                mImsServicesStarted = true;
-                            }
+                    mCurrentNetworkInterface.register(mDnsResolvedFields);
 
-                            // Reset number of failures
-                            nbFailures = 0;
+                    // InterruptedException thrown by stopImsConnection() may be caught by one
+                    // of the methods used in currentNetworkInterface.register() above
+                    if (mImsPollingThreadId != Thread.currentThread().getId()) {
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("IMS connection polling thread race condition");
                         }
+                        break;
                     } else {
-                        if (logger.isActivated()) {
-                            logger.debug("Can't register to the IMS");
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("Registered to the IMS with success: start IMS services");
+                        }
+                        if (mImsModule.isInitializationFinished() && !mImsServicesStarted) {
+                            mImsModule.startImsServices();
+                            mImsServicesStarted = true;
                         }
 
-                        // Increment number of failures
-                        nbFailures++;
-
-                        // Force to perform a new DNS lookup
-                        mDnsResolvedFields = null;
+                        // Reset number of failures
+                        nbFailures = 0;
                     }
+
                 } else {
                     if (mImsModule.isInitializationFinished()) {
                         if (!mImsServicesStarted) {
-                            if (logger.isActivated()) {
-                                logger.debug("Already registered to IMS: start IMS services");
+                            if (sLogger.isActivated()) {
+                                sLogger.debug("Already registered to IMS: start IMS services");
                             }
                             mImsModule.startImsServices();
                             mImsServicesStarted = true;
                         } else {
-                            if (logger.isActivated()) {
-                                logger.debug("Already registered to IMS: check IMS services");
+                            if (sLogger.isActivated()) {
+                                sLogger.debug("Already registered to IMS: check IMS services");
                             }
                             mImsModule.checkImsServices();
                         }
                     } else {
-                        if (logger.isActivated()) {
-                            logger.debug("Already registered to IMS: IMS services not yet started");
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("Already registered to IMS: IMS services not yet started");
                         }
                     }
                 }
-            } catch (Exception e) {
-                if (logger.isActivated()) {
-                    logger.error("Internal exception", e);
-                }
-                // Force to perform a new DNS lookup
+            } catch (SipPayloadException e) {
+                sLogger.error("Can't register to the IMS!", e);
+                mCurrentNetworkInterface.getSipManager().closeStack();
+                /* Increment number of failures */
+                nbFailures++;
+                /* Force to perform a new DNS lookup */
+                mDnsResolvedFields = null;
+            } catch (SipNetworkException e) {
+                mCurrentNetworkInterface.getSipManager().closeStack();
+                /* Increment number of failures */
+                nbFailures++;
+                /* Force to perform a new DNS lookup */
                 mDnsResolvedFields = null;
             }
 
             // InterruptedException thrown by stopImsConnection() may be caught by one
             // of the methods used in currentNetworkInterface.register() above
             if (mImsPollingThreadId != Thread.currentThread().getId()) {
-                logger.debug("IMS connection polling thread race condition");
+                sLogger.debug("IMS connection polling thread race condition");
                 break;
             }
 
@@ -658,8 +662,8 @@ public class ImsConnectionManager implements Runnable {
                         double coeff = (random.nextInt(51) + 50) / 100.0; // Coeff between 50% and
                                                                           // 100%
                         long retryPeriod = (long) (coeff * w);
-                        if (logger.isActivated()) {
-                            logger.debug(new StringBuilder("Wait ").append(retryPeriod)
+                        if (sLogger.isActivated()) {
+                            sLogger.debug(new StringBuilder("Wait ").append(retryPeriod)
                                     .append("ms before retry registration (failures=")
                                     .append(nbFailures).append(", coeff=").append(coeff)
                                     .append(')').toString());
@@ -668,8 +672,8 @@ public class ImsConnectionManager implements Runnable {
                     }
                 } else if (!mImsServicesStarted) {
                     long retryPeriod = 5000;
-                    if (logger.isActivated()) {
-                        logger.debug(new StringBuilder("Wait ").append(retryPeriod)
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(new StringBuilder("Wait ").append(retryPeriod)
                                 .append("ms before retry to start services").toString());
                     }
                     Thread.sleep(retryPeriod);
@@ -682,8 +686,8 @@ public class ImsConnectionManager implements Runnable {
             }
         }
 
-        if (logger.isActivated()) {
-            logger.debug("IMS connection polling is terminated");
+        if (sLogger.isActivated()) {
+            sLogger.debug("IMS connection polling is terminated");
         }
     }
 
@@ -701,8 +705,8 @@ public class ImsConnectionManager implements Runnable {
             }
             int batteryLevel = intent.getIntExtra("level", 0);
             int batteryPlugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 1);
-            if (logger.isActivated()) {
-                logger.info(new StringBuilder("Battery level: ").append(batteryLevel)
+            if (sLogger.isActivated()) {
+                sLogger.info(new StringBuilder("Battery level: ").append(batteryLevel)
                         .append("% plugged: ").append(batteryPlugged).toString());
             }
             if (batteryLevel <= batteryLimit.toInt() && batteryPlugged == 0) {

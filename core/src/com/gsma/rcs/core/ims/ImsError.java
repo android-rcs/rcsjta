@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims;
@@ -39,7 +43,7 @@ public class ImsError extends Error {
     /**
      * Error code
      */
-    private int code;
+    private int mErrorCode;
 
     /**
      * Constructor
@@ -48,8 +52,7 @@ public class ImsError extends Error {
      */
     public ImsError(int code) {
         super();
-
-        this.code = code;
+        mErrorCode = code;
     }
 
     /**
@@ -60,8 +63,20 @@ public class ImsError extends Error {
      */
     public ImsError(int code, String msg) {
         super(msg);
+        mErrorCode = code;
+    }
 
-        this.code = code;
+    /**
+     * Constructor
+     * 
+     * @param code Error code
+     * @param cause the cause (which is saved for later retrieval by the Throwable.getCause()
+     *            method). (A null value is permitted, and indicates that the cause is nonexistent
+     *            or unknown.)
+     */
+    public ImsError(int code, Throwable cause) {
+        super(cause);
+        mErrorCode = code;
     }
 
     /**
@@ -70,6 +85,6 @@ public class ImsError extends Error {
      * @return Error code
      */
     public int getErrorCode() {
-        return code;
+        return mErrorCode;
     }
 }

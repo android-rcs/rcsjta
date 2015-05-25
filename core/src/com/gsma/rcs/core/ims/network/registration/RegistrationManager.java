@@ -22,14 +22,14 @@
 
 package com.gsma.rcs.core.ims.network.registration;
 
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.ImsError;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.ImsNetworkInterface;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -97,9 +97,7 @@ public class RegistrationManager extends PeriodicRefresher {
      */
     private RcsServiceRegistration.ReasonCode mReasonCode = RcsServiceRegistration.ReasonCode.UNSPECIFIED;
 
-    private boolean mRegistering = false;
-
-    private boolean mNeedUnregister = false;
+    private boolean mPendingUnRegister = false;
 
     private int mNb401Failures = 0;
 
@@ -110,7 +108,7 @@ public class RegistrationManager extends PeriodicRefresher {
 
     private final RcsSettings mRcsSettings;
 
-    private Logger mLogger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(RegistrationManager.class.getName());
 
     /**
      * Constructor
@@ -190,77 +188,78 @@ public class RegistrationManager extends PeriodicRefresher {
             public void run() {
                 // Stop the current registration
                 stopRegistration();
-                
                 mFeatureTags = RegistrationUtils.getSupportedFeatureTags(mRcsSettings);
 
-                // Start a new registration
-                registration();
+                try {
+                    register();
+                } catch (SipPayloadException e) {
+                    sLogger.error("Registration has failed!", e);
+                } catch (SipNetworkException e) {
+                    /* Nothing to be handled here */
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(e.getMessage());
+                    }
+                } catch (RuntimeException e) {
+                    /*
+                     * Intentionally catch runtime exceptions as else it will abruptly end the
+                     * thread and eventually bring the whole system down, which is not intended.
+                     */
+                    sLogger.error("Registration has failed!", e);
+                    handleError(new ImsError(ImsError.REGISTRATION_FAILED, e));
+                }
+
             }
         }.start();
     }
 
     /**
-     * Registration
+     * Attempts to perform a registration to IMS
      * 
-     * @return Boolean status
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public synchronized boolean registration() {
-        mRegistering = true;
+    public synchronized void register() throws SipPayloadException, SipNetworkException {
         try {
-            // Create a dialog path if necessary
             if (mDialogPath == null) {
-                // Reset the registration authentication procedure
+                /* Reset the registration authentication procedure */
                 mRegistrationProcedure.init();
 
-                // Set Call-Id
                 String callId = mNetworkInterface.getSipManager().getSipStack().generateCallId();
 
-                // Set target
                 String target = PhoneUtils.SIP_URI_HEADER.concat(mRegistrationProcedure
                         .getHomeDomain());
 
-                // Set local party
                 String localParty = mRegistrationProcedure.getPublicUri();
 
-                // Set remote party
                 String remoteParty = mRegistrationProcedure.getPublicUri();
 
-                // Set the route path
                 Vector<String> route = mNetworkInterface.getSipManager().getSipStack()
                         .getDefaultRoutePath();
 
-                // Create a dialog path
                 mDialogPath = new SipDialogPath(mNetworkInterface.getSipManager().getSipStack(),
                         callId, 1, target, localParty, remoteParty, route, mRcsSettings);
             } else {
-                // Increment the Cseq number of the dialog path
                 mDialogPath.incrementCseq();
             }
 
-            // Reset the number of 401 failures
             mNb401Failures = 0;
 
-            // Reset the number of 4xx5xx6xx failures
             mNb4xx5xx6xxFailures = 0;
 
-            // Reset retry after header duration
             mNetworkInterface.setRetryAfterHeaderDuration(0);
 
-            // Create REGISTER request
             SipRequest register = SipMessageFactory.createRegister(mDialogPath, mFeatureTags,
                     getExpiryValue(), mInstanceId);
 
-            // Send REGISTER request
             sendRegister(register);
-
-        } catch (Exception e) {
-            if (mLogger.isActivated()) {
-                mLogger.error("Registration has failed", e);
-            }
-            handleError(new ImsError(ImsError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        } catch (SipPayloadException e) {
+            handleError(new ImsError(ImsError.REGISTRATION_FAILED, e));
+            throw e;
+        } catch (SipNetworkException e) {
+            handleError(new ImsError(ImsError.REGISTRATION_FAILED, e));
+            throw e;
         }
-        mRegistering = false;
-        return mRegistered;
+
     }
 
     private boolean isBatteryLow() {
@@ -294,73 +293,50 @@ public class RegistrationManager extends PeriodicRefresher {
     }
 
     /**
-     * Unregistration
+     * Performs a de-registration to IMS
+     * 
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public synchronized void unRegistration() {
+    public synchronized void deRegister() throws SipPayloadException, SipNetworkException {
         if (mRegistered) {
-            doUnRegistration();
-        } else if (mRegistering) {
-            mNeedUnregister = true;
-        }
-    }
+            mPendingUnRegister = false;
 
-    /**
-     * Unregistration
-     */
-    private synchronized void doUnRegistration() {
-        mNeedUnregister = false;
-        if (!mRegistered) {
-            // Already unregistered
-            return;
-        }
-
-        try {
-            // Stop periodic registration
             stopTimer();
 
-            // Increment the Cseq number of the dialog path
             mDialogPath.incrementCseq();
 
-            // Reset the number of 4xx5xx6xx failures
             mNb4xx5xx6xxFailures = 0;
 
-            // Create REGISTER request with expire 0
+            /* Create REGISTER request with expire 0 */
             SipRequest register = SipMessageFactory.createRegister(mDialogPath, mFeatureTags, 0,
                     mInstanceId);
-
-            // Send REGISTER request
             sendRegister(register);
 
-        } catch (Exception e) {
-            if (mLogger.isActivated()) {
-                mLogger.error("Unregistration has failed", e);
-            }
+            mRegistered = false;
+
+            resetDialogPath();
+
+            mReasonCode = isBatteryLow() ? RcsServiceRegistration.ReasonCode.BATTERY_LOW
+                    : RcsServiceRegistration.ReasonCode.CONNECTION_LOST;
+
+            mNetworkInterface.getImsModule().getCore().getListener()
+                    .handleRegistrationTerminated(mReasonCode);
+        } else {
+            mPendingUnRegister = true;
         }
-
-        // Force registration flag to false
-        mRegistered = false;
-
-        // Reset dialog path attributes
-        resetDialogPath();
-
-        mReasonCode = isBatteryLow() ? RcsServiceRegistration.ReasonCode.BATTERY_LOW
-                : RcsServiceRegistration.ReasonCode.CONNECTION_LOST;
-
-        // Notify event listener
-        mNetworkInterface.getImsModule().getCore().getListener()
-                .handleRegistrationTerminated(mReasonCode);
     }
 
     /**
      * Send REGISTER message
      * 
      * @param register SIP REGISTER
-     * @throws SipException
-     * @throws CoreException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void sendRegister(SipRequest register) throws SipException, CoreException {
-        if (mLogger.isActivated()) {
-            mLogger.info(new StringBuilder("Send REGISTER, expire=").append(register.getExpires())
+    private void sendRegister(SipRequest register) throws SipPayloadException, SipNetworkException {
+        if (sLogger.isActivated()) {
+            sLogger.info(new StringBuilder("Send REGISTER, expire=").append(register.getExpires())
                     .append("ms").toString());
         }
 
@@ -433,13 +409,14 @@ public class RegistrationManager extends PeriodicRefresher {
      * Handle 200 0K response
      * 
      * @param ctx SIP transaction context
-     * @throws SipException
-     * @throws CoreException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void handle200OK(SipTransactionContext ctx) throws SipException, CoreException {
+    private void handle200OK(SipTransactionContext ctx) throws SipPayloadException,
+            SipNetworkException {
         // 200 OK response received
-        if (mLogger.isActivated()) {
-            mLogger.info("200 OK response received");
+        if (sLogger.isActivated()) {
+            sLogger.info("200 OK response received");
         }
 
         SipResponse resp = ctx.getSipResponse();
@@ -482,22 +459,22 @@ public class RegistrationManager extends PeriodicRefresher {
                 try {
                     viaRport = Integer.parseInt(viaRportStr);
                 } catch (NumberFormatException e) {
-                    if (mLogger.isActivated()) {
-                        mLogger.warn("Non-numeric rport value \"" + viaRportStr + "\"");
+                    if (sLogger.isActivated()) {
+                        sLogger.warn("Non-numeric rport value \"" + viaRportStr + "\"");
                     }
                 }
             }
             mNetworkInterface.setNatPublicPort(viaRport);
-            if (mLogger.isActivated()) {
-                mLogger.debug("NAT public interface detected: " + received + ":" + viaRport);
+            if (sLogger.isActivated()) {
+                sLogger.debug("NAT public interface detected: " + received + ":" + viaRport);
             }
         } else {
             mNetworkInterface.setNatTraversal(false);
             mNetworkInterface.setNatPublicAddress(null);
             mNetworkInterface.setNatPublicPort(-1);
         }
-        if (mLogger.isActivated()) {
-            mLogger.debug("NAT traversal detection: " + mNetworkInterface.isBehindNat());
+        if (sLogger.isActivated()) {
+            sLogger.debug("NAT traversal detection: " + mNetworkInterface.isBehindNat());
         }
 
         // Read the security header
@@ -519,9 +496,9 @@ public class RegistrationManager extends PeriodicRefresher {
         // Notify event listener
         mNetworkInterface.getImsModule().getCore().getListener().handleRegistrationSuccessful();
 
-        // Start unregister procedure if necessary
-        if (mNeedUnregister) {
-            doUnRegistration();
+        /* Start deregister procedure if necessary */
+        if (mPendingUnRegister) {
+            deRegister();
         }
     }
 
@@ -532,8 +509,8 @@ public class RegistrationManager extends PeriodicRefresher {
      */
     private void handle200OkUnregister(SipTransactionContext ctx) {
         // 200 OK response received
-        if (mLogger.isActivated()) {
-            mLogger.info("200 OK response received");
+        if (sLogger.isActivated()) {
+            sLogger.info("200 OK response received");
         }
 
         // Reset the NAT parameters as we are not expecting any more messages
@@ -546,14 +523,14 @@ public class RegistrationManager extends PeriodicRefresher {
      * Handle 302 response
      * 
      * @param ctx SIP transaction context
-     * @throws SipException
-     * @throws CoreException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void handle302MovedTemporarily(SipTransactionContext ctx) throws SipException,
-            CoreException {
+    private void handle302MovedTemporarily(SipTransactionContext ctx) throws SipPayloadException,
+            SipNetworkException {
         // 302 Moved Temporarily response received
-        if (mLogger.isActivated()) {
-            mLogger.info("302 Moved Temporarily response received");
+        if (sLogger.isActivated()) {
+            sLogger.info("302 Moved Temporarily response received");
         }
 
         // Extract new target URI from Contact header of the received response
@@ -567,8 +544,8 @@ public class RegistrationManager extends PeriodicRefresher {
         mDialogPath.incrementCseq();
 
         // Create REGISTER request with security token
-        if (mLogger.isActivated()) {
-            mLogger.info("Send REGISTER to new address");
+        if (sLogger.isActivated()) {
+            sLogger.info("Send REGISTER to new address");
         }
         SipRequest register = SipMessageFactory.createRegister(mDialogPath, mFeatureTags, ctx
                 .getTransaction().getRequest().getExpires().getExpires()
@@ -582,19 +559,19 @@ public class RegistrationManager extends PeriodicRefresher {
      * Handle 401 response
      * 
      * @param ctx SIP transaction context
-     * @throws SipException
-     * @throws CoreException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void handle401Unauthorized(SipTransactionContext ctx) throws SipException,
-            CoreException {
+    private void handle401Unauthorized(SipTransactionContext ctx) throws SipPayloadException,
+            SipNetworkException {
         /**
          * Increment the number of 401 failures
          */
         mNb401Failures++;
 
         // 401 response received
-        if (mLogger.isActivated()) {
-            mLogger.info("401 response received, nbFailures=" + mNb401Failures);
+        if (sLogger.isActivated()) {
+            sLogger.info("401 response received, nbFailures=" + mNb401Failures);
         }
 
         if (mNb401Failures >= MAX_REGISTRATION_FAILURES) {
@@ -614,8 +591,8 @@ public class RegistrationManager extends PeriodicRefresher {
         mDialogPath.incrementCseq();
 
         // Create REGISTER request with security token
-        if (mLogger.isActivated()) {
-            mLogger.info("Send REGISTER with security token");
+        if (sLogger.isActivated()) {
+            sLogger.info("Send REGISTER with security token");
         }
         SipRequest register = SipMessageFactory.createRegister(mDialogPath, mFeatureTags, ctx
                 .getTransaction().getRequest().getExpires().getExpires()
@@ -629,14 +606,14 @@ public class RegistrationManager extends PeriodicRefresher {
      * Handle 423 response
      * 
      * @param ctx SIP transaction context
-     * @throws SipException
-     * @throws CoreException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void handle423IntervalTooBrief(SipTransactionContext ctx) throws SipException,
-            CoreException {
+    private void handle423IntervalTooBrief(SipTransactionContext ctx) throws SipPayloadException,
+            SipNetworkException {
         // 423 response received
-        if (mLogger.isActivated()) {
-            mLogger.info("423 response received");
+        if (sLogger.isActivated()) {
+            sLogger.info("423 response received");
         }
 
         SipResponse resp = ctx.getSipResponse();
@@ -647,8 +624,8 @@ public class RegistrationManager extends PeriodicRefresher {
         // Extract the Min-Expire value
         long minExpire = SipUtils.getMinExpiresPeriod(resp);
         if (minExpire == -1) {
-            if (mLogger.isActivated()) {
-                mLogger.error("Can't read the Min-Expires value");
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't read the Min-Expires value");
             }
             handleError(new ImsError(ImsError.UNEXPECTED_EXCEPTION, "No Min-Expires value found"));
             return;
@@ -658,8 +635,8 @@ public class RegistrationManager extends PeriodicRefresher {
         mExpirePeriod = minExpire;
 
         // Create a new REGISTER with the right expire period
-        if (mLogger.isActivated()) {
-            mLogger.info("Send new REGISTER");
+        if (sLogger.isActivated()) {
+            sLogger.info("Send new REGISTER");
         }
         SipRequest register = SipMessageFactory.createRegister(mDialogPath, mFeatureTags,
                 mExpirePeriod, mInstanceId);
@@ -675,8 +652,8 @@ public class RegistrationManager extends PeriodicRefresher {
      */
     private void handleError(ImsError error) {
         // Error
-        if (mLogger.isActivated()) {
-            mLogger.info("Registration has failed: " + error.getErrorCode() + ", reason="
+        if (sLogger.isActivated()) {
+            sLogger.info("Registration has failed: " + error.getErrorCode() + ", reason="
                     + error.getMessage());
         }
         mRegistered = false;
@@ -733,26 +710,29 @@ public class RegistrationManager extends PeriodicRefresher {
 
     /**
      * Registration processing
+     * 
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void periodicProcessing() {
+    public void periodicProcessing() throws SipPayloadException, SipNetworkException {
         // Make a registration
-        if (mLogger.isActivated()) {
-            mLogger.info("Execute re-registration");
+        if (sLogger.isActivated()) {
+            sLogger.info("Execute re-registration");
         }
-        registration();
+        register();
     }
 
     /**
      * Handle 4xx5xx6xx response without retry header
      * 
      * @param ctx SIP transaction context
-     * @throws SipException
-     * @throws CoreException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void handle4xx5xx6xxNoRetryAfterHeader(SipTransactionContext ctx) throws SipException,
-            CoreException {
-        if (mLogger.isActivated()) {
-            mLogger.info("4xx5xx6xx response without retry after header received");
+    private void handle4xx5xx6xxNoRetryAfterHeader(SipTransactionContext ctx)
+            throws SipPayloadException, SipNetworkException {
+        if (sLogger.isActivated()) {
+            sLogger.info("4xx5xx6xx response without retry after header received");
         }
         final SipResponse response = ctx.getSipResponse();
         final RetryAfterHeader retryHeader = (RetryAfterHeader) response.getStackMessage()

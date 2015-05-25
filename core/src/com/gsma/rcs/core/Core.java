@@ -24,6 +24,8 @@ package com.gsma.rcs.core;
 
 import com.gsma.rcs.addressbook.AddressBookManager;
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.capability.CapabilityService;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.ipcall.IPCallService;
@@ -119,8 +121,11 @@ public class Core {
 
     /**
      * Terminate the core
+     * 
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public synchronized static void terminateCore() {
+    public synchronized static void terminateCore() throws SipPayloadException, SipNetworkException {
         if (sInstance == null) {
             return;
         }
@@ -238,8 +243,11 @@ public class Core {
 
     /**
      * Stop the terminal core
+     * 
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void stopCore() {
+    private void stopCore() throws SipPayloadException, SipNetworkException {
         if (!mStarted) {
             // Already stopped
             return;
@@ -254,14 +262,8 @@ public class Core {
         // Stop the address book monitoring
         mAddressBookManager.stopAddressBookMonitoring();
 
-        try {
-            // Stop the IMS module
-            mImsModule.stop();
-        } catch (Exception e) {
-            if (logActivated) {
-                logger.error("Error during core shutdown", e);
-            }
-        }
+        // Stop the IMS module
+        mImsModule.stop();
 
         mStopping = false;
         mStarted = false;

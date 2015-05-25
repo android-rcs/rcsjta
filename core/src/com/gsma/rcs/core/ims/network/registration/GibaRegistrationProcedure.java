@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +15,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.network.registration;
+
+import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
+import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
+import com.gsma.rcs.platform.AndroidFactory;
+import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
+import com.gsma.rcs.utils.PhoneUtils;
+import com.gsma.rcs.utils.logger.Logger;
+
+import android.content.Context;
+import android.telephony.TelephonyManager;
 
 import java.text.ParseException;
 import java.util.ListIterator;
@@ -26,20 +44,6 @@ import javax2.sip.address.SipURI;
 import javax2.sip.address.URI;
 import javax2.sip.header.ExtensionHeader;
 import javax2.sip.header.Header;
-
-import android.content.Context;
-import android.telephony.TelephonyManager;
-
-import com.gsma.rcs.core.CoreException;
-import com.gsma.rcs.core.ims.ImsModule;
-import com.gsma.rcs.core.ims.network.sip.SipUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
-import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
-import com.gsma.rcs.platform.AndroidFactory;
-import com.gsma.rcs.utils.ContactUtil;
-import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
-import com.gsma.rcs.utils.PhoneUtils;
-import com.gsma.rcs.utils.logger.Logger;
 
 /**
  * GIBA or early-IMS registration procedure
@@ -65,7 +69,8 @@ public class GibaRegistrationProcedure extends RegistrationProcedure {
     /**
      * The logger
      */
-    private Logger mLogger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(GibaRegistrationProcedure.class
+            .getName());
 
     /**
      * Constructor
@@ -120,11 +125,33 @@ public class GibaRegistrationProcedure extends RegistrationProcedure {
      * Read the security header from REGISTER response
      * 
      * @param response Response
-     * @throws CoreException
+     * @throws SipPayloadException
      */
-    public void readSecurityHeader(SipResponse response) throws CoreException {
-        // Read the associated-URI from the 200 OK response
-        ListIterator<Header> list = response.getHeaders(SipUtils.HEADER_P_ASSOCIATED_URI);
+    public void readSecurityHeader(SipResponse response) throws SipPayloadException {
+        SipURI sipUri = getSipUri(response.getHeaders(SipUtils.HEADER_P_ASSOCIATED_URI));
+
+        String user = sipUri.getUser();
+        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(user);
+        if (number == null) {
+            throw new SipPayloadException(new StringBuilder(
+                    "Can't read a SIP-URI from the P-Associated-URI header: invalid user '")
+                    .append(user).append("'").toString());
+        }
+        ImsModule.IMS_USER_PROFILE
+                .setUsername(ContactUtil.createContactIdFromValidatedData(number));
+        ImsModule.IMS_USER_PROFILE.setHomeDomain(sipUri.getHost());
+        ImsModule.IMS_USER_PROFILE.setXdmServerLogin(PhoneUtils.SIP_URI_HEADER + sipUri.getUser()
+                + "@" + sipUri.getHost());
+    }
+
+    /**
+     * Return the associated SIP URI fetched from the 200 OK response
+     * 
+     * @param list
+     * @return
+     * @throws SipPayloadException
+     */
+    private SipURI getSipUri(ListIterator<Header> list) throws SipPayloadException {
         SipURI sipUri = null;
         while (list.hasNext()) {
             ExtensionHeader associatedHeader = (ExtensionHeader) list.next();
@@ -133,34 +160,19 @@ public class GibaRegistrationProcedure extends RegistrationProcedure {
                 Address sipAddr = SipUtils.ADDR_FACTORY.createAddress(unparsedAddress);
                 URI uri = sipAddr.getURI();
                 if (uri instanceof SipURI) {
-                    // SIP-URI
                     sipUri = (SipURI) sipAddr.getURI();
                     break;
                 }
             } catch (ParseException e) {
-                if (mLogger.isActivated()) {
-                    mLogger.warn("Failed to parse extension header '" + unparsedAddress + "'");
+                if (sLogger.isActivated()) {
+                    sLogger.warn(new StringBuilder("Failed to parse extension header '")
+                            .append(unparsedAddress).append("'").toString());
                 }
             }
         }
         if (sipUri == null) {
-            throw new CoreException("No SIP-URI found in the P-Associated-URI header");
+            throw new SipPayloadException("No SIP-URI found in the P-Associated-URI header!");
         }
-
-        // Update the user profile
-        String user = sipUri.getUser();
-        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(user);
-        if (number == null) {
-            if (mLogger.isActivated()) {
-                mLogger.error("Can't read a SIP-URI from the P-Associated-URI header: invalid user '"
-                        + user + "'");
-            }
-            throw new CoreException("Bad P-Associated-URI header");
-        }
-        ImsModule.IMS_USER_PROFILE
-                .setUsername(ContactUtil.createContactIdFromValidatedData(number));
-        ImsModule.IMS_USER_PROFILE.setHomeDomain(sipUri.getHost());
-        ImsModule.IMS_USER_PROFILE.setXdmServerLogin(PhoneUtils.SIP_URI_HEADER + sipUri.getUser()
-                + "@" + sipUri.getHost());
+        return sipUri;
     }
 }

@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +15,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.network.registration;
 
-import javax2.sip.header.AuthenticationInfoHeader;
-import javax2.sip.header.AuthorizationHeader;
-import javax2.sip.header.WWWAuthenticateHeader;
-
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.security.HttpDigestMd5Authentication;
 import com.gsma.rcs.utils.PhoneUtils;
-import com.gsma.rcs.utils.logger.Logger;
+
+import javax2.sip.InvalidArgumentException;
+import javax2.sip.header.AuthenticationInfoHeader;
+import javax2.sip.header.AuthorizationHeader;
+import javax2.sip.header.WWWAuthenticateHeader;
 
 /**
  * HTTP Digest MD5 registration procedure
@@ -41,8 +45,6 @@ public class HttpDigestRegistrationProcedure extends RegistrationProcedure {
      * HTTP Digest MD5 agent
      */
     private HttpDigestMd5Authentication mDigest;
-
-    private Logger mLogger = Logger.getLogger(this.getClass().getName());
 
     /**
      * Constructor
@@ -80,30 +82,23 @@ public class HttpDigestRegistrationProcedure extends RegistrationProcedure {
      * Write security header to REGISTER request
      * 
      * @param request Request
-     * @throws CoreException
+     * @throws SipPayloadException
      */
-    public void writeSecurityHeader(SipRequest request) throws CoreException {
-        if (mDigest == null) {
-            return;
-        }
-
+    public void writeSecurityHeader(SipRequest request) throws SipPayloadException {
         try {
-            // Get Realm
-            String realm = "";
+            String realm;
             if (mDigest.getRealm() != null) {
                 realm = mDigest.getRealm();
             } else {
                 realm = ImsModule.IMS_USER_PROFILE.getRealm();
             }
 
-            // Update nonce parameters
             String nonce = "";
             if (mDigest.getNextnonce() != null) {
                 mDigest.updateNonceParameters();
                 nonce = mDigest.getNonce();
             }
 
-            // Calculate response
             String response = "";
             if (nonce.length() > 0) {
                 String user = ImsModule.IMS_USER_PROFILE.getPrivateID();
@@ -112,7 +107,7 @@ public class HttpDigestRegistrationProcedure extends RegistrationProcedure {
                         request.getRequestURI(), mDigest.buildNonceCounter(), request.getContent());
             }
 
-            // Build the Authorization header
+            /* Build the Authorization header */
             String auth = "Digest username=\"" + ImsModule.IMS_USER_PROFILE.getPrivateID() + "\""
                     + ",uri=\"" + request.getRequestURI() + "\"" + ",algorithm=MD5" + ",realm=\""
                     + realm + "\"" + ",nonce=\"" + nonce + "\"" + ",response=\"" + response + "\"";
@@ -125,14 +120,9 @@ public class HttpDigestRegistrationProcedure extends RegistrationProcedure {
                 auth += ",nc=" + mDigest.buildNonceCounter() + ",qop=" + qop + ",cnonce=\""
                         + mDigest.getCnonce() + "\"";
             }
-
-            // Set header in the SIP message
             request.addHeader(AuthorizationHeader.NAME, auth);
-        } catch (Exception e) {
-            if (mLogger.isActivated()) {
-                mLogger.error("Can't create the authorization header", e);
-            }
-            throw new CoreException("Can't write the security header");
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException("Unable to write security header!", e);
         }
     }
 
@@ -140,12 +130,9 @@ public class HttpDigestRegistrationProcedure extends RegistrationProcedure {
      * Read security header from REGISTER response
      * 
      * @param response SIP response
-     * @throws CoreException
+     * @throws SipPayloadException
      */
-    public void readSecurityHeader(SipResponse response) throws CoreException {
-        if (mDigest == null) {
-            return;
-        }
+    public void readSecurityHeader(SipResponse response) throws SipPayloadException {
 
         WWWAuthenticateHeader wwwHeader = (WWWAuthenticateHeader) response
                 .getHeader(WWWAuthenticateHeader.NAME);
@@ -154,37 +141,26 @@ public class HttpDigestRegistrationProcedure extends RegistrationProcedure {
 
         if (wwwHeader != null) {
             // Retrieve data from the header WWW-Authenticate (401 response)
-            try {
-                // Get domain name
-                mDigest.setRealm(wwwHeader.getRealm());
 
-                // Get opaque parameter
-                mDigest.setOpaque(wwwHeader.getOpaque());
+            // Get domain name
+            mDigest.setRealm(wwwHeader.getRealm());
 
-                // Get qop
-                mDigest.setQop(wwwHeader.getQop());
+            // Get opaque parameter
+            mDigest.setOpaque(wwwHeader.getOpaque());
 
-                // Get nonce to be used
-                mDigest.setNextnonce(wwwHeader.getNonce());
-            } catch (Exception e) {
-                if (mLogger.isActivated()) {
-                    mLogger.error("Can't read the WWW-Authenticate header", e);
-                }
-                throw new CoreException("Can't read the security header");
-            }
+            // Get qop
+            mDigest.setQop(wwwHeader.getQop());
+
+            // Get nonce to be used
+            mDigest.setNextnonce(wwwHeader.getNonce());
+
         } else if (infoHeader != null) {
             // Retrieve data from the header Authentication-Info (200 OK response)
-            try {
-                // Check if 200 OK really included Authentication-Info: nextnonce=""
-                if (infoHeader.getNextNonce() != null) {
-                    // Get nextnonce to be used
-                    mDigest.setNextnonce(infoHeader.getNextNonce());
-                }
-            } catch (Exception e) {
-                if (mLogger.isActivated()) {
-                    mLogger.error("Can't read the authentication-info header", e);
-                }
-                throw new CoreException("Can't read the security header");
+
+            // Check if 200 OK really included Authentication-Info: nextnonce=""
+            if (infoHeader.getNextNonce() != null) {
+                // Get nextnonce to be used
+                mDigest.setNextnonce(infoHeader.getNextNonce());
             }
         }
     }
