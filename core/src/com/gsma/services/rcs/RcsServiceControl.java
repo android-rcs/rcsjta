@@ -55,19 +55,12 @@ public class RcsServiceControl {
 
     private final Context mContext;
 
-    private final Handler mHandler;
-
     private static final long INTENT_RESPONSE_TIMEOUT = 2000;
 
     private final static String LOG_TAG = "[RCS][" + RcsServiceControl.class.getSimpleName() + "]";
 
     private RcsServiceControl(Context ctx) {
         mContext = ctx;
-        // Create a dedicate handler to schedule the Broadcast onReceiver callback
-        HandlerThread handlerThread = new HandlerThread("ht");
-        handlerThread.start();
-        Looper looper = handlerThread.getLooper();
-        mHandler = new Handler(looper);
     }
 
     /**
@@ -200,8 +193,12 @@ public class RcsServiceControl {
         trySetIntentForActivePackageAndReceiverInForeground(broadcastIntent);
 
         synchronized (broadcastReceiver) {
-            mContext.sendOrderedBroadcast(broadcastIntent, null, broadcastReceiver, mHandler,
-                    Activity.RESULT_OK, null, null);
+            /* Create a dedicate handler to schedule the Broadcast onReceiver callback */
+            HandlerThread handlerThread = new HandlerThread("ht");
+            handlerThread.start();
+            Looper looper = handlerThread.getLooper();
+            mContext.sendOrderedBroadcast(broadcastIntent, null, broadcastReceiver, new Handler(
+                    looper), Activity.RESULT_OK, null, null);
 
             long endTime = System.currentTimeMillis() + INTENT_RESPONSE_TIMEOUT;
 

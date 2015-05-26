@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.res.Resources;
 
 import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.RcsServiceControl;
 
 /**
  * This subclass of Application allows to get a resource content from a static context
@@ -128,6 +129,8 @@ public class RiApplication extends Application {
 
     private static Map<Direction, String> sDirectionToString;
 
+    private static RcsServiceControl mRcsServiceControl;
+
     /**
      * Gets direction
      * 
@@ -168,6 +171,7 @@ public class RiApplication extends Application {
         sDirectionToString.put(Direction.IRRELEVANT,
                 resources.getString(R.string.label_direction_unknown));
 
+        mRcsServiceControl = RcsServiceControl.getInstance(mContext);
         ConnectionManager.getInstance(mContext).connectApis();
     }
 
@@ -178,6 +182,15 @@ public class RiApplication extends Application {
      */
     public static Context getAppContext() {
         return mContext;
+    }
+
+    /**
+     * Gets the RCS service control singleton
+     * 
+     * @return the RCS service control singleton
+     */
+    public static RcsServiceControl getRcsServiceControl() {
+        return mRcsServiceControl;
     }
 
 }

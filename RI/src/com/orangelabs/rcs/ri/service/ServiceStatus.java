@@ -26,6 +26,7 @@ import com.gsma.services.rcs.RcsServiceListener;
 import com.gsma.services.rcs.capability.CapabilityService;
 
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -70,7 +71,8 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mRcsServiceControl = RcsServiceControl.getInstance(this);
+        mRcsServiceControl = RiApplication.getRcsServiceControl();
+        
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.service_status);

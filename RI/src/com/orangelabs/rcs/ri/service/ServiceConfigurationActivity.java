@@ -38,7 +38,9 @@ import com.gsma.services.rcs.RcsServiceControl;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMethod;
 import com.gsma.services.rcs.CommonServiceConfiguration.MinimumBatteryLevel;
 import com.gsma.services.rcs.RcsServiceException;
+
 import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LockAccess;
@@ -107,7 +109,7 @@ public class ServiceConfigurationActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mRcsServiceControl = RcsServiceControl.getInstance(this);
+        mRcsServiceControl = RiApplication.getRcsServiceControl();
 
         /* Set layout */
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);

@@ -27,6 +27,7 @@ import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceListener;
 
 import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -113,7 +114,7 @@ public class SettingsDisplay extends PreferenceActivity implements
                 "rcs_activation");
         mBatteryLevel = (ListPreference) findPreference("min_battery_level");
 
-        mRcsServiceControl = RcsServiceControl.getInstance(this);
+        mRcsServiceControl = RiApplication.getRcsServiceControl();
         mCnxManager = ConnectionManager.getInstance(this);
     }
 

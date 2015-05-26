@@ -18,7 +18,9 @@
 
 package com.orangelabs.rcs.ri;
 
+import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsServiceControl;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceListener;
 import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
@@ -116,6 +118,8 @@ public class ConnectionManager {
     private final Context mContext;
 
     private final Handler mHandler = new Handler();
+
+    private RcsServiceControl mRcsServiceControl;
 
     private static final String LOGTAG = LogUtils.getTag(ConnectionManager.class.getSimpleName());
 
@@ -260,6 +264,13 @@ public class ConnectionManager {
                     }
                     notifyImsDisconnection(RcsServiceRegistration.ReasonCode.CONNECTION_LOST);
                 }
+                try {
+                    if (mRcsServiceControl.isActivated()) {
+                        // TODO try to reconnect automatically
+                    }
+                } catch (RcsGenericException e) {
+                    Log.e(LOGTAG, "Failed to check if stack is activated", e);
+                }
             }
 
             @Override
@@ -284,7 +295,7 @@ public class ConnectionManager {
                                 }
                             } catch (RcsServiceException e) {
                                 if (LogUtils.isActive) {
-                                    Log.e(LOGTAG, "Cannot add Rcs Service Registration Listener", e);
+                                    Log.e(LOGTAG, "Cannot add RCS Service Registration Listener", e);
                                 }
                             }
                         }
@@ -306,6 +317,7 @@ public class ConnectionManager {
             Log.d(LOGTAG, "ConnectionManager");
         }
         mContext = context;
+        mRcsServiceControl = RiApplication.getRcsServiceControl();
         /* Construct list of connected services */
         mConnectedServices = new HashSet<RcsServiceName>();
         /* Construct list of clients to notify */
@@ -343,23 +355,34 @@ public class ConnectionManager {
      * Connect APIs
      */
     public void connectApis() {
-        /* Connect all APIs */
-        for (RcsServiceName service : mApis.keySet()) {
-            /* Check if not already connected */
-            if (!isServiceConnected(service)) {
-                try {
-                    RcsService rcsService = mApis.get(service);
-                    rcsService.connect();
-                } catch (Exception e) {
-                    if (LogUtils.isActive) {
-                        Log.i(LOGTAG, "Cannot connect service ".concat(service.name()), e);
-                    }
-                    if (RcsServiceName.CAPABILITY == service) {
-                        notifyImsDisconnection(RcsServiceRegistration.ReasonCode.CONNECTION_LOST);
+        try {
+            if (!mRcsServiceControl.isActivated()) {
+                notifyImsDisconnection(RcsServiceRegistration.ReasonCode.CONNECTION_LOST);
+                /* Do not even try to connect since stack is not activated */
+                return;
+            }
+            /* Connect all APIs */
+            for (RcsServiceName service : mApis.keySet()) {
+                /* Check if not already connected */
+                if (!isServiceConnected(service)) {
+                    try {
+                        RcsService rcsService = mApis.get(service);
+                        rcsService.connect();
+                    } catch (Exception e) {
+                        if (LogUtils.isActive) {
+                            Log.i(LOGTAG, "Cannot connect service ".concat(service.name()), e);
+                        }
+                        if (RcsServiceName.CAPABILITY == service) {
+                            notifyImsDisconnection(RcsServiceRegistration.ReasonCode.CONNECTION_LOST);
+                        }
                     }
                 }
             }
+        } catch (RcsGenericException e) {
+            Log.e(LOGTAG, "Failed to check if RCS stack is activated!", e);
+            return;
         }
+        
     }
 
     /**
