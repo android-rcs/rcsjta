@@ -413,13 +413,6 @@ public class StartService extends Service {
 
         Context context = getApplicationContext();
 
-        /**
-         * This event is broadcasted to notify client application that 'mcc' read from the Android
-         * configuration is defined and then ContactUtil is ready to be used to validate and format
-         * local numbers.
-         */
-        broadcastEvent(context, ContactUtil.ACTION_CONTACT_UTIL_MCC_DEFINED);
-
         if (!ConfigurationMode.AUTO.equals(mode)) {
             // Manual provisioning: accept terms and conditions
             mRcsSettings.setProvisioningTermsAccepted(true);

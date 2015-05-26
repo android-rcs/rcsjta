@@ -97,15 +97,14 @@ public class Intents {
         public static final String EXTRA_GET_COMPATIBILITY_SERVICE = "get_compatibility_service";
 
         /**
-         * Intent to check if RCS service is started.
+         * Intent to get the RCS service starting state.
          */
-        public static final String ACTION_IS_SERVICE_STARTED = "com.gsma.services.rcs.action.IS_SERVICE_STARTED";
+        public static final String ACTION_GET_SERVICE_STARTING_STATE = "com.gsma.services.rcs.action.GET_SERVICE_STARTING_STATE";
 
         /**
-         * Used as an boolean extra field in ACTION_IS_SERVICE_UP intent to reply if RCS service is
-         * started.
+         * Used as a boolean extra field in ACTION_GET_SERVICE_STARTING_STATE intent to convey the response.
          */
-        public static final String EXTRA_IS_SERVICE_STARTED = "is_service_started";
+        public static final String EXTRA_GET_SERVICE_STARTING_STATE = "get_service_starting_state";
 
         private Service() {
         }

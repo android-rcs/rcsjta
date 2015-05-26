@@ -95,12 +95,6 @@ public class ContactUtil {
     private static final int MCC_UNDEFINED = 0;
 
     /**
-     * Action broadcasted by the Core stack to notify that mobile country code is defined (so
-     * ContactUtil can be used to format and validate local phone numbers) .
-     */
-    public static final String ACTION_CONTACT_UTIL_MCC_DEFINED = "com.gsma.services.rcs.action.CONTACT_UTIL_MCC_DEFINED";
-
-    /**
      * A map between the ISO country code and an array of String containing first the County Code
      * and secondly the Area Code.<br>
      * Note 1 : the Area Code is optional (if it does not exist then it is null).<br>

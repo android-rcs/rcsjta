@@ -226,7 +226,7 @@ public class RcsServiceControlReceiver extends BroadcastReceiver {
             }
             results.putBoolean(Intents.Service.EXTRA_GET_COMPATIBILITY_RESPONSE, compatible);
             setResultExtras(results);
-        } else if (Intents.Service.ACTION_IS_SERVICE_STARTED.equals(action)) {
+        } else if (Intents.Service.ACTION_GET_SERVICE_STARTING_STATE.equals(action)) {
             Bundle results = getResultExtras(true);
             if (results == null) {
                 return;
@@ -236,7 +236,7 @@ public class RcsServiceControlReceiver extends BroadcastReceiver {
             if (sLogger.isActivated()) {
                 sLogger.debug("Service started ".concat(Boolean.toString(started)));
             }
-            results.putBoolean(Intents.Service.EXTRA_IS_SERVICE_STARTED, started);
+            results.putBoolean(Intents.Service.EXTRA_GET_SERVICE_STARTING_STATE, started);
             setResultExtras(results);
         }
     }

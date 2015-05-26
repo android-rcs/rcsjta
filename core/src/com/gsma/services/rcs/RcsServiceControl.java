@@ -209,8 +209,8 @@ public class RcsServiceControl {
                 long delay = endTime - System.currentTimeMillis();
                 if (delay <= 0) {
                     if (!broadcastReceiver.mHaveResult) {
-                        throw new RcsGenericException("No response to broadcast intent ".concat(intent
-                                .getAction()));
+                        throw new RcsGenericException(
+                                "No response to broadcast intent ".concat(intent.getAction()));
                     }
                     break;
                 }
@@ -259,18 +259,13 @@ public class RcsServiceControl {
      */
     public boolean isActivationModeChangeable() throws RcsGenericException {
         Log.d(LOG_TAG, "Query activation mode changeable");
-        try {
-            Bundle resultExtraData = queryRcsStackByIntent(Intents.Service.ACTION_GET_ACTIVATION_MODE_CHANGEABLE);
-            if (resultExtraData == null) {
-                // No response
-                throw new RcsGenericException("Failed to read stack activation mode changeable!");
-            }
-            return resultExtraData.getBoolean(Intents.Service.EXTRA_GET_ACTIVATION_MODE_CHANGEABLE,
-                    false);
-        } catch (RcsGenericException e) {
-            throw new RcsGenericException("Query activation mode changeable failed in timeout!", e);
+        Bundle resultExtraData = queryRcsStackByIntent(Intents.Service.ACTION_GET_ACTIVATION_MODE_CHANGEABLE);
+        if (resultExtraData == null) {
+            // No response
+            throw new RcsGenericException("Failed to read stack activation mode changeable!");
         }
-
+        return resultExtraData.getBoolean(Intents.Service.EXTRA_GET_ACTIVATION_MODE_CHANGEABLE,
+                false);
     }
 
     /**
@@ -281,16 +276,12 @@ public class RcsServiceControl {
      */
     public boolean isActivated() throws RcsGenericException {
         Log.d(LOG_TAG, "Query activation mode");
-        try {
-            Bundle resultExtraData = queryRcsStackByIntent(Intents.Service.ACTION_GET_ACTIVATION_MODE);
-            if (resultExtraData == null) {
-                // No response
-                throw new RcsGenericException("Failed to read stack activation mode!");
-            }
-            return resultExtraData.getBoolean(Intents.Service.EXTRA_GET_ACTIVATION_MODE, false);
-        } catch (RcsGenericException e) {
-            throw new RcsGenericException("Query activation mode failed in timeout!", e);
+        Bundle resultExtraData = queryRcsStackByIntent(Intents.Service.ACTION_GET_ACTIVATION_MODE);
+        if (resultExtraData == null) {
+            // No response
+            throw new RcsGenericException("Failed to read stack activation mode!");
         }
+        return resultExtraData.getBoolean(Intents.Service.EXTRA_GET_ACTIVATION_MODE, false);
     }
 
     /**
@@ -304,20 +295,15 @@ public class RcsServiceControl {
     public void setActivationMode(boolean active) throws RcsPermissionDeniedException,
             RcsGenericException {
         Log.d(LOG_TAG, "Query activation mode changeable");
-        try {
-            Bundle resultExtraData = queryRcsStackByIntent(Intents.Service.ACTION_GET_ACTIVATION_MODE_CHANGEABLE);
-            if (resultExtraData == null) {
-                // No response to check if change is allowed
-                throw new RcsPermissionDeniedException("Failed to set stack activation mode!");
-            }
-            boolean activationChangeable = resultExtraData.getBoolean(
-                    Intents.Service.EXTRA_GET_ACTIVATION_MODE_CHANGEABLE, false);
-            if (!activationChangeable) {
-                throw new RcsPermissionDeniedException("Stack activation mode not changeable");
-            }
-        } catch (RcsGenericException e) {
-            throw new RcsGenericException(
-                    "Cannot set activation mode: query of changeable mode failed in timeout!", e);
+        Bundle resultExtraData = queryRcsStackByIntent(Intents.Service.ACTION_GET_ACTIVATION_MODE_CHANGEABLE);
+        if (resultExtraData == null) {
+            // No response to check if change is allowed
+            throw new RcsPermissionDeniedException("Failed to set stack activation mode!");
+        }
+        boolean activationChangeable = resultExtraData.getBoolean(
+                Intents.Service.EXTRA_GET_ACTIVATION_MODE_CHANGEABLE, false);
+        if (!activationChangeable) {
+            throw new RcsPermissionDeniedException("Stack activation mode not changeable");
         }
         final Intent broadcastIntent = new Intent(Intents.Service.ACTION_SET_ACTIVATION_MODE);
         broadcastIntent.setPackage(RCS_STACK_PACKAGENAME);
@@ -350,20 +336,14 @@ public class RcsServiceControl {
         intent.putExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_INCREMENT,
                 RcsService.Build.API_INCREMENTAL);
         Log.d(LOG_TAG, "Query compatibility for service ".concat(serviceName));
-        try {
-            Bundle resultExtraData = queryRcsStackByIntent(intent);
-            if (resultExtraData == null) {
-                // No response
-                throw new RcsGenericException(
-                        "Failed to check client RCS API compatibility for service " + serviceName
-                                + " !");
-            }
-            return resultExtraData.getBoolean(Intents.Service.EXTRA_GET_COMPATIBILITY_RESPONSE,
-                    false);
-        } catch (RcsGenericException e) {
-            throw new RcsGenericException("Compatibility API checking for service '" + serviceName
-                    + "' failed in timeout!", e);
+        Bundle resultExtraData = queryRcsStackByIntent(intent);
+        if (resultExtraData == null) {
+            // No response
+            throw new RcsGenericException(
+                    "Failed to check client RCS API compatibility for service " + serviceName
+                            + " !");
         }
+        return resultExtraData.getBoolean(Intents.Service.EXTRA_GET_COMPATIBILITY_RESPONSE, false);
     }
 
     /**
@@ -374,15 +354,11 @@ public class RcsServiceControl {
      */
     public boolean isServiceStarted() throws RcsGenericException {
         Log.d(LOG_TAG, "Query service started");
-        try {
-            Bundle resultExtraData = queryRcsStackByIntent(Intents.Service.ACTION_IS_SERVICE_STARTED);
-            if (resultExtraData == null) {
-                // No response
-                throw new RcsGenericException("Failed to query service started!");
-            }
-            return resultExtraData.getBoolean(Intents.Service.EXTRA_IS_SERVICE_STARTED, false);
-        } catch (RcsGenericException e) {
-            throw new RcsGenericException("Query service started failed in timeout!", e);
+        Bundle resultExtraData = queryRcsStackByIntent(Intents.Service.ACTION_GET_SERVICE_STARTING_STATE);
+        if (resultExtraData == null) {
+            // No response
+            throw new RcsGenericException("Failed to query service started!");
         }
+        return resultExtraData.getBoolean(Intents.Service.EXTRA_GET_SERVICE_STARTING_STATE, false);
     }
 }
