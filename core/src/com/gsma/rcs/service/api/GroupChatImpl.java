@@ -696,6 +696,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * @return Participants
      * @throws RemoteException
      */
+    @Override
     public Map<ContactId, Integer> getParticipants() throws RemoteException {
         try {
             Map<ContactId, Integer> apiParticipants = new HashMap<ContactId, Integer>();
@@ -704,6 +705,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             GroupChatSession session = mImService.getGroupChatSession(mChatId);
             if (session == null) {
                 participants = mPersistentStorage.getParticipants();
+                if (participants == null) {
+                    throw new ServerApiPersistentStorageException(
+                            "No participants found for chatId : ".concat(mChatId));
+                }
             } else {
                 participants = session.getParticipants();
             }
@@ -1383,8 +1388,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     if (loggerActivated) {
                         sLogger.debug(new StringBuilder(
                                 "Failed to send isComposing command for chatId : ").append(mChatId)
-                                .append(" for isComposing status : ")
-                                .append(composingStatus).toString());
+                                .append(" for isComposing status : ").append(composingStatus)
+                                .toString());
                     }
                 }
             }

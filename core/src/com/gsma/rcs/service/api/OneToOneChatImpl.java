@@ -725,7 +725,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                     if (loggerActivated) {
                         sLogger.debug(new StringBuilder(
                                 "Failed to send isComposing command for contact : ")
-                                .append(contact.toString()).append(" for isComposing status : ")
+                                .append(mContact.toString()).append(" for isComposing status : ")
                                 .append(composingStatus).toString());
                     }
                 }
