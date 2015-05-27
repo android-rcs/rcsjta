@@ -486,8 +486,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public Cursor getQueuedFileTransfers() {
-        return mFileTransferLog.getQueuedFileTransfers();
+    public Cursor getQueuedAndUploadedButNotTransferredFileTransfers() {
+        return mFileTransferLog.getQueuedAndUploadedButNotTransferredFileTransfers();
     }
 
     @Override

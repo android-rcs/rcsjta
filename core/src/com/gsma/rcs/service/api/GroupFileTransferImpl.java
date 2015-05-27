@@ -999,9 +999,13 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
     }
 
     /**
-     * Handle file transfer message dequeued
+     * Handle file info dequeued
      */
-    public void handleFileTransferMessageDequeued() {
+    public void handleFileInfoDequeued() {
+        if (sLogger.isActivated()) {
+            sLogger.info(new StringBuilder("Group file info with transferId ")
+                    .append(mFileTransferId).append(" dequeued successfully.").toString());
+        }
         synchronized (mLock) {
             mFileTransferService.removeGroupFileTransfer(mFileTransferId);
             setStateAndReasonCode(State.TRANSFERRED, ReasonCode.UNSPECIFIED);

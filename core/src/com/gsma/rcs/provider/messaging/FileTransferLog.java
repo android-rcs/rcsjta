@@ -68,8 +68,11 @@ public class FileTransferLog implements IFileTransferLog {
             FileTransferData.KEY_CHAT_ID).append("=").append(FileTransferData.KEY_CONTACT)
             .toString();
 
-    private static final String SELECTION_BY_QUEUED_FILE_TRANSFERS = new StringBuilder(
-            FileTransferData.KEY_STATE).append("=").append(State.QUEUED.toInt()).toString();
+    private static final String SELECTION_BY_QUEUED_AND_UPLOADED_BUT_NOT_TRANSFERRED_FILE_TRANSFERS = new StringBuilder(
+            FileTransferData.KEY_STATE).append("=").append(State.QUEUED.toInt()).append(" OR (")
+            .append(FileTransferData.KEY_STATE).append("=").append(State.STARTED.toInt())
+            .append(" AND ").append(FileTransferData.KEY_FILESIZE).append("=")
+            .append(FileTransferData.KEY_TRANSFERRED).append(")").toString();
 
     private static final String SELECTION_BY_INTERRUPTED_FILE_TRANSFERS = new StringBuilder(
             FileTransferData.KEY_STATE).append(" IN ('").append(State.STARTED.toInt())
@@ -765,9 +768,10 @@ public class FileTransferLog implements IFileTransferLog {
     }
 
     @Override
-    public Cursor getQueuedFileTransfers() {
+    public Cursor getQueuedAndUploadedButNotTransferredFileTransfers() {
         Cursor cursor = mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
-                SELECTION_BY_QUEUED_FILE_TRANSFERS, null, ORDER_BY_TIMESTAMP_ASC);
+                SELECTION_BY_QUEUED_AND_UPLOADED_BUT_NOT_TRANSFERRED_FILE_TRANSFERS, null,
+                ORDER_BY_TIMESTAMP_ASC);
         CursorUtil.assertCursorIsNotNull(cursor, FileTransferData.CONTENT_URI);
         return cursor;
     }

@@ -39,6 +39,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDo
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.OneToOneFileTransferImpl;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.contact.ContactId;
@@ -155,6 +156,43 @@ public abstract class OneToOneChatSession extends ChatSession {
                         ChatUtils.networkMimeTypeToApiMimeType(mimeType));
             }
         }
+    }
+
+    /**
+     * Send file info within a 1-1 chat session
+     * 
+     * @param fileTransfer
+     * @param fileTransferId
+     * @param fileInfo
+     * @param displayedReportEnabled
+     * @param deliveredReportEnabled
+     * @throws MsrpException
+     */
+    public void sendFileInfo(OneToOneFileTransferImpl fileTransfer, String fileTransferId,
+            String fileInfo, boolean displayedReportEnabled, boolean deliveredReportEnabled)
+            throws MsrpException {
+        String networkContent;
+        long timestamp = System.currentTimeMillis();
+        /* For outgoing file transfer, timestampSent = timestamp */
+        long timestampSent = timestamp;
+        mMessagingLog.setFileTransferTimestamps(fileTransferId, timestamp, timestampSent);
+
+        if (displayedReportEnabled) {
+            networkContent = ChatUtils.buildCpimMessageWithImdn(ChatUtils.ANOMYNOUS_URI,
+                    ChatUtils.ANOMYNOUS_URI, fileTransferId, fileInfo,
+                    FileTransferHttpInfoDocument.MIME_TYPE, timestampSent);
+        } else if (deliveredReportEnabled) {
+            networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(
+                    ChatUtils.ANOMYNOUS_URI, ChatUtils.ANOMYNOUS_URI, fileTransferId, fileInfo,
+                    FileTransferHttpInfoDocument.MIME_TYPE, timestampSent);
+        } else {
+            networkContent = ChatUtils.buildCpimMessage(ChatUtils.ANOMYNOUS_URI,
+                    ChatUtils.ANOMYNOUS_URI, fileInfo, FileTransferHttpInfoDocument.MIME_TYPE,
+                    timestampSent);
+        }
+        sendDataChunks(IdGenerator.generateMessageID(), networkContent, CpimMessage.MIME_TYPE,
+                MsrpSession.TypeMsrpChunk.HttpFileSharing);
+        fileTransfer.handleFileInfoDequeued(getRemoteContact());
     }
 
     /**

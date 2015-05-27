@@ -16,10 +16,10 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
-import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.DequeueTask;
@@ -63,6 +63,9 @@ public class OneToOneChatMessageDequeueTask extends DequeueTask {
                 int mimeTypeIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_MIME_TYPE);
                 OneToOneChatImpl oneToOneChat = mChatService.getOrCreateOneToOneChat(mContact);
                 while (cursor.moveToNext()) {
+                    if (!isAllowedToDequeueOneToOneChatMessage(mContact)) {
+                        continue;
+                    }
                     String msgId = cursor.getString(msgIdIdx);
                     String content = cursor.getString(contentIdx);
                     String mimeType = cursor.getString(mimeTypeIdx);
@@ -71,32 +74,21 @@ public class OneToOneChatMessageDequeueTask extends DequeueTask {
                     ChatMessage message = ChatUtils.createChatMessage(msgId, mimeType, content,
                             mContact, null, timestamp, timestamp);
                     try {
-                        if (isAllowedToDequeueOneToOneChatMessage(mContact)) {
-                            OneToOneChatSession session = mImService
-                                    .getOneToOneChatSession(mContact);
-                            if (session == null) {
-                                oneToOneChat.dequeueChatMessageInNewSession(message);
-                            } else if (session.isMediaEstablished()) {
-                                oneToOneChat.dequeueChatMessageWithinSession(message, session);
-                            } else if (session.isInitiatedByRemote()) {
-                                session.acceptSession();
-                            } else {
-                                oneToOneChat.dequeueChatMessageInNewSession(message);
-                            }
+                        try {
+                            oneToOneChat.dequeueOneToOneChatMessage(message);
+                        } catch (MsrpException e) {
+                            mLogger.error(e.getMessage());
                         }
-                    } catch (Exception e) {
-                        /* Exceptions will be handled better in CR037 */
+                    } catch (RuntimeException e) {
                         /*
                          * Break only for terminal exception, in rest of the cases dequeue and try
                          * to send other messages.
                          */
-                        if (logActivated) {
-                            mLogger.error(
-                                    new StringBuilder(
-                                            "Exception occured while dequeueing one-to-one chat message with msgId '")
-                                            .append(msgId).append("'for contact '")
-                                            .append(mContact).append("' ").toString(), e);
-                        }
+                        mLogger.error(
+                                new StringBuilder(
+                                        "Exception occured while dequeueing one-to-one chat message with msgId '")
+                                        .append(msgId).append("'for contact '").append(mContact)
+                                        .append("' ").toString(), e);
                     }
                 }
             }

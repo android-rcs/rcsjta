@@ -728,14 +728,13 @@ public class ChatUtils {
      * 
      * @param remote Remote contact identifier
      * @param fileInfo File XML description
-     * @param imdn IMDN flag
      * @param msgId Message ID
      * @param timestamp The local timestamp for the file transfer
      * @param timestampSent The timestamp sent in payload for the file transfer
      * @return File message
      */
     public static ChatMessage createFileTransferMessage(ContactId remote, String fileInfo,
-            boolean imdn, String msgId, long timestamp, long timestampSent) {
+            String msgId, long timestamp, long timestampSent) {
         return new ChatMessage(msgId, remote, fileInfo, FileTransferHttpInfoDocument.MIME_TYPE,
                 timestamp, timestampSent, null);
     }

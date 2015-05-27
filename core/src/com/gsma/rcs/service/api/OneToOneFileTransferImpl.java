@@ -56,6 +56,7 @@ import com.gsma.services.rcs.filetransfer.IFileTransfer;
 
 import android.net.Uri;
 import android.os.RemoteException;
+import android.util.MonthDisplayHelper;
 
 import javax2.sip.message.Response;
 
@@ -1174,6 +1175,21 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         synchronized (mLock) {
             setStateAndReasonCode(contact, State.STARTED, ReasonCode.UNSPECIFIED);
         }
+    }
+
+    /**
+     * Handle file info dequeued
+     */
+    public void handleFileInfoDequeued(ContactId contact) {
+        if (sLogger.isActivated()) {
+            sLogger.info(new StringBuilder("One-One file info with transferId ")
+                    .append(mFileTransferId).append(" dequeued successfully.").toString());
+        }
+        synchronized (mLock) {
+            mFileTransferService.removeGroupFileTransfer(mFileTransferId);
+            setStateAndReasonCode(contact, State.TRANSFERRED, ReasonCode.UNSPECIFIED);
+        }
+        mCore.getListener().tryToDequeueFileTransfers(mImService);
     }
 
     /**

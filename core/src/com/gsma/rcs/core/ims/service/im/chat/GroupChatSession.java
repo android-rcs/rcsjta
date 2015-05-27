@@ -434,16 +434,16 @@ public abstract class GroupChatSession extends ChatSession {
     }
 
     /**
-     * Send file transfer info on group chat session
+     * Send file info on group chat session
      * 
      * @param fileTransfer
-     * @param transferId
+     * @param fileTransferId
      * @param fileInfo
      * @param displayedReportEnabled
      * @param deliveredReportEnabled
      * @throws MsrpException
      */
-    public void sendFileTransferInfo(GroupFileTransferImpl fileTransfer, String transferId,
+    public void sendFileInfo(GroupFileTransferImpl fileTransfer, String fileTransferId,
             String fileInfo, boolean displayedReportEnabled, boolean deliveredReportEnabled)
             throws MsrpException {
         String from = ImsModule.IMS_USER_PROFILE.getPublicAddress();
@@ -451,13 +451,13 @@ public abstract class GroupChatSession extends ChatSession {
         long timestamp = System.currentTimeMillis();
         /* For outgoing file transfer, timestampSent = timestamp */
         long timestampSent = timestamp;
-        mMessagingLog.setFileTransferTimestamps(transferId, timestamp, timestampSent);
+        mMessagingLog.setFileTransferTimestamps(fileTransferId, timestamp, timestampSent);
         if (displayedReportEnabled) {
             networkContent = ChatUtils.buildCpimMessageWithImdn(from, ChatUtils.ANOMYNOUS_URI,
-                    transferId, fileInfo, FileTransferHttpInfoDocument.MIME_TYPE, timestampSent);
+                    fileTransferId, fileInfo, FileTransferHttpInfoDocument.MIME_TYPE, timestampSent);
         } else if (deliveredReportEnabled) {
             networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from,
-                    ChatUtils.ANOMYNOUS_URI, transferId, fileInfo,
+                    ChatUtils.ANOMYNOUS_URI, fileTransferId, fileInfo,
                     FileTransferHttpInfoDocument.MIME_TYPE, timestampSent);
         } else {
             networkContent = ChatUtils.buildCpimMessage(from, ChatUtils.ANOMYNOUS_URI, fileInfo,
@@ -465,7 +465,7 @@ public abstract class GroupChatSession extends ChatSession {
         }
         sendDataChunks(IdGenerator.generateMessageID(), networkContent, CpimMessage.MIME_TYPE,
                 TypeMsrpChunk.HttpFileSharing);
-        fileTransfer.handleFileTransferMessageDequeued();
+        fileTransfer.handleFileInfoDequeued();
     }
 
     /**

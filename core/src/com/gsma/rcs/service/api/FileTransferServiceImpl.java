@@ -268,6 +268,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         return ServerApiUtils.getServiceRegistrationReasonCode().toInt();
     }
 
+    /**
+     * Get or create group file transfer
+     * 
+     * @param chatId
+     * @param transferId
+     * @return GroupFileTransferImpl
+     */
     public GroupFileTransferImpl getOrCreateGroupFileTransfer(String chatId, String transferId) {
         GroupFileTransferImpl groupChat = mGroupFileTransferCache.get(transferId);
         if (groupChat != null) {
@@ -277,6 +284,26 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 transferId, mMessagingLog);
         return new GroupFileTransferImpl(transferId, mGroupFileTransferBroadcaster, mImService,
                 storageAccessor, this, mRcsSettings, mCore, mMessagingLog, mContactManager);
+    }
+
+    /**
+     * Get or create one-one file transfer
+     * 
+     * @param contact
+     * @param transferId
+     * @return OneToOneFileTransferImpl
+     */
+    public OneToOneFileTransferImpl getOrCreateOneToOneFileTransfer(ContactId contact,
+            String transferId) {
+        OneToOneFileTransferImpl oneToOneFileTransfer = mOneToOneFileTransferCache.get(transferId);
+        if (oneToOneFileTransfer != null) {
+            return oneToOneFileTransfer;
+        }
+        FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
+                transferId, mMessagingLog);
+        return new OneToOneFileTransferImpl(transferId, mOneToOneFileTransferBroadcaster,
+                mImService, storageAccessor, this, mRcsSettings, mCore, mMessagingLog,
+                mContactManager, mOneToOneUndeliveredImManager);
     }
 
     /**

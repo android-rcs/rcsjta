@@ -138,17 +138,18 @@ public class UpdateFileTransferStateAfterUngracefulTerminationTask implements Ru
                                     ReasonCode.ABORTED_BY_SYSTEM);
                             break;
                         case STARTED:
-                            if (groupFileTransfer) {
-                                if (cursor.getLong(fileSizeIdx) != cursor.getLong(transferredIdx)) {
-                                    mFileTransferService.setGroupFileTransferStateAndReasonCode(
-                                            fileTransferId, chatId, State.PAUSED,
-                                            ReasonCode.PAUSED_BY_SYSTEM);
-                                }
+                            if (cursor.getLong(fileSizeIdx) == cursor.getLong(transferredIdx)) {
                                 break;
                             }
-                            mFileTransferService.setOneToOneFileTransferStateAndReasonCode(
-                                    fileTransferId, contact, State.PAUSED,
-                                    ReasonCode.PAUSED_BY_SYSTEM);
+                            if (groupFileTransfer) {
+                                mFileTransferService.setGroupFileTransferStateAndReasonCode(
+                                        fileTransferId, chatId, State.PAUSED,
+                                        ReasonCode.PAUSED_BY_SYSTEM);
+                            } else {
+                                mFileTransferService.setOneToOneFileTransferStateAndReasonCode(
+                                        fileTransferId, contact, State.PAUSED,
+                                        ReasonCode.PAUSED_BY_SYSTEM);
+                            }
                             break;
                         case INVITED:
                             if (cursor.getLong(fileExpirationIdx) > System.currentTimeMillis()) {

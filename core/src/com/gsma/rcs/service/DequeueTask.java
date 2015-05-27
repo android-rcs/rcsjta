@@ -98,6 +98,25 @@ public abstract class DequeueTask implements Runnable {
     }
 
     /**
+     * Check if dequeuing and sending of group chat messages to specified chatId is possible
+     * 
+     * @param chatId
+     * @return boolean
+     */
+    protected boolean isAllowedToDequeueGroupChatMessage(String chatId) {
+        final GroupChatSession groupChatSession = mImService.getGroupChatSession(chatId);
+        if (groupChatSession == null || !groupChatSession.isMediaEstablished()) {
+            if (mLogger.isActivated()) {
+                mLogger.debug(new StringBuilder(
+                        "Cannot transfer file to group chat as there is no corresponding group chat session with chatId ")
+                        .append(chatId).append(" in established state.").toString());
+            }
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Check if it is allowed to dequeue one-one file transfer
      * 
      * @return boolean

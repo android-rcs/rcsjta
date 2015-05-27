@@ -206,14 +206,14 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
             }
             long timestamp = getTimestamp();
             ChatMessage firstMsg = ChatUtils.createFileTransferMessage(getRemoteContact(),
-                    fileInfo, false, msgId, timestamp, mTimestampSent);
+                    fileInfo, msgId, timestamp, mTimestampSent);
             InstantMessagingService imService = mCore.getImService();
             if (!imService.isChatSessionAvailable()) {
                 if (logActivated) {
                     mLogger.debug("Couldn't initiate One to one session as max chat sessions reached.");
                 }
-                // Upload error
-                handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED));
+                mMessagingLog.setFileTransferDownloadInfo(getFileTransferId(), infoDocument);
+                removeSession();
                 return;
             }
             chatSession = imService.initiateOneToOneChatSession(getRemoteContact(), firstMsg);

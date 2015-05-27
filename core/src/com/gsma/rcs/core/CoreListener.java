@@ -449,11 +449,12 @@ public interface CoreListener {
             InstantMessagingService imService);
 
     /**
-     * Try to dequeue of one-to-one chat messages
+     * Try to dequeue all one-to-one chat messages and one-one file transfers
      * 
      * @param imService
      */
-    public void tryToDequeueAllOneToOneChatMessages(InstantMessagingService imService);
+    public void tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(
+            InstantMessagingService imService);
 
     /**
      * Try to dequeue one-to-one and group file transfers

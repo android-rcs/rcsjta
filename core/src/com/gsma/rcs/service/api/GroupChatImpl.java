@@ -983,6 +983,12 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         }.start();
     }
 
+    /**
+     * Dequeue group chat message
+     * 
+     * @param message
+     * @throws MsrpException
+     */
     public void dequeueGroupChatMessage(ChatMessage message) throws MsrpException {
         mMessagingLog.dequeueChatMessage(message);
         String msgId = message.getMessageId();
@@ -993,21 +999,33 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         final GroupChatSession session = mImService.getGroupChatSession(mChatId);
         if (session == null || !session.isMediaEstablished()) {
             throw new MsrpException("Failed to dequeue group chat message " + msgId
-                    + " message on group chat " + mChatId + "!");
+                    + " message on group chat " + mChatId
+                    + " as there is no established group chat session!");
         }
         session.sendChatMessage(message);
     }
 
-    public void dequeueGroupFileTransferMessage(String transferId, String fileInfo,
+    /**
+     * Dequeue group file info
+     * 
+     * @param fileTransferId
+     * @param fileInfo
+     * @param displayedReportEnabled
+     * @param deliveredReportEnabled
+     * @param groupFileTransfer
+     * @throws MsrpException
+     */
+    public void dequeueGroupFileInfo(String fileTransferId, String fileInfo,
             boolean displayedReportEnabled, boolean deliveredReportEnabled,
             GroupFileTransferImpl groupFileTransfer) throws MsrpException {
         GroupChatSession session = mImService.getGroupChatSession(mChatId);
         if (session == null || !session.isMediaEstablished()) {
-            throw new MsrpException("Failed to dequeue group chat message " + transferId
-                    + " message on group chat " + mChatId + "!");
+            throw new MsrpException(new StringBuilder("Failed to dequeue group file info ")
+                    .append(fileTransferId).append(" message on group chat ").append(mChatId)
+                    .append(" as there is no established group chat session!").toString());
         }
-        session.sendFileTransferInfo(groupFileTransfer, transferId, fileInfo,
-                displayedReportEnabled, deliveredReportEnabled);
+        session.sendFileInfo(groupFileTransfer, fileTransferId, fileInfo, displayedReportEnabled,
+                deliveredReportEnabled);
     }
 
     /**

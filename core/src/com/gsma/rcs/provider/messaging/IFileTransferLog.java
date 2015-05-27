@@ -276,12 +276,12 @@ public interface IFileTransferLog {
     public FtHttpResume getFileTransferResumeInfo(String fileTransferId);
 
     /**
-     * Get all one-to-one and group file transfers that are in queued state in ascending order of
-     * timestamp
+     * Get all one-to-one and group file transfers that are queued and uploaded but not transferred
+     * in ascending order of timestamp
      * 
      * @return Cursor
      */
-    public Cursor getQueuedFileTransfers();
+    public Cursor getQueuedAndUploadedButNotTransferredFileTransfers();
 
     /**
      * Dequeue file transfer

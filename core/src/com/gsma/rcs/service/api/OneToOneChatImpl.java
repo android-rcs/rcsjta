@@ -23,6 +23,7 @@
 package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.Core;
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
@@ -32,14 +33,18 @@ import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSessionListener;
+import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
+import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatMessageSession;
+import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.ChatMessagePersistedStorageAccessor;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ImSessionStartMode;
 import com.gsma.rcs.service.broadcaster.IOneToOneChatEventBroadcaster;
+import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
 import com.gsma.services.rcs.Geoloc;
@@ -494,7 +499,13 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         }
     }
 
-    public void dequeueChatMessageWithinSession(ChatMessage message, OneToOneChatSession session) {
+    /**
+     * Dequeue one-one chat message
+     * 
+     * @param message
+     * @throws MsrpException
+     */
+    public void dequeueOneToOneChatMessage(ChatMessage message) throws MsrpException {
         String msgId = message.getMessageId();
         String mimeType = message.getMimeType();
         if (sLogger.isActivated()) {
@@ -504,23 +515,92 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(mimeType);
         mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId, Status.SENDING,
                 ReasonCode.UNSPECIFIED);
-        synchronized (lock) {
+        OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
+        if (session == null) {
+            if (mImService.isChatSessionAvailable()) {
+                sendChatMessageInNewSession(message);
+            } else {
+                throw new MsrpException(
+                        new StringBuilder("Failed to dequeue one-one chat message ").append(msgId)
+                                .append(" message for contact ").append(mContact)
+                                .append(" as there is no available chat session!").toString());
+            }
+        } else if (session.isMediaEstablished()) {
             sendChatMessageWithinSession(session, message);
+        } else if (session.isInitiatedByRemote()) {
+            session.acceptSession();
+        } else {
+            if (mImService.isChatSessionAvailable()) {
+                sendChatMessageInNewSession(message);
+            } else {
+                throw new MsrpException(
+                        new StringBuilder("Failed to dequeue one-one chat message ").append(msgId)
+                                .append(" message for contact ").append(mContact)
+                                .append(" as there is no available chat session!").toString());
+            }
         }
     }
 
-    public void dequeueChatMessageInNewSession(ChatMessage message) {
-        String msgId = message.getMessageId();
-        String mimeType = message.getMimeType();
-        if (sLogger.isActivated()) {
-            sLogger.debug("Dequeue chat message msgId=".concat(msgId));
-        }
-        mMessagingLog.dequeueChatMessage(message);
-        String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(mimeType);
-        mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId, Status.SENDING,
-                ReasonCode.UNSPECIFIED);
-        synchronized (lock) {
-            sendChatMessageInNewSession(message);
+    /**
+     * Send file info in a new one-one chat session
+     * 
+     * @param fileTransferId
+     * @param fileInfo
+     * @param oneToOneFileTransfer
+     * @throws MsrpException
+     */
+    private void sendFileInfoInNewSession(String fileTransferId, String fileInfo,
+            OneToOneFileTransferImpl oneToOneFileTransfer) throws MsrpException {
+        long timestamp = System.currentTimeMillis();
+        /* For outgoing file transfer, timestampSent = timestamp */
+        long timestampSent = timestamp;
+        mMessagingLog.setFileTransferTimestamps(fileTransferId, timestamp, timestampSent);
+        ChatMessage firstMsg = ChatUtils.createFileTransferMessage(getRemoteContact(), fileInfo,
+                fileTransferId, timestamp, timestampSent);
+        OneToOneChatSession chatSession = mImService.initiateOneToOneChatSession(
+                getRemoteContact(), firstMsg);
+        chatSession.startSession();
+        mCore.getListener().handleOneOneChatSessionInitiation(chatSession);
+        oneToOneFileTransfer.handleFileInfoDequeued(getRemoteContact());
+    }
+
+    /**
+     * Dequeue one-one file info
+     * 
+     * @param fileTransferId
+     * @param fileInfo
+     * @param displayReportsEnabled
+     * @param deliverReportsEnabled
+     * @param oneToOneFileTransfer
+     * @throws MsrpException
+     */
+    public void dequeueOneToOneFileInfo(String fileTransferId, String fileInfo,
+            boolean displayReportsEnabled, boolean deliverReportsEnabled,
+            OneToOneFileTransferImpl oneToOneFileTransfer) throws MsrpException {
+        OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
+        if (session == null) {
+            if (mImService.isChatSessionAvailable()) {
+                sendFileInfoInNewSession(fileTransferId, fileInfo, oneToOneFileTransfer);
+            } else {
+                throw new MsrpException(new StringBuilder(
+                        "Failed to dequeue one-one file info ").append(fileTransferId)
+                        .append(" message for contact ").append(mContact)
+                        .append(" as there is no available chat session!").toString());
+            }
+        } else if (session.isMediaEstablished()) {
+            session.sendFileInfo(oneToOneFileTransfer, fileTransferId, fileInfo,
+                    displayReportsEnabled, deliverReportsEnabled);
+        } else if (session.isInitiatedByRemote()) {
+            session.acceptSession();
+        } else {
+            if (mImService.isChatSessionAvailable()) {
+                sendFileInfoInNewSession(fileTransferId, fileInfo, oneToOneFileTransfer);
+            } else {
+                throw new MsrpException(new StringBuilder(
+                        "Failed to dequeue one-one file info ").append(fileTransferId)
+                        .append(" message for contact ").append(mContact)
+                        .append(" as there is no available chat session!").toString());
+            }
         }
     }
 
@@ -743,7 +823,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         synchronized (lock) {
             mChatService.removeOneToOneChat(mContact);
         }
-        mCore.getListener().tryToDequeueAllOneToOneChatMessages(mImService);
+        mCore.getListener().tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(mImService);
     }
 
     @Override
@@ -807,7 +887,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                     break;
             }
         }
-        mCore.getListener().tryToDequeueAllOneToOneChatMessages(mImService);
+        mCore.getListener().tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(mImService);
     }
 
     @Override
@@ -906,7 +986,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         synchronized (lock) {
             mChatService.removeOneToOneChat(mContact);
         }
-        mCore.getListener().tryToDequeueAllOneToOneChatMessages(mImService);
+        mCore.getListener().tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(mImService);
     }
 
     @Override
