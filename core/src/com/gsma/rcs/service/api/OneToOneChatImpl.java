@@ -131,7 +131,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         handleMessageSent(msg.getMessageId(), msg.getMimeType());
     }
 
-    private void sendChatMessageWithinSession(final OneToOneChatSession session, ChatMessage msg) {
+    private void sendChatMessageWithinSession(final OneToOneChatSession session, ChatMessage msg)
+            throws MsrpException {
         session.sendChatMessage(msg);
     }
 
@@ -146,8 +147,9 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * Sends a chat message
      * 
      * @param msg Message
+     * @throws MsrpException
      */
-    private void sendChatMessage(final ChatMessage msg) {
+    private void sendChatMessage(final ChatMessage msg) throws MsrpException {
         synchronized (lock) {
             boolean loggerActivated = sLogger.isActivated();
             if (loggerActivated) {
@@ -204,8 +206,9 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * Resends a chat message
      * 
      * @param msg Message
+     * @throws MsrpException
      */
-    private void resendChatMessage(final ChatMessage msg) {
+    private void resendChatMessage(final ChatMessage msg) throws MsrpException {
         synchronized (lock) {
             String msgId = msg.getMessageId();
             String mimeType = msg.getMimeType();

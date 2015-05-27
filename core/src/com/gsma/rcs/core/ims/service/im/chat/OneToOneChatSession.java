@@ -119,42 +119,36 @@ public abstract class OneToOneChatSession extends ChatSession {
      * Send a text message
      * 
      * @param msg Chat message
+     * @throws MsrpException
      */
     @Override
-    public void sendChatMessage(ChatMessage msg) {
+    public void sendChatMessage(ChatMessage msg) throws MsrpException {
         String from = ChatUtils.ANOMYNOUS_URI;
         String to = ChatUtils.ANOMYNOUS_URI;
         String msgId = msg.getMessageId();
         String networkContent;
         String mimeType = msg.getMimeType();
-        try {
-            if (mImdnManager.isRequestOneToOneDeliveryDisplayedReportsEnabled()) {
-                networkContent = ChatUtils.buildCpimMessageWithImdn(from, to, msgId,
-                        msg.getContent(), mimeType, msg.getTimestampSent());
-            } else if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
-                networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from, to, msgId,
-                        msg.getContent(), mimeType, msg.getTimestampSent());
-            } else {
-                networkContent = ChatUtils.buildCpimMessage(from, to, msg.getContent(), mimeType,
-                        msg.getTimestampSent());
-            }
+        if (mImdnManager.isRequestOneToOneDeliveryDisplayedReportsEnabled()) {
+            networkContent = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, msg.getContent(),
+                    mimeType, msg.getTimestampSent());
+        } else if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
+            networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from, to, msgId,
+                    msg.getContent(), mimeType, msg.getTimestampSent());
+        } else {
+            networkContent = ChatUtils.buildCpimMessage(from, to, msg.getContent(), mimeType,
+                    msg.getTimestampSent());
+        }
 
-            if (ChatUtils.isGeolocType(mimeType)) {
-                sendDataChunks(IdGenerator.generateMessageID(), networkContent,
-                        CpimMessage.MIME_TYPE, TypeMsrpChunk.GeoLocation);
-            } else {
-                sendDataChunks(IdGenerator.generateMessageID(), networkContent,
-                        CpimMessage.MIME_TYPE, TypeMsrpChunk.TextMessage);
-            }
-            for (ImsSessionListener listener : getListeners()) {
-                ((ChatSessionListener) listener).handleMessageSent(msgId,
-                        ChatUtils.networkMimeTypeToApiMimeType(mimeType));
-            }
-        } catch (MsrpException e) {
-            for (ImsSessionListener listener : getListeners()) {
-                ((ChatSessionListener) listener).handleMessageFailedSend(msgId,
-                        ChatUtils.networkMimeTypeToApiMimeType(mimeType));
-            }
+        if (ChatUtils.isGeolocType(mimeType)) {
+            sendDataChunks(IdGenerator.generateMessageID(), networkContent, CpimMessage.MIME_TYPE,
+                    TypeMsrpChunk.GeoLocation);
+        } else {
+            sendDataChunks(IdGenerator.generateMessageID(), networkContent, CpimMessage.MIME_TYPE,
+                    TypeMsrpChunk.TextMessage);
+        }
+        for (ImsSessionListener listener : getListeners()) {
+            ((ChatSessionListener) listener).handleMessageSent(msgId,
+                    ChatUtils.networkMimeTypeToApiMimeType(mimeType));
         }
     }
 
