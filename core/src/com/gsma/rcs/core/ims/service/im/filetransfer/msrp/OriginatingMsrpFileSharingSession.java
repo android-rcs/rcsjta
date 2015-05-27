@@ -394,11 +394,11 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * @throws SipException
      */
     public void handle200OK(SipResponse resp) throws SipException {
-        super.handle200OK(resp);
         long timestamp = System.currentTimeMillis();
         ((InstantMessagingService) getImsService()).receiveOneToOneFileDeliveryStatus(
                 getRemoteContact(), new ImdnDocument(getFileTransferId(),
                         ImdnDocument.POSITIVE_DELIVERY, ImdnDocument.DELIVERY_STATUS_DELIVERED,
                         timestamp));
+        super.handle200OK(resp);
     }
 }
