@@ -520,10 +520,9 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             if (mImService.isChatSessionAvailable()) {
                 sendChatMessageInNewSession(message);
             } else {
-                throw new MsrpException(
-                        new StringBuilder("Failed to dequeue one-one chat message ").append(msgId)
-                                .append(" message for contact ").append(mContact)
-                                .append(" as there is no available chat session!").toString());
+                throw new MsrpException(new StringBuilder(
+                        "There is no available chat session for contact '").append(mContact)
+                        .append("'!").toString());
             }
         } else if (session.isMediaEstablished()) {
             sendChatMessageWithinSession(session, message);
@@ -533,10 +532,9 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             if (mImService.isChatSessionAvailable()) {
                 sendChatMessageInNewSession(message);
             } else {
-                throw new MsrpException(
-                        new StringBuilder("Failed to dequeue one-one chat message ").append(msgId)
-                                .append(" message for contact ").append(mContact)
-                                .append(" as there is no available chat session!").toString());
+                throw new MsrpException(new StringBuilder(
+                        "There is no available chat session for contact '").append(mContact)
+                        .append("'!").toString());
             }
         }
     }
@@ -583,9 +581,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                 sendFileInfoInNewSession(fileTransferId, fileInfo, oneToOneFileTransfer);
             } else {
                 throw new MsrpException(new StringBuilder(
-                        "Failed to dequeue one-one file info ").append(fileTransferId)
-                        .append(" message for contact ").append(mContact)
-                        .append(" as there is no available chat session!").toString());
+                        "There is no available chat session for contact '").append(mContact)
+                        .append("'!").toString());
             }
         } else if (session.isMediaEstablished()) {
             session.sendFileInfo(oneToOneFileTransfer, fileTransferId, fileInfo,
@@ -597,9 +594,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                 sendFileInfoInNewSession(fileTransferId, fileInfo, oneToOneFileTransfer);
             } else {
                 throw new MsrpException(new StringBuilder(
-                        "Failed to dequeue one-one file info ").append(fileTransferId)
-                        .append(" message for contact ").append(mContact)
-                        .append(" as there is no available chat session!").toString());
+                        "There is no available chat session for contact '").append(mContact)
+                        .append("'!").toString());
             }
         }
     }

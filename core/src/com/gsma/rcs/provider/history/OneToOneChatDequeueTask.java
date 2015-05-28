@@ -109,7 +109,13 @@ public class OneToOneChatDequeueTask extends DequeueTask {
                                 try {
                                     oneToOneChat.dequeueOneToOneChatMessage(message);
                                 } catch (MsrpException e) {
-                                    mLogger.error(e.getMessage());
+                                    if (logActivated) {
+                                        mLogger.debug(new StringBuilder(
+                                                "Failed to dequeue one-one chat message '")
+                                                .append(id).append("' message for contact '")
+                                                .append(contact).append("' due to: ")
+                                                .append(e.getMessage()).toString());
+                                    }
                                 }
                                 break;
                             case FileTransferData.HISTORYLOG_MEMBER_ID:
@@ -133,10 +139,12 @@ public class OneToOneChatDequeueTask extends DequeueTask {
                                             mFileTransferService.dequeueOneToOneFileTransfer(id,
                                                     contact, fileContent, fileIconContent);
                                         } catch (SecurityException e) {
-                                            mLogger.error(new StringBuilder(
-                                                    "Security exception occured while dequeueing file transfer with transferId '")
-                                                    .append(id).append("', so mark as failed")
-                                                    .toString());
+                                            mLogger.error(
+                                                    new StringBuilder(
+                                                            "Security exception occured while dequeueing file transfer with transferId '")
+                                                            .append(id)
+                                                            .append("', so mark as failed")
+                                                            .toString(), e);
                                             mFileTransferService
                                                     .setOneToOneFileTransferStateAndReasonCode(id,
                                                             contact, State.FAILED,
@@ -157,12 +165,21 @@ public class OneToOneChatDequeueTask extends DequeueTask {
                                                     mDisplayedReportEnabled,
                                                     mDeliveryReportEnabled, oneToOneFileTransfer);
                                         } catch (MsrpException e) {
-                                            mLogger.error(e.getMessage());
+                                            if (logActivated) {
+                                                mLogger.debug(new StringBuilder(
+                                                        "Failed to dequeue one-one file info '")
+                                                        .append(id)
+                                                        .append("' message for contact '")
+                                                        .append(contact).append("' due to: ")
+                                                        .append(e.getMessage()).toString());
+                                            }
                                         } catch (SecurityException e) {
-                                            mLogger.error(new StringBuilder(
-                                                    "Security exception occured while dequeueing file info with transferId '")
-                                                    .append(id).append("', so mark as failed")
-                                                    .toString());
+                                            mLogger.error(
+                                                    new StringBuilder(
+                                                            "Security exception occured while dequeueing file info with transferId '")
+                                                            .append(id)
+                                                            .append("', so mark as failed")
+                                                            .toString(), e);
                                             mFileTransferService
                                                     .setOneToOneFileTransferStateAndReasonCode(id,
                                                             contact, State.FAILED,

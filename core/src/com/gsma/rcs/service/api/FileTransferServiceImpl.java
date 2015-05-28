@@ -25,6 +25,7 @@ package com.gsma.rcs.service.api;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
@@ -941,7 +942,9 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         if (groupChatSession != null) {
             if (groupChatSession.isInitiatedByRemote()) {
                 if (sLogger.isActivated()) {
-                    sLogger.debug("Group chat session is pending: auto accept it.");
+                    sLogger.debug(new StringBuilder("Group chat session with chatId '")
+                            .append(chatId).append("' is pending for acceptance, accept it.")
+                            .toString());
                 }
                 new Thread() {
                     public void run() {
@@ -953,11 +956,15 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             try {
                 mCore.getListener().handleRejoinGroupChatAsPartOfSendOperation(chatId);
 
-            } catch (ServerApiException e) {
+            } catch (MsrpException e) {
                 /*
                  * failed to rejoin group chat session. Ignoring this exception because we want to
                  * try again later.
                  */
+                if (sLogger.isActivated()) {
+                    sLogger.debug(new StringBuilder("Could not rejoin group chat with chatID '")
+                            .append(chatId).append("' due to: ").append(e.getMessage()).toString());
+                }
             }
         }
         return new GroupFileTransferImpl(fileTransferId, chatId, mGroupFileTransferBroadcaster,
@@ -972,28 +979,43 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param content
      * @param fileIcon
      * @param chatId
+     * @throws MsrpException
      */
     public void dequeueGroupFileTransfer(String chatId, String fileTransferId, MmContent content,
-            MmContent fileIcon) {
-        long timestamp = System.currentTimeMillis();
-        /* For outgoing file transfer, timestampSent = timestamp */
-        long timestampSent = timestamp;
-        mMessagingLog.dequeueFileTransfer(fileTransferId, timestamp, timestampSent);
-        mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId,
-                FileTransfer.State.INITIATING, FileTransfer.ReasonCode.UNSPECIFIED);
+            MmContent fileIcon) throws MsrpException {
         GroupChatSession groupChatSession = mImService.getGroupChatSession(chatId);
-        // TODO: check nr of sessions
-        final FileSharingSession session = mImService.initiateGroupFileTransferSession(
-                fileTransferId, content, fileIcon, chatId, groupChatSession.getSessionID(),
-                timestamp, timestampSent);
-        FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
-                fileTransferId, null, Direction.OUTGOING, chatId, content, fileIcon, mMessagingLog);
-        GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(fileTransferId, chatId,
-                mGroupFileTransferBroadcaster, mImService, storageAccessor, this, mRcsSettings,
-                mCore, mMessagingLog, mContactManager);
-        addGroupFileTransfer(fileTransferId, groupFileTransfer);
-        session.addListener(groupFileTransfer);
-        session.startSession();
+        if (groupChatSession == null) {
+            mCore.getListener().handleRejoinGroupChatAsPartOfSendOperation(chatId);
+        } else if (groupChatSession.isMediaEstablished()) {
+            long timestamp = System.currentTimeMillis();
+            /* For outgoing file transfer, timestampSent = timestamp */
+            long timestampSent = timestamp;
+            mMessagingLog.dequeueFileTransfer(fileTransferId, timestamp, timestampSent);
+            mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId,
+                    FileTransfer.State.INITIATING, FileTransfer.ReasonCode.UNSPECIFIED);
+            final FileSharingSession session = mImService.initiateGroupFileTransferSession(
+                    fileTransferId, content, fileIcon, chatId, groupChatSession.getSessionID(),
+                    timestamp, timestampSent);
+            FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
+                    fileTransferId, null, Direction.OUTGOING, chatId, content, fileIcon,
+                    mMessagingLog);
+            GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(fileTransferId,
+                    chatId, mGroupFileTransferBroadcaster, mImService, storageAccessor, this,
+                    mRcsSettings, mCore, mMessagingLog, mContactManager);
+            addGroupFileTransfer(fileTransferId, groupFileTransfer);
+            session.addListener(groupFileTransfer);
+            session.startSession();
+        } else if (groupChatSession.isInitiatedByRemote()) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(new StringBuilder("Group chat session with chatId '").append(chatId)
+                        .append("' is pending for acceptance, accept it.").toString());
+            }
+            groupChatSession.acceptSession();
+        } else {
+            throw new MsrpException(new StringBuilder(
+                    "The existing group chat session with chatId '").append(chatId)
+                    .append("' is not established right now!").toString());
+        }
     }
 
     /**

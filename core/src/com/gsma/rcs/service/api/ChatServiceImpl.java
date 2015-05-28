@@ -1045,10 +1045,11 @@ public class ChatServiceImpl extends IChatService.Stub {
      * Handle rejoin group chat as part of send operation
      * 
      * @param chatId
-     * @throws ServerApiException
+     * @throws MsrpException
      */
-    public void handleRejoinGroupChatAsPartOfSendOperation(String chatId) throws ServerApiException {
+    public void handleRejoinGroupChatAsPartOfSendOperation(String chatId) throws MsrpException {
         GroupChatImpl groupChat = getOrCreateGroupChat(chatId);
+        groupChat.setRejoinedAsPartOfSendOperation(true);
         groupChat.rejoinGroupChat();
     }
 
@@ -1056,9 +1057,9 @@ public class ChatServiceImpl extends IChatService.Stub {
      * Handle rejoin group chat
      * 
      * @param chatId
-     * @throws ServerApiException
+     * @throws MsrpException
      */
-    public void handleRejoinGroupChat(String chatId) throws ServerApiException {
+    public void handleRejoinGroupChat(String chatId) throws MsrpException {
         GroupChatImpl groupChat = getOrCreateGroupChat(chatId);
         groupChat.rejoinGroupChat();
     }

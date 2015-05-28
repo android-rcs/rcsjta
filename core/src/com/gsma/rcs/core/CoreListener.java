@@ -27,6 +27,7 @@ import com.gsma.rcs.core.content.GeolocContent;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.ImsError;
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
@@ -42,7 +43,6 @@ import com.gsma.rcs.core.ims.service.richcall.image.ImageTransferSession;
 import com.gsma.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.gsma.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
 import com.gsma.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
-import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.rcs.service.ipcalldraft.IPCall;
 import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.chat.GroupChat;
@@ -396,17 +396,17 @@ public interface CoreListener {
      * Handle rejoin group chat as part of send operation
      * 
      * @param chatId
-     * @throws ServerApiException
+     * @throws MsrpException
      */
-    public void handleRejoinGroupChatAsPartOfSendOperation(String chatId) throws ServerApiException;
+    public void handleRejoinGroupChatAsPartOfSendOperation(String chatId) throws MsrpException;
 
     /**
      * Handle auto rejoin group chat
      * 
      * @param chatId
-     * @throws ServerApiException
+     * @throws MsrpException
      */
-    public void handleRejoinGroupChat(String chatId) throws ServerApiException;
+    public void handleRejoinGroupChat(String chatId) throws MsrpException;
 
     /**
      * Try to start ImService tasks once the IMS connection is re-established and the ImsServices

@@ -33,7 +33,6 @@ import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
 import com.gsma.rcs.service.api.GroupChatImpl;
 import com.gsma.rcs.service.api.GroupFileTransferImpl;
-import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 
@@ -45,8 +44,6 @@ import android.net.Uri;
  * transfers that are either QUEUED or UPLOADED but not trasnferred for a specific group chat.
  */
 public class GroupChatDequeueTask extends DequeueTask {
-
-    private static final Logger sLogger = Logger.getLogger(GroupChatDequeueTask.class.getName());
 
     private final String mChatId;
 
@@ -111,7 +108,13 @@ public class GroupChatDequeueTask extends DequeueTask {
                                     groupChat.dequeueGroupChatMessage(message);
 
                                 } catch (MsrpException e) {
-                                    sLogger.error(e.getMessage());
+                                    if (logActivated) {
+                                        mLogger.debug(new StringBuilder(
+                                                "Failed to dequeue group chat message '")
+                                                .append(id).append("' message on group chat '")
+                                                .append(mChatId).append("' due to: ")
+                                                .append(e.getMessage()).toString());
+                                    }
                                 }
                                 break;
                             case FileTransferData.HISTORYLOG_MEMBER_ID:
@@ -134,11 +137,21 @@ public class GroupChatDequeueTask extends DequeueTask {
                                             }
                                             mFileTransferService.dequeueGroupFileTransfer(mChatId,
                                                     id, fileContent, fileIconContent);
+                                        } catch (MsrpException e) {
+                                            if (logActivated) {
+                                                mLogger.debug(new StringBuilder(
+                                                        "Failed to dequeue group file transfer with fileTransferId '")
+                                                        .append(id).append("' on group chat '")
+                                                        .append(mChatId).append("' due to: ")
+                                                        .append(e.getMessage()).toString());
+                                            }
                                         } catch (SecurityException e) {
-                                            mLogger.error(new StringBuilder(
-                                                    "Security exception occured while dequeueing file transfer with transferId '")
-                                                    .append(id).append("', so mark as failed")
-                                                    .toString());
+                                            mLogger.error(
+                                                    new StringBuilder(
+                                                            "Security exception occured while dequeueing file transfer with transferId '")
+                                                            .append(id)
+                                                            .append("', so mark as failed")
+                                                            .toString(), e);
                                             mFileTransferService
                                                     .setGroupFileTransferStateAndReasonCode(id,
                                                             mChatId, State.FAILED,
@@ -160,12 +173,21 @@ public class GroupChatDequeueTask extends DequeueTask {
                                                     mDeliveryReportEnabled, groupFileTransfer);
 
                                         } catch (MsrpException e) {
-                                            sLogger.error(e.getMessage());
+                                            if (logActivated) {
+                                                mLogger.debug(new StringBuilder(
+                                                        "Failed to dequeue group file info '")
+                                                        .append(id)
+                                                        .append("' message on group chat '")
+                                                        .append(mChatId).append("' due to: ")
+                                                        .append(e.getMessage()).toString());
+                                            }
                                         } catch (SecurityException e) {
-                                            mLogger.error(new StringBuilder(
-                                                    "Security exception occured while dequeueing file info with transferId '")
-                                                    .append(id).append("', so mark as failed")
-                                                    .toString());
+                                            mLogger.error(
+                                                    new StringBuilder(
+                                                            "Security exception occured while dequeueing file info with transferId '")
+                                                            .append(id)
+                                                            .append("', so mark as failed")
+                                                            .toString(), e);
                                             mFileTransferService
                                                     .setGroupFileTransferStateAndReasonCode(id,
                                                             mChatId, State.FAILED,
@@ -197,6 +219,5 @@ public class GroupChatDequeueTask extends DequeueTask {
                 cursor.close();
             }
         }
-
     }
 }

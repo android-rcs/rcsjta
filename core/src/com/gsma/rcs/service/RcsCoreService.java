@@ -31,6 +31,7 @@ import com.gsma.rcs.core.content.GeolocContent;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.ImsError;
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatAutoRejoinTask;
@@ -83,7 +84,6 @@ import com.gsma.rcs.service.api.IPCallServiceImpl;
 import com.gsma.rcs.service.api.ImageSharingServiceImpl;
 import com.gsma.rcs.service.api.MultimediaSessionServiceImpl;
 import com.gsma.rcs.service.api.OneToOneUndeliveredImManager;
-import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.rcs.service.api.VideoSharingServiceImpl;
 import com.gsma.rcs.service.ipcalldraft.IIPCallService;
 import com.gsma.rcs.service.ipcalldraft.IPCall;
@@ -980,12 +980,12 @@ public class RcsCoreService extends Service implements CoreListener {
     }
 
     @Override
-    public void handleRejoinGroupChatAsPartOfSendOperation(String chatId) throws ServerApiException {
+    public void handleRejoinGroupChatAsPartOfSendOperation(String chatId) throws MsrpException {
         mChatApi.handleRejoinGroupChatAsPartOfSendOperation(chatId);
     }
 
     @Override
-    public void handleRejoinGroupChat(String chatId) throws ServerApiException {
+    public void handleRejoinGroupChat(String chatId) throws MsrpException {
         mChatApi.handleRejoinGroupChat(chatId);
     }
 

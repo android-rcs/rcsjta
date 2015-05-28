@@ -77,7 +77,12 @@ public class OneToOneChatMessageDequeueTask extends DequeueTask {
                         try {
                             oneToOneChat.dequeueOneToOneChatMessage(message);
                         } catch (MsrpException e) {
-                            mLogger.error(e.getMessage());
+                            if (logActivated) {
+                                mLogger.debug(new StringBuilder(
+                                        "Failed to dequeue one-one chat message '").append(msgId)
+                                        .append("' message for contact '").append(mContact)
+                                        .append("' due to: ").append(e.getMessage()).toString());
+                            }
                         }
                     } catch (RuntimeException e) {
                         /*

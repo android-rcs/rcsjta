@@ -17,8 +17,8 @@
 package com.gsma.rcs.core.ims.service.im.chat;
 
 import com.gsma.rcs.core.Core;
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.provider.messaging.MessagingLog;
-import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.rcs.utils.logger.Logger;
 
 public class GroupChatAutoRejoinTask implements Runnable {
@@ -40,10 +40,10 @@ public class GroupChatAutoRejoinTask implements Runnable {
             try {
                 mCore.getListener().handleRejoinGroupChat(chatId);
 
-            } catch (ServerApiException e) {
+            } catch (MsrpException e) {
                 if (logger.isActivated()) {
-                    logger.warn(new StringBuilder("Could not auto-rejoin group chat with chatID '")
-                            .append(chatId).append("'").toString());
+                    logger.debug(new StringBuilder("Could not auto-rejoin group chat with chatID '")
+                            .append(chatId).append("' due to: ").append(e.getMessage()).toString());
                 }
             }
         }

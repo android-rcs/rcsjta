@@ -41,7 +41,6 @@ import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -237,16 +236,32 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
             handleFileTransfered();
 
         } else {
+            mMessagingLog.setFileTransferDownloadInfo(getFileTransferId(), infoDocument);
+            removeSession();
             /*
              * If group chat session does not exist, try to rejoin group chat and on success dequeue
              * the file transfer message
              */
-            try {
-                mMessagingLog.setFileTransferDownloadInfo(getFileTransferId(), infoDocument);
-                removeSession();
-                mCore.getListener().handleRejoinGroupChatAsPartOfSendOperation(chatId);
-            } catch (ServerApiException e) {
-                handleError(new FileSharingError(FileSharingError.NO_CHAT_SESSION));
+            if (mChatSession == null) {
+                try {
+                    mCore.getListener().handleRejoinGroupChatAsPartOfSendOperation(chatId);
+                } catch (MsrpException e) {
+                    /*
+                     * Failed to rejoin group chat session. Ignoring this exception because we want
+                     * to try again later.
+                     */
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(new StringBuilder("Could not rejoin group chat with chatId '")
+                                .append(chatId).append("' due to: ").append(e.getMessage()).toString());
+                    }
+                }
+            } else if (!mChatSession.isMediaEstablished() && mChatSession.isInitiatedByRemote()) {
+                if (logActivated) {
+                    sLogger.debug(new StringBuilder("Group chat session with chatId '")
+                            .append(chatId).append("' is pending for acceptance, accept it.")
+                            .toString());
+                }
+                mChatSession.acceptSession();
             }
         }
     }

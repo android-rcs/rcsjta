@@ -117,11 +117,20 @@ public class FileTransferDequeueTask extends DequeueTask {
                                         mFileTransferService.dequeueOneToOneFileTransfer(
                                                 fileTransferId, contact, content, fileIconContent);
                                     }
+                                } catch (MsrpException e) {
+                                    if (logActivated) {
+                                        mLogger.debug(new StringBuilder(
+                                                "Failed to dequeue file transfer with fileTransferId '")
+                                                .append(fileTransferId).append("' on chat '")
+                                                .append(chatId).append("' due to: ")
+                                                .append(e.getMessage()).toString());
+                                    }
                                 } catch (SecurityException e) {
-                                    mLogger.error(new StringBuilder(
-                                            "Security exception occured while dequeueing file transfer with transferId '")
-                                            .append(fileTransferId).append("', so mark as failed")
-                                            .toString());
+                                    mLogger.error(
+                                            new StringBuilder(
+                                                    "Security exception occured while dequeueing file transfer with transferId '")
+                                                    .append(fileTransferId)
+                                                    .append("', so mark as failed").toString(), e);
                                     if (isGroupFileTransfer) {
                                         mFileTransferService
                                                 .setGroupFileTransferStateAndReasonCode(
@@ -169,12 +178,19 @@ public class FileTransferDequeueTask extends DequeueTask {
                                                 mDeliveryReportEnabled, oneToOneFileTransfer);
                                     }
                                 } catch (MsrpException e) {
-                                    mLogger.error(e.getMessage());
+                                    if (logActivated) {
+                                        mLogger.debug(new StringBuilder(
+                                                "Failed to dequeue file transfer with fileTransferId '")
+                                                .append(fileTransferId).append("' on chat '")
+                                                .append(chatId).append("' due to: ")
+                                                .append(e.getMessage()).toString());
+                                    }
                                 } catch (SecurityException e) {
-                                    mLogger.error(new StringBuilder(
-                                            "Security exception occured while dequeueing file info with transferId '")
-                                            .append(fileTransferId).append("', so mark as failed")
-                                            .toString());
+                                    mLogger.error(
+                                            new StringBuilder(
+                                                    "Security exception occured while dequeueing file info with transferId '")
+                                                    .append(fileTransferId)
+                                                    .append("', so mark as failed").toString(), e);
                                     if (isGroupFileTransfer) {
                                         mFileTransferService
                                                 .setGroupFileTransferStateAndReasonCode(

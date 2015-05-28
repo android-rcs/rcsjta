@@ -18,6 +18,7 @@ package com.gsma.rcs.service;
 
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
+import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
@@ -25,6 +26,8 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.contact.ContactId;
+
+import android.text.TextUtils;
 
 public abstract class DequeueTask implements Runnable {
 
@@ -98,68 +101,12 @@ public abstract class DequeueTask implements Runnable {
     }
 
     /**
-     * Check if dequeuing and sending of group chat messages to specified chatId is possible
-     * 
-     * @param chatId
-     * @return boolean
-     */
-    protected boolean isAllowedToDequeueGroupChatMessage(String chatId) {
-        final GroupChatSession groupChatSession = mImService.getGroupChatSession(chatId);
-        if (groupChatSession == null || !groupChatSession.isMediaEstablished()) {
-            if (mLogger.isActivated()) {
-                mLogger.debug(new StringBuilder(
-                        "Cannot transfer file to group chat as there is no corresponding group chat session with chatId ")
-                        .append(chatId).append(" in established state.").toString());
-            }
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Check if it is allowed to dequeue one-one file transfer
-     * 
-     * @return boolean
-     */
-    protected boolean isAllowedToDequeueOneToOneFileTransfer() {
-        return isAllowedToDequeueFileTransfer();
-    }
-
-    /**
-     * Check if it is allowed to dequeue group file transfer
-     * 
-     * @param chatId
-     * @return boolean
-     */
-    protected boolean isAllowedToDequeueGroupFileTransfer(String chatId) {
-        if (!mRcsSettings.getMyCapabilities().isFileTransferHttpSupported()) {
-            if (mLogger.isActivated()) {
-                mLogger.debug("Cannot transfer file to group chat as FT over HTTP capabilities are not supported for self.");
-            }
-            return false;
-        }
-        final GroupChatSession groupChatSession = mImService.getGroupChatSession(chatId);
-        if (groupChatSession == null || !groupChatSession.isMediaEstablished()) {
-            if (mLogger.isActivated()) {
-                mLogger.debug(new StringBuilder(
-                        "Cannot transfer file to group chat as there is no corresponding group chat session with chatId ")
-                        .append(chatId).append(" in established state.").toString());
-            }
-            return false;
-        }
-        if (!isAllowedToDequeueFileTransfer()) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * Check if it is possible to dequeue group chat messages and group file transfers
      * 
      * @param chatId
      * @return boolean
      */
-    protected boolean isAllowedToDequeueGroupChatMessagesAndGroupFileTransfers(String chatId) {
+    private boolean isAllowedToDequeueGroupChatMessagesAndGroupFileTransfers(String chatId) {
         if (!mRcsSettings.isGroupChatActivated()) {
             if (mLogger.isActivated()) {
                 mLogger.debug("Cannot dequeue group chat messages and file transfers right now as group chat feature is not activated!");
@@ -182,6 +129,75 @@ public abstract class DequeueTask implements Runnable {
                 return false;
             default:
                 break;
+        }
+        final GroupChatSession groupChatSession = mImService.getGroupChatSession(chatId);
+        if (groupChatSession == null) {
+            GroupChatInfo groupChat = mMessagingLog.getGroupChatInfo(chatId);
+            if (groupChat == null) {
+                if (mLogger.isActivated()) {
+                    mLogger.debug(new StringBuilder(
+                            "Cannot dequeue group chat messages and group file transfers as the group chat with group chat Id '")
+                            .append(chatId)
+                            .append("' is not rejoinable as the group chat does not exist in DB.")
+                            .toString());
+                }
+                return false;
+            }
+            if (TextUtils.isEmpty(groupChat.getRejoinId())) {
+                if (mLogger.isActivated()) {
+                    mLogger.debug(new StringBuilder(
+                            "Cannot dequeue group chat messages and group file transfers as thr group chat with group chat Id '")
+                            .append(chatId)
+                            .append("' is not rejoinable as there is no ongoing session with "
+                                    + "corresponding chatId and there exists no rejoinId to "
+                                    + "rejoin the group chat.").toString());
+                }
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Check if dequeuing and sending of group chat messages to specified chatId is possible
+     * 
+     * @param chatId
+     * @return boolean
+     */
+    protected boolean isAllowedToDequeueGroupChatMessage(String chatId) {
+        if (!isAllowedToDequeueGroupChatMessagesAndGroupFileTransfers(chatId)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Check if it is allowed to dequeue one-one file transfer
+     * 
+     * @return boolean
+     */
+    protected boolean isAllowedToDequeueOneToOneFileTransfer() {
+        return isAllowedToDequeueFileTransfer();
+    }
+
+    /**
+     * Check if it is allowed to dequeue group file transfer
+     * 
+     * @param chatId
+     * @return boolean
+     */
+    protected boolean isAllowedToDequeueGroupFileTransfer(String chatId) {
+        if (!isAllowedToDequeueGroupChatMessagesAndGroupFileTransfers(chatId)) {
+            return false;
+        }
+        if (!mRcsSettings.getMyCapabilities().isFileTransferHttpSupported()) {
+            if (mLogger.isActivated()) {
+                mLogger.debug("Cannot transfer file to group chat as FT over HTTP capabilities are not supported for self.");
+            }
+            return false;
+        }
+        if (!isAllowedToDequeueFileTransfer()) {
+            return false;
         }
         return true;
     }
