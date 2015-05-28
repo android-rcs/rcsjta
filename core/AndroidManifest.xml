@@ -230,7 +230,7 @@
                 <action android:name="com.gsma.services.rcs.action.GET_ACTIVATION_MODE" />
                 <action android:name="com.gsma.services.rcs.action.SET_ACTIVATION_MODE" />
                 <action android:name="com.gsma.services.rcs.action.GET_COMPATIBILITY" />
-                <action android:name="com.gsma.services.rcs.action.IS_SERVICE_STARTED" />
+                <action android:name="com.gsma.services.rcs.action.GET_SERVICE_STARTING_STATE" />
             </intent-filter>
         </receiver>
 
