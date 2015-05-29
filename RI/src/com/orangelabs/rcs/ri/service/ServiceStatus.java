@@ -72,7 +72,7 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
         super.onCreate(savedInstanceState);
 
         mRcsServiceControl = RiApplication.getRcsServiceControl();
-        
+
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.service_status);
@@ -94,7 +94,7 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
         displayServiceBinding(false);
 
         displayServiceActivation();
-        
+
         displayServiceStarted();
 
         // Register service up event listener

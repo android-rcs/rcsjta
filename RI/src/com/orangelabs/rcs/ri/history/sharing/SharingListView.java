@@ -73,7 +73,7 @@ public class SharingListView extends HistoryListView {
             @Override
             public void onItemSelected(AdapterView<?> parent, View v, int position, long id) {
                 /* Call when an item is selected so also at the start of the activity to initialize */
-                startQuery();
+                queryHistoryLogAndRefreshView();
             }
 
             @Override
@@ -124,7 +124,8 @@ public class SharingListView extends HistoryListView {
         return ContactUtil.formatContact(contact).toString();
     }
 
-    protected void startQuery() {
+    @Override
+    protected void queryHistoryLogAndRefreshView() {
         Cursor cursor = null;
         List<Integer> selectedProviderIds = getSelectedProviderIds();
         String contact = getSelectedContact();

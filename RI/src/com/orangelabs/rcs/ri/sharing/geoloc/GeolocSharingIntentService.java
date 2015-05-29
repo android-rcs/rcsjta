@@ -92,8 +92,7 @@ public class GeolocSharingIntentService extends IntentService {
 
         try {
             ConnectionManager connectionManager = ConnectionManager.getInstance(this);
-            if (connectionManager == null
-                    || !connectionManager.isServiceConnected(RcsServiceName.GEOLOC_SHARING)) {
+            if (!connectionManager.isServiceConnected(RcsServiceName.GEOLOC_SHARING)) {
                 if (LogUtils.isActive) {
                     Log.e(LOGTAG, "Cannot bind to GSH service");
                 }

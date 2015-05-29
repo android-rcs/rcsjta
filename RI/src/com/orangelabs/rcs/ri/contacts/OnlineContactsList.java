@@ -60,7 +60,7 @@ public class OnlineContactsList extends ListActivity {
 
         // Register to API connection manager
         mCnxManager = ConnectionManager.getInstance(this);
-        if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CONTACT)) {
+        if (!mCnxManager.isServiceConnected(RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
             return;
@@ -71,9 +71,7 @@ public class OnlineContactsList extends ListActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mCnxManager != null) {
-            mCnxManager.stopMonitorServices(this);
-        }
+        mCnxManager.stopMonitorServices(this);
     }
 
     @Override

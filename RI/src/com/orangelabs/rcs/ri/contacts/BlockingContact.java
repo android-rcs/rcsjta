@@ -33,7 +33,7 @@ public class BlockingContact extends Activity {
     /**
      * API connection manager
      */
-    private ConnectionManager connectionManager;
+    private ConnectionManager mCnxManager;
 
     /**
      * A locker to exit only once
@@ -59,14 +59,13 @@ public class BlockingContact extends Activity {
         setContentView(R.layout.contacts_blocking);
 
         // Register to API connection manager
-        connectionManager = ConnectionManager.getInstance(this);
-        if (connectionManager == null
-                || !connectionManager.isServiceConnected(RcsServiceName.CONTACT)) {
+        mCnxManager = ConnectionManager.getInstance(this);
+        if (!mCnxManager.isServiceConnected(RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     exitOnce);
             return;
         }
-        connectionManager.startMonitorServices(this, null, RcsServiceName.CONTACT);
+        mCnxManager.startMonitorServices(this, null, RcsServiceName.CONTACT);
 
         // Set the contact selector
         mSpinner = (Spinner) findViewById(R.id.contact);
@@ -90,14 +89,12 @@ public class BlockingContact extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (connectionManager != null) {
-            connectionManager.stopMonitorServices(this);
-        }
+        mCnxManager.stopMonitorServices(this);
     }
 
     private void updateBlockingState(ContactId contactId) {
         try {
-            RcsContact contact = connectionManager.getContactApi().getRcsContact(contactId);
+            RcsContact contact = mCnxManager.getContactApi().getRcsContact(contactId);
             toggleBtn.setChecked(contact.isBlocked());
         } catch (RcsServiceNotAvailableException e) {
             e.printStackTrace();
@@ -145,12 +142,12 @@ public class BlockingContact extends Activity {
                 ContactId contact = getSelectedContact();
                 if (toggleBtn.isChecked()) {
                     // Block the contact
-                    connectionManager.getContactApi().blockContact(contact);
+                    mCnxManager.getContactApi().blockContact(contact);
                     Utils.displayToast(BlockingContact.this,
                             getString(R.string.label_contact_blocked, contact.toString()));
                 } else {
                     // Unblock the contact
-                    connectionManager.getContactApi().unblockContact(contact);
+                    mCnxManager.getContactApi().unblockContact(contact);
                     Utils.displayToast(BlockingContact.this,
                             getString(R.string.label_contact_unblocked, contact.toString()));
                 }

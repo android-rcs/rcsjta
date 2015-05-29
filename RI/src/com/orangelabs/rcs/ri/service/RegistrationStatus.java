@@ -68,7 +68,7 @@ public class RegistrationStatus extends Activity {
 
         // Register to API connection manager
         mCnxManager = ConnectionManager.getInstance(this);
-        if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
+        if (!mCnxManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
             return;
@@ -85,9 +85,6 @@ public class RegistrationStatus extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mCnxManager == null) {
-            return;
-        }
         mCnxManager.stopMonitorServices(this);
         if (mCnxManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
             // Remove listener

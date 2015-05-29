@@ -202,20 +202,20 @@ public class StreamingSessionView extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Set layout
+        connectionManager = ConnectionManager.getInstance(this);
+
+        /* Set layout */
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.extension_session_view);
 
-        // Set buttons callback
+        /* Set buttons callback */
         Button sendBtn = (Button) findViewById(R.id.send_btn);
         sendBtn.setOnClickListener(btnSendListener);
         sendBtn.setEnabled(false);
 
-        // Register to API connection manager
-        connectionManager = ConnectionManager.getInstance(this);
-        if (connectionManager == null
-                || !connectionManager.isServiceConnected(RcsServiceName.MULTIMEDIA,
-                        RcsServiceName.CONTACT)) {
+        /* Register to API connection manager */
+        if (!connectionManager
+                .isServiceConnected(RcsServiceName.MULTIMEDIA, RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
             return;
@@ -237,9 +237,6 @@ public class StreamingSessionView extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (connectionManager == null) {
-            return;
-        }
         connectionManager.stopMonitorServices(this);
         if (connectionManager.isServiceConnected(RcsServiceName.MULTIMEDIA)) {
             // Remove listener

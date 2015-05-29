@@ -86,6 +86,8 @@ public class InitiateFileUpload extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mCnxManager = ConnectionManager.getInstance(this);
+
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.fileupload_initiate);
@@ -101,8 +103,7 @@ public class InitiateFileUpload extends Activity {
         selectBtn.setOnClickListener(btnSelectListener);
 
         // Register to API connection manager
-        mCnxManager = ConnectionManager.getInstance(this);
-        if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
+        if (!mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
             return;
@@ -121,9 +122,6 @@ public class InitiateFileUpload extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mCnxManager == null) {
-            return;
-        }
         mCnxManager.stopMonitorServices(this);
         // Remove upload listener
         if (mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {

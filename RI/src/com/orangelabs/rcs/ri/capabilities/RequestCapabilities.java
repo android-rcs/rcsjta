@@ -77,20 +77,22 @@ public class RequestCapabilities extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Set layout
+        /* Set layout */
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.capabilities_request);
 
-        // Set the contact selector
+        mCnxManager = ConnectionManager.getInstance(this);
+
+        /* Set the contact selector */
         mSpinner = (Spinner) findViewById(R.id.contact);
         mSpinner.setAdapter(ContactListAdapter.createContactListAdapter(this));
         mSpinner.setOnItemSelectedListener(listenerContact);
 
-        // Set button callback
+        /* Set button callback */
         Button refreshBtn = (Button) findViewById(R.id.refresh_btn);
         refreshBtn.setOnClickListener(btnRefreshListener);
 
-        // Update refresh button
+        /* Update refresh button */
         if (mSpinner.getAdapter().getCount() == 0) {
             // Disable button if no contact available
             refreshBtn.setEnabled(false);
@@ -98,9 +100,8 @@ public class RequestCapabilities extends Activity {
             refreshBtn.setEnabled(true);
         }
 
-        // Register to API connection manager
-        mCnxManager = ConnectionManager.getInstance(this);
-        if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
+        /* Register to API connection manager */
+        if (!mCnxManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
             return;
@@ -120,9 +121,6 @@ public class RequestCapabilities extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mCnxManager == null) {
-            return;
-        }
         mCnxManager.stopMonitorServices(this);
         if (mCnxManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
             // Remove image sharing listener

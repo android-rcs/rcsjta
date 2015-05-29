@@ -20,41 +20,54 @@ package com.orangelabs.rcs.ri.messaging.chat.single;
 
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.chat.ChatLog.Message;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content;
+import com.gsma.services.rcs.chat.ChatService;
+import com.gsma.services.rcs.chat.OneToOneChatListener;
 import com.gsma.services.rcs.contact.ContactId;
 
 import com.orangelabs.rcs.ri.ConnectionManager;
 import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.ContactUtil;
+import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsDisplayName;
 import com.orangelabs.rcs.ri.utils.Utils;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.text.format.DateUtils;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import java.util.Arrays;
+import java.util.Set;
 
 /**
  * List chats from the content provider
  * 
  * @author YPLO6403
  */
-public class SingleChatList extends Activity {
+public class SingleChatList extends FragmentActivity implements
+        LoaderManager.LoaderCallbacks<Cursor> {
 
     // @formatter:off
     private static final String[] PROJECTION = new String[] {
@@ -77,108 +90,105 @@ public class SingleChatList extends Activity {
     private static final String SORT_ORDER = new StringBuilder(Message.TIMESTAMP).append(" DESC")
             .toString();
 
-    private static final String WHERE_CLAUSE = new StringBuilder(Message.CHAT_ID).append("=")
-            .append(Message.CONTACT).toString();
-
     private ListView mListView;
 
+    private ChatService mChatService;
+
+    private boolean mOneToOneChatListenerSet = false;
+
+    private ConnectionManager mCnxManager;
+
+    private ChatListAdapter mAdapter;
+
+    private Handler mHandler = new Handler();
+
+    private LockAccess mExitOnce = new LockAccess();
+
     private static final String LOGTAG = LogUtils.getTag(SingleChatList.class.getSimpleName());
+
+    /**
+     * The loader's unique ID. Loader IDs are specific to the Activity in which they reside.
+     */
+    private static final int LOADER_ID = 1;
+
+    /**
+     * List of items for contextual menu
+     */
+    private static final int CHAT_MENU_ITEM_DELETE = 1;
+    private static final int CHAT_MENU_ITEM_OPEN = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Set layout
+        /* Set layout */
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.chat_list);
 
-        // Set list adapter
+        mCnxManager = ConnectionManager.getInstance(this);
+        mChatService = mCnxManager.getChatApi();
+
         mListView = (ListView) findViewById(android.R.id.list);
         TextView emptyView = (TextView) findViewById(android.R.id.empty);
         mListView.setEmptyView(emptyView);
-        mListView.setOnItemClickListener(new OnItemClickListener() {
+        registerForContextMenu(mListView);
 
-            @Override
-            public void onItemClick(AdapterView<?> parent, View v, int pos, long id) {
-                // TODO: if not connected offers possibility to show history
-                ConnectionManager apiConnectionManager = ConnectionManager
-                        .getInstance(SingleChatList.this);
-                if (apiConnectionManager == null
-                        || !apiConnectionManager.isServiceConnected(RcsServiceName.CHAT)) {
-                    Utils.showMessage(SingleChatList.this,
-                            getString(R.string.label_continue_chat_failed));
-                    return;
-
-                }
-                // Get selected item
-                Cursor cursor = (Cursor) (parent.getAdapter()).getItem(pos);
-                String number = cursor.getString(cursor.getColumnIndexOrThrow(Message.CONTACT));
-
-                ContactId contact = ContactUtil.formatContact(number);
-                // Open chat
-                startActivity(SingleChatView.forgeIntentToStart(SingleChatList.this, contact));
-
-            }
-
-        });
+        mAdapter = new ChatListAdapter(this);
+        mListView.setAdapter(mAdapter);
+        /*
+         * Initialize the Loader with id '1' and callbacks 'mCallbacks'.
+         */
+        getSupportLoaderManager().initLoader(LOADER_ID, null, this);
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-
-        // Refresh view
-        mListView.setAdapter(createListAdapter());
-    }
-
-    /**
-     * Create chat list adapter with unique contact entries
-     */
-    private ChatListAdapter createListAdapter() {
-        Cursor cursor = getContentResolver().query(Message.CONTENT_URI, PROJECTION,
-                WHERE_CLAUSE_GROUPED, null, SORT_ORDER);
-        if (cursor == null) {
-            Utils.showMessageAndExit(this, getString(R.string.label_load_log_failed));
-            return null;
-
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mChatService == null || !mOneToOneChatListenerSet) {
+            return;
         }
-        return new ChatListAdapter(this, cursor);
+        try {
+            mChatService.removeEventListener(mOneChatListener);
+        } catch (Exception e) {
+            if (LogUtils.isActive) {
+                Log.e(LOGTAG, "removeEventListener failed", e);
+            }
+        }
     }
 
     /**
      * Single chat list adapter
      */
     private class ChatListAdapter extends CursorAdapter {
+
+        private LayoutInflater mInflater;
+
         /**
          * Constructor
          * 
          * @param context Context
-         * @param c Cursor
          */
-        public ChatListAdapter(Context context, Cursor c) {
-            super(context, c);
+        public ChatListAdapter(Context context) {
+            super(context, null, 0);
+            mInflater = LayoutInflater.from(context);
         }
 
         @Override
         public View newView(Context context, Cursor cursor, ViewGroup parent) {
-            LayoutInflater inflater = LayoutInflater.from(context);
-            View view = inflater.inflate(R.layout.chat_list_item, parent, false);
-            SingleChatListItemViewHolder holder = new SingleChatListItemViewHolder(view, cursor);
-            view.setTag(holder);
+            final View view = mInflater.inflate(R.layout.chat_list_item, parent, false);
+            view.setTag(new SingleChatListItemViewHolder(view, cursor));
             return view;
         }
 
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
-            SingleChatListItemViewHolder holder = (SingleChatListItemViewHolder) view.getTag();
-
-            // Set the date/time field by mixing relative and absolute times
+            final SingleChatListItemViewHolder holder = (SingleChatListItemViewHolder) view
+                    .getTag();
             long date = cursor.getLong(holder.columnTimestamp);
             holder.dateText.setText(DateUtils.getRelativeTimeSpanString(date,
                     System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS,
                     DateUtils.FORMAT_ABBREV_RELATIVE));
 
-            // Set the contact name
             String number = cursor.getString(holder.columnContact);
             String displayName = RcsDisplayName.getInstance(context).getDisplayName(number);
             holder.contactText.setText(getString(R.string.title_chat, displayName));
@@ -250,13 +260,141 @@ public class SingleChatList extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_clear_log:
-                // Delete all
-                getContentResolver().delete(Message.CONTENT_URI, WHERE_CLAUSE, null);
-
-                // Refresh view
-                mListView.setAdapter(createListAdapter());
+                /* Delete all one-to-one chat messages */
+                if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
+                    Utils.showMessage(this, getString(R.string.label_api_unavailable));
+                    break;
+                }
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "delete all one-to-one chat sessions");
+                }
+                try {
+                    if (!mOneToOneChatListenerSet) {
+                        mChatService.addEventListener(mOneChatListener);
+                        mOneToOneChatListenerSet = true;
+                    }
+                    mChatService.deleteOneToOneChats();
+                } catch (Exception e) {
+                    Utils.showMessageAndExit(this, getString(R.string.label_delete_chat_failed),
+                            mExitOnce, e);
+                }
                 break;
         }
         return true;
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        /* Check file transfer API is connected */
+        if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
+            Utils.showMessage(this, getString(R.string.label_api_unavailable));
+            return;
+        }
+        menu.add(0, CHAT_MENU_ITEM_OPEN, CHAT_MENU_ITEM_OPEN, R.string.menu_open_chat_session);
+        menu.add(0, CHAT_MENU_ITEM_DELETE, CHAT_MENU_ITEM_DELETE, R.string.menu_delete_chat_session);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        /* Get selected item */
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+        Cursor cursor = (Cursor) (mListView.getAdapter()).getItem(info.position);
+        String number = cursor.getString(cursor.getColumnIndexOrThrow(Message.CONTACT));
+        ContactId contact = ContactUtil.formatContact(number);
+        if (LogUtils.isActive) {
+            Log.d(LOGTAG, "onContextItemSelected contact=".concat(contact.toString()));
+        }
+        switch (item.getItemId()) {
+            case CHAT_MENU_ITEM_OPEN:
+                if (mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
+                    /* Open one-to-one chat view */
+                    startActivity(SingleChatView.forgeIntentToStart(this, contact));
+                } else {
+                    Utils.showMessage(this, getString(R.string.label_continue_chat_failed));
+                }
+                return true;
+
+            case CHAT_MENU_ITEM_DELETE:
+                if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
+                    Utils.showMessage(this, getString(R.string.label_delete_chat_failed));
+                    return true;
+                }
+                /* Delete messages for contact */
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "Delete messages for contact=".concat(contact.toString()));
+                }
+                try {
+                    if (!mOneToOneChatListenerSet) {
+                        mChatService.addEventListener(mOneChatListener);
+                        mOneToOneChatListenerSet = true;
+                    }
+                    mChatService.deleteOneToOneChat(contact);
+                } catch (Exception e) {
+                    Utils.showMessageAndExit(this, getString(R.string.label_delete_chat_failed),
+                            mExitOnce, e);
+                }
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
+
+    private OneToOneChatListener mOneChatListener = new OneToOneChatListener() {
+
+        @Override
+        public void onMessagesDeleted(final ContactId contact, Set<String> msgIds) {
+            if (LogUtils.isActive) {
+                Log.d(LOGTAG,
+                        "onMessagesDeleted contact=" + contact + " for message IDs="
+                                + Arrays.toString(msgIds.toArray()));
+            }
+            mHandler.post(new Runnable() {
+                public void run() {
+                    Utils.displayLongToast(SingleChatList.this,
+                            getString(R.string.label_delete_chat_success, contact.toString()));
+                }
+            });
+        }
+
+        @Override
+        public void onMessageStatusChanged(ContactId contact, String mimeType, String msgId,
+                Content.Status status, Content.ReasonCode reasonCode) {
+        }
+
+        @Override
+        public void onComposingEvent(ContactId contact, boolean status) {
+        }
+    };
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        /* Create a new CursorLoader with the following query parameters. */
+        return new CursorLoader(this, Message.CONTENT_URI, PROJECTION, WHERE_CLAUSE_GROUPED, null,
+                SORT_ORDER);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        /* A switch-case is useful when dealing with multiple Loaders/IDs */
+        switch (loader.getId()) {
+            case LOADER_ID:
+                /*
+                 * The asynchronous load is complete and the data is now available for use. Only now
+                 * can we associate the queried Cursor with the CursorAdapter.
+                 */
+                mAdapter.swapCursor(cursor);
+                break;
+        }
+        /* The listview now displays the queried data. */
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        /*
+         * For whatever reason, the Loader's data is now unavailable. Remove any references to the
+         * old data by replacing it with a null Cursor.
+         */
+        mAdapter.swapCursor(null);
     }
 }

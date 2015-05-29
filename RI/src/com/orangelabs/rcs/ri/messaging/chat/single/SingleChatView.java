@@ -44,7 +44,6 @@ import com.orangelabs.rcs.ri.utils.Utils;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.content.CursorLoader;
@@ -59,6 +58,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -66,19 +66,11 @@ import java.util.Set;
  * Single chat view
  */
 public class SingleChatView extends ChatView {
-    /**
-     * Intent parameters
-     */
+
     private final static String EXTRA_CONTACT = "contact";
 
-    /**
-     * The remote contact
-     */
     private ContactId mContact;
 
-    /**
-     * The chat session instance
-     */
     private OneToOneChat mChat;
 
     /**
@@ -95,9 +87,6 @@ public class SingleChatView extends ChatView {
 
     private final static int CHAT_MENU_ITEM_REVOKE = 2;
 
-    /**
-     * The log tag for this class
-     */
     private static final String LOGTAG = LogUtils.getTag(SingleChatView.class.getSimpleName());
 
     /**
@@ -123,6 +112,7 @@ public class SingleChatView extends ChatView {
      * Single Chat listener
      */
     private OneToOneChatListener mListener = new OneToOneChatListener() {
+
         // Callback called when an Is-composing event has been received
         @Override
         public void onComposingEvent(ContactId contact, boolean status) {
@@ -154,9 +144,9 @@ public class SingleChatView extends ChatView {
         @Override
         public void onMessagesDeleted(ContactId contact, Set<String> msgIds) {
             if (LogUtils.isActive) {
-                Log.i(LOGTAG,
-                        new StringBuilder("onDeleted contact=").append(contact).append(" msgIds=")
-                                .append(msgIds).toString());
+                Log.d(LOGTAG,
+                        "onMessagesDeleted contact=" + contact + " for message IDs="
+                                + Arrays.toString(msgIds.toArray()));
             }
         }
 
@@ -165,10 +155,12 @@ public class SingleChatView extends ChatView {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ChatService chatService = mCnxManager.getChatApi();
+        if (mExitOnce.isLocked()) {
+            return;
+        }
         try {
-            addChatEventListener(chatService);
-            ChatServiceConfiguration configuration = chatService.getConfiguration();
+            addChatEventListener(mChatService);
+            ChatServiceConfiguration configuration = mChatService.getConfiguration();
             // Set max label length
             int maxMsgLength = configuration.getOneToOneChatMessageMaxLength();
             if (maxMsgLength > 0) {
@@ -213,7 +205,6 @@ public class SingleChatView extends ChatView {
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "processIntent");
         }
-        ChatService chatService = mCnxManager.getChatApi();
         // Open chat
         ContactId newContact = (ContactId) getIntent().getParcelableExtra(EXTRA_CONTACT);
         if (newContact == null) {
@@ -233,7 +224,7 @@ public class SingleChatView extends ChatView {
                  * Open chat so that if the parameter IM SESSION START is 0 then the session is
                  * accepted now.
                  */
-                mChat = chatService.getOneToOneChat(mContact);
+                mChat = mChatService.getOneToOneChat(mContact);
                 if (firstLoad) {
                     /*
                      * Initialize the Loader with id '1' and callbacks 'mCallbacks'.
@@ -241,7 +232,7 @@ public class SingleChatView extends ChatView {
                     getSupportLoaderManager().initLoader(LOADER_ID, null, this);
                 } else {
                     if (switchConversation) {
-                        // Reload history since
+                        /* Reload history since */
                         getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
                     }
                 }
@@ -260,7 +251,7 @@ public class SingleChatView extends ChatView {
             // Mark as read messages if required
             Set<String> msgIdUnreads = getUnreadMessageIds(mContact);
             for (String msgId : msgIdUnreads) {
-                chatService.markMessageAsRead(msgId);
+                mChatService.markMessageAsRead(msgId);
             }
             return true;
 
@@ -274,11 +265,11 @@ public class SingleChatView extends ChatView {
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        // Create a new CursorLoader with the following query parameters.
-        Uri uri = Message.CONTENT_URI;
-        return new CursorLoader(this, uri, PROJ_CHAT_MSG, WHERE_CLAUSE, new String[] {
-            mContact.toString()
-        }, ORDER_CHAT_MSG);
+        /* Create a new CursorLoader with the following query parameters. */
+        return new CursorLoader(this, Message.CONTENT_URI, PROJ_CHAT_MSG, WHERE_CLAUSE,
+                new String[] {
+                    mContact.toString()
+                }, ORDER_CHAT_MSG);
     }
 
     @Override
@@ -331,7 +322,13 @@ public class SingleChatView extends ChatView {
                 // TODO
                 return true;
             case CHAT_MENU_ITEM_DELETE:
-                // TODO CR005 delete methods
+                try {
+                    mChatService.deleteMessage(messageId);
+                } catch (Exception e) {
+                    if (LogUtils.isActive) {
+                        Log.e(LOGTAG, "delete message failed", e);
+                    }
+                }
                 return true;
             default:
                 return super.onContextItemSelected(item);
@@ -420,12 +417,12 @@ public class SingleChatView extends ChatView {
 
     @Override
     public void addChatEventListener(ChatService chatService) throws RcsServiceException {
-        mCnxManager.getChatApi().addEventListener(mListener);
+        mChatService.addEventListener(mListener);
     }
 
     @Override
     public void removeChatEventListener(ChatService chatService) throws RcsServiceException {
-        mCnxManager.getChatApi().removeEventListener(mListener);
+        mChatService.removeEventListener(mListener);
     }
 
     @Override

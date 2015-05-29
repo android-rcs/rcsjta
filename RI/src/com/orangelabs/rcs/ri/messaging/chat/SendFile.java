@@ -125,9 +125,8 @@ public abstract class SendFile extends Activity implements ISendFile {
 
         // Register to API connection manager
         mCnxManager = ConnectionManager.getInstance(this);
-        if (mCnxManager == null
-                || !mCnxManager.isServiceConnected(RcsServiceName.CHAT,
-                        RcsServiceName.FILE_TRANSFER, RcsServiceName.CONTACT)) {
+        if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.FILE_TRANSFER,
+                RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
         } else {
@@ -145,9 +144,6 @@ public abstract class SendFile extends Activity implements ISendFile {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mCnxManager == null) {
-            return;
-        }
         mCnxManager.stopMonitorServices(this);
         if (mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
             // Remove file listener

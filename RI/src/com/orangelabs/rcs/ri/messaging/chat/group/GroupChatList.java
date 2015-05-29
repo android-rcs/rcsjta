@@ -18,42 +18,57 @@
 
 package com.orangelabs.rcs.ri.messaging.chat.group;
 
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content;
+import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.chat.GroupChat;
+import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
+import com.gsma.services.rcs.chat.GroupChatListener;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
 import com.orangelabs.rcs.ri.ConnectionManager;
 import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import java.util.Arrays;
+import java.util.Set;
 
 /**
  * List group chats from the content provider
  * 
  * @author YPLO6403
  */
-public class GroupChatList extends Activity {
+public class GroupChatList extends FragmentActivity implements
+        LoaderManager.LoaderCallbacks<Cursor> {
 
     // @formatter:off
     String[] PROJECTION = new String[] {
@@ -70,114 +85,103 @@ public class GroupChatList extends Activity {
 
     private ListView mListView;
 
-    /**
-     * A locker to exit only once
-     */
     private LockAccess mExitOnce = new LockAccess();
+
+    private ConnectionManager mCnxManager;
+
+    private ChatService mChatService;
+
+    private GroupChatListAdapter mAdapter;
+
+    private boolean mGroupChatListenerSet = false;
+
+    private Handler mHandler = new Handler();
+
+    /**
+     * List of items for contextual menu
+     */
+    private static final int CHAT_MENU_ITEM_DELETE = 1;
+    private static final int CHAT_MENU_ITEM_OPEN = 0;
+
+    private static final String LOGTAG = LogUtils.getTag(GroupChatList.class.getSimpleName());
+
+    /**
+     * The loader's unique ID. Loader IDs are specific to the Activity in which they reside.
+     */
+    private static final int LOADER_ID = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Set layout
+        /* Set layout */
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.chat_list);
 
-        // Set list adapter
+        mCnxManager = ConnectionManager.getInstance(this);
+        mChatService = mCnxManager.getChatApi();
+
+        /* Set list adapter */
         mListView = (ListView) findViewById(android.R.id.list);
         TextView emptyView = (TextView) findViewById(android.R.id.empty);
         mListView.setEmptyView(emptyView);
-        mListView.setOnItemClickListener(new OnItemClickListener() {
+        registerForContextMenu(mListView);
 
-            @Override
-            public void onItemClick(AdapterView<?> parent, View v, int pos, long id) {
-                ConnectionManager cnxManager = ConnectionManager.getInstance(GroupChatList.this);
-                if (cnxManager == null || !cnxManager.isServiceConnected(RcsServiceName.CHAT)) {
-                    Utils.showMessage(GroupChatList.this,
-                            getString(R.string.label_continue_chat_failed));
-                    return;
-
-                }
-                Cursor cursor = (Cursor) (parent.getAdapter()).getItem(pos);
-                String chatId = cursor.getString(cursor
-                        .getColumnIndexOrThrow(ChatLog.GroupChat.CHAT_ID));
-                try {
-                    // Get group chat
-                    GroupChat groupChat = cnxManager.getChatApi().getGroupChat(chatId);
-                    if (groupChat != null) {
-                        // Session already active on the device: just reload it
-                        // in the UI
-                        GroupChatView.openGroupChat(GroupChatList.this, groupChat.getChatId());
-                    } else {
-                        // Rejoin or restart the session
-                        // TODO CR018
-                    }
-                } catch (RcsServiceNotAvailableException e) {
-                    Utils.showMessageAndExit(GroupChatList.this,
-                            getString(R.string.label_api_unavailable), mExitOnce, e);
-                } catch (RcsServiceException e) {
-                    Utils.showMessageAndExit(GroupChatList.this,
-                            getString(R.string.label_api_failed), mExitOnce, e);
-                }
-            }
-        });
+        mAdapter = new GroupChatListAdapter(this);
+        mListView.setAdapter(mAdapter);
+        /*
+         * Initialize the Loader with id '1' and callbacks 'mCallbacks'.
+         */
+        getSupportLoaderManager().initLoader(LOADER_ID, null, this);
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        // Refresh view
-        mListView.setAdapter(createListAdapter());
-    }
-
-    /**
-     * Create chat list adapter with unique chat ID entries
-     */
-    private GroupChatListAdapter createListAdapter() {
-        Cursor cursor = getContentResolver().query(ChatLog.GroupChat.CONTENT_URI, PROJECTION, null,
-                null, SORT_ORDER);
-        if (cursor == null) {
-            Utils.showMessageAndExit(this, getString(R.string.label_load_log_failed));
-            return null;
-
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mChatService == null || !mGroupChatListenerSet) {
+            return;
         }
-        return new GroupChatListAdapter(this, cursor);
+        try {
+            mChatService.removeEventListener(mGroupChatListener);
+        } catch (Exception e) {
+            if (LogUtils.isActive) {
+                Log.e(LOGTAG, "removeEventListener failed", e);
+            }
+        }
     }
 
     /**
      * Group chat list adapter
      */
     private class GroupChatListAdapter extends CursorAdapter {
+
+        private LayoutInflater mInflater;
+
         /**
          * Constructor
          * 
          * @param context Context
-         * @param c Cursor
          */
-        public GroupChatListAdapter(Context context, Cursor c) {
-            super(context, c);
+        public GroupChatListAdapter(Context context) {
+            super(context, null, 0);
+            mInflater = LayoutInflater.from(context);
         }
 
         @Override
         public View newView(Context context, Cursor cursor, ViewGroup parent) {
-            LayoutInflater inflater = LayoutInflater.from(context);
-            View view = inflater.inflate(R.layout.chat_list_item, parent, false);
-            GroupChatListItemViewHolder holder = new GroupChatListItemViewHolder(view, cursor);
-            view.setTag(holder);
+            final View view = mInflater.inflate(R.layout.chat_list_item, parent, false);
+            view.setTag(new GroupChatListItemViewHolder(view, cursor));
             return view;
         }
 
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
-            GroupChatListItemViewHolder holder = (GroupChatListItemViewHolder) view.getTag();
-
-            // Set the date/time field by mixing relative and absolute times
+            final GroupChatListItemViewHolder holder = (GroupChatListItemViewHolder) view.getTag();
             long date = cursor.getLong(holder.columnDate);
             holder.dateText.setText(DateUtils.getRelativeTimeSpanString(date,
                     System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS,
                     DateUtils.FORMAT_ABBREV_RELATIVE));
 
-            // Set the label
             holder.titleText.setText(R.string.label_group_chat);
 
             String subject = cursor.getString(holder.columnSubject);
@@ -228,12 +232,167 @@ public class GroupChatList extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_clear_log:
-                // Delete all: TODO CR005 delete methods
-                getContentResolver().delete(ChatLog.GroupChat.CONTENT_URI, null, null);
-                // Refresh view
-                mListView.setAdapter(createListAdapter());
+                /* Delete all group chats */
+                if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
+                    Utils.showMessage(this, getString(R.string.label_api_unavailable));
+                    break;
+                }
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "delete all group chat sessions");
+                }
+                try {
+                    if (!mGroupChatListenerSet) {
+                        mChatService.addEventListener(mGroupChatListener);
+                        mGroupChatListenerSet = true;
+                    }
+                    mChatService.deleteGroupChats();
+                } catch (Exception e) {
+                    Utils.showMessageAndExit(this, getString(R.string.label_delete_chat_failed),
+                            mExitOnce, e);
+                }
                 break;
         }
         return true;
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        /* Check file transfer API is connected */
+        if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
+            Utils.showMessage(this, getString(R.string.label_api_unavailable));
+            return;
+        }
+        menu.add(0, CHAT_MENU_ITEM_OPEN, CHAT_MENU_ITEM_OPEN, R.string.menu_open_chat_session);
+        menu.add(0, CHAT_MENU_ITEM_DELETE, CHAT_MENU_ITEM_DELETE, R.string.menu_delete_chat_session);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        /* Get selected item */
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+        Cursor cursor = (Cursor) (mListView.getAdapter()).getItem(info.position);
+        String chatId = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.CHAT_ID));
+        if (LogUtils.isActive) {
+            Log.d(LOGTAG, "onContextItemSelected chatId=".concat(chatId));
+        }
+        switch (item.getItemId()) {
+            case CHAT_MENU_ITEM_OPEN:
+                if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
+                    Utils.showMessage(this, getString(R.string.label_api_unavailable));
+                    return true;
+                }
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "Open group chat for chatId=".concat(chatId));
+                }
+                /* Open group chat view */
+                GroupChatView.openGroupChat(this, chatId);
+                return true;
+
+            case CHAT_MENU_ITEM_DELETE:
+                if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
+                    Utils.showMessage(this, getString(R.string.label_api_unavailable));
+                    return true;
+                }
+                /* Delete messages for chat ID */
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "Delete messages for chatId=".concat(chatId));
+                }
+                try {
+                    if (!mGroupChatListenerSet) {
+                        mChatService.addEventListener(mGroupChatListener);
+                        mGroupChatListenerSet = true;
+                    }
+                    mChatService.deleteGroupChat(chatId);
+                } catch (Exception e) {
+                    Utils.showMessageAndExit(this, getString(R.string.label_delete_chat_failed),
+                            mExitOnce, e);
+                }
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
+
+    private GroupChatListener mGroupChatListener = new GroupChatListener() {
+
+        @Override
+        public void onMessagesDeleted(String chatId, Set<String> msgIds) {
+            if (LogUtils.isActive) {
+                Log.d(LOGTAG,
+                        "onMessagesDeleted chatId=" + chatId + " for message IDs="
+                                + Arrays.toString(msgIds.toArray()));
+            }
+        }
+
+        @Override
+        public void onDeleted(Set<String> chatIds) {
+            if (LogUtils.isActive) {
+                Log.i(LOGTAG, "onDeleted chatIds=".concat(Arrays.toString(chatIds.toArray())));
+            }
+            mHandler.post(new Runnable() {
+                public void run() {
+                    Utils.displayLongToast(GroupChatList.this,
+                            getString(R.string.label_delete_gchat_success));
+                }
+            });
+        }
+
+        @Override
+        public void onComposingEvent(String chatId, ContactId contact, boolean status) {
+        }
+
+        @Override
+        public void onMessageGroupDeliveryInfoChanged(String chatId, ContactId contact,
+                String mimeType, String msgId, GroupDeliveryInfo.Status status,
+                GroupDeliveryInfo.ReasonCode reasonCode) {
+        }
+
+        @Override
+        public void onMessageStatusChanged(String chatId, String mimeType, String msgId,
+                Content.Status status, Content.ReasonCode reasonCode) {
+        }
+
+        @Override
+        public void onParticipantStatusChanged(String chatId, ContactId contact,
+                ParticipantStatus status) {
+        }
+
+        @Override
+        public void onStateChanged(String chatId, final GroupChat.State state,
+                GroupChat.ReasonCode reasonCode) {
+        }
+
+    };
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        /* Create a new CursorLoader with the following query parameters. */
+        return new CursorLoader(this, ChatLog.GroupChat.CONTENT_URI, PROJECTION, null, null,
+                SORT_ORDER);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        /* A switch-case is useful when dealing with multiple Loaders/IDs */
+        switch (loader.getId()) {
+            case LOADER_ID:
+                /*
+                 * The asynchronous load is complete and the data is now available for use. Only now
+                 * can we associate the queried Cursor with the CursorAdapter.
+                 */
+                mAdapter.swapCursor(cursor);
+                break;
+        }
+        /* The listview now displays the queried data. */
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        /*
+         * For whatever reason, the Loader's data is now unavailable. Remove any references to the
+         * old data by replacing it with a null Cursor.
+         */
+        mAdapter.swapCursor(null);
     }
 }

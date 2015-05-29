@@ -125,6 +125,8 @@ public abstract class SendMultiFile extends Activity implements ISendMultiFile {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mCnxManager = ConnectionManager.getInstance(this);
+
         mTransferIds = new ArrayList<String>();
         if (!parseIntent(getIntent())) {
             if (LogUtils.isActive) {
@@ -156,10 +158,8 @@ public abstract class SendMultiFile extends Activity implements ISendMultiFile {
         });
 
         /* Register to API connection manager */
-        mCnxManager = ConnectionManager.getInstance(this);
-        if (mCnxManager == null
-                || !mCnxManager.isServiceConnected(RcsServiceName.CHAT,
-                        RcsServiceName.FILE_TRANSFER, RcsServiceName.CONTACT)) {
+        if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.FILE_TRANSFER,
+                RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
         } else {
@@ -221,9 +221,6 @@ public abstract class SendMultiFile extends Activity implements ISendMultiFile {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mCnxManager == null) {
-            return;
-        }
         mCnxManager.stopMonitorServices(this);
         if (mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
             // Remove file listener

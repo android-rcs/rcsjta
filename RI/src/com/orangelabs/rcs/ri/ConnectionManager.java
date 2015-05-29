@@ -382,7 +382,7 @@ public class ConnectionManager {
             Log.e(LOGTAG, "Failed to check if RCS stack is activated!", e);
             return;
         }
-        
+
     }
 
     /**

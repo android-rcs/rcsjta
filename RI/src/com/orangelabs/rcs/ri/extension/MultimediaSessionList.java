@@ -57,7 +57,7 @@ public abstract class MultimediaSessionList extends ListActivity {
 
         // Register to API connection manager
         mCnxManager = ConnectionManager.getInstance(this);
-        if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.MULTIMEDIA)) {
+        if (!mCnxManager.isServiceConnected(RcsServiceName.MULTIMEDIA)) {
             Utils.showMessageAndExit(MultimediaSessionList.this,
                     getString(R.string.label_service_not_available), mExitOnce);
             return;
@@ -77,9 +77,7 @@ public abstract class MultimediaSessionList extends ListActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mCnxManager != null) {
-            mCnxManager.stopMonitorServices(this);
-        }
+        mCnxManager.stopMonitorServices(this);
     }
 
     @Override

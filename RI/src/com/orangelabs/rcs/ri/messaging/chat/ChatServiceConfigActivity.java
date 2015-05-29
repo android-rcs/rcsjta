@@ -74,7 +74,7 @@ public class ChatServiceConfigActivity extends Activity {
 
         // Register to API connection manager
         mCnxManager = ConnectionManager.getInstance(this);
-        if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
+        if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
             return;
@@ -114,10 +114,6 @@ public class ChatServiceConfigActivity extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mCnxManager == null) {
-            return;
-
-        }
         mCnxManager.stopMonitorServices(this);
     }
 

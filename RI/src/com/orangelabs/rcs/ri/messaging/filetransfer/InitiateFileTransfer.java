@@ -180,7 +180,7 @@ public class InitiateFileTransfer extends Activity {
 
         // Register to API connection manager
         mCnxManager = ConnectionManager.getInstance(this);
-        if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
+        if (!mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
             return;
@@ -249,9 +249,6 @@ public class InitiateFileTransfer extends Activity {
             Log.d(LOGTAG, "onDestroy");
         }
         super.onDestroy();
-        if (mCnxManager == null) {
-            return;
-        }
         mCnxManager.stopMonitorServices(this);
         if (mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
             // Remove file transfer listener

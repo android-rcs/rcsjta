@@ -71,6 +71,7 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -113,29 +114,14 @@ public class GroupChatView extends ChatView {
             .append(Message.MIME_TYPE).append("='").append(Message.MimeType.GROUPCHAT_EVENT)
             .append("')").toString();
 
-    /**
-     * Subject
-     */
     private String mSubject;
 
-    /**
-     * Chat ID
-     */
     private String mChatId;
 
-    /**
-     * The Group chat session instance
-     */
     private GroupChat mGroupChat;
 
-    /**
-     * Progress dialog
-     */
     private Dialog mProgressDialog;
 
-    /**
-     * List of participants
-     */
     private Set<ContactId> mParticipants = new HashSet<ContactId>();
 
     /**
@@ -208,7 +194,7 @@ public class GroupChatView extends ChatView {
 
             }
             final String _reasonCode = RiApplication.sGroupChatReasonCodes[reasonCode.toInt()];
-            handler.post(new Runnable() {
+            mHandler.post(new Runnable() {
                 public void run() {
                     switch (state) {
                         case STARTED:
@@ -246,7 +232,7 @@ public class GroupChatView extends ChatView {
         @Override
         public void onDeleted(Set<String> chatIds) {
             if (LogUtils.isActive) {
-                Log.i(LOGTAG, new StringBuilder("onDeleted chatIds=").append(chatIds).toString());
+                Log.i(LOGTAG, "onDeleted chatIds=".concat(Arrays.toString(chatIds.toArray())));
             }
         }
 
@@ -254,8 +240,8 @@ public class GroupChatView extends ChatView {
         public void onMessagesDeleted(String chatId, Set<String> msgIds) {
             if (LogUtils.isActive) {
                 Log.i(LOGTAG,
-                        new StringBuilder("onMessagesDeleted chatId=").append(chatId)
-                                .append(" msgIds=").append(msgIds).toString());
+                        "onMessagesDeleted chatId=" + chatId + " msgIds="
+                                + Arrays.toString(msgIds.toArray()));
             }
         }
 
@@ -289,7 +275,13 @@ public class GroupChatView extends ChatView {
                 return true;
 
             case GROUPCHAT_MENU_ITEM_DELETE:
-                // TODO CR005 delete methods
+                try {
+                    mChatService.deleteMessage(messageId);
+                } catch (Exception e) {
+                    if (LogUtils.isActive) {
+                        Log.e(LOGTAG, "delete message failed", e);
+                    }
+                }
                 return true;
 
             default:
@@ -300,10 +292,12 @@ public class GroupChatView extends ChatView {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ChatService chatService = mCnxManager.getChatApi();
+        if (mExitOnce.isLocked()) {
+            return;
+        }
         try {
-            addChatEventListener(chatService);
-            ChatServiceConfiguration configuration = chatService.getConfiguration();
+            addChatEventListener(mChatService);
+            ChatServiceConfiguration configuration = mChatService.getConfiguration();
             // Set max label length
             int maxMsgLength = configuration.getGroupChatMessageMaxLength();
             if (maxMsgLength > 0) {
@@ -384,7 +378,7 @@ public class GroupChatView extends ChatView {
                     mChatId = getIntent().getStringExtra(GroupChatView.EXTRA_CHAT_ID);
 
                     // Get chat session
-                    mGroupChat = mCnxManager.getChatApi().getGroupChat(mChatId);
+                    mGroupChat = mChatService.getGroupChat(mChatId);
                     if (mGroupChat == null) {
                         if (LogUtils.isActive) {
                             Log.e(LOGTAG,
@@ -423,7 +417,7 @@ public class GroupChatView extends ChatView {
                         // conversation
                         if (message.getChatId().equals(mChatId) || mChatId == null) {
                             // Mark the message as read
-                            mCnxManager.getChatApi().markMessageAsRead(message.getMsgId());
+                            mChatService.markMessageAsRead(message.getMsgId());
                             if (mChatId != null) {
                                 return true;
                             }
@@ -444,7 +438,7 @@ public class GroupChatView extends ChatView {
                         // New GC invitation
                         mChatId = getIntent().getStringExtra(GroupChatIntent.EXTRA_CHAT_ID);
                     }
-                    mGroupChat = mCnxManager.getChatApi().getGroupChat(mChatId);
+                    mGroupChat = mChatService.getGroupChat(mChatId);
                     if (mGroupChat == null) {
                         Utils.showMessageAndExit(this, getString(R.string.label_session_not_found),
                                 mExitOnce);
@@ -566,8 +560,8 @@ public class GroupChatView extends ChatView {
     private boolean startGroupChat() {
         // Initiate the chat session in background
         try {
-            mGroupChat = mCnxManager.getChatApi().initiateGroupChat(
-                    new HashSet<ContactId>(mParticipants), mSubject);
+            mGroupChat = mChatService.initiateGroupChat(new HashSet<ContactId>(mParticipants),
+                    mSubject);
             mChatId = mGroupChat.getChatId();
             getSupportLoaderManager().initLoader(LOADER_ID, null, this);
             chatIdOnForeground = mChatId;
@@ -911,12 +905,12 @@ public class GroupChatView extends ChatView {
 
     @Override
     public void addChatEventListener(ChatService chatService) throws RcsServiceException {
-        mCnxManager.getChatApi().addEventListener(mListener);
+        mChatService.addEventListener(mListener);
     }
 
     @Override
     public void removeChatEventListener(ChatService chatService) throws RcsServiceException {
-        mCnxManager.getChatApi().removeEventListener(mListener);
+        mChatService.removeEventListener(mListener);
     }
 
     @Override

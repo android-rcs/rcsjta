@@ -3,13 +3,25 @@ package com.orangelabs.rcs.ri.history.messaging;
 
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content;
+import com.gsma.services.rcs.chat.ChatService;
+import com.gsma.services.rcs.chat.GroupChat;
+import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
+import com.gsma.services.rcs.chat.GroupChatListener;
+import com.gsma.services.rcs.chat.OneToOneChatListener;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 import com.gsma.services.rcs.history.HistoryLog;
 
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.history.HistoryListView;
 import com.orangelabs.rcs.ri.messaging.filetransfer.multi.SendMultiFile;
+import com.orangelabs.rcs.ri.utils.ContactUtil;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 
 import android.app.Activity;
 import android.content.Context;
@@ -19,10 +31,15 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -30,11 +47,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -61,24 +80,43 @@ public class MessagingListView extends HistoryListView {
      */
     private final static TreeMap<Integer, String> sProviders = new TreeMap<Integer, String>();
 
+    /**
+     * List of items for contextual menu
+     */
+    private static final int CHAT_MENU_ITEM_DELETE = 0;
+
     /* mapping chat_id / group chat info */
-    private final Map<String, MessagingLogInfos> mGroupChatMap = new HashMap<String, MessagingLogInfos>();
+    private final Map<String, MessagingLogInfo> mGroupChatMap = new HashMap<String, MessagingLogInfo>();
 
-    private ArrayAdapter<MessagingLogInfos> mArrayAdapter;
+    private ArrayAdapter<MessagingLogInfo> mArrayAdapter;
 
-    private final List<MessagingLogInfos> mMessagingLogInfos = new ArrayList<MessagingLogInfos>();
+    private final List<MessagingLogInfo> mMessagingLogInfos = new ArrayList<MessagingLogInfo>();
 
     private boolean mSendFile = false;
+
+    private boolean mOneToOneChatListenerSet = false;
+
+    private boolean mGroupChatListenerSet = false;
+
+    private ChatService mChatService;
+
+    private ConnectionManager mCnxManager;
+
+    private static final String LOGTAG = LogUtils.getTag(MessagingListView.class.getSimpleName());
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.history_log_messaging);
+
+        mCnxManager = ConnectionManager.getInstance(this);
+
         mArrayAdapter = new MessagingLogAdapter(this);
         TextView emptyView = (TextView) findViewById(android.R.id.empty);
         ListView view = (ListView) findViewById(android.R.id.list);
         view.setEmptyView(emptyView);
         view.setAdapter(mArrayAdapter);
+
         getGroupChatInfos();
 
         sProviders.put(ChatLog.Message.HISTORYLOG_MEMBER_ID,
@@ -90,14 +128,36 @@ public class MessagingListView extends HistoryListView {
         mSendFile = getIntent().getAction() != null;
         if (mSendFile) {
             view.setOnItemClickListener(getOnItemClickListener());
+        } else {
+            registerForContextMenu(view);
         }
-        startQuery();
+        queryHistoryLogAndRefreshView();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mChatService == null) {
+            return;
+        }
+        try {
+            if (mOneToOneChatListenerSet) {
+                mChatService.removeEventListener(mOneChatListener);
+            }
+            if (mGroupChatListenerSet) {
+                mChatService.removeEventListener(mGroupChatListener);
+            }
+        } catch (Exception e) {
+            if (LogUtils.isActive) {
+                Log.e(LOGTAG, "removeEventListener failed", e);
+            }
+        }
     }
 
     /**
      * Messaging log adapter
      */
-    private class MessagingLogAdapter extends ArrayAdapter<MessagingLogInfos> {
+    private class MessagingLogAdapter extends ArrayAdapter<MessagingLogInfo> {
         private Context mContext;
 
         private Drawable mDrawableIncomingFailed;
@@ -157,7 +217,7 @@ public class MessagingListView extends HistoryListView {
                 viewHolder = (ViewHolder) convertView.getTag();
             }
 
-            MessagingLogInfos item = mMessagingLogInfos.get(position);
+            MessagingLogInfo item = mMessagingLogInfos.get(position);
             int providerId = item.getProviderId();
 
             // Set the date/time field by mixing relative and absolute times
@@ -188,13 +248,10 @@ public class MessagingListView extends HistoryListView {
                     break;
             }
 
-            String contact = item.getContact();
-            String chat_id = item.getChatId();
-            boolean isOnetoOneConversation = chat_id.equals(contact);
-            if (isOnetoOneConversation) {
+            if (item.isSingleChat()) {
                 viewHolder.mConversationType
                         .setText(R.string.label_history_log_single_conversation);
-                viewHolder.mConversationLabel.setText(contact);
+                viewHolder.mConversationLabel.setText(item.getContact().toString());
             } else {
                 viewHolder.mConversationType.setText(R.string.label_history_log_group_conversation);
                 String subject = item.getSubject();
@@ -218,9 +275,9 @@ public class MessagingListView extends HistoryListView {
     }
 
     @Override
-    protected void startQuery() {
+    protected void queryHistoryLogAndRefreshView() {
         List<Integer> providers = getSelectedProviderIds();
-        Map<String, MessagingLogInfos> dataMap = new HashMap<String, MessagingLogInfos>();
+        Map<String, MessagingLogInfo> dataMap = new HashMap<String, MessagingLogInfo>();
         if (!providers.isEmpty()) {
             Uri uri = createHistoryUri(providers);
             Cursor cursor = null;
@@ -242,18 +299,21 @@ public class MessagingListView extends HistoryListView {
                      * We may have both GC and FT messages for the same chat ID. Only keep the most
                      * recent one.
                      */
-                    MessagingLogInfos infos = dataMap.get(chatId);
+                    MessagingLogInfo infos = dataMap.get(chatId);
                     if (infos != null && timestamp < infos.getTimestamp()) {
                         continue;
                     }
+                    String phoneNumber = cursor.getString(columnContact);
+                    ContactId contact = null;
+                    if (phoneNumber != null) {
+                        contact = ContactUtil.formatContact(phoneNumber);
+                    }
                     dataMap.put(
                             chatId,
-                            new MessagingLogInfos(cursor.getInt(columnProviderId), timestamp,
-                                    cursor.getInt(columnStatus), Direction.valueOf(cursor
-                                            .getInt(columnDirection)), cursor
-                                            .getString(columnContact), chatId, cursor
-                                            .getString(columnContent), cursor
-                                            .getString(columnFilename)));
+                            new MessagingLogInfo(cursor.getInt(columnProviderId), timestamp, cursor
+                                    .getInt(columnStatus), Direction.valueOf(cursor
+                                    .getInt(columnDirection)), contact, chatId, cursor
+                                    .getString(columnContent), cursor.getString(columnFilename)));
                 }
 
             } finally {
@@ -262,10 +322,10 @@ public class MessagingListView extends HistoryListView {
                 }
             }
 
-            for (Entry<String, MessagingLogInfos> groupChat : mGroupChatMap.entrySet()) {
+            for (Entry<String, MessagingLogInfo> groupChat : mGroupChatMap.entrySet()) {
                 String chatId = groupChat.getKey();
-                MessagingLogInfos groupChatInfos = groupChat.getValue();
-                MessagingLogInfos messageInfos = dataMap.get(chatId);
+                MessagingLogInfo groupChatInfos = groupChat.getValue();
+                MessagingLogInfo messageInfos = dataMap.get(chatId);
                 if (messageInfos == null) {
                     if (mSendFile) {
                         /* Add group chat entries if there is no associated message */
@@ -301,7 +361,7 @@ public class MessagingListView extends HistoryListView {
                 String chatId = cursor.getString(columnChatId);
                 mGroupChatMap.put(
                         chatId,
-                        new MessagingLogInfos(cursor.getLong(columnTimestamp), cursor
+                        new MessagingLogInfo(cursor.getLong(columnTimestamp), cursor
                                 .getInt(columnStatus), Direction.valueOf(cursor
                                 .getInt(columnDirection)), cursor.getString(columnChatId), cursor
                                 .getString(columnSubject)));
@@ -315,22 +375,15 @@ public class MessagingListView extends HistoryListView {
 
     private OnItemClickListener getOnItemClickListener() {
         return new OnItemClickListener() {
+
             @Override
             public void onItemClick(AdapterView<?> parent, View v, int pos, long id) {
-                if (!mSendFile) {
-                    return;
-                }
                 // Get selected item
-                MessagingLogInfos messagingLogInfos = (MessagingLogInfos) (parent.getAdapter())
+                MessagingLogInfo chatLogInfo = (MessagingLogInfo) (parent.getAdapter())
                         .getItem(pos);
-                boolean singleChat = false;
-                String chatId = messagingLogInfos.getChatId();
-                if (chatId.equals(messagingLogInfos.getContact())) {
-                    singleChat = true;
-                }
                 // Open multiple file transfer
-                SendMultiFile
-                        .startActivity(MessagingListView.this, getIntent(), singleChat, chatId);
+                SendMultiFile.startActivity(MessagingListView.this, getIntent(),
+                        chatLogInfo.isSingleChat(), chatLogInfo.getChatId());
             }
         };
     }
@@ -338,13 +391,13 @@ public class MessagingListView extends HistoryListView {
     /**
      * A POJO class to hold the messaging log information.
      */
-    public class MessagingLogInfos implements Comparable<MessagingLogInfos> {
+    public class MessagingLogInfo implements Comparable<MessagingLogInfo> {
 
         private final int mProviderId;
         private final long mTimestamp;
         private final int mStatus;
         private final Direction mDirection;
-        private final String mContact;
+        private final ContactId mContact;
         private final String mChatId;
         private final String mContent;
         private final String mFilename;
@@ -359,7 +412,7 @@ public class MessagingListView extends HistoryListView {
          * @param chatId the chat ID
          * @param subject the subject (or null if not defined)
          */
-        public MessagingLogInfos(long timestamp, int state, Direction direction, String chatId,
+        public MessagingLogInfo(long timestamp, int state, Direction direction, String chatId,
                 String subject) {
             super();
             mTimestamp = timestamp;
@@ -385,8 +438,8 @@ public class MessagingListView extends HistoryListView {
          * @param content the message content
          * @param filename the filename
          */
-        public MessagingLogInfos(int providerId, long timestamp, int status, Direction direction,
-                String contact, String chatId, String content, String filename) {
+        public MessagingLogInfo(int providerId, long timestamp, int status, Direction direction,
+                ContactId contact, String chatId, String content, String filename) {
             super();
             mProviderId = providerId;
             mTimestamp = timestamp;
@@ -439,7 +492,7 @@ public class MessagingListView extends HistoryListView {
          * 
          * @return the contact ID
          */
-        public String getContact() {
+        public ContactId getContact() {
             return mContact;
         }
 
@@ -480,6 +533,18 @@ public class MessagingListView extends HistoryListView {
         }
 
         /**
+         * Checks if single chat
+         * 
+         * @return true if single chat
+         */
+        public boolean isSingleChat() {
+            if (mContact == null) {
+                return false;
+            }
+            return mChatId.equals(mContact.toString());
+        }
+
+        /**
          * Sets the group chat subject
          * 
          * @param subject the group chat subject
@@ -489,9 +554,167 @@ public class MessagingListView extends HistoryListView {
         }
 
         @Override
-        public int compareTo(MessagingLogInfos another) {
+        public int compareTo(MessagingLogInfo another) {
             return (int) (another.getTimestamp() - mTimestamp);
         }
 
     }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        menu.add(0, CHAT_MENU_ITEM_DELETE, CHAT_MENU_ITEM_DELETE, R.string.menu_delete_chat_session);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+        MessagingLogInfo chatInfo = (MessagingLogInfo) (mArrayAdapter.getItem(info.position));
+        if (LogUtils.isActive) {
+            Log.d(LOGTAG, "onContextItemSelected chatId=".concat(chatInfo.mChatId));
+        }
+        switch (item.getItemId()) {
+            case CHAT_MENU_ITEM_DELETE:
+                if (mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
+                    if (mChatService == null) {
+                        mChatService = mCnxManager.getChatApi();
+                    }
+                    boolean singleChat = chatInfo.isSingleChat();
+                    try {
+                        if (singleChat) {
+                            if (!mOneToOneChatListenerSet) {
+                                mChatService.addEventListener(mOneChatListener);
+                                mOneToOneChatListenerSet = true;
+                            }
+                            ContactId contact = chatInfo.getContact();
+                            if (LogUtils.isActive) {
+                                Log.d(LOGTAG,
+                                        "Delete messages for contact=".concat(contact.toString()));
+                            }
+                            mChatService.deleteOneToOneChat(contact);
+                        } else {
+                            if (!mGroupChatListenerSet) {
+                                mChatService.addEventListener(mGroupChatListener);
+                                mGroupChatListenerSet = true;
+                            }
+                            String chatId = chatInfo.getChatId();
+                            if (LogUtils.isActive) {
+                                Log.d(LOGTAG, "Delete Group chat chatId=".concat(chatId));
+                            }
+                            mChatService.deleteGroupChat(chatId);
+                        }
+                    } catch (Exception e) {
+                        if (LogUtils.isActive) {
+                            Log.e(LOGTAG, "delete chat session failed", e);
+                        }
+                    }
+                }
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
+
+    MessagingLogInfo getmMessagingLogInfos(String chatId) {
+        for (MessagingLogInfo messagingLogInfo : mMessagingLogInfos) {
+            if (messagingLogInfo.getChatId().equals(chatId)) {
+                return messagingLogInfo;
+            }
+        }
+        return null;
+    }
+
+    OneToOneChatListener mOneChatListener = new OneToOneChatListener() {
+
+        @Override
+        public void onMessagesDeleted(ContactId contact, Set<String> msgIds) {
+            if (LogUtils.isActive) {
+                Log.d(LOGTAG,
+                        "onMessagesDeleted contact=" + contact + " for message IDs="
+                                + Arrays.toString(msgIds.toArray()));
+            }
+            boolean refreshRequired = false;
+            MessagingLogInfo messagingLogInfo = getmMessagingLogInfos(contact.toString());
+            if (messagingLogInfo != null) {
+                refreshRequired = true;
+                mMessagingLogInfos.remove(messagingLogInfo);
+            }
+            if (refreshRequired) {
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        mArrayAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void onMessageStatusChanged(ContactId contact, String mimeType, String msgId,
+                Content.Status status, Content.ReasonCode reasonCode) {
+        }
+
+        @Override
+        public void onComposingEvent(ContactId contact, boolean status) {
+        }
+    };
+
+    GroupChatListener mGroupChatListener = new GroupChatListener() {
+
+        @Override
+        public void onMessagesDeleted(String chatId, Set<String> msgIds) {
+            if (LogUtils.isActive) {
+                Log.d(LOGTAG,
+                        "onMessagesDeleted chatId=" + chatId + " for message IDs="
+                                + Arrays.toString(msgIds.toArray()));
+            }
+        }
+
+        @Override
+        public void onDeleted(Set<String> chatIds) {
+            if (LogUtils.isActive) {
+                Log.i(LOGTAG, "onDeleted chatIds=".concat(Arrays.toString(chatIds.toArray())));
+            }
+            boolean refresh = false;
+            for (String chatId : chatIds) {
+                MessagingLogInfo messagingLogInfo = getmMessagingLogInfos(chatId);
+                if (messagingLogInfo != null) {
+                    refresh = true;
+                    mMessagingLogInfos.remove(messagingLogInfo);
+                }
+            }
+            if (refresh) {
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        mArrayAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void onComposingEvent(String chatId, ContactId contact, boolean status) {
+        }
+
+        @Override
+        public void onMessageGroupDeliveryInfoChanged(String chatId, ContactId contact,
+                String mimeType, String msgId, GroupDeliveryInfo.Status status,
+                GroupDeliveryInfo.ReasonCode reasonCode) {
+        }
+
+        @Override
+        public void onMessageStatusChanged(String chatId, String mimeType, String msgId,
+                Content.Status status, Content.ReasonCode reasonCode) {
+        }
+
+        @Override
+        public void onParticipantStatusChanged(String chatId, ContactId contact,
+                ParticipantStatus status) {
+        }
+
+        @Override
+        public void onStateChanged(String chatId, final GroupChat.State state,
+                GroupChat.ReasonCode reasonCode) {
+        }
+
+    };
 }

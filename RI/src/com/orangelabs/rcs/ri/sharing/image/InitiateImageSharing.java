@@ -209,6 +209,8 @@ public class InitiateImageSharing extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mCnxManager = ConnectionManager.getInstance(this);
+
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.image_sharing_initiate);
@@ -234,8 +236,7 @@ public class InitiateImageSharing extends Activity {
         }
 
         // Register to API connection manager
-        mCnxManager = ConnectionManager.getInstance(this);
-        if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.IMAGE_SHARING)) {
+        if (!mCnxManager.isServiceConnected(RcsServiceName.IMAGE_SHARING)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
             return;
@@ -255,14 +256,9 @@ public class InitiateImageSharing extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mCnxManager == null) {
-            return;
-
-        }
         mCnxManager.stopMonitorServices(this);
         if (!mCnxManager.isServiceConnected(RcsServiceName.IMAGE_SHARING)) {
             return;
-
         }
         // Remove image sharing listener
         try {

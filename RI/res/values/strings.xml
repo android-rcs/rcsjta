@@ -160,14 +160,15 @@
     <string name="label_GroupFileTransferSupported">Group supported:</string>
     <string name="menu_file_transfer_config">File transfer service configuration</string>
     <string name="label_ft_ImageResizeOption">Image resize option:</string>
-    <string name="label_resend_failed">Transfer resend failed</string>
+    <string name="label_resend_failed">File transfer resend failed</string>
     <string name="label_expiration">Expiration:</string>
     <string name="label_expiration_args">Expiration: %s</string>
     <string name="label_ft_start_file_transfer">Start transfer</string>
     <string name="label_ft_filesize">Size:</string>
     <string name="label_ft_not_allowed">Not allowed to transfer file(s)</string>
  	<string name="title_multi_file_transfer">Multiple file transfer</string>
- 
+	<string name="label_delete_ft_failed">Failed to delete the file transfer</string>
+	
     <!-- Chat menu -->
     <string name="menu_initiate_chat">Initiate single chat</string>
     <string name="menu_initiate_group_chat">Initiate group chat</string>
@@ -197,6 +198,9 @@
     <string name="label_add_participant_failed">Request to add participant(s) has failed</string>
     <string name="label_group_chat">Group chat</string>
     <string name="label_continue_chat_failed">Can\'t continue the conversation: RCS service is not available</string>
+    <string name="label_delete_chat_failed">Delete chat conversation failed</string>
+    <string name="label_delete_chat_success">Chat with contact %1$s is deleted</string>
+    <string name="label_delete_gchat_success">Group chat successfully deleted</string>
     <string name="label_subject">Subject: </string>
     <string name="label_subject_notif">Subject: %s</string>
     <string name="label_max_participants">Can\'t add participants: max number of participants is reached (max=%d)</string>
@@ -238,7 +242,10 @@
     <string name="label_sharing_cancelled">Sharing has been cancelled</string>
     <string name="label_sharing_failed">Sharing failed (%1$s)</string>
     <string name="label_sharing_rejected">Sharing rejected (%1$s)</string>
-
+    <string name="menu_sharing_delete">Delete</string>
+    <string name="label_delete_sharing_failed">Failed to delete sharing</string>
+    <string name="label_delete_sharing_success">Sharing successfully deleted</string>
+    
     <!-- Image sharing menu -->
     <string name="menu_initiate_image_sharing">Initiate image sharing</string>
     <string name="menu_image_sharing_log">Image sharing log</string>
@@ -369,6 +376,10 @@
     <string name="menu_delete_message">Delete</string>
     <string name="menu_resend_message">Resend</string>
     <string name="menu_revoke_message">Revoke</string>
+    
+     <!-- Chat session menu -->
+    <string name="menu_delete_chat_session">Delete</string>
+    <string name="menu_open_chat_session">Open</string>
 
     <!-- HistoryLog  menu -->
     <string name="menu_history_log">History Log</string>

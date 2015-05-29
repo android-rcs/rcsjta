@@ -208,6 +208,8 @@ public class ReceiveGeolocSharing extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mCnxManager = ConnectionManager.getInstance(this);
+
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.geoloc_sharing_receive);
@@ -217,10 +219,7 @@ public class ReceiveGeolocSharing extends Activity {
         mRemoteContact = getIntent().getParcelableExtra(GeolocSharingIntentService.BUNDLE_GSH_ID);
 
         // Register to API connection manager
-        mCnxManager = ConnectionManager.getInstance(this);
-        if (mCnxManager == null
-                || !mCnxManager.isServiceConnected(RcsServiceName.GEOLOC_SHARING,
-                        RcsServiceName.CONTACT)) {
+        if (!mCnxManager.isServiceConnected(RcsServiceName.GEOLOC_SHARING, RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
         } else {
@@ -233,9 +232,6 @@ public class ReceiveGeolocSharing extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mCnxManager == null) {
-            return;
-        }
         mCnxManager.stopMonitorServices(this);
         if (mCnxManager.isServiceConnected(RcsServiceName.GEOLOC_SHARING)) {
             // Remove service listener

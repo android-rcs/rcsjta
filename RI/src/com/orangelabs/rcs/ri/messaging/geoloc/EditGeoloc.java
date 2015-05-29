@@ -103,7 +103,7 @@ public class EditGeoloc extends Activity {
 
         // Register to API connection manager
         ConnectionManager connectionManager = ConnectionManager.getInstance(this);
-        if (connectionManager != null && connectionManager.isServiceConnected(RcsServiceName.CHAT)) {
+        if (connectionManager.isServiceConnected(RcsServiceName.CHAT)) {
             try {
                 ChatServiceConfiguration configuration = connectionManager.getChatApi()
                         .getConfiguration();

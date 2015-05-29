@@ -88,18 +88,16 @@ public class FileTransferServiceConfigActivity extends Activity {
 
         // Register to API connection manager
         mCnxManager = ConnectionManager.getInstance(this);
-        if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
+        if (!mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
             return;
-
         }
         try {
             mConfig = mCnxManager.getFileTransferApi().getConfiguration();
         } catch (RcsServiceException e) {
             Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce);
             return;
-
         }
 
         mCnxManager.startMonitorServices(this, null, RcsServiceName.FILE_TRANSFER);
@@ -181,10 +179,6 @@ public class FileTransferServiceConfigActivity extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mCnxManager == null) {
-            return;
-
-        }
         mCnxManager.stopMonitorServices(this);
     }
 

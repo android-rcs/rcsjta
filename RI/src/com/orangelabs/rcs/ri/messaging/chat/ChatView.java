@@ -22,6 +22,7 @@ import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatMessage;
+import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.contact.ContactId;
 
 import com.orangelabs.rcs.ri.ConnectionManager;
@@ -108,7 +109,12 @@ public abstract class ChatView extends FragmentActivity implements
     /**
      * UI handler
      */
-    protected Handler handler = new Handler();
+    protected Handler mHandler = new Handler();
+
+    /**
+     * The chat service instance
+     */
+    protected ChatService mChatService;
 
     private static final String LOGTAG = LogUtils.getTag(ChatView.class.getSimpleName());
 
@@ -137,11 +143,14 @@ public abstract class ChatView extends FragmentActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Set layout
+        /* Set layout */
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.chat_view);
 
-        // Set message composer callbacks
+        /* Register to API connection manager */
+        mCnxManager = ConnectionManager.getInstance(this);
+
+        /* Set message composer callbacks */
         composeText = (EditText) findViewById(R.id.userText);
         composeText.setOnKeyListener(new OnKeyListener() {
 
@@ -185,7 +194,7 @@ public abstract class ChatView extends FragmentActivity implements
             }
         });
 
-        // Set send button listener
+        /* Set send button listener */
         Button sendBtn = (Button) findViewById(R.id.send_button);
         sendBtn.setOnClickListener(new OnClickListener() {
 
@@ -195,7 +204,7 @@ public abstract class ChatView extends FragmentActivity implements
             }
         });
 
-        // Initialize the adapter.
+        /* Initialize the adapter. */
         mAdapter = new ChatCursorAdapter(this, isSingleChat());
 
         // Associate the list adapter with the ListView.
@@ -203,11 +212,7 @@ public abstract class ChatView extends FragmentActivity implements
         listView.setAdapter(mAdapter);
         registerForContextMenu(listView);
 
-        // Register to API connection manager
-        mCnxManager = ConnectionManager.getInstance(this);
-
-        if (mCnxManager == null
-                || !mCnxManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACT)) {
+        if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
             return;
@@ -215,20 +220,17 @@ public abstract class ChatView extends FragmentActivity implements
         }
         mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.CHAT,
                 RcsServiceName.CONTACT);
+        mChatService = mCnxManager.getChatApi();
         processIntent();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mCnxManager == null) {
-            return;
-
-        }
         mCnxManager.stopMonitorServices(this);
-        if (mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
+        if (mCnxManager.isServiceConnected(RcsServiceName.CHAT) && mChatService != null) {
             try {
-                removeChatEventListener(mCnxManager.getChatApi());
+                removeChatEventListener(mChatService);
             } catch (RcsServiceException e) {
                 e.printStackTrace();
             }
@@ -272,23 +274,25 @@ public abstract class ChatView extends FragmentActivity implements
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        // A switch-case is useful when dealing with multiple Loaders/IDs
+        /* A switch-case is useful when dealing with multiple Loaders/IDs */
         switch (loader.getId()) {
             case LOADER_ID:
-                // The asynchronous load is complete and the data
-                // is now available for use. Only now can we associate
-                // the queried Cursor with the CursorAdapter.
+                /*
+                 * The asynchronous load is complete and the data is now available for use. Only now
+                 * can we associate the queried Cursor with the CursorAdapter.
+                 */
                 mAdapter.swapCursor(cursor);
                 break;
         }
-        // The listview now displays the queried data.
+        /* The listview now displays the queried data. */
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        // For whatever reason, the Loader's data is now unavailable.
-        // Remove any references to the old data by replacing it with a null
-        // Cursor.
+        /*
+         * For whatever reason, the Loader's data is now unavailable. Remove any references to the
+         * old data by replacing it with a null Cursor.
+         */
         mAdapter.swapCursor(null);
     }
 
@@ -392,7 +396,7 @@ public abstract class ChatView extends FragmentActivity implements
     protected void displayComposingEvent(final ContactId contact, final boolean status) {
         final String from = RcsDisplayName.getInstance(this).getDisplayName(contact);
         // Execute on UI handler since callback is executed from service
-        handler.post(new Runnable() {
+        mHandler.post(new Runnable() {
             public void run() {
                 TextView view = (TextView) findViewById(R.id.isComposingText);
                 if (status) {

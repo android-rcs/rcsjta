@@ -219,6 +219,8 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mCnxManager = ConnectionManager.getInstance(this);
+
         // Always on window
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
@@ -333,12 +335,10 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
         }
 
         // Register to API connection manager
-        mCnxManager = ConnectionManager.getInstance(this);
-        if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.VIDEO_SHARING)) {
+        if (!mCnxManager.isServiceConnected(RcsServiceName.VIDEO_SHARING)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
             return;
-
         }
         mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.VIDEO_SHARING);
 
@@ -377,15 +377,9 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-        if (mCnxManager == null) {
-            return;
-
-        }
         mCnxManager.stopMonitorServices(this);
         if (!mCnxManager.isServiceConnected(RcsServiceName.VIDEO_SHARING)) {
             return;
-
         }
         // Remove video sharing listener
         try {

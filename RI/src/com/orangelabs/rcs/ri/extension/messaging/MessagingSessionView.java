@@ -201,20 +201,19 @@ public class MessagingSessionView extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Set layout
+        mCnxManager = ConnectionManager.getInstance(this);
+
+        /* Set layout */
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.extension_session_view);
 
-        // Set buttons callback
+        /* Set buttons callback */
         Button sendBtn = (Button) findViewById(R.id.send_btn);
         sendBtn.setOnClickListener(btnSendListener);
         sendBtn.setEnabled(false);
 
-        // Register to API connection manager
-        mCnxManager = ConnectionManager.getInstance(this);
-        if (mCnxManager == null
-                || !mCnxManager.isServiceConnected(RcsServiceName.MULTIMEDIA,
-                        RcsServiceName.CONTACT)) {
+        /* Register to API connection manager */
+        if (!mCnxManager.isServiceConnected(RcsServiceName.MULTIMEDIA, RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
             return;
@@ -222,7 +221,7 @@ public class MessagingSessionView extends Activity {
         mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.MULTIMEDIA,
                 RcsServiceName.CONTACT);
         try {
-            // Add service listener
+            /* Add service listener */
             mCnxManager.getMultimediaSessionApi().addEventListener(mServiceListener);
 
             initialiseMessagingSession(getIntent());
@@ -237,9 +236,6 @@ public class MessagingSessionView extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mCnxManager == null) {
-            return;
-        }
         mCnxManager.stopMonitorServices(this);
         if (mCnxManager.isServiceConnected(RcsServiceName.MULTIMEDIA)) {
             // Remove listener

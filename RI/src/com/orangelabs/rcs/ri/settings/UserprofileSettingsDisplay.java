@@ -53,7 +53,7 @@ public class UserprofileSettingsDisplay extends PreferenceActivity implements
         displaynameEdit.setOnPreferenceChangeListener(this);
 
         mCnxManager = ConnectionManager.getInstance(this);
-        if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
+        if (!mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
             Utils.showMessage(this, getString(R.string.label_service_not_available));
             return;
         }

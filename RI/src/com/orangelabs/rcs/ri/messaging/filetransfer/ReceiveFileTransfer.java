@@ -131,9 +131,7 @@ public class ReceiveFileTransfer extends Activity {
 
         // Register to API connection manager
         mCnxManager = ConnectionManager.getInstance(this);
-        if (mCnxManager == null
-                || !mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER,
-                        RcsServiceName.CONTACT)) {
+        if (!mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER, RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
         } else {
@@ -166,9 +164,6 @@ public class ReceiveFileTransfer extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mCnxManager == null) {
-            return;
-        }
         mCnxManager.stopMonitorServices(this);
         if (mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
             // Remove service listener

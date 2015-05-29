@@ -191,6 +191,8 @@ public class ReceiveImageSharing extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mCnxManager = ConnectionManager.getInstance(this);
+
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.image_sharing_receive);
@@ -207,10 +209,7 @@ public class ReceiveImageSharing extends Activity {
         }
 
         // Register to API connection manager
-        mCnxManager = ConnectionManager.getInstance(this);
-        if (mCnxManager == null
-                || !mCnxManager.isServiceConnected(RcsServiceName.IMAGE_SHARING,
-                        RcsServiceName.CONTACT)) {
+        if (!mCnxManager.isServiceConnected(RcsServiceName.IMAGE_SHARING, RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
         } else {
@@ -223,14 +222,9 @@ public class ReceiveImageSharing extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mCnxManager == null) {
-            return;
-
-        }
         mCnxManager.stopMonitorServices(this);
         if (!mCnxManager.isServiceConnected(RcsServiceName.IMAGE_SHARING)) {
             return;
-
         }
         // Remove file transfer listener
         try {

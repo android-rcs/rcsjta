@@ -12,6 +12,7 @@ import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -45,7 +46,15 @@ public abstract class HistoryListView extends Activity {
      */
     private List<Integer> mProviderIds;
 
-    protected abstract void startQuery();
+    /**
+     * UI handler
+     */
+    protected Handler mHandler = new Handler();
+
+    /**
+     * A method called to query the history log and refresh view
+     */
+    protected abstract void queryHistoryLogAndRefreshView();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -76,7 +85,7 @@ public abstract class HistoryListView extends Activity {
                 builder.setPositiveButton(R.string.label_ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         mFilterAlertDialog.dismiss();
-                        startQuery();
+                        queryHistoryLogAndRefreshView();
                     }
                 });
                 builder.setNegativeButton(R.string.label_cancel,
@@ -105,6 +114,13 @@ public abstract class HistoryListView extends Activity {
         return uriBuilder.build();
     }
 
+    /**
+     * Truncate a string
+     * 
+     * @param in string to truncate
+     * @param maxLength maximum length
+     * @return truncated string
+     */
     protected String truncateString(String in, int maxLength) {
         if (in.length() > maxLength) {
             in = in.substring(0, maxLength).concat("...");
