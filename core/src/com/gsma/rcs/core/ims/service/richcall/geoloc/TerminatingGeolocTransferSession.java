@@ -476,6 +476,9 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
         // Remove the current session
         removeSession();
 
+        if (isGeolocTransfered()) {
+            return;
+        }
         for (ImsSessionListener listener : getListeners()) {
             ((GeolocTransferSessionListener) listener).handleSharingError(contact,
                     new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));

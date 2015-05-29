@@ -207,13 +207,13 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
         // Remove the current session
         removeSession();
 
-        // Notify listeners
-        if (!isSessionInterrupted() && !isSessionTerminatedByRemote()) {
-            ContactId contact = getRemoteContact();
-            for (ImsSessionListener listener : getListeners()) {
-                ((FileSharingSessionListener) listener).handleTransferError(new FileSharingError(
-                        FileSharingError.MEDIA_TRANSFER_FAILED, error), contact);
-            }
+        if (isFileTransfered()) {
+            return;
+        }
+        ContactId contact = getRemoteContact();
+        for (ImsSessionListener listener : getListeners()) {
+            ((FileSharingSessionListener) listener).handleTransferError(new FileSharingError(
+                    FileSharingError.MEDIA_TRANSFER_FAILED, error), contact);
         }
     }
 

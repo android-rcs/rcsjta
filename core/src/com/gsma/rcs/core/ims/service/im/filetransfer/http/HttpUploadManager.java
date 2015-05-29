@@ -547,12 +547,11 @@ public class HttpUploadManager extends HttpTransferManager {
      * @return tid TID header
      */
     private String generateTidMultipart() {
-        String tidPartHeader = TWO_HYPENS + BOUNDARY_TAG + LINE_END;
-        tidPartHeader += "Content-Disposition: form-data; name=\"tid\"" + LINE_END;
-        tidPartHeader += "Content-Type: text/plain" + LINE_END;
-        tidPartHeader += "Content-Length: " + mTId.length();
-
-        return tidPartHeader + LINE_END + LINE_END + mTId + LINE_END;
+        return new StringBuilder(TWO_HYPENS).append(BOUNDARY_TAG).append(LINE_END)
+                .append("Content-Disposition: form-data; name=\"tid\"").append(LINE_END)
+                .append("Content-Type: text/plain").append(LINE_END).append("Content-Length: ")
+                .append(mTId.length()).append(LINE_END).append(LINE_END).append(mTId)
+                .append(LINE_END).toString();
     }
 
     /**

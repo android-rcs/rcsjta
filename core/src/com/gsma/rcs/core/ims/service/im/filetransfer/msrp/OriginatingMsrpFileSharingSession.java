@@ -117,13 +117,13 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
         setContributionID(id);
     }
 
-    private byte[] getFileData(Uri file, long size) throws IOException {
+    private byte[] getFileData(Uri file, int size) throws IOException {
         FileInputStream fileInputStream = null;
         try {
             fileInputStream = (FileInputStream) AndroidFactory.getApplicationContext()
                     .getContentResolver().openInputStream(file);
-            byte[] data = new byte[(int) size];
-            if (size != fileInputStream.read(data, 0, (int) size)) {
+            byte[] data = new byte[size];
+            if (size != fileInputStream.read(data, 0, size)) {
                 throw new IOException("Unable to retrive data from ".concat(file.toString()));
             }
             return data;
@@ -181,44 +181,46 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
             }
 
             MmContent fileIcon = getFileicon();
-            Capabilities remoteCapabilities = mContactManager
-                    .getContactCapabilities(getRemoteContact());
-            boolean fileIconSupported = remoteCapabilities != null
-                    && remoteCapabilities.isFileTransferThumbnailSupported();
             if (fileIcon == null) {
                 /* Set the local SDP part in the dialog path */
                 getDialogPath().setLocalContent(sdp.toString());
-            } else if (fileIconSupported) {
-                sdp.append("a=file-icon:cid:image@joyn.com").append(SipUtils.CRLF);
-
-                /* Encode the file icon file */
-                String imageEncoded = Base64.encodeBase64ToString(getFileData(fileIcon.getUri(),
-                        fileIcon.getSize()));
-                String sdpContent = sdp.toString();
-                String multipart = new StringBuilder(Multipart.BOUNDARY_DELIMITER)
-                        .append(BOUNDARY_TAG).append(SipUtils.CRLF).append(ContentTypeHeader.NAME)
-                        .append(": application/sdp").append(SipUtils.CRLF)
-                        .append(ContentLengthHeader.NAME).append(": ")
-                        .append(sdpContent.getBytes(UTF8).length).append(SipUtils.CRLF)
-                        .append(SipUtils.CRLF).append(sdpContent).append(SipUtils.CRLF)
-                        .append(Multipart.BOUNDARY_DELIMITER).append(BOUNDARY_TAG)
-                        .append(SipUtils.CRLF).append(ContentTypeHeader.NAME).append(": ")
-                        .append(fileIcon.getEncoding()).append(SipUtils.CRLF)
-                        .append(SipUtils.HEADER_CONTENT_TRANSFER_ENCODING).append(": base64")
-                        .append(SipUtils.CRLF).append(SipUtils.HEADER_CONTENT_ID)
-                        .append(": <image@joyn.com>").append(SipUtils.CRLF)
-                        .append(ContentLengthHeader.NAME).append(": ")
-                        .append(imageEncoded.length()).append(SipUtils.CRLF)
-                        .append(ContentDispositionHeader.NAME).append(": icon")
-                        .append(SipUtils.CRLF).append(SipUtils.CRLF).append(imageEncoded)
-                        .append(SipUtils.CRLF).append(Multipart.BOUNDARY_DELIMITER)
-                        .append(BOUNDARY_TAG).append(Multipart.BOUNDARY_DELIMITER).toString();
-
-                /* Set the local SDP part in the dialog path */
-                getDialogPath().setLocalContent(multipart);
             } else {
-                /* Set the local SDP part in the dialog path */
-                getDialogPath().setLocalContent(sdp.toString());
+                Capabilities remoteCapabilities = mContactManager
+                        .getContactCapabilities(getRemoteContact());
+                boolean fileIconSupported = remoteCapabilities != null
+                        && remoteCapabilities.isFileTransferThumbnailSupported();
+                if (fileIconSupported) {
+                    sdp.append("a=file-icon:cid:image@joyn.com").append(SipUtils.CRLF);
+
+                    /* Encode the file icon file */
+                    String imageEncoded = Base64.encodeBase64ToString(getFileData(
+                            fileIcon.getUri(), (int) fileIcon.getSize()));
+                    String sdpContent = sdp.toString();
+                    String multipart = new StringBuilder(Multipart.BOUNDARY_DELIMITER)
+                            .append(BOUNDARY_TAG).append(SipUtils.CRLF)
+                            .append(ContentTypeHeader.NAME).append(": application/sdp")
+                            .append(SipUtils.CRLF).append(ContentLengthHeader.NAME).append(": ")
+                            .append(sdpContent.getBytes(UTF8).length).append(SipUtils.CRLF)
+                            .append(SipUtils.CRLF).append(sdpContent).append(SipUtils.CRLF)
+                            .append(Multipart.BOUNDARY_DELIMITER).append(BOUNDARY_TAG)
+                            .append(SipUtils.CRLF).append(ContentTypeHeader.NAME).append(": ")
+                            .append(fileIcon.getEncoding()).append(SipUtils.CRLF)
+                            .append(SipUtils.HEADER_CONTENT_TRANSFER_ENCODING).append(": base64")
+                            .append(SipUtils.CRLF).append(SipUtils.HEADER_CONTENT_ID)
+                            .append(": <image@joyn.com>").append(SipUtils.CRLF)
+                            .append(ContentLengthHeader.NAME).append(": ")
+                            .append(imageEncoded.length()).append(SipUtils.CRLF)
+                            .append(ContentDispositionHeader.NAME).append(": icon")
+                            .append(SipUtils.CRLF).append(SipUtils.CRLF).append(imageEncoded)
+                            .append(SipUtils.CRLF).append(Multipart.BOUNDARY_DELIMITER)
+                            .append(BOUNDARY_TAG).append(Multipart.BOUNDARY_DELIMITER).toString();
+
+                    /* Set the local SDP part in the dialog path */
+                    getDialogPath().setLocalContent(multipart);
+                } else {
+                    /* Set the local SDP part in the dialog path */
+                    getDialogPath().setLocalContent(sdp.toString());
+                }
             }
 
             /* Create an INVITE request */

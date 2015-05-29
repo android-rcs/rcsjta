@@ -518,12 +518,9 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
         if (isImageTransfered()) {
             return;
         }
-        // Notify listeners
-        if (!isSessionInterrupted() && !isSessionTerminatedByRemote()) {
-            for (ImsSessionListener listener : getListeners()) {
-                ((ImageTransferSessionListener) listener).handleSharingError(contact,
-                        new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
-            }
+        for (ImsSessionListener listener : getListeners()) {
+            ((ImageTransferSessionListener) listener).handleSharingError(contact,
+                    new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
         }
     }
 
