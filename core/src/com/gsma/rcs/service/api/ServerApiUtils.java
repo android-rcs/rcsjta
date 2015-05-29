@@ -88,9 +88,10 @@ public class ServerApiUtils {
      * Test API extension permission
      * 
      * @param ext Extension ID
-     * @throws ServerApiException
+     * @throws ServerApiPermissionDeniedException
      */
-    public static void testApiExtensionPermission(String ext) throws ServerApiException {
+    public static void testApiExtensionPermission(String ext)
+            throws ServerApiPermissionDeniedException {
         // No control done in this release
     }
 }

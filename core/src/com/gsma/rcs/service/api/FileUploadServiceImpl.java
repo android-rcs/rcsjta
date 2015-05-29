@@ -356,9 +356,8 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      * 
      * @return Version
      * @see VERSION_CODES
-     * @throws ServerApiException
      */
-    public int getServiceVersion() throws ServerApiException {
+    public int getServiceVersion() {
         return RcsService.Build.API_VERSION;
     }
 

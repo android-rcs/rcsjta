@@ -51,6 +51,8 @@ import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -244,25 +246,27 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * @param player IP call player
      * @param renderer IP call renderer
      * @return IP call
-     * @throws ServerApiException
+     * @throws RemoteException
      */
     public IIPCall initiateCall(ContactId contact, IIPCallPlayer player, IIPCallRenderer renderer)
-            throws ServerApiException {
+            throws RemoteException {
+        if (contact == null) {
+            throw new ServerApiIllegalArgumentException("contact must not be null!");
+        }
+        if (player == null) {
+            throw new ServerApiIllegalArgumentException("player must not be null!");
+        }
+        if (renderer == null) {
+            throw new ServerApiIllegalArgumentException("renderer must not be null!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Initiate an IP call audio session with " + contact);
         }
 
-        // Test IMS connection
         ServerApiUtils.testIms();
 
-        // Test if at least the audio media is configured
-        if ((player == null) || (renderer == null)) {
-            throw new ServerApiException("Missing audio player or renderer");
-        }
         long timestamp = System.currentTimeMillis();
         try {
-            // Initiate a new session
-
             final IPCallSession session = mIPCallService.initiateIPCallSession(contact, false,
                     player, renderer, timestamp);
 
@@ -281,7 +285,6 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
             addIPCall(ipCall);
             session.addListener(ipCall);
 
-            // Start the session
             Thread t = new Thread() {
                 public void run() {
                     session.startSession();
@@ -290,11 +293,21 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
             t.start();
             return ipCall;
 
-        } catch (Exception e) {
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
             mIPCallLog.addCall(SessionIdGenerator.getNewId(), contact, Direction.OUTGOING, null,
                     null, IPCall.State.FAILED, ReasonCode.FAILED_INITIATION, timestamp);
             ;
-            throw new ServerApiException(e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            mIPCallLog.addCall(SessionIdGenerator.getNewId(), contact, Direction.OUTGOING, null,
+                    null, IPCall.State.FAILED, ReasonCode.FAILED_INITIATION, timestamp);
+            ;
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -307,25 +320,27 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * @param player IP call player
      * @param renderer IP call renderer
      * @return IP call
-     * @throws ServerApiException
+     * @throws RemoteException
      */
     public IIPCall initiateVisioCall(ContactId contact, IIPCallPlayer player,
-            IIPCallRenderer renderer) throws ServerApiException {
+            IIPCallRenderer renderer) throws RemoteException {
+        if (contact == null) {
+            throw new ServerApiIllegalArgumentException("contact must not be null!");
+        }
+        if (player == null) {
+            throw new ServerApiIllegalArgumentException("player must not be null!");
+        }
+        if (renderer == null) {
+            throw new ServerApiIllegalArgumentException("renderer must not be null!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Initiate an IP call visio session with " + contact);
         }
 
-        // Test IMS connection
         ServerApiUtils.testIms();
-
-        // Test if at least the audio media is configured
-        if ((player == null) || (renderer == null)) {
-            throw new ServerApiException("Missing audio player or renderer");
-        }
 
         long timestamp = System.currentTimeMillis();
         try {
-            // Initiate a new session
             final IPCallSession session = mIPCallService.initiateIPCallSession(contact, true,
                     player, renderer, timestamp);
 
@@ -344,7 +359,6 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
             addIPCall(ipCall);
             session.addListener(ipCall);
 
-            // Start the session
             Thread t = new Thread() {
                 public void run() {
                     session.startSession();
@@ -353,10 +367,19 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
             t.start();
             return ipCall;
 
-        } catch (Exception e) {
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
             mIPCallLog.addCall(SessionIdGenerator.getNewId(), contact, Direction.OUTGOING, null,
                     null, IPCall.State.FAILED, ReasonCode.FAILED_INITIATION, timestamp);
-            throw new ServerApiException(e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            mIPCallLog.addCall(SessionIdGenerator.getNewId(), contact, Direction.OUTGOING, null,
+                    null, IPCall.State.FAILED, ReasonCode.FAILED_INITIATION, timestamp);
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -365,29 +388,43 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * 
      * @param callId Call ID
      * @return IP call
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public IIPCall getIPCall(String callId) throws ServerApiException {
+    public IIPCall getIPCall(String callId) throws RemoteException {
+        if (TextUtils.isEmpty(callId)) {
+            throw new ServerApiIllegalArgumentException("callId must not be null or empty!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Get IP call " + callId);
         }
+        try {
+            IIPCall ipCall = mIPCallCache.get(callId);
+            if (ipCall != null) {
+                return ipCall;
+            }
+            IPCallPersistedStorageAccessor storageAccessor = new IPCallPersistedStorageAccessor(
+                    callId, mIPCallLog);
+            return new IPCallImpl(callId, mBroadcaster, mIPCallService, storageAccessor, this);
 
-        IIPCall ipCall = mIPCallCache.get(callId);
-        if (ipCall != null) {
-            return ipCall;
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        IPCallPersistedStorageAccessor storageAccessor = new IPCallPersistedStorageAccessor(callId,
-                mIPCallLog);
-        return new IPCallImpl(callId, mBroadcaster, mIPCallService, storageAccessor, this);
     }
 
     /**
      * Returns the list of IP calls in progress
      * 
      * @return List of IP calls
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public List<IBinder> getIPCalls() throws ServerApiException {
+    public List<IBinder> getIPCalls() throws RemoteException {
         if (sLogger.isActivated()) {
             sLogger.info("Get IP call sessions");
         }
@@ -399,11 +436,15 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
             }
             return ipCalls;
 
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Unexpected error", e);
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
-            throw new ServerApiException(e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -411,9 +452,22 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * Returns the configuration of IP call service
      * 
      * @return Configuration
+     * @throws RemoteException
      */
-    public IIPCallServiceConfiguration getConfiguration() {
-        return new IPCallServiceConfigurationImpl(mRcsSettings);
+    public IIPCallServiceConfiguration getConfiguration() throws RemoteException {
+        try {
+            return new IPCallServiceConfigurationImpl(mRcsSettings);
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
@@ -437,13 +491,29 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * Adds an event listener on IP call events
      * 
      * @param listener Listener
+     * @throws RemoteException
      */
-    public void addEventListener2(IIPCallListener listener) {
+    public void addEventListener2(IIPCallListener listener) throws RemoteException {
+        if (listener == null) {
+            throw new ServerApiIllegalArgumentException("listener must not be null!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Add an IP call event listener");
         }
-        synchronized (lock) {
-            mBroadcaster.addEventListener(listener);
+
+        try {
+            synchronized (lock) {
+                mBroadcaster.addEventListener(listener);
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -451,13 +521,29 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * Removes an event listener from IP call events
      * 
      * @param listener Listener
+     * @throws RemoteException
      */
-    public void removeEventListener2(IIPCallListener listener) {
+    public void removeEventListener2(IIPCallListener listener) throws RemoteException {
+        if (listener == null) {
+            throw new ServerApiIllegalArgumentException("listener must not be null!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Remove an IP call event listener");
         }
-        synchronized (lock) {
-            mBroadcaster.removeEventListener(listener);
+
+        try {
+            synchronized (lock) {
+                mBroadcaster.removeEventListener(listener);
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -466,9 +552,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * 
      * @return Version
      * @see VERSION_CODES
-     * @throws ServerApiException
      */
-    public int getServiceVersion() throws ServerApiException {
+    public int getServiceVersion() {
         return RcsService.Build.API_VERSION;
     }
 

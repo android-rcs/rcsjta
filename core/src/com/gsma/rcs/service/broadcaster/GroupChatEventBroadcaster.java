@@ -17,7 +17,6 @@
 package com.gsma.rcs.service.broadcaster;
 
 import com.gsma.rcs.platform.AndroidFactory;
-import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content;
@@ -50,11 +49,11 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
     public GroupChatEventBroadcaster() {
     }
 
-    public void addGroupChatEventListener(IGroupChatListener listener) throws ServerApiException {
+    public void addGroupChatEventListener(IGroupChatListener listener) {
         mGroupChatListeners.register(listener);
     }
 
-    public void removeGroupChatEventListener(IGroupChatListener listener) throws ServerApiException {
+    public void removeGroupChatEventListener(IGroupChatListener listener) {
         mGroupChatListeners.unregister(listener);
     }
 

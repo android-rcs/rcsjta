@@ -17,7 +17,6 @@
 package com.gsma.rcs.service.broadcaster;
 
 import com.gsma.rcs.platform.AndroidFactory;
-import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
@@ -48,13 +47,11 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
     public GroupFileTransferBroadcaster() {
     }
 
-    public void addGroupFileTransferListener(IGroupFileTransferListener listener)
-            throws ServerApiException {
+    public void addGroupFileTransferListener(IGroupFileTransferListener listener) {
         mGroupFileTransferListeners.register(listener);
     }
 
-    public void removeGroupFileTransferListener(IGroupFileTransferListener listener)
-            throws ServerApiException {
+    public void removeGroupFileTransferListener(IGroupFileTransferListener listener) {
         mGroupFileTransferListeners.unregister(listener);
     }
 

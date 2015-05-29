@@ -249,27 +249,6 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
     }
 
     /**
-     * Get the remote contact Id involved in the current call
-     * 
-     * @return ContactId or null if there is no call in progress
-     * @throws ServerApiException
-     */
-    public ContactId getRemotePhoneNumber() throws ServerApiException {
-        if (sLogger.isActivated()) {
-            sLogger.info("Get remote phone number");
-        }
-
-        // Test core availability
-        ServerApiUtils.testCore();
-
-        try {
-            return mCore.getImsModule().getCallManager().getContact();
-        } catch (Exception e) {
-            throw new ServerApiException(e);
-        }
-    }
-
-    /**
      * Receive a new video sharing invitation
      * 
      * @param session Video sharing session
@@ -492,10 +471,9 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * Returns service version
      * 
      * @return Version
-     * @throws ServerApiException
      * @see VERSION_CODES
      */
-    public int getServiceVersion() throws ServerApiException {
+    public int getServiceVersion() {
         return RcsService.Build.API_VERSION;
     }
 

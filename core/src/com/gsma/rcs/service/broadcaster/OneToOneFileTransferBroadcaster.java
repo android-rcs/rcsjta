@@ -17,7 +17,6 @@
 package com.gsma.rcs.service.broadcaster;
 
 import com.gsma.rcs.platform.AndroidFactory;
-import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
@@ -47,13 +46,11 @@ public class OneToOneFileTransferBroadcaster implements IOneToOneFileTransferBro
     public OneToOneFileTransferBroadcaster() {
     }
 
-    public void addOneToOneFileTransferListener(IOneToOneFileTransferListener listener)
-            throws ServerApiException {
+    public void addOneToOneFileTransferListener(IOneToOneFileTransferListener listener) {
         mOneToOneFileTransferListeners.register(listener);
     }
 
-    public void removeOneToOneFileTransferListener(IOneToOneFileTransferListener listener)
-            throws ServerApiException {
+    public void removeOneToOneFileTransferListener(IOneToOneFileTransferListener listener) {
         mOneToOneFileTransferListeners.unregister(listener);
     }
 

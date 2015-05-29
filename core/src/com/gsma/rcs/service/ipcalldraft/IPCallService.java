@@ -22,11 +22,15 @@
 
 package com.gsma.rcs.service.ipcalldraft;
 
+import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.RcsIllegalArgumentException;
 import com.gsma.services.rcs.RcsPermissionDeniedException;
+import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsServiceControl;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceListener;
+import com.gsma.services.rcs.RcsServiceNotRegisteredException;
 import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contact.ContactId;
@@ -62,8 +66,6 @@ public final class IPCallService extends RcsService {
     private IIPCallService mApi;
 
     private final Map<IPCallListener, WeakReference<IIPCallListener>> mIPCallListeners = new WeakHashMap<IPCallListener, WeakReference<IIPCallListener>>();
-
-    private static final String ERROR_CNX = "IPCall service not connected";
 
     private static boolean sApiCompatible = false;
 
@@ -154,17 +156,19 @@ public final class IPCallService extends RcsService {
      * Returns the configuration of IP call service
      * 
      * @return Configuration
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public IPCallServiceConfiguration getConfiguration() throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                return new IPCallServiceConfiguration(mApi.getConfiguration());
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+    public IPCallServiceConfiguration getConfiguration() throws RcsServiceNotAvailableException,
+            RcsGenericException {
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            return new IPCallServiceConfiguration(mApi.getConfiguration());
+
+        } catch (Exception e) {
+            throw new RcsGenericException(e);
         }
     }
 
@@ -177,23 +181,30 @@ public final class IPCallService extends RcsService {
      * @param player IP call player
      * @param renderer IP call renderer
      * @return IP call
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsServiceNotRegisteredException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     public IPCall initiateCall(ContactId contact, IPCallPlayer player, IPCallRenderer renderer)
-            throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                IIPCall callIntf = mApi.initiateCall(contact, player, renderer);
-                if (callIntf != null) {
-                    return new IPCall(callIntf);
-                } else {
-                    return null;
-                }
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
+            throws RcsPersistentStorageException, RcsServiceNotRegisteredException,
+            RcsServiceNotAvailableException, RcsGenericException {
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            IIPCall callIntf = mApi.initiateCall(contact, player, renderer);
+            if (callIntf != null) {
+                return new IPCall(callIntf);
+
+            } else {
+                return null;
             }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            RcsServiceNotRegisteredException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -206,23 +217,30 @@ public final class IPCallService extends RcsService {
      * @param player IP call player
      * @param renderer IP call renderer
      * @return IP call
-     * @throws RcsServiceException
+     * @throws RcsPersistentStorageException
+     * @throws RcsServiceNotRegisteredException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
     public IPCall initiateVisioCall(ContactId contact, IPCallPlayer player, IPCallRenderer renderer)
-            throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                IIPCall callIntf = mApi.initiateVisioCall(contact, player, renderer);
-                if (callIntf != null) {
-                    return new IPCall(callIntf);
-                } else {
-                    return null;
-                }
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
+            throws RcsPersistentStorageException, RcsServiceNotRegisteredException,
+            RcsServiceNotAvailableException, RcsGenericException {
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            IIPCall callIntf = mApi.initiateVisioCall(contact, player, renderer);
+            if (callIntf != null) {
+                return new IPCall(callIntf);
+
+            } else {
+                return null;
             }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            RcsServiceNotRegisteredException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -230,23 +248,22 @@ public final class IPCallService extends RcsService {
      * Returns the list of IP calls in progress
      * 
      * @return List of IP calls
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
      */
-    public Set<IPCall> getIPCalls() throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                Set<IPCall> result = new HashSet<IPCall>();
-                List<IBinder> vshList = mApi.getIPCalls();
-                for (IBinder binder : vshList) {
-                    IPCall call = new IPCall(IIPCall.Stub.asInterface(binder));
-                    result.add(call);
-                }
-                return result;
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
+    public Set<IPCall> getIPCalls() throws RcsServiceNotAvailableException, RcsGenericException {
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            Set<IPCall> result = new HashSet<IPCall>();
+            for (IBinder binder : mApi.getIPCalls()) {
+                result.add(new IPCall(IIPCall.Stub.asInterface(binder)));
             }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+            return result;
+
+        } catch (Exception e) {
+            throw new RcsGenericException(e);
         }
     }
 
@@ -255,17 +272,21 @@ public final class IPCallService extends RcsService {
      * 
      * @param callId Call ID
      * @return IP call or null if not found
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsIllegalArgumentException
+     * @throws RcsGenericException
      */
-    public IPCall getIPCall(String callId) throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                return new IPCall(mApi.getIPCall(callId));
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+    public IPCall getIPCall(String callId) throws RcsServiceNotAvailableException,
+            RcsIllegalArgumentException, RcsGenericException {
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            return new IPCall(mApi.getIPCall(callId));
+
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -273,19 +294,22 @@ public final class IPCallService extends RcsService {
      * Adds an event listener on IP call events
      * 
      * @param listener Listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsIllegalArgumentException
+     * @throws RcsGenericException
      */
-    public void addEventListener(IPCallListener listener) throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                IIPCallListener rcsListener = new IPCallListenerImpl(listener);
-                mIPCallListeners.put(listener, new WeakReference<IIPCallListener>(rcsListener));
-                mApi.addEventListener2(rcsListener);
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+    public void addEventListener(IPCallListener listener) throws RcsServiceNotAvailableException,
+            RcsIllegalArgumentException, RcsGenericException {
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            IIPCallListener rcsListener = new IPCallListenerImpl(listener);
+            mIPCallListeners.put(listener, new WeakReference<IIPCallListener>(rcsListener));
+            mApi.addEventListener2(rcsListener);
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -293,25 +317,28 @@ public final class IPCallService extends RcsService {
      * Removes an event listener from IP call events
      * 
      * @param listener Listener
-     * @throws RcsServiceException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsIllegalArgumentException
+     * @throws RcsGenericException
      */
-    public void removeEventListener(IPCallListener listener) throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                WeakReference<IIPCallListener> weakRef = mIPCallListeners.remove(listener);
-                if (weakRef == null) {
-                    return;
-                }
-                IIPCallListener rcsListener = weakRef.get();
-                if (rcsListener != null) {
-                    mApi.removeEventListener2(rcsListener);
-                }
-
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
+    public void removeEventListener(IPCallListener listener)
+            throws RcsServiceNotAvailableException, RcsIllegalArgumentException,
+            RcsGenericException {
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            WeakReference<IIPCallListener> weakRef = mIPCallListeners.remove(listener);
+            if (weakRef == null) {
+                return;
             }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+            IIPCallListener rcsListener = weakRef.get();
+            if (rcsListener != null) {
+                mApi.removeEventListener2(rcsListener);
+            }
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 }
