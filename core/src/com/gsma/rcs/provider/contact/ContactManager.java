@@ -178,12 +178,12 @@ public final class ContactManager {
     /**
      * MIME type for GSMA_CS_IMAGE (image sharing) capability
      */
-    private static final String MIMETYPE_CAPABILITY_IMAGE_SHARING = ContactProvider.MIME_TYPE_IMAGE_SHARING;
+    private static final String MIMETYPE_CAPABILITY_IMAGE_SHARING = ContactProvider.MIME_TYPE_IMAGE_SHARE;
 
     /**
      * MIME type for 3GPP_CS_VOICE (video sharing) capability
      */
-    private static final String MIMETYPE_CAPABILITY_VIDEO_SHARING = ContactProvider.MIME_TYPE_VIDEO_SHARING;
+    private static final String MIMETYPE_CAPABILITY_VIDEO_SHARING = ContactProvider.MIME_TYPE_VIDEO_SHARE;
 
     /**
      * MIME type for RCS_IM (IM session) capability

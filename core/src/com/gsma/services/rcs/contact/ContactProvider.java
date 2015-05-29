@@ -42,12 +42,12 @@ public class ContactProvider {
     /**
      * Image sharing capability support
      */
-    public final static String MIME_TYPE_IMAGE_SHARING = "vnd.android.cursor.item/com.gsma.services.rcs.image-sharing";
+    public final static String MIME_TYPE_IMAGE_SHARE = "vnd.android.cursor.item/com.gsma.services.rcs.image-share";
 
     /**
      * Video sharing capability support
      */
-    public final static String MIME_TYPE_VIDEO_SHARING = "vnd.android.cursor.item/com.gsma.services.rcs.video-sharing";
+    public final static String MIME_TYPE_VIDEO_SHARE = "vnd.android.cursor.item/com.gsma.services.rcs.video-share";
 
     /**
      * IM/Chat capability support
@@ -64,6 +64,11 @@ public class ContactProvider {
      */
     public final static String MIME_TYPE_GEOLOC_PUSH = "vnd.android.cursor.item/com.gsma.services.rcs.geoloc-push";
 
+    /**
+     * Mime type for the time stamp when the blocking was activated
+     */
+    public final static String MIME_TYPE_BLOCKING_TIMESTAMP = "vnd.android.cursor.item/com.gsma.services.rcs.blocking-timestamp";
+    
     /**
      * IP voice call capability support
      */
