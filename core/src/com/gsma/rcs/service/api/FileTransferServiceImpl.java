@@ -953,19 +953,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 }.start();
             }
         } else {
-            try {
-                mCore.getListener().handleRejoinGroupChatAsPartOfSendOperation(chatId);
-
-            } catch (MsrpException e) {
-                /*
-                 * failed to rejoin group chat session. Ignoring this exception because we want to
-                 * try again later.
-                 */
-                if (sLogger.isActivated()) {
-                    sLogger.debug(new StringBuilder("Could not rejoin group chat with chatID '")
-                            .append(chatId).append("' due to: ").append(e.getMessage()).toString());
-                }
-            }
+            mCore.getListener().handleRejoinGroupChatAsPartOfSendOperation(chatId);
         }
         return new GroupFileTransferImpl(fileTransferId, chatId, mGroupFileTransferBroadcaster,
                 mImService, storageAccessor, this, mRcsSettings, mCore, mMessagingLog,

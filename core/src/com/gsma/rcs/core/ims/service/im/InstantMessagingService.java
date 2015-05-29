@@ -1120,9 +1120,8 @@ public class InstantMessagingService extends ImsService {
      * 
      * @param chatId Chat ID
      * @return IM session
-     * @throws CoreException
      */
-    public ChatSession rejoinGroupChatSession(String chatId) throws CoreException {
+    public ChatSession rejoinGroupChatSession(String chatId) {
         if (sLogger.isActivated()) {
             sLogger.info("Rejoin group chat session");
         }
@@ -1135,13 +1134,14 @@ public class InstantMessagingService extends ImsService {
             if (sLogger.isActivated()) {
                 sLogger.warn("Group chat " + chatId + " can't be rejoined: conversation not found");
             }
-            throw new CoreException("Group chat conversation not found in database");
+            throw new ServerApiPersistentStorageException(
+                    "Group chat conversation not found in database");
         }
         if (groupChat.getRejoinId() == null) {
             if (sLogger.isActivated()) {
                 sLogger.warn("Group chat " + chatId + " can't be rejoined: rejoin ID not found");
             }
-            throw new CoreException("Rejoin ID not found in database");
+            throw new ServerApiPersistentStorageException("Rejoin ID not found in database");
         }
 
         if (sLogger.isActivated()) {
@@ -1157,9 +1157,8 @@ public class InstantMessagingService extends ImsService {
      * 
      * @param chatId Chat ID
      * @return IM session
-     * @throws CoreException
      */
-    public GroupChatSession restartGroupChatSession(String chatId) throws CoreException {
+    public GroupChatSession restartGroupChatSession(String chatId) {
         if (sLogger.isActivated()) {
             sLogger.info("Restart group chat session");
         }
@@ -1172,7 +1171,8 @@ public class InstantMessagingService extends ImsService {
             if (sLogger.isActivated()) {
                 sLogger.warn("Group chat " + chatId + " can't be restarted: conversation not found");
             }
-            throw new CoreException("Group chat conversation not found in database");
+            throw new ServerApiPersistentStorageException(
+                    "Group chat conversation not found in database");
         }
         if (sLogger.isActivated()) {
             sLogger.debug("Restart group chat: " + groupChat.toString());
@@ -1184,7 +1184,8 @@ public class InstantMessagingService extends ImsService {
             if (sLogger.isActivated()) {
                 sLogger.warn("Group chat " + chatId + " can't be restarted: participants not found");
             }
-            throw new CoreException("No connected group chat participants found in database");
+            throw new ServerApiPersistentStorageException(
+                    "No connected group chat participants found in database");
         }
         long timestamp = groupChat.getTimestamp();
         return new RestartGroupChatSession(this, ImsModule.IMS_USER_PROFILE.getImConferenceUri(),

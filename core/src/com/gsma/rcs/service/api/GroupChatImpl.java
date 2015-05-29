@@ -23,7 +23,6 @@
 package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.Core;
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.CoreListener;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
@@ -878,16 +877,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             }
 
             if (session == null) {
-                try {
-                    if (isGroupChatRejoinable() && ServerApiUtils.isImsConnected()) {
-                        rejoinGroupChat();
-                    }
-                } catch (MsrpException e) {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug(new StringBuilder("Could not rejoin group chat with chatID '")
-                                .append(mChatId).append("' due to: ").append(e.getMessage())
-                                .toString());
-                    }
+                if (isGroupChatRejoinable() && ServerApiUtils.isImsConnected()) {
+                    rejoinGroupChat();
                 }
             }
         } catch (ServerApiBaseException e) {
@@ -944,23 +935,13 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
              * session
              */
             addOutgoingGroupChatMessage(msg, Content.Status.QUEUED, Content.ReasonCode.UNSPECIFIED);
-            try {
-                setRejoinedAsPartOfSendOperation(true);
-                rejoinGroupChat();
-                /*
-                 * Observe that the queued message above will be dequeued on the trigger of
-                 * established rejoined group chat and so the sendChatMessage method is finished
-                 * here for now
-                 */
-                return;
-
-            } catch (MsrpException e) {
-                /*
-                 * Failed to rejoin group chat session. Ignoring this exception because we want to
-                 * try again later.
-                 */
-                return;
-            }
+            setRejoinedAsPartOfSendOperation(true);
+            rejoinGroupChat();
+            /*
+             * Observe that the queued message above will be dequeued on the trigger of established
+             * rejoined group chat and so the sendChatMessage method is finished here for now
+             */
+            return;
         }
         SipDialogPath chatSessionDialogPath = groupChatSession.getDialogPath();
         if (chatSessionDialogPath != null && chatSessionDialogPath.isSessionEstablished()) {
@@ -1274,60 +1255,36 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * Rejoins an existing group chat from its unique chat ID
      * 
      * @return Group chat
-     * @throws MsrpException
      */
-    public IGroupChat rejoinGroupChat() throws MsrpException {
+    public IGroupChat rejoinGroupChat() {
         if (sLogger.isActivated()) {
             sLogger.info("Rejoin group chat session related to the conversation " + mChatId);
         }
 
         ServerApiUtils.testIms();
-
-        try {
-            final ChatSession session = mImService.rejoinGroupChatSession(mChatId);
-            session.addListener(this);
-            new Thread() {
-                public void run() {
-                    session.startSession();
-                }
-            }.start();
-            mChatService.addGroupChat(this);
-            return this;
-
-        } catch (CoreException e) {
-            throw new MsrpException(new StringBuilder("Unable to rejoin group chat with chatId '")
-                    .append(mChatId).append("' due to: ").append(e.getMessage()).toString());
-        }
+        final ChatSession session = mImService.rejoinGroupChatSession(mChatId);
+        session.addListener(this);
+        session.startSession();
+        mChatService.addGroupChat(this);
+        return this;
     }
 
     /**
      * Restarts a previous group chat from its unique chat ID
      * 
      * @return Group chat
-     * @throws MsrpException
      */
-    public IGroupChat restartGroupChat() throws MsrpException {
+    public IGroupChat restartGroupChat() {
         if (sLogger.isActivated()) {
             sLogger.info("Restart group chat session related to the conversation " + mChatId);
         }
 
         ServerApiUtils.testIms();
-
-        try {
-            final GroupChatSession session = mImService.restartGroupChatSession(mChatId);
-            session.addListener(this);
-            new Thread() {
-                public void run() {
-                    session.startSession();
-                }
-            }.start();
-            mChatService.addGroupChat(this);
-            return this;
-
-        } catch (CoreException e) {
-            throw new MsrpException(new StringBuilder("Unable to restart group chat with chatId '")
-                    .append(mChatId).append("' due to: ").append(e.getMessage()).toString());
-        }
+        final GroupChatSession session = mImService.restartGroupChatSession(mChatId);
+        session.addListener(this);
+        session.startSession();
+        mChatService.addGroupChat(this);
+        return this;
     }
 
     /**
@@ -1385,19 +1342,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * Try to restart group chat session on failure of restart
      */
     private void handleGroupChatRejoinAsPartOfSendOperationFailed() {
-        try {
-            restartGroupChat();
-
-        } catch (MsrpException e) {
-            /*
-             * failed to restart group chat session. Ignoring this exception because we want to try
-             * again later.
-             */
-            if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder("Could not restart group chat with chatId '")
-                        .append(mChatId).append("' due to: ").append(e.getMessage()).toString());
-            }
-        }
+        restartGroupChat();
     }
 
     /**

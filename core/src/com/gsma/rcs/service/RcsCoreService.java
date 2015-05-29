@@ -1005,12 +1005,12 @@ public class RcsCoreService extends Service implements CoreListener {
     }
 
     @Override
-    public void handleRejoinGroupChatAsPartOfSendOperation(String chatId) throws MsrpException {
+    public void handleRejoinGroupChatAsPartOfSendOperation(String chatId) {
         mChatApi.handleRejoinGroupChatAsPartOfSendOperation(chatId);
     }
 
     @Override
-    public void handleRejoinGroupChat(String chatId) throws MsrpException {
+    public void handleRejoinGroupChat(String chatId) {
         mChatApi.handleRejoinGroupChat(chatId);
     }
 

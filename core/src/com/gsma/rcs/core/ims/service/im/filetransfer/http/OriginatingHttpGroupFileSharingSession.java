@@ -243,18 +243,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
              * the file transfer message
              */
             if (mChatSession == null) {
-                try {
-                    mCore.getListener().handleRejoinGroupChatAsPartOfSendOperation(chatId);
-                } catch (MsrpException e) {
-                    /*
-                     * Failed to rejoin group chat session. Ignoring this exception because we want
-                     * to try again later.
-                     */
-                    if (sLogger.isActivated()) {
-                        sLogger.debug(new StringBuilder("Could not rejoin group chat with chatId '")
-                                .append(chatId).append("' due to: ").append(e.getMessage()).toString());
-                    }
-                }
+                mCore.getListener().handleRejoinGroupChatAsPartOfSendOperation(chatId);
             } else if (!mChatSession.isMediaEstablished() && mChatSession.isInitiatedByRemote()) {
                 if (logActivated) {
                     sLogger.debug(new StringBuilder("Group chat session with chatId '")

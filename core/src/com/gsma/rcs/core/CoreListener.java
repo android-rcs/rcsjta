@@ -396,17 +396,15 @@ public interface CoreListener {
      * Handle rejoin group chat as part of send operation
      * 
      * @param chatId
-     * @throws MsrpException
      */
-    public void handleRejoinGroupChatAsPartOfSendOperation(String chatId) throws MsrpException;
+    public void handleRejoinGroupChatAsPartOfSendOperation(String chatId);
 
     /**
      * Handle auto rejoin group chat
      * 
      * @param chatId
-     * @throws MsrpException
      */
-    public void handleRejoinGroupChat(String chatId) throws MsrpException;
+    public void handleRejoinGroupChat(String chatId);
 
     /**
      * Try to start ImService tasks once the IMS connection is re-established and the ImsServices

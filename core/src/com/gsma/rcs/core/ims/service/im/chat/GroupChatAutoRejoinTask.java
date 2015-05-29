@@ -17,7 +17,6 @@
 package com.gsma.rcs.core.ims.service.im.chat;
 
 import com.gsma.rcs.core.Core;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -27,7 +26,7 @@ public class GroupChatAutoRejoinTask implements Runnable {
 
     private final Core mCore;
 
-    private static Logger logger = Logger.getLogger(GroupChatAutoRejoinTask.class.getName());
+    private static final Logger sLogger = Logger.getLogger(GroupChatAutoRejoinTask.class.getName());
 
     public GroupChatAutoRejoinTask(MessagingLog messagingLog, Core core) {
         mMessagingLog = messagingLog;
@@ -40,11 +39,14 @@ public class GroupChatAutoRejoinTask implements Runnable {
             try {
                 mCore.getListener().handleRejoinGroupChat(chatId);
 
-            } catch (MsrpException e) {
-                if (logger.isActivated()) {
-                    logger.debug(new StringBuilder("Could not auto-rejoin group chat with chatID '")
-                            .append(chatId).append("' due to: ").append(e.getMessage()).toString());
-                }
+            } catch (RuntimeException e) {
+                /*
+                 * Intentionally catch runtime exceptions as else it will abruptly end the thread
+                 * and eventually bring the whole system down, which is not intended.
+                 */
+                sLogger.error(new StringBuilder("Could not auto-rejoin group chat with chatID '")
+                        .append(chatId).append("' due to: ").append(e.getMessage()).toString(), e);
+
             }
         }
     }
