@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="rcs_core_application_title">RCS services</string>
+    <string name="rcs_core_permission">RCS</string>
+    <string name="rcs_core_permission_desc">utiliser les RCS services</string>
+
+    <!-- Strings associated to ContactsContract menus -->
+    <string name="rcs_core_my_profile">\u0020Mon profil RCS</string>
+    
+    <string name="rcs_core_contact_file_transfer_summary">Transférer un fichier via RCS</string>
+    <string name="rcs_core_contact_im_session_summary">Démarrer un chat via RCS</string>
+    <string name="rcs_core_contact_ip_voice_call_summary">Démarrer un appel IP voix via RCS</string>
+    <string name="rcs_core_contact_ip_video_call_summary">Démarrer un appel IP vidéo via RCS</string>
+    <string name="rcs_core_contact_image_share_summary">Partager une image via RCS</string>
+    <string name="rcs_core_contact_video_share_summary">Partager une vidéo via RCS</string>
+    
+    <string name="rcs_core_contact_file_transfer_details">Transférer un fichier</string>
+    <string name="rcs_core_contact_im_session_details">Démarrer une conversation</string>
+    <string name="rcs_core_contact_ip_voice_call_details">Démarrer un appel IP voix</string>
+    <string name="rcs_core_contact_ip_video_call_details">Démarrer un appel IP vidéo</string>
+    <string name="rcs_core_contact_image_share_details">Partager une image</string>
+    <string name="rcs_core_contact_video_share_details">Partager une vidéo</string>
+    <string name="rcs_core_contact_extensions_details">Démarrer une session SIP</string>
+
+    <!-- Strings linked to RCS account -->
+    <string name="rcs_core_account_id">RCS</string>
+    <string name="rcs_core_account_username">Rich Communication Suite</string>
+    <string name="rcs_core_account_main_title">Paramètres généraux</string>
+    <string name="rcs_core_account_menu_settings">Paramètres</string>
+    <string name="rcs_core_account_configure">Configurer le service RCS</string>
+    <string name="rcs_core_account_stopping_after_deletion">Le service RCS sera arrêté lorsque le compte sera supprimé</string>
+
+    <!-- Terms and Conditions -->
+    <string name="rcs_core_terms_accept">Accepter</string>
+    <string name="rcs_core_terms_decline">Décliner</string>
+    <string name="rcs_core_terms_ok">Ok</string>
+
+</resources>

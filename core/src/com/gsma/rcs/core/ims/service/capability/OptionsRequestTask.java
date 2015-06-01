@@ -89,8 +89,8 @@ public class OptionsRequestTask implements Runnable {
      * @param parent IMS module
      * @param contact Remote contact identifier
      * @param featureTags Feature tags
-     * @param rcsSettings
-     * @param contactManager
+     * @param rcsSettings accessor to RCS settings
+     * @param contactManager accessor to contact manager
      */
     public OptionsRequestTask(ImsModule parent, ContactId contact, String[] featureTags,
             RcsSettings rcsSettings, ContactManager contactManager) {
@@ -198,25 +198,26 @@ public class OptionsRequestTask implements Runnable {
      * @param ctx SIP transaction context
      */
     private void handleUserNotRegistered(SipTransactionContext ctx) {
-        // 408 or 480 response received
+        /* 408 or 480 response received */
         if (logger.isActivated()) {
             logger.info("User " + mContact + " is not registered");
         }
         ContactInfo info = mContactManager.getContactInfo(mContact);
         if (RcsStatus.NO_INFO.equals(info.getRcsStatus())) {
-            // If we do not have already some info on this contact
-            // We update the database with empty capabilities
-            Capabilities capabilities = new Capabilities();
-            mContactManager.setContactCapabilities(mContact, capabilities, RcsStatus.NO_INFO,
-                    RegistrationState.OFFLINE);
+            /*
+             * If there is not already some info on this contact: update the database with default
+             * capabilities
+             */
+            mContactManager.setContactCapabilities(mContact, Capabilities.sDefaultCapabilities,
+                    RcsStatus.NO_INFO, RegistrationState.OFFLINE);
         } else {
-            // We have some info on this contact
-            // We update the database with its previous infos and set the registration state to
-            // offline
-            mContactManager.setContactCapabilities(mContact, info.getCapabilities(),
-                    info.getRcsStatus(), RegistrationState.OFFLINE);
+            /*
+             * There are info on this contact: update the database with its previous info and set
+             * the registration state to offline.
+             */
+            mContactManager.setContactCapabilities(mContact, info.getCapabilities(), info.getRcsStatus(),
+                    RegistrationState.OFFLINE);
 
-            // Notify listener
             mImsModule.getCore().getListener()
                     .handleCapabilitiesNotification(mContact, info.getCapabilities());
         }
@@ -228,18 +229,14 @@ public class OptionsRequestTask implements Runnable {
      * @param ctx SIP transaction context
      */
     private void handleUserNotFound(SipTransactionContext ctx) {
-        // 404 response received
+        /* 404 response received */
         if (logger.isActivated()) {
             logger.info("User " + mContact + " is not found");
         }
-
-        // The contact is not RCS
-        Capabilities capabilities = new Capabilities();
-        mContactManager.setContactCapabilities(mContact, capabilities, RcsStatus.NOT_RCS,
-                RegistrationState.UNKNOWN);
-
-        // Notify listener
-        mImsModule.getCore().getListener().handleCapabilitiesNotification(mContact, capabilities);
+        /* The contact is not RCS */
+        mContactManager.setContactCapabilities(mContact, Capabilities.sDefaultCapabilities,
+                RcsStatus.NOT_RCS, RegistrationState.UNKNOWN);
+        mImsModule.getCore().getListener().handleCapabilitiesNotification(mContact, Capabilities.sDefaultCapabilities);
     }
 
     /**

@@ -67,8 +67,8 @@ public class AnonymousFetchManager implements DiscoveryManager {
      * Constructor
      * 
      * @param parent IMS module
-     * @param rcsSettings
-     * @param contactManager
+     * @param rcsSettings RCS settings accessor
+     * @param contactManager Contact manager accessor
      */
     public AnonymousFetchManager(ImsModule parent, RcsSettings rcsSettings,
             ContactManager contactManager) {
@@ -103,7 +103,7 @@ public class AnonymousFetchManager implements DiscoveryManager {
             logger.debug("Anonymous fetch notification received");
         }
 
-        // Parse XML part
+        /* Parse XML part */
         byte[] content = notify.getContentBytes();
         if (content != null) {
             if (logActivated) {
@@ -124,11 +124,11 @@ public class AnonymousFetchManager implements DiscoveryManager {
             if (presence == null) {
                 return;
             }
-            // Extract capabilities
-            Capabilities capabilities = new Capabilities();
+            /* Extract capabilities */
+            Capabilities.CapabilitiesBuilder capaBuilder = new Capabilities.CapabilitiesBuilder();
 
-            // We queried via anonymous fetch procedure, so set presence discovery to true
-            capabilities.setPresenceDiscoverySupport(true);
+            /* We queried via anonymous fetch procedure, so set presence discovery to true */
+            capaBuilder.setPresenceDiscovery(true);
 
             String entity = presence.getEntity();
             PhoneNumber validPhoneNumber = ContactUtil.getValidPhoneNumberFromUri(entity);
@@ -147,23 +147,26 @@ public class AnonymousFetchManager implements DiscoveryManager {
                 }
                 String id = tuple.getService().getId();
                 if (PresenceUtils.FEATURE_RCS2_VIDEO_SHARE.equalsIgnoreCase(id)) {
-                    capabilities.setVideoSharingSupport(state);
+                    capaBuilder.setVideoSharing(state);
+
                 } else if (PresenceUtils.FEATURE_RCS2_IMAGE_SHARE.equalsIgnoreCase(id)) {
-                    capabilities.setImageSharingSupport(state);
+                    capaBuilder.setImageSharing(state);
+
                 } else if (PresenceUtils.FEATURE_RCS2_FT.equalsIgnoreCase(id)) {
-                    capabilities.setFileTransferSupport(state);
+                    capaBuilder.setFileTransfer(state);
+
                 } else if (PresenceUtils.FEATURE_RCS2_CS_VIDEO.equalsIgnoreCase(id)) {
-                    capabilities.setCsVideoSupport(state);
+                    capaBuilder.setCsVideo(state);
+
                 } else if (PresenceUtils.FEATURE_RCS2_CHAT.equalsIgnoreCase(id)) {
-                    capabilities.setImSessionSupport(state);
+                    capaBuilder.setImSession(state);
                 }
             }
 
-            // Update capabilities in database
+            Capabilities capabilities = capaBuilder.build();
             mContactManager.setContactCapabilities(contact, capabilities, RcsStatus.RCS_CAPABLE,
                     RegistrationState.UNKNOWN);
 
-            // Notify listener
             mImsModule.getCore().getListener()
                     .handleCapabilitiesNotification(contact, capabilities);
         } else {
@@ -181,16 +184,12 @@ public class AnonymousFetchManager implements DiscoveryManager {
             }
             ContactId contact = ContactUtil.createContactIdFromValidatedData(validPhoneNumber);
 
-            // Notify content was empty
-            Capabilities capabilities = new Capabilities();
+            /* Notify content was empty : set default capabilities */
+            mContactManager.setContactCapabilities(contact, Capabilities.sDefaultCapabilities,
+                    RcsStatus.NO_INFO, RegistrationState.UNKNOWN);
 
-            // Update capabilities in database
-            mContactManager.setContactCapabilities(contact, capabilities, RcsStatus.NO_INFO,
-                    RegistrationState.UNKNOWN);
-
-            // Notify listener
             mImsModule.getCore().getListener()
-                    .handleCapabilitiesNotification(contact, capabilities);
+                    .handleCapabilitiesNotification(contact, Capabilities.sDefaultCapabilities);
         }
     }
 }

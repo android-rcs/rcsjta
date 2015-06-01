@@ -23,6 +23,7 @@
 package com.gsma.rcs.provider.settings;
 
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
+import com.gsma.rcs.core.ims.service.capability.Capabilities.CapabilitiesBuilder;
 import com.gsma.rcs.core.ims.service.extension.ServiceExtensionManager;
 import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.LocalContentResolver;
@@ -691,29 +692,29 @@ public class RcsSettings {
      * @return capability
      */
     public Capabilities getMyCapabilities() {
-        Capabilities capabilities = new Capabilities();
-
-        // Add default capabilities
-        capabilities.setCsVideoSupport(isCsVideoSupported());
-        capabilities.setFileTransferSupport(isFileTransferSupported());
-        capabilities.setFileTransferHttpSupport(isFileTransferHttpSupported());
-        capabilities.setImageSharingSupport(isImageSharingSupported());
-        capabilities.setImSessionSupport(isImSessionSupported());
-        capabilities.setPresenceDiscoverySupport(isPresenceDiscoverySupported());
-        capabilities.setSocialPresenceSupport(isSocialPresenceSupported());
-        capabilities.setVideoSharingSupport(isVideoSharingSupported());
-        capabilities.setGeolocationPushSupport(isGeoLocationPushSupported());
-        capabilities.setFileTransferThumbnailSupport(isFileTransferThumbnailSupported());
-        capabilities.setFileTransferStoreForwardSupport(isFileTransferStoreForwardSupported());
-        capabilities.setIPVoiceCallSupport(isIPVoiceCallSupported());
-        capabilities.setIPVideoCallSupport(isIPVideoCallSupported());
-        capabilities.setGroupChatStoreForwardSupport(isGroupChatStoreForwardSupported());
-        capabilities.setSipAutomata(isSipAutomata());
-        capabilities.setTimestampOfLastRequest(Capabilities.INVALID_TIMESTAMP);
-        capabilities.setTimestampOfLastResponse(Capabilities.INVALID_TIMESTAMP);
-        // Add extensions
-        capabilities.setSupportedExtensions(getSupportedRcsExtensions());
-        return capabilities;
+        /* Initialize with default capabilities */
+        CapabilitiesBuilder capaBuilder = new CapabilitiesBuilder();
+        /* Add my own capabilities */
+        capaBuilder.setCsVideo(isCsVideoSupported());
+        capaBuilder.setFileTransfer(isFileTransferSupported());
+        capaBuilder.setFileTransferHttp(isFileTransferHttpSupported());
+        capaBuilder.setImageSharing(isImageSharingSupported());
+        capaBuilder.setImSession(isImSessionSupported());
+        capaBuilder.setPresenceDiscovery(isPresenceDiscoverySupported());
+        capaBuilder.setSocialPresence(isSocialPresenceSupported());
+        capaBuilder.setVideoSharing(isVideoSharingSupported());
+        capaBuilder.setGeolocationPush(isGeoLocationPushSupported());
+        capaBuilder.setFileTransferThumbnail(isFileTransferThumbnailSupported());
+        capaBuilder.setFileTransferStoreForward(isFileTransferStoreForwardSupported());
+        capaBuilder.setIpVoiceCall(isIPVoiceCallSupported());
+        capaBuilder.setIpVideoCall(isIPVideoCallSupported());
+        capaBuilder.setGroupChatStoreForward(isGroupChatStoreForwardSupported());
+        capaBuilder.setSipAutomata(isSipAutomata());
+        capaBuilder.setTimestampOfLastRequest(Capabilities.INVALID_TIMESTAMP);
+        capaBuilder.setTimestampOfLastResponse(Capabilities.INVALID_TIMESTAMP);
+        /* Add extensions */
+        capaBuilder.setExtensions(getSupportedRcsExtensions());
+        return capaBuilder.build();
     }
 
     /**

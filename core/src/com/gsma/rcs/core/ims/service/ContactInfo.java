@@ -18,11 +18,12 @@
 
 package com.gsma.rcs.core.ims.service;
 
-import android.util.SparseArray;
-
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
+import com.gsma.rcs.core.ims.service.capability.Capabilities.CapabilitiesBuilder;
 import com.gsma.rcs.core.ims.service.presence.PresenceInfo;
 import com.gsma.services.rcs.contact.ContactId;
+
+import android.util.SparseArray;
 
 /**
  * Contact info
@@ -74,7 +75,7 @@ public class ContactInfo {
         /**
          * Returns a RegistrationState instance for the specified integer value.
          * 
-         * @param value
+         * @param value to convert
          * @return instance of RegistrationState
          */
         public static RegistrationState valueOf(int value) {
@@ -127,7 +128,7 @@ public class ContactInfo {
         /**
          * Returns a BlockingState instance for the specified integer value.
          * 
-         * @param value
+         * @param value to convert
          * @return instance of BlockingState
          */
         public static BlockingState valueOf(int value) {
@@ -210,7 +211,7 @@ public class ContactInfo {
         /**
          * Returns a RcsStatus instance for the specified integer value.
          * 
-         * @param value
+         * @param value to convert
          * @return instance of RcsStatus
          */
         public static RcsStatus valueOf(int value) {
@@ -274,16 +275,16 @@ public class ContactInfo {
     }
 
     /**
-     * Constructor
+     * Copy constructor
      * 
-     * @param info
+     * @param info to copy
      */
     public ContactInfo(ContactInfo info) {
         mContact = info.getContact();
         mRegistrationState = info.getRegistrationState();
         mRcsStatus = info.getRcsStatus();
         mRcsStatusTimestamp = info.getRcsStatusTimestamp();
-        mCapabilities = info.mCapabilities;
+        mCapabilities = new CapabilitiesBuilder(info.mCapabilities).build();
         mPresenceInfo = info.getPresenceInfo();
         mDisplayName = info.getDisplayName();
         mBlockingState = info.getBlockingState();
@@ -404,8 +405,7 @@ public class ContactInfo {
      * @return true if the contact is RCS
      */
     public boolean isRcsContact() {
-        return (!RcsStatus.NO_INFO.equals(mRcsStatus) && !RcsStatus.NOT_RCS.equals(mRcsStatus));
-
+        return (RcsStatus.NO_INFO != mRcsStatus && RcsStatus.NOT_RCS != mRcsStatus);
     }
 
     /**
@@ -420,7 +420,7 @@ public class ContactInfo {
     /**
      * Sets the RCS display name
      * 
-     * @param displayName
+     * @param displayName the RCS display name
      */
     public void setDisplayName(String displayName) {
         mDisplayName = displayName;

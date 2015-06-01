@@ -56,7 +56,7 @@ public class CapabilityUtils {
      * Get supported feature tags for capability exchange
      * 
      * @param richcall Rich call supported
-     * @param rcsSettings
+     * @param rcsSettings the accessor to RCS settings
      * @return List of tags
      */
     public static String[] getSupportedFeatureTags(boolean richcall, RcsSettings rcsSettings) {
@@ -167,84 +167,84 @@ public class CapabilityUtils {
      * @return Capabilities
      */
     public static Capabilities extractCapabilities(SipMessage msg) {
-
-        // Analyze feature tags
-        Capabilities capabilities = new Capabilities();
+        /* Analyze feature tags */
+        Capabilities.CapabilitiesBuilder capaBuilder = new Capabilities.CapabilitiesBuilder();
         Set<String> tags = msg.getFeatureTags();
         boolean ipCall_RCSE = false;
         boolean ipCall_3GPP = false;
 
         for (String tag : tags) {
             if (tag.contains(FeatureTags.FEATURE_3GPP_VIDEO_SHARE)) {
-                // Support video share service
-                capabilities.setVideoSharingSupport(true);
+                capaBuilder.setVideoSharing(true);
+
             } else if (tag.contains(FeatureTags.FEATURE_RCSE_IMAGE_SHARE)) {
-                // Support image share service
-                capabilities.setImageSharingSupport(true);
+                capaBuilder.setImageSharing(true);
+
             } else if (tag.contains(FeatureTags.FEATURE_RCSE_CHAT)) {
-                // Support IM service
-                capabilities.setImSessionSupport(true);
+                capaBuilder.setImSession(true);
+
             } else if (tag.contains(FeatureTags.FEATURE_RCSE_FT)) {
-                // Support FT service
-                capabilities.setFileTransferSupport(true);
+                capaBuilder.setFileTransfer(true);
+
             } else if (tag.contains(FeatureTags.FEATURE_RCSE_FT_HTTP)) {
-                // Support FT over HTTP service
-                capabilities.setFileTransferHttpSupport(true);
+                capaBuilder.setFileTransferHttp(true);
+
             } else if (tag.contains(FeatureTags.FEATURE_OMA_IM)) {
-                // Support both IM & FT services
-                capabilities.setImSessionSupport(true);
-                capabilities.setFileTransferSupport(true);
+                /* Support both IM & FT services */
+                capaBuilder.setImSession(true).setFileTransfer(true);
+
             } else if (tag.contains(FeatureTags.FEATURE_RCSE_PRESENCE_DISCOVERY)) {
-                // Support capability discovery via presence service
-                capabilities.setPresenceDiscoverySupport(true);
+                capaBuilder.setPresenceDiscovery(true);
+
             } else if (tag.contains(FeatureTags.FEATURE_RCSE_SOCIAL_PRESENCE)) {
-                // Support social presence service
-                capabilities.setSocialPresenceSupport(true);
+                capaBuilder.setSocialPresence(true);
+
             } else if (tag.contains(FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH)) {
-                // Support geolocation push service
-                capabilities.setGeolocationPushSupport(true);
+                capaBuilder.setGeolocationPush(true);
+
             } else if (tag.contains(FeatureTags.FEATURE_RCSE_FT_THUMBNAIL)) {
-                // Support file transfer thumbnail service
-                capabilities.setFileTransferThumbnailSupport(true);
+                capaBuilder.setFileTransferThumbnail(true);
+
             } else if (tag.contains(FeatureTags.FEATURE_RCSE_IP_VOICE_CALL)) {
-                // Support IP Call
                 if (ipCall_3GPP) {
-                    capabilities.setIPVoiceCallSupport(true);
+                    capaBuilder.setIpVoiceCall(true);
                 } else {
                     ipCall_RCSE = true;
                 }
+
             } else if (tag.contains(FeatureTags.FEATURE_3GPP_IP_VOICE_CALL)) {
-                // Support IP Call
                 if (ipCall_RCSE) {
-                    capabilities.setIPVoiceCallSupport(true);
+                    capaBuilder.setIpVoiceCall(true);
                 } else {
                     ipCall_3GPP = true;
                 }
             } else if (tag.contains(FeatureTags.FEATURE_RCSE_IP_VIDEO_CALL)) {
-                capabilities.setIPVideoCallSupport(true);
+                capaBuilder.setIpVideoCall(true);
+
             } else if (tag.contains(FeatureTags.FEATURE_RCSE_FT_SF)) {
-                // Support FT S&F service
-                capabilities.setFileTransferStoreForwardSupport(true);
+                capaBuilder.setFileTransferStoreForward(true);
+
             } else if (tag.contains(FeatureTags.FEATURE_RCSE_GC_SF)) {
-                // Support FT S&F service
-                capabilities.setGroupChatStoreForwardSupport(true);
+                capaBuilder.setGroupChatStoreForward(true);
+
             } else
             // TODO if (tag.contains(FeatureTags.FEATURE_RCSE_EXTENSION + ".ext") ||
             // TODO tag.contains(FeatureTags.FEATURE_RCSE_EXTENSION + ".mnc")) {
             if (tag.contains(FeatureTags.FEATURE_RCSE_EXTENSION)) {
                 // Support an RCS extension
-                capabilities.addSupportedExtension(extractServiceId(tag));
+                capaBuilder.addExtension(extractServiceId(tag));
+
             } else if (tag.contains(FeatureTags.FEATURE_SIP_AUTOMATA)) {
-                capabilities.setSipAutomata(true);
+                capaBuilder.setSipAutomata(true);
             }
         }
 
-        // Analyze SDP part
+        /* Analyze SDP part */
         byte[] content = msg.getContentBytes();
         if (content != null) {
             SdpParser parser = new SdpParser(content);
 
-            // Get supported video codecs
+            /* Get supported video codecs */
             Vector<MediaDescription> mediaVideo = parser.getMediaDescriptions("video");
             Vector<String> videoCodecs = new Vector<String>();
             for (int i = 0; i < mediaVideo.size(); i++) {
@@ -265,8 +265,8 @@ public class CapabilityUtils {
                 }
             }
             if (videoCodecs.size() == 0) {
-                // No video codec supported between me and the remote contact
-                capabilities.setVideoSharingSupport(false);
+                /* No video codec supported between me and the remote contact */
+                capaBuilder.setVideoSharing(false);
             }
 
             // Check supported image formats
@@ -286,14 +286,14 @@ public class CapabilityUtils {
                 }
             }
             if (imgFormats.size() == 0) {
-                // No image format supported between me and the remote contact
-                capabilities.setImageSharingSupport(false);
+                /* No image format supported between me and the remote contact */
+                capaBuilder.setImageSharing(false);
             }
         }
         long timestamp = System.currentTimeMillis();
-        capabilities.setTimestampOfLastResponse(timestamp);
-        capabilities.setTimestampOfLastRequest(timestamp);
-        return capabilities;
+        capaBuilder.setTimestampOfLastResponse(timestamp);
+        capaBuilder.setTimestampOfLastRequest(timestamp);
+        return capaBuilder.build();
     }
 
     /**
@@ -301,7 +301,7 @@ public class CapabilityUtils {
      * 
      * @param ipAddress Local IP address
      * @param richcall Rich call supported
-     * @param rcsSettings
+     * @param rcsSettings RCS settings accessor
      * @return SDP
      */
     public static String buildSdp(String ipAddress, boolean richcall, RcsSettings rcsSettings) {

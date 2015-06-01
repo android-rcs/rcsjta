@@ -6,13 +6,13 @@
         android:detailColumn="data3"
         android:detailSocialSummary="false"
         android:icon="@drawable/rcs_icon"
-        android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.image-sharing"
+        android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.image-share"
         android:summaryColumn="data2" />
     <ContactsDataKind
         android:detailColumn="data3"
         android:detailSocialSummary="false"
         android:icon="@drawable/rcs_icon"
-        android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.video-sharing"
+        android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.video-share"
         android:summaryColumn="data2" />
     <ContactsDataKind
         android:detailColumn="data3"
@@ -31,6 +31,12 @@
         android:detailSocialSummary="false"
         android:icon="@drawable/rcs_core_ipcall_icon"
         android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.ip-voice-call"
+        android:summaryColumn="data2" />
+   <ContactsDataKind
+        android:detailColumn="data3"
+        android:detailSocialSummary="false"
+        android:icon="@drawable/rcs_core_ipcall_icon"
+        android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.ip-video-call"
         android:summaryColumn="data2" />
     <ContactsDataKind
         android:detailColumn="data3"

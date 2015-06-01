@@ -91,8 +91,8 @@ public class AnonymousFetchRequestTask {
      * 
      * @param parent IMS module
      * @param contact Remote contact identifier
-     * @param rcsSettings
-     * @param contactManager
+     * @param rcsSettings RCS settings accessor
+     * @param contactManager Contact manager accessor
      */
     public AnonymousFetchRequestTask(ImsModule parent, ContactId contact, RcsSettings rcsSettings,
             ContactManager contactManager) {
@@ -289,9 +289,8 @@ public class AnonymousFetchRequestTask {
             sLogger.info("User not found (" + ctx.getStatusCode() + " error)");
         }
 
-        /* We update the database with empty capabilities */
-        Capabilities capabilities = new Capabilities();
-        mContactManager.setContactCapabilities(mContact, capabilities, RcsStatus.NOT_RCS,
-                RegistrationState.UNKNOWN);
+        /* We update the database with default capabilities */
+        mContactManager.setContactCapabilities(mContact, Capabilities.sDefaultCapabilities,
+                RcsStatus.NOT_RCS, RegistrationState.UNKNOWN);
     }
 }

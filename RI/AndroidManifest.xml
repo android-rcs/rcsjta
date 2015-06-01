@@ -305,7 +305,15 @@
             android:label="@string/title_image_sharing" />
         <activity
             android:name=".sharing.image.InitiateImageSharing"
-            android:label="@string/menu_initiate_image_sharing" />
+            android:label="@string/menu_initiate_image_sharing" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.image-share" />
+            </intent-filter>
+        </activity>
 
         <receiver android:name=".sharing.image.ImageSharingInvitationReceiver" >
             <intent-filter>
@@ -356,7 +364,15 @@
             android:label="@string/title_video_sharing" />
         <activity
             android:name=".sharing.video.OutgoingVideoSharing"
-            android:label="@string/menu_video_sharing" />
+            android:label="@string/menu_video_sharing" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.video-share" />
+            </intent-filter>
+        </activity>
 
         <receiver android:name=".sharing.video.VideoSharingInvitationReceiver" >
             <intent-filter>
@@ -381,7 +397,15 @@
         <activity android:name=".extension.TestMultimediaSessionApi" />
         <activity
             android:name="com.orangelabs.rcs.ri.extension.messaging.InitiateMessagingSession"
-            android:label="@string/menu_initiate_messaging_session" />
+            android:label="@string/menu_initiate_messaging_session" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.extensions" />
+            </intent-filter>
+        </activity>
         <activity
             android:name="com.orangelabs.rcs.ri.extension.messaging.MessagingSessionView"
             android:label="@string/title_messaging_session" />

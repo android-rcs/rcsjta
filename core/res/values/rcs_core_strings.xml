@@ -7,12 +7,23 @@
 
     <!-- Strings associated to ContactsContract menus -->
     <string name="rcs_core_my_profile">\u0020My RCS profile</string>
-    <string name="rcs_core_contact_file_transfer">Transfer a file</string>
-    <string name="rcs_core_contact_im_session">Initiate a chat</string>
-    <string name="rcs_core_contact_ip_voice_call">IP voice call</string>
-    <string name="rcs_core_contact_ip_video_call">IP video call</string>
+    
+    <string name="rcs_core_contact_file_transfer_summary">Transfer a file via RCS</string>
+    <string name="rcs_core_contact_im_session_summary">Initiate a chat via RCS </string>
+    <string name="rcs_core_contact_ip_voice_call_summary">Start an IP voice call via RCS</string>
+    <string name="rcs_core_contact_ip_video_call_summary">Start an IP video call via RCS</string>
+    <string name="rcs_core_contact_image_share_summary">Share an image via RCS</string>
+    <string name="rcs_core_contact_video_share_summary">Share a video via RCS</string>
+    
+    <string name="rcs_core_contact_file_transfer_details">Transfer a file</string>
+    <string name="rcs_core_contact_im_session_details">Initiate a chat</string>
+    <string name="rcs_core_contact_ip_voice_call_details">Start an IP voice call</string>
+    <string name="rcs_core_contact_ip_video_call_details">Start an IP video call</string>
+    <string name="rcs_core_contact_image_share_details">Share an image</string>
+    <string name="rcs_core_contact_video_share_details">Share a video</string>
+    <string name="rcs_core_contact_extensions_details">Start a SIP session</string>
 
-    <!-- Strings linked to rcs account -->
+    <!-- Strings linked to RCS account -->
     <string name="rcs_core_account_id">RCS</string>
     <string name="rcs_core_account_username">Rich Communication Suite</string>
     <string name="rcs_core_account_main_title">General settings</string>

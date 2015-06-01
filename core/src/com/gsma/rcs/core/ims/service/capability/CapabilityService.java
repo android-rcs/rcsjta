@@ -29,6 +29,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ContactInfo;
 import com.gsma.rcs.core.ims.service.ImsService;
+import com.gsma.rcs.core.ims.service.capability.Capabilities.CapabilitiesBuilder;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -322,17 +323,17 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      */
     public void resetContactCapabilitiesForContentSharing(ContactId contact) {
         Capabilities capabilities = mContactManager.getContactCapabilities(contact);
-        if (capabilities != null) {
-            // Force a reset of content sharing capabilities
-            capabilities.setImageSharingSupport(false);
-            capabilities.setVideoSharingSupport(false);
-
-            // Update the database capabilities
-            mContactManager.setContactCapabilities(contact, capabilities);
-
-            // Notify listener
-            getImsModule().getCore().getListener()
-                    .handleCapabilitiesNotification(contact, capabilities);
+        if (capabilities == null) {
+            return;
         }
+        CapabilitiesBuilder capaBuilder = new CapabilitiesBuilder(capabilities);
+        /* Force a reset of content sharing capabilities */
+        capaBuilder.setImageSharing(false);
+        capaBuilder.setVideoSharing(false);
+        
+        mContactManager.setContactCapabilities(contact, capabilities);
+        
+        getImsModule().getCore().getListener()
+                .handleCapabilitiesNotification(contact, capabilities);
     }
 }
