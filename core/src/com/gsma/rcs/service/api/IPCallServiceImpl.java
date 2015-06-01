@@ -284,13 +284,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 
             addIPCall(ipCall);
             session.addListener(ipCall);
-
-            Thread t = new Thread() {
-                public void run() {
-                    session.startSession();
-                }
-            };
-            t.start();
+            session.startSession();
             return ipCall;
 
         } catch (ServerApiBaseException e) {
@@ -358,13 +352,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 
             addIPCall(ipCall);
             session.addListener(ipCall);
-
-            Thread t = new Thread() {
-                public void run() {
-                    session.startSession();
-                }
-            };
-            t.start();
+            session.startSession();
             return ipCall;
 
         } catch (ServerApiBaseException e) {

@@ -329,13 +329,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 
             addImageSharing(imageSharing, sharingId);
             session.addListener(imageSharing);
-
-            new Thread() {
-                public void run() {
-                    session.startSession();
-                }
-            }.start();
-
+            session.startSession();
             return imageSharing;
 
         } catch (ServerApiBaseException e) {

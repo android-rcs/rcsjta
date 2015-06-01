@@ -1263,9 +1263,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
         ServerApiUtils.testIms();
         final ChatSession session = mImService.rejoinGroupChatSession(mChatId);
+
         session.addListener(this);
-        session.startSession();
         mChatService.addGroupChat(this);
+        session.startSession();
         return this;
     }
 
@@ -1281,9 +1282,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
         ServerApiUtils.testIms();
         final GroupChatSession session = mImService.restartGroupChatSession(mChatId);
+
         session.addListener(this);
-        session.startSession();
         mChatService.addGroupChat(this);
+        session.startSession();
         return this;
     }
 

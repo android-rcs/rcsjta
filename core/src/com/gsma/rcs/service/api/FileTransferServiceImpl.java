@@ -539,12 +539,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 mOneToOneUndeliveredImManager);
         session.addListener(oneToOneFileTransfer);
         addOneToOneFileTransfer(fileTransferId, oneToOneFileTransfer);
-
-        new Thread() {
-            public void run() {
-                session.startSession();
-            }
-        }.start();
+        session.startSession();
         return oneToOneFileTransfer;
     }
 
@@ -645,12 +640,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 mOneToOneUndeliveredImManager);
         session.addListener(oneToOneFileTransfer);
         addOneToOneFileTransfer(fileTransferId, oneToOneFileTransfer);
-
-        new Thread() {
-            public void run() {
-                session.startSession();
-            }
-        }.start();
+        session.startSession();
     }
 
     /**
@@ -925,12 +915,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                     storageAccessor, this, mRcsSettings, mCore, mMessagingLog, mContactManager);
             session.addListener(groupFileTransfer);
             addGroupFileTransfer(fileTransferId, groupFileTransfer);
-
-            new Thread() {
-                public void run() {
-                    session.startSession();
-                }
-            }.start();
+            session.startSession();
             return groupFileTransfer;
         }
         /*
@@ -990,8 +975,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(fileTransferId,
                     chatId, mGroupFileTransferBroadcaster, mImService, storageAccessor, this,
                     mRcsSettings, mCore, mMessagingLog, mContactManager);
-            addGroupFileTransfer(fileTransferId, groupFileTransfer);
             session.addListener(groupFileTransfer);
+            addGroupFileTransfer(fileTransferId, groupFileTransfer);
             session.startSession();
         } else if (groupChatSession.isInitiatedByRemote()) {
             if (sLogger.isActivated()) {

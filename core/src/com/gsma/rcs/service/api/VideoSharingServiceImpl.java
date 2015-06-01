@@ -334,15 +334,10 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
                     content.getHeight(), content.getWidth(), timestamp);
             VideoSharingImpl videoSharing = new VideoSharingImpl(sharingId, mRichcallService,
                     mBroadcaster, storageAccessor, this);
+
             addVideoSharing(videoSharing, sharingId);
             session.addListener(videoSharing);
-
-            new Thread() {
-                public void run() {
-                    session.startSession();
-                }
-            }.start();
-
+            session.startSession();
             return videoSharing;
 
         } catch (ServerApiBaseException e) {

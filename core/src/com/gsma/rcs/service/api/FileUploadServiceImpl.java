@@ -182,11 +182,10 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 
             FileUploadImpl fileUpload = new FileUploadImpl(session.getUploadID(), mBroadcaster,
                     mImService, this, file);
+
             session.addListener(fileUpload);
-
-            session.startSession();
-
             addFileUpload(fileUpload);
+            session.startSession();
             return fileUpload;
 
         } catch (ServerApiBaseException e) {

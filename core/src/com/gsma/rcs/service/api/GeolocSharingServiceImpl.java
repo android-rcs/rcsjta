@@ -317,14 +317,9 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
             GeolocSharingImpl geolocSharing = new GeolocSharingImpl(sharingId, mBroadcaster,
                     mRichcallService, this, persistedStorage);
 
-            new Thread() {
-                public void run() {
-                    session.startSession();
-                }
-            }.start();
-
-            addGeolocSharing(geolocSharing, sharingId);
             session.addListener(geolocSharing);
+            addGeolocSharing(geolocSharing, sharingId);
+            session.startSession();
             return geolocSharing;
 
         } catch (ServerApiBaseException e) {

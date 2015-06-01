@@ -565,11 +565,7 @@ public class ChatServiceImpl extends IChatService.Stub {
                     GroupChat.ReasonCode.UNSPECIFIED, Direction.OUTGOING, timestamp);
 
             addGroupChat(groupChat);
-            new Thread() {
-                public void run() {
-                    session.startSession();
-                }
-            }.start();
+            session.startSession();
             return groupChat;
 
         } catch (ServerApiBaseException e) {

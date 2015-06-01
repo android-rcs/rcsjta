@@ -346,15 +346,10 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
             MultimediaMessagingSessionImpl multiMediaMessaging = new MultimediaMessagingSessionImpl(
                     session.getSessionID(), mMultimediaMessagingSessionEventBroadcaster,
                     mSipService, this, Direction.OUTGOING, contact, serviceId, State.INITIATING);
+
             session.addListener(multiMediaMessaging);
-
             addMultimediaMessaging(multiMediaMessaging);
-            new Thread() {
-                public void run() {
-                    session.startSession();
-                }
-            }.start();
-
+            session.startSession();
             return multiMediaMessaging;
 
         } catch (ServerApiBaseException e) {
@@ -468,15 +463,10 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
             MultimediaStreamingSessionImpl multimediaStreaming = new MultimediaStreamingSessionImpl(
                     session.getSessionID(), mMultimediaStreamingSessionEventBroadcaster,
                     mSipService, this, Direction.OUTGOING, contact, serviceId, State.INITIATING);
+
             session.addListener(multimediaStreaming);
-
             addMultimediaStreaming(multimediaStreaming);
-            new Thread() {
-                public void run() {
-                    session.startSession();
-                }
-            }.start();
-
+            session.startSession();
             return multimediaStreaming;
 
         } catch (ServerApiBaseException e) {
