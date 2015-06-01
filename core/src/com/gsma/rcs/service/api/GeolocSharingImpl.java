@@ -176,6 +176,9 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
             if (session == null) {
                 return mPersistentStorage.getState().toInt();
             }
+            if (session.isGeolocTransfered()) {
+                return State.TRANSFERRED.toInt();
+            }
             SipDialogPath dialogPath = session.getDialogPath();
             if (dialogPath != null && dialogPath.isSessionEstablished()) {
                 return State.STARTED.toInt();

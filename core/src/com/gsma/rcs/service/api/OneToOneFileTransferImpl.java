@@ -137,6 +137,9 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                 return State.STARTED;
             }
         } else if (session instanceof ImsFileSharingSession) {
+            if (session.isFileTransfered()) {
+                return State.TRANSFERRED;
+            }
             SipDialogPath dialogPath = session.getDialogPath();
             if (dialogPath != null && dialogPath.isSessionEstablished()) {
                 return State.STARTED;

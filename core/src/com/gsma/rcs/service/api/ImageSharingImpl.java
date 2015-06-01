@@ -308,6 +308,9 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
             if (session == null) {
                 return mPersistentStorage.getState().toInt();
             }
+            if (session.isImageTransfered()) {
+                return ImageSharing.State.TRANSFERRED.toInt();
+            }
             SipDialogPath dialogPath = session.getDialogPath();
             if (dialogPath != null && dialogPath.isSessionEstablished()) {
                 return ImageSharing.State.STARTED.toInt();
