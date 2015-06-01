@@ -737,12 +737,23 @@ public class RegistrationManager extends PeriodicRefresher {
         final SipResponse response = ctx.getSipResponse();
         final RetryAfterHeader retryHeader = (RetryAfterHeader) response.getStackMessage()
                 .getHeader(RetryAfterHeader.NAME);
-        final long durationInMillis = retryHeader.getDuration()
-                * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
-        if (retryHeader != null && durationInMillis > 0) {
-            mNetworkInterface.setRetryAfterHeaderDuration(durationInMillis);
-            handleError(new ImsError(ImsError.REGISTRATION_FAILED, new StringBuilder("retry after")
-                    .append(durationInMillis).append(" for 4xx/5xx/6xx").toString()));
+        if (retryHeader != null) {
+            final long durationInMillis = retryHeader.getDuration()
+                    * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
+            if (durationInMillis > 0) {
+                mNetworkInterface.setRetryAfterHeaderDuration(durationInMillis);
+                handleError(new ImsError(ImsError.REGISTRATION_FAILED, new StringBuilder(
+                        "retry after").append(durationInMillis).append(" for 4xx/5xx/6xx")
+                        .toString()));
+            } else {
+                mNb4xx5xx6xxFailures++;
+                if (mNb4xx5xx6xxFailures >= MAX_REGISTRATION_FAILURES) {
+                    /**
+                     * We reached MAX_REGISTRATION_FAILURES, stop registration retries
+                     */
+                    handleError(new ImsError(ImsError.REGISTRATION_FAILED, "too many 4xx/5xx/6xx"));
+                }
+            }
             return;
         } else {
             mNb4xx5xx6xxFailures++;
