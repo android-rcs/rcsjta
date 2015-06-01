@@ -16,8 +16,8 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
-import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.provider.contact.ContactManager;
@@ -39,10 +39,10 @@ public class OneToOneChatMessageDequeueTask extends DequeueTask {
 
     private final ChatServiceImpl mChatService;
 
-    public OneToOneChatMessageDequeueTask(Object lock, ContactId contact,
-            InstantMessagingService imService, MessagingLog messagingLog,
-            ChatServiceImpl chatService, RcsSettings rcsSettings, ContactManager contactManager) {
-        super(lock, imService, contactManager, messagingLog, rcsSettings);
+    public OneToOneChatMessageDequeueTask(Object lock, Core core, ContactId contact,
+            MessagingLog messagingLog, ChatServiceImpl chatService, RcsSettings rcsSettings,
+            ContactManager contactManager) {
+        super(lock, core, contactManager, messagingLog, rcsSettings);
         mContact = contact;
         mChatService = chatService;
     }
@@ -56,6 +56,13 @@ public class OneToOneChatMessageDequeueTask extends DequeueTask {
         Cursor cursor = null;
         try {
             synchronized (mLock) {
+                if (mCore.isStopping()) {
+                    if (logActivated) {
+                        mLogger.debug("Core service is stopped, exiting dequeue task to dequeue one-to-one chat messages for contact "
+                                .concat(mContact.toString()));
+                    }
+                    return;
+                }
                 cursor = mMessagingLog.getQueuedOneToOneChatMessages(mContact);
                 /* TODO: Handle cursor when null. */
                 int msgIdIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_MESSAGE_ID);
@@ -63,6 +70,13 @@ public class OneToOneChatMessageDequeueTask extends DequeueTask {
                 int mimeTypeIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_MIME_TYPE);
                 OneToOneChatImpl oneToOneChat = mChatService.getOrCreateOneToOneChat(mContact);
                 while (cursor.moveToNext()) {
+                    if (mCore.isStopping()) {
+                        if (logActivated) {
+                            mLogger.debug("Core service is stopped, exiting dequeue task to dequeue one-to-one chat messages for contact "
+                                    .concat(mContact.toString()));
+                        }
+                        return;
+                    }
                     if (!isAllowedToDequeueOneToOneChatMessage(mContact)) {
                         continue;
                     }

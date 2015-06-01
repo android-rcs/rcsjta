@@ -1413,7 +1413,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         }
         CoreListener listener = mCore.getListener();
         listener.tryToInviteQueuedGroupChatParticipantInvitations(mChatId, mImService);
-        listener.tryToDequeueGroupChatMessagesAndGroupFileTransfers(mChatId, mImService);
+        listener.tryToDequeueGroupChatMessagesAndGroupFileTransfers(mChatId, mCore);
     }
 
     @Override

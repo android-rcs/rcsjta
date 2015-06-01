@@ -410,9 +410,9 @@ public interface CoreListener {
      * Try to start ImService tasks once the IMS connection is re-established and the ImsServices
      * are restarted
      * 
-     * @param imService
+     * @param core
      */
-    public void tryToStartImServiceTasks(InstantMessagingService imService);
+    public void tryToStartImServiceTasks(Core core);
 
     /**
      * Try to invite queued group chat participants
@@ -432,34 +432,30 @@ public interface CoreListener {
      * Try to dequeue group chat messages and group file transfers
      * 
      * @param chatId
-     * @param imService
+     * @param core
      */
-    public void tryToDequeueGroupChatMessagesAndGroupFileTransfers(String chatId,
-            InstantMessagingService imService);
+    public void tryToDequeueGroupChatMessagesAndGroupFileTransfers(String chatId, Core core);
 
     /**
      * Try to dequeue of one-to-one chat messages for specific contact
      * 
      * @param contact
-     * @param imService
+     * @param core
      */
-    public void tryToDequeueOneToOneChatMessages(ContactId contact,
-            InstantMessagingService imService);
+    public void tryToDequeueOneToOneChatMessages(ContactId contact, Core core);
 
     /**
      * Try to dequeue all one-to-one chat messages and one-one file transfers
-     * 
-     * @param imService
+     * @param core
      */
     public void tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(
-            InstantMessagingService imService);
+            Core core);
 
     /**
      * Try to dequeue one-to-one and group file transfers
-     * 
-     * @param imService
+     * @param core
      */
-    public void tryToDequeueFileTransfers(InstantMessagingService imService);
+    public void tryToDequeueFileTransfers(Core core);
 
     /**
      * Try to mark all queued group chat messages and group file transfers corresponding to contact

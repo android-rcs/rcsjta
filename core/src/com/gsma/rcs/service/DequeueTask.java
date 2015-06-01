@@ -16,6 +16,7 @@
 
 package com.gsma.rcs.service;
 
+import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
@@ -33,6 +34,8 @@ public abstract class DequeueTask implements Runnable {
 
     protected final Object mLock;
 
+    protected final Core mCore;
+
     protected final InstantMessagingService mImService;
 
     protected final ContactManager mContactManager;
@@ -43,10 +46,11 @@ public abstract class DequeueTask implements Runnable {
 
     protected final Logger mLogger = Logger.getLogger(getClass().getName());
 
-    public DequeueTask(Object lock, InstantMessagingService imService,
-            ContactManager contactManager, MessagingLog messagingLog, RcsSettings rcsSettings) {
+    public DequeueTask(Object lock, Core core, ContactManager contactManager,
+            MessagingLog messagingLog, RcsSettings rcsSettings) {
         mLock = lock;
-        mImService = imService;
+        mCore = core;
+        mImService = mCore.getImService();
         mContactManager = contactManager;
         mMessagingLog = messagingLog;
         mRcsSettings = rcsSettings;

@@ -1163,7 +1163,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             mFileTransferService.removeOneToOneFileTransfer(mFileTransferId);
             setStateAndReasonCode(contact, State.REJECTED, reasonCode);
         }
-        mCore.getListener().tryToDequeueFileTransfers(mImService);
+        mCore.getListener().tryToDequeueFileTransfers(mCore);
     }
 
     /**
@@ -1192,7 +1192,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             mFileTransferService.removeGroupFileTransfer(mFileTransferId);
             setStateAndReasonCode(contact, State.TRANSFERRED, ReasonCode.UNSPECIFIED);
         }
-        mCore.getListener().tryToDequeueFileTransfers(mImService);
+        mCore.getListener().tryToDequeueFileTransfers(mCore);
     }
 
     /**
@@ -1235,7 +1235,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                                     .append(reason).append("!").toString());
             }
         }
-        mCore.getListener().tryToDequeueFileTransfers(mImService);
+        mCore.getListener().tryToDequeueFileTransfers(mCore);
     }
 
     /**
@@ -1257,7 +1257,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                 setStateAndReasonCode(contact, State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
             }
         }
-        mCore.getListener().tryToDequeueFileTransfers(mImService);
+        mCore.getListener().tryToDequeueFileTransfers(mCore);
     }
 
     /**
@@ -1278,7 +1278,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             mFileTransferService.removeOneToOneFileTransfer(mFileTransferId);
             setStateAndReasonCode(contact, state, reasonCode);
         }
-        mCore.getListener().tryToDequeueFileTransfers(mImService);
+        mCore.getListener().tryToDequeueFileTransfers(mCore);
     }
 
     /**
@@ -1306,7 +1306,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             mFileTransferService.removeOneToOneFileTransfer(mFileTransferId);
             setStateAndReasonCode(contact, State.FAILED, ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
         }
-        mCore.getListener().tryToDequeueFileTransfers(mImService);
+        mCore.getListener().tryToDequeueFileTransfers(mCore);
     }
 
     /**
@@ -1342,7 +1342,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                         ReasonCode.UNSPECIFIED);
             }
         }
-        mCore.getListener().tryToDequeueFileTransfers(mImService);
+        mCore.getListener().tryToDequeueFileTransfers(mCore);
     }
 
     /**

@@ -1015,16 +1015,16 @@ public class RcsCoreService extends Service implements CoreListener {
     }
 
     @Override
-    public void tryToStartImServiceTasks(InstantMessagingService imService) {
-        Core core = Core.getInstance();
+    public void tryToStartImServiceTasks(Core core) {
         /* Try to auto-rejoin group chats that are still marked as active. */
         mImOperationExecutor.execute(new GroupChatAutoRejoinTask(mMessagingLog, core));
+        InstantMessagingService imService = core.getImService();
         /* Try to start auto resuming of HTTP file transfers marked as PAUSED_BY_SYSTEM */
         mImOperationExecutor.execute(new FtHttpResumeManager(imService, mRcsSettings,
                 mMessagingLog, mContactManager));
         /* Try to dequeue one-to-one chat messages and one-to-one file transfers. */
-        mImOperationExecutor.execute(new OneToOneChatDequeueTask(mOperationLock, imService,
-                mChatApi, mFtApi, mHistoryLog, mMessagingLog, mContactManager, mRcsSettings));
+        mImOperationExecutor.execute(new OneToOneChatDequeueTask(mOperationLock, core, mChatApi,
+                mFtApi, mHistoryLog, mMessagingLog, mContactManager, mRcsSettings));
 
         ImdnManager imdnManager = imService.getImdnManager();
         if (imdnManager.isSendOneToOneDeliveryDisplayedReportsEnabled()
@@ -1053,29 +1053,26 @@ public class RcsCoreService extends Service implements CoreListener {
     }
 
     @Override
-    public void tryToDequeueGroupChatMessagesAndGroupFileTransfers(String chatId,
-            InstantMessagingService imService) {
-        mImOperationExecutor.execute(new GroupChatDequeueTask(mOperationLock, chatId, imService,
+    public void tryToDequeueGroupChatMessagesAndGroupFileTransfers(String chatId, Core core) {
+        mImOperationExecutor.execute(new GroupChatDequeueTask(mOperationLock, core, chatId,
                 mMessagingLog, mChatApi, mFtApi, mRcsSettings, mHistoryLog, mContactManager));
     }
 
     @Override
-    public void tryToDequeueOneToOneChatMessages(ContactId contact,
-            InstantMessagingService imService) {
-        mImOperationExecutor.execute(new OneToOneChatMessageDequeueTask(mOperationLock, contact,
-                imService, mMessagingLog, mChatApi, mRcsSettings, mContactManager));
+    public void tryToDequeueOneToOneChatMessages(ContactId contact, Core core) {
+        mImOperationExecutor.execute(new OneToOneChatMessageDequeueTask(mOperationLock, core,
+                contact, mMessagingLog, mChatApi, mRcsSettings, mContactManager));
     }
 
     @Override
-    public void tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(
-            InstantMessagingService imService) {
-        mImOperationExecutor.execute(new OneToOneChatDequeueTask(mOperationLock, imService,
-                mChatApi, mFtApi, mHistoryLog, mMessagingLog, mContactManager, mRcsSettings));
+    public void tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(Core core) {
+        mImOperationExecutor.execute(new OneToOneChatDequeueTask(mOperationLock, core, mChatApi,
+                mFtApi, mHistoryLog, mMessagingLog, mContactManager, mRcsSettings));
     }
 
     @Override
-    public void tryToDequeueFileTransfers(InstantMessagingService imService) {
-        mImOperationExecutor.execute(new FileTransferDequeueTask(mOperationLock, imService,
+    public void tryToDequeueFileTransfers(Core core) {
+        mImOperationExecutor.execute(new FileTransferDequeueTask(mOperationLock, core,
                 mMessagingLog, mChatApi, mFtApi, mContactManager, mRcsSettings));
     }
 

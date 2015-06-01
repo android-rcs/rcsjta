@@ -16,9 +16,9 @@
 
 package com.gsma.rcs.provider.history;
 
+import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
-import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
@@ -57,11 +57,10 @@ public class GroupChatDequeueTask extends DequeueTask {
 
     private final boolean mDeliveryReportEnabled;
 
-    public GroupChatDequeueTask(Object lock, String chatId, InstantMessagingService imService,
-            MessagingLog messagingLog, ChatServiceImpl chatService,
-            FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings,
-            HistoryLog historyLog, ContactManager contactManager) {
-        super(lock, imService, contactManager, messagingLog, rcsSettings);
+    public GroupChatDequeueTask(Object lock, Core core, String chatId, MessagingLog messagingLog,
+            ChatServiceImpl chatService, FileTransferServiceImpl fileTransferService,
+            RcsSettings rcsSettings, HistoryLog historyLog, ContactManager contactManager) {
+        super(lock, core, contactManager, messagingLog, rcsSettings);
         mChatId = chatId;
         mChatService = chatService;
         mFileTransferService = fileTransferService;
@@ -80,6 +79,13 @@ public class GroupChatDequeueTask extends DequeueTask {
         Cursor cursor = null;
         try {
             synchronized (mLock) {
+                if (mCore.isStopping()) {
+                    if (logActivated) {
+                        mLogger.debug("Core service is stopped, exiting dequeue task to dequeue group chat messages and group file transfers for chatId "
+                                .concat(mChatId));
+                    }
+                    return;
+                }
                 cursor = mHistoryLog.getQueuedGroupChatMessagesAndGroupFileTransfers(mChatId);
                 /* TODO: Handle cursor when null. */
                 int providerIdIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_PROVIDER_ID);
@@ -90,6 +96,13 @@ public class GroupChatDequeueTask extends DequeueTask {
                 int statusIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_STATUS);
                 GroupChatImpl groupChat = mChatService.getOrCreateGroupChat(mChatId);
                 while (cursor.moveToNext()) {
+                    if (mCore.isStopping()) {
+                        if (logActivated) {
+                            mLogger.debug("Core service is stopped, exiting dequeue task to dequeue group chat messages and group file transfers for chatId "
+                                    .concat(mChatId));
+                        }
+                        return;
+                    }
                     int providerId = cursor.getInt(providerIdIdx);
                     String id = cursor.getString(idIdx);
                     try {

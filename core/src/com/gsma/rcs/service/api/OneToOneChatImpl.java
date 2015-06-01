@@ -825,7 +825,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                 }
             }
         }
-        mCore.getListener().tryToDequeueOneToOneChatMessages(mContact, mImService);
+        mCore.getListener().tryToDequeueOneToOneChatMessages(mContact, mCore);
     }
 
     @Override
@@ -837,7 +837,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         synchronized (lock) {
             mChatService.removeOneToOneChat(mContact);
         }
-        mCore.getListener().tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(mImService);
+        mCore.getListener().tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(mCore);
     }
 
     @Override
@@ -901,7 +901,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                     break;
             }
         }
-        mCore.getListener().tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(mImService);
+        mCore.getListener().tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(mCore);
     }
 
     @Override
@@ -1000,7 +1000,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         synchronized (lock) {
             mChatService.removeOneToOneChat(mContact);
         }
-        mCore.getListener().tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(mImService);
+        mCore.getListener().tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(mCore);
     }
 
     @Override

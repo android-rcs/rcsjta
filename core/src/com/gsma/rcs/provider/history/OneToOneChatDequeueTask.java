@@ -16,9 +16,9 @@
 
 package com.gsma.rcs.provider.history;
 
+import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
-import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
@@ -57,11 +57,10 @@ public class OneToOneChatDequeueTask extends DequeueTask {
 
     private final boolean mDeliveryReportEnabled;
 
-    public OneToOneChatDequeueTask(Object lock, InstantMessagingService imService,
-            ChatServiceImpl chatService, FileTransferServiceImpl fileTransferService,
-            HistoryLog historyLog, MessagingLog messagingLog, ContactManager contactManager,
-            RcsSettings rcsSettings) {
-        super(lock, imService, contactManager, messagingLog, rcsSettings);
+    public OneToOneChatDequeueTask(Object lock, Core core, ChatServiceImpl chatService,
+            FileTransferServiceImpl fileTransferService, HistoryLog historyLog,
+            MessagingLog messagingLog, ContactManager contactManager, RcsSettings rcsSettings) {
+        super(lock, core, contactManager, messagingLog, rcsSettings);
         mChatService = chatService;
         mFileTransferService = fileTransferService;
         mHistoryLog = historyLog;
@@ -78,6 +77,12 @@ public class OneToOneChatDequeueTask extends DequeueTask {
         Cursor cursor = null;
         try {
             synchronized (mLock) {
+                if (mCore.isStopping()) {
+                    if (logActivated) {
+                        mLogger.debug("Core service is stopped, exiting dequeue task to dequeue all one-to-one chat messages and one-to-one file transfers.");
+                    }
+                    return;
+                }
                 cursor = mHistoryLog.getQueuedOneToOneChatMessagesAndOneToOneFileTransfers();
                 /* TODO: Handle cursor when null. */
                 int providerIdIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_PROVIDER_ID);
@@ -88,6 +93,12 @@ public class OneToOneChatDequeueTask extends DequeueTask {
                 int fileIconIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_FILEICON);
                 int statusIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_STATUS);
                 while (cursor.moveToNext()) {
+                    if (mCore.isStopping()) {
+                        if (logActivated) {
+                            mLogger.debug("Core service is stopped, exiting dequeue task to dequeue all one-to-one chat messages and one-to-one file transfers.");
+                        }
+                        return;
+                    }
                     int providerId = cursor.getInt(providerIdIdx);
                     String id = cursor.getString(idIdx);
                     String phoneNumber = cursor.getString(contactIdx);

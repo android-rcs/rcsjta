@@ -1010,7 +1010,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             mFileTransferService.removeGroupFileTransfer(mFileTransferId);
             setStateAndReasonCode(State.TRANSFERRED, ReasonCode.UNSPECIFIED);
         }
-        mCore.getListener().tryToDequeueFileTransfers(mImService);
+        mCore.getListener().tryToDequeueFileTransfers(mCore);
     }
 
     /*
@@ -1057,7 +1057,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
             setStateAndReasonCode(State.REJECTED, reasonCode);
         }
-        mCore.getListener().tryToDequeueFileTransfers(mImService);
+        mCore.getListener().tryToDequeueFileTransfers(mCore);
     }
 
     private void setStateAndReasonCode(State state, ReasonCode reasonCode) {
@@ -1107,7 +1107,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                                     .append(reason).append("!").toString());
             }
         }
-        mCore.getListener().tryToDequeueFileTransfers(mImService);
+        mCore.getListener().tryToDequeueFileTransfers(mCore);
     }
 
     /**
@@ -1130,7 +1130,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                 setStateAndReasonCode(State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
             }
         }
-        mCore.getListener().tryToDequeueFileTransfers(mImService);
+        mCore.getListener().tryToDequeueFileTransfers(mCore);
     }
 
     /**
@@ -1150,7 +1150,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             mFileTransferService.removeGroupFileTransfer(mFileTransferId);
             setStateAndReasonCode(state, reasonCode);
         }
-        mCore.getListener().tryToDequeueFileTransfers(mImService);
+        mCore.getListener().tryToDequeueFileTransfers(mCore);
     }
 
     /**
@@ -1177,7 +1177,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         synchronized (mLock) {
             setStateAndReasonCode(State.FAILED, ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
         }
-        mCore.getListener().tryToDequeueFileTransfers(mImService);
+        mCore.getListener().tryToDequeueFileTransfers(mCore);
     }
 
     /**
@@ -1205,7 +1205,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                         ReasonCode.UNSPECIFIED);
             }
         }
-        mCore.getListener().tryToDequeueFileTransfers(mImService);
+        mCore.getListener().tryToDequeueFileTransfers(mCore);
     }
 
     /**

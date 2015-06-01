@@ -16,9 +16,9 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
-import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.contact.ContactManager;
@@ -30,6 +30,7 @@ import com.gsma.rcs.service.api.GroupChatImpl;
 import com.gsma.rcs.service.api.GroupFileTransferImpl;
 import com.gsma.rcs.service.api.OneToOneChatImpl;
 import com.gsma.rcs.service.api.OneToOneFileTransferImpl;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
@@ -52,11 +53,10 @@ public class FileTransferDequeueTask extends DequeueTask {
 
     private final boolean mDeliveryReportEnabled;
 
-    public FileTransferDequeueTask(Object lock, InstantMessagingService imService,
-            MessagingLog messagingLog, ChatServiceImpl chatService,
-            FileTransferServiceImpl fileTransferService, ContactManager contactManager,
-            RcsSettings rcsSettings) {
-        super(lock, imService, contactManager, messagingLog, rcsSettings);
+    public FileTransferDequeueTask(Object lock, Core core, MessagingLog messagingLog,
+            ChatServiceImpl chatService, FileTransferServiceImpl fileTransferService,
+            ContactManager contactManager, RcsSettings rcsSettings) {
+        super(lock, core, contactManager, messagingLog, rcsSettings);
         mChatService = chatService;
         mFileTransferService = fileTransferService;
         final ImdnManager imdnManager = mImService.getImdnManager();
@@ -72,6 +72,12 @@ public class FileTransferDequeueTask extends DequeueTask {
         Cursor cursor = null;
         try {
             synchronized (mLock) {
+                if (mCore.isStopping()) {
+                    if (logActivated) {
+                        mLogger.debug("Core service is stopped, exiting dequeue task to dequeue one-to-one and group file transfers");
+                    }
+                    return;
+                }
                 cursor = mMessagingLog.getQueuedAndUploadedButNotTransferredFileTransfers();
                 /* TODO: Handle cursor when null. */
                 int fileTransferIdIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FT_ID);
@@ -81,6 +87,12 @@ public class FileTransferDequeueTask extends DequeueTask {
                 int chatIdIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_CHAT_ID);
                 int stateIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_STATE);
                 while (cursor.moveToNext()) {
+                    if (mCore.isStopping()) {
+                        if (logActivated) {
+                            mLogger.debug("Core service is stopped, exiting dequeue task to dequeue one-to-one and group file transfers");
+                        }
+                        return;
+                    }
                     String fileTransferId = cursor.getString(fileTransferIdIdx);
                     String chatId = cursor.getString(chatIdIdx);
                     String contactNumber = cursor.getString(contactIdx);

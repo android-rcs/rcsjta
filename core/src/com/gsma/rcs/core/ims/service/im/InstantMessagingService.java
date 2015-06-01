@@ -251,7 +251,7 @@ public class InstantMessagingService extends ImsService {
         }
         setServiceStarted(true);
 
-        mCore.getListener().tryToStartImServiceTasks(this);
+        mCore.getListener().tryToStartImServiceTasks(mCore);
     }
 
     /**
