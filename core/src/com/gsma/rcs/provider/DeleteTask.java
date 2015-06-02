@@ -207,9 +207,9 @@ public abstract class DeleteTask<T> implements Runnable {
             Map<T, Set<String>> result = null;
             while (cursor.moveToNext()) {
                 String key = cursor.getString(0);
-                String groupId = null;
+                T groupId = null;
                 if (mColumnGroupBy != null) {
-                    groupId = cursor.getString(1);
+                    groupId = getGroupAsKey(cursor.getString(1));
                 }
                 Set<String> ids = null;
                 if (result != null) {
@@ -220,11 +220,12 @@ public abstract class DeleteTask<T> implements Runnable {
                     if (result == null) {
                         result = new HashMap<T, Set<String>>();
                     }
-                    result.put(getGroupAsKey(groupId), ids);
+                    result.put(groupId, ids);
                 }
                 ids.add(key);
             }
             return result;
+
         } finally {
             if (cursor != null) {
                 cursor.close();
