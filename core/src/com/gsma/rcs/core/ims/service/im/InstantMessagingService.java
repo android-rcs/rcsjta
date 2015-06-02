@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.im;
 
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.CoreException;
+import com.gsma.rcs.core.CoreListener;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.ImsModule;
@@ -1480,8 +1481,10 @@ public class InstantMessagingService extends ImsService {
 
             }
         }
-        mCore.getListener().handleOneToOneFileTransferInvitation(fileSharingSession,
-                oneToOneChatSession, ftinfo.getExpiration());
+        CoreListener listener = mCore.getListener();
+        listener.handleOneOneChatSessionInitiation(oneToOneChatSession);
+        listener.handleOneToOneFileTransferInvitation(fileSharingSession, oneToOneChatSession,
+                ftinfo.getExpiration());
         oneToOneChatSession.startSession();
         fileSharingSession.startSession();
     }
@@ -1514,9 +1517,11 @@ public class InstantMessagingService extends ImsService {
         CpimMessage cpimMessage = ChatUtils.extractCpimMessage(invite);
         long timestampSent = cpimMessage.getTimestampSent();
         // Create and start a chat session
-        TerminatingStoreAndForwardOneToOneChatMessageSession one2oneChatSession = new TerminatingStoreAndForwardOneToOneChatMessageSession(
+        TerminatingStoreAndForwardOneToOneChatMessageSession oneToOneChatSession = new TerminatingStoreAndForwardOneToOneChatMessageSession(
                 this, invite, remote, mRcsSettings, mMessagingLog, timestamp, mContactManager);
-        one2oneChatSession.startSession();
+        CoreListener listener = mCore.getListener();
+        listener.handleOneOneChatSessionInitiation(oneToOneChatSession);
+        oneToOneChatSession.startSession();
 
         /* Auto reject if file too big */
         if (isFileSizeExceeded(ftinfo.getSize())) {
@@ -1525,37 +1530,37 @@ public class InstantMessagingService extends ImsService {
             }
 
             // TODO add warning header "xxx Size exceeded"
-            one2oneChatSession.sendErrorResponse(invite, one2oneChatSession.getDialogPath()
+            oneToOneChatSession.sendErrorResponse(invite, oneToOneChatSession.getDialogPath()
                     .getLocalTag(), Response.FORBIDDEN);
 
             // Close session
-            one2oneChatSession
+            oneToOneChatSession
                     .handleError(new FileSharingError(FileSharingError.MEDIA_SIZE_TOO_BIG));
             return;
         }
 
         /* Create and start a new HTTP file transfer session from INVITE */
         DownloadFromInviteFileSharingSession filetransferSession = new DownloadFromInviteFileSharingSession(
-                this, one2oneChatSession, ftinfo, ChatUtils.getMessageId(invite),
-                one2oneChatSession.getRemoteContact(), one2oneChatSession.getRemoteDisplayName(),
+                this, oneToOneChatSession, ftinfo, ChatUtils.getMessageId(invite),
+                oneToOneChatSession.getRemoteContact(), oneToOneChatSession.getRemoteDisplayName(),
                 mRcsSettings, mMessagingLog, timestamp, timestampSent, mContactManager);
         if (filetransferSession.getFileicon() != null) {
             try {
                 filetransferSession.downloadFileIcon();
             } catch (IOException e) {
                 sLogger.error("Failed to download file icon", e);
-                one2oneChatSession.sendErrorResponse(invite, one2oneChatSession.getDialogPath()
+                oneToOneChatSession.sendErrorResponse(invite, oneToOneChatSession.getDialogPath()
                         .getLocalTag(), Response.DECLINE);
 
                 /* Close session */
-                one2oneChatSession.handleError(new FileSharingError(
+                oneToOneChatSession.handleError(new FileSharingError(
                         FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
                 return;
             }
 
         }
-        mCore.getListener().handleOneToOneFileTransferInvitation(filetransferSession,
-                one2oneChatSession, ftinfo.getExpiration());
+        listener.handleOneToOneFileTransferInvitation(filetransferSession,
+                oneToOneChatSession, ftinfo.getExpiration());
         filetransferSession.startSession();
     }
 
