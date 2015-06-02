@@ -323,16 +323,18 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      */
     public void resetContactCapabilitiesForContentSharing(ContactId contact) {
         Capabilities capabilities = mContactManager.getContactCapabilities(contact);
-        if (capabilities == null) {
+        if (capabilities == null
+                || (!capabilities.isImageSharingSupported() && !capabilities
+                        .isVideoSharingSupported())) {
             return;
         }
         CapabilitiesBuilder capaBuilder = new CapabilitiesBuilder(capabilities);
         /* Force a reset of content sharing capabilities */
         capaBuilder.setImageSharing(false);
         capaBuilder.setVideoSharing(false);
-        
+        capabilities = capaBuilder.build();
         mContactManager.setContactCapabilities(contact, capabilities);
-        
+
         getImsModule().getCore().getListener()
                 .handleCapabilitiesNotification(contact, capabilities);
     }
