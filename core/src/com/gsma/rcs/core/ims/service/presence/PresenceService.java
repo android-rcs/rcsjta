@@ -24,28 +24,28 @@ package com.gsma.rcs.core.ims.service.presence;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8_STR;
 
-import java.util.Set;
-
 import com.gsma.rcs.addressbook.AddressBookEventListener;
 import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.http.HttpResponse;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
+import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.presence.xdm.XdmManager;
 import com.gsma.rcs.platform.AndroidFactory;
-import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.StartService;
 import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.DateUtils;
 import com.gsma.rcs.utils.StringUtils;
-import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
+
+import java.util.Set;
 
 /**
  * Presence service
@@ -258,7 +258,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                 }
 
                 // Add the contact to the rich address book provider
-                mContactManager.modifyRcsContactInProvider(contact, RcsStatus.PENDING_OUT);
+                mContactManager.updateRcsStatusOrCreateNewContact(contact, RcsStatus.PENDING_OUT);
             }
         }
 
@@ -291,7 +291,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                 }
 
                 // Add the contact to the rich address book provider
-                mContactManager.modifyRcsContactInProvider(contact, RcsStatus.BLOCKED);
+                mContactManager.updateRcsStatusOrCreateNewContact(contact, RcsStatus.BLOCKED);
             }
         }
     }
@@ -916,7 +916,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                         result = removeRevokedContact(contact);
                         if (result) {
                             // Remove entry from rich address book provider
-                            mContactManager.modifyRcsContactInProvider(contact,
+                            mContactManager.updateRcsStatusOrCreateNewContact(contact,
                                     RcsStatus.RCS_CAPABLE);
                         } else {
                             if (logger.isActivated()) {
@@ -934,7 +934,8 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                     boolean result = removeBlockedContact(contact);
                     if (result) {
                         // Remove entry from rich address book provider
-                        mContactManager.modifyRcsContactInProvider(contact, RcsStatus.RCS_CAPABLE);
+                        mContactManager.updateRcsStatusOrCreateNewContact(contact,
+                                RcsStatus.RCS_CAPABLE);
                     } else {
                         if (logger.isActivated()) {
                             logger.error("Something went wrong when removing blocked contact");
@@ -955,7 +956,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                                 logger.debug("We remove it from rich address book provider");
                             }
                             // Remove entry from rich address book provider
-                            mContactManager.modifyRcsContactInProvider(contact,
+                            mContactManager.updateRcsStatusOrCreateNewContact(contact,
                                     RcsStatus.RCS_CAPABLE);
                         }
                     }

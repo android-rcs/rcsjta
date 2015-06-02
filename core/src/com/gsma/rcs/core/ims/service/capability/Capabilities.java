@@ -478,6 +478,15 @@ public class Capabilities {
         }
 
         /**
+         * Is Presence Discovery supported
+         * 
+         * @return Boolean
+         */
+        public boolean isPresenceDiscovery() {
+            return mPresenceDiscovery;
+        }
+
+        /**
          * Sets Social Presence support
          * 
          * @param support the Social Presence support
@@ -486,6 +495,15 @@ public class Capabilities {
         public CapabilitiesBuilder setSocialPresence(boolean support) {
             mSocialPresence = support;
             return this;
+        }
+
+        /**
+         * Is Social Presence supported
+         * 
+         * @return Boolean
+         */
+        public boolean isSocialPresence() {
+            return mSocialPresence;
         }
 
         /**
@@ -600,6 +618,15 @@ public class Capabilities {
         }
 
         /**
+         * Is Sip Automata
+         * 
+         * @return Boolean
+         */
+        public boolean isSipAutomata() {
+            return mSipAutomata;
+        }
+
+        /**
          * Sets extensions
          * 
          * @param extensions the supported extensions
@@ -609,7 +636,7 @@ public class Capabilities {
             mExtensions = extensions;
             return this;
         }
-        
+
         /**
          * Add extension
          * 
@@ -633,6 +660,15 @@ public class Capabilities {
         }
 
         /**
+         * Gets timestamp of last request
+         * 
+         * @return Boolean
+         */
+        public long getTimestampOfLastRequest() {
+            return mTimestampOfLastRequest;
+        }
+
+        /**
          * Sets the timestamp of last response
          * 
          * @param time the File Transfer Thumbnail support
@@ -641,6 +677,15 @@ public class Capabilities {
         public CapabilitiesBuilder setTimestampOfLastResponse(long time) {
             mTimestampOfLastResponse = time;
             return this;
+        }
+
+        /**
+         * Gets timestamp of last response
+         * 
+         * @return Boolean
+         */
+        public long getTimestampOfLastResponse() {
+            return mTimestampOfLastResponse;
         }
 
         /**

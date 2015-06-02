@@ -136,7 +136,10 @@ import java.util.Set;
  */
 public final class ContactManager {
 
-    private static final int INVALID_ID = -1;
+    /**
+     * Invalid contact raw ID
+     */
+    public static final int INVALID_ID = -1;
 
     private static final long INVALID_TIME = -1L;
 
@@ -516,72 +519,32 @@ public final class ContactManager {
         values.put(KEY_RCS_STATUS, newInfo.getRcsStatus().toInt());
         values.put(KEY_RCS_STATUS_TIMESTAMP, newInfo.getRcsStatusTimestamp());
 
-        /* Save capabilities, if contact is not registered, do not set the capability to true */
-        boolean isRegistered = RegistrationState.ONLINE.equals(newInfo.getRegistrationState());
-        Capabilities newCapabilities = newInfo.getCapabilities();
-
-        boolean support = newCapabilities.isCsVideoSupported() && isRegistered;
-        values.put(KEY_CAPABILITY_CS_VIDEO, support);
-
-        support = newCapabilities.isFileTransferSupported() && isRegistered;
-        values.put(KEY_CAPABILITY_FILE_TRANSFER, support);
-
-        support = newCapabilities.isImageSharingSupported() && isRegistered;
-        values.put(KEY_CAPABILITY_IMAGE_SHARE, support);
-
-        support = (newCapabilities.isImSessionSupported() && isRegistered)
-                || (mRcsSettings.isImAlwaysOn() && newInfo.isRcsContact());
-        values.put(KEY_CAPABILITY_IM_SESSION, support);
-
-        support = newCapabilities.isPresenceDiscoverySupported() && isRegistered;
-        values.put(KEY_CAPABILITY_PRESENCE_DISCOVERY, support);
-
-        support = newCapabilities.isSocialPresenceSupported() && isRegistered;
-        values.put(KEY_CAPABILITY_SOCIAL_PRESENCE, support);
-
-        support = newCapabilities.isVideoSharingSupported() && isRegistered;
-        values.put(KEY_CAPABILITY_VIDEO_SHARE, support);
-
-        support = newCapabilities.isGeolocationPushSupported() && isRegistered;
-        values.put(KEY_CAPABILITY_GEOLOC_PUSH, support);
-
-        boolean fileTransferHttpSupported = newCapabilities.isFileTransferHttpSupported();
-        support = ((fileTransferHttpSupported && isRegistered) || (mRcsSettings
-                .isFtHttpCapAlwaysOn() && fileTransferHttpSupported));
-        values.put(KEY_CAPABILITY_FILE_TRANSFER_HTTP, support);
-
-        support = newCapabilities.isFileTransferThumbnailSupported() && isRegistered;
-        values.put(KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL, support);
-
-        support = newCapabilities.isIPVoiceCallSupported() && isRegistered;
-        values.put(KEY_CAPABILITY_IP_VOICE_CALL, support);
-
-        support = newCapabilities.isIPVideoCallSupported() && isRegistered;
-        values.put(KEY_CAPABILITY_IP_VIDEO_CALL, support);
-
-        support = (newCapabilities.isFileTransferStoreForwardSupported() && isRegistered)
-                || (mRcsSettings.isFtAlwaysOn() && newInfo.isRcsContact());
-        values.put(KEY_CAPABILITY_FILE_TRANSFER_SF, support);
-
-        support = newCapabilities.isSipAutomata() && isRegistered;
-        values.put(KEY_AUTOMATA, support);
-
-        support = newCapabilities.isGroupChatStoreForwardSupported() && isRegistered;
-        values.put(KEY_CAPABILITY_GROUP_CHAT_SF, support);
-
-        // Save the capabilities extensions
+        /* Save capabilities */
+        Capabilities newCapa = newInfo.getCapabilities();
+        values.put(KEY_CAPABILITY_CS_VIDEO, newCapa.isCsVideoSupported());
+        values.put(KEY_CAPABILITY_FILE_TRANSFER, newCapa.isFileTransferSupported());
+        values.put(KEY_CAPABILITY_IMAGE_SHARE, newCapa.isImageSharingSupported());
+        values.put(KEY_CAPABILITY_IM_SESSION, newCapa.isImSessionSupported());
+        values.put(KEY_CAPABILITY_VIDEO_SHARE, newCapa.isVideoSharingSupported());
+        values.put(KEY_CAPABILITY_GEOLOC_PUSH, newCapa.isGeolocationPushSupported());
+        values.put(KEY_CAPABILITY_FILE_TRANSFER_HTTP, newCapa.isFileTransferHttpSupported());
+        values.put(KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL,
+                newCapa.isFileTransferThumbnailSupported());
+        values.put(KEY_CAPABILITY_IP_VOICE_CALL, newCapa.isIPVoiceCallSupported());
+        values.put(KEY_CAPABILITY_IP_VIDEO_CALL, newCapa.isIPVideoCallSupported());
+        values.put(KEY_CAPABILITY_FILE_TRANSFER_SF, newCapa.isFileTransferStoreForwardSupported());
+        values.put(KEY_AUTOMATA, newCapa.isSipAutomata());
+        values.put(KEY_CAPABILITY_GROUP_CHAT_SF, newCapa.isGroupChatStoreForwardSupported());
         values.put(KEY_CAPABILITY_EXTENSIONS,
-                ServiceExtensionManager.getExtensions(newCapabilities.getSupportedExtensions()));
-
-        // Save capabilities timestamp
-        values.put(KEY_CAPABILITY_TIMESTAMP_LAST_REQUEST,
-                newCapabilities.getTimestampOfLastRequest());
-        values.put(KEY_CAPABILITY_TIMESTAMP_LAST_RESPONSE,
-                newCapabilities.getTimestampOfLastResponse());
+                ServiceExtensionManager.getExtensions(newCapa.getSupportedExtensions()));
+        values.put(KEY_CAPABILITY_TIMESTAMP_LAST_REQUEST, newCapa.getTimestampOfLastRequest());
+        values.put(KEY_CAPABILITY_TIMESTAMP_LAST_RESPONSE, newCapa.getTimestampOfLastResponse());
+        values.put(KEY_CAPABILITY_PRESENCE_DISCOVERY, newCapa.isPresenceDiscoverySupported());
+        values.put(KEY_CAPABILITY_SOCIAL_PRESENCE, newCapa.isSocialPresenceSupported());
 
         PhotoIcon photoIcon = null;
 
-        // Save presence infos
+        /* Save presence information */
         PresenceInfo newPresenceInfo = newInfo.getPresenceInfo();
         if (newPresenceInfo != null) {
             values.put(KEY_PRESENCE_SHARING_STATUS, newPresenceInfo.getPresenceStatus());
@@ -625,189 +588,151 @@ public final class ContactManager {
             values.put(KEY_PRESENCE_TIMESTAMP, INVALID_TIME);
         }
 
-        // Save blocking state
+        /* Save blocking state */
         if (BlockingState.BLOCKED == newInfo.getBlockingState()) {
-            // Block the contact
             values.put(KEY_BLOCKED, BLOCKED_VALUE_SET);
             values.put(KEY_BLOCKING_TIMESTAMP, newInfo.getBlockingTimestamp());
         } else {
-            // Unblock the contact
             values.put(KEY_BLOCKED, BLOCKED_VALUE_NOT_SET);
             values.put(KEY_BLOCKING_TIMESTAMP, INVALID_TIME);
         }
 
         values.put(KEY_TIMESTAMP_CONTACT_UPDATED, System.currentTimeMillis());
 
-        // Save registration state
+        /* Save the registration state */
         values.put(KEY_REGISTRATION_STATE, newInfo.getRegistrationState().toInt());
 
         if (hasEntryInRcsContactAddressBook) {
-            // Update RABP
+            /* RCS contact already exists in provider: update RABP entry */
             Uri uri = Uri.withAppendedPath(CONTENT_URI, contactNumber);
             mLocalContentResolver.update(uri, values, null, null);
         } else {
-            // Insert
+            /* RCS contact does not exists in provider: insert entry in RABP */
             mLocalContentResolver.insert(CONTENT_URI, values);
         }
 
-        // Save presence photo content
+        /* Save presence photo content */
         if (photoIcon != null) {
             savePhotoIcon(photoIcon, contact);
         }
 
-        // Get all the Ids from raw contacts that have this phone number
+        /* Get all the IDs from raw contacts that have this phone number */
         Set<Long> rawContactIds = getRawContactIdsFromPhoneNumber(contact);
         if (rawContactIds.isEmpty()) {
-            // If the number is not in the native address book, we are done.
+            /*
+             * If the number is not in the native address book, work is done.
+             */
             return;
         }
-
-        // For each, prepare the modifications
+        boolean isRcsContact = newInfo.isRcsContact();
+        /* For each entries in the native address book, prepare the modifications */
         ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
         for (Long rawContactId : rawContactIds) {
-            // Get the associated RCS raw contact id
+            /* Get the associated RCS raw contact ID */
             long rcsRawContactId = getAssociatedRcsRawContact(rawContactId, contact);
 
-            if (!newInfo.isRcsContact()) {
-                // If the contact is not a RCS contact anymore, we have to delete the corresponding
-                // native raw contacts
+            if (!isRcsContact) {
+                /*
+                 * If the contact is not a RCS contact anymore, we delete the corresponding native
+                 * raw contacts.
+                 */
                 ops.add(ContentProviderOperation.newDelete(RawContacts.CONTENT_URI)
                         .withSelection(SEL_RAW_CONTACT, new String[] {
                             Long.toString(rcsRawContactId)
                         }).build());
-                // Also delete the corresponding entries in the aggregation provider
+                /* Also delete the corresponding entries in the RCS aggregation provider. */
                 mLocalContentResolver.delete(AggregationData.CONTENT_URI, WHERE_RCS_RAW_CONTACT_ID,
                         new String[] {
                             Long.toString(rcsRawContactId)
                         });
             } else {
-                // If the contact is still a RCS contact, we have to update the native raw contacts
+                /* If the contact is still a RCS contact, we update the native raw contacts. */
                 if (INVALID_ID == rcsRawContactId) {
-                    // If no RCS raw contact id is associated to the raw contact, create one with
-                    // the right infos
+                    /*
+                     * If no RCS raw contact ID is associated to the raw contact, create one with
+                     * the right information.
+                     */
                     rcsRawContactId = createRcsContact(newInfo, rawContactId);
-                    // Nothing to modify, as the new contact will have taken the new infos
+                    /* Nothing to modify, as the new contact will have taken the new information. */
                     continue;
                 }
 
-                // Modify the contact type
+                /* Modify the contact type */
                 if (newInfo.getRcsStatus() != oldInfo.getRcsStatus()) {
-                    // Update data in RCS contact provider
-                    modifyRcsContactInProvider(contact, newInfo.getRcsStatus());
+                    /* Update status in RCS contact provider if it has changed */
+                    updateRcsStatusOrCreateNewContact(contact, newInfo.getRcsStatus());
                 }
 
-                // Modify the capabilities
-                // If the contact is not registered, do not set the capability to true
-
-                // File transfer
-                // For FT, also check if the FT S&F is activated, for RCS contacts
-                ContentProviderOperation op = modifyMimeTypeForContact(
-                        rcsRawContactId,
-                        contact,
-                        MIMETYPE_CAPABILITY_FILE_TRANSFER,
-                        (newInfo.getCapabilities().isFileTransferSupported() && isRegistered)
-                                || (mRcsSettings.isFileTransferStoreForwardSupported() && newInfo
-                                        .isRcsContact()), oldInfo.getCapabilities()
-                                .isFileTransferSupported());
+                /* Modify the capabilities */
+                Capabilities oldCapa = oldInfo.getCapabilities();
+                ContentProviderOperation op = modifyMimeTypeForContact(rcsRawContactId, contact,
+                        MIMETYPE_CAPABILITY_FILE_TRANSFER, newCapa.isFileTransferSupported(),
+                        oldCapa.isFileTransferSupported());
                 if (op != null) {
                     ops.add(op);
                 }
-                // Image sharing
                 op = modifyMimeTypeForContact(rcsRawContactId, contact,
-                        MIMETYPE_CAPABILITY_IMAGE_SHARE, newInfo.getCapabilities()
-                                .isImageSharingSupported() && isRegistered, oldInfo
-                                .getCapabilities().isImageSharingSupported());
+                        MIMETYPE_CAPABILITY_IMAGE_SHARE, newCapa.isImageSharingSupported(),
+                        oldCapa.isImageSharingSupported());
                 if (op != null) {
                     ops.add(op);
                 }
-                // IM session
-                // For IM, also check if the IM capability always on is activated, for RCS contacts
                 op = modifyMimeTypeForContact(rcsRawContactId, contact,
-                        MIMETYPE_CAPABILITY_IM_SESSION,
-                        (newInfo.getCapabilities().isImSessionSupported() && isRegistered)
-                                || (mRcsSettings.isImAlwaysOn() && newInfo.isRcsContact()), oldInfo
-                                .getCapabilities().isImSessionSupported());
+                        MIMETYPE_CAPABILITY_IM_SESSION, newCapa.isImSessionSupported(),
+                        oldCapa.isImSessionSupported());
                 if (op != null) {
                     ops.add(op);
                 }
-                // Video sharing
                 op = modifyMimeTypeForContact(rcsRawContactId, contact,
-                        MIMETYPE_CAPABILITY_VIDEO_SHARE, newInfo.getCapabilities()
-                                .isVideoSharingSupported() && isRegistered, oldInfo
-                                .getCapabilities().isVideoSharingSupported());
+                        MIMETYPE_CAPABILITY_VIDEO_SHARE, newCapa.isVideoSharingSupported(),
+                        oldCapa.isVideoSharingSupported());
                 if (op != null) {
                     ops.add(op);
                 }
-                // IP Voice call
                 op = modifyMimeTypeForContact(rcsRawContactId, contact,
-                        MIMETYPE_CAPABILITY_IP_VOICE_CALL, newInfo.getCapabilities()
-                                .isIPVoiceCallSupported() && isRegistered, oldInfo
-                                .getCapabilities().isIPVoiceCallSupported());
+                        MIMETYPE_CAPABILITY_IP_VOICE_CALL, newCapa.isIPVoiceCallSupported(),
+                        oldCapa.isIPVoiceCallSupported());
                 if (op != null) {
                     ops.add(op);
                 }
-                // IP video call
                 op = modifyMimeTypeForContact(rcsRawContactId, contact,
-                        MIMETYPE_CAPABILITY_IP_VIDEO_CALL, newInfo.getCapabilities()
-                                .isIPVideoCallSupported() && isRegistered, oldInfo
-                                .getCapabilities().isIPVideoCallSupported());
+                        MIMETYPE_CAPABILITY_IP_VIDEO_CALL, newCapa.isIPVideoCallSupported(),
+                        oldCapa.isIPVideoCallSupported());
                 if (op != null) {
                     ops.add(op);
                 }
-                // Geolocation push
                 op = modifyMimeTypeForContact(rcsRawContactId, contact,
-                        MIMETYPE_CAPABILITY_GEOLOCATION_PUSH, newInfo.getCapabilities()
-                                .isGeolocationPushSupported() && isRegistered, oldInfo
-                                .getCapabilities().isGeolocationPushSupported());
+                        MIMETYPE_CAPABILITY_GEOLOCATION_PUSH, newCapa.isGeolocationPushSupported(),
+                        oldCapa.isGeolocationPushSupported());
                 if (op != null) {
                     ops.add(op);
                 }
-                // RCS extensions
-                Set<String> extensions = newInfo.getCapabilities().getSupportedExtensions();
-                if (!isRegistered) {
-                    // If contact is not registered, do not put any extensions
-                    extensions.clear();
+                /* Modify the RCS extensions */
+                op = modifyExtensionsCapabilityForContact(rcsRawContactId, contact,
+                        newCapa.getSupportedExtensions(), oldCapa.getSupportedExtensions());
+                if (op != null) {
+                    ops.add(op);
                 }
-                ContentProviderOperation extensionOperation = modifyExtensionsCapabilityForContact(
-                        rcsRawContactId, contact, extensions, oldInfo.getCapabilities()
-                                .getSupportedExtensions());
-                if (extensionOperation != null) {
-                    ops.add(extensionOperation);
-                }
-                /* Blocking state */
-                if (newInfo.getBlockingState() != oldInfo.getBlockingState()) {
-                    /* Modify blocking state */
-                    ops.add(ContentProviderOperation
-                            .newUpdate(Data.CONTENT_URI)
-                            .withSelection(
-                                    SEL_RAW_CONTACT_MIMETYPE_DATA1,
-                                    new String[] {
-                                            Long.toString(rawContactId), MIMETYPE_BLOCKING_STATE,
-                                            contactNumber
-                                    }).withValue(Data.DATA2, newInfo.getBlockingState().toInt())
-                            .build());
+                /* Modify the Blocking state */
+                op = modifyBlockingStateForContact(rcsRawContactId, contact,
+                        newInfo.getBlockingState(), oldInfo.getBlockingState());
+                if (op != null) {
+                    ops.add(op);
                 }
 
-                /* Blocking timestamp */
-                if (newInfo.getBlockingTimestamp() != oldInfo.getBlockingTimestamp()) {
-                    /* Modify blocking timestamp */
-                    ops.add(ContentProviderOperation
-                            .newUpdate(Data.CONTENT_URI)
-                            .withSelection(
-                                    SEL_RAW_CONTACT_MIMETYPE_DATA1,
-                                    new String[] {
-                                            Long.toString(rawContactId),
-                                            MIMETYPE_BLOCKING_TIMESTAMP, contactNumber
-                                    }).withValue(Data.DATA2, newInfo.getBlockingTimestamp())
-                            .build());
+                /* Modify the Blocking timestamp */
+                op = modifyBlockingTimestampForContact(rcsRawContactId, contact,
+                        newInfo.getBlockingTimestamp(), oldInfo.getBlockingTimestamp());
+                if (op != null) {
+                    ops.add(op);
                 }
 
-                // New contact registration state
+                /* New contact registration state */
                 String newFreeText = "";
                 if (newInfo.getPresenceInfo() != null) {
                     newFreeText = newInfo.getPresenceInfo().getFreetext();
                 }
-                // Old contact registration state
+                /* Old contact registration state */
                 String oldFreeText = "";
                 if (oldInfo.getPresenceInfo() != null) {
                     oldFreeText = oldInfo.getPresenceInfo().getFreetext();
@@ -821,7 +746,7 @@ public final class ContactManager {
                     }
                 }
 
-                // Presence fields
+                /* Presence fields */
                 List<ContentProviderOperation> presenceOps = modifyPresenceForContact(
                         rcsRawContactId, contact, newInfo.getPresenceInfo(),
                         oldInfo.getPresenceInfo());
@@ -834,7 +759,7 @@ public final class ContactManager {
         }
 
         if (!ops.isEmpty()) {
-            // Do the actual database modifications
+            /* Do the actual database modifications */
             try {
                 mContentResolver.applyBatch(ContactsContract.AUTHORITY, ops);
             } catch (RemoteException e) {
@@ -851,7 +776,7 @@ public final class ContactManager {
      * @param contact Contact
      * @return Contact info
      */
-    protected ContactInfo getContactInfoFromProvider(ContactId contact) {
+    private ContactInfo getContactInfoFromProvider(ContactId contact) {
         ContactInfo infos = new ContactInfo();
         infos.setRcsStatus(RcsStatus.NO_INFO);
         infos.setRcsStatusTimestamp(System.currentTimeMillis());
@@ -981,15 +906,8 @@ public final class ContactManager {
      * @return Contact info
      */
     public ContactInfo getContactInfo(ContactId contact) {
-        boolean logActivated = sLogger.isActivated();
-        if (logActivated) {
-            sLogger.debug("getContactInfo for : ".concat(contact.toString()));
-        }
         ContactInfo contactInfo = mContactInfoCache.get(contact);
         if (contactInfo == null) {
-            if (logActivated) {
-                sLogger.debug("  --> ContactInfo not found in cache");
-            }
             contactInfo = getContactInfoFromProvider(contact);
             mContactInfoCache.put(contact, contactInfo);
         }
@@ -1067,13 +985,12 @@ public final class ContactManager {
      * Block a contact
      * 
      * @param contact Contact ID
-     * @throws ContactManagerException
+     * @throws ContactManagerException exception thrown if update operation has failed
      */
     public void blockContact(ContactId contact) throws ContactManagerException {
         if (sLogger.isActivated()) {
             sLogger.info("Block contact ".concat(contact.toString()));
         }
-        // Go to RCS_BLOCKED state
         ContactInfo oldInfo = getContactInfo(contact);
         ContactInfo newInfo = new ContactInfo(oldInfo);
         newInfo.setRcsStatus(RcsStatus.BLOCKED);
@@ -1092,12 +1009,13 @@ public final class ContactManager {
     }
 
     /**
-     * Add or modify a contact number to the RCS contact provider
+     * Update status if contact exists in RCS provider. If it does not already exists, create a new
+     * contact with default attributes.
      * 
      * @param contact Contact ID
      * @param rcsStatus RCS status
      */
-    public void modifyRcsContactInProvider(ContactId contact, RcsStatus rcsStatus) {
+    public void updateRcsStatusOrCreateNewContact(ContactId contact, RcsStatus rcsStatus) {
         long currentTime = System.currentTimeMillis();
         ContentValues values = new ContentValues();
         values.put(KEY_PRESENCE_SHARING_STATUS, rcsStatus.toInt());
@@ -1145,7 +1063,6 @@ public final class ContactManager {
      */
     public Set<ContactId> getRcsContactsWithSocialPresence() {
         Set<ContactId> rcsNumbers = new HashSet<ContactId>();
-        // Filter the RCS status
         Cursor cursor = null;
         try {
             cursor = mLocalContentResolver.query(CONTENT_URI, PROJ_RCSCONTACT_CONTACT,
@@ -1176,7 +1093,6 @@ public final class ContactManager {
      */
     public Set<ContactId> getRcsContacts() {
         Set<ContactId> rcsNumbers = new HashSet<ContactId>();
-        // Filter the RCS status
         Cursor cursor = null;
         try {
             cursor = mLocalContentResolver.query(CONTENT_URI, PROJ_RCSCONTACT_CONTACT,
@@ -1519,22 +1435,65 @@ public final class ContactManager {
      */
     private ContentProviderOperation modifyExtensionsCapabilityForContact(long rawContactId,
             ContactId contact, Set<String> newExtensions, Set<String> oldExtensions) {
-        // Compare the two lists of extensions
+        /* Compare the two lists of extensions */
         if (newExtensions.containsAll(oldExtensions) && oldExtensions.containsAll(newExtensions)) {
-            // Both lists have the same tags, no need to update
+            /* Both lists have the same tags, no need to update */
             return null;
         }
-        // Update extensions
         return ContentProviderOperation
                 .newUpdate(Data.CONTENT_URI)
                 .withSelection(
                         SEL_RAW_CONTACT_MIMETYPE_DATA1,
                         new String[] {
-                                String.valueOf(rawContactId), MIMETYPE_CAPABILITY_EXTENSIONS,
+                                Long.toString(rawContactId), MIMETYPE_CAPABILITY_EXTENSIONS,
                                 contact.toString()
                         })
                 .withValue(Data.DATA2, ServiceExtensionManager.getExtensions(newExtensions))
                 .build();
+    }
+
+    /**
+     * Modify blocking state for contact
+     * 
+     * @param rawContactIdRaw contact id of the RCS contact
+     * @param contact RCS number of the contact
+     * @param newBlockingState new blocking state
+     * @param oldBlockingState old blocking state
+     * @return contentProviderOperation to be done of null if no update is required
+     */
+    private ContentProviderOperation modifyBlockingStateForContact(long rawContactId,
+            ContactId contact, BlockingState newBlockingState, BlockingState oldBlockingState) {
+        if (newBlockingState == oldBlockingState) {
+            return null;
+        }
+        return ContentProviderOperation.newUpdate(Data.CONTENT_URI)
+                .withSelection(SEL_RAW_CONTACT_MIMETYPE_DATA1, new String[] {
+                        Long.toString(rawContactId), MIMETYPE_BLOCKING_STATE, contact.toString()
+                }).withValue(Data.DATA2, newBlockingState.toInt()).build();
+    }
+
+    /**
+     * Modify blocking timestamp for contact
+     * 
+     * @param rawContactIdRaw contact id of the RCS contact
+     * @param contact RCS number of the contact
+     * @param newBlockingState new blocking timestamp
+     * @param oldBlockingState old blocking timestamp
+     * @return contentProviderOperation to be done of null if no update is required
+     */
+    private ContentProviderOperation modifyBlockingTimestampForContact(long rawContactId,
+            ContactId contact, long newBlockingTimestamp, long oldBlockingTimestamp) {
+        if (newBlockingTimestamp == oldBlockingTimestamp) {
+            return null;
+        }
+        return ContentProviderOperation
+                .newUpdate(Data.CONTENT_URI)
+                .withSelection(
+                        SEL_RAW_CONTACT_MIMETYPE_DATA1,
+                        new String[] {
+                                Long.toString(rawContactId), MIMETYPE_BLOCKING_TIMESTAMP,
+                                contact.toString()
+                        }).withValue(Data.DATA2, newBlockingTimestamp).build();
     }
 
     /**
@@ -1807,7 +1766,7 @@ public final class ContactManager {
      */
     public void setContactCapabilities(ContactId contact, Capabilities capabilities,
             RcsStatus contactType, RegistrationState registrationState) {
-        // Get the current information on this contact
+        /* Get the current information on this contact */
         ContactInfo oldInfo = getContactInfo(contact);
         ContactInfo newInfo = new ContactInfo(oldInfo);
 
@@ -1818,7 +1777,7 @@ public final class ContactManager {
         newInfo.setRegistrationState(registrationState);
 
         /* Modify the capabilities regarding the registration state */
-        boolean isRegistered = RegistrationState.ONLINE.equals(registrationState);
+        boolean isRegistered = RegistrationState.ONLINE == registrationState;
         boolean isRcsContact = newInfo.isRcsContact();
 
         CapabilitiesBuilder capaBuilder = new CapabilitiesBuilder(capabilities);
@@ -1826,19 +1785,19 @@ public final class ContactManager {
 
         /*
          * File transfer. This capability is enabled: - if the capability is present and the contact
-         * is registered - if the FT S&F is enabled and the contact is RCS capable
+         * is registered - if the FT S&F is enabled and the contact is RCS capable.
          */
-        capaBuilder.setFileTransfer((capaBuilder.isFileTransferSupported() && isRegistered)
-                || (mRcsSettings.isFileTransferStoreForwardSupported() && isRcsContact));
+        capaBuilder.setFileTransfer(capaBuilder.isFileTransferSupported() && isRegistered
+                || mRcsSettings.isFileTransferStoreForwardSupported() && isRcsContact);
 
         capaBuilder.setImageSharing(capaBuilder.isImageSharingSupported() && isRegistered);
 
         /*
          * IM session capability is enabled: - if the capability is present and the contact is
-         * registered - if the IM store&forward is enabled and the contact is RCS capable
+         * registered - if the IM store&forward is enabled and the contact is RCS capable.
          */
-        capaBuilder.setImSession((capaBuilder.isImSessionSupported() && isRegistered)
-                || (mRcsSettings.isImAlwaysOn() && isRcsContact));
+        capaBuilder.setImSession(capaBuilder.isImSessionSupported() && isRegistered
+                || mRcsSettings.isImAlwaysOn() && isRcsContact);
 
         capaBuilder.setVideoSharing(capaBuilder.isVideoSharingSupported() && isRegistered);
 
@@ -1847,12 +1806,11 @@ public final class ContactManager {
         capaBuilder.setFileTransferThumbnail(capaBuilder.isFileTransferThumbnailSupported()
                 && isRegistered);
 
-        capaBuilder.setFileTransferHttp(capaBuilder.isFileTransferHttpSupported()
-                && (isRegistered || mRcsSettings.isFtHttpCapAlwaysOn()));
+        capaBuilder.setFileTransferHttp(capaBuilder.isFileTransferHttpSupported() && isRegistered
+                || mRcsSettings.isFtHttpCapAlwaysOn() && isRcsContact);
 
-        capaBuilder
-                .setFileTransferStoreForward((capaBuilder.isFileTransferStoreForwardSupported() && isRegistered)
-                        || (mRcsSettings.isFtAlwaysOn() && isRcsContact));
+        capaBuilder.setFileTransferStoreForward(capaBuilder.isFileTransferStoreForwardSupported()
+                && isRegistered || mRcsSettings.isFtAlwaysOn() && isRcsContact);
 
         capaBuilder.setGroupChatStoreForward(capaBuilder.isGroupChatStoreForwardSupported()
                 && isRegistered);
@@ -1860,6 +1818,15 @@ public final class ContactManager {
         capaBuilder.setIpVoiceCall(capaBuilder.isIPVoiceCallSupported() && isRegistered);
 
         capaBuilder.setIpVideoCall(capaBuilder.isIPVideoCallSupported() && isRegistered);
+
+        capaBuilder.setPresenceDiscovery(capaBuilder.isPresenceDiscovery() && isRegistered);
+
+        capaBuilder.setSocialPresence(capaBuilder.isSocialPresence() && isRegistered);
+
+        if (!isRegistered) {
+            /* If contact is not registered, do not put any extensions */
+            capaBuilder.setExtensions(new HashSet<String>());
+        }
 
         /* Add the capabilities */
         newInfo.setCapabilities(capaBuilder.build());
@@ -1946,12 +1913,11 @@ public final class ContactManager {
         ContactId contact = info.getContact();
         String contactNumber = contact.toString();
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Creating new RCS rawcontact for ")
-                    .append(contactNumber).append(" to be associated to rawContactId ")
-                    .append(rawContactId).toString());
+            sLogger.debug("Create RCS rawcontact for '" + contactNumber
+                    + "' associated to rawContactId " + rawContactId);
         }
         ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
-        /* Create rawcontact for RCS */
+        /* Create raw contact for RCS */
         int rawContactRefIms = ops.size();
         ops.add(ContentProviderOperation
                 .newInsert(RawContacts.CONTENT_URI)
@@ -2102,13 +2068,14 @@ public final class ContactManager {
     /**
      * Utility method to create the "Me" raw contact.
      * 
-     * @return the rawContactId of the newly created contact
+     * @return the rawContactId of the newly created contact or INVALID_ID is social presence is not
+     *         supported or creation failed
      */
     public long createMyContact() {
         if (!mRcsSettings.isSocialPresenceSupported()) {
             return INVALID_ID;
         }
-        // Check if IMS account exists before continue
+        /* Check if IMS account exists before continue */
         AccountManager am = AccountManager.get(mContext);
         if (am.getAccountsByType(AuthenticationService.ACCOUNT_MANAGER_TYPE).length == 0) {
             if (sLogger.isActivated()) {
@@ -2116,62 +2083,60 @@ public final class ContactManager {
             }
             throw new IllegalStateException("No RCS account found");
         }
-        // Check if RCS raw contact for "Me" does not already exist
+        /* Check if RCS raw contact for "Me" does not already exist */
         long imsRawContactId = getRawContactIdForMe();
 
         if (INVALID_ID != imsRawContactId) {
             if (sLogger.isActivated()) {
                 sLogger.error("\"Me\" contact already exists, no need to recreate");
             }
-        } else {
-            if (sLogger.isActivated()) {
-                sLogger.error("\"Me\" contact does not already exists, creating it");
+            return imsRawContactId;
+        }
+        if (sLogger.isActivated()) {
+            sLogger.error("\"Me\" contact does not already exists, creating it");
+        }
+        ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+        /* Create raw contact for RCS */
+        int rawContactRefIms = ops.size();
+        ops.add(ContentProviderOperation
+                .newInsert(RawContacts.CONTENT_URI)
+                .withValue(RawContacts.ACCOUNT_TYPE, AuthenticationService.ACCOUNT_MANAGER_TYPE)
+                .withValue(RawContacts.ACCOUNT_NAME,
+                        mContext.getString(R.string.rcs_core_account_username))
+                .withValue(RawContacts.SOURCE_ID, MYSELF)
+                .withValue(RawContacts.AGGREGATION_MODE, RawContacts.AGGREGATION_MODE_DISABLED)
+                .build());
+        /* Set name */
+        ops.add(ContentProviderOperation
+                .newInsert(Data.CONTENT_URI)
+                .withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
+                .withValue(Data.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE)
+                .withValue(StructuredName.DISPLAY_NAME,
+                        mContext.getString(R.string.rcs_core_my_profile)).build());
+        try {
+            ContentProviderResult[] results;
+            results = mContentResolver.applyBatch(ContactsContract.AUTHORITY, ops);
+            imsRawContactId = ContentUris.parseId(results[rawContactRefIms].uri);
+        } catch (RemoteException e) {
+            imsRawContactId = INVALID_ID;
+        } catch (OperationApplicationException e) {
+            imsRawContactId = INVALID_ID;
+        }
+        ops.clear();
+        /* Set default free text to null and availability to online */
+        List<ContentProviderOperation> registrationStateOps = modifyContactRegistrationStateForMyself(
+                imsRawContactId, RegistrationState.ONLINE, RegistrationState.UNKNOWN, "", "");
+        for (ContentProviderOperation registrationStateOp : registrationStateOps) {
+            if (registrationStateOp != null) {
+                ops.add(registrationStateOp);
             }
-
-            ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
-
-            // Create rawcontact for RCS
-            int rawContactRefIms = ops.size();
-            ops.add(ContentProviderOperation
-                    .newInsert(RawContacts.CONTENT_URI)
-                    .withValue(RawContacts.ACCOUNT_TYPE, AuthenticationService.ACCOUNT_MANAGER_TYPE)
-                    .withValue(RawContacts.ACCOUNT_NAME,
-                            mContext.getString(R.string.rcs_core_account_username))
-                    .withValue(RawContacts.SOURCE_ID, MYSELF)
-                    .withValue(RawContacts.AGGREGATION_MODE, RawContacts.AGGREGATION_MODE_DISABLED)
-                    .build());
-            // Set name
-            ops.add(ContentProviderOperation
-                    .newInsert(Data.CONTENT_URI)
-                    .withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
-                    .withValue(Data.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE)
-                    .withValue(StructuredName.DISPLAY_NAME,
-                            mContext.getString(R.string.rcs_core_my_profile)).build());
-            try {
-                ContentProviderResult[] results;
-                results = mContentResolver.applyBatch(ContactsContract.AUTHORITY, ops);
-                imsRawContactId = ContentUris.parseId(results[rawContactRefIms].uri);
-            } catch (RemoteException e) {
-                imsRawContactId = INVALID_ID;
-            } catch (OperationApplicationException e) {
-                imsRawContactId = INVALID_ID;
-            }
-            ops.clear();
-            // Set default free text to null and availability to online
-            List<ContentProviderOperation> registrationStateOps = modifyContactRegistrationStateForMyself(
-                    imsRawContactId, RegistrationState.ONLINE, RegistrationState.UNKNOWN, "", "");
-            for (ContentProviderOperation registrationStateOp : registrationStateOps) {
-                if (registrationStateOp != null) {
-                    ops.add(registrationStateOp);
-                }
-            }
-            try {
-                mContentResolver.applyBatch(ContactsContract.AUTHORITY, ops);
-            } catch (RemoteException e) {
-                imsRawContactId = INVALID_ID;
-            } catch (OperationApplicationException e) {
-                imsRawContactId = INVALID_ID;
-            }
+        }
+        try {
+            mContentResolver.applyBatch(ContactsContract.AUTHORITY, ops);
+        } catch (RemoteException e) {
+            imsRawContactId = INVALID_ID;
+        } catch (OperationApplicationException e) {
+            imsRawContactId = INVALID_ID;
         }
         return imsRawContactId;
     }
@@ -2187,7 +2152,7 @@ public final class ContactManager {
         String[] selectionArgs = {
                 Phone.CONTENT_ITEM_TYPE, contact.toString()
         };
-        // Starting LOOSE equal
+        /* Starting LOOSE equal */
         Cursor cursor = null;
         try {
             cursor = mContentResolver.query(Data.CONTENT_URI, PROJ_DATA_RAW_CONTACT,
@@ -2198,10 +2163,12 @@ public final class ContactManager {
                 do {
                     long rawContactId = cursor.getLong(contactColumnIdx);
                     if (!rawContactsIds.contains(rawContactId)
-                            && (!isSimAccount(rawContactId) || (Build.VERSION.SDK_INT > 10))) { // Build.VERSION_CODES.GINGERBREAD_MR1
-                        // We exclude the SIM only contacts, as they cannot be aggregated to a RCS
-                        // raw contact
-                        // only if OS version if gingerbread or fewer
+                            && (!isSimAccount(rawContactId) || (Build.VERSION.SDK_INT > 10))) {
+                        // Build.VERSION_CODES.GINGERBREAD_MR1
+                        /*
+                         * We exclude the SIM only contacts, as they cannot be aggregated to a RCS
+                         * raw contact only if OS version if gingerbread or fewer.
+                         */
                         rawContactsIds.add(rawContactId);
                     }
                 } while (cursor.moveToNext());
@@ -2234,9 +2201,10 @@ public final class ContactManager {
                 if (!rawContactsIds.contains(rawContactId)
                         && (!isSimAccount(rawContactId) || (Build.VERSION.SDK_INT > 10))) {
                     // Build.VERSION_CODES.GINGERBREAD_MR1
-                    // We exclude the SIM only contacts, as they cannot be aggregated to a RCS raw
-                    // contact
-                    // only if OS version if gingerbread or fewer
+                    /*
+                     * We exclude the SIM only contacts, as they cannot be aggregated to a RCS raw
+                     * contact only if OS version if gingerbread or fewer.
+                     */
                     rawContactsIds.add(rawContactId);
                 }
             } while (cursor.moveToNext());
@@ -2331,7 +2299,7 @@ public final class ContactManager {
     /**
      * Utility method to check if a raw contact id is a SIM account
      * 
-     * @param rawContactId
+     * @param rawContactId raw contact ID
      * @return True if raw contact id is a SIM account
      */
     public boolean isSimAccount(final long rawContactId) {
@@ -2355,7 +2323,7 @@ public final class ContactManager {
     /**
      * Utility to set the photo icon attribute on a RCS contact.
      * 
-     * @param rawContactId RCS rawcontact
+     * @param rawContactId RCS raw contact
      * @param photoIcon The photoIcon
      * @param makeSuperPrimary whether or not to set the super primary flag
      * @return
@@ -2363,7 +2331,7 @@ public final class ContactManager {
     private List<ContentProviderOperation> setContactPhoto(Long rawContactId, PhotoIcon photoIcon,
             boolean makeSuperPrimary) {
         List<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
-        // Get the photo data id
+        /* Get the photo data id */
         String[] selectionArgs = {
                 Long.toString(rawContactId), Photo.CONTENT_ITEM_TYPE
         };
@@ -2378,7 +2346,7 @@ public final class ContactManager {
         if (photoIcon != null) {
             iconData = photoIcon.getContent();
         }
-        // Insert default avatar if icon is null and it is not for myself
+        /* Insert default avatar if icon is null and it is not for myself */
         if (iconData == null && rawContactId != getRawContactIdForMe()) {
             Bitmap rcsAvatar = BitmapFactory.decodeResource(mContext.getResources(),
                     R.drawable.rcs_core_default_portrait_icon);
@@ -2387,11 +2355,12 @@ public final class ContactManager {
         long dataId = INVALID_ID;
         try {
             if (iconData == null) {
-                // May happen only for myself
-                // Remove photoIcon if no data
+                /*
+                 * May happen only for myself. Remove photoIcon if no data.
+                 */
                 if (cursor.moveToNext()) {
                     dataId = cursor.getLong(cursor.getColumnIndex(Data._ID));
-                    // Add delete operation
+                    /* Add delete operation */
                     ops.add(ContentProviderOperation.newDelete(Data.CONTENT_URI)
                             .withSelection(SEL_DATA_ID, new String[] {
                                 String.valueOf(dataId)
@@ -2406,19 +2375,19 @@ public final class ContactManager {
                     values.put(Data.IS_SUPER_PRIMARY, 1);
                 }
                 if (cursor.moveToNext()) {
-                    // We already had an icon, update it
+                    /* We already have an icon, update it */
                     dataId = cursor.getLong(cursor.getColumnIndex(Data._ID));
                     ops.add(ContentProviderOperation.newUpdate(Data.CONTENT_URI)
                             .withSelection(SEL_DATA_ID, new String[] {
                                 String.valueOf(dataId)
                             }).withValues(values).build());
                 } else {
-                    // We did not have an icon, insert a new one
+                    /* We did not have an icon, insert a new one */
                     ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI).withValues(values)
                             .build());
                 }
                 values.clear();
-                // Set etag
+                /* Set etag */
                 values.put(Data.RAW_CONTACT_ID, rawContactId);
                 String etag = null;
                 if (photoIcon != null) {
@@ -2439,14 +2408,14 @@ public final class ContactManager {
                     /* TODO: Handle cursor when null. */
                     if (cur2.moveToNext()) {
                         dataId = cur2.getLong(cur2.getColumnIndexOrThrow(Data._ID));
-                        // We already had an etag, update it
+                        /* We already have an etag, update it */
                         dataId = cursor.getLong(cursor.getColumnIndexOrThrow(Data._ID));
                         ops.add(ContentProviderOperation.newUpdate(Data.CONTENT_URI)
                                 .withSelection(SEL_DATA_ID, new String[] {
                                     String.valueOf(dataId)
                                 }).withValues(values).build());
                     } else {
-                        // Insert etag
+                        /* Insert etag */
                         ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
                                 .withValues(values).build());
                     }
@@ -2735,8 +2704,10 @@ public final class ContactManager {
      * Clean Address Book
      */
     private void cleanRCSRawContactsInAB() {
-        // Get all RCS raw contacts id
-        // Delete RCS Entry where number is not in the address book anymore
+        /*
+         * Get all RCS raw contacts id Delete RCS Entry where number is not in the address book
+         * anymore.
+         */
         ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
         Cursor cursor = null;
         try {
@@ -2764,7 +2735,7 @@ public final class ContactManager {
                             .withSelection(SEL_RAW_CONTACT, new String[] {
                                 Long.toString(rawContactId)
                             }).build());
-                    // Also delete the corresponding entries in the aggregation provider
+                    /* Also delete the corresponding entries in the aggregation provider */
                     mLocalContentResolver.delete(AggregationData.CONTENT_URI,
                             WHERE_RCS_RAW_CONTACT_ID, new String[] {
                                 Long.toString(rawContactId)
@@ -2781,7 +2752,7 @@ public final class ContactManager {
             }
         }
         if (!ops.isEmpty()) {
-            // Do the actual database modifications
+            /* Do the actual database modifications */
             try {
                 mContentResolver.applyBatch(ContactsContract.AUTHORITY, ops);
             } catch (RemoteException e) {
@@ -2926,7 +2897,7 @@ public final class ContactManager {
      * 
      * @param contact Contact ID
      * @param state Blocking state
-     * @throws ContactManagerException
+     * @throws ContactManagerException exception thrown if update operation has failed
      */
     public void setBlockingState(ContactId contact, BlockingState state)
             throws ContactManagerException {
