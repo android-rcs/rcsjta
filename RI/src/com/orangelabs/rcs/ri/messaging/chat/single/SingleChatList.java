@@ -175,7 +175,7 @@ public class SingleChatList extends FragmentActivity implements
 
         @Override
         public View newView(Context context, Cursor cursor, ViewGroup parent) {
-            final View view = mInflater.inflate(R.layout.chat_list_item, parent, false);
+            final View view = mInflater.inflate(R.layout.chat_one2one_list_item, parent, false);
             view.setTag(new SingleChatListItemViewHolder(view, cursor));
             return view;
         }

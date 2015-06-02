@@ -18,6 +18,7 @@
 
 package com.orangelabs.rcs.ri.messaging.chat.group;
 
+import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content;
 import com.gsma.services.rcs.chat.ChatService;
@@ -30,6 +31,7 @@ import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 import com.orangelabs.rcs.ri.ConnectionManager;
 import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -60,6 +62,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -76,7 +79,8 @@ public class GroupChatList extends FragmentActivity implements
             ChatLog.GroupChat.CHAT_ID,
             ChatLog.GroupChat.SUBJECT,
             ChatLog.GroupChat.STATE,
-            ChatLog.GroupChat.TIMESTAMP
+            ChatLog.GroupChat.TIMESTAMP,
+            ChatLog.GroupChat.PARTICIPANTS
     };
     // @formatter:on
 
@@ -169,7 +173,7 @@ public class GroupChatList extends FragmentActivity implements
 
         @Override
         public View newView(Context context, Cursor cursor, ViewGroup parent) {
-            final View view = mInflater.inflate(R.layout.chat_list_item, parent, false);
+            final View view = mInflater.inflate(R.layout.chat_group_list_item, parent, false);
             view.setTag(new GroupChatListItemViewHolder(view, cursor));
             return view;
         }
@@ -182,8 +186,6 @@ public class GroupChatList extends FragmentActivity implements
                     System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS,
                     DateUtils.FORMAT_ABBREV_RELATIVE));
 
-            holder.titleText.setText(R.string.label_group_chat);
-
             String subject = cursor.getString(holder.columnSubject);
             if (TextUtils.isEmpty(subject)) {
                 holder.subjectText.setText(context.getString(R.string.label_subject_notif, "<"
@@ -192,6 +194,31 @@ public class GroupChatList extends FragmentActivity implements
                 holder.subjectText
                         .setText(context.getString(R.string.label_subject_notif, subject));
             }
+            int state = cursor.getInt(holder.columnState);
+            if (state < RiApplication.sGroupChatStates.length) {
+                holder.stateText.setText(RiApplication.sGroupChatStates[state]);
+            }
+
+            try {
+                Map<ContactId, ParticipantStatus> mapOfparticipants = ChatLog.GroupChat
+                        .getParticipants(GroupChatList.this,
+                                cursor.getString(holder.columnParticipants));
+                StringBuilder sb = null;
+                for (ContactId participant : mapOfparticipants.keySet()) {
+                    if (sb == null) {
+                        sb = new StringBuilder(participant.toString());
+                    } else {
+                        sb.append("\n");
+                        sb.append(participant.toString());
+                    }
+                }
+                holder.participantsText.setText(sb.toString());
+            } catch (RcsPermissionDeniedException e) {
+                if (LogUtils.isActive) {
+                    Log.e(LOGTAG, "getParticipants failed", e);
+                }
+            }
+
         }
     }
 
@@ -200,24 +227,31 @@ public class GroupChatList extends FragmentActivity implements
      * findViewById() or getColumnIndex() on each row.
      */
     private class GroupChatListItemViewHolder {
-        TextView titleText;
-
         TextView subjectText;
 
         TextView dateText;
 
+        TextView stateText;
+
         int columnSubject;
 
+        TextView participantsText;
+
         int columnDate;
+
+        int columnState;
+
+        int columnParticipants;
 
         GroupChatListItemViewHolder(View base, Cursor cursor) {
             columnSubject = cursor.getColumnIndexOrThrow(ChatLog.GroupChat.SUBJECT);
             columnDate = cursor.getColumnIndexOrThrow(ChatLog.GroupChat.TIMESTAMP);
-
-            titleText = (TextView) base.findViewById(R.id.line1);
-            subjectText = (TextView) base.findViewById(R.id.line2);
+            columnState = cursor.getColumnIndexOrThrow(ChatLog.GroupChat.STATE);
+            columnParticipants = cursor.getColumnIndexOrThrow(ChatLog.GroupChat.PARTICIPANTS);
+            subjectText = (TextView) base.findViewById(R.id.subject);
             dateText = (TextView) base.findViewById(R.id.date);
-            titleText.setVisibility(View.VISIBLE);
+            stateText = (TextView) base.findViewById(R.id.state);
+            participantsText = (TextView) base.findViewById(R.id.participants);
         }
     }
 
