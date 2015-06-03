@@ -18,6 +18,17 @@
 
 package com.orangelabs.rcs.ri.messaging.chat;
 
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.services.rcs.filetransfer.FileTransferService;
+
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.FileUtils;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.Utils;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -39,17 +50,6 @@ import android.widget.CheckBox;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.filetransfer.FileTransfer;
-import com.gsma.services.rcs.filetransfer.FileTransferService;
-
-import com.orangelabs.rcs.ri.ConnectionManager;
-import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.FileUtils;
-import com.orangelabs.rcs.ri.utils.LockAccess;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Send file

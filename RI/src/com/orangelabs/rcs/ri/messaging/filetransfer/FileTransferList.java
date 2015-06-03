@@ -21,6 +21,8 @@ package com.orangelabs.rcs.ri.messaging.filetransfer;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
+import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
 
@@ -76,6 +78,7 @@ public class FileTransferList extends FragmentActivity implements
             FileTransferLog.FILENAME,
             FileTransferLog.FILESIZE,
             FileTransferLog.STATE,
+            FileTransferLog.REASON_CODE,
             FileTransferLog.DIRECTION,
             FileTransferLog.TIMESTAMP
     };
@@ -165,9 +168,18 @@ public class FileTransferList extends FragmentActivity implements
             Long filesize = cursor.getLong(holder.columnFilesize);
             holder.filesizeText.setText(getString(R.string.label_filesize, filesize));
 
-            FileTransfer.State state = FileTransfer.State
-                    .valueOf(cursor.getInt(holder.columnState));
-            holder.stateText.setText(getString(R.string.label_session_state, decodeState(state)));
+            State state = State.valueOf(cursor.getInt(holder.columnState));
+            holder.stateText.setText(getString(R.string.label_session_state,
+                    RiApplication.sFileTransferStates[state.toInt()]));
+
+            ReasonCode reason = ReasonCode.valueOf(cursor.getInt(holder.columnReason));
+            if (ReasonCode.UNSPECIFIED == reason) {
+                holder.reasonText.setVisibility(View.GONE);
+            } else {
+                holder.reasonText.setVisibility(View.VISIBLE);
+                holder.reasonText.setText(getString(R.string.label_session_reason,
+                        RiApplication.sFileTransferReasonCodes[reason.toInt()]));
+            }
 
             Direction direction = Direction.valueOf(cursor.getInt(holder.columnDirection));
             holder.directionText.setText(getString(R.string.label_direction,
@@ -193,6 +205,8 @@ public class FileTransferList extends FragmentActivity implements
 
         int columnState;
 
+        int columnReason;
+
         int columnTimestamp;
 
         int columnNumber;
@@ -205,6 +219,8 @@ public class FileTransferList extends FragmentActivity implements
 
         TextView stateText;
 
+        TextView reasonText;
+
         TextView directionText;
 
         TextView timestamptext;
@@ -216,51 +232,16 @@ public class FileTransferList extends FragmentActivity implements
             columnState = cursor.getColumnIndexOrThrow(FileTransferLog.STATE);
             columnDirection = cursor.getColumnIndexOrThrow(FileTransferLog.DIRECTION);
             columnTimestamp = cursor.getColumnIndexOrThrow(FileTransferLog.TIMESTAMP);
+            columnReason = cursor.getColumnIndexOrThrow(FileTransferLog.REASON_CODE);
             numberText = (TextView) base.findViewById(R.id.number);
             filenameText = (TextView) base.findViewById(R.id.filename);
             filesizeText = (TextView) base.findViewById(R.id.filesize);
             stateText = (TextView) base.findViewById(R.id.state);
             directionText = (TextView) base.findViewById(R.id.direction);
             timestamptext = (TextView) base.findViewById(R.id.date);
+            reasonText = (TextView) base.findViewById(R.id.reason);
         }
 
-    }
-
-    /**
-     * Decode state
-     * 
-     * @param state State
-     * @return String
-     */
-    private String decodeState(FileTransfer.State state) {
-        switch (state) {
-            case INVITED:
-                return getString(R.string.label_state_invited);
-            case INITIATING:
-                return getString(R.string.label_state_initiating);
-            case STARTED:
-                return getString(R.string.label_state_started);
-            case TRANSFERRED:
-                return getString(R.string.label_state_transferred);
-            case ABORTED:
-                return getString(R.string.label_state_aborted);
-            case FAILED:
-                return getString(R.string.label_state_failed);
-            case PAUSED:
-                return getString(R.string.label_state_paused);
-            case REJECTED:
-                return getString(R.string.label_state_rejected);
-            case ACCEPTING:
-                return getString(R.string.label_state_accepting);
-            case DELIVERED:
-                return getString(R.string.label_state_delivered);
-            case DISPLAYED:
-                return getString(R.string.label_state_displayed);
-            case QUEUED:
-                return getString(R.string.label_state_queued);
-            default:
-                return getString(R.string.label_state_unknown);
-        }
     }
 
     /**

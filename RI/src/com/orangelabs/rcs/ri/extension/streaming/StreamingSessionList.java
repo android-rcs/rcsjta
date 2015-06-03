@@ -18,18 +18,19 @@
 
 package com.orangelabs.rcs.ri.extension.streaming;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.extension.MultimediaStreamingSession;
+
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.extension.MultimediaSessionList;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.content.Intent;
 import android.widget.ArrayAdapter;
 
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.extension.MultimediaStreamingSession;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.extension.MultimediaSessionList;
-import com.orangelabs.rcs.ri.utils.Utils;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * List of streaming sessions in progress

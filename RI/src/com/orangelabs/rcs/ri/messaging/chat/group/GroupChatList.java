@@ -79,6 +79,7 @@ public class GroupChatList extends FragmentActivity implements
             ChatLog.GroupChat.CHAT_ID,
             ChatLog.GroupChat.SUBJECT,
             ChatLog.GroupChat.STATE,
+            ChatLog.GroupChat.REASON_CODE,
             ChatLog.GroupChat.TIMESTAMP,
             ChatLog.GroupChat.PARTICIPANTS
     };
@@ -198,6 +199,15 @@ public class GroupChatList extends FragmentActivity implements
             if (state < RiApplication.sGroupChatStates.length) {
                 holder.stateText.setText(RiApplication.sGroupChatStates[state]);
             }
+            int reason = cursor.getInt(holder.columnReasonCode);
+            if (reason < RiApplication.sGroupChatReasonCodes.length) {
+                if (GroupChat.ReasonCode.UNSPECIFIED == GroupChat.ReasonCode.valueOf(reason)) {
+                    holder.reasonText.setVisibility(View.GONE);
+                } else {
+                    holder.reasonText.setVisibility(View.VISIBLE);
+                    holder.reasonText.setText(RiApplication.sGroupChatReasonCodes[reason]);
+                }
+            }
 
             try {
                 Map<ContactId, ParticipantStatus> mapOfparticipants = ChatLog.GroupChat
@@ -233,6 +243,8 @@ public class GroupChatList extends FragmentActivity implements
 
         TextView stateText;
 
+        TextView reasonText;
+
         int columnSubject;
 
         TextView participantsText;
@@ -243,15 +255,19 @@ public class GroupChatList extends FragmentActivity implements
 
         int columnParticipants;
 
+        int columnReasonCode;
+
         GroupChatListItemViewHolder(View base, Cursor cursor) {
             columnSubject = cursor.getColumnIndexOrThrow(ChatLog.GroupChat.SUBJECT);
             columnDate = cursor.getColumnIndexOrThrow(ChatLog.GroupChat.TIMESTAMP);
             columnState = cursor.getColumnIndexOrThrow(ChatLog.GroupChat.STATE);
             columnParticipants = cursor.getColumnIndexOrThrow(ChatLog.GroupChat.PARTICIPANTS);
+            columnReasonCode = cursor.getColumnIndexOrThrow(ChatLog.GroupChat.REASON_CODE);
             subjectText = (TextView) base.findViewById(R.id.subject);
             dateText = (TextView) base.findViewById(R.id.date);
             stateText = (TextView) base.findViewById(R.id.state);
             participantsText = (TextView) base.findViewById(R.id.participants);
+            reasonText = (TextView) base.findViewById(R.id.reason);
         }
     }
 

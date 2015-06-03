@@ -18,21 +18,22 @@
 
 package com.orangelabs.rcs.ri.contacts;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import com.gsma.services.rcs.contact.RcsContact;
+
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.ListActivity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 
-import com.gsma.services.rcs.contact.RcsContact;
-import com.orangelabs.rcs.ri.ConnectionManager;
-import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.LockAccess;
-import com.orangelabs.rcs.ri.utils.Utils;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * List of RCS contacts who are online (i.e. registered)

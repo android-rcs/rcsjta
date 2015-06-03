@@ -20,7 +20,6 @@ package com.orangelabs.rcs.ri.sharing.video;
 
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.sharing.video.VideoSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.video.VideoSharing.State;
 import com.gsma.services.rcs.sharing.video.VideoSharingListener;
@@ -45,6 +44,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -80,6 +80,7 @@ public class VideoSharingList extends FragmentActivity implements
         VideoSharingLog.CONTACT,
         VideoSharingLog.DURATION,
         VideoSharingLog.STATE,
+        VideoSharingLog.REASON_CODE,
         VideoSharingLog.DIRECTION,
         VideoSharingLog.TIMESTAMP
     };
@@ -185,11 +186,21 @@ public class VideoSharingList extends FragmentActivity implements
             holder.numberText.setText(getString(R.string.label_contact, displayName));
 
             Long duration = cursor.getLong(holder.columnDuration);
-            holder.durationText.setText(getString(R.string.label_video_duration, duration));
+            holder.durationText.setText(getString(R.string.label_video_duration,
+                    DateUtils.formatElapsedTime(duration / 1000)));
 
-            VideoSharing.State state = VideoSharing.State
-                    .valueOf(cursor.getInt(holder.columnState));
-            holder.stateText.setText(getString(R.string.label_session_state, decodeState(state)));
+            State state = State.valueOf(cursor.getInt(holder.columnState));
+            holder.stateText.setText(getString(R.string.label_session_state,
+                    RiApplication.sVideoSharingStates[state.toInt()]));
+
+            ReasonCode reason = ReasonCode.valueOf(cursor.getInt(holder.columnReason));
+            if (ReasonCode.UNSPECIFIED == reason) {
+                holder.reasonText.setVisibility(View.GONE);
+            } else {
+                holder.reasonText.setVisibility(View.VISIBLE);
+                holder.reasonText.setText(getString(R.string.label_session_reason,
+                        RiApplication.sVideoReasonCodes[reason.toInt()]));
+            }
 
             Direction direction = Direction.valueOf(cursor.getInt(holder.columnDirection));
             holder.directionText.setText(getString(R.string.label_direction,
@@ -211,6 +222,8 @@ public class VideoSharingList extends FragmentActivity implements
 
         int columnState;
 
+        int columnReason;
+
         int columnTimestamp;
 
         int columnNumber;
@@ -221,6 +234,8 @@ public class VideoSharingList extends FragmentActivity implements
 
         TextView stateText;
 
+        TextView reasonText;
+
         TextView directionText;
 
         TextView timestamptext;
@@ -229,42 +244,15 @@ public class VideoSharingList extends FragmentActivity implements
             columnNumber = cursor.getColumnIndexOrThrow(VideoSharingLog.CONTACT);
             columnDuration = cursor.getColumnIndexOrThrow(VideoSharingLog.DURATION);
             columnState = cursor.getColumnIndexOrThrow(VideoSharingLog.STATE);
+            columnReason = cursor.getColumnIndexOrThrow(VideoSharingLog.REASON_CODE);
             columnDirection = cursor.getColumnIndexOrThrow(VideoSharingLog.DIRECTION);
             columnTimestamp = cursor.getColumnIndexOrThrow(VideoSharingLog.TIMESTAMP);
             numberText = (TextView) view.findViewById(R.id.number);
             durationText = (TextView) view.findViewById(R.id.duration);
             stateText = (TextView) view.findViewById(R.id.state);
+            reasonText = (TextView) view.findViewById(R.id.reason);
             directionText = (TextView) view.findViewById(R.id.direction);
             timestamptext = (TextView) view.findViewById(R.id.date);
-        }
-    }
-
-    /**
-     * Decode state
-     * 
-     * @param state State
-     * @return String
-     */
-    private String decodeState(VideoSharing.State state) {
-        switch (state) {
-            case INVITED:
-                return getString(R.string.label_state_invited);
-            case INITIATING:
-                return getString(R.string.label_state_initiating);
-            case STARTED:
-                return getString(R.string.label_state_started);
-            case ABORTED:
-                return getString(R.string.label_state_aborted);
-            case FAILED:
-                return getString(R.string.label_state_failed);
-            case REJECTED:
-                return getString(R.string.label_state_rejected);
-            case RINGING:
-                return getString(R.string.label_state_ringing);
-            case ACCEPTING:
-                return getString(R.string.label_state_accepting);
-            default:
-                return getString(R.string.label_state_unknown);
         }
     }
 

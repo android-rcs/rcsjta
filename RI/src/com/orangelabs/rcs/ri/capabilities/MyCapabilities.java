@@ -18,20 +18,21 @@
 
 package com.orangelabs.rcs.ri.capabilities;
 
-import android.app.Activity;
-import android.content.pm.ActivityInfo;
-import android.os.Bundle;
-import android.widget.CheckBox;
-import android.widget.TextView;
-
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.capability.Capabilities;
+
 import com.orangelabs.rcs.ri.ConnectionManager;
 import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
+
+import android.app.Activity;
+import android.content.pm.ActivityInfo;
+import android.os.Bundle;
+import android.widget.CheckBox;
+import android.widget.TextView;
 
 /**
  * My capabilities

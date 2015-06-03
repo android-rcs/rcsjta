@@ -18,9 +18,13 @@
 
 package com.orangelabs.rcs.ri.contacts;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import com.gsma.services.rcs.contact.RcsContact;
+
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.Activity;
 import android.content.Context;
@@ -33,12 +37,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.gsma.services.rcs.contact.RcsContact;
-import com.orangelabs.rcs.ri.ConnectionManager;
-import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.LockAccess;
-import com.orangelabs.rcs.ri.utils.Utils;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * List of RCS contacts supporting a given feature tag or extension

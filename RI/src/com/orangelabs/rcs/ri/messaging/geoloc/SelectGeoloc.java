@@ -18,7 +18,12 @@
 
 package com.orangelabs.rcs.ri.messaging.geoloc;
 
-import java.util.ArrayList;
+import com.google.android.maps.GeoPoint;
+import com.google.android.maps.ItemizedOverlay;
+import com.google.android.maps.MapActivity;
+import com.google.android.maps.MapView;
+import com.google.android.maps.OverlayItem;
+import com.orangelabs.rcs.ri.R;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -30,12 +35,7 @@ import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.Button;
 
-import com.google.android.maps.GeoPoint;
-import com.google.android.maps.ItemizedOverlay;
-import com.google.android.maps.MapActivity;
-import com.google.android.maps.MapView;
-import com.google.android.maps.OverlayItem;
-import com.orangelabs.rcs.ri.R;
+import java.util.ArrayList;
 
 /**
  * Select a geoloc from a map

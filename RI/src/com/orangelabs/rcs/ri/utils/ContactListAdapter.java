@@ -18,8 +18,12 @@
 
 package com.orangelabs.rcs.ri.utils;
 
-import java.util.HashSet;
-import java.util.Set;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactService;
+import com.gsma.services.rcs.contact.RcsContact;
+
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.R;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -34,12 +38,8 @@ import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.ContactService;
-import com.gsma.services.rcs.contact.RcsContact;
-
-import com.orangelabs.rcs.ri.ConnectionManager;
-import com.orangelabs.rcs.ri.R;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Contact list adapter

@@ -18,6 +18,10 @@
 
 package com.orangelabs.rcs.ri.messaging;
 
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.messaging.chat.TestChatApi;
+import com.orangelabs.rcs.ri.messaging.filetransfer.TestFileTransferApi;
+
 import android.app.ListActivity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -25,10 +29,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.messaging.chat.TestChatApi;
-import com.orangelabs.rcs.ri.messaging.filetransfer.TestFileTransferApi;
 
 /**
  * Messaging API

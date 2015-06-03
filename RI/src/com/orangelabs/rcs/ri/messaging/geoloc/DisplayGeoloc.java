@@ -18,16 +18,17 @@
 
 package com.orangelabs.rcs.ri.messaging.geoloc;
 
-import android.graphics.drawable.Drawable;
-import android.os.Bundle;
+import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.contact.ContactId;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
-import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.contact.ContactId;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
+
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 
 /**
  * Display a geoloc on a Google map

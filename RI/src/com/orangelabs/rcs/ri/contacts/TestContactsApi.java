@@ -18,6 +18,9 @@
 
 package com.orangelabs.rcs.ri.contacts;
 
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.Utils;
+
 import android.app.ListActivity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -27,9 +30,6 @@ import android.provider.ContactsContract;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * CONTACTS API

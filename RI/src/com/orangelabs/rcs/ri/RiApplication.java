@@ -18,15 +18,17 @@
 
 package com.orangelabs.rcs.ri;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.RcsServiceControl;
 
 import android.app.Application;
 import android.content.Context;
 import android.content.res.Resources;
 
-import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.RcsServiceControl;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This subclass of Application allows to get a resource content from a static context
@@ -146,24 +148,26 @@ public class RiApplication extends Application {
         super.onCreate();
         mContext = getApplicationContext();
         Resources resources = getResources();
-        sParticipantStatuses = resources.getStringArray(R.array.participant_statuses);
-        sDeliveryStatuses = resources.getStringArray(R.array.delivery_statuses);
-        sDeliveryReasonCode = resources.getStringArray(R.array.delivery_reason_codes);
-        sGroupChatStates = resources.getStringArray(R.array.group_chat_states);
-        sGroupChatReasonCodes = resources.getStringArray(R.array.group_chat_reason_codes);
-        sMessageReasonCodes = resources.getStringArray(R.array.message_reason_codes);
-        sMessagesStatuses = resources.getStringArray(R.array.message_statuses);
-        sFileTransferStates = resources.getStringArray(R.array.file_transfer_states);
-        sFileTransferReasonCodes = resources.getStringArray(R.array.file_transfer_reason_codes);
-        sImageSharingStates = resources.getStringArray(R.array.ish_states);
-        sImageSharingReasonCodes = resources.getStringArray(R.array.ish_reason_codes);
-        sVideoSharingStates = resources.getStringArray(R.array.vsh_states);
-        sVideoReasonCodes = resources.getStringArray(R.array.vsh_reason_codes);
-        sGeolocSharingStates = resources.getStringArray(R.array.gsh_states);
-        sGeolocReasonCodes = resources.getStringArray(R.array.gsh_reason_codes);
-        sMultimediaStates = resources.getStringArray(R.array.mms_states);
-        sMultimediaReasonCodes = resources.getStringArray(R.array.mms_reason_codes);
-        sGroupChatEvents = resources.getStringArray(R.array.group_chat_event);
+        sParticipantStatuses = convertForUI(resources.getStringArray(R.array.participant_statuses));
+        sDeliveryStatuses = convertForUI(resources.getStringArray(R.array.delivery_statuses));
+        sDeliveryReasonCode = convertForUI(resources.getStringArray(R.array.delivery_reason_codes));
+        sGroupChatStates = convertForUI(resources.getStringArray(R.array.group_chat_states));
+        sGroupChatReasonCodes = convertForUI(resources
+                .getStringArray(R.array.group_chat_reason_codes));
+        sMessageReasonCodes = convertForUI(resources.getStringArray(R.array.message_reason_codes));
+        sMessagesStatuses = convertForUI(resources.getStringArray(R.array.message_statuses));
+        sFileTransferStates = convertForUI(resources.getStringArray(R.array.file_transfer_states));
+        sFileTransferReasonCodes = convertForUI(resources
+                .getStringArray(R.array.file_transfer_reason_codes));
+        sImageSharingStates = convertForUI(resources.getStringArray(R.array.ish_states));
+        sImageSharingReasonCodes = convertForUI(resources.getStringArray(R.array.ish_reason_codes));
+        sVideoSharingStates = convertForUI(resources.getStringArray(R.array.vsh_states));
+        sVideoReasonCodes = convertForUI(resources.getStringArray(R.array.vsh_reason_codes));
+        sGeolocSharingStates = convertForUI(resources.getStringArray(R.array.gsh_states));
+        sGeolocReasonCodes = convertForUI(resources.getStringArray(R.array.gsh_reason_codes));
+        sMultimediaStates = convertForUI(resources.getStringArray(R.array.mms_states));
+        sMultimediaReasonCodes = convertForUI(resources.getStringArray(R.array.mms_reason_codes));
+        sGroupChatEvents = convertForUI(resources.getStringArray(R.array.group_chat_event));
 
         sDirectionToString = new HashMap<Direction, String>();
         sDirectionToString.put(Direction.INCOMING, resources.getString(R.string.label_incoming));
@@ -173,6 +177,14 @@ public class RiApplication extends Application {
 
         mRcsServiceControl = RcsServiceControl.getInstance(mContext);
         ConnectionManager.getInstance(mContext).connectApis();
+    }
+
+    private String[] convertForUI(String[] strings) {
+        List<String> stringList = Arrays.asList(strings);
+        for (int i = 0, l = stringList.size(); i < l; ++i) {
+            stringList.set(i, stringList.get(i).toLowerCase().replace('_', ' '));
+        }
+        return (String[]) stringList.toArray();
     }
 
     /**

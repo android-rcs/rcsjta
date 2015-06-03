@@ -227,8 +227,8 @@ public class SharingListView extends HistoryListView {
                 case VideoSharingLog.HISTORYLOG_MEMBER_ID:
                     sharingTypeView.setText(R.string.label_history_log_video_sharing);
                     int duration = cursor.getInt(cursor.getColumnIndex(HistoryLog.DURATION));
-                    descriptionView.setText(new StringBuilder("Duration : ")
-                            .append(duration / 1000).append("s").toString());
+                    descriptionView.setText(new StringBuilder("Duration : ").append(
+                            DateUtils.formatElapsedTime(duration / 1000)).toString());
                     break;
                 case GeolocSharingLog.HISTORYLOG_MEMBER_ID:
                     sharingTypeView.setText(R.string.label_history_log_geoloc_sharing);

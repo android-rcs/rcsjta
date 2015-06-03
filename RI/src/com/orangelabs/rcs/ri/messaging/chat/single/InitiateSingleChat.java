@@ -18,6 +18,12 @@
 
 package com.orangelabs.rcs.ri.messaging.chat.single;
 
+import com.gsma.services.rcs.contact.ContactId;
+
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.ContactListAdapter;
+import com.orangelabs.rcs.ri.utils.ContactUtil;
+
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
@@ -25,12 +31,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Spinner;
-
-import com.gsma.services.rcs.contact.ContactId;
-
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.ContactListAdapter;
-import com.orangelabs.rcs.ri.utils.ContactUtil;
 
 /**
  * Initiate chat

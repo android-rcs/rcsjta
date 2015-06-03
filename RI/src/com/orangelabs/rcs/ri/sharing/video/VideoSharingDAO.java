@@ -33,6 +33,7 @@ import android.database.SQLException;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.format.DateUtils;
 import android.util.Log;
 
 /**
@@ -208,7 +209,7 @@ public class VideoSharingDAO implements Parcelable {
     @Override
     public String toString() {
         return "VideoSharingDAO [sharingId=" + mSharingId + ", contact=" + mContact + ", state="
-                + mState + ", duration=" + mDuration + "]";
+                + mState + ", duration=" + DateUtils.formatElapsedTime(mDuration / 1000) + "]";
     }
 
     @Override

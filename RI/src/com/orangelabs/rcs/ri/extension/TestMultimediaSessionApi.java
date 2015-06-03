@@ -18,6 +18,12 @@
 
 package com.orangelabs.rcs.ri.extension;
 
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.extension.messaging.InitiateMessagingSession;
+import com.orangelabs.rcs.ri.extension.messaging.MessagingSessionList;
+import com.orangelabs.rcs.ri.extension.streaming.InitiateStreamingSession;
+import com.orangelabs.rcs.ri.extension.streaming.StreamingSessionList;
+
 import android.app.ListActivity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -25,12 +31,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.extension.messaging.InitiateMessagingSession;
-import com.orangelabs.rcs.ri.extension.messaging.MessagingSessionList;
-import com.orangelabs.rcs.ri.extension.streaming.InitiateStreamingSession;
-import com.orangelabs.rcs.ri.extension.streaming.StreamingSessionList;
 
 /**
  * MM session API

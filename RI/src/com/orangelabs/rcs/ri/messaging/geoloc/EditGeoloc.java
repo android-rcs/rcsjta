@@ -18,6 +18,14 @@
 
 package com.orangelabs.rcs.ri.messaging.geoloc;
 
+import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.chat.ChatServiceConfiguration;
+
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.R;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -31,13 +39,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.chat.ChatServiceConfiguration;
-import com.gsma.services.rcs.Geoloc;
-import com.orangelabs.rcs.ri.ConnectionManager;
-import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.ri.R;
 
 /**
  * Geoloc info editor

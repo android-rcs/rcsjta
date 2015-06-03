@@ -20,15 +20,15 @@ package com.orangelabs.rcs.ri.settings;
 
 import com.gsma.services.rcs.RcsServiceException;
 
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.Utils;
+
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-
-import com.orangelabs.rcs.ri.ConnectionManager;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Presence settings display

@@ -18,17 +18,17 @@
 
 package com.orangelabs.rcs.ri.extension;
 
-import android.app.ListActivity;
-import android.content.pm.ActivityInfo;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.ListView;
-
 import com.orangelabs.rcs.ri.ConnectionManager;
 import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
+
+import android.app.ListActivity;
+import android.content.pm.ActivityInfo;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.ListView;
 
 /**
  * Abstract list of multimedia sessions

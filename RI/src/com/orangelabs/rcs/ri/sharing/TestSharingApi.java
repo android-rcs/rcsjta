@@ -18,6 +18,11 @@
 
 package com.orangelabs.rcs.ri.sharing;
 
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.sharing.geoloc.TestGeolocSharingApi;
+import com.orangelabs.rcs.ri.sharing.image.TestImageSharingApi;
+import com.orangelabs.rcs.ri.sharing.video.TestVideoSharingApi;
+
 import android.app.ListActivity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -25,11 +30,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.sharing.geoloc.TestGeolocSharingApi;
-import com.orangelabs.rcs.ri.sharing.image.TestImageSharingApi;
-import com.orangelabs.rcs.ri.sharing.video.TestVideoSharingApi;
 
 /**
  * Sharing API

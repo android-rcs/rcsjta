@@ -18,6 +18,23 @@
 
 package com.orangelabs.rcs.ri.extension.streaming;
 
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.extension.MultimediaSession;
+import com.gsma.services.rcs.extension.MultimediaSessionService;
+import com.gsma.services.rcs.extension.MultimediaStreamingSession;
+import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
+import com.gsma.services.rcs.extension.MultimediaStreamingSessionListener;
+
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.Utils;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -37,23 +54,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.extension.MultimediaSession;
-import com.gsma.services.rcs.extension.MultimediaSessionService;
-import com.gsma.services.rcs.extension.MultimediaStreamingSession;
-import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
-import com.gsma.services.rcs.extension.MultimediaStreamingSessionListener;
-
-import com.orangelabs.rcs.ri.ConnectionManager;
-import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.utils.LockAccess;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Streaming session view

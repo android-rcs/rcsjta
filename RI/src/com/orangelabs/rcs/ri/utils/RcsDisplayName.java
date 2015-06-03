@@ -18,14 +18,15 @@
 
 package com.orangelabs.rcs.ri.utils;
 
-import android.content.Context;
-import android.util.Log;
-
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactService;
 import com.gsma.services.rcs.contact.RcsContact;
+
 import com.orangelabs.rcs.ri.ConnectionManager;
 import com.orangelabs.rcs.ri.R;
+
+import android.content.Context;
+import android.util.Log;
 
 /**
  * Utilities to manage the RCS display name

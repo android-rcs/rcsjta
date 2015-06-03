@@ -18,21 +18,22 @@
 
 package com.orangelabs.rcs.ri.service;
 
-import android.app.Activity;
-import android.content.pm.ActivityInfo;
-import android.os.Bundle;
-import android.os.Handler;
-import android.widget.TextView;
-
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.RcsServiceRegistrationListener;
+
 import com.orangelabs.rcs.ri.ConnectionManager;
 import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
+
+import android.app.Activity;
+import android.content.pm.ActivityInfo;
+import android.os.Bundle;
+import android.os.Handler;
+import android.widget.TextView;
 
 /**
  * Display and monitor the registration status

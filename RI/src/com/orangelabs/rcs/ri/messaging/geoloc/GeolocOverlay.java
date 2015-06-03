@@ -18,7 +18,12 @@
 
 package com.orangelabs.rcs.ri.messaging.geoloc;
 
-import java.util.ArrayList;
+import com.google.android.maps.GeoPoint;
+import com.google.android.maps.ItemizedOverlay;
+import com.google.android.maps.MapView;
+import com.google.android.maps.OverlayItem;
+import com.google.android.maps.Projection;
+import com.orangelabs.rcs.ri.R;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -28,12 +33,7 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 
-import com.google.android.maps.GeoPoint;
-import com.google.android.maps.ItemizedOverlay;
-import com.google.android.maps.MapView;
-import com.google.android.maps.OverlayItem;
-import com.google.android.maps.Projection;
-import com.orangelabs.rcs.ri.R;
+import java.util.ArrayList;
 
 /**
  * Geoloc overlay

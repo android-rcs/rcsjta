@@ -18,6 +18,12 @@
 
 package com.orangelabs.rcs.ri.messaging.chat.group;
 
+import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.GroupChat;
+
+import com.orangelabs.rcs.ri.utils.LogUtils;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
@@ -26,12 +32,6 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
-
-import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.chat.GroupChat;
-
-import com.orangelabs.rcs.ri.utils.LogUtils;
 
 /**
  * Group CHAT Data Object

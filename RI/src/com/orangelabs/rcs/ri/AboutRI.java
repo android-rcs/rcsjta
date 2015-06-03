@@ -18,13 +18,14 @@
 
 package com.orangelabs.rcs.ri;
 
+import com.gsma.services.rcs.RcsService.Build;
+
+import com.orangelabs.rcs.ri.utils.Utils;
+
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.widget.TextView;
-
-import com.gsma.services.rcs.RcsService.Build;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * About the RI

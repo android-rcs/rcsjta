@@ -18,9 +18,29 @@
 
 package com.orangelabs.rcs.ri.sharing.video;
 
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Set;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.sharing.video.VideoDescriptor;
+import com.gsma.services.rcs.sharing.video.VideoSharing;
+import com.gsma.services.rcs.sharing.video.VideoSharingListener;
+import com.gsma.services.rcs.sharing.video.VideoSharingService;
+
+import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
+import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.CameraOptions;
+import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.Orientation;
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.sharing.video.media.OriginatingVideoPlayer;
+import com.orangelabs.rcs.ri.sharing.video.media.VideoPlayerListener;
+import com.orangelabs.rcs.ri.sharing.video.media.VideoSurfaceView;
+import com.orangelabs.rcs.ri.utils.ContactListAdapter;
+import com.orangelabs.rcs.ri.utils.ContactUtil;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -51,29 +71,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.sharing.video.VideoDescriptor;
-import com.gsma.services.rcs.sharing.video.VideoSharing;
-import com.gsma.services.rcs.sharing.video.VideoSharingListener;
-import com.gsma.services.rcs.sharing.video.VideoSharingService;
-
-import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
-import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.CameraOptions;
-import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.Orientation;
-import com.orangelabs.rcs.ri.ConnectionManager;
-import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.sharing.video.media.OriginatingVideoPlayer;
-import com.orangelabs.rcs.ri.sharing.video.media.VideoPlayerListener;
-import com.orangelabs.rcs.ri.sharing.video.media.VideoSurfaceView;
-import com.orangelabs.rcs.ri.utils.ContactListAdapter;
-import com.orangelabs.rcs.ri.utils.ContactUtil;
-import com.orangelabs.rcs.ri.utils.LockAccess;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
-import com.orangelabs.rcs.ri.utils.Utils;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Initiate video sharing.

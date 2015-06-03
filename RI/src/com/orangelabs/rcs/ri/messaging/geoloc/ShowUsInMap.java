@@ -18,8 +18,15 @@
 
 package com.orangelabs.rcs.ri.messaging.geoloc;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.chat.ChatLog;
+
+import com.google.android.maps.GeoPoint;
+import com.google.android.maps.MapActivity;
+import com.google.android.maps.MapView;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.content.Context;
 import android.content.Intent;
@@ -28,14 +35,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.telephony.PhoneNumberUtils;
 
-import com.google.android.maps.GeoPoint;
-import com.google.android.maps.MapActivity;
-import com.google.android.maps.MapView;
-import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.chat.ChatLog;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.Utils;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Show us in a map

@@ -4,9 +4,18 @@
 
 package com.orangelabs.rcs.ri.messaging.chat;
 
-import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Map;
+import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.contact.ContactId;
+
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.utils.ContactUtil;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.SmileyParser;
+import com.orangelabs.rcs.ri.utils.Smileys;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -20,18 +29,9 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.contact.ContactId;
-
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.utils.ContactUtil;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
-import com.orangelabs.rcs.ri.utils.SmileyParser;
-import com.orangelabs.rcs.ri.utils.Smileys;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author YPLO6403

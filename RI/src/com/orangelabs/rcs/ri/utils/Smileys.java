@@ -18,11 +18,8 @@
 
 package com.orangelabs.rcs.ri.utils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.AbstractMessageParser.TrieNode;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -34,8 +31,11 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SimpleAdapter;
 
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.AbstractMessageParser.TrieNode;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Resources for smiley parser.

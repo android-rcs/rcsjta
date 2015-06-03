@@ -27,9 +27,9 @@ import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceListener;
 
 import com.orangelabs.rcs.ri.ConnectionManager;
-import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 

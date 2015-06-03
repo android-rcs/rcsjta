@@ -18,10 +18,10 @@
 
 package com.orangelabs.rcs.ri.messaging.chat;
 
-import android.net.Uri;
-
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
+
+import android.net.Uri;
 
 /**
  * @author YPLO6403

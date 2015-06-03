@@ -18,7 +18,10 @@
 
 package com.orangelabs.rcs.ri.sharing.geoloc;
 
-import java.util.ArrayList;
+import com.gsma.services.rcs.capability.CapabilitiesLog;
+
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.messaging.geoloc.ShowUsInMap;
 
 import android.app.ListActivity;
 import android.content.Intent;
@@ -29,9 +32,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.gsma.services.rcs.capability.CapabilitiesLog;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.messaging.geoloc.ShowUsInMap;
+import java.util.ArrayList;
 
 /**
  * Geoloc sharing API

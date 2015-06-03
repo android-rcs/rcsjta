@@ -18,13 +18,9 @@
 
 package com.orangelabs.rcs.ri.sharing.video.media;
 
-import java.io.IOException;
-
-import android.hardware.Camera;
-import android.os.SystemClock;
-
 import com.gsma.services.rcs.sharing.video.VideoCodec;
 import com.gsma.services.rcs.sharing.video.VideoPlayer;
+
 import com.orangelabs.rcs.core.ims.protocol.rtp.RtpUtils;
 import com.orangelabs.rcs.core.ims.protocol.rtp.VideoRtpSender;
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
@@ -42,6 +38,11 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.media.VideoSample;
 import com.orangelabs.rcs.core.ims.protocol.rtp.stream.RtpStreamListener;
 import com.orangelabs.rcs.ri.utils.DatagramConnection;
 import com.orangelabs.rcs.ri.utils.NetworkRessourceManager;
+
+import android.hardware.Camera;
+import android.os.SystemClock;
+
+import java.io.IOException;
 
 /**
  * Live RTP video player based on H264 QCIF format

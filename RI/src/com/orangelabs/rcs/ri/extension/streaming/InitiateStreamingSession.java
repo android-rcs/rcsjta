@@ -18,11 +18,12 @@
 
 package com.orangelabs.rcs.ri.extension.streaming;
 
+import com.gsma.services.rcs.contact.ContactId;
+
+import com.orangelabs.rcs.ri.extension.InitiateMultimediaSession;
+
 import android.content.Intent;
 import android.os.Parcelable;
-
-import com.gsma.services.rcs.contact.ContactId;
-import com.orangelabs.rcs.ri.extension.InitiateMultimediaSession;
 
 /**
  * Initiate streaming session

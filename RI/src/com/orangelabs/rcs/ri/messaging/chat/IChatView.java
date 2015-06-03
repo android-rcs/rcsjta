@@ -18,10 +18,11 @@
 
 package com.orangelabs.rcs.ri.messaging.chat;
 
+import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.ChatService;
-import com.gsma.services.rcs.Geoloc;
+
 import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager.INotifyComposing;
 
 /**
