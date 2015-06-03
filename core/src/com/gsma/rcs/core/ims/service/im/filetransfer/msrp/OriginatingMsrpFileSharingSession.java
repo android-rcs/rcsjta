@@ -37,6 +37,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
+import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ContributionIdGenerator;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
@@ -49,6 +50,7 @@ import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.utils.Base64;
+import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
@@ -56,7 +58,7 @@ import com.gsma.services.rcs.contact.ContactId;
 
 import android.net.Uri;
 
-import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -115,6 +117,21 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
         setContributionID(id);
     }
 
+    private byte[] getFileData(Uri file, long size) throws IOException {
+        FileInputStream fileInputStream = null;
+        try {
+            fileInputStream = (FileInputStream) AndroidFactory.getApplicationContext()
+                    .getContentResolver().openInputStream(file);
+            byte[] data = new byte[(int) size];
+            if (size != fileInputStream.read(data, 0, (int) size)) {
+                throw new IOException("Unable to retrive data from ".concat(file.toString()));
+            }
+            return data;
+        } finally {
+            CloseableUtils.close(fileInputStream);
+        }
+    }
+
     /**
      * Background processing
      */
@@ -152,32 +169,42 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
             long maxSize = mRcsSettings.getMaxFileTransferSize();
             /* Set File-selector attribute */
             String selector = getFileSelectorAttribute();
-            String sdp = SdpUtils.buildFileSDP(ipAddress, localMsrpPort,
+            StringBuilder sdp = new StringBuilder(SdpUtils.buildFileSDP(ipAddress, localMsrpPort,
                     msrpMgr.getLocalSocketProtocol(), encoding, getFileTransferIdAttribute(),
                     selector, "attachment", localSetup, msrpMgr.getLocalMsrpPath(),
-                    SdpUtils.DIRECTION_SENDONLY, maxSize);
+                    SdpUtils.DIRECTION_SENDONLY, maxSize));
 
             /* Set File-location attribute */
             Uri location = getFileLocationAttribute();
             if (location != null) {
-                sdp += "a=file-location:" + location.toString() + SipUtils.CRLF;
+                sdp.append("a=file-location:").append(location.toString()).append(SipUtils.CRLF);
             }
 
-            if (getFileicon() != null) {
-                sdp += "a=file-icon:cid:image@joyn.com" + SipUtils.CRLF;
+            MmContent fileIcon = getFileicon();
+            Capabilities remoteCapabilities = mContactManager
+                    .getContactCapabilities(getRemoteContact());
+            boolean fileIconSupported = remoteCapabilities != null
+                    && remoteCapabilities.isFileTransferThumbnailSupported();
+            if (fileIcon == null) {
+                /* Set the local SDP part in the dialog path */
+                getDialogPath().setLocalContent(sdp.toString());
+            }
+            if (fileIconSupported) {
+                sdp.append("a=file-icon:cid:image@joyn.com").append(SipUtils.CRLF);
 
                 /* Encode the file icon file */
-                String imageEncoded = Base64.encodeBase64ToString(getFileicon().getData());
-
+                String imageEncoded = Base64.encodeBase64ToString(getFileData(fileIcon.getUri(),
+                        fileIcon.getSize()));
+                String sdpContent = sdp.toString();
                 String multipart = new StringBuilder(Multipart.BOUNDARY_DELIMITER)
                         .append(BOUNDARY_TAG).append(SipUtils.CRLF).append(ContentTypeHeader.NAME)
                         .append(": application/sdp").append(SipUtils.CRLF)
                         .append(ContentLengthHeader.NAME).append(": ")
-                        .append(sdp.getBytes(UTF8).length).append(SipUtils.CRLF)
-                        .append(SipUtils.CRLF).append(sdp).append(SipUtils.CRLF)
+                        .append(sdpContent.getBytes(UTF8).length).append(SipUtils.CRLF)
+                        .append(SipUtils.CRLF).append(sdpContent).append(SipUtils.CRLF)
                         .append(Multipart.BOUNDARY_DELIMITER).append(BOUNDARY_TAG)
                         .append(SipUtils.CRLF).append(ContentTypeHeader.NAME).append(": ")
-                        .append(getFileicon().getEncoding()).append(SipUtils.CRLF)
+                        .append(fileIcon.getEncoding()).append(SipUtils.CRLF)
                         .append(SipUtils.HEADER_CONTENT_TRANSFER_ENCODING).append(": base64")
                         .append(SipUtils.CRLF).append(SipUtils.HEADER_CONTENT_ID)
                         .append(": <image@joyn.com>").append(SipUtils.CRLF)
@@ -192,7 +219,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
                 getDialogPath().setLocalContent(multipart);
             } else {
                 /* Set the local SDP part in the dialog path */
-                getDialogPath().setLocalContent(sdp);
+                getDialogPath().setLocalContent(sdp.toString());
             }
 
             /* Create an INVITE request */
@@ -215,6 +242,12 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
         } catch (InvalidArgumentException e) {
             mLogger.error("Unable to set authorization header!", e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (IOException e) {
+            if (mLogger.isActivated()) {
+                mLogger.debug("Failed to initiate a file transfer session with fileTransferId "
+                        .concat(getFileTransferId()));
+            }
+            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
@@ -223,7 +256,6 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
             mLogger.error("Failed to initiate a file transfer session!", e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
         }
-
     }
 
     /**
@@ -264,16 +296,8 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
     public void startMediaTransfer() throws IOException {
         try {
             /* Start sending data chunks */
-            byte[] data = getContent().getData();
-            InputStream stream;
-            if (data == null) {
-                /* Load data from URL */
-                stream = AndroidFactory.getApplicationContext().getContentResolver()
-                        .openInputStream(getContent().getUri());
-            } else {
-                /* Load data from memory */
-                stream = new ByteArrayInputStream(data);
-            }
+            InputStream stream = AndroidFactory.getApplicationContext().getContentResolver()
+                    .openInputStream(getContent().getUri());
             msrpMgr.sendChunks(stream, IdGenerator.generateMessageID(), getContent().getEncoding(),
                     getContent().getSize(), TypeMsrpChunk.FileSharing);
         } catch (SecurityException e) {

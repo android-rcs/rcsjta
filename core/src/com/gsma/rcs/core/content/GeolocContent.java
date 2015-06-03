@@ -32,6 +32,9 @@ import android.net.Uri;
  * @author vfml3370
  */
 public class GeolocContent extends MmContent {
+
+    private byte[] mData;
+
     /**
      * Encoding type
      */
@@ -42,12 +45,11 @@ public class GeolocContent extends MmContent {
      * 
      * @param fileName File name
      * @param size Content size
-     * @param geolocDoc Geoloc
+     * @param data Geoloc
      */
-    public GeolocContent(String fileName, long size, byte[] geolocDoc) {
+    public GeolocContent(String fileName, long size, byte[] data) {
         super(fileName, size, ENCODING);
-
-        setData(geolocDoc);
+        mData = data;
     }
 
     /**
@@ -59,5 +61,9 @@ public class GeolocContent extends MmContent {
      */
     public GeolocContent(Uri geolocFile, long size, String fileName) {
         super(geolocFile, ENCODING, size, fileName);
+    }
+
+    public byte[] getData() {
+        return mData;
     }
 }

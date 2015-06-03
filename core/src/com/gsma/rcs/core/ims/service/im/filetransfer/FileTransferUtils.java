@@ -139,8 +139,6 @@ public class FileTransferUtils {
                     "image/jpeg", rcsSettings);
             MmContent fileIcon = ContentManager.createMmContent(fileIconUri, fileIconData.length,
                     fileIconName);
-            // Save the fileIcon data
-            fileIcon.setData(fileIconData);
             // persist the fileIcon content
             fileIcon.writeData2File(fileIconData);
             fileIcon.closeFile();
@@ -206,7 +204,6 @@ public class FileTransferUtils {
                     // Generate fileIcon content
                     MmContent result = ContentManager.createMmContent(fileIconUri,
                             fileIconData.length, iconName);
-                    result.setData(fileIconData);
                     // Decode the content and persist on disk
                     result.writeData2File(fileIconData);
                     result.closeFile();

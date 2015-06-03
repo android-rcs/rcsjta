@@ -38,18 +38,20 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
+import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.Base64;
+import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.net.Uri;
 
-import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -100,6 +102,21 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
         createOriginatingDialogPath();
     }
 
+    private byte[] getFileData(Uri file, long size) throws IOException {
+        FileInputStream fileInputStream = null;
+        try {
+            fileInputStream = (FileInputStream) AndroidFactory.getApplicationContext()
+                    .getContentResolver().openInputStream(file);
+            byte[] data = new byte[(int) size];
+            if (size != fileInputStream.read(data, 0, (int) size)) {
+                throw new IOException("Unable to retrive data from ".concat(file.toString()));
+            }
+            return data;
+        } finally {
+            CloseableUtils.close(fileInputStream);
+        }
+    }
+
     /**
      * Background processing
      */
@@ -137,29 +154,39 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
             long maxSize = ImageTransferSession.getMaxImageSharingSize(mRcsSettings);
             // Set File-selector attribute
             String selector = getFileSelectorAttribute();
-            String sdp = SdpUtils.buildFileSDP(ipAddress, localMsrpPort,
+            StringBuilder sdp = new StringBuilder(SdpUtils.buildFileSDP(ipAddress, localMsrpPort,
                     msrpMgr.getLocalSocketProtocol(), encoding, getFileTransferId(), selector,
                     "render", localSetup, msrpMgr.getLocalMsrpPath(), SdpUtils.DIRECTION_SENDONLY,
-                    maxSize);
+                    maxSize));
 
             // Set File-location attribute
             Uri location = getFileLocationAttribute();
             if (location != null) {
-                sdp += "a=file-location:" + location.toString() + SipUtils.CRLF;
+                sdp.append("a=file-location:").append(location.toString()).append(SipUtils.CRLF);
             }
 
-            if (getThumbnail() != null) {
-                sdp += "a=file-icon:cid:image@joyn.com" + SipUtils.CRLF;
+            MmContent fileIcon = getThumbnail();
+            Capabilities remoteCapabilities = mContactManager
+                    .getContactCapabilities(getRemoteContact());
+            boolean fileIconSupported = remoteCapabilities != null
+                    && remoteCapabilities.isFileTransferThumbnailSupported();
+            if (fileIcon == null) {
+                /* Set the local SDP part in the dialog path */
+                getDialogPath().setLocalContent(sdp.toString());
+            }
+            if (fileIconSupported) {
+                sdp.append("a=file-icon:cid:image@joyn.com").append(SipUtils.CRLF);
 
                 // Encode the thumbnail file
-                String imageEncoded = Base64.encodeBase64ToString(getThumbnail().getData());
-
+                String imageEncoded = Base64.encodeBase64ToString(getFileData(fileIcon.getUri(),
+                        fileIcon.getSize()));
+                String sdpContent = sdp.toString();
                 String multipart = new StringBuilder(Multipart.BOUNDARY_DELIMITER)
                         .append(BOUNDARY_TAG).append(SipUtils.CRLF).append(ContentTypeHeader.NAME)
                         .append(": application/sdp").append(SipUtils.CRLF)
                         .append(ContentLengthHeader.NAME).append(": ")
-                        .append(sdp.getBytes(UTF8).length).append(SipUtils.CRLF)
-                        .append(SipUtils.CRLF).append(sdp).append(SipUtils.CRLF)
+                        .append(sdpContent.getBytes(UTF8).length).append(SipUtils.CRLF)
+                        .append(SipUtils.CRLF).append(sdpContent).append(SipUtils.CRLF)
                         .append(Multipart.BOUNDARY_DELIMITER).append(BOUNDARY_TAG)
                         .append(SipUtils.CRLF).append(ContentTypeHeader.NAME).append(": ")
                         .append(getContent().getEncoding()).append(SipUtils.CRLF)
@@ -177,7 +204,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
                 getDialogPath().setLocalContent(multipart);
             } else {
                 // Set the local SDP part in the dialog path
-                getDialogPath().setLocalContent(sdp);
+                getDialogPath().setLocalContent(sdp.toString());
             }
 
             // Create an INVITE request
@@ -199,6 +226,12 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         } catch (InvalidArgumentException e) {
             mLogger.error("Failed to send invite!", e);
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (IOException e) {
+            if (mLogger.isActivated()) {
+                mLogger.debug("Failed to initiate a new image transfer session with sharingId "
+                        .concat(getFileTransferId()));
+            }
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         } catch (RuntimeException e) {
             /**
@@ -250,17 +283,8 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
      */
     public void startMediaTransfer() throws IOException {
         /* Start sending data chunks */
-        byte[] data = getContent().getData();
-        InputStream stream;
-        if (data == null) {
-            /* Load data from Uri */
-            stream = AndroidFactory.getApplicationContext().getContentResolver()
-                    .openInputStream(getContent().getUri());
-        } else {
-            /* Load data from memory */
-            stream = new ByteArrayInputStream(data);
-        }
-
+        InputStream stream = AndroidFactory.getApplicationContext().getContentResolver()
+                .openInputStream(getContent().getUri());
         msrpMgr.sendChunks(stream, getFileTransferId(), getContent().getEncoding(), getContent()
                 .getSize(), TypeMsrpChunk.FileSharing);
     }

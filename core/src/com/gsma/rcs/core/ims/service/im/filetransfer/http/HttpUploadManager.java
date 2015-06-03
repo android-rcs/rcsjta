@@ -86,12 +86,12 @@ public class HttpUploadManager extends HttpTransferManager {
     /**
      * Two hyphens
      */
-    private final static String twoHyphens = "--";
+    private final static String TWO_HYPENS = "--";
 
     /**
      * End of line
      */
-    private final static String lineEnd = "\r\n";
+    private final static String LINE_END = "\r\n";
 
     /**
      * Maximum value of retry
@@ -356,7 +356,7 @@ public class HttpUploadManager extends HttpTransferManager {
                      * if the upload is cancelled, we don't send the last boundary to get bad
                      * request
                      */
-                    outputStream.writeBytes(twoHyphens + BOUNDARY_TAG + twoHyphens);
+                    outputStream.writeBytes(TWO_HYPENS + BOUNDARY_TAG + TWO_HYPENS);
 
                     /* Check response status code */
                     int responseCode = connection.getResponseCode();
@@ -506,41 +506,38 @@ public class HttpUploadManager extends HttpTransferManager {
      * @param outputStream DataOutputStream to write to
      */
     private void writeThumbnailMultipart(DataOutputStream outputStream) throws IOException {
+        long size = mFileIcon.getSize();
+        Uri fileIcon = mFileIcon.getUri();
         if (mLogger.isActivated()) {
-            mLogger.debug("write file icon " + mFileIcon.getName() + " (size="
-                    + mFileIcon.getSize() + ")");
+            mLogger.debug(new StringBuilder("write file icon ").append(fileIcon).append(" (size=")
+                    .append(size).append(")").toString());
         }
-        if (mFileIcon.getSize() > 0) {
-            outputStream.writeBytes(twoHyphens + BOUNDARY_TAG + lineEnd);
-            outputStream
-                    .writeBytes("Content-Disposition: form-data; name=\"Thumbnail\"; filename=\"thumb_"
-                            + mContent.getName() + "\"" + lineEnd);
-            outputStream.writeBytes("Content-Type: image/jpeg" + lineEnd);
-            outputStream.writeBytes("Content-Length: " + mFileIcon.getSize());
-            outputStream.writeBytes(lineEnd + lineEnd);
-            // Are thumbnail data available ?
-            if (mFileIcon.getData() != null) {
-                // Thumbnail data were loaded upon creation.
-                // Write thumbnail content
-                outputStream.write(mFileIcon.getData());
-            } else {
-                // Thumbnail must be loaded from file.
-                FileInputStream fileInputStream = null;
-                try {
-                    fileInputStream = (FileInputStream) AndroidFactory.getApplicationContext()
-                            .getContentResolver().openInputStream(mFileIcon.getUri());
-                    byte[] buffer = new byte[(int) mFileIcon.getSize()];
-                    int bytesRead = fileInputStream.read(buffer, 0, (int) mFileIcon.getSize());
-                    if (bytesRead > 0) {
-                        outputStream.write(buffer);
-                    }
-                } finally {
-                    if (fileInputStream != null) {
-                        fileInputStream.close();
-                    }
+        if (size > 0) {
+            FileInputStream fileInputStream = null;
+            try {
+                fileInputStream = (FileInputStream) AndroidFactory.getApplicationContext()
+                        .getContentResolver().openInputStream(fileIcon);
+                int bufferSize = (int) size;
+                byte[] fileIconData = new byte[bufferSize];
+                if (size != fileInputStream.read(fileIconData, 0, bufferSize)) {
+                    throw new IOException("Unable to read fileIcon from ".concat(fileIcon
+                            .toString()));
+                }
+                outputStream.writeBytes(new StringBuilder(TWO_HYPENS).append(BOUNDARY_TAG)
+                        .append(LINE_END).toString());
+                outputStream.writeBytes(new StringBuilder(
+                        "Content-Disposition: form-data; name=\"Thumbnail\"; filename=\"thumb_")
+                        .append(mContent.getName()).append("\"").append(LINE_END).toString());
+                outputStream.writeBytes("Content-Type: image/jpeg".concat(LINE_END));
+                outputStream.writeBytes("Content-Length: " + size);
+                outputStream.writeBytes(LINE_END.concat(LINE_END));
+                outputStream.write(fileIconData);
+                outputStream.writeBytes(LINE_END);
+            } finally {
+                if (fileInputStream != null) {
+                    fileInputStream.close();
                 }
             }
-            outputStream.writeBytes(lineEnd);
         }
     }
 
@@ -550,12 +547,12 @@ public class HttpUploadManager extends HttpTransferManager {
      * @return tid TID header
      */
     private String generateTidMultipart() {
-        String tidPartHeader = twoHyphens + BOUNDARY_TAG + lineEnd;
-        tidPartHeader += "Content-Disposition: form-data; name=\"tid\"" + lineEnd;
-        tidPartHeader += "Content-Type: text/plain" + lineEnd;
+        String tidPartHeader = TWO_HYPENS + BOUNDARY_TAG + LINE_END;
+        tidPartHeader += "Content-Disposition: form-data; name=\"tid\"" + LINE_END;
+        tidPartHeader += "Content-Type: text/plain" + LINE_END;
         tidPartHeader += "Content-Length: " + mTId.length();
 
-        return tidPartHeader + lineEnd + lineEnd + mTId + lineEnd;
+        return tidPartHeader + LINE_END + LINE_END + mTId + LINE_END;
     }
 
     /**
@@ -571,12 +568,12 @@ public class HttpUploadManager extends HttpTransferManager {
         long fileSize = mContent.getSize();
 
         // Build and write headers
-        StringBuilder filePartHeader = new StringBuilder(twoHyphens).append(BOUNDARY_TAG)
-                .append(lineEnd)
+        StringBuilder filePartHeader = new StringBuilder(TWO_HYPENS).append(BOUNDARY_TAG)
+                .append(LINE_END)
                 .append("Content-Disposition: form-data; name=\"File\"; filename=\"")
-                .append(URLEncoder.encode(filename, UTF8_STR)).append("\"").append(lineEnd)
-                .append("Content-Type: ").append(mContent.getEncoding()).append(lineEnd)
-                .append("Content-Length: ").append(fileSize).append(lineEnd).append(lineEnd);
+                .append(URLEncoder.encode(filename, UTF8_STR)).append("\"").append(LINE_END)
+                .append("Content-Type: ").append(mContent.getEncoding()).append(LINE_END)
+                .append("Content-Length: ").append(fileSize).append(LINE_END).append(LINE_END);
         outputStream.writeBytes(filePartHeader.toString());
 
         // Write file content
@@ -605,7 +602,7 @@ public class HttpUploadManager extends HttpTransferManager {
             }
         }
         if (!isCancelled())
-            outputStream.writeBytes(lineEnd);
+            outputStream.writeBytes(LINE_END);
     }
 
     /**

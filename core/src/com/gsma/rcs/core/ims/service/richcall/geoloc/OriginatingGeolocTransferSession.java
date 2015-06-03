@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.richcall.geoloc;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.content.GeolocContent;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
@@ -209,7 +210,7 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
      */
     public void startMediaTransfer() throws IOException {
         /* Start sending data chunks */
-        byte[] data = getContent().getData();
+        byte[] data = ((GeolocContent) getContent()).getData();
         InputStream stream = new ByteArrayInputStream(data);
         msrpMgr.sendChunks(stream, getFileTransferId(), getContent().getEncoding(), getContent()
                 .getSize(), TypeMsrpChunk.GeoLocation);

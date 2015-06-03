@@ -96,36 +96,6 @@ public class ContentManager {
     }
 
     /**
-     * Save a content in the local directory of the device
-     * 
-     * @param content Content to be saved
-     * @throws IOException
-     */
-    public static void saveContent(MmContent content) throws IOException {
-        ParcelFileDescriptor pfd = null;
-        // Write data
-        OutputStream os = null;
-        Uri file = content.getUri();
-        try {
-            pfd = AndroidFactory.getApplicationContext().getContentResolver()
-                    .openFileDescriptor(file, "w");
-            os = new FileOutputStream(pfd.getFileDescriptor());
-            os.write(content.getData());
-            os.flush();
-        } finally {
-            if (os != null) {
-                os.close();
-            }
-            if (pfd != null) {
-                pfd.close();
-            }
-        }
-        // Update the media storage with uri.getPath() since its always fileUri
-        // in the receiver side
-        FileFactory.getFactory().updateMediaStorage(file.getPath());
-    }
-
-    /**
      * Create a content object from URI description
      * 
      * @param uri Content URI

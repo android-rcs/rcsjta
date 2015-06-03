@@ -40,6 +40,7 @@ import java.io.IOException;
  * @author jexa7410
  */
 public abstract class MmContent {
+
     /**
      * Content uri
      */
@@ -59,11 +60,6 @@ public abstract class MmContent {
      * Encoding
      */
     private String mEncoding;
-
-    /**
-     * Data
-     */
-    private byte[] mData;
 
     /**
      * Stream to write received data direct to file.
@@ -212,24 +208,6 @@ public abstract class MmContent {
      */
     public String toString() {
         return mFile + " (" + mSize + " bytes)";
-    }
-
-    /**
-     * Returns the content data
-     * 
-     * @return Data
-     */
-    public byte[] getData() {
-        return mData;
-    }
-
-    /**
-     * Sets the content data
-     * 
-     * @param data
-     */
-    public void setData(byte[] data) {
-        mData = data;
     }
 
     /**
