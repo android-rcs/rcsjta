@@ -61,7 +61,7 @@
 				classpath=":${terminal.classpath}" 
 				sourcepath="${src.path}"
 				packagenames="com.gsma.services.rcs.*"
-				bootclasspath="${android.platform}/android.jar;${terminal.build}/classes">
+				bootclasspath="${android.platform}/android.jar;${terminal.build}/classes">	
 
 			<doclet name="com.google.doclava.Doclava" path="${terminal.root}/doclava-1.0.6/doclava-1.0.6.jar">
 				<param name="-d" value="${terminal.root}/sdk-joyn"/>			    
@@ -106,8 +106,11 @@
 	<target name="docs">
 		<delete dir="${terminal.root}/doclava"/>
 		<mkdir dir="${terminal.root}/doclava"/>
-		
+
 		<echo>Generate Javadoc to ${terminal.root}/doclava</echo>
+
+		<fail unless="env.ANDROID_TARGET" message="variable $ANDROID_TARGET not set! Please define variable like 'export ANDROID_TARGET=android-19'"/>
+
 		<javadoc 
 				verbose="on"
 				access="public"
@@ -130,5 +133,5 @@
 		</javadoc>
 	</target>
 
-
 </project>
+
