@@ -503,9 +503,7 @@ public final class ContactManager {
             throws ContactManagerException {
         ContactId contact = newInfo.getContact();
         String contactNumber = contact.toString();
-        if (sLogger.isActivated()) {
-            sLogger.info("Set contact info for ".concat(contactNumber));
-        }
+        boolean logActivated = sLogger.isActivated();
         /* Update contactInfo cache with new contact information */
         mContactInfoCache.put(contact, newInfo);
 
@@ -603,10 +601,16 @@ public final class ContactManager {
         values.put(KEY_REGISTRATION_STATE, newInfo.getRegistrationState().toInt());
 
         if (hasEntryInRcsContactAddressBook) {
+            if (logActivated) {
+                sLogger.info("Update RCS contact ".concat(contactNumber));
+            }
             /* RCS contact already exists in provider: update RABP entry */
             Uri uri = Uri.withAppendedPath(CONTENT_URI, contactNumber);
             mLocalContentResolver.update(uri, values, null, null);
         } else {
+            if (logActivated) {
+                sLogger.info("Insert new contact ".concat(contactNumber));
+            }
             /* RCS contact does not exists in provider: insert entry in RABP */
             mLocalContentResolver.insert(CONTENT_URI, values);
         }
@@ -759,6 +763,11 @@ public final class ContactManager {
         }
 
         if (!ops.isEmpty()) {
+            if (logActivated) {
+                sLogger.info("Execute " + ops.size()
+                        + " operations to update entries in native address book for contact "
+                        + contactNumber);
+            }
             /* Do the actual database modifications */
             try {
                 mContentResolver.applyBatch(ContactsContract.AUTHORITY, ops);
