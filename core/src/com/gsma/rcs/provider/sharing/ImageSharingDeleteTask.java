@@ -27,7 +27,7 @@ public class ImageSharingDeleteTask extends DeleteTask.GroupedByContactId {
     public ImageSharingDeleteTask(ImageSharingServiceImpl imageSharingService,
             RichcallService richcallService, LocalContentResolver contentResolver, Object imsLock) {
         super(contentResolver, imsLock, ImageSharingData.CONTENT_URI,
-                ImageSharingData.KEY_SHARING_ID, ImageSharingData.KEY_CONTACT, null);
+                ImageSharingData.KEY_SHARING_ID, ImageSharingData.KEY_CONTACT, (String) null);
         mImageSharingService = imageSharingService;
         mRichcallService = richcallService;
     }

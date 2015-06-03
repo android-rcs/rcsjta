@@ -27,7 +27,7 @@ public class GeolocSharingDeleteTask extends DeleteTask.GroupedByContactId {
     public GeolocSharingDeleteTask(GeolocSharingServiceImpl geolocSharingService,
             RichcallService richcallService, LocalContentResolver contentResolver, Object imsLock) {
         super(contentResolver, imsLock, GeolocSharingData.CONTENT_URI,
-                GeolocSharingData.KEY_SHARING_ID, GeolocSharingData.KEY_CONTACT, null);
+                GeolocSharingData.KEY_SHARING_ID, GeolocSharingData.KEY_CONTACT, (String) null);
         mGeolocSharingService = geolocSharingService;
         mRichcallService = richcallService;
     }

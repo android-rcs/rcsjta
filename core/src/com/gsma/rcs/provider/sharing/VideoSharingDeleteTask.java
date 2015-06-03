@@ -27,7 +27,7 @@ public class VideoSharingDeleteTask extends DeleteTask.GroupedByContactId {
     public VideoSharingDeleteTask(VideoSharingServiceImpl videoSharingService,
             RichcallService richcallService, LocalContentResolver contentResolver, Object imsLock) {
         super(contentResolver, imsLock, VideoSharingData.CONTENT_URI,
-                VideoSharingData.KEY_SHARING_ID, VideoSharingData.KEY_CONTACT, null);
+                VideoSharingData.KEY_SHARING_ID, VideoSharingData.KEY_CONTACT, (String) null);
         mVideoSharingService = videoSharingService;
         mRichcallService = richcallService;
     }
