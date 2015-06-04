@@ -50,9 +50,6 @@ import java.util.Set;
  */
 public class SyncAdapterService extends Service {
 
-    /**
-     * Contacts sync adapter.
-     */
     private RcsContactsSyncAdapter mSyncAdapter;
 
     /**
@@ -60,7 +57,7 @@ public class SyncAdapterService extends Service {
      */
     public static final String ANDROID_CONTENT_SYNCADPTER = "android.content.SyncAdapter";
 
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger logger = Logger.getLogger(SyncAdapterService.class.getSimpleName());
 
     private ContactManager mContactManager;
 
@@ -83,11 +80,11 @@ public class SyncAdapterService extends Service {
      */
     @Override
     public IBinder onBind(Intent intent) {
-        if (intent.getAction().equals(ANDROID_CONTENT_SYNCADPTER)) {
+        if (ANDROID_CONTENT_SYNCADPTER.equals(intent.getAction())) {
             return mSyncAdapter.getSyncAdapterBinder();
         }
         if (logger.isActivated()) {
-            logger.error("Bound with unknown intent: " + intent);
+            logger.error("Bound with unknown intent: ".concat(intent.toString()));
         }
         return null;
     }
@@ -99,7 +96,6 @@ public class SyncAdapterService extends Service {
 
         public RcsContactsSyncAdapter(Context context) {
             super(context, true /* autoInitialize */);
-
         }
 
         /**
@@ -108,12 +104,11 @@ public class SyncAdapterService extends Service {
         @Override
         public void onPerformSync(Account account, Bundle extras, String authority,
                 ContentProviderClient provider, SyncResult syncResult) {
-
             if (logger.isActivated()) {
                 logger.debug("Performing a refresh on contact capabilities");
             }
 
-            // Test IMS connection
+            /* Test IMS connection */
             try {
                 ServerApiUtils.testIms();
             } catch (ServerApiServiceNotRegisteredException e) {

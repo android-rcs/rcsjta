@@ -22,6 +22,12 @@
 
 package com.gsma.rcs.addressbook;
 
+import com.gsma.rcs.R;
+import com.gsma.rcs.provider.LocalContentResolver;
+import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.utils.logger.Logger;
+
 import android.accounts.AbstractAccountAuthenticator;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorResponse;
@@ -32,24 +38,17 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Groups;
-
-import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.contact.ContactManager;
-import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.logger.Logger;
 
 /**
  * This class is a Service to authenticate the user's account information.
  */
 public class AuthenticationService extends Service {
 
-    /**
-     * Authenticator
-     */
     private RcsContactsAccountAuthenticator mAuthenticator;
 
     /**
@@ -57,10 +56,10 @@ public class AuthenticationService extends Service {
      */
     public static final String ACCOUNT_MANAGER_TYPE = "com.gsma.rcs";
 
-    /**
-     * The logger
-     */
-    private static Logger logger = Logger.getLogger(AuthenticationService.class.getName());
+    private static final Logger sLogger = Logger.getLogger(AuthenticationService.class.getName());
+
+    private static final String CONTACTSCONTRACT_GROUPS_COLUMN_TITLE_RES = "title_res";
+    private static final String CONTACTSCONTRACT_GROUPS_COLUMN_RES_PACKAGE = "res_package";
 
     /**
      * Get the account for the specified name
@@ -71,17 +70,12 @@ public class AuthenticationService extends Service {
      */
     public static Account getAccount(Context context, String username) {
         AccountManager accountManager = AccountManager.get(context);
-        Account[] mAccounts = accountManager
-                .getAccountsByType(AuthenticationService.ACCOUNT_MANAGER_TYPE);
-        Account mAccount = null;
-        int length = mAccounts.length;
-        for (int i = 0; i < length; i++) {
-            if (username.equals(mAccounts[i].name)) {
-                mAccount = mAccounts[i];
-                break;
+        for (Account account : accountManager.getAccountsByType(ACCOUNT_MANAGER_TYPE)) {
+            if (username.equals(account)) {
+                return account;
             }
         }
-        return mAccount;
+        return null;
     }
 
     /**
@@ -91,43 +85,51 @@ public class AuthenticationService extends Service {
      * @param localContentResolver Local content resolver
      * @param username The username
      * @param enableSync true to enable synchronization
-     * @param rcsSettings
-     * @param contactManager
+     * @param rcsSettings RCS settings accessor
+     * @param contactManager Contact manager accessor
      */
     public static void createRcsAccount(Context context, LocalContentResolver localContentResolver,
             String username, boolean enableSync, RcsSettings rcsSettings,
             ContactManager contactManager) {
-        ContactManager.createInstance(context, context.getContentResolver(), localContentResolver,
-                rcsSettings);
-
-        // Save the account info into the AccountManager if needed
-        Account mAccount = getAccount(context, username);
-        if (mAccount == null) {
-            mAccount = new Account(username, AuthenticationService.ACCOUNT_MANAGER_TYPE);
+        /* Save the account info into the AccountManager if needed */
+        Account account = getAccount(context, username);
+        if (account == null) {
+            account = new Account(username, ACCOUNT_MANAGER_TYPE);
             AccountManager accountManager = AccountManager.get(context);
-            boolean resource = accountManager.addAccountExplicitly(mAccount, null, null);
+            boolean resource = accountManager.addAccountExplicitly(account, null, null);
             if (!resource) {
-                if (logger.isActivated()) {
-                    logger.error("Unable to create account for " + username);
+                if (sLogger.isActivated()) {
+                    sLogger.error("Unable to create account for ".concat(username));
                 }
                 return;
             }
         }
 
-        // Set contacts sync for this account.
+        /* Set contacts sync for this account. */
         if (enableSync) {
-            ContentResolver.setIsSyncable(mAccount, ContactsContract.AUTHORITY, 1);
+            ContentResolver.setIsSyncable(account, ContactsContract.AUTHORITY, 1);
         }
-        ContentResolver.setSyncAutomatically(mAccount, ContactsContract.AUTHORITY, enableSync);
+        ContentResolver.setSyncAutomatically(account, ContactsContract.AUTHORITY, enableSync);
 
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(Groups.ACCOUNT_NAME, username);
-        contentValues.put(Groups.ACCOUNT_TYPE, AuthenticationService.ACCOUNT_MANAGER_TYPE);
-        contentValues.put(Groups.GROUP_VISIBLE, false);
+        /* Insert RCS group if it does not exist */
+        if (ContactManager.INVALID_ID == contactManager.getRcsGroupIdFromContactsContractGroups()) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Groups.ACCOUNT_NAME, username);
+            contentValues.put(Groups.ACCOUNT_TYPE, ACCOUNT_MANAGER_TYPE);
+            contentValues.put(Groups.GROUP_VISIBLE, false);
+            contentValues.put(Groups.TITLE, context.getString(R.string.rcs_core_account_id));
+            if (Build.VERSION.SDK_INT >= 21) {
+                contentValues.put(CONTACTSCONTRACT_GROUPS_COLUMN_TITLE_RES,
+                        R.string.rcs_core_account_id);
+                contentValues.put(CONTACTSCONTRACT_GROUPS_COLUMN_RES_PACKAGE,
+                        context.getPackageName());
 
-        context.getContentResolver().insert(Groups.CONTENT_URI, contentValues);
+            }
+            contentValues.put(Groups.GROUP_IS_READ_ONLY, 1);
+            context.getContentResolver().insert(Groups.CONTENT_URI, contentValues);
+        }
 
-        // Create the "Me" item
+        /* Create the "Me" item */
         contactManager.createMyContact();
     }
 
@@ -139,11 +141,11 @@ public class AuthenticationService extends Service {
      * @return True if sync is enabled
      */
     public static boolean isSyncEnabled(Context context, String username) {
-        Account mAccount = getAccount(context, username);
-        if (mAccount == null) {
+        Account account = getAccount(context, username);
+        if (account == null) {
             return false;
         }
-        return ContentResolver.getSyncAutomatically(mAccount, ContactsContract.AUTHORITY);
+        return ContentResolver.getSyncAutomatically(account, ContactsContract.AUTHORITY);
     }
 
     /**
@@ -154,12 +156,9 @@ public class AuthenticationService extends Service {
      */
     public static void removeRcsAccount(Context context, String excludeUsername) {
         AccountManager accountManager = AccountManager.get(context);
-        Account[] mAccounts = accountManager
-                .getAccountsByType(AuthenticationService.ACCOUNT_MANAGER_TYPE);
-        int length = mAccounts.length;
-        for (int i = 0; i < length; i++) {
-            if (!mAccounts[i].name.equals(excludeUsername)) {
-                accountManager.removeAccount(mAccounts[i], null, null);
+        for (Account account : accountManager.getAccountsByType(ACCOUNT_MANAGER_TYPE)) {
+            if (!account.name.equals(excludeUsername)) {
+                accountManager.removeAccount(account, null, null);
             }
         }
     }
@@ -180,9 +179,8 @@ public class AuthenticationService extends Service {
         if (AccountManager.ACTION_AUTHENTICATOR_INTENT.equals(intent.getAction())) {
             return mAuthenticator.getIBinder();
         }
-
-        if (logger.isActivated()) {
-            logger.error("Bound with unknown intent: " + intent);
+        if (sLogger.isActivated()) {
+            sLogger.error("Bound with unknown intent: ".concat(intent.toString()));
         }
         return null;
     }
@@ -205,16 +203,15 @@ public class AuthenticationService extends Service {
         public Bundle addAccount(AccountAuthenticatorResponse response, String accountType,
                 String authTokenType, String[] requiredFeatures, Bundle options)
                 throws NetworkErrorException {
-
             /*
              * Launch the login activity to add the account, letting it know that we got there by
              * trying to add an account so it can check for an existing account.
              */
-            Bundle mBundle = new Bundle();
-            Intent mIntent = new Intent(mContext, SetupRcsAccount.class);
-            mIntent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
-            mBundle.putParcelable(AccountManager.KEY_INTENT, mIntent);
-            return mBundle;
+            Bundle bundle = new Bundle();
+            Intent intent = new Intent(mContext, SetupRcsAccount.class);
+            intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
+            bundle.putParcelable(AccountManager.KEY_INTENT, intent);
+            return bundle;
         }
 
         /**
