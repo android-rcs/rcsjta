@@ -188,8 +188,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
             if (fileIcon == null) {
                 /* Set the local SDP part in the dialog path */
                 getDialogPath().setLocalContent(sdp.toString());
-            }
-            if (fileIconSupported) {
+            } else if (fileIconSupported) {
                 sdp.append("a=file-icon:cid:image@joyn.com").append(SipUtils.CRLF);
 
                 /* Encode the file icon file */
