@@ -27,8 +27,8 @@ import java.util.Set;
 public class GroupFileTransferDeleteTask extends DeleteTask.GroupedByChatId {
 
     private static final String SELECTION_ALL_GROUP_FILETRANSFERS = new StringBuilder(
-            FileTransferData.KEY_CHAT_ID).append("<>").append(FileTransferData.KEY_CONTACT)
-            .toString();
+            FileTransferData.KEY_CONTACT).append(" IS NULL").toString();
+
     private static final String SELECTION_FILETRANSFER_BY_CHATID = new StringBuilder(
             FileTransferData.KEY_CHAT_ID).append("=?").toString();
 
