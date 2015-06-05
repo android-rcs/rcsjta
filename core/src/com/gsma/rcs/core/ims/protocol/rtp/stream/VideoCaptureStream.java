@@ -19,6 +19,7 @@
 package com.gsma.rcs.core.ims.protocol.rtp.stream;
 
 import com.gsma.rcs.core.ims.protocol.rtp.format.Format;
+import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.rtp.media.MediaInput;
 import com.gsma.rcs.core.ims.protocol.rtp.media.VideoSample;
 import com.gsma.rcs.core.ims.protocol.rtp.util.Buffer;
@@ -43,9 +44,9 @@ public class VideoCaptureStream extends MediaCaptureStream {
      * Read from the stream
      * 
      * @return Buffer
-     * @throws Exception
+     * @throws MediaException
      */
-    public Buffer read() throws Exception {
+    public Buffer read() throws MediaException {
         // Read a new sample from the media player
         VideoSample sample = (VideoSample) getPlayer().readSample();
         if (sample == null) {

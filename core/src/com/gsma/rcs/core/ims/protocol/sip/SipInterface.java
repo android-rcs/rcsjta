@@ -62,7 +62,9 @@ import javax2.sip.SipListener;
 import javax2.sip.SipProvider;
 import javax2.sip.SipStack;
 import javax2.sip.TimeoutEvent;
+import javax2.sip.TransactionAlreadyExistsException;
 import javax2.sip.TransactionTerminatedEvent;
+import javax2.sip.TransactionUnavailableException;
 import javax2.sip.TransportNotSupportedException;
 import javax2.sip.address.Address;
 import javax2.sip.address.SipURI;
@@ -1147,39 +1149,50 @@ public class SipInterface implements SipListener {
             System.out.println("<<< " + request.toString());
             System.out.println(TRACE_SEPARATOR);
         }
-
-        // Get transaction
-        ServerTransaction transaction = requestEvent.getServerTransaction();
-        if (transaction == null) {
-            try {
+        try {
+            // Get transaction
+            ServerTransaction transaction = requestEvent.getServerTransaction();
+            if (transaction == null) {
                 // Create a transaction for this new incoming request
                 SipProvider srcSipProvider = (SipProvider) requestEvent.getSource();
                 transaction = srcSipProvider.getNewServerTransaction(request);
-            } catch (Exception e) {
-                if (loggerActivated) {
-                    sLogger.error("Unable to create a new server transaction for an incoming request");
-                }
+            }
+
+            // Create received request with its associated transaction
+            SipRequest req = new SipRequest(request);
+            req.setStackTransaction(transaction);
+
+            if (Request.ACK.equals(req.getMethod())) {
+                // Search the context associated to the received ACK and notify it
+                String transactionId = SipTransactionContext.getTransactionContextId(req);
+                notifyTransactionContext(transactionId, req);
                 return;
             }
-        }
 
-        // Create received request with its associated transaction
-        SipRequest req = new SipRequest(request);
-        req.setStackTransaction(transaction);
-
-        if ("ACK".equals(req.getMethod())) {
-            // Search the context associated to the received ACK and notify it
-            String transactionId = SipTransactionContext.getTransactionContextId(req);
-            notifyTransactionContext(transactionId, req);
-            return;
-        }
-
-        // Notify event listeners
-        for (SipEventListener listener : mListeners) {
-            if (loggerActivated) {
-                sLogger.debug("Notify a SIP listener");
+            // Notify event listeners
+            for (SipEventListener listener : mListeners) {
+                if (loggerActivated) {
+                    sLogger.debug("Notify a SIP listener");
+                }
+                listener.receiveSipRequest(req);
             }
-            listener.receiveSipRequest(req);
+        } catch (TransactionAlreadyExistsException e) {
+            /**
+             * Intentionally consuming this exception as no need to create a new transaction in case
+             * it already exists.
+             */
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
+
+        } catch (TransactionUnavailableException e) {
+            /**
+             * Intentionally consuming this exception as the transcation can be created at a later
+             * instance if not created here.
+             */
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
         }
     }
 

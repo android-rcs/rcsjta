@@ -45,37 +45,37 @@ public class DummyPacketSourceStream extends Thread implements ProcessorInputStr
     /**
      * Input format
      */
-    private DummyFormat format = new DummyFormat();
+    private DummyFormat mFormat = new DummyFormat();
 
     /**
      * Time base
      */
-    private SystemTimeBase systemTimeBase = new SystemTimeBase();
+    private SystemTimeBase mSystemTimeBase = new SystemTimeBase();
 
     /**
      * Sequence number
      */
-    private long seqNo = 0;
+    private long mSeqNo;
 
     /**
      * Message buffer
      */
-    private FifoBuffer fifo = new FifoBuffer();
+    private FifoBuffer mBuffer = new FifoBuffer();
 
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(DummyPacketSourceStream.class.getName());
 
     /**
      * Interruption flag
      */
-    private boolean interrupted = false;
+    private boolean mInterrupted;
 
     /**
      * Incoming stream is started ?
      */
-    private boolean incomingStarted = false;
+    private boolean mIncomingStarted;
 
     /**
      * Constructor
@@ -88,8 +88,8 @@ public class DummyPacketSourceStream extends Thread implements ProcessorInputStr
      */
     public void open() {
         start();
-        if (logger.isActivated()) {
-            logger.debug("Dummy source stream opened");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Dummy source stream opened");
         }
     }
 
@@ -97,14 +97,10 @@ public class DummyPacketSourceStream extends Thread implements ProcessorInputStr
      * Close the input stream
      */
     public void close() {
-        interrupted = true;
-        try {
-            fifo.close();
-        } catch (Exception e) {
-            // Intentionally blank
-        }
-        if (logger.isActivated()) {
-            logger.debug("Dummy source stream closed");
+        mInterrupted = true;
+        mBuffer.close();
+        if (sLogger.isActivated()) {
+            sLogger.debug("Dummy source stream closed");
         }
     }
 
@@ -114,37 +110,45 @@ public class DummyPacketSourceStream extends Thread implements ProcessorInputStr
      * @return Format
      */
     public Format getFormat() {
-        return format;
+        return mFormat;
     }
 
     /**
      * Background processing
      */
     public void run() {
-        while (!interrupted) {
-            try {
-                // Build a new dummy packet
-                Buffer packet = new Buffer();
-                packet.setData(new byte[0]);
-                packet.setLength(0);
-                packet.setFormat(format);
-                packet.setSequenceNumber(seqNo++);
-                packet.setTimestamp(systemTimeBase.getTimestamp());
+        try {
+            while (!mInterrupted) {
+                try {
+                    // Build a new dummy packet
+                    Buffer packet = new Buffer();
+                    packet.setData(new byte[0]);
+                    packet.setLength(0);
+                    packet.setFormat(mFormat);
+                    packet.setSequenceNumber(mSeqNo++);
+                    packet.setTimestamp(mSystemTimeBase.getTimestamp());
 
-                // Post the packet in the FIFO
-                fifo.addObject(packet);
+                    // Post the packet in the FIFO
+                    mBuffer.addObject(packet);
 
-                // Make a pause
-                if (!incomingStarted) {
-                    Thread.sleep(DUMMY_SOURCE_OPENING_PERIOD);
-                } else {
-                    Thread.sleep(DUMMY_SOURCE_PERIOD);
-                }
-            } catch (Exception e) {
-                if (logger.isActivated()) {
-                    logger.error("Dummy packet source has failed", e);
+                    // Make a pause
+                    if (!mIncomingStarted) {
+                        Thread.sleep(DUMMY_SOURCE_OPENING_PERIOD);
+                    } else {
+                        Thread.sleep(DUMMY_SOURCE_PERIOD);
+                    }
+                } catch (InterruptedException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(e.getMessage());
+                    }
                 }
             }
+        } catch (RuntimeException e) {
+            /*
+             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
+             * eventually bring the whole system down, which is not intended.
+             */
+            sLogger.error("Dummy packet source has failed!", e);
         }
     }
 
@@ -152,11 +156,10 @@ public class DummyPacketSourceStream extends Thread implements ProcessorInputStr
      * Read from the stream
      * 
      * @return Buffer
-     * @throws Exception
      */
-    public Buffer read() throws Exception {
+    public Buffer read() {
         // Read the FIFO the buffer
-        Buffer buffer = (Buffer) fifo.getObject();
+        Buffer buffer = (Buffer) mBuffer.getObject();
         return buffer;
     }
 
@@ -164,6 +167,6 @@ public class DummyPacketSourceStream extends Thread implements ProcessorInputStr
      * Set incomingStarted.
      */
     public void incomingStarted() {
-        incomingStarted = true;
+        mIncomingStarted = true;
     }
 }

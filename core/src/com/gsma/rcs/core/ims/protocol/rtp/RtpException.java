@@ -40,4 +40,16 @@ public class RtpException extends IOException {
     public RtpException(String error) {
         super(error);
     }
+
+    /**
+     * Constructor
+     * 
+     * @param message Error message obtained either from a constant string or through e.getMessage()
+     * @param cause the cause (which is saved for later retrieval by the Throwable.getCause()
+     *            method). (A null value is permitted, and indicates that the cause is nonexistent
+     *            or unknown.)
+     */
+    public RtpException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

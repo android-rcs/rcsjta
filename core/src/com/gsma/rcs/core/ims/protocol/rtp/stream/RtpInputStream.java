@@ -37,6 +37,7 @@ import com.gsma.rcs.core.ims.protocol.rtp.core.RtpPacketReceiver;
 import com.gsma.rcs.core.ims.protocol.rtp.core.RtpExtensionHeader.ExtensionElement;
 import com.gsma.rcs.core.ims.protocol.rtp.format.Format;
 import com.gsma.rcs.core.ims.protocol.rtp.format.video.VideoOrientation;
+import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.rtp.util.Buffer;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -192,9 +193,9 @@ public class RtpInputStream implements ProcessorInputStream {
                 rtcpReceiver.close();
             }
             rtpStreamListener = null;
-        } catch (Exception e) {
+        } catch (IOException e) {
             if (logger.isActivated()) {
-                logger.error("Can't close correctly RTP ressources", e);
+                logger.debug(e.getMessage());
             }
         }
     }
@@ -221,53 +222,47 @@ public class RtpInputStream implements ProcessorInputStream {
      * Read from the input stream without blocking
      * 
      * @return Buffer
-     * @throws Exception
+     * @throws MediaException
      */
-    public Buffer read() throws Exception {
-        try {
-            do {
-                // Wait and read a RTP packet
+    public Buffer read() throws MediaException {
+        do {
+            try {
+                /* Wait and read a RTP packet */
                 RtpPacket rtpPacket = rtpReceiver.readRtpPacket();
                 if (rtpPacket == null) {
-                    return null;
+                    throw new MediaException("Unable to read RTP packet!");
                 }
 
-                // Add the buffer in queue
                 rtpPacketsBuffer.add(rtpPacket);
-            } while (rtpPacketsBuffer.size() <= 5);
-
-            RtpPacket packet = rtpPacketsBuffer.poll();
-
-            // Create a buffer
-            buffer.setData(packet.data);
-            buffer.setLength(packet.payloadlength);
-            buffer.setOffset(0);
-            buffer.setFormat(inputFormat);
-            buffer.setSequenceNumber(packet.seqnum);
-            buffer.setRTPMarker(packet.marker != 0);
-            buffer.setTimestamp(packet.timestamp);
-
-            if (packet.extensionHeader != null) {
-                ExtensionElement element = packet.extensionHeader.getElementById(extensionHeaderId);
-                if (element != null) {
-                    buffer.setVideoOrientation(VideoOrientation.parse(element.data[0]));
+            } catch (TimeoutException e) {
+                if (!isClosed) {
+                    if (rtpStreamListener != null) {
+                        rtpStreamListener.rtpStreamAborted();
+                    }
                 }
+                throw new MediaException("RTP Packet reading timeout!", e);
             }
+        } while (rtpPacketsBuffer.size() <= 5);
 
-            // Set inputFormat back to null
-            inputFormat = null;
-            return buffer;
-        } catch (TimeoutException ex) {
-            if (!isClosed) {
-                if (logger.isActivated()) {
-                    logger.error("RTP Packet receiver socket error", ex);
-                }
-                if (rtpStreamListener != null) {
-                    rtpStreamListener.rtpStreamAborted();
-                }
+        RtpPacket packet = rtpPacketsBuffer.poll();
+
+        buffer.setData(packet.data);
+        buffer.setLength(packet.payloadlength);
+        buffer.setOffset(0);
+        buffer.setFormat(inputFormat);
+        buffer.setSequenceNumber(packet.seqnum);
+        buffer.setRTPMarker(packet.marker != 0);
+        buffer.setTimestamp(packet.timestamp);
+
+        if (packet.extensionHeader != null) {
+            ExtensionElement element = packet.extensionHeader.getElementById(extensionHeaderId);
+            if (element != null) {
+                buffer.setVideoOrientation(VideoOrientation.parse(element.data[0]));
             }
-            return null;
         }
+
+        inputFormat = null;
+        return buffer;
     }
 
     /**

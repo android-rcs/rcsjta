@@ -210,41 +210,33 @@ public abstract class H264Profile {
      * @return {@link H264Profile} if supported, otherwise <code>null</code>
      */
     public static H264Profile getProfile(String profileId) {
-        H264Profile profile = null;
-        try {
+        final Byte profileIDC = getProfileIDCFromLevelId(profileId);
+        final Byte profileIOP = getProfileIOPFromLevelId(profileId);
+        final Byte levelIDC = getLevelIDCFromLevelId(profileId);
 
-            final Byte profileIDC = getProfileIDCFromLevelId(profileId);
-            final Byte profileIOP = getProfileIOPFromLevelId(profileId);
-            final Byte levelIDC = getLevelIDCFromLevelId(profileId);
-
-            if (profileIDC == null || profileIOP == null || levelIDC == null) {
-                return null;
-            }
-
-            // constraintSet3Flag is the X bit on YYYX YYYY
-            int constraintSet3FlagValue = ((profileIOP >> 4) & 0x01);
-            H264ConstraintSetFlagType constraintSet3Flag = ((constraintSet3FlagValue == 1) ? H264ConstraintSetFlagType.TRUE
-                    : H264ConstraintSetFlagType.FALSE);
-
-            H264TypeLevel level = H264TypeLevel.getH264LevelType(levelIDC, constraintSet3Flag);
-
-            if (H264TypeLevel.LEVEL_1 == level) {
-                profile = new H264Profile1();
-            } else if (H264TypeLevel.LEVEL_1B == level) {
-                profile = new H264Profile1b();
-            } else if (H264TypeLevel.LEVEL_1_1 == level) {
-                profile = new H264Profile1_1();
-            } else if (H264TypeLevel.LEVEL_1_2 == level) {
-                profile = new H264Profile1_2();
-            } else if (H264TypeLevel.LEVEL_1_3 == level) {
-                profile = new H264Profile1_3();
-            } else {
-                profile = null;
-            }
-
-        } catch (Exception e) {
+        if (profileIDC == null || profileIOP == null || levelIDC == null) {
+            return null;
         }
 
-        return profile;
+        /* constraintSet3Flag is the X bit on YYYX YYYY */
+        int constraintSet3FlagValue = ((profileIOP >> 4) & 0x01);
+        H264ConstraintSetFlagType constraintSet3Flag = ((constraintSet3FlagValue == 1) ? H264ConstraintSetFlagType.TRUE
+                : H264ConstraintSetFlagType.FALSE);
+
+        H264TypeLevel level = H264TypeLevel.getH264LevelType(levelIDC, constraintSet3Flag);
+        switch (level) {
+            case LEVEL_1:
+                return new H264Profile1();
+            case LEVEL_1B:
+                return new H264Profile1b();
+            case LEVEL_1_1:
+                return new H264Profile1_1();
+            case LEVEL_1_2:
+                return new H264Profile1_2();
+            case LEVEL_1_3:
+                return new H264Profile1_3();
+            default:
+                return null;
+        }
     }
 }

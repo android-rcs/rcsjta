@@ -26,6 +26,8 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PeriodicRefresher;
 import com.gsma.rcs.utils.logger.Logger;
 
+import java.io.IOException;
+
 /**
  * Keep-alive manager (see RFC 5626)
  * 
@@ -45,7 +47,7 @@ public class KeepAliveManager extends PeriodicRefresher {
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(KeepAliveManager.class.getName());
 
     /**
      * Constructor
@@ -62,8 +64,8 @@ public class KeepAliveManager extends PeriodicRefresher {
      * Start
      */
     public void start() {
-        if (logger.isActivated()) {
-            logger.debug("Start keep-alive");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Start keep-alive");
         }
         startTimer(System.currentTimeMillis(), mPeriod);
     }
@@ -72,8 +74,8 @@ public class KeepAliveManager extends PeriodicRefresher {
      * Start
      */
     public void stop() {
-        if (logger.isActivated()) {
-            logger.debug("Stop keep-alive");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Stop keep-alive");
         }
         stopTimer();
     }
@@ -83,8 +85,8 @@ public class KeepAliveManager extends PeriodicRefresher {
      */
     public void periodicProcessing() {
         try {
-            if (logger.isActivated()) {
-                logger.debug("Send keep-alive");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Send keep-alive");
             }
 
             // Send a double-CRLF
@@ -93,9 +95,9 @@ public class KeepAliveManager extends PeriodicRefresher {
 
             // Start timer
             startTimer(System.currentTimeMillis(), mPeriod);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("SIP heartbeat has failed", e);
+        } catch (IOException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
             }
         }
     }
@@ -105,8 +107,8 @@ public class KeepAliveManager extends PeriodicRefresher {
      */
     public void setPeriod(long period) {
         mPeriod = period;
-        if (logger.isActivated()) {
-            logger.debug("Set keep-alive period \"" + period + "\"");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Set keep-alive period \"" + period + "\"");
         }
     }
 }

@@ -34,9 +34,6 @@ public class NativeH264Decoder {
 
     static {
         String libname = "H264Decoder";
-        try {
-            System.loadLibrary(libname);
-        } catch (Exception exception) {
-        }
+        System.loadLibrary(libname);
     }
 }

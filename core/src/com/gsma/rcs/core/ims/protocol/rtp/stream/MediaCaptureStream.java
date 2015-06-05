@@ -115,9 +115,9 @@ public class MediaCaptureStream implements ProcessorInputStream {
      * Read from the stream
      * 
      * @return Buffer
-     * @throws Exception
+     * @throws MediaException
      */
-    public Buffer read() throws Exception {
+    public Buffer read() throws MediaException {
         // Read a new sample from the media player
         MediaSample sample = player.readSample();
         if (sample == null) {

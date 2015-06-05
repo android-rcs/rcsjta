@@ -85,11 +85,10 @@ public class VideoRtpSender extends MediaRtpSender {
             if (logger.isActivated()) {
                 logger.debug("Session has been prepared with success");
             }
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't prepare resources correctly", e);
-            }
-            throw new RtpException("Can't prepare resources");
+        } catch (IOException e) {
+            throw new RtpException(new StringBuilder(
+                    "Can't prepare resources correctly for remoteAddress : ").append(remoteAddress)
+                    .append(" with remotePort : ").append(remotePort).append("!").toString(), e);
         }
     }
 

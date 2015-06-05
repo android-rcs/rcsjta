@@ -18,6 +18,7 @@
 
 package com.gsma.rcs.core.ims.protocol.rtp.stream;
 
+import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.rtp.media.MediaOutput;
 import com.gsma.rcs.core.ims.protocol.rtp.media.VideoSample;
 import com.gsma.rcs.core.ims.protocol.rtp.util.Buffer;
@@ -41,9 +42,9 @@ public class VideoRendererStream extends MediaRendererStream {
      * Write to the stream without blocking
      * 
      * @param buffer Input buffer
-     * @throws Exception
+     * @throws MediaException
      */
-    public void write(Buffer buffer) throws Exception {
+    public void write(Buffer buffer) throws MediaException {
         VideoSample sample = new VideoSample((byte[]) buffer.getData(), buffer.getTimestamp(),
                 buffer.getSequenceNumber(), buffer.getVideoOrientation());
         getRenderer().writeSample(sample);

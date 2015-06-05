@@ -19,6 +19,7 @@
 package com.gsma.rcs.core.ims.protocol.rtp;
 
 import com.gsma.rcs.core.ims.protocol.rtp.codec.Codec;
+import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.rtp.stream.ProcessorOutputStream;
 import com.gsma.rcs.core.ims.protocol.rtp.util.Buffer;
 import com.gsma.rcs.utils.logger.Logger;
@@ -93,11 +94,11 @@ public class CodecChain {
      */
     private int doProcess(int codecNo, Buffer input) {
         if (codecNo == codecs.length) {
-            // End of chain
+            /* End of chain */
             try {
-                // Write data to the output stream
+                /* Write data to the output stream */
                 if (input.isFragmented()) {
-                    // Write data from sub-buffers to the output stream
+                    /* Write data from sub-buffers to the output stream */
                     final Buffer[] fragments = input.getFragments();
                     for (int i = 0; i < input.getFragmentsSize(); i++) {
                         Buffer fragment = fragments[i];
@@ -109,23 +110,20 @@ public class CodecChain {
                     renderer.write(input);
                 }
                 return Codec.BUFFER_PROCESSED_OK;
-            } catch (Exception e) {
+
+            } catch (MediaException e) {
+                if (logger.isActivated()) {
+                    logger.debug(e.getMessage());
+                }
                 return Codec.BUFFER_PROCESSED_FAILED;
             }
         } else {
-            // Process this codec
             Codec codec = codecs[codecNo];
             int returnVal;
             do {
-                try {
-                    returnVal = codec.process(input, buffers[codecNo]);
-                } catch (Exception e) {
-                    if (logger.isActivated()) {
-                        logger.error("Codec processing exception", e);
-                    }
-                    return Codec.BUFFER_PROCESSED_FAILED;
-                }
-                if (returnVal == Codec.BUFFER_PROCESSED_FAILED) {
+                returnVal = codec.process(input, buffers[codecNo]);
+
+                if (Codec.BUFFER_PROCESSED_FAILED == returnVal) {
                     if (logger.isActivated()) {
                         logger.error("Codec processing error " + returnVal);
                     }

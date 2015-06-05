@@ -39,27 +39,27 @@ public class ChunkSender extends Thread {
     /**
      * MSRP connection
      */
-    private MsrpConnection connection;
+    private MsrpConnection mConnection;
 
     /**
      * MSRP output stream
      */
-    private OutputStream stream;
+    private OutputStream mStream;
 
     /**
      * Buffer of chunks
      */
-    private FifoBuffer buffer = new FifoBuffer();
+    private FifoBuffer mBuffer = new FifoBuffer();
 
     /**
      * Termination flag
      */
-    private boolean terminated = false;
+    private boolean mTerminated;
 
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(ChunkSender.class.getName());
 
     /**
      * Constructor
@@ -68,8 +68,8 @@ public class ChunkSender extends Thread {
      * @param stream TCP output stream
      */
     public ChunkSender(MsrpConnection connection, OutputStream stream) {
-        this.connection = connection;
-        this.stream = stream;
+        mConnection = connection;
+        mStream = stream;
     }
 
     /**
@@ -78,19 +78,16 @@ public class ChunkSender extends Thread {
      * @return MSRP connection
      */
     public MsrpConnection getConnection() {
-        return connection;
+        return mConnection;
     }
 
     /**
      * Terminate the sender
      */
     public void terminate() {
-        terminated = true;
-        buffer.unblockRead();
-        try {
-            interrupt();
-        } catch (Exception e) {
-        }
+        mTerminated = true;
+        mBuffer.unblockRead();
+        interrupt();
     }
 
     /**
@@ -100,26 +97,33 @@ public class ChunkSender extends Thread {
         try {
             // Read chunk to be sent
             byte chunk[] = null;
-            while ((chunk = (byte[]) buffer.getMessage()) != null) {
+            while ((chunk = (byte[]) mBuffer.getMessage()) != null) {
                 // Write chunk to the output stream
                 if (MsrpConnection.MSRP_TRACE_ENABLED) {
                     System.out.println(">>> Send MSRP message:\n" + new String(chunk, UTF8));
                 }
                 writeData(chunk);
             }
-        } catch (Exception e) {
-            if (terminated) {
-                if (logger.isActivated()) {
-                    logger.debug("Chunk sender thread terminated");
+        } catch (IOException e) {
+            if (!mTerminated) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(e.getMessage());
                 }
-            } else {
-                if (logger.isActivated()) {
-                    logger.error("Chunk sender has failed", e);
-                }
-
-                // Notify the msrp session listener that an error has occured
-                // Changed by Deutsche Telekom
-                connection.getSession().getMsrpEventListener()
+                /* Notify the msrp session listener that an error has occured */
+                /* Changed by Deutsche Telekom */
+                mConnection.getSession().getMsrpEventListener()
+                        .msrpTransferError(null, e.getMessage(), TypeMsrpChunk.Unknown);
+            }
+        } catch (RuntimeException e) {
+            /*
+             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
+             * eventually bring the whole system down, which is not intended.
+             */
+            sLogger.error("Unable to send chunks!", e);
+            if (!mTerminated) {
+                /* Notify the msrp session listener that an error has occured */
+                /* Changed by Deutsche Telekom */
+                mConnection.getSession().getMsrpEventListener()
                         .msrpTransferError(null, e.getMessage(), TypeMsrpChunk.Unknown);
             }
         }
@@ -132,8 +136,8 @@ public class ChunkSender extends Thread {
      * @throws IOException
      */
     public void sendChunk(byte chunk[]) throws IOException {
-        if (connection.getSession().isFailureReportRequested()) {
-            buffer.putMessage(chunk);
+        if (mConnection.getSession().isFailureReportRequested()) {
+            mBuffer.putMessage(chunk);
         } else {
             sendChunkImmediately(chunk);
         }
@@ -159,7 +163,7 @@ public class ChunkSender extends Thread {
      * @throws IOException
      */
     private synchronized void writeData(byte chunk[]) throws IOException {
-        stream.write(chunk);
-        stream.flush();
+        mStream.write(chunk);
+        mStream.flush();
     }
 }

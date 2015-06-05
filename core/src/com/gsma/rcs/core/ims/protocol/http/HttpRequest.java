@@ -27,27 +27,27 @@ public abstract class HttpRequest {
     /**
      * URL
      */
-    private String url;
+    private String mUrl;
 
     /**
      * Content
      */
-    private String content;
+    private String mContent;
 
     /**
      * Content type
      */
-    private String contentType;
+    private String mContentType;
 
     /**
      * Cookie
      */
-    private String cookie = null;
+    private String mCookie;
 
     /**
      * HTTP authentication agent
      */
-    private HttpAuthenticationAgent authenticationAgent = null;
+    private HttpAuthenticationAgent mAuthenticationAgent;
 
     /**
      * Constructor
@@ -57,9 +57,9 @@ public abstract class HttpRequest {
      * @param contentType Content type
      */
     public HttpRequest(String url, String content, String contentType) {
-        this.url = url;
-        this.content = content;
-        this.contentType = contentType;
+        mUrl = url;
+        mContent = content;
+        mContentType = contentType;
     }
 
     /**
@@ -68,7 +68,7 @@ public abstract class HttpRequest {
      * @return Authentication agent
      */
     public HttpAuthenticationAgent getAuthenticationAgent() {
-        return authenticationAgent;
+        return mAuthenticationAgent;
     }
 
     /**
@@ -77,7 +77,7 @@ public abstract class HttpRequest {
      * @param agent Authentication agent
      */
     public void setAuthenticationAgent(HttpAuthenticationAgent agent) {
-        this.authenticationAgent = agent;
+        mAuthenticationAgent = agent;
     }
 
     /**
@@ -93,7 +93,7 @@ public abstract class HttpRequest {
      * @return URL
      */
     public String getUrl() {
-        return url;
+        return mUrl;
     }
 
     /**
@@ -102,7 +102,7 @@ public abstract class HttpRequest {
      * @return Conetnt
      */
     public String getContent() {
-        return content;
+        return mContent;
     }
 
     /**
@@ -112,8 +112,8 @@ public abstract class HttpRequest {
      */
     public int getContentLength() {
         int length = 0;
-        if (content != null) {
-            length = content.length();
+        if (mContent != null) {
+            length = mContent.length();
         }
         return length;
     }
@@ -124,7 +124,7 @@ public abstract class HttpRequest {
      * @return Mime content type
      */
     public String getContentType() {
-        return contentType;
+        return mContentType;
     }
 
     /**
@@ -133,7 +133,7 @@ public abstract class HttpRequest {
      * @return Cookie
      */
     public String getCookie() {
-        return cookie;
+        return mCookie;
     }
 
     /**
@@ -142,7 +142,7 @@ public abstract class HttpRequest {
      * @param cookie Cookie
      */
     public void setCookie(String cookie) {
-        this.cookie = cookie;
+        mCookie = cookie;
     }
 
     /**
@@ -151,11 +151,6 @@ public abstract class HttpRequest {
      * @return AUID
      */
     public String getAUID() {
-        try {
-            String[] parts = url.split("/");
-            return parts[1];
-        } catch (Exception e) {
-            return null;
-        }
+        return mUrl.split("/")[1];
     }
 }

@@ -26,6 +26,9 @@ import java.util.Hashtable;
  * @author jexa7410
  */
 public class HttpResponse {
+
+    private static final int INVALID_RESPONSE = -1;
+
     /**
      * Status line
      */
@@ -95,8 +98,9 @@ public class HttpResponse {
             int index1 = status.indexOf(" ") + 1;
             int index2 = status.indexOf(" ", index1);
             return Integer.parseInt(status.substring(index1, index2));
-        } catch (Exception e) {
-            return -1;
+
+        } catch (NumberFormatException e) {
+            return INVALID_RESPONSE;
         }
     }
 

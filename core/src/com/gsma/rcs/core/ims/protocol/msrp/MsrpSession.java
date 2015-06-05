@@ -584,10 +584,8 @@ public class MsrpSession {
             String newMsgId = generateTransactionId();
             addMsrpTransactionInfo(newTransactionId, newMsgId, null, TypeMsrpChunk.EmptyChunk);
             sendEmptyMsrpSendRequest(newTransactionId, to, from, newMsgId);
-        } catch (MsrpException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new MsrpException(e.getMessage());
+        } catch (IOException e) {
+            throw new MsrpException("Failed to send empty chunk!", e);
         }
     }
 

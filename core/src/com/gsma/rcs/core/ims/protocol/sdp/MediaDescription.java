@@ -18,6 +18,8 @@
 
 package com.gsma.rcs.core.ims.protocol.sdp;
 
+import com.gsma.rcs.utils.logger.Logger;
+
 import java.util.Vector;
 
 /**
@@ -26,6 +28,12 @@ import java.util.Vector;
  * @author jexa7410
  */
 public class MediaDescription {
+
+    /**
+     * The logger
+     */
+    private static final Logger sLogger = Logger.getLogger(MediaDescription.class.getName());
+
     /**
      * Media name
      */
@@ -111,7 +119,10 @@ public class MediaDescription {
         this.payload = payload;
         try {
             this.payloadType = Integer.parseInt(payload);
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Invalid payload type : ".concat(payload));
+            }
             this.payloadType = -1;
         }
     }

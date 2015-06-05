@@ -89,9 +89,9 @@ public class MediaRendererStream implements ProcessorOutputStream {
      * Write to the stream without blocking
      * 
      * @param buffer Input buffer
-     * @throws Exception
+     * @throws MediaException
      */
-    public void write(Buffer buffer) throws Exception {
+    public void write(Buffer buffer) throws MediaException {
         MediaSample sample = new MediaSample((byte[]) buffer.getData(), buffer.getTimestamp(),
                 buffer.getSequenceNumber());
         renderer.writeSample(sample);

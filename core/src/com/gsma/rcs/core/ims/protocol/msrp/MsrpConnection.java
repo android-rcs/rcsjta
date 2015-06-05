@@ -153,33 +153,36 @@ public abstract class MsrpConnection {
      * Close the connection
      */
     public void close() {
-        // Terminate chunk sender
         if (sender != null) {
             sender.terminate();
         }
 
-        // Terminate chunk receiver
         if (receiver != null) {
             receiver.terminate();
         }
 
-        // Close socket connection
-        try {
-            if (logger.isActivated()) {
-                logger.debug("Close the socket connection");
-            }
-            if (inputStream != null) {
+        if (logger.isActivated()) {
+            logger.debug("Close the socket connection");
+        }
+        if (inputStream != null) {
+            try {
                 inputStream.close();
+            } catch (IOException ignore) {
+                /* Do nothing */
             }
-            if (outputStream != null) {
+        }
+        if (outputStream != null) {
+            try {
                 outputStream.close();
+            } catch (IOException ignore) {
+                /* Do nothing */
             }
-            if (socket != null) {
+        }
+        if (socket != null) {
+            try {
                 socket.close();
-            }
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't close the socket correctly", e);
+            } catch (IOException ignore) {
+                /* Do nothing */
             }
         }
 

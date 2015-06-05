@@ -75,7 +75,7 @@ public class RtcpPacketTransmitter extends Thread {
     /**
      * The logger
      */
-    private final Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(RtcpPacketTransmitter.class.getName());
 
     /**
      * Constructor
@@ -97,8 +97,8 @@ public class RtcpPacketTransmitter extends Thread {
         datagramConnection = NetworkFactory.getFactory().createDatagramConnection();
         datagramConnection.open();
 
-        if (logger.isActivated()) {
-            logger.debug("RTCP transmitter connected to " + remoteAddress + ":" + remotePort);
+        if (sLogger.isActivated()) {
+            sLogger.debug("RTCP transmitter connected to " + remoteAddress + ":" + remotePort);
         }
     }
 
@@ -127,8 +127,8 @@ public class RtcpPacketTransmitter extends Thread {
             this.datagramConnection.open();
         }
 
-        if (logger.isActivated()) {
-            logger.debug("RTCP transmitter connected to " + remoteAddress + ":" + remotePort);
+        if (sLogger.isActivated()) {
+            sLogger.debug("RTCP transmitter connected to " + remoteAddress + ":" + remotePort);
         }
     }
 
@@ -149,8 +149,8 @@ public class RtcpPacketTransmitter extends Thread {
         if (datagramConnection != null) {
             datagramConnection.close();
         }
-        if (logger.isActivated()) {
-            logger.debug("RTCP transmitter closed");
+        if (sLogger.isActivated()) {
+            sLogger.debug("RTCP transmitter closed");
         }
         // If the method start() was never invoked this Thread will be on NEW
         // state and the resources won't be freed. We need to force the start()
@@ -217,10 +217,13 @@ public class RtcpPacketTransmitter extends Thread {
                     rtcpSession.isByeRequested = true;
                 }
             }
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't send the RTCP packet", e);
-            }
+        } catch (RuntimeException e) {
+            /*
+             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
+             * eventually bring the whole system down, which is not intended.
+             */
+            sLogger.error("Can't send the RTCP packet", e);
+
         }
     }
 
@@ -430,8 +433,8 @@ public class RtcpPacketTransmitter extends Thread {
         try {
             datagramConnection.send(remoteAddress, remotePort, data);
         } catch (IOException e) {
-            if (logger.isActivated()) {
-                logger.error("Can't send the RTCP packet", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't send the RTCP packet", e);
             }
         }
     }
@@ -451,8 +454,8 @@ public class RtcpPacketTransmitter extends Thread {
         try {
             datagramConnection.send(remoteAddress, remotePort, packet);
         } catch (IOException e) {
-            if (logger.isActivated()) {
-                logger.error("Can't send the RTCP packet", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't send the RTCP packet", e);
             }
         }
     }

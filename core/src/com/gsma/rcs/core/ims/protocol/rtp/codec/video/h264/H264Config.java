@@ -94,24 +94,6 @@ public class H264Config {
     public final static int BIT_RATE = 64000;
 
     /**
-     * Get value of packetization mode
-     * 
-     * @param codecParams
-     * @return
-     */
-    public static int getCodecPacketizationMode(String codecParams) {
-        int packetization_mode = 0;
-        String valPackMode = getParameterValue(CODEC_PARAM_PACKETIZATIONMODE, codecParams);
-        if (valPackMode != null) {
-            try {
-                packetization_mode = Integer.parseInt(valPackMode);
-            } catch (Exception e) {
-            }
-        }
-        return packetization_mode;
-    }
-
-    /**
      * Get value of profile level ID
      * 
      * @param codecParams

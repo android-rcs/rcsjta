@@ -40,27 +40,27 @@ public class ChunkReceiver extends Thread {
     /**
      * MSRP connection
      */
-    private MsrpConnection connection;
+    private MsrpConnection mConnection;
 
     /**
      * MSRP input stream
      */
-    private InputStream stream;
+    private InputStream mStream;
 
     /**
      * Termination flag
      */
-    private boolean terminated = false;
+    private boolean mTerminated;
 
     /**
-     * maximum length of MSRP chunk buffer
+     * Maximum length of MSRP chunk buffer
      */
-    private int buffer_length = MsrpConstants.CHUNK_MAX_SIZE;
+    private int mBufferLength = MsrpConstants.CHUNK_MAX_SIZE;
 
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(ChunkReceiver.class.getName());
 
     /**
      * Constructor
@@ -69,8 +69,8 @@ public class ChunkReceiver extends Thread {
      * @param stream TCP input stream
      */
     public ChunkReceiver(MsrpConnection connection, InputStream stream) {
-        this.connection = connection;
-        this.stream = stream;
+        mConnection = connection;
+        mStream = stream;
     }
 
     /**
@@ -79,18 +79,15 @@ public class ChunkReceiver extends Thread {
      * @return MSRP connection
      */
     public MsrpConnection getConnection() {
-        return connection;
+        return mConnection;
     }
 
     /**
      * Terminate the receiver
      */
     public void terminate() {
-        terminated = true;
-        try {
-            interrupt();
-        } catch (Exception e) {
-        }
+        mTerminated = true;
+        interrupt();
     }
 
     /**
@@ -99,7 +96,7 @@ public class ChunkReceiver extends Thread {
     public void run() {
         try {
             // Background processing
-            while (!terminated) {
+            while (!mTerminated) {
                 StringBuilder trace = new StringBuilder();
 
                 // Read first line of a new data chunk
@@ -146,7 +143,7 @@ public class ChunkReceiver extends Thread {
                 Hashtable<String, String> headers = new Hashtable<String, String>();
                 char continuationFlag = '\0';
                 int totalSize = 0;
-                while (continuationFlag == '\0' && !terminated) {
+                while (continuationFlag == '\0' && !mTerminated) {
                     line = readLine();
                     if (MsrpConnection.MSRP_TRACE_ENABLED) {
                         trace.append(line);
@@ -164,7 +161,7 @@ public class ChunkReceiver extends Thread {
 
                             // Changed by Deutsche Telekom
                             if (chunkSize == 0) {
-                                this.buffer_length = totalSize;
+                                mBufferLength = totalSize;
                             }
                         }
 
@@ -228,13 +225,14 @@ public class ChunkReceiver extends Thread {
                     }
                 }
 
+                final MsrpSession session = mConnection.getSession();
                 // Process the received MSRP message
                 if (responseCode != -1) {
                     // Process MSRP response
                     if (MsrpConnection.MSRP_TRACE_ENABLED) {
                         System.out.println("<<< Receive MSRP response:\n" + trace);
                     }
-                    connection.getSession().receiveMsrpResponse(responseCode, txId, headers);
+                    session.receiveMsrpResponse(responseCode, txId, headers);
                 } else {
                     // Process MSRP request
                     if (method.toString().equals(MsrpConstants.METHOD_SEND)) {
@@ -242,14 +240,13 @@ public class ChunkReceiver extends Thread {
                         if (MsrpConnection.MSRP_TRACE_ENABLED) {
                             System.out.println("<<< Receive MSRP SEND request:\n" + trace);
                         }
-                        connection.getSession().receiveMsrpSend(txId, headers, continuationFlag,
-                                data, totalSize);
+                        session.receiveMsrpSend(txId, headers, continuationFlag, data, totalSize);
                     } else if (method.toString().equals(MsrpConstants.METHOD_REPORT)) {
                         // Process a REPORT request
                         if (MsrpConnection.MSRP_TRACE_ENABLED) {
                             System.out.println("<<< Receive MSRP REPORT request:\n" + trace);
                         }
-                        connection.getSession().receiveMsrpReport(txId, headers);
+                        session.receiveMsrpReport(txId, headers);
                     } else {
                         // Unknown request
                         if (MsrpConnection.MSRP_TRACE_ENABLED) {
@@ -257,34 +254,48 @@ public class ChunkReceiver extends Thread {
                         }
                         // Remove transaction info from list
                         // Changed by Deutsche Telekom
-                        connection.getSession().removeMsrpTransactionInfo(txId);
+                        session.removeMsrpTransactionInfo(txId);
                     }
                 }
 
                 // Check transaction info data
                 // Changed by Deutsche Telekom
-                connection.getSession().checkMsrpTransactionInfo();
+                session.checkMsrpTransactionInfo();
             }
-        } catch (Exception e) {
-            if (terminated) {
-                if (logger.isActivated()) {
-                    logger.debug("Chunk receiver thread terminated");
+        } catch (IOException e) {
+            if (!mTerminated) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(e.getMessage());
                 }
-            } else {
-                if (logger.isActivated()) {
-                    logger.error("Chunk receiver has failed", e);
-                }
+                /* Notify the session listener that an error has occured */
+                /* Changed by Deutsche Telekom */
+                final MsrpSession session = mConnection.getSession();
+                session.getMsrpEventListener().msrpTransferError(null, e.getMessage(),
+                        TypeMsrpChunk.Unknown);
 
-                // Notify the session listener that an error has occured
-                // Changed by Deutsche Telekom
-                connection.getSession().getMsrpEventListener()
-                        .msrpTransferError(null, e.getMessage(), TypeMsrpChunk.Unknown);
-
-                // Check transaction info data
-                // Changed by Deutsche Telekom
-                connection.getSession().checkMsrpTransactionInfo();
+                /* Check transaction info data */
+                /* Changed by Deutsche Telekom */
+                session.checkMsrpTransactionInfo();
+                mTerminated = true;
             }
-            terminated = true;
+        } catch (RuntimeException e) {
+            /*
+             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
+             * eventually bring the whole system down, which is not intended.
+             */
+            sLogger.error("Unable to receive chunks!", e);
+            if (!mTerminated) {
+                /* Notify the session listener that an error has occured */
+                /* Changed by Deutsche Telekom */
+                final MsrpSession session = mConnection.getSession();
+                session.getMsrpEventListener().msrpTransferError(null, e.getMessage(),
+                        TypeMsrpChunk.Unknown);
+
+                /* Check transaction info data */
+                /* Changed by Deutsche Telekom */
+                session.checkMsrpTransactionInfo();
+                mTerminated = true;
+            }
         }
     }
 
@@ -298,7 +309,7 @@ public class ChunkReceiver extends Thread {
         StringBuilder line = new StringBuilder();
         int previous = -1;
         int current = -1;
-        while ((current = stream.read()) != -1) {
+        while ((current = mStream.read()) != -1) {
             line.append((char) current);
             if ((previous == MsrpConstants.CHAR_LF) && (current == MsrpConstants.CHAR_CR)) {
                 return line.delete(line.length() - 2, line.length());
@@ -323,14 +334,14 @@ public class ChunkReceiver extends Thread {
             int nbRead = 0;
             int nbData = -1;
             while ((nbRead < chunkSize)
-                    && ((nbData = stream.read(result, nbRead, chunkSize - nbRead)) != -1)) {
+                    && ((nbData = mStream.read(result, nbRead, chunkSize - nbRead)) != -1)) {
                 nbRead += nbData;
             }
         } else {
             int b;
             int tagLength = endTag.length();
             int[] tail = new int[tagLength];
-            byte[] buffer = new byte[this.buffer_length + tagLength + 2];
+            byte[] buffer = new byte[mBufferLength + tagLength + 2];
 
             // MSRP end tag in reverse order
             int[] match = new int[tagLength];
@@ -339,7 +350,7 @@ public class ChunkReceiver extends Thread {
             }
 
             // Read stream byte by byte
-            for (int j = 0; (b = stream.read()) != -1; j++) {
+            for (int j = 0; (b = mStream.read()) != -1; j++) {
                 // Sliding window over last received bytes
                 System.arraycopy(tail, 0, tail, 1, tagLength - 1);
                 tail[0] = b;
@@ -365,14 +376,14 @@ public class ChunkReceiver extends Thread {
                                                                                    // CR/LF
 
                         // read continuation flag
-                        result[j - tagLength - 1] = (byte) stream.read();
+                        result[j - tagLength - 1] = (byte) mStream.read();
                         break;
                     }
                 }
             }
         }
-        stream.read(); // Read LF
-        stream.read(); // Read CR
+        mStream.read(); // Read LF
+        mStream.read(); // Read CR
         return result;
     }
 }

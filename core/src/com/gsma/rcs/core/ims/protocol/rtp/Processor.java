@@ -24,6 +24,8 @@ import com.gsma.rcs.core.ims.protocol.rtp.stream.ProcessorOutputStream;
 import com.gsma.rcs.core.ims.protocol.rtp.util.Buffer;
 import com.gsma.rcs.utils.logger.Logger;
 
+import java.io.IOException;
+
 /**
  * Media processor. A processor receives an input stream, use a codec chain to filter the data
  * before to send it to the output stream.
@@ -54,7 +56,7 @@ public class Processor extends Thread {
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(Processor.class.getName());
 
     /**
      * Constructor
@@ -73,8 +75,8 @@ public class Processor extends Thread {
         // Create the codec chain
         codecChain = new CodecChain(codecs, outputStream);
 
-        if (logger.isActivated()) {
-            logger.debug("Media processor created");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Media processor created");
         }
     }
 
@@ -82,8 +84,8 @@ public class Processor extends Thread {
      * Start processing
      */
     public void startProcessing() {
-        if (logger.isActivated()) {
-            logger.debug("Start media processor");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Start media processor");
         }
         interrupted = false;
         start();
@@ -93,8 +95,8 @@ public class Processor extends Thread {
      * Stop processing
      */
     public void stopProcessing() {
-        if (logger.isActivated()) {
-            logger.debug("Stop media processor");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Stop media processor");
         }
         interrupted = true;
 
@@ -108,8 +110,8 @@ public class Processor extends Thread {
      */
     public void run() {
         try {
-            if (logger.isActivated()) {
-                logger.debug("Processor processing is started");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Processor processing is started");
             }
 
             // Start processing
@@ -118,8 +120,8 @@ public class Processor extends Thread {
                 Buffer inBuffer = inputStream.read();
                 if (inBuffer == null) {
                     interrupted = true;
-                    if (logger.isActivated()) {
-                        logger.debug("Processing terminated: null data received");
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Processing terminated: null data received");
                     }
                     break;
                 }
@@ -129,22 +131,24 @@ public class Processor extends Thread {
                 if ((result != Codec.BUFFER_PROCESSED_OK)
                         && (result != Codec.OUTPUT_BUFFER_NOT_FILLED)) {
                     interrupted = true;
-                    if (logger.isActivated()) {
-                        logger.error("Codec chain processing error: " + result);
+                    if (sLogger.isActivated()) {
+                        sLogger.error("Codec chain processing error: " + result);
                     }
                     break;
                 }
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             if (!interrupted) {
-                if (logger.isActivated()) {
-                    logger.error("Processor error", e);
-                }
-            } else {
-                if (logger.isActivated()) {
-                    logger.debug("Processor processing has been terminated");
+                if (sLogger.isActivated()) {
+                    sLogger.debug(e.getMessage());
                 }
             }
+        } catch (RuntimeException e) {
+            /*
+             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
+             * eventually bring the whole system down, which is not intended.
+             */
+            sLogger.error("Unable to process codec chain!", e);
         }
     }
 

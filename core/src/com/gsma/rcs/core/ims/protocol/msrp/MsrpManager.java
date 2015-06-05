@@ -364,11 +364,7 @@ public class MsrpManager {
             if (logger.isActivated()) {
                 logger.info("Close the MSRP session");
             }
-            try {
-                mMsrpSession.close();
-            } catch (Exception e) {
-                // Intentionally blank
-            }
+            mMsrpSession.close();
             mMsrpSession = null;
         }
     }

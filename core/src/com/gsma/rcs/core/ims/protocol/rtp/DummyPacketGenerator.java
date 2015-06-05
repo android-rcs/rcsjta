@@ -24,6 +24,8 @@ import com.gsma.rcs.core.ims.protocol.rtp.stream.RtpInputStream;
 import com.gsma.rcs.core.ims.protocol.rtp.stream.RtpOutputStream;
 import com.gsma.rcs.utils.logger.Logger;
 
+import java.io.IOException;
+
 /**
  * Dummy packet generator for maintaining alive the network address in NAT
  * 
@@ -87,12 +89,10 @@ public class DummyPacketGenerator {
             if (logger.isActivated()) {
                 logger.debug("Session has been prepared with success");
             }
-
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't prepare resources correctly", e);
-            }
-            throw new RtpException("Can't prepare resources");
+        } catch (IOException e) {
+            throw new RtpException(new StringBuilder(
+                    "Can't prepare resources correctly for remoteAddress : ").append(remoteAddress)
+                    .append(" with remotePort : ").append(remotePort).append("!").toString(), e);
         }
     }
 

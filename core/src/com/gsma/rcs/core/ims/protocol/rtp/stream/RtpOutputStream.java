@@ -29,6 +29,7 @@ import com.gsma.rcs.core.ims.protocol.rtp.core.RtpPacketReceiver;
 import com.gsma.rcs.core.ims.protocol.rtp.core.RtpPacketTransmitter;
 import com.gsma.rcs.core.ims.protocol.rtp.event.RtcpEvent;
 import com.gsma.rcs.core.ims.protocol.rtp.event.RtcpEventListener;
+import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.rtp.util.Buffer;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -213,9 +214,9 @@ public class RtpOutputStream implements ProcessorOutputStream, RtcpEventListener
 
             // Remove rtpStreamListener
             rtpStreamListener = null;
-        } catch (Exception e) {
+        } catch (IOException e) {
             if (logger.isActivated()) {
-                logger.error("Can't close correctly RTP ressources", e);
+                logger.debug(e.getMessage());
             }
         }
     }
@@ -224,10 +225,15 @@ public class RtpOutputStream implements ProcessorOutputStream, RtcpEventListener
      * Write to the stream without blocking
      * 
      * @param buffer Input buffer
-     * @throws IOException
+     * @throws MediaException
      */
-    public void write(Buffer buffer) throws IOException {
-        rtpTransmitter.sendRtpPacket(buffer);
+    public void write(Buffer buffer) throws MediaException {
+        try {
+            rtpTransmitter.sendRtpPacket(buffer);
+        } catch (IOException e) {
+            throw new MediaException("Unable to send RTP packet for input buffer : ".concat(buffer
+                    .toString()), e);
+        }
     }
 
     @Override
