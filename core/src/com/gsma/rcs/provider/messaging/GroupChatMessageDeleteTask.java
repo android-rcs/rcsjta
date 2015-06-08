@@ -27,7 +27,9 @@ import java.util.Set;
 public class GroupChatMessageDeleteTask extends DeleteTask.GroupedByChatId {
 
     private static final String SELECTION_GROUP_CHATMESSAGES = new StringBuilder(
-            MessageData.KEY_CHAT_ID).append("<>").append(MessageData.KEY_CONTACT).toString();
+            MessageData.KEY_CHAT_ID).append("<>").append(MessageData.KEY_CONTACT).append(" OR ")
+            .append(MessageData.KEY_CONTACT).append(" IS NULL").toString();
+
     private static final String SELECTION_CHATMESSAGES_BY_CHATID = new StringBuilder(
             MessageData.KEY_CHAT_ID).append("=?").toString();
 
