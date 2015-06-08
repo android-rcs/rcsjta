@@ -23,7 +23,6 @@
 package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.Core;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
@@ -33,18 +32,14 @@ import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSessionListener;
-import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
-import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatMessageSession;
-import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.ChatMessagePersistedStorageAccessor;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ImSessionStartMode;
 import com.gsma.rcs.service.broadcaster.IOneToOneChatEventBroadcaster;
-import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
 import com.gsma.services.rcs.Geoloc;
@@ -651,40 +646,60 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                 if (sLogger.isActivated()) {
                     sLogger.debug("Unable to send composing event '" + status
                             + "' since oneToOne chat session found with contact '" + mContact
-                            + "' does not exist for now");
+                            + "' does not exist for now.");
                 }
                 mImService.addOneToOneChatComposingStatus(mContact, status);
-                return;
-            }
-            if (session.getDialogPath().isSessionEstablished()) {
+            } else if (session.getDialogPath().isSessionEstablished()) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Sending composing event '" + status
+                            + "' since oneToOne chat session found with contact '" + mContact
+                            + "' is established.");
+                }
                 session.sendIsComposingStatus(status);
-            }
-            if (!session.isInitiatedByRemote()) {
+            } else if (!session.isInitiatedByRemote()) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Unable to send composing event '" + status
+                            + "' since oneToOne chat session found with contact '" + mContact
+                            + "' is initiated locally.");
+                }
                 mImService.addOneToOneChatComposingStatus(mContact, status);
-                return;
-            }
-            ImSessionStartMode imSessionStartMode = mRcsSettings.getImSessionStartMode();
-            switch (imSessionStartMode) {
-                case ON_OPENING:
-                case ON_COMPOSING:
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("Core chat session is pending: auto accept it.");
-                    }
-                    session.acceptSession();
-                    session.sendIsComposingStatus(status);
-                    break;
-                default:
-                    break;
+            } else {
+                ImSessionStartMode imSessionStartMode = mRcsSettings.getImSessionStartMode();
+                switch (imSessionStartMode) {
+                    case ON_OPENING:
+                    case ON_COMPOSING:
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("OneToOne chat session found with contact '" + mContact
+                                    + "' is not established and imSessionStartMode = "
+                                    + imSessionStartMode
+                                    + " so accepting it and sending composing event '" + status
+                                    + "'");
+                        }
+                        session.acceptSession();
+                        session.sendIsComposingStatus(status);
+                        break;
+                    default:
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("OneToOne chat session found with contact '" + mContact
+                                    + "' is not established and imSessionStartMode = "
+                                    + imSessionStartMode
+                                    + " so can't accept it and sending composing event '" + status
+                                    + "' yet.");
+                        }
+                        mImService.addOneToOneChatComposingStatus(mContact, status);
+                        break;
+                }
             }
         } catch (MsrpException e) {
             mImService.addOneToOneChatComposingStatus(mContact, status);
         } catch (ServerApiBaseException e) {
+            mImService.addOneToOneChatComposingStatus(mContact, status);
             if (!e.shouldNotBeLogged()) {
                 sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
-
         } catch (Exception e) {
+            mImService.addOneToOneChatComposingStatus(mContact, status);
             sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }

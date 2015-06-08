@@ -1211,41 +1211,61 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             if (session == null) {
                 if (sLogger.isActivated()) {
                     sLogger.debug("Unable to send composing event '" + status
-                            + "' since group chat session found with chatId '" + mChatId
-                            + "' does not exist for now");
+                            + "' since Group chat session found with ChatId '" + mChatId
+                            + "' does not exist for now.");
                 }
                 mImService.addGroupChatComposingStatus(mChatId, status);
-                return;
-            }
-            if (session.getDialogPath().isSessionEstablished()) {
+            } else if (session.getDialogPath().isSessionEstablished()) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Sending composing event '" + status
+                            + "' since Group chat session found with ChatId '" + mChatId
+                            + "' is established.");
+                }
                 session.sendIsComposingStatus(status);
-            }
-            if (!session.isInitiatedByRemote()) {
+            } else if (!session.isInitiatedByRemote()) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Unable to send composing event '" + status
+                            + "' since Group chat session found with ChatId '" + mChatId
+                            + "' is initiated locally.");
+                }
                 mImService.addGroupChatComposingStatus(mChatId, status);
-                return;
-            }
-            ImSessionStartMode imSessionStartMode = mRcsSettings.getImSessionStartMode();
-            switch (imSessionStartMode) {
-                case ON_OPENING:
-                case ON_COMPOSING:
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("Core chat session is pending: auto accept it.");
-                    }
-                    session.acceptSession();
-                    session.sendIsComposingStatus(status);
-                    break;
-                default:
-                    break;
+            } else {
+                ImSessionStartMode imSessionStartMode = mRcsSettings.getImSessionStartMode();
+                switch (imSessionStartMode) {
+                    case ON_OPENING:
+                    case ON_COMPOSING:
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("Group chat session found with ChatId '" + mChatId
+                                    + "' is not established and imSessionStartMode = "
+                                    + imSessionStartMode
+                                    + " so accepting it and sending composing event '" + status
+                                    + "'");
+                        }
+                        session.acceptSession();
+                        session.sendIsComposingStatus(status);
+                        break;
+                    default:
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("Group chat session found with ChatId '" + mChatId
+                                    + "' is not established and imSessionStartMode = "
+                                    + imSessionStartMode
+                                    + " so can't accept it and sending composing event '" + status
+                                    + "' yet.");
+                        }
+                        mImService.addGroupChatComposingStatus(mChatId, status);
+                        break;
+                }
             }
         } catch (MsrpException e) {
             mImService.addGroupChatComposingStatus(mChatId, status);
         } catch (ServerApiBaseException e) {
+            mImService.addGroupChatComposingStatus(mChatId, status);
             if (!e.shouldNotBeLogged()) {
                 sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
-
         } catch (Exception e) {
+            mImService.addGroupChatComposingStatus(mChatId, status);
             sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
