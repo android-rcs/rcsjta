@@ -5,7 +5,7 @@
 
     <TableLayout
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:paddingTop="10dip"
         android:stretchColumns="1" >
 
@@ -69,7 +69,6 @@
                 android:id="@+id/spinner_default_messaging_method"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignLeft="@id/label_default_messaging_method"
                 android:layout_marginLeft="5dip"
                 android:layout_marginRight="5dip" />
         </TableRow>
@@ -131,7 +130,6 @@
                 android:id="@+id/spinner_label_min_battery_level"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignLeft="@id/label_min_battery_level"
                 android:layout_marginLeft="5dip"
                 android:layout_marginRight="5dip" />
         </TableRow>

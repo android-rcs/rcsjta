@@ -5,24 +5,19 @@
     android:orientation="vertical"
     android:paddingTop="10dip" >
 
-    <FrameLayout
+    <ListView
+        android:id="@android:id/list"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
+        android:layout_height="fill_parent"
+        android:listSelector="@android:drawable/list_selector_background"
+        android:scrollbarStyle="outsideOverlay" />
 
-        <ListView
-            android:id="@android:id/list"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:listSelector="@android:drawable/list_selector_background"
-            android:scrollbarStyle="outsideOverlay" />
-
-        <TextView
-            android:id="@android:id/empty"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:gravity="center"
-            android:text="@string/label_capabilities_empty"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
-    </FrameLayout>
+    <TextView
+        android:id="@android:id/empty"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:gravity="center"
+        android:text="@string/label_capabilities_empty"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
 
 </LinearLayout>

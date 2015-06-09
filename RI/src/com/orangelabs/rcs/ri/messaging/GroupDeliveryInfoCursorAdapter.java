@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 /**
  * @author YPLO6403
@@ -28,7 +29,8 @@ public class GroupDeliveryInfoCursorAdapter extends CursorAdapter {
 
     private LayoutInflater mInflater;
 
-    private final static SimpleDateFormat df = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
+    private final static SimpleDateFormat df = new SimpleDateFormat("yy-MM-dd HH:mm:ss",
+            Locale.getDefault());
 
     private Context mContext;
 

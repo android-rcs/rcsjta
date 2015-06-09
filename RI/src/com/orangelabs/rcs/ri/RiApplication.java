@@ -28,6 +28,7 @@ import android.content.res.Resources;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -182,7 +183,7 @@ public class RiApplication extends Application {
     private String[] convertForUI(String[] strings) {
         List<String> stringList = Arrays.asList(strings);
         for (int i = 0, l = stringList.size(); i < l; ++i) {
-            stringList.set(i, stringList.get(i).toLowerCase().replace('_', ' '));
+            stringList.set(i, stringList.get(i).toLowerCase(Locale.getDefault()).replace('_', ' '));
         }
         return (String[]) stringList.toArray();
     }

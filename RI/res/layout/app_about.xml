@@ -8,15 +8,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginBottom="10px"
-        android:layout_marginTop="10px"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
         android:src="@drawable/rcs_icon" >
     </ImageView>
 
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="10px"
+        android:layout_marginBottom="10dp"
         android:gravity="center_vertical|center_horizontal"
         android:text="@string/label_about_title"
         android:textAppearance="?android:attr/textAppearanceLarge"
@@ -26,7 +26,7 @@
         android:id="@+id/release"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="10px"
+        android:layout_marginBottom="10dp"
         android:gravity="center_vertical|center_horizontal"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -34,7 +34,7 @@
         android:id="@+id/api"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="10px"
+        android:layout_marginBottom="10dp"
         android:gravity="center_vertical|center_horizontal"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 

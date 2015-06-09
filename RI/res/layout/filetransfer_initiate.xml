@@ -5,7 +5,7 @@
 
     <TableLayout
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:paddingTop="10dip"
         android:stretchColumns="1" >
 
@@ -84,8 +84,9 @@
                 android:gravity="left" />
         </TableRow>
 
-        <TableRow android:paddingTop="5dip"
-             android:id="@+id/expiration" >
+        <TableRow
+            android:id="@+id/expiration"
+            android:paddingTop="5dip" >
 
             <TextView
                 android:layout_marginLeft="5dip"
@@ -98,9 +99,6 @@
                 android:layout_marginRight="5dip"
                 android:singleLine="true"
                 android:textStyle="bold" />
-        </TableRow>
-
-        <TableRow android:padding="5dip" >
         </TableRow>
 
         <Button

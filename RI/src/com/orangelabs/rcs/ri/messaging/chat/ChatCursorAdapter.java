@@ -31,6 +31,7 @@ import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -42,7 +43,8 @@ public class ChatCursorAdapter extends CursorAdapter {
 
     private LayoutInflater mInflater;
 
-    private final static SimpleDateFormat df = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
+    private final static SimpleDateFormat df = new SimpleDateFormat("yy-MM-dd HH:mm:ss",
+            Locale.getDefault());
 
     /**
      * A map between contact and display name to minimize queries of RCS settings provider

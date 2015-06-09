@@ -25,9 +25,6 @@
             android:paddingTop="10dip"
             android:text="@string/label_select_geoloc_map" />
 
-        <TableRow android:padding="5dip" >
-        </TableRow>
-
         <com.google.android.maps.MapView
             android:id="@+id/mapview"
             android:layout_width="fill_parent"
