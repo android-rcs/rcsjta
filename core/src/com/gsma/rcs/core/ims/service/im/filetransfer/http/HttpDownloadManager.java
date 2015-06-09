@@ -219,16 +219,26 @@ public class HttpDownloadManager extends HttpTransferManager {
                 getListener().httpTransferProgress(mCalcLength, mContent.getSize());
                 mFileDownloadStream.write(buffer, 0, num);
             }
+
+            /*
+             * Check if the file is already paused, If it is then its still a partial download and
+             * hence we should not delete the file.
+             */
+            if (isPaused()) {
+                throw new FileNotDownloadedException(
+                        "Download file paused, the file is not complete!");
+            }
+
             /*
              * Check if we are able to download the file properly by comparing the file content
-             * size, also make sure that the download is not paused or cancelled
+             * size, also make sure that the download is not cancelled
              */
-            if (!isPaused() && !isCancelled() && mCalcLength != mContent.getSize()) {
+            if (!isCancelled() && mCalcLength != mContent.getSize()) {
                 /* Delete file as download is not successful */
                 mFile.delete();
                 throw new FileNotDownloadedException(
                         "Download file error, the file is not complete!");
-            }            
+            }
             FileFactory.getFactory().updateMediaStorage(mDownloadedFile.getEncodedPath());
         } finally {
             if (mFileDownloadStream != null) {
