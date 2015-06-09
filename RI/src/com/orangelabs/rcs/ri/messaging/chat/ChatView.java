@@ -84,12 +84,12 @@ public abstract class ChatView extends FragmentActivity implements
     /**
      * Message composer
      */
-    protected EditText composeText;
+    protected EditText mComposeText;
 
     /**
      * Utility class to manage the is-composing status
      */
-    protected IsComposingManager composingManager;
+    protected IsComposingManager mComposingManager;
 
     /**
      * A locker to exit only once
@@ -151,8 +151,8 @@ public abstract class ChatView extends FragmentActivity implements
         mCnxManager = ConnectionManager.getInstance(this);
 
         /* Set message composer callbacks */
-        composeText = (EditText) findViewById(R.id.userText);
-        composeText.setOnKeyListener(new OnKeyListener() {
+        mComposeText = (EditText) findViewById(R.id.userText);
+        mComposeText.setOnKeyListener(new OnKeyListener() {
 
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -170,7 +170,7 @@ public abstract class ChatView extends FragmentActivity implements
             }
         });
 
-        composeText.addTextChangedListener(new TextWatcher() {
+        mComposeText.addTextChangedListener(new TextWatcher() {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -179,8 +179,8 @@ public abstract class ChatView extends FragmentActivity implements
                 // (like when sending message), is having activity
                 if (!TextUtils.isEmpty(s)) {
                     // Warn the composing manager that we have some activity
-                    if (composingManager != null) {
-                        composingManager.hasActivity();
+                    if (mComposingManager != null) {
+                        mComposingManager.hasActivity();
                     }
                 }
             }
@@ -212,14 +212,15 @@ public abstract class ChatView extends FragmentActivity implements
         listView.setAdapter(mAdapter);
         registerForContextMenu(listView);
 
-        if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACT)) {
+        if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACT,
+                RcsServiceName.CAPABILITY)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
             return;
 
         }
         mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.CHAT,
-                RcsServiceName.CONTACT);
+                RcsServiceName.CONTACT, RcsServiceName.CAPABILITY);
         mChatService = mCnxManager.getChatApi();
         processIntent();
     }
@@ -300,7 +301,7 @@ public abstract class ChatView extends FragmentActivity implements
      * Send a text and display it
      */
     private void sendText() {
-        String text = composeText.getText().toString();
+        String text = mComposeText.getText().toString();
         if (TextUtils.isEmpty(text)) {
             return;
 
@@ -313,8 +314,8 @@ public abstract class ChatView extends FragmentActivity implements
 
         }
         // Warn the composing manager that the message was sent
-        composingManager.messageWasSent();
-        composeText.setText(null);
+        mComposingManager.messageWasSent();
+        mComposeText.setText(null);
     }
 
     /**
@@ -340,7 +341,7 @@ public abstract class ChatView extends FragmentActivity implements
         builder.setItems(R.array.select_quicktext, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 String[] items = getResources().getStringArray(R.array.select_quicktext);
-                composeText.append(items[which]);
+                mComposeText.append(items[which]);
             }
         });
 

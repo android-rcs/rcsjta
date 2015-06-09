@@ -304,10 +304,10 @@ public class GroupChatView extends ChatView {
                 // Set the message composer max length
                 InputFilter[] filterArray = new InputFilter[1];
                 filterArray[0] = new InputFilter.LengthFilter(maxMsgLength);
-                composeText.setFilters(filterArray);
+                mComposeText.setFilters(filterArray);
             }
             // Instantiate the composing manager
-            composingManager = new IsComposingManager(configuration.getIsComposingTimeout(),
+            mComposingManager = new IsComposingManager(configuration.getIsComposingTimeout(),
                     getNotifyComposing());
         } catch (RcsServiceNotAvailableException e) {
             Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce);
@@ -725,7 +725,7 @@ public class GroupChatView extends ChatView {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_insert_smiley:
-                Smileys.showSmileyDialog(this, composeText, getResources(),
+                Smileys.showSmileyDialog(this, mComposeText, getResources(),
                         getString(R.string.menu_insert_smiley));
                 break;
 

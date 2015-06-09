@@ -23,6 +23,7 @@ import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import com.gsma.services.rcs.capability.CapabilityService;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content;
 import com.gsma.services.rcs.chat.ChatMessage;
@@ -152,6 +153,8 @@ public class SingleChatView extends ChatView {
 
     };
 
+    private CapabilityService mCapabilityService;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -167,10 +170,10 @@ public class SingleChatView extends ChatView {
                 // Set the message composer max length
                 InputFilter[] filterArray = new InputFilter[1];
                 filterArray[0] = new InputFilter.LengthFilter(maxMsgLength);
-                composeText.setFilters(filterArray);
+                mComposeText.setFilters(filterArray);
             }
             // Instantiate the composing manager
-            composingManager = new IsComposingManager(configuration.getIsComposingTimeout(),
+            mComposingManager = new IsComposingManager(configuration.getIsComposingTimeout(),
                     getNotifyComposing());
         } catch (RcsServiceNotAvailableException e) {
             Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce, e);
@@ -217,8 +220,7 @@ public class SingleChatView extends ChatView {
         try {
             if (!newContact.equals(mContact) || mChat == null) {
                 boolean firstLoad = (mChat == null);
-                boolean switchConversation = (mContact != null && !newContact.equals(mContact));
-                /* Save contact */
+                /* Save contact ID */
                 mContact = newContact;
                 /*
                  * Open chat so that if the parameter IM SESSION START is 0 then the session is
@@ -231,11 +233,14 @@ public class SingleChatView extends ChatView {
                      */
                     getSupportLoaderManager().initLoader(LOADER_ID, null, this);
                 } else {
-                    if (switchConversation) {
-                        /* Reload history since */
-                        getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
-                    }
+                    /* We switched from one contact to another: reload history since */
+                    getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
                 }
+                if (mCapabilityService == null) {
+                    mCapabilityService = mCnxManager.getCapabilityApi();
+                }
+                /* Request options for this new contact */
+                mCapabilityService.requestContactCapabilities(mContact);
             }
             /*
              * Open chat to accept session if the parameter IM SESSION START is 0. Client
@@ -458,7 +463,7 @@ public class SingleChatView extends ChatView {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_insert_smiley:
-                Smileys.showSmileyDialog(this, composeText, getResources(),
+                Smileys.showSmileyDialog(this, mComposeText, getResources(),
                         getString(R.string.menu_insert_smiley));
                 break;
 

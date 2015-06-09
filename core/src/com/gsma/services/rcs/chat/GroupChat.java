@@ -406,8 +406,7 @@ public class GroupChat {
     }
 
     /**
-     * Returns the list of connected participants. A participant is identified by its MSISDN in
-     * national or international format, SIP address, SIP-URI or Tel-URI.
+     * Returns the map of participants and associated status .
      * 
      * @return Map&lt;ContactId, ParticipantStatus&gt;
      * @throws RcsPersistentStorageException
