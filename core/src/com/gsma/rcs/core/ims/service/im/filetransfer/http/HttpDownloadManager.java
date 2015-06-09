@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -227,7 +228,8 @@ public class HttpDownloadManager extends HttpTransferManager {
                 mFile.delete();
                 throw new FileNotDownloadedException(
                         "Download file error, the file is not complete!");
-            }
+            }            
+            FileFactory.getFactory().updateMediaStorage(mDownloadedFile.getEncodedPath());
         } finally {
             if (mFileDownloadStream != null) {
                 try {
