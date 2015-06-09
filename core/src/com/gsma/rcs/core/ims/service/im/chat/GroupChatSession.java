@@ -453,8 +453,9 @@ public abstract class GroupChatSession extends ChatSession {
         long timestampSent = timestamp;
         mMessagingLog.setFileTransferTimestamps(fileTransferId, timestamp, timestampSent);
         if (displayedReportEnabled) {
-            networkContent = ChatUtils.buildCpimMessageWithImdn(from, ChatUtils.ANOMYNOUS_URI,
-                    fileTransferId, fileInfo, FileTransferHttpInfoDocument.MIME_TYPE, timestampSent);
+            networkContent = ChatUtils
+                    .buildCpimMessageWithImdn(from, ChatUtils.ANOMYNOUS_URI, fileTransferId,
+                            fileInfo, FileTransferHttpInfoDocument.MIME_TYPE, timestampSent);
         } else if (deliveredReportEnabled) {
             networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from,
                     ChatUtils.ANOMYNOUS_URI, fileTransferId, fileInfo,
@@ -642,9 +643,10 @@ public abstract class GroupChatSession extends ChatSession {
         mConferenceSubscriber.subscribe();
     }
 
-    private boolean isDisplayReportRequested(String dispositionNotification) {
-        return (dispositionNotification != null && dispositionNotification
-                .contains(ImdnDocument.DISPLAY));
+    private boolean shouldSendDisplayReport(String dispositionNotification) {
+        return mImdnManager.isSendGroupDeliveryDisplayedReportsEnabled()
+                && (dispositionNotification != null && dispositionNotification
+                        .contains(ImdnDocument.DISPLAY));
     }
 
     /*
@@ -681,8 +683,7 @@ public abstract class GroupChatSession extends ChatSession {
              */
             ChatMessage msg = new ChatMessage(msgId, getRemoteContact(), new String(data, UTF8),
                     MimeType.TEXT_MESSAGE, timestamp, timestamp, null);
-            boolean imdnDisplayedRequested = false;
-            receive(msg, imdnDisplayedRequested);
+            receive(msg, false);
             return;
 
         } else if (!ChatUtils.isMessageCpimType(mimeType)) {
@@ -747,10 +748,6 @@ public abstract class GroupChatSession extends ChatSession {
 
         String dispositionNotification = cpimMsg.getHeader(ImdnUtils.HEADER_IMDN_DISPO_NOTIF);
 
-        boolean displayReportRequested = isDisplayReportRequested(dispositionNotification);
-
-        boolean isFToHTTP = FileTransferUtils.isFileTransferHttpType(contentType);
-
         /**
          * Set message's timestamp to the System.currentTimeMillis, not the session's itself
          * timestamp
@@ -759,7 +756,7 @@ public abstract class GroupChatSession extends ChatSession {
         long timestampSent = cpimMsg.getTimestampSent();
 
         // Analyze received message thanks to the MIME type
-        if (isFToHTTP) {
+        if (FileTransferUtils.isFileTransferHttpType(contentType)) {
             // File transfer over HTTP message
             // Parse HTTP document
             FileTransferHttpInfoDocument fileInfo = FileTransferUtils
@@ -781,7 +778,7 @@ public abstract class GroupChatSession extends ChatSession {
             if (ChatUtils.isTextPlainType(contentType)) {
                 ChatMessage msg = new ChatMessage(cpimMsgId, remoteId, cpimMsg.getMessageContent(),
                         MimeType.TEXT_MESSAGE, timestamp, timestampSent, pseudo);
-                receive(msg, displayReportRequested);
+                receive(msg, shouldSendDisplayReport(dispositionNotification));
             } else {
                 if (ChatUtils.isApplicationIsComposingType(contentType)) {
                     // Is composing event
@@ -811,7 +808,7 @@ public abstract class GroupChatSession extends ChatSession {
                             ChatMessage msg = new ChatMessage(cpimMsgId, remoteId,
                                     cpimMsg.getMessageContent(), GeolocInfoDocument.MIME_TYPE,
                                     timestamp, timestampSent, pseudo);
-                            receive(msg, displayReportRequested);
+                            receive(msg, shouldSendDisplayReport(dispositionNotification));
                         }
                     }
                 }
