@@ -93,7 +93,7 @@ public class PollingManager extends PeriodicRefresher {
         }
 
         // Update all contacts capabilities if refresh timeout has not expired
-        Set<ContactId> contacts = mContatManager.getAllContacts();
+        Set<ContactId> contacts = mContatManager.getAllContactsFromRcsContactProvider();
         for (ContactId contact : contacts) {
             requestContactCapabilities(contact);
         }

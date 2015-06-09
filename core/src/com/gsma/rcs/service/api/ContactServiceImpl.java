@@ -247,7 +247,7 @@ public class ContactServiceImpl extends IContactService.Stub {
     private List<RcsContact> getRcsContacts(FilterContactInfo filterContactInfo) {
         List<RcsContact> rcsContacts = new ArrayList<RcsContact>();
         // Read capabilities in the local database
-        Set<ContactId> contacts = mContactManager.getRcsContacts();
+        Set<ContactId> contacts = mContactManager.getRcsContactsFromRcsContactProvider();
         for (ContactId contact : contacts) {
             ContactInfo contactInfo = mContactManager.getContactInfo(contact);
             if (contactInfo != null) {

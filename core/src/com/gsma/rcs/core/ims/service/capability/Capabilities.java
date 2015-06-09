@@ -248,20 +248,67 @@ public class Capabilities {
         return mTimestampOfLastRequest;
     }
 
-    /**
-     * Returns a string representation of the object
-     * 
-     * @return String
-     */
+    @Override
     public String toString() {
-        return "Image_share=" + mImageSharing + ", Video_share=" + mVideoSharing
-                + ", IP_voice_call=" + mIpVoiceCall + ", IP_video_call=" + mIpVideoCall
-                + ", File_transfer=" + mFileTransfer + ", Chat=" + mImSession + ", FT_http="
-                + mFileTransferHttp + ", Geolocation_push=" + mGeolocationPush + ", Automata="
-                + mSipAutomata + ", TimestampLastRequest=" + mTimestampOfLastRequest
-                + ", TimestampLastResponse=" + mTimestampOfLastResponse;
+        return "Capabilities [mImageSharing=" + mImageSharing + ", mVideoSharing=" + mVideoSharing
+                + ", mIpVoiceCall=" + mIpVoiceCall + ", mIpVideoCall=" + mIpVideoCall
+                + ", mImSession=" + mImSession + ", mFileTransfer=" + mFileTransfer + ", mCsVideo="
+                + mCsVideo + ", mPresenceDiscovery=" + mPresenceDiscovery + ", mSocialPresence="
+                + mSocialPresence + ", mFileTransferHttp=" + mFileTransferHttp
+                + ", mGeolocationPush=" + mGeolocationPush + ", mFileTransferThumbnail="
+                + mFileTransferThumbnail + ", mFileTransferStoreForward="
+                + mFileTransferStoreForward + ", mGroupChatStoreForward=" + mGroupChatStoreForward
+                + ", mSipAutomata=" + mSipAutomata + ", mExtensions=" + mExtensions + "]";
     }
 
+    /* The equals method does not consider the 2 timestamps.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Capabilities other = (Capabilities) obj;
+        if (mCsVideo != other.mCsVideo)
+            return false;
+        if (mExtensions == null) {
+            if (other.mExtensions != null)
+                return false;
+        } else if (!mExtensions.equals(other.mExtensions))
+            return false;
+        if (mFileTransfer != other.mFileTransfer)
+            return false;
+        if (mFileTransferHttp != other.mFileTransferHttp)
+            return false;
+        if (mFileTransferStoreForward != other.mFileTransferStoreForward)
+            return false;
+        if (mFileTransferThumbnail != other.mFileTransferThumbnail)
+            return false;
+        if (mGeolocationPush != other.mGeolocationPush)
+            return false;
+        if (mGroupChatStoreForward != other.mGroupChatStoreForward)
+            return false;
+        if (mImSession != other.mImSession)
+            return false;
+        if (mImageSharing != other.mImageSharing)
+            return false;
+        if (mIpVideoCall != other.mIpVideoCall)
+            return false;
+        if (mIpVoiceCall != other.mIpVoiceCall)
+            return false;
+        if (mPresenceDiscovery != other.mPresenceDiscovery)
+            return false;
+        if (mSipAutomata != other.mSipAutomata)
+            return false;
+        if (mSocialPresence != other.mSocialPresence)
+            return false;
+        if (mVideoSharing != other.mVideoSharing)
+            return false;
+        return true;
+    }
     /**
      * Get timestamp of last response
      * 
@@ -699,4 +746,5 @@ public class Capabilities {
 
     }
 
+    
 }

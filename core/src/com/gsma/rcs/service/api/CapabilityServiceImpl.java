@@ -106,7 +106,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
         }
 
         public void run() {
-            mCapabilityService.requestContactCapabilities(mContactManager.getAllContacts());
+            mCapabilityService.requestContactCapabilities(mContactManager.getAllContactsFromRcsContactProvider());
         }
     }
 

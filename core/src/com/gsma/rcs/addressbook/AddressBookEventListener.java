@@ -18,12 +18,16 @@
 
 package com.gsma.rcs.addressbook;
 
+import com.gsma.rcs.provider.contact.ContactManagerException;
+
 /**
  * Address book event listener
  */
 public interface AddressBookEventListener {
     /**
      * Address book content has changed
+     * 
+     * @throws ContactManagerException
      */
-    public void handleAddressBookHasChanged();
+    public void handleAddressBookHasChanged() throws ContactManagerException;
 }

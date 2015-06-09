@@ -102,7 +102,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Build;
 import android.os.RemoteException;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.AggregationExceptions;
@@ -120,6 +119,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -139,7 +139,7 @@ public final class ContactManager {
     /**
      * Invalid contact raw ID
      */
-    public static final int INVALID_ID = -1;
+    public static final long INVALID_ID = -1;
 
     private static final long INVALID_TIME = -1L;
 
@@ -401,6 +401,10 @@ public final class ContactManager {
         Data.RAW_CONTACT_ID
     };
 
+    private final String[] PHONE_PROJ_NUMBER_RAW_CONTACT_ID = {
+            Phone.NUMBER, Phone.RAW_CONTACT_ID
+    };
+
     private static final String SEL_RAW_CONTACT_ID = new StringBuilder(Data.RAW_CONTACT_ID).append(
             "=?").toString();
 
@@ -488,7 +492,7 @@ public final class ContactManager {
             return new PresenceInfo();
         }
         Cursor cursor = getRawContactDataCursor(getRawContactIdForMe());
-        /* TODO: Handle cursor when null. */
+        CursorUtil.assertCursorIsNotNull(cursor, Data.CONTENT_URI);
         return getContactInfoFromCursor(cursor).getPresenceInfo();
     }
 
@@ -656,7 +660,7 @@ public final class ContactManager {
                      * If no RCS raw contact ID is associated to the raw contact, create one with
                      * the right information.
                      */
-                    rcsRawContactId = createRcsContact(newInfo, rawContactId);
+                    rcsRawContactId = createRcsRawContact(newInfo, rawContactId);
                     /* Nothing to modify, as the new contact will have taken the new information. */
                     continue;
                 }
@@ -765,8 +769,9 @@ public final class ContactManager {
         if (!ops.isEmpty()) {
             if (logActivated) {
                 sLogger.info("Execute " + ops.size()
-                        + " operations to update entries in native address book for contact "
-                        + contactNumber);
+                        + " operations to update native address book for contact " + contactNumber
+                        + " (for raw contact IDs: " + Arrays.toString(rawContactIds.toArray())
+                        + ")");
             }
             /* Do the actual database modifications */
             try {
@@ -1096,11 +1101,11 @@ public final class ContactManager {
     }
 
     /**
-     * Get the RCS contacts in the contact contract provider
+     * Gets the RCS contacts from RCS contact provider
      * 
      * @return set containing all RCS contacts
      */
-    public Set<ContactId> getRcsContacts() {
+    public Set<ContactId> getRcsContactsFromRcsContactProvider() {
         Set<ContactId> rcsNumbers = new HashSet<ContactId>();
         Cursor cursor = null;
         try {
@@ -1126,11 +1131,11 @@ public final class ContactManager {
     }
 
     /**
-     * Get all the contacts in the RCS contact provider
+     * Get all contacts from RCS contact provider
      * 
      * @return set containing all contacts that have been at least queried once for capabilities
      */
-    public Set<ContactId> getAllContacts() {
+    public Set<ContactId> getAllContactsFromRcsContactProvider() {
         Set<ContactId> numbers = new HashSet<ContactId>();
         Cursor cursor = null;
         try {
@@ -1350,7 +1355,7 @@ public final class ContactManager {
         try {
             cursor = mContentResolver.query(Data.CONTENT_URI, PROJ_DATA_ID, SEL_RAW_CONTACT_ID,
                     selectionArgs, null);
-            /* TODO: Handle cursor when null. */
+            CursorUtil.assertCursorIsNotNull(cursor, Data.CONTENT_URI);
             if (cursor.moveToNext()) {
                 dataId = cursor.getLong(cursor.getColumnIndexOrThrow(Data._ID));
             }
@@ -1683,7 +1688,8 @@ public final class ContactManager {
                     SEL_RAW_CONTACT_WITH_WEBLINK, new String[] {
                             Long.toString(rawContactId), String.valueOf(Website.TYPE_HOMEPAGE)
                     }, null);
-            /* TODO: Handle cursor when null. */
+            CursorUtil.assertCursorIsNotNull(cur, Data.CONTENT_URI);
+
             if (cur.moveToNext()) {
                 return cur.getLong(cur.getColumnIndexOrThrow(Data._ID));
             }
@@ -1840,6 +1846,13 @@ public final class ContactManager {
         /* Add the capabilities */
         newInfo.setCapabilities(capaBuilder.build());
 
+        /* Do not set contact info if they are unchanged */
+        if (newInfo.getCapabilities().equals(oldInfo.getCapabilities())
+                && newInfo.getRcsStatus() == oldInfo.getRcsStatus()
+                && newInfo.getRegistrationState() == oldInfo.getRegistrationState()) {
+            return;
+        }
+
         /* Save the modifications */
         try {
             setContactInfo(newInfo, oldInfo);
@@ -1918,7 +1931,7 @@ public final class ContactManager {
      * @param rawContactId of the raw contact we want to aggregate the RCS infos to
      * @return the RCS rawContactId concerning this newly created contact
      */
-    public long createRcsContact(final ContactInfo info, final long rawContactId) {
+    private long createRcsRawContact(final ContactInfo info, final long rawContactId) {
         ContactId contact = info.getContact();
         String contactNumber = contact.toString();
         if (sLogger.isActivated()) {
@@ -2166,20 +2179,11 @@ public final class ContactManager {
         try {
             cursor = mContentResolver.query(Data.CONTENT_URI, PROJ_DATA_RAW_CONTACT,
                     SEL_RAW_CONTACT_FROM_NUMBER, selectionArgs, Data.RAW_CONTACT_ID);
-            /* TODO: Handle cursor when null. */
+            CursorUtil.assertCursorIsNotNull(cursor, Data.CONTENT_URI);
             if (cursor.moveToFirst()) {
                 int contactColumnIdx = cursor.getColumnIndexOrThrow(Data.RAW_CONTACT_ID);
                 do {
-                    long rawContactId = cursor.getLong(contactColumnIdx);
-                    if (!rawContactsIds.contains(rawContactId)
-                            && (!isSimAccount(rawContactId) || (Build.VERSION.SDK_INT > 10))) {
-                        // Build.VERSION_CODES.GINGERBREAD_MR1
-                        /*
-                         * We exclude the SIM only contacts, as they cannot be aggregated to a RCS
-                         * raw contact only if OS version if gingerbread or fewer.
-                         */
-                        rawContactsIds.add(rawContactId);
-                    }
+                    rawContactsIds.add(cursor.getLong(contactColumnIdx));
                 } while (cursor.moveToNext());
             }
         } finally {
@@ -2200,22 +2204,13 @@ public final class ContactManager {
             cursor = mContentResolver.query(Data.CONTENT_URI, PROJ_DATA_RAW_CONTACT,
                     STRICT_SELECTION_RAW_CONTACT_FROM_NUMBER, selectionArgsStrict,
                     Data.RAW_CONTACT_ID);
-            /* TODO: Handle cursor when null. */
+            CursorUtil.assertCursorIsNotNull(cursor, Data.CONTENT_URI);
             if (!cursor.moveToFirst()) {
                 return rawContactsIds;
             }
             int contactColumnIdx = cursor.getColumnIndexOrThrow(Data.RAW_CONTACT_ID);
             do {
-                long rawContactId = cursor.getLong(contactColumnIdx);
-                if (!rawContactsIds.contains(rawContactId)
-                        && (!isSimAccount(rawContactId) || (Build.VERSION.SDK_INT > 10))) {
-                    // Build.VERSION_CODES.GINGERBREAD_MR1
-                    /*
-                     * We exclude the SIM only contacts, as they cannot be aggregated to a RCS raw
-                     * contact only if OS version if gingerbread or fewer.
-                     */
-                    rawContactsIds.add(rawContactId);
-                }
+                rawContactsIds.add(cursor.getLong(contactColumnIdx));
             } while (cursor.moveToNext());
             return rawContactsIds;
 
@@ -2233,7 +2228,7 @@ public final class ContactManager {
      * @param contact The contact ID
      * @return the id of the associated RCS rawContact
      */
-    public long getAssociatedRcsRawContact(final long rawContactId, final ContactId contact) {
+    private long getAssociatedRcsRawContact(final long rawContactId, final ContactId contact) {
         Cursor cursor = null;
         try {
             cursor = mLocalContentResolver.query(AggregationData.CONTENT_URI,
@@ -2292,7 +2287,7 @@ public final class ContactManager {
             try {
                 cursor = mContentResolver.query(RawContacts.CONTENT_URI, PROJ_RAW_CONTACT_ID,
                         NOT_SIM_ACCOUNT_SELECTION, selectionArgs, null);
-                /* TODO: Handle cursor when null. */
+                CursorUtil.assertCursorIsNotNull(cursor, RawContacts.CONTENT_URI);
                 if (cursor.moveToFirst()) {
                     return false;
                 }
@@ -2319,7 +2314,7 @@ public final class ContactManager {
         try {
             cursor = mContentResolver.query(RawContacts.CONTENT_URI, PROJ_RAW_CONTACT_ID,
                     SIM_ACCOUNT_SELECTION, selectionArgs, null);
-            /* TODO: Handle cursor when null. */
+            CursorUtil.assertCursorIsNotNull(cursor, RawContacts.CONTENT_URI);
             return cursor.moveToFirst();
 
         } finally {
@@ -2414,7 +2409,7 @@ public final class ContactManager {
                 try {
                     cur2 = mContentResolver.query(Data.CONTENT_URI, projection2,
                             SEL_RAW_CONTACT_ID, selectionArgs2, null);
-                    /* TODO: Handle cursor when null. */
+                    CursorUtil.assertCursorIsNotNull(cursor, Data.CONTENT_URI);
                     if (cur2.moveToNext()) {
                         dataId = cur2.getLong(cur2.getColumnIndexOrThrow(Data._ID));
                         /* We already have an etag, update it */
@@ -2455,7 +2450,7 @@ public final class ContactManager {
         try {
             cursor = mContentResolver.query(RawContacts.CONTENT_URI, PROJ_RAW_CONTACT_ID,
                     SEL_RAW_CONTACT_ME, null, null);
-            /* TODO: Handle cursor when null. */
+            CursorUtil.assertCursorIsNotNull(cursor, RawContacts.CONTENT_URI);
             if (!cursor.moveToNext()) {
                 return INVALID_ID;
             }
@@ -2722,7 +2717,7 @@ public final class ContactManager {
         try {
             cursor = mContentResolver.query(Data.CONTENT_URI, PROJ_RAW_CONTACT_DATA1,
                     SEL_DATA_MIMETYPE_NUMBER, null, null);
-            /* TODO: Handle cursor when null. */
+            CursorUtil.assertCursorIsNotNull(cursor, Data.CONTENT_URI);
             if (!cursor.moveToFirst()) {
                 return;
             }
@@ -2919,4 +2914,87 @@ public final class ContactManager {
         /* Save the modifications */
         setContactInfo(newInfo, oldInfo);
     }
+
+    /**
+     * Gets the raw IDs for all contacts of the native address book
+     * 
+     * @return map of contact IDs associated with their raw contact IDs
+     */
+    public Map<ContactId, Set<Long>> getAllRawIdsInPhoneAddressBook() {
+        Map<ContactId, Set<Long>> result = new HashMap<ContactId, Set<Long>>();
+        Cursor cursor = null;
+        try {
+            /* Query all phone numbers of the native address book */
+            cursor = mContentResolver.query(Phone.CONTENT_URI, PHONE_PROJ_NUMBER_RAW_CONTACT_ID,
+                    null, null, null);
+            CursorUtil.assertCursorIsNotNull(cursor, Phone.CONTENT_URI);
+            if (!cursor.moveToFirst()) {
+                return result;
+            }
+            int columnIndexPhoneNumber = cursor.getColumnIndexOrThrow(Phone.NUMBER);
+            int columnIndexRawContactId = cursor.getColumnIndexOrThrow(Phone.RAW_CONTACT_ID);
+            do {
+                String phoneNumber = cursor.getString(columnIndexPhoneNumber);
+                PhoneNumber validatedNumber = ContactUtil
+                        .getValidPhoneNumberFromAndroid(phoneNumber);
+                if (validatedNumber == null) {
+                    if (sLogger.isActivated()) {
+                        sLogger.warn("Cannot parse phone number '" + phoneNumber + "'");
+                    }
+                    continue;
+                }
+                Long rawContactId = cursor.getLong(columnIndexRawContactId);
+                if (ContactManager.INVALID_ID == rawContactId) {
+                    if (sLogger.isActivated()) {
+                        sLogger.warn("Phone number '" + phoneNumber + "' has no raw contact ID");
+                    }
+                    continue;
+                }
+                ContactId contact = ContactUtil.createContactIdFromValidatedData(validatedNumber);
+                if (result.containsKey(contact)) {
+                    Set<Long> rawIds = result.get(contact);
+                    rawIds.add(rawContactId);
+                    result.put(contact, rawIds);
+                } else {
+                    Set<Long> rawIds = new HashSet<Long>();
+                    rawIds.add(rawContactId);
+                    result.put(contact, rawIds);
+                }
+            } while (cursor.moveToNext());
+            return result;
+
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    /**
+     * Checks if a RCS raw contact exists for the raw contact of the native address book
+     * 
+     * @param rawContactId the raw contact ID of the native address book
+     * @param contact contactId
+     * @return true if a RCS raw contact exists for the raw contact of the native address book
+     */
+    public boolean isAssociatedRcsRawContact(long rawContactId, final ContactId contact) {
+        long rcsRawContactId = getAssociatedRcsRawContact(rawContactId, contact);
+        return (ContactManager.INVALID_ID != rcsRawContactId);
+    }
+
+    /**
+     * Aggregate contact with RCS raw contact
+     * 
+     * @param contactInfo contact to aggregate with RCS raw contact. The contact must be RCS.
+     * @throws ContactManagerException thrown is contact information setting fails
+     */
+    public void aggregateContactWithRcsRawContact(ContactInfo contactInfo)
+            throws ContactManagerException {
+        /*
+         * if RCS contact does not exist, it will be created and RCS raw contact also. if RCS
+         * contact already exists, it will enforce creation and association of RCS raw contact.
+         */
+        setContactInfo(contactInfo, contactInfo);
+    }
+
 }

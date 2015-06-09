@@ -125,7 +125,7 @@ public class SyncAdapterService extends Service {
             }
 
             // Update all contacts capabilities
-            Set<ContactId> contacts = mContactManager.getAllContacts();
+            Set<ContactId> contacts = mContactManager.getAllContactsFromRcsContactProvider();
             Core.getInstance().getCapabilityService().requestContactCapabilities(contacts);
         }
     }

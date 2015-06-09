@@ -25,6 +25,7 @@ package com.gsma.rcs.addressbook;
 import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.utils.logger.Logger;
 
 import android.content.ContentResolver;
@@ -34,6 +35,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -52,7 +55,7 @@ public class AddressBookManager {
     /**
      * Address book changed event listeners
      */
-    private Vector<AddressBookEventListener> listeners = new Vector<AddressBookEventListener>();
+    private List<AddressBookEventListener> listeners = new ArrayList<AddressBookEventListener>();
 
     /**
      * Content resolver
@@ -170,7 +173,7 @@ public class AddressBookManager {
      * @param listener Listener
      */
     public void addAddressBookListener(AddressBookEventListener listener) {
-        listeners.addElement(listener);
+        listeners.add(listener);
     }
 
     /**
@@ -179,14 +182,14 @@ public class AddressBookManager {
      * @param listener Listener
      */
     public void removeAddressBookListener(AddressBookEventListener listener) {
-        listeners.removeElement(listener);
+        listeners.remove(listener);
     }
 
     /**
      * Remove all listeners
      */
     public void removeAllAddressBookListeners() {
-        listeners.removeAllElements();
+        listeners.clear();
     }
 
     /**
@@ -218,31 +221,31 @@ public class AddressBookManager {
      * Handler used to avoid too many checks
      */
     private class CheckHandler extends Handler {
-        private boolean isCleanupNeeded;
-        private boolean isCleanupRunning;
-        private final Object check = new Object();
+        private boolean mCleanupNeeded;
+        private boolean mCleanupRunning;
+        private final Object mCheck = new Object();
 
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
 
             if (msg.what == CHECK_MESSAGE) {
-                // Clean RCS entries associated to numbers that have been removed or modified
+                /* Clean RCS entries associated to numbers that have been removed or modified */
                 if (mLogger.isActivated()) {
                     mLogger.debug("Minimum check period elapsed, notify the listeners that a change occured in the address book");
                 }
 
-                // We may receive multiple CHECK_MESSAGE messages while already processing one. We
-                // cannot
-                // stay in the handler for too long because the application will be killed as ANR.
-                // Thus,
-                // we will schedule the processing if is is not running or tell the running task
-                // that it will have to do it again once it is done.
+                /*
+                 * We may receive multiple CHECK_MESSAGE messages while already processing one. We
+                 * cannot stay in the handler for too long because the application will be killed as
+                 * ANR. Thus, we will schedule the processing if is is not running or tell the
+                 * running task that it will have to do it again once it is done.
+                 */
                 boolean scheduleCleanup = false;
-                synchronized (check) {
-                    if (isCleanupRunning) {
-                        // We need to redo it again
-                        isCleanupNeeded = true;
+                synchronized (mCheck) {
+                    if (mCleanupRunning) {
+                        /* We need to re-do it again */
+                        mCleanupNeeded = true;
                     } else {
                         scheduleCleanup = true;
                     }
@@ -251,29 +254,39 @@ public class AddressBookManager {
                 if (scheduleCleanup) {
                     mCleanupExecutor.execute(new Runnable() {
                         public void run() {
-                            isCleanupRunning = true;
+                            try {
+                                mCleanupRunning = true;
 
-                            while (true) {
-                                isCleanupNeeded = false;
+                                while (true) {
+                                    mCleanupNeeded = false;
 
-                                /*
-                                 * Clean RCS entries associated to numbers that have been removed or
-                                 * modified
-                                 */
-                                mContactManager.cleanRCSEntries();
+                                    /*
+                                     * Clean RCS entries associated to numbers that have been
+                                     * removed or modified
+                                     */
+                                    mContactManager.cleanRCSEntries();
 
-                                // Notify listeners
-                                for (int i = 0; i < listeners.size(); i++) {
-                                    AddressBookEventListener listener = (AddressBookEventListener) listeners
-                                            .elementAt(i);
-                                    listener.handleAddressBookHasChanged();
-                                }
-                                synchronized (check) {
-                                    if (!isCleanupNeeded) {
-                                        isCleanupRunning = false;
-                                        break;
+                                    for (AddressBookEventListener listener : listeners) {
+                                        listener.handleAddressBookHasChanged();
+                                    }
+                                    synchronized (mCheck) {
+                                        if (!mCleanupNeeded) {
+                                            mCleanupRunning = false;
+                                            break;
+                                        }
                                     }
                                 }
+                            } catch (ContactManagerException e) {
+                                // TODO CR037 exception handling
+                                mLogger.error("Failed to check address book!", e);
+                            } catch (RuntimeException e) {
+                                /*
+                                 * Intentionally catch runtime exceptions as else it will abruptly
+                                 * end the thread and eventually bring the whole system down, which
+                                 * is not intended.
+                                 */
+                                // TODO CR037 exception handling
+                                mLogger.error("Failed to check address book!", e);
                             }
                         }
                     });

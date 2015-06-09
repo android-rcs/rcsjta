@@ -30,22 +30,17 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ContactInfo;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.capability.Capabilities.CapabilitiesBuilder;
-import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.ContactUtil;
-import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
-import android.database.Cursor;
-import android.os.Build;
-import android.provider.ContactsContract.CommonDataKinds.Phone;
-
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 /**
@@ -59,25 +54,21 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
 
     private final ContactManager mContactManager;
 
-    private OptionsManager optionsManager;
+    private OptionsManager mOptionsManager;
 
-    private AnonymousFetchManager anonymousFetchManager;
+    private AnonymousFetchManager mAnonymousFetchManager;
 
-    private PollingManager pollingManager;
+    private PollingManager mPollingManager;
 
     /**
      * Flag: set during the address book changed procedure, if we are notified of a change
      */
-    private boolean isRecheckNeeded = false;
+    private boolean mRecheckNeeded = false;
 
     /**
      * Flag indicating if a check procedure is in progress
      */
-    private boolean isCheckInProgress = false;
-
-    private final String[] PHONE_PROJECTION = {
-            Phone.NUMBER, Phone.RAW_CONTACT_ID
-    };
+    private boolean mCheckInProgress = false;
 
     private final static Logger sLogger = Logger.getLogger(CapabilityService.class.getSimpleName());
 
@@ -94,14 +85,9 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
         super(parent, true);
         mRcsSettings = rcsSettings;
         mContactManager = contactsManager;
-        // Instantiate the polling manager
-        pollingManager = new PollingManager(this, mRcsSettings, mContactManager);
-
-        // Instantiate the options manager
-        optionsManager = new OptionsManager(parent, mRcsSettings, mContactManager);
-
-        // Instantiate the anonymous fetch manager
-        anonymousFetchManager = new AnonymousFetchManager(parent, mRcsSettings, mContactManager);
+        mPollingManager = new PollingManager(this, mRcsSettings, mContactManager);
+        mOptionsManager = new OptionsManager(parent, mRcsSettings, mContactManager);
+        mAnonymousFetchManager = new AnonymousFetchManager(parent, mRcsSettings, mContactManager);
     }
 
     /**
@@ -109,27 +95,33 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      */
     public synchronized void start() {
         if (isServiceStarted()) {
-            // Already started
+            /* Already started */
             return;
         }
         setServiceStarted(true);
-
-        // Start options manager
-        optionsManager.start();
-
-        // Listen to address book changes
+        mOptionsManager.start();
+        /* Listen to address book changes */
         getImsModule().getCore().getAddressBookManager().addAddressBookListener(this);
+        mPollingManager.start();
 
-        // Start polling
-        pollingManager.start();
-
-        // Force a first capability check
-        Thread t = new Thread() {
+        /* Force a first capability check */
+        new Thread() {
             public void run() {
-                handleAddressBookHasChanged();
+                try {
+                    handleAddressBookHasChanged();
+                } catch (ContactManagerException e) {
+                    // TODO CR037 exception handling
+                    sLogger.error("Failed to process change in address book!", e);
+                } catch (RuntimeException e) {
+                    /*
+                     * Intentionally catch runtime exceptions as else it will abruptly end the
+                     * thread and eventually bring the whole system down, which is not intended.
+                     */
+                    // TODO CR037 exception handling
+                    sLogger.error("Failed to process change in address book!", e);
+                }
             }
-        };
-        t.start();
+        }.start();
     }
 
     /**
@@ -137,18 +129,13 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      */
     public synchronized void stop() {
         if (!isServiceStarted()) {
-            // Already stopped
+            /* Already stopped */
             return;
         }
         setServiceStarted(false);
-
-        // Stop options manager
-        optionsManager.stop();
-
-        // Stop polling
-        pollingManager.stop();
-
-        // Stop listening to address book changes
+        mOptionsManager.stop();
+        mPollingManager.stop();
+        /* Stop listening to address book changes */
         getImsModule().getCore().getAddressBookManager().removeAddressBookListener(this);
     }
 
@@ -164,7 +151,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      * @return Options manager
      */
     public OptionsManager getOptionsManager() {
-        return optionsManager;
+        return mOptionsManager;
     }
 
     /**
@@ -173,7 +160,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      * @return Options manager
      */
     public AnonymousFetchManager getAnonymousFetchManager() {
-        return anonymousFetchManager;
+        return mAnonymousFetchManager;
     }
 
     /**
@@ -183,9 +170,9 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      */
     public synchronized void requestContactCapabilities(ContactId contact) {
         if (sLogger.isActivated()) {
-            sLogger.debug("Request capabilities to " + contact);
+            sLogger.debug("Request capabilities to ".concat(contact.toString()));
         }
-        optionsManager.requestCapabilities(contact);
+        mOptionsManager.requestCapabilities(contact);
     }
 
     /**
@@ -198,7 +185,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
             if (sLogger.isActivated()) {
                 sLogger.debug("Request capabilities for " + contacts.size() + " contacts");
             }
-            optionsManager.requestCapabilities(contacts);
+            mOptionsManager.requestCapabilities(contacts);
         }
     }
 
@@ -209,7 +196,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      * @throws SipException
      */
     public void receiveCapabilityRequest(SipRequest options) throws SipException {
-        optionsManager.receiveCapabilityRequest(options);
+        mOptionsManager.receiveCapabilityRequest(options);
     }
 
     /**
@@ -219,99 +206,111 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      * @throws IOException
      */
     public void receiveNotification(SipRequest notify) throws IOException {
-        anonymousFetchManager.receiveNotification(notify);
+        mAnonymousFetchManager.receiveNotification(notify);
     }
 
     /**
-     * Address book content has changed
+     * Gets contacts not associated with RCS raw contact (i.e. existing in native address book but
+     * without entry in RCS aggregation table)
+     * 
+     * @param nativeContacts map of contact IDs from the native address book
+     * @param rcsContacts set of contact from the RCS contact provider
+     * @return
      */
-    public void handleAddressBookHasChanged() {
-        // Update capabilities for the contacts that have never been queried
-        if (isCheckInProgress) {
-            isRecheckNeeded = true;
-            return;
-        }
-
-        // We are beginning the check procedure
-        isCheckInProgress = true;
-
-        // Reset recheck flag
-        isRecheckNeeded = false;
-
-        // Check all phone numbers and query only the new ones
-        Cursor phonesCursor = AndroidFactory.getApplicationContext().getContentResolver()
-                .query(Phone.CONTENT_URI, PHONE_PROJECTION, null, null, null);
-        /* TODO: Handle phonesCursor when null. */
-
-        // List of unique number that will have to be queried for capabilities
-        Set<ContactId> toBeTreatedNumbers = new HashSet<ContactId>();
-
-        // List of unique number that have already been queried
-        List<ContactId> alreadyInEabOrInvalidNumbers = new ArrayList<ContactId>();
-
-        // We add "My number" to the numbers that are already RCS, so we don't query it if it is
-        // present in the address book
-        alreadyInEabOrInvalidNumbers.add(ImsModule.IMS_USER_PROFILE.getUsername());
-
-        int columnIndexPhoneNumber = phonesCursor.getColumnIndexOrThrow(Phone.NUMBER);
-        int columnIndexRawContactId = phonesCursor.getColumnIndexOrThrow(Phone.RAW_CONTACT_ID);
-
-        while (phonesCursor.moveToNext()) {
-            // Keep a trace of already treated row. Key is (phone number in international format)
-            String phoneNumber = phonesCursor.getString(columnIndexPhoneNumber);
-            PhoneNumber validatedNumber = ContactUtil.getValidPhoneNumberFromAndroid(phoneNumber);
-            if (validatedNumber == null) {
-                if (sLogger.isActivated()) {
-                    sLogger.warn(new StringBuilder("Cannot parse phone number '")
-                            .append(phoneNumber).append("'").toString());
-                }
-                continue;
-            }
-            ContactId contact = ContactUtil.createContactIdFromValidatedData(validatedNumber);
-            if (!alreadyInEabOrInvalidNumbers.contains(contact)) {
-                // If this number is not considered RCS valid or has already an entry with RCS, skip
-                // it
-                if (!mContactManager.isContactIdAssociatedWithRcsContactProvider(contact)
-                        && (!mContactManager.isOnlySimAssociated(contact) || (Build.VERSION.SDK_INT > 10))) {
-                    // This entry is valid and not already has a RCS raw contact, it can be treated
-                    // We exclude the number that comes from SIM only contacts, as those cannot be
-                    // aggregated to RCS raw contacts only if OS version if gingerbread or fewer
-                    toBeTreatedNumbers.add(contact);
-                } else {
-                    // This entry is either not valid or already RCS, this number is already done
-                    alreadyInEabOrInvalidNumbers.add(contact);
-
-                    // Remove the number from the treated list, if it is in it
-                    toBeTreatedNumbers.remove(contact);
-                }
-            } else {
-                // Remove the number from the treated list, it was already queried for another raw
-                // contact on the same number
-                toBeTreatedNumbers.remove(contact);
-
-                // If it is a RCS contact and the raw contact is not associated with a RCS raw
-                // contact,
-                // then we have to create a new association for it
-                long rawContactId = phonesCursor.getLong(columnIndexRawContactId);
-                if ((!mContactManager.isSimAccount(rawContactId) || (Build.VERSION.SDK_INT > 10))
-                        && (mContactManager.getAssociatedRcsRawContact(rawContactId, contact) == -1)) {
-                    ContactInfo currentInfo = mContactManager.getContactInfo(contact);
-                    if (currentInfo != null && currentInfo.isRcsContact()) {
-                        mContactManager.createRcsContact(currentInfo, rawContactId);
+    private Set<ContactId> getContactsNotAssociatedWithRcsRawContact(
+            Map<ContactId, Set<Long>> nativeContacts, Set<ContactId> rcsContacts) {
+        Set<ContactId> result = new HashSet<ContactId>();
+        for (Entry<ContactId, Set<Long>> nativeContactEntry : nativeContacts.entrySet()) {
+            ContactId nativeContact = nativeContactEntry.getKey();
+            if (rcsContacts.contains(nativeContact)) {
+                Set<Long> nativeRawContactIds = nativeContactEntry.getValue();
+                for (Long nativeRawContactId : nativeRawContactIds) {
+                    if (!mContactManager.isAssociatedRcsRawContact(nativeRawContactId,
+                            nativeContact)) {
+                        /*
+                         * Contact is known from RCS contact but without association between RCS raw
+                         * contact and native row contact.
+                         */
+                        result.add(nativeContact);
+                        break;
                     }
                 }
+            } else {
+                /* Contact is not known from RCS contact */
+                result.add(nativeContact);
             }
         }
-        phonesCursor.close();
+        return result;
+    }
 
-        // Get the capabilities for the numbers that haven't got a RCS associated contact
-        requestContactCapabilities(toBeTreatedNumbers);
+    /**
+     * Address book content has changed.<br>
+     * This method requests update of capabilities for non RCS contacts (which capabilities are
+     * unknown).<br>
+     * This method set contact information for RCS contacts not yet aggregated.
+     * 
+     * @throws ContactManagerException thrown if RCS contact aggregation fails
+     */
+    @Override
+    public void handleAddressBookHasChanged() throws ContactManagerException {
+        if (mCheckInProgress) {
+            mRecheckNeeded = true;
+            return;
+        }
+        /* We are beginning the check procedure */
+        mCheckInProgress = true;
 
-        // End of the check procedure
-        isCheckInProgress = false;
+        /* Reset re-check flag */
+        mRecheckNeeded = false;
 
-        // Check if we have to make another check
-        if (isRecheckNeeded) {
+        Map<ContactId, Set<Long>> nativeContacts = mContactManager.getAllRawIdsInPhoneAddressBook();
+
+        /*
+         * Remove my contact since already created in native address book and no need to query for
+         * capabilities.
+         */
+        nativeContacts.remove(ImsModule.IMS_USER_PROFILE.getUsername());
+
+        Set<ContactId> rcsContacts = mContactManager.getAllContactsFromRcsContactProvider();
+
+        boolean logActivated = sLogger.isActivated();
+
+        /*
+         * Gets contacts for which RCS contact aggregation is not done.
+         */
+        Set<ContactId> contactsWithNoRcsAggregation = getContactsNotAssociatedWithRcsRawContact(
+                nativeContacts, rcsContacts);
+
+        for (ContactId contact : contactsWithNoRcsAggregation) {
+            ContactInfo contactInfo = mContactManager.getContactInfo(contact);
+            if (!contactInfo.isRcsContact()) {
+                /* Do not aggregate non RCS contact */
+                continue;
+            }
+            if (logActivated) {
+                sLogger.debug("handleAddressBookHasChanged: aggregate contact ".concat(contact
+                        .toString()));
+            }
+            mContactManager.aggregateContactWithRcsRawContact(contactInfo);
+        }
+
+        Set<ContactId> unqueriedContacts = new HashSet<ContactId>(nativeContacts.keySet());
+        /* Remove all contacts known from RCS contact provider to keep only unqueried contacts */
+        unqueriedContacts.removeAll(rcsContacts);
+
+        if (!unqueriedContacts.isEmpty()) {
+            if (logActivated) {
+                sLogger.debug("handleAddressBookHasChanged: request capabilities for contacts "
+                        .concat(Arrays.toString(unqueriedContacts.toArray())));
+            }
+            mOptionsManager.requestCapabilities(unqueriedContacts);
+        }
+
+        /* End of the check procedure */
+        mCheckInProgress = false;
+
+        /* Check if we have to make another check */
+        if (mRecheckNeeded) {
             handleAddressBookHasChanged();
         }
     }
