@@ -650,11 +650,6 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                 }
                 mImService.addOneToOneChatComposingStatus(mContact, status);
             } else if (session.getDialogPath().isSessionEstablished()) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Sending composing event '" + status
-                            + "' since oneToOne chat session found with contact '" + mContact
-                            + "' is established.");
-                }
                 session.sendIsComposingStatus(status);
             } else if (!session.isInitiatedByRemote()) {
                 if (sLogger.isActivated()) {

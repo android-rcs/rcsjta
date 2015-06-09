@@ -1216,11 +1216,6 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 }
                 mImService.addGroupChatComposingStatus(mChatId, status);
             } else if (session.getDialogPath().isSessionEstablished()) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Sending composing event '" + status
-                            + "' since Group chat session found with ChatId '" + mChatId
-                            + "' is established.");
-                }
                 session.sendIsComposingStatus(status);
             } else if (!session.isInitiatedByRemote()) {
                 if (sLogger.isActivated()) {
