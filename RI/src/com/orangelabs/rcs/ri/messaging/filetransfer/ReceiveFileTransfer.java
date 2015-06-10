@@ -18,6 +18,7 @@
 
 package com.orangelabs.rcs.ri.messaging.filetransfer;
 
+import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contact.ContactId;
@@ -75,19 +76,10 @@ public class ReceiveFileTransfer extends Activity {
      */
     private final Handler mHandler = new Handler();
 
-    /**
-     * File transfer
-     */
     private FileTransfer mFileTransfer;
 
-    /**
-     * File transfer is mResuming
-     */
     private boolean mResuming = false;
 
-    /**
-     * The File Transfer Data Object
-     */
     private FileTransferDAO mFtDao;
 
     private boolean mGgroupFileTransfer = false;
@@ -106,9 +98,10 @@ public class ReceiveFileTransfer extends Activity {
 
     private String mTransferId;
 
-    /**
-     * The log tag for this class
-     */
+    private Button mPauseBtn;
+
+    private Button mResumeBtn;
+
     private static final String LOGTAG = LogUtils.getTag(ReceiveFileTransfer.class.getSimpleName());
 
     private static final String VCARD_MIME_TYPE = "text/x-vcard";
@@ -117,19 +110,18 @@ public class ReceiveFileTransfer extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.filetransfer_receive);
 
-        // Set pause and resume button
-        Button pauseBtn = (Button) findViewById(R.id.pause_btn);
-        pauseBtn.setOnClickListener(btnPauseListener);
-        pauseBtn.setEnabled(true);
-        Button resumeBtn = (Button) findViewById(R.id.resume_btn);
-        resumeBtn.setOnClickListener(btnResumeListener);
-        resumeBtn.setEnabled(false);
+        /* Set pause and resume button */
+        mPauseBtn = (Button) findViewById(R.id.pause_btn);
+        mPauseBtn.setOnClickListener(btnPauseListener);
+        mPauseBtn.setEnabled(false);
+        mResumeBtn = (Button) findViewById(R.id.resume_btn);
+        mResumeBtn.setOnClickListener(btnResumeListener);
+        mResumeBtn.setEnabled(false);
 
-        // Register to API connection manager
+        /* Register to API connection manager */
         mCnxManager = ConnectionManager.getInstance(this);
         if (!mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER, RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
@@ -166,7 +158,7 @@ public class ReceiveFileTransfer extends Activity {
         super.onDestroy();
         mCnxManager.stopMonitorServices(this);
         if (mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
-            // Remove service listener
+            /* Remove service listener */
             try {
                 if (mGgroupFileTransfer) {
                     mCnxManager.getFileTransferApi().removeEventListener(groupFtListener);
@@ -182,7 +174,6 @@ public class ReceiveFileTransfer extends Activity {
     }
 
     void processIntent(Intent intent, boolean newIntent) {
-        // Get invitation info
         mFtDao = (FileTransferDAO) (intent.getExtras()
                 .getParcelable(FileTransferIntentService.BUNDLE_FTDAO_ID));
         if (mFtDao == null) {
@@ -451,13 +442,12 @@ public class ReceiveFileTransfer extends Activity {
     private android.view.View.OnClickListener btnPauseListener = new android.view.View.OnClickListener() {
         @Override
         public void onClick(View arg0) {
-            Button resumeBtn = (Button) findViewById(R.id.resume_btn);
-            resumeBtn.setEnabled(true);
-            Button pauseBtn = (Button) findViewById(R.id.pause_btn);
-            pauseBtn.setEnabled(false);
-
+            mPauseBtn.setEnabled(false);
             try {
                 mFileTransfer.pauseTransfer();
+                if (mFileTransfer.isAllowedToResumeTransfer()) {
+                    mResumeBtn.setEnabled(true);
+                }
             } catch (RcsServiceException e) {
                 Utils.showMessageAndExit(ReceiveFileTransfer.this,
                         getString(R.string.label_pause_failed), mExitOnce, e);
@@ -471,13 +461,12 @@ public class ReceiveFileTransfer extends Activity {
     private android.view.View.OnClickListener btnResumeListener = new android.view.View.OnClickListener() {
         @Override
         public void onClick(View arg0) {
-            Button resumeBtn = (Button) findViewById(R.id.resume_btn);
-            resumeBtn.setEnabled(false);
-            Button pauseBtn = (Button) findViewById(R.id.pause_btn);
-            pauseBtn.setEnabled(true);
-
+            mResumeBtn.setEnabled(false);
             try {
                 mFileTransfer.resumeTransfer();
+                if (mFileTransfer.isAllowedToPauseTransfer()) {
+                    mPauseBtn.setEnabled(true);
+                }
             } catch (RcsServiceException e) {
                 Utils.showMessageAndExit(ReceiveFileTransfer.this,
                         getString(R.string.label_resume_failed), mExitOnce, e);
@@ -595,6 +584,14 @@ public class ReceiveFileTransfer extends Activity {
                     case STARTED:
                         // Session is well established display session status
                         statusView.setText(_state);
+                        try {
+                            if (mFileTransfer.isAllowedToPauseTransfer()) {
+                                mPauseBtn.setEnabled(true);
+                            }
+                        } catch (RcsGenericException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }                        
                         break;
 
                     case ABORTED:
@@ -635,12 +632,8 @@ public class ReceiveFileTransfer extends Activity {
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         progressBar.setProgress(progressBar.getMax());
 
-        // Disable pause button
-        Button pauseBtn = (Button) findViewById(R.id.pause_btn);
-        pauseBtn.setEnabled(false);
-        // Disable resume button
-        Button resumeBtn = (Button) findViewById(R.id.resume_btn);
-        resumeBtn.setEnabled(false);
+        mPauseBtn.setEnabled(false);
+        mResumeBtn.setEnabled(false);
 
         if (VCARD_MIME_TYPE.equals(mFtDao.getMimeType())) {
             // Show the transferred vCard
@@ -690,7 +683,7 @@ public class ReceiveFileTransfer extends Activity {
             if (!mFtDao.getTransferId().equals(transferId)) {
                 return;
             }
-            ReceiveFileTransfer.this.onTransferProgressUpdateUI(currentSize, totalSize);
+            onTransferProgressUpdateUI(currentSize, totalSize);
         }
 
         @Override
@@ -703,7 +696,7 @@ public class ReceiveFileTransfer extends Activity {
             if (!mFtDao.getTransferId().equals(transferId)) {
                 return;
             }
-            ReceiveFileTransfer.this.onTransferStateChangedUpdateUI(transferId, state, reasonCode);
+            onTransferStateChangedUpdateUI(transferId, state, reasonCode);
         }
 
         @Override
@@ -726,7 +719,7 @@ public class ReceiveFileTransfer extends Activity {
             if (!mFtDao.getTransferId().equals(transferId)) {
                 return;
             }
-            ReceiveFileTransfer.this.onTransferProgressUpdateUI(currentSize, totalSize);
+            onTransferProgressUpdateUI(currentSize, totalSize);
         }
 
         @Override
@@ -739,7 +732,7 @@ public class ReceiveFileTransfer extends Activity {
             if (!mFtDao.getTransferId().equals(transferId)) {
                 return;
             }
-            ReceiveFileTransfer.this.onTransferStateChangedUpdateUI(transferId, state, reasonCode);
+            onTransferStateChangedUpdateUI(transferId, state, reasonCode);
         }
 
         @Override
