@@ -342,9 +342,11 @@ public class ImsServiceDispatcher extends Thread {
                         sendFinalResponse(request, Response.SESSION_NOT_ACCEPTABLE);
                     }
                 } else {
+                    String contentType = request.getContentType();
+                    SipUtils.assertContentIsNotNull(contentType, request);
                     if (SipUtils.getAssertedIdentity(request).contains(
                             StoreAndForwardManager.SERVICE_URI)
-                            && (!request.getContentType().contains("multipart"))) {
+                            && (!contentType.contains("multipart"))) {
                         // Store & Forward push notifs session
                         if (logActivated) {
                             logger.debug("Store & Forward push notifications");

@@ -34,6 +34,7 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -80,11 +81,12 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @throws SipPayloadException
      */
     public TerminatingAdhocGroupChatSession(InstantMessagingService imService, SipRequest invite,
             ContactId contact, Map<ContactId, ParticipantStatus> participantsFromInvite,
             String remoteUri, RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
-            ContactManager contactManager) {
+            ContactManager contactManager) throws SipPayloadException {
         super(imService, contact, remoteUri, participantsFromInvite, rcsSettings, messagingLog,
                 timestamp, contactManager);
 
@@ -114,8 +116,9 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
      * Check is session should be auto accepted. This method should only be called once per session
      * 
      * @return true if group chat session should be auto accepted
+     * @throws SipPayloadException
      */
-    private boolean shouldBeAutoAccepted() {
+    private boolean shouldBeAutoAccepted() throws SipPayloadException {
         /*
          * In case the invite contains a http file transfer info the chat session should be
          * auto-accepted so that the file transfer session can be started.
@@ -281,7 +284,9 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
             }
 
             /* Parse the remote SDP part */
-            String remoteSdp = getDialogPath().getInvite().getSdpContent();
+            final SipRequest invite = getDialogPath().getInvite();
+            String remoteSdp = invite.getSdpContent();
+            SipUtils.assertContentIsNotNull(remoteSdp, invite);
             SdpParser parser = new SdpParser(remoteSdp.getBytes(UTF8));
             Vector<MediaDescription> media = parser.getMediaDescriptions();
             MediaDescription mediaDesc = media.elementAt(0);

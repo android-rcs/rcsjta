@@ -27,6 +27,7 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
+import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpConstants;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
@@ -38,6 +39,7 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -85,9 +87,11 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @throws SipPayloadException
      */
     public TerminatingImageTransferSession(ImsService parent, SipRequest invite, ContactId contact,
-            RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
+            RcsSettings rcsSettings, long timestamp, ContactManager contactManager)
+            throws SipPayloadException {
         super(parent, ContentManager.createMmContentFromSdp(invite, rcsSettings), contact,
                 FileTransferUtils.extractFileIcon(invite, rcsSettings), rcsSettings, timestamp,
                 contactManager);
@@ -205,7 +209,9 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
             }
 
             // Parse the remote SDP part
-            String remoteSdp = getDialogPath().getInvite().getSdpContent();
+            final SipRequest invite = getDialogPath().getInvite();
+            String remoteSdp = invite.getSdpContent();
+            SipUtils.assertContentIsNotNull(remoteSdp, invite);
             SdpParser parser = new SdpParser(remoteSdp.getBytes(UTF8));
             Vector<MediaDescription> media = parser.getMediaDescriptions();
             MediaDescription mediaDesc = media.elementAt(0);
@@ -299,14 +305,14 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 
                 /* Open the MSRP session */
                 msrpMgr.openMsrpSession(ImageTransferSession.DEFAULT_SO_TIMEOUT);
-                
+
                 /* Send an empty packet */
                 sendEmptyDataChunk();
             }
-            
+
             /* wait a response */
             getImsService().getImsModule().getSipManager().waitResponse(ctx);
-           
+
             // Test if the session should be interrupted
             if (isInterrupted()) {
                 if (mLogger.isActivated()) {

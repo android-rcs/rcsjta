@@ -29,6 +29,7 @@ import com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.platform.file.FileFactory;
@@ -314,9 +315,12 @@ public class ContentManager {
      * @param invite SIP invite request
      * @param rcsSettings
      * @return Content instance
+     * @throws SipPayloadException
      */
-    public static MmContent createMmContentFromSdp(SipRequest invite, RcsSettings rcsSettings) {
+    public static MmContent createMmContentFromSdp(SipRequest invite, RcsSettings rcsSettings)
+            throws SipPayloadException {
         String remoteSdp = invite.getSdpContent();
+        SipUtils.assertContentIsNotNull(remoteSdp, invite);
         SdpParser parser = new SdpParser(remoteSdp.getBytes(UTF8));
         Vector<MediaDescription> media = parser.getMediaDescriptions();
         MediaDescription desc = media.elementAt(0);

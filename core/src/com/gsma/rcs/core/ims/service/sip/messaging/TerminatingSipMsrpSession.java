@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.sip.messaging;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
@@ -177,7 +178,9 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
             }
 
             // Parse the remote SDP part
-            String remoteSdp = getDialogPath().getInvite().getSdpContent();
+            final SipRequest invite = getDialogPath().getInvite();
+            String remoteSdp = invite.getSdpContent();
+            SipUtils.assertContentIsNotNull(remoteSdp, invite);
             SdpParser parser = new SdpParser(remoteSdp.getBytes(UTF8));
             Vector<MediaDescription> media = parser.getMediaDescriptions();
             MediaDescription mediaDesc = media.elementAt(0);
@@ -224,7 +227,7 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
 
             // The signalisation is established
             getDialogPath().sigEstablished();
-            
+
             // Send response
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
                     .sendSipMessage(resp);

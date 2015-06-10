@@ -36,6 +36,7 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -82,10 +83,11 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @throws SipPayloadException
      */
     public TerminatingGeolocTransferSession(ImsService parent, SipRequest invite,
             ContactId contact, RcsSettings rcsSettings, long timestamp,
-            ContactManager contactManager) {
+            ContactManager contactManager) throws SipPayloadException {
         super(parent, ContentManager.createMmContentFromSdp(invite, rcsSettings), contact,
                 rcsSettings, timestamp, contactManager);
 
@@ -199,7 +201,9 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
             }
 
             // Parse the remote SDP part
-            String remoteSdp = getDialogPath().getInvite().getSdpContent();
+            final SipRequest invite = getDialogPath().getInvite();
+            String remoteSdp = invite.getSdpContent();
+            SipUtils.assertContentIsNotNull(remoteSdp, invite);
             SdpParser parser = new SdpParser(remoteSdp.getBytes(UTF8));
             Vector<MediaDescription> media = parser.getMediaDescriptions();
             MediaDescription mediaDesc = media.elementAt(0);
@@ -277,7 +281,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
             // Send response
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
                     .sendSipMessage(resp);
-            
+
             // Create the MSRP server session
             if (localSetup.equals("passive")) {
                 // Passive mode: client wait a connection
@@ -286,10 +290,10 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                 /* Open the MSRP session */
                 msrpMgr.openMsrpSession(GeolocTransferSession.DEFAULT_SO_TIMEOUT);
             }
-            
+
             /* wait a response */
             getImsService().getImsModule().getSipManager().waitResponse(ctx);
-            
+
             // Test if the session should be interrupted
             if (isInterrupted()) {
                 if (mLogger.isActivated()) {

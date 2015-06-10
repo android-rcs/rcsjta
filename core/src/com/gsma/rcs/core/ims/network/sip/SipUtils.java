@@ -24,8 +24,13 @@ package com.gsma.rcs.core.ims.network.sip;
 
 import com.gsma.rcs.core.TerminalInfo;
 import com.gsma.rcs.core.ims.protocol.sip.SipMessage;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
+import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.PhoneUtils;
+
+import android.database.Cursor;
+import android.net.Uri;
 
 import java.text.ParseException;
 import java.util.ListIterator;
@@ -663,5 +668,13 @@ public class SipUtils {
             }
         }
         return null;
+    }
+
+    public static void assertContentIsNotNull(String content, SipRequest invite)
+            throws SipPayloadException {
+        if (content == null) {
+            throw new SipPayloadException("Unable to extract content from invite : ".concat(invite
+                    .toString()));
+        }
     }
 }

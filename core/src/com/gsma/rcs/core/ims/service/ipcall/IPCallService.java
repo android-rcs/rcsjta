@@ -31,6 +31,7 @@ import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
@@ -105,8 +106,10 @@ public class IPCallService extends ImsService {
     }
 
     private void handleIPCallInvitationRejected(SipRequest invite, ContactId contact,
-            ReasonCode reasonCode, long timestamp) {
-        byte[] sessionDescriptionProtocol = invite.getSdpContent().getBytes(UTF8);
+            ReasonCode reasonCode, long timestamp) throws SipPayloadException {
+        String remoteSdp = invite.getSdpContent();
+        SipUtils.assertContentIsNotNull(remoteSdp, invite);
+        byte[] sessionDescriptionProtocol = remoteSdp.getBytes(UTF8);
         AudioContent audioContent = ContentManager
                 .createLiveAudioContentFromSdp(sessionDescriptionProtocol);
         VideoContent videoContent = ContentManager
@@ -248,8 +251,10 @@ public class IPCallService extends ImsService {
      * @param invite Initial invite
      * @param audio
      * @param video
+     * @throws SipPayloadException
      */
-    public void receiveIPCallInvitation(SipRequest invite, boolean audio, boolean video) {
+    public void receiveIPCallInvitation(SipRequest invite, boolean audio, boolean video)
+            throws SipPayloadException {
         boolean logActivated = sLogger.isActivated();
         // Parse contact
         PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(SipUtils

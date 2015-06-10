@@ -34,6 +34,7 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -80,10 +81,12 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @throws SipPayloadException
      */
     public TerminatingStoreAndForwardOneToOneChatMessageSession(InstantMessagingService imService,
             SipRequest invite, ContactId contact, RcsSettings rcsSettings,
-            MessagingLog messagingLog, long timestamp, ContactManager contactManager) {
+            MessagingLog messagingLog, long timestamp, ContactManager contactManager)
+            throws SipPayloadException {
         super(imService, contact, PhoneUtils.formatContactIdToUri(contact), ChatUtils
                 .getFirstMessage(invite, timestamp), rcsSettings, messagingLog, timestamp,
                 contactManager);
@@ -107,8 +110,9 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
      * Check is session should be auto accepted. This method should only be called once per session
      * 
      * @return true if one-to-one chat session should be auto accepted
+     * @throws SipPayloadException
      */
-    private boolean shouldBeAutoAccepted() {
+    private boolean shouldBeAutoAccepted() throws SipPayloadException {
         /*
          * In case the invite contains a http file transfer info the chat session should be
          * auto-accepted so that the file transfer session can be started.
@@ -235,7 +239,9 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
             }
 
             /* Parse the remote SDP part */
-            String remoteSdp = getDialogPath().getInvite().getSdpContent();
+            final SipRequest invite = getDialogPath().getInvite();
+            String remoteSdp = invite.getSdpContent();
+            SipUtils.assertContentIsNotNull(remoteSdp, invite);
             SdpParser parser = new SdpParser(remoteSdp.getBytes(UTF8));
             Vector<MediaDescription> media = parser.getMediaDescriptions();
             MediaDescription mediaDesc = media.elementAt(0);

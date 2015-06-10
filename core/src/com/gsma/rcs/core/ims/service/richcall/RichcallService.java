@@ -33,6 +33,7 @@ import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
@@ -116,8 +117,6 @@ public class RichcallService extends ImsService {
 
     private final RcsSettings mRcsSettings;
 
-    private final Core mCore;
-
     /**
      * Constructor
      * 
@@ -129,28 +128,29 @@ public class RichcallService extends ImsService {
     public RichcallService(ImsModule parent, Core core, ContactManager contactsManager,
             RcsSettings rcsSettings) throws CoreException {
         super(parent, true);
-        mCore = core;
         mContactManager = contactsManager;
         mRcsSettings = rcsSettings;
     }
 
     private void handleImageSharingInvitationRejected(SipRequest invite, ContactId contact,
-            ImageSharing.ReasonCode reasonCode, long timestamp) {
+            ImageSharing.ReasonCode reasonCode, long timestamp) throws SipPayloadException {
         MmContent content = ContentManager.createMmContentFromSdp(invite, mRcsSettings);
         getImsModule().getCore().getListener()
                 .handleImageSharingInvitationRejected(contact, content, reasonCode, timestamp);
     }
 
     private void handleVideoSharingInvitationRejected(SipRequest invite, ContactId contact,
-            VideoSharing.ReasonCode reasonCode, long timestamp) {
-        VideoContent content = ContentManager.createLiveVideoContentFromSdp(invite.getSdpContent()
+            VideoSharing.ReasonCode reasonCode, long timestamp) throws SipPayloadException {
+        String remoteSdp = invite.getSdpContent();
+        SipUtils.assertContentIsNotNull(remoteSdp, invite);
+        VideoContent content = ContentManager.createLiveVideoContentFromSdp(remoteSdp
                 .getBytes(UTF8));
         getImsModule().getCore().getListener()
                 .handleVideoSharingInvitationRejected(contact, content, reasonCode, timestamp);
     }
 
     private void handleGeolocSharingInvitationRejected(SipRequest invite, ContactId contact,
-            ReasonCode reasonCode, long timestamp) {
+            ReasonCode reasonCode, long timestamp) throws SipPayloadException {
         GeolocContent content = (GeolocContent) ContentManager.createMmContentFromSdp(invite,
                 mRcsSettings);
         getImsModule().getCore().getListener()
@@ -480,8 +480,10 @@ public class RichcallService extends ImsService {
      * 
      * @param invite Initial invite
      * @param timestamp Local timestamp when got SipRequest
+     * @throws SipPayloadException
      */
-    public void receiveImageSharingInvitation(SipRequest invite, long timestamp) {
+    public void receiveImageSharingInvitation(SipRequest invite, long timestamp)
+            throws SipPayloadException {
         boolean logActivated = sLogger.isActivated();
         if (logActivated) {
             sLogger.info("Receive an image sharing session invitation");
@@ -667,8 +669,10 @@ public class RichcallService extends ImsService {
      * 
      * @param invite Initial invite
      * @param timestamp Local timestamp when got SipRequest
+     * @throws SipPayloadException
      */
-    public void receiveVideoSharingInvitation(SipRequest invite, long timestamp) {
+    public void receiveVideoSharingInvitation(SipRequest invite, long timestamp)
+            throws SipPayloadException {
         boolean logActivated = sLogger.isActivated();
         if (logActivated) {
             sLogger.info("Receive a video sharing invitation");
@@ -794,8 +798,10 @@ public class RichcallService extends ImsService {
      * 
      * @param invite Initial invite
      * @param timestamp Local timestamp when got SipRequest
+     * @throws SipPayloadException
      */
-    public void receiveGeolocSharingInvitation(SipRequest invite, long timestamp) {
+    public void receiveGeolocSharingInvitation(SipRequest invite, long timestamp)
+            throws SipPayloadException {
         boolean logActivated = sLogger.isActivated();
         if (logActivated) {
             sLogger.info("Receive a geoloc sharing session invitation");

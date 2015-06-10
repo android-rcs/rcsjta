@@ -29,6 +29,7 @@ import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -1335,8 +1336,10 @@ public abstract class ImsServiceSession extends Thread {
      * @param ReInvite
      * @param serviceContext
      * @return SDP built
+     * @throws SipPayloadException
      */
-    public String buildReInviteSdpResponse(SipRequest ReInvite, int serviceContext) {
+    public String buildReInviteSdpResponse(SipRequest ReInvite, int serviceContext)
+            throws SipPayloadException {
         return null;
     }
 

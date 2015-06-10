@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.service.im.chat.standfw;
 
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.provider.contact.ContactManager;
@@ -72,8 +73,10 @@ public class StoreAndForwardManager {
      * @param invite Received invite
      * @param contact Contact identifier
      * @param timestamp Local timestamp when got SipRequest
+     * @throws SipPayloadException
      */
-    public void receiveStoredMessages(SipRequest invite, ContactId contact, long timestamp) {
+    public void receiveStoredMessages(SipRequest invite, ContactId contact, long timestamp)
+            throws SipPayloadException {
         if (logger.isActivated()) {
             logger.debug("Receive stored messages");
         }

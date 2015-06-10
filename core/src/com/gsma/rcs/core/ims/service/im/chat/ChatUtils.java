@@ -29,6 +29,7 @@ import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimParser;
@@ -68,6 +69,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
+
 import javax2.sip.header.ContactHeader;
 import javax2.sip.header.ExtensionHeader;
 
@@ -339,25 +341,20 @@ public class ChatUtils {
      * 
      * @param request Request
      * @return Boolean
+     * @throws SipPayloadException
      */
-    public static boolean isImdnDeliveredRequested(SipRequest request) {
-        boolean result = false;
-        try {
-            // Read ID from multipart content
-            String content = request.getContent();
-            int index = content.indexOf(ImdnUtils.HEADER_IMDN_DISPO_NOTIF);
-            if (index != -1) {
-                index = index + ImdnUtils.HEADER_IMDN_DISPO_NOTIF.length() + 1;
-                String part = content.substring(index);
-                String notif = part.substring(0, part.indexOf(CRLF));
-                if (notif.indexOf(ImdnDocument.POSITIVE_DELIVERY) != -1) {
-                    result = true;
-                }
-            }
-        } catch (Exception e) {
-            result = false;
+    public static boolean isImdnDeliveredRequested(SipRequest request) throws SipPayloadException {
+        /* Read ID from multipart content */
+        String content = request.getContent();
+        SipUtils.assertContentIsNotNull(content, request);
+        int index = content.indexOf(ImdnUtils.HEADER_IMDN_DISPO_NOTIF);
+        if (index == -1) {
+            return false;
         }
-        return result;
+        index = index + ImdnUtils.HEADER_IMDN_DISPO_NOTIF.length() + 1;
+        String part = content.substring(index);
+        String notif = part.substring(0, part.indexOf(CRLF));
+        return notif.indexOf(ImdnDocument.POSITIVE_DELIVERY) != -1;
     }
 
     /**
@@ -365,25 +362,20 @@ public class ChatUtils {
      * 
      * @param request Request
      * @return Boolean
+     * @throws SipPayloadException
      */
-    public static boolean isImdnDisplayedRequested(SipRequest request) {
-        boolean result = false;
-        try {
-            // Read ID from multipart content
-            String content = request.getContent();
-            int index = content.indexOf(ImdnUtils.HEADER_IMDN_DISPO_NOTIF);
-            if (index != -1) {
-                index = index + ImdnUtils.HEADER_IMDN_DISPO_NOTIF.length() + 1;
-                String part = content.substring(index);
-                String notif = part.substring(0, part.indexOf(CRLF));
-                if (notif.indexOf(ImdnDocument.DISPLAY) != -1) {
-                    result = true;
-                }
-            }
-        } catch (Exception e) {
-            result = false;
+    public static boolean isImdnDisplayedRequested(SipRequest request) throws SipPayloadException {
+        /* Read ID from multipart content */
+        String content = request.getContent();
+        SipUtils.assertContentIsNotNull(content, request);
+        int index = content.indexOf(ImdnUtils.HEADER_IMDN_DISPO_NOTIF);
+        if (index == -1) {
+            return false;
         }
-        return result;
+        index = index + ImdnUtils.HEADER_IMDN_DISPO_NOTIF.length() + 1;
+        String part = content.substring(index);
+        String notif = part.substring(0, part.indexOf(CRLF));
+        return notif.indexOf(ImdnDocument.DISPLAY) != -1;
     }
 
     /**
@@ -391,23 +383,19 @@ public class ChatUtils {
      * 
      * @param request Request
      * @return Message ID
+     * @throws SipPayloadException
      */
-    public static String getMessageId(SipRequest request) {
-        String result = null;
-        try {
-            // Read ID from multipart content
-            String content = request.getContent();
-            int index = content.indexOf(ImdnUtils.HEADER_IMDN_MSG_ID);
-            if (index != -1) {
-                index = index + ImdnUtils.HEADER_IMDN_MSG_ID.length() + 1;
-                String part = content.substring(index);
-                String msgId = part.substring(0, part.indexOf(CRLF));
-                result = msgId.trim();
-            }
-        } catch (Exception e) {
-            result = null;
+    public static String getMessageId(SipRequest request) throws SipPayloadException {
+        /* Read ID from multipart content */
+        String content = request.getContent();
+        SipUtils.assertContentIsNotNull(content, request);
+        int index = content.indexOf(ImdnUtils.HEADER_IMDN_MSG_ID);
+        if (index == -1) {
+            return null;
         }
-        return result;
+        index = index + ImdnUtils.HEADER_IMDN_MSG_ID.length() + 1;
+        String part = content.substring(index);
+        return part.substring(0, part.indexOf(CRLF)).trim();
     }
 
     private static String addUriDelimiters(String uri) {
@@ -763,8 +751,10 @@ public class ChatUtils {
      * @param invite Request
      * @param timestamp Local timestamp
      * @return First message
+     * @throws SipPayloadException
      */
-    public static ChatMessage getFirstMessage(SipRequest invite, long timestamp) {
+    public static ChatMessage getFirstMessage(SipRequest invite, long timestamp)
+            throws SipPayloadException {
         ChatMessage msg = getFirstMessageFromCpim(invite, timestamp);
         if (msg != null) {
             return msg;
@@ -799,8 +789,10 @@ public class ChatUtils {
      * @param invite Request
      * @param timestamp Local timestamp
      * @return First message
+     * @throws SipPayloadException
      */
-    private static ChatMessage getFirstMessageFromCpim(SipRequest invite, long timestamp) {
+    private static ChatMessage getFirstMessageFromCpim(SipRequest invite, long timestamp)
+            throws SipPayloadException {
         CpimMessage cpimMsg = extractCpimMessage(invite);
         if (cpimMsg == null) {
             return null;

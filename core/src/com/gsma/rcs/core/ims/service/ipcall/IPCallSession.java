@@ -34,6 +34,7 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
@@ -976,8 +977,10 @@ public abstract class IPCallSession extends ImsServiceSession {
      * @param reInvite reInvite received request
      * @param serviceContext context of service (Add Video, Remove Video ...)
      * @return sdp built by builder
+     * @throws SipPayloadException
      */
-    public String buildReInviteSdpResponse(SipRequest reInvite, int serviceContext) {
+    public String buildReInviteSdpResponse(SipRequest reInvite, int serviceContext)
+            throws SipPayloadException {
         String localSdp = "";
         switch (serviceContext) {
             case (IPCallSession.ADD_VIDEO): {
@@ -997,16 +1000,18 @@ public abstract class IPCallSession extends ImsServiceSession {
      * Build sdp response for addVideo
      * 
      * @param reInvite reInvite Request received
+     * @throws SipPayloadException
      */
-    private String buildAddVideoSdpResponse(SipRequest reInvite) {
+    private String buildAddVideoSdpResponse(SipRequest reInvite) throws SipPayloadException {
         if (logger.isActivated()) {
             logger.info("buildAddVideoSdpResponse()");
         }
 
         StringBuilder sdp = new StringBuilder();
 
-        // Parse the remote SDP part
-        SdpParser parser = new SdpParser(reInvite.getSdpContent().getBytes(UTF8));
+        final String remoteSdp = reInvite.getSdpContent();
+        SipUtils.assertContentIsNotNull(remoteSdp, reInvite);
+        SdpParser parser = new SdpParser(remoteSdp.getBytes(UTF8));
         MediaDescription mediaVideo = parser.getMediaDescription("video");
 
         // Extract video codecs from SDP

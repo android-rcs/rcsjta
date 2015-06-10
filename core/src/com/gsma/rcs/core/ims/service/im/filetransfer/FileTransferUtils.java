@@ -28,6 +28,7 @@ import static com.gsma.rcs.utils.StringUtils.UTF8_STR;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
@@ -243,9 +244,10 @@ public class FileTransferUtils {
      * @param request Request
      * @param rcsSettings RCS settings
      * @return FT HTTP info
+     * @throws SipPayloadException
      */
     public static FileTransferHttpInfoDocument getHttpFTInfo(SipRequest request,
-            RcsSettings rcsSettings) {
+            RcsSettings rcsSettings) throws SipPayloadException {
         /* Not a valid timestamp here as the message is just for temp use */
         long timestamp = -1;
         ChatMessage message = ChatUtils.getFirstMessage(request, timestamp);
