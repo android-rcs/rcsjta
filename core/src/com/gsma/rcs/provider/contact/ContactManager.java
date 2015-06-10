@@ -1418,7 +1418,7 @@ public final class ContactManager {
         // Get the id of the status update data linked to this raw contact id
         long dataId = INVALID_ID;
         Cursor cur = getRawContactDataCursor(rawContactId);
-        if (cur != null) {
+        if (cur != null && cur.moveToNext()) {
             dataId = cur.getLong(cur.getColumnIndex(Data._ID));
         }
         ops.add(ContentProviderOperation

@@ -24,6 +24,8 @@ package com.gsma.rcs.provisioning.https;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.R;
+import com.gsma.rcs.addressbook.AuthenticationService;
 import com.gsma.rcs.core.TerminalInfo;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
@@ -945,6 +947,10 @@ public class HttpsProvisioningManager {
                                         if (logActivated) {
                                             sLogger.debug("No special terms and conditions");
                                         }
+                                        AuthenticationService.createRcsAccount(mCtx,
+                                                mLocalContentResolver,
+                                                mCtx.getString(R.string.rcs_core_account_username),
+                                                true, mRcsSettings, mContactManager);
                                         mRcsSettings.setProvisioningTermsAccepted(true);
                                     }
                                     // We parsed successfully the configuration

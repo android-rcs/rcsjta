@@ -362,13 +362,6 @@ public class StartService extends Service {
                     sLogger.debug("It was manually destroyed by the user, we do not recreate it");
                 }
                 return false;
-            } else {
-                if (logActivated) {
-                    sLogger.debug("Recreate a new RCS account");
-                }
-                AuthenticationService.createRcsAccount(ctx, localContentResolver,
-                        getString(R.string.rcs_core_account_username), true, mRcsSettings,
-                        mContactManager);
             }
         } else if (hasChangedAccount()) {
             /*
@@ -381,14 +374,6 @@ public class StartService extends Service {
             }
             mContactManager.deleteRCSEntries();
             AuthenticationService.removeRcsAccount(ctx, null);
-
-            if (logActivated) {
-                sLogger.debug(new StringBuilder("Creating a new RCS account for ").append(
-                        mCurrentUserAccount).toString());
-            }
-            AuthenticationService.createRcsAccount(ctx, localContentResolver,
-                    getString(R.string.rcs_core_account_username), true, mRcsSettings,
-                    mContactManager);
         }
 
         /* Save the current end user account */
@@ -414,6 +399,9 @@ public class StartService extends Service {
         Context context = getApplicationContext();
 
         if (!ConfigurationMode.AUTO.equals(mode)) {
+            AuthenticationService.createRcsAccount(context, mLocalContentResolver,
+                    getString(R.string.rcs_core_account_username), true, mRcsSettings,
+                    mContactManager);
             // Manual provisioning: accept terms and conditions
             mRcsSettings.setProvisioningTermsAccepted(true);
             // No auto config: directly start the RCS core service

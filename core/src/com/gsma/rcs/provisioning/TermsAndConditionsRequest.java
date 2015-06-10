@@ -23,6 +23,7 @@
 package com.gsma.rcs.provisioning;
 
 import com.gsma.rcs.R;
+import com.gsma.rcs.addressbook.AuthenticationService;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.contact.ContactManager;
@@ -103,6 +104,9 @@ public class TermsAndConditionsRequest extends Activity {
             builder.setPositiveButton(R.string.rcs_core_terms_accept,
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
+                            AuthenticationService.createRcsAccount(ctx, localContentResolver,
+                                    getString(R.string.rcs_core_account_username), true,
+                                    rcsSettings, contactManager);
                             // Set terms and conditions accepted
                             rcsSettings.setProvisioningTermsAccepted(true);
                             LauncherUtils.launchRcsCoreService(ctx, rcsSettings);
@@ -126,6 +130,9 @@ public class TermsAndConditionsRequest extends Activity {
             builder.setNeutralButton(R.string.rcs_core_terms_ok,
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
+                            AuthenticationService.createRcsAccount(ctx, localContentResolver,
+                                    getString(R.string.rcs_core_account_username), true,
+                                    rcsSettings, contactManager);
                             // Set terms and conditions accepted
                             rcsSettings.setProvisioningTermsAccepted(true);
                             LauncherUtils.launchRcsCoreService(ctx, rcsSettings);
