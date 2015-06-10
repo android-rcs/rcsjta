@@ -204,13 +204,13 @@ public class ContactManagerTest extends AndroidTestCase {
 
     public void testDeleteRCSEntries() {
         createRcsContact();
-        Set<ContactId> contacts = mContactManager.getAllContacts();
+        Set<ContactId> contacts = mContactManager.getAllContactsFromRcsContactProvider();
         assertTrue(!contacts.isEmpty());
         if (sLogger.isActivated()) {
             sLogger.debug("All contacts=".concat(Arrays.toString(contacts.toArray())));
         }
         mContactManager.deleteRCSEntries();
-        assertTrue(mContactManager.getAllContacts().isEmpty());
+        assertTrue(mContactManager.getAllContactsFromRcsContactProvider().isEmpty());
     }
 
 }
