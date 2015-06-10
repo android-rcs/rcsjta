@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.provisioning.https;
 
+import com.gsma.rcs.addressbook.RcsAccountException;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
@@ -84,9 +85,6 @@ public class HttpsProvisioningService extends Service {
      */
     private static final String ACTION_RETRY = "com.gsma.rcs.provisioning.https.HttpsProvisioningService.ACTION_RETRY";
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(HttpsProvisioningService.class
             .getSimpleName());
 
@@ -119,8 +117,10 @@ public class HttpsProvisioningService extends Service {
             user = intent.getBooleanExtra(USER_KEY, false);
         }
         String version = mRcsSettings.getProvisioningVersion();
-        // It makes no sense to start service if version is 0 (unconfigured)
-        // if version = 0, then (re)set first to true
+        /*
+         * It makes no sense to start service if version is 0 (unconfigured). If version = 0, then
+         * (re)set first to true.
+         */
         try {
             int ver = Integer.parseInt(version);
             if (ver == 0) {
@@ -186,16 +186,18 @@ public class HttpsProvisioningService extends Service {
                 mHttpsProvisioningMng.registerNetworkStateListener();
             }
         }
-        // We want this service to continue running until it is explicitly
-        // stopped, so return sticky.
+        /*
+         * We want this service to continue running until it is explicitly stopped, so return
+         * sticky.
+         */
         return START_STICKY;
     }
 
     /**
      * Start retry alarm
      * 
-     * @param context
-     * @param intent
+     * @param context the application context
+     * @param intent the pending intent to execute when alarm is raised
      * @param delay delay in milliseconds
      */
     public static void startRetryAlarm(Context context, PendingIntent intent, long delay) {
@@ -210,8 +212,8 @@ public class HttpsProvisioningService extends Service {
     /**
      * Cancel retry alarm
      * 
-     * @param context
-     * @param intent
+     * @param context the application context
+     * @param intent the pending intent to cancel
      */
     public static void cancelRetryAlarm(Context context, PendingIntent intent) {
         if (sLogger.isActivated()) {
@@ -256,7 +258,18 @@ public class HttpsProvisioningService extends Service {
         public void onReceive(Context context, Intent intent) {
             new Thread() {
                 public void run() {
-                    mHttpsProvisioningMng.updateConfig();
+                    try {
+                        mHttpsProvisioningMng.updateConfig();
+                    } catch (RcsAccountException e) {
+                        sLogger.error("Failed to update configuration!", e);
+
+                    } catch (RuntimeException e) {
+                        /*
+                         * Intentionally catch runtime exceptions as else it will abruptly end the
+                         * thread and eventually bring the whole system down, which is not intended.
+                         */
+                        sLogger.error("Failed to update configuration!", e);
+                    }
                 }
             }.start();
         }
@@ -265,7 +278,7 @@ public class HttpsProvisioningService extends Service {
     /**
      * Start the HTTPs provisioning service
      * 
-     * @param context
+     * @param context the application context
      * @param firstLaunch first launch after (re)boot
      * @param userLaunch launch is requested by user action
      */

@@ -22,14 +22,8 @@
 
 package com.gsma.rcs.service;
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.telephony.TelephonyManager;
-
 import com.gsma.rcs.addressbook.AccountChangedReceiver;
-import com.gsma.rcs.addressbook.AuthenticationService;
+import com.gsma.rcs.addressbook.RcsAccountManager;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.platform.registry.AndroidRegistryFactory;
 import com.gsma.rcs.provider.LocalContentResolver;
@@ -40,6 +34,12 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.sharing.RichCallHistory;
 import com.gsma.rcs.provisioning.https.HttpsProvisioningService;
 import com.gsma.rcs.utils.logger.Logger;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.telephony.TelephonyManager;
 
 /**
  * Launcher utility functions
@@ -70,9 +70,6 @@ public class LauncherUtils {
      */
     private static final String REGISTRY_PROVISIONING_EXPIRATION = "ProvisioningExpiration";
 
-    /**
-     * Logger
-     */
     private static final Logger sLogger = Logger.getLogger(LauncherUtils.class.getName());
 
     /**
@@ -81,14 +78,13 @@ public class LauncherUtils {
      * @param context application context
      * @param boot Boot flag
      * @param user restart is required by user
-     * @param rcsSettings
+     * @param rcsSettings RCS settings accessor
      */
     public static void launchRcsService(Context context, boolean boot, boolean user,
             RcsSettings rcsSettings) {
-        // Set the logger properties
+        /* Set the logger properties */
         Logger.activationFlag = rcsSettings.isTraceActivated();
         Logger.traceLevel = rcsSettings.getTraceLevel();
-
         if (rcsSettings.isServiceActivated()) {
             StartService.LaunchRcsStartService(context, boot, user);
         }
@@ -98,7 +94,7 @@ public class LauncherUtils {
      * Launch the RCS core service
      * 
      * @param context Application context
-     * @param rcsSettings
+     * @param rcsSettings RCS settings accessor
      */
     public static void launchRcsCoreService(Context context, RcsSettings rcsSettings) {
         boolean logActivated = sLogger.isActivated();
@@ -110,21 +106,18 @@ public class LauncherUtils {
                 sLogger.debug("RCS service is disabled");
             }
             return;
-
         }
         if (!rcsSettings.isUserProfileConfigured()) {
             if (logActivated) {
                 sLogger.debug("RCS service not configured");
             }
             return;
-
         }
         if (!rcsSettings.isProvisioningTermsAccepted()) {
             if (logActivated) {
                 sLogger.debug("Provisioning terms are not accepted");
             }
             return;
-
         }
         context.startService(new Intent(context, RcsCoreService.class));
     }
@@ -161,29 +154,29 @@ public class LauncherUtils {
      * 
      * @param ctx Application context
      * @param localContentResolver Local content resolver
-     * @param rcsSettings
-     * @param mMessagingLog
-     * @param contactManager
+     * @param rcsSettings RCS settings accessor
+     * @param mMessagingLog Message log accessor
+     * @param contactManager Contact manager accessor
      */
     public static void resetRcsConfig(Context ctx, LocalContentResolver localContentResolver,
             RcsSettings rcsSettings, MessagingLog mMessagingLog, ContactManager contactManager) {
         if (sLogger.isActivated()) {
             sLogger.debug("Reset RCS config");
         }
-        // Stop the Core service
+        /* Stop the Core service */
         ctx.stopService(new Intent(ctx, RcsCoreService.class));
 
-        // Reset user profile
+        /* Reset user profile */
         rcsSettings.resetUserProfile();
 
-        // Clear all entries in chat, message and file transfer tables
+        /* Clear all entries in chat, message and file transfer tables */
         mMessagingLog.deleteAllEntries();
 
-        // Clear all entries in IP call table
+        /* Clear all entries in IP call table */
         IPCallHistory.createInstance(localContentResolver);
         IPCallHistory.getInstance().deleteAllEntries();
 
-        // Clear all entries in Rich Call tables (image and video)
+        /* Clear all entries in Rich Call tables (image and video) */
         RichCallHistory.createInstance(localContentResolver);
         RichCallHistory.getInstance().deleteAllEntries();
 
@@ -193,17 +186,20 @@ public class LauncherUtils {
          */
         contactManager.deleteRCSEntries();
 
-        // Remove the RCS account
-        AuthenticationService.removeRcsAccount(ctx, null);
-        // Ensure that factory is set up properly to avoid NullPointerException in
-        // AccountChangedReceiver.setAccountResetByEndUser
+        /* Remove the RCS account */
+        RcsAccountManager accountUtility = RcsAccountManager.createInstance(ctx, contactManager);
+        accountUtility.removeRcsAccount(null);
+        /*
+         * Ensure that factory is set up properly to avoid NullPointerException in
+         * AccountChangedReceiver.setAccountResetByEndUser
+         */
         AndroidFactory.setApplicationContext(ctx, rcsSettings);
         AccountChangedReceiver.setAccountResetByEndUser(false);
 
-        // Clean terms status
+        /* Clean terms status */
         rcsSettings.setProvisioningTermsAccepted(false);
 
-        // Set the configuration validity flag to false
+        /* Set the configuration validity flag to false */
         rcsSettings.setConfigurationValid(false);
     }
 
@@ -310,14 +306,14 @@ public class LauncherUtils {
     /**
      * Save the provisioning validity in shared preferences
      * 
-     * @param context
+     * @param context Context
      * @param validity validity of the provisioning expressed in milliseconds
      */
     public static void saveProvisioningValidity(Context context, long validity) {
         if (validity <= 0L) {
             return;
         }
-        // Calculate next expiration date in msec
+        /* Calculate next expiration time in milliseconds */
         long next = System.currentTimeMillis() + validity;
         SharedPreferences preferences = context.getSharedPreferences(
                 AndroidRegistryFactory.RCS_PREFS_NAME, Activity.MODE_PRIVATE);

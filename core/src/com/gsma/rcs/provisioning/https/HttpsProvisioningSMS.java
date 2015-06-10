@@ -28,6 +28,7 @@ import java.util.Random;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HttpContext;
 
+import com.gsma.rcs.addressbook.RcsAccountException;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.contact.ContactManager;
@@ -59,15 +60,9 @@ public class HttpsProvisioningSMS {
      */
     private BroadcastReceiver mSmsProvisioningReceiver;
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(HttpsProvisioningSMS.class
             .getSimpleName());
 
-    /**
-     * Context
-     */
     private final Context mContext;
 
     private final RcsSettings mRcsSettings;
@@ -81,11 +76,11 @@ public class HttpsProvisioningSMS {
     /**
      * Constructor
      * 
-     * @param httpsProvisioningManager
-     * @param localContentResolver
-     * @param rcsSettings
-     * @param messagingLog
-     * @param contactManager
+     * @param httpsProvisioningManager HTTPs provisioning manager
+     * @param localContentResolver Local content resolver
+     * @param rcsSettings RCS settings accessor
+     * @param messagingLog Message log accessor
+     * @param contactManager Contact manager accessor
      */
     public HttpsProvisioningSMS(HttpsProvisioningManager httpsProvisioningManager,
             LocalContentResolver localContentResolver, RcsSettings rcsSettings,
@@ -127,7 +122,7 @@ public class HttpsProvisioningSMS {
             sLogger.debug("Registering SMS provider receiver in port: ".concat(smsPort));
         }
 
-        // Instantiate the receiver
+        /* Instantiate the receiver */
         mSmsProvisioningReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(final Context ctx, final Intent intent) {
@@ -209,8 +204,20 @@ public class HttpsProvisioningSMS {
                         if (mManager != null) {
                             new Thread() {
                                 public void run() {
-                                    mManager.updateConfigWithOTP(smsData, requestUri, client,
-                                            localContext);
+                                    try {
+                                        mManager.updateConfigWithOTP(smsData, requestUri, client,
+                                                localContext);
+                                    } catch (RcsAccountException e) {
+                                        sLogger.error("Failed to update Config with OTP!", e);
+
+                                    } catch (RuntimeException e) {
+                                        /*
+                                         * Intentionally catch runtime exceptions as else it will
+                                         * abruptly end the thread and eventually bring the whole
+                                         * system down, which is not intended.
+                                         */
+                                        sLogger.error("Failed to update Config with OTP!", e);
+                                    }
                                 }
                             }.start();
 

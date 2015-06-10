@@ -27,6 +27,7 @@ import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.LauncherUtils;
+import com.gsma.rcs.utils.logger.Logger;
 
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
@@ -39,31 +40,46 @@ import android.os.Bundle;
  */
 public class SetupRcsAccount extends android.accounts.AccountAuthenticatorActivity {
 
+    private static final Logger sLogger = Logger.getLogger(SetupRcsAccount.class.getSimpleName());
+
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        Context ctx = getApplicationContext();
-        ContentResolver contentResolver = ctx.getContentResolver();
-        LocalContentResolver localContentResolver = new LocalContentResolver(contentResolver);
-        RcsSettings rcsSettings = RcsSettings.createInstance(localContentResolver);
-        ContactManager contactManager = ContactManager.createInstance(ctx, contentResolver,
-                localContentResolver, rcsSettings);
+        try {
+            Context ctx = getApplicationContext();
+            ContentResolver contentResolver = ctx.getContentResolver();
+            LocalContentResolver localContentResolver = new LocalContentResolver(contentResolver);
+            RcsSettings rcsSettings = RcsSettings.createInstance(localContentResolver);
+            ContactManager contactManager = ContactManager.createInstance(ctx, contentResolver,
+                    localContentResolver, rcsSettings);
+            RcsAccountManager rcsAccountMngr = RcsAccountManager
+                    .createInstance(ctx, contactManager);
 
-        AuthenticationService.createRcsAccount(this, localContentResolver,
-                getString(R.string.rcs_core_account_username), true, rcsSettings, contactManager);
+            String rcsAccountUsername = getString(R.string.rcs_core_account_username);
 
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            AccountAuthenticatorResponse response = extras
-                    .getParcelable(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE);
-            Bundle result = new Bundle();
-            result.putString(AccountManager.KEY_ACCOUNT_NAME,
-                    getString(R.string.rcs_core_account_username));
-            result.putString(AccountManager.KEY_ACCOUNT_TYPE,
-                    AuthenticationService.ACCOUNT_MANAGER_TYPE);
-            response.onResult(result);
+            rcsAccountMngr.createRcsAccount(rcsAccountUsername, true);
 
-            // Start the service
-            LauncherUtils.launchRcsService(ctx, false, false, rcsSettings);
+            Bundle extras = getIntent().getExtras();
+            if (extras != null) {
+                AccountAuthenticatorResponse response = extras
+                        .getParcelable(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE);
+                Bundle result = new Bundle();
+                result.putString(AccountManager.KEY_ACCOUNT_NAME, rcsAccountUsername);
+                result.putString(AccountManager.KEY_ACCOUNT_TYPE,
+                        RcsAccountManager.ACCOUNT_MANAGER_TYPE);
+                response.onResult(result);
+
+                // Start the service
+                LauncherUtils.launchRcsService(ctx, false, false, rcsSettings);
+            }
+        } catch (RcsAccountException e) {
+            sLogger.error("Failed to set up RCS account!", e);
+
+        } catch (RuntimeException e) {
+            /*
+             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
+             * eventually bring the whole system down, which is not intended.
+             */
+            sLogger.error("Failed to set up RCS account!", e);
         }
         finish();
     }

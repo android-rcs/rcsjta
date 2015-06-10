@@ -23,15 +23,18 @@
 package com.gsma.rcs.provisioning;
 
 import com.gsma.rcs.R;
-import com.gsma.rcs.addressbook.AuthenticationService;
+import com.gsma.rcs.addressbook.RcsAccountException;
+import com.gsma.rcs.addressbook.RcsAccountManager;
 import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.LauncherUtils;
+import com.gsma.rcs.utils.logger.Logger;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -64,17 +67,23 @@ public class TermsAndConditionsRequest extends Activity {
      */
     public static final String EXTRA_REJECT_BTN = "reject_btn";
 
+    private static final Logger sLogger = Logger.getLogger(TermsAndConditionsRequest.class
+            .getName());
+
     @Override
     public void onCreate(Bundle savedInstance) {
         super.onCreate(savedInstance);
         final Context ctx = getApplicationContext();
-        final LocalContentResolver localContentResolver = new LocalContentResolver(ctx);
-
+        final ContentResolver contentResolver = ctx.getContentResolver();
+        final LocalContentResolver localContentResolver = new LocalContentResolver(contentResolver);
         final RcsSettings rcsSettings = RcsSettings.createInstance(localContentResolver);
         final MessagingLog messaginLog = MessagingLog.createInstance(localContentResolver,
                 rcsSettings);
-        final ContactManager contactManager = ContactManager.createInstance(ctx,
-                ctx.getContentResolver(), localContentResolver, rcsSettings);
+        final ContactManager contactManager = ContactManager.createInstance(ctx, contentResolver,
+                localContentResolver, rcsSettings);
+        final RcsAccountManager rcsAccountMngr = RcsAccountManager.createInstance(ctx,
+                contactManager);
+        final String rcsAccountUsername = getString(R.string.rcs_core_account_username);
 
         Intent intent = getIntent();
         if (intent == null) {
@@ -90,7 +99,7 @@ public class TermsAndConditionsRequest extends Activity {
         boolean accept_btn = intent.getBooleanExtra(EXTRA_ACCEPT_BTN, false);
         boolean reject_btn = intent.getBooleanExtra(EXTRA_REJECT_BTN, false);
 
-        // Add text
+        /* Add text */
         TextView textView = new TextView(this);
         textView.setAutoLinkMask(Linkify.ALL);
         textView.setText(message);
@@ -98,18 +107,23 @@ public class TermsAndConditionsRequest extends Activity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(title).setView(textView);
 
-        // If accept and reject is enabled, then create Alert dialog
-        // with two buttons else with neutral button
+        /*
+         * If accept and reject is enabled, then create Alert dialog with two buttons else with
+         * neutral button.
+         */
         if (accept_btn && reject_btn) {
             builder.setPositiveButton(R.string.rcs_core_terms_accept,
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            AuthenticationService.createRcsAccount(ctx, localContentResolver,
-                                    getString(R.string.rcs_core_account_username), true,
-                                    rcsSettings, contactManager);
-                            // Set terms and conditions accepted
-                            rcsSettings.setProvisioningTermsAccepted(true);
-                            LauncherUtils.launchRcsCoreService(ctx, rcsSettings);
+                            try {
+                                rcsAccountMngr.createRcsAccount(rcsAccountUsername, true);
+                                /* Set terms and conditions accepted */
+                                rcsSettings.setProvisioningTermsAccepted(true);
+                                LauncherUtils.launchRcsCoreService(ctx, rcsSettings);
+                            } catch (RcsAccountException e) {
+                                sLogger.error("Failed to launch RCS service!", e);
+                                // TODO report an error to end user
+                            }
                             finish();
                         }
                     });
@@ -117,8 +131,10 @@ public class TermsAndConditionsRequest extends Activity {
             builder.setNegativeButton(R.string.rcs_core_terms_decline,
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            // If the user declines the terms, the RCS service is stopped
-                            // and the RCS config is reset
+                            /*
+                             * If the user declines the terms, the RCS service is stopped and the
+                             * RCS configuration is reset.
+                             */
                             LauncherUtils.stopRcsService(ctx);
                             LauncherUtils.resetRcsConfig(ctx, localContentResolver, rcsSettings,
                                     messaginLog, contactManager);
@@ -130,12 +146,15 @@ public class TermsAndConditionsRequest extends Activity {
             builder.setNeutralButton(R.string.rcs_core_terms_ok,
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            AuthenticationService.createRcsAccount(ctx, localContentResolver,
-                                    getString(R.string.rcs_core_account_username), true,
-                                    rcsSettings, contactManager);
-                            // Set terms and conditions accepted
-                            rcsSettings.setProvisioningTermsAccepted(true);
-                            LauncherUtils.launchRcsCoreService(ctx, rcsSettings);
+                            try {
+                                rcsAccountMngr.createRcsAccount(rcsAccountUsername, true);
+                                /* Set terms and conditions accepted */
+                                rcsSettings.setProvisioningTermsAccepted(true);
+                                LauncherUtils.launchRcsCoreService(ctx, rcsSettings);
+                            } catch (RcsAccountException e) {
+                                sLogger.error("Failed to launch RCS service!", e);
+                                // TODO report an error to end user
+                            }
                             finish();
                         }
                     });

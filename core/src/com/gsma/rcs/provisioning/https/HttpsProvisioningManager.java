@@ -25,7 +25,8 @@ package com.gsma.rcs.provisioning.https;
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.R;
-import com.gsma.rcs.addressbook.AuthenticationService;
+import com.gsma.rcs.addressbook.RcsAccountException;
+import com.gsma.rcs.addressbook.RcsAccountManager;
 import com.gsma.rcs.core.TerminalInfo;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
@@ -145,9 +146,7 @@ public class HttpsProvisioningManager {
      * User action flag
      */
     private boolean mUser = false;
-    /**
-     * Retry counter
-     */
+
     private int mRetryCount = 0;
 
     /**
@@ -157,9 +156,6 @@ public class HttpsProvisioningManager {
 
     private final LocalContentResolver mLocalContentResolver;
 
-    /**
-     * The Service Context
-     */
     private final Context mCtx;
 
     /**
@@ -177,9 +173,6 @@ public class HttpsProvisioningManager {
      */
     private int mRetryAfter511ErrorCount = 0;
 
-    /**
-     * Retry intent
-     */
     private PendingIntent mRetryIntent;
 
     private final RcsSettings mRcsSettings;
@@ -187,6 +180,8 @@ public class HttpsProvisioningManager {
     private final MessagingLog mMessagingLog;
 
     private final ContactManager mContactManager;
+
+    private final RcsAccountManager mRcsAccountManager;
 
     /**
      * Builds HTTPS request parameters that are related to Terminal, PARAM_RCS_VERSION &
@@ -200,29 +195,25 @@ public class HttpsProvisioningManager {
      */
     private static Uri.Builder sHttpsReqUriBuilder;
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(HttpsProvisioningManager.class
             .getSimpleName());
 
     /**
      * Constructor
      * 
-     * @param applicationContext
-     * @param localContentResolver
+     * @param context application context
+     * @param localContentResolver Local content resolver
      * @param retryIntent pending intent to update periodically the configuration
      * @param first is provisioning service launch after (re)boot ?
      * @param user is provisioning service launch after user action ?
-     * @param rcsSettings
-     * @param messagingLog
-     * @param contactManager
+     * @param rcsSettings RCS settings accessor
+     * @param messagingLog Message log accessor
+     * @param contactManager Contact manager accessor
      */
-    public HttpsProvisioningManager(Context applicationContext,
-            LocalContentResolver localContentResolver, final PendingIntent retryIntent,
-            boolean first, boolean user, RcsSettings rcsSettings, MessagingLog messagingLog,
-            ContactManager contactManager) {
-        mCtx = applicationContext;
+    public HttpsProvisioningManager(Context context, LocalContentResolver localContentResolver,
+            final PendingIntent retryIntent, boolean first, boolean user, RcsSettings rcsSettings,
+            MessagingLog messagingLog, ContactManager contactManager) {
+        mCtx = context;
         mLocalContentResolver = localContentResolver;
         mRetryIntent = retryIntent;
         mFirst = first;
@@ -233,6 +224,7 @@ public class HttpsProvisioningManager {
         mContactManager = contactManager;
         mSmsManager = new HttpsProvisioningSMS(this, localContentResolver, rcsSettings,
                 messagingLog, contactManager);
+        mRcsAccountManager = new RcsAccountManager(mCtx, contactManager);
     }
 
     /**
@@ -272,7 +264,18 @@ public class HttpsProvisioningManager {
         }
         new Thread() {
             public void run() {
-                updateConfig();
+                try {
+                    updateConfig();
+                } catch (RcsAccountException e) {
+                    sLogger.error("Failed to update configuration!", e);
+
+                } catch (RuntimeException e) {
+                    /*
+                     * Intentionally catch runtime exceptions as else it will abruptly end the
+                     * thread and eventually bring the whole system down, which is not intended.
+                     */
+                    sLogger.error("Failed to update configuration!", e);
+                }
             }
         }.start();
 
@@ -511,9 +514,10 @@ public class HttpsProvisioningManager {
      * @param requestUri Request URI
      * @param client Instance of {@link DefaultHttpClient}
      * @param localContext Instance of {@link HttpContext}
+     * @throws RcsAccountException thrown if RCS account failed to be created
      */
     protected void updateConfigWithOTP(String otp, String requestUri, DefaultHttpClient client,
-            HttpContext localContext) {
+            HttpContext localContext) throws RcsAccountException {
         // Cancel previous retry alarm
         HttpsProvisioningService.cancelRetryAlarm(mCtx, mRetryIntent);
 
@@ -729,8 +733,10 @@ public class HttpsProvisioningManager {
 
     /**
      * Update provisioning config
+     * 
+     * @throws RcsAccountException thrown if RCS account failed to be created
      */
-    protected void updateConfig() {
+    protected void updateConfig() throws RcsAccountException {
         // Cancel previous retry alarm
         HttpsProvisioningService.cancelRetryAlarm(mCtx, mRetryIntent);
 
@@ -816,8 +822,10 @@ public class HttpsProvisioningManager {
      * Process provisioning result
      * 
      * @param result Instance of {@link HttpsProvisioningResult}
+     * @throws RcsAccountException thrown if RCS account failed to be created
      */
-    private void processProvisioningResult(HttpsProvisioningResult result) {
+    private void processProvisioningResult(HttpsProvisioningResult result)
+            throws RcsAccountException {
         boolean logActivated = sLogger.isActivated();
         if (result != null) {
             if (HttpStatus.SC_OK == result.code) {
@@ -901,65 +909,60 @@ public class HttpsProvisioningManager {
                         mRcsSettings.setConfigurationValid(true);
                         // Stop the RCS core service. Provisioning is still running.
                         LauncherUtils.stopRcsCoreService(mCtx);
-                    } else {
-                        if (ProvisioningInfo.Version.DISABLED_NOQUERY.equals(version)) {
-                            // -2 : Disable RCS client and stop configuration query
-                            if (logActivated) {
-                                sLogger.debug("Provisioning: disable RCS client");
-                            }
-                            // We parsed successfully the configuration
-                            mRcsSettings.setConfigurationValid(true);
-                            // Disable and stop RCS service
-                            mRcsSettings.setServiceActivationState(false);
-                            LauncherUtils.stopRcsService(mCtx);
-                        } else {
-                            if (ProvisioningInfo.Version.RESETED_NOQUERY.equals(version)) {
-                                // -1 Forbidden: reset account + version = 0-1 (doesn't restart)
-                                if (logActivated) {
-                                    sLogger.debug("Provisioning forbidden: reset account");
-                                }
-                                // Reset config
-                                LauncherUtils.resetRcsConfig(mCtx, mLocalContentResolver,
-                                        mRcsSettings, mMessagingLog, mContactManager);
-                                // Force version to "-1" (resetRcs set version to "0")
-                                mRcsSettings.setProvisioningVersion(version);
-                                // Disable the RCS service
-                                mRcsSettings.setServiceActivationState(false);
-                            } else {
-                                if (ProvisioningInfo.Version.RESETED.equals(version)) {
-                                    if (logActivated) {
-                                        sLogger.debug("Provisioning forbidden: no account");
-                                    }
-                                    // Reset config
-                                    LauncherUtils.resetRcsConfig(mCtx, mLocalContentResolver,
-                                            mRcsSettings, mMessagingLog, mContactManager);
-                                } else {
-                                    // Start retry alarm
-                                    if (validity > 0) {
-                                        HttpsProvisioningService.startRetryAlarm(mCtx,
-                                                mRetryIntent, validity);
-                                    }
-                                    // Terms request
-                                    if (info.getMessage() != null
-                                            && !mRcsSettings.isProvisioningTermsAccepted()) {
-                                        showTermsAndConditions(info);
-                                    } else {
-                                        if (logActivated) {
-                                            sLogger.debug("No special terms and conditions");
-                                        }
-                                        AuthenticationService.createRcsAccount(mCtx,
-                                                mLocalContentResolver,
-                                                mCtx.getString(R.string.rcs_core_account_username),
-                                                true, mRcsSettings, mContactManager);
-                                        mRcsSettings.setProvisioningTermsAccepted(true);
-                                    }
-                                    // We parsed successfully the configuration
-                                    mRcsSettings.setConfigurationValid(true);
-                                    // Start the RCS core service
-                                    LauncherUtils.launchRcsCoreService(mCtx, mRcsSettings);
-                                }
-                            }
+
+                    } else if (ProvisioningInfo.Version.DISABLED_NOQUERY.equals(version)) {
+                        // -2 : Disable RCS client and stop configuration query
+                        if (logActivated) {
+                            sLogger.debug("Provisioning: disable RCS client");
                         }
+                        // We parsed successfully the configuration
+                        mRcsSettings.setConfigurationValid(true);
+                        // Disable and stop RCS service
+                        mRcsSettings.setServiceActivationState(false);
+                        LauncherUtils.stopRcsService(mCtx);
+
+                    } else if (ProvisioningInfo.Version.RESETED_NOQUERY.equals(version)) {
+                        // -1 Forbidden: reset account + version = 0-1 (doesn't restart)
+                        if (logActivated) {
+                            sLogger.debug("Provisioning forbidden: reset account");
+                        }
+                        // Reset config
+                        LauncherUtils.resetRcsConfig(mCtx, mLocalContentResolver, mRcsSettings,
+                                mMessagingLog, mContactManager);
+                        // Force version to "-1" (resetRcs set version to "0")
+                        mRcsSettings.setProvisioningVersion(version);
+                        // Disable the RCS service
+                        mRcsSettings.setServiceActivationState(false);
+
+                    } else if (ProvisioningInfo.Version.RESETED.equals(version)) {
+                        if (logActivated) {
+                            sLogger.debug("Provisioning forbidden: no account");
+                        }
+                        // Reset config
+                        LauncherUtils.resetRcsConfig(mCtx, mLocalContentResolver, mRcsSettings,
+                                mMessagingLog, mContactManager);
+
+                    } else {
+                        // Start retry alarm
+                        if (validity > 0) {
+                            HttpsProvisioningService.startRetryAlarm(mCtx, mRetryIntent, validity);
+                        }
+                        // Terms request
+                        if (info.getMessage() != null
+                                && !mRcsSettings.isProvisioningTermsAccepted()) {
+                            showTermsAndConditions(info);
+                        } else {
+                            if (logActivated) {
+                                sLogger.debug("No special terms and conditions");
+                            }
+                            mRcsAccountManager.createRcsAccount(
+                                    mCtx.getString(R.string.rcs_core_account_username), true);
+                            mRcsSettings.setProvisioningTermsAccepted(true);
+                        }
+                        // We parsed successfully the configuration
+                        mRcsSettings.setConfigurationValid(true);
+                        // Start the RCS core service
+                        LauncherUtils.launchRcsCoreService(mCtx, mRcsSettings);
                     }
 
                     // Send service provisioning intent

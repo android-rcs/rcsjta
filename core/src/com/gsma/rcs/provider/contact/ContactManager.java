@@ -66,7 +66,7 @@ import static com.gsma.rcs.provider.contact.ContactData.KEY_TIMESTAMP_CONTACT_UP
 import static com.gsma.rcs.provider.contact.ContactData.TRUE_VALUE;
 
 import com.gsma.rcs.R;
-import com.gsma.rcs.addressbook.AuthenticationService;
+import com.gsma.rcs.addressbook.RcsAccountManager;
 import com.gsma.rcs.core.ims.service.ContactInfo;
 import com.gsma.rcs.core.ims.service.ContactInfo.BlockingState;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
@@ -361,7 +361,7 @@ public final class ContactManager {
             Data.RAW_CONTACT_ID).append("=? AND ").append(Data.MIMETYPE).append("=?").toString();
 
     private static final String SEL_RAW_CONTACT_ME = new StringBuilder(RawContacts.ACCOUNT_TYPE)
-            .append("='").append(AuthenticationService.ACCOUNT_MANAGER_TYPE).append("' AND ")
+            .append("='").append(RcsAccountManager.ACCOUNT_MANAGER_TYPE).append("' AND ")
             .append(RawContacts.SOURCE_ID).append("='").append(MYSELF).append("'").toString();
 
     private static final String SEL_DATA_MIMETYPE_CAPABILITY_FILE_TRANSFER = new StringBuilder(
@@ -427,7 +427,7 @@ public final class ContactManager {
             .append(MIMETYPE_CAPABILITY_GEOLOCATION_PUSH).append("','")
             .append(MIMETYPE_CAPABILITY_EXTENSIONS).append("')").toString();
 
-    private static final String RCS_CONTACT_GROUP_NAME = AuthenticationService.ACCOUNT_MANAGER_TYPE;
+    private static final String RCS_CONTACT_GROUP_NAME = RcsAccountManager.ACCOUNT_MANAGER_TYPE;
 
     private static final String[] PROJ_CONTACT_GROUP_ID = new String[] {
         Groups._ID
@@ -1955,7 +1955,7 @@ public final class ContactManager {
         ops.add(ContentProviderOperation
                 .newInsert(RawContacts.CONTENT_URI)
                 .withValue(RawContacts.AGGREGATION_MODE, RawContacts.AGGREGATION_MODE_SUSPENDED)
-                .withValue(RawContacts.ACCOUNT_TYPE, AuthenticationService.ACCOUNT_MANAGER_TYPE)
+                .withValue(RawContacts.ACCOUNT_TYPE, RcsAccountManager.ACCOUNT_MANAGER_TYPE)
                 .withValue(RawContacts.ACCOUNT_NAME,
                         mContext.getString(R.string.rcs_core_account_username)).build());
 
@@ -2119,7 +2119,7 @@ public final class ContactManager {
         }
         /* Check if IMS account exists before continue */
         AccountManager am = AccountManager.get(mContext);
-        if (am.getAccountsByType(AuthenticationService.ACCOUNT_MANAGER_TYPE).length == 0) {
+        if (am.getAccountsByType(RcsAccountManager.ACCOUNT_MANAGER_TYPE).length == 0) {
             if (sLogger.isActivated()) {
                 sLogger.error("Could not create \"Me\" contact, no RCS account found");
             }
@@ -2142,7 +2142,7 @@ public final class ContactManager {
         int rawContactRefIms = ops.size();
         ops.add(ContentProviderOperation
                 .newInsert(RawContacts.CONTENT_URI)
-                .withValue(RawContacts.ACCOUNT_TYPE, AuthenticationService.ACCOUNT_MANAGER_TYPE)
+                .withValue(RawContacts.ACCOUNT_TYPE, RcsAccountManager.ACCOUNT_MANAGER_TYPE)
                 .withValue(RawContacts.ACCOUNT_NAME,
                         mContext.getString(R.string.rcs_core_account_username))
                 .withValue(RawContacts.SOURCE_ID, MYSELF)
@@ -3035,7 +3035,7 @@ public final class ContactManager {
         try {
             cursor = mContentResolver.query(Groups.CONTENT_URI, PROJ_CONTACT_GROUP_ID,
                     SEL_RCS_CONTACT_GROUP_ACCOUNT_TYPE, null, null);
-            /* TODO: Handle cursor when null. */
+            CursorUtil.assertCursorIsNotNull(cursor, Groups.CONTENT_URI);
             if (!cursor.moveToNext()) {
                 return ContactManager.INVALID_ID;
             }
