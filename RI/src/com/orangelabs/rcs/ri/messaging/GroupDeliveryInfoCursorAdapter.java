@@ -73,14 +73,17 @@ public class GroupDeliveryInfoCursorAdapter extends CursorAdapter {
         holder.contactText.setText(mContext.getString(R.string.label_from_args, displayName));
 
         if (deliver == 0) {
-            holder.deliverText.setVisibility(View.INVISIBLE);
+            holder.deliverText.setVisibility(View.GONE);
         } else {
+            holder.deliverText.setVisibility(View.VISIBLE);
             holder.deliverText.setText(mContext.getString(R.string.label_state_delivered_at,
                     df.format(deliver)));
         }
+        /* Display information is only applicable to file transfers */
         if (display == 0) {
-            holder.displayText.setVisibility(View.INVISIBLE);
+            holder.displayText.setVisibility(View.GONE);
         } else {
+            holder.displayText.setVisibility(View.VISIBLE);
             holder.displayText.setText(mContext.getString(R.string.label_state_displayed_at,
                     df.format(display)));
         }
@@ -89,11 +92,12 @@ public class GroupDeliveryInfoCursorAdapter extends CursorAdapter {
                 RiApplication.sDeliveryStatuses[status.toInt()]);
         holder.statusText.setText(_status);
         if (reason != GroupDeliveryInfo.ReasonCode.UNSPECIFIED) {
+            holder.reasonText.setVisibility(View.VISIBLE);
             String _reason = mContext.getString(R.string.label_reason_code_args,
                     RiApplication.sDeliveryReasonCode[reason.toInt()]);
             holder.reasonText.setText(_reason);
         } else {
-            holder.reasonText.setVisibility(View.INVISIBLE);
+            holder.reasonText.setVisibility(View.GONE);
         }
 
     }
