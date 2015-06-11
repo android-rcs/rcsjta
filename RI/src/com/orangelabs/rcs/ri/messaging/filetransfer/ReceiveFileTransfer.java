@@ -45,7 +45,6 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -59,6 +58,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -281,19 +281,20 @@ public class ReceiveFileTransfer extends Activity {
 
                 // Manual accept
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle(R.string.title_file_transfer);
-
+                View titleView = getLayoutInflater().inflate(R.layout.filetransfer_custom_title, null);
+                builder.setCustomTitle(titleView);
                 builder.setMessage(getString(R.string.label_ft_from_size, from,
                         mFtDao.getSize() / 1024));
                 builder.setCancelable(false);
                 // Make sure progress bar is at the beginning
                 ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
                 progressBar.setProgress(0);
+                ImageView iconView = (ImageView)titleView.findViewById(R.id.filetransfer_alert_title_icon);
                 if (mFtDao.getThumbnail() != null) {
                     try {
                         Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),
                                 mFtDao.getThumbnail());
-                        builder.setIcon(new BitmapDrawable(getResources(), bitmap));
+                        iconView.setImageBitmap(bitmap);
                     } catch (Exception e) {
                         if (LogUtils.isActive) {
                             Log.e(LOGTAG, "Failed to load thumbnail", e);
@@ -301,9 +302,9 @@ public class ReceiveFileTransfer extends Activity {
                     }
                 } else {
                     if (VCARD_MIME_TYPE.equals(mFtDao.getMimeType())) {
-                        builder.setIcon(R.drawable.ri_contact_card_icon);
+                        iconView.setImageResource(R.drawable.ri_contact_card_icon);
                     } else {
-                        builder.setIcon(R.drawable.ri_notif_file_transfer_icon);
+                        iconView.setImageResource(R.drawable.ri_notif_file_transfer_icon);
                     }
                 }
                 builder.setPositiveButton(getString(R.string.label_accept), acceptBtnListener);
