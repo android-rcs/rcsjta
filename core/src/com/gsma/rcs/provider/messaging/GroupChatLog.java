@@ -245,6 +245,7 @@ public class GroupChatLog implements IGroupChatLog {
         ContentValues values = new ContentValues();
         values.put(GroupChatData.KEY_REJOIN_ID, rejoinId);
         values.put(GroupChatData.KEY_STATE, State.STARTED.toInt());
+        values.put(GroupChatData.KEY_REASON_CODE, ReasonCode.UNSPECIFIED.toInt());
         return mLocalContentResolver.update(
                 Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId), values, null, null) > 0;
     }
