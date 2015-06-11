@@ -29,7 +29,7 @@ import java.util.List;
 public interface ISendMultiFile {
 
     /**
-     * Transfer list of files
+     * Transfers list of files
      * 
      * @param files to transfer
      * @return boolean
@@ -37,7 +37,7 @@ public interface ISendMultiFile {
     boolean transferFiles(List<FileTransferProperties> files);
 
     /**
-     * Add file transfer event listener
+     * Adds file transfer event listener
      * 
      * @param fileTransferService
      * @throws RcsServiceException
@@ -46,7 +46,7 @@ public interface ISendMultiFile {
             throws RcsServiceException;
 
     /**
-     * Remove file transfer event listener
+     * Removes file transfer event listener
      * 
      * @param fileTransferService
      * @throws RcsServiceException
@@ -54,4 +54,12 @@ public interface ISendMultiFile {
     void removeFileTransferEventListener(FileTransferService fileTransferService)
             throws RcsServiceException;
 
+    /**
+     * Checks if it is possible to initiate file transfer to group chat or single contact.
+     * 
+     * @param chatId the chat ID or contact ID in single chat
+     * @return True if it is possible to initiate file transfer to group chat or single contact.
+     * @throws RcsServiceException
+     */
+    boolean checkPermissionToSendFile(String chatId) throws RcsServiceException;
 }

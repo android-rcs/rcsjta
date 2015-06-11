@@ -97,6 +97,28 @@ public class Utils {
     }
 
     /**
+     * Display toast and log an exception
+     * 
+     * @param context Context of activity
+     * @param e exception to log
+     */
+    public static void displayToast(Context context, Exception e) {
+        displayToast(context, "Exception occurred", e);
+    }
+
+    /**
+     * Display toast and log an exception
+     * 
+     * @param context Context of activity
+     * @param message message to display
+     * @param e exception to log
+     */
+    public static void displayToast(Context context, String message, Exception e) {
+        Log.w(LOGTAG, message, e);
+        displayLongToast(context, message.concat(": see Logcat!"));
+    }
+
+    /**
      * Show a message and exit activity
      * 
      * @param activity Activity
@@ -137,11 +159,13 @@ public class Utils {
         }
 
         if (e != null) {
-            e.printStackTrace();
-        }
-        if (LogUtils.isActive) {
-            Log.w(LOGTAG, new StringBuilder("Exit activity ").append(activity.getLocalClassName())
-                    .append(" <").append(msg).append(">").toString());
+            Log.e(LOGTAG, "Exception enforces exit of activity!", e);
+        } else {
+            if (LogUtils.isActive) {
+                Log.w(LOGTAG,
+                        new StringBuilder("Exit activity ").append(activity.getLocalClassName())
+                                .append(" <").append(msg).append(">").toString());
+            }
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
@@ -172,25 +196,6 @@ public class Utils {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setMessage(msg);
         builder.setTitle(R.string.title_msg);
-        builder.setCancelable(false);
-        builder.setPositiveButton(activity.getString(R.string.label_ok), null);
-        AlertDialog alert = builder.create();
-        alert.show();
-        return alert;
-    }
-
-    /**
-     * Show a message with a specific title
-     * 
-     * @param activity Activity
-     * @param title Title of the dialog
-     * @param msg Message to be displayed
-     * @return Dialog
-     */
-    public static AlertDialog showMessage(Activity activity, String title, String msg) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setMessage(msg);
-        builder.setTitle(title);
         builder.setCancelable(false);
         builder.setPositiveButton(activity.getString(R.string.label_ok), null);
         AlertDialog alert = builder.create();

@@ -100,6 +100,11 @@ public abstract class SendMultiFile extends Activity implements ISendMultiFile {
     private ConnectionManager mCnxManager;
 
     /**
+     * A flag to only add listener once and to remove only if previously added
+     */
+    protected boolean mFileTransferListenerAdded = false;
+
+    /**
      * Set of file transfers
      */
     protected Set<FileTransfer> mFileTransfers;
@@ -120,6 +125,8 @@ public abstract class SendMultiFile extends Activity implements ISendMultiFile {
      * Instance of file transfer service
      */
     protected FileTransferService mFileTransferService;
+
+    private Button mStartButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -148,9 +155,10 @@ public abstract class SendMultiFile extends Activity implements ISendMultiFile {
 
         mFileTransfers = new HashSet<FileTransfer>();
 
-        // Set buttons callback
-        final Button startFileTransfer = (Button) findViewById(R.id.ft_start_btn);
-        startFileTransfer.setOnClickListener(new OnClickListener() {
+        /* Set start button */
+        mStartButton = (Button) findViewById(R.id.ft_start_btn);
+        mStartButton.setVisibility(View.GONE);
+        mStartButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 // TODO check warn size
                 initiateTransfer();
@@ -167,7 +175,17 @@ public abstract class SendMultiFile extends Activity implements ISendMultiFile {
                     RcsServiceName.FILE_TRANSFER, RcsServiceName.CONTACT);
             mFileTransferService = mCnxManager.getFileTransferApi();
             try {
-                addFileTransferEventListener(mFileTransferService);
+                Boolean authorized = checkPermissionToSendFile(mChatId);
+                if (authorized) {
+                    mStartButton.setVisibility(View.VISIBLE);
+                    addFileTransferEventListener(mFileTransferService);
+                } else {
+                    if (LogUtils.isActive) {
+                        Log.d(LOGTAG, "Not allowed to transfer file to ".concat(mChatId));
+                    }
+                    mStartButton.setVisibility(View.INVISIBLE);
+                    Utils.showMessage(this, getString(R.string.label_ft_not_allowed));
+                }
             } catch (RcsServiceException e) {
                 Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
             }

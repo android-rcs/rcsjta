@@ -304,14 +304,12 @@ public abstract class ChatView extends FragmentActivity implements
         String text = mComposeText.getText().toString();
         if (TextUtils.isEmpty(text)) {
             return;
-
         }
         // Send text message
         ChatMessage message = sendMessage(text);
         if (message == null) {
-            Utils.showMessage(ChatView.this, getString(R.string.label_send_im_failed));
+            Utils.showMessage(this, getString(R.string.label_send_im_failed));
             return;
-
         }
         // Warn the composing manager that the message was sent
         mComposingManager.messageWasSent();
@@ -327,7 +325,7 @@ public abstract class ChatView extends FragmentActivity implements
         // Send text message
         ChatMessage message = sendMessage(geoloc);
         if (message == null) {
-            Utils.showMessage(ChatView.this, getString(R.string.label_send_im_failed));
+            Utils.showMessage(this, getString(R.string.label_send_im_failed));
         }
     }
 

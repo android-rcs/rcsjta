@@ -145,13 +145,24 @@ public class SendMultiFileGroupChat extends SendMultiFile implements ISendMultiF
     @Override
     public void addFileTransferEventListener(FileTransferService fileTransferService)
             throws RcsServiceException {
-        fileTransferService.addEventListener(mFtListener);
+        if (!mFileTransferListenerAdded) {
+            fileTransferService.addEventListener(mFtListener);
+            mFileTransferListenerAdded = true;
+        }
     }
 
     @Override
     public void removeFileTransferEventListener(FileTransferService fileTransferService)
             throws RcsServiceException {
-        fileTransferService.removeEventListener(mFtListener);
+        if (mFileTransferListenerAdded) {
+            fileTransferService.removeEventListener(mFtListener);
+            mFileTransferListenerAdded = false;
+        }
+    }
+
+    @Override
+    public boolean checkPermissionToSendFile(String chatId) throws RcsServiceException {
+        return mFileTransferService.isAllowedToTransferFileToGroupChat(chatId);
     }
 
 }
