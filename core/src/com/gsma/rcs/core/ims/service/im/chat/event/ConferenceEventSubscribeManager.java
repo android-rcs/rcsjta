@@ -27,6 +27,8 @@ import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -51,10 +53,13 @@ import com.gsma.services.rcs.contact.ContactId;
 import org.xml.sax.InputSource;
 
 import java.io.ByteArrayInputStream;
+import java.text.ParseException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+import javax2.sip.InvalidArgumentException;
 import javax2.sip.header.ExpiresHeader;
 import javax2.sip.header.SubscriptionStateHeader;
 
@@ -394,28 +399,40 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * @param dialog SIP dialog path
      * @param expirePeriod Expiration period in milliseconds
      * @return SIP request
-     * @throws Exception
+     * @throws SipPayloadException
      */
-    private SipRequest createSubscribe(SipDialogPath dialog, long expirePeriod) throws Exception {
-        // Create SUBSCRIBE message
-        SipRequest subscribe = SipMessageFactory.createSubscribe(dialog, expirePeriod);
+    private SipRequest createSubscribe(SipDialogPath dialog, long expirePeriod)
+            throws SipPayloadException {
+        try {
+            // Create SUBSCRIBE message
+            SipRequest subscribe = SipMessageFactory.createSubscribe(dialog, expirePeriod);
 
-        // Set feature tags
-        SipUtils.setFeatureTags(subscribe.getStackMessage(), InstantMessagingService.CHAT_FEATURE_TAGS);
+            // Set feature tags
+            SipUtils.setFeatureTags(subscribe.getStackMessage(),
+                    InstantMessagingService.CHAT_FEATURE_TAGS);
 
-        // Set the Event header
-        subscribe.addHeader("Event", "conference");
+            // Set the Event header
+            subscribe.addHeader("Event", "conference");
 
-        // Set the Accept header
-        subscribe.addHeader("Accept", "application/conference-info+xml");
+            // Set the Accept header
+            subscribe.addHeader("Accept", "application/conference-info+xml");
 
-        return subscribe;
+            return subscribe;
+
+        } catch (ParseException e) {
+            throw new SipPayloadException(
+                    "Unable to form subscribe message with featureTags : ".concat(Arrays.asList(
+                            InstantMessagingService.CHAT_FEATURE_TAGS).toString()), e);
+        }
     }
 
     /**
      * Subscription refresh processing
+     * 
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void periodicProcessing() {
+    public void periodicProcessing() throws SipPayloadException, SipNetworkException {
         // Make a subscribe
         if (sLogger.isActivated()) {
             sLogger.info("Execute re-subscribe");
@@ -427,45 +444,34 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 
     /**
      * Subscribe
+     * 
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public synchronized void subscribe() {
-        new Thread() {
-            public void run() {
-                if (sLogger.isActivated()) {
-                    sLogger.info("Subscribe to " + getIdentity());
-                }
+    public synchronized void subscribe() throws SipPayloadException, SipNetworkException {
+        if (sLogger.isActivated()) {
+            sLogger.info("Subscribe to " + getIdentity());
+        }
+        if (mDialogPath == null) {
+            String callId = mImsModule.getSipManager().getSipStack().generateCallId();
 
-                try {
-                    if (mDialogPath == null) {
-                        String callId = mImsModule.getSipManager().getSipStack().generateCallId();
+            String target = getIdentity();
 
-                        String target = getIdentity();
+            String localParty = ImsModule.IMS_USER_PROFILE.getPublicUri();
 
-                        String localParty = ImsModule.IMS_USER_PROFILE.getPublicUri();
+            String remoteParty = getIdentity();
 
-                        String remoteParty = getIdentity();
+            Vector<String> route = mImsModule.getSipManager().getSipStack().getServiceRoutePath();
 
-                        Vector<String> route = mImsModule.getSipManager().getSipStack()
-                                .getServiceRoutePath();
+            mDialogPath = new SipDialogPath(mImsModule.getSipManager().getSipStack(), callId, 1,
+                    target, localParty, remoteParty, route, mRcsSettings);
+        } else {
+            mDialogPath.incrementCseq();
+        }
 
-                        mDialogPath = new SipDialogPath(mImsModule.getSipManager().getSipStack(),
-                                callId, 1, target, localParty, remoteParty, route, mRcsSettings);
-                    } else {
-                        mDialogPath.incrementCseq();
-                    }
+        SipRequest subscribe = createSubscribe(mDialogPath, mExpirePeriod);
 
-                    SipRequest subscribe = createSubscribe(mDialogPath, mExpirePeriod);
-
-                    sendSubscribe(subscribe);
-
-                } catch (Exception e) {
-                    if (sLogger.isActivated()) {
-                        sLogger.error("Subscribe has failed", e);
-                    }
-                    handleError(new ChatError(ChatError.UNEXPECTED_EXCEPTION, e.getMessage()));
-                }
-            }
-        }.start();
+        sendSubscribe(subscribe);
     }
 
     /**
@@ -539,52 +545,61 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * Send SUBSCRIBE message
      * 
      * @param subscribe SIP SUBSCRIBE
-     * @throws Exception
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void sendSubscribe(SipRequest subscribe) throws Exception {
-        if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Send SUBSCRIBE, expire=")
-                    .append(subscribe.getExpires()).append("ms").toString());
-        }
-
-        if (mSubscribed) {
-            // Set the Authorization header
-            mAuthenticationAgent.setProxyAuthorizationHeader(subscribe);
-        }
-
-        // Send SUBSCRIBE request
-        SipTransactionContext ctx = mImsModule.getSipManager().sendSipMessageAndWait(subscribe);
-
-        // Analyze the received response
-        if (ctx.isSipResponse()) {
-            // A response has been received
-            if (ctx.getStatusCode() == 200) {
-                if (subscribe.getExpires() != 0) {
-                    handle200OK(ctx);
-                } else {
-                    handle200OkUnsubscribe(ctx);
-                }
-            } else if (ctx.getStatusCode() == 202) {
-                // 202 Accepted
-                handle200OK(ctx);
-            } else if (ctx.getStatusCode() == 407) {
-                // 407 Proxy Authentication Required
-                handle407Authentication(ctx);
-            } else if (ctx.getStatusCode() == 423) {
-                // 423 Interval Too Brief
-                handle423IntervalTooBrief(ctx);
-            } else {
-                // Other error response
-                handleError(new ChatError(ChatError.SUBSCRIBE_CONFERENCE_FAILED,
-                        ctx.getStatusCode() + " " + ctx.getReasonPhrase()));
-            }
-        } else {
+    private void sendSubscribe(SipRequest subscribe) throws SipPayloadException,
+            SipNetworkException {
+        try {
             if (sLogger.isActivated()) {
-                sLogger.debug("No response received for SUBSCRIBE");
+                sLogger.info(new StringBuilder("Send SUBSCRIBE, expire=")
+                        .append(subscribe.getExpires()).append("ms").toString());
             }
 
-            // No response received: timeout
-            handleError(new ChatError(ChatError.SUBSCRIBE_CONFERENCE_FAILED));
+            if (mSubscribed) {
+                // Set the Authorization header
+                mAuthenticationAgent.setProxyAuthorizationHeader(subscribe);
+            }
+
+            // Send SUBSCRIBE request
+            SipTransactionContext ctx = mImsModule.getSipManager().sendSipMessageAndWait(subscribe);
+
+            // Analyze the received response
+            if (ctx.isSipResponse()) {
+                // A response has been received
+                if (ctx.getStatusCode() == 200) {
+                    if (subscribe.getExpires() != 0) {
+                        handle200OK(ctx);
+                    } else {
+                        handle200OkUnsubscribe(ctx);
+                    }
+                } else if (ctx.getStatusCode() == 202) {
+                    // 202 Accepted
+                    handle200OK(ctx);
+                } else if (ctx.getStatusCode() == 407) {
+                    // 407 Proxy Authentication Required
+                    handle407Authentication(ctx);
+                } else if (ctx.getStatusCode() == 423) {
+                    // 423 Interval Too Brief
+                    handle423IntervalTooBrief(ctx);
+                } else {
+                    // Other error response
+                    handleError(new ChatError(ChatError.SUBSCRIBE_CONFERENCE_FAILED,
+                            ctx.getStatusCode() + " " + ctx.getReasonPhrase()));
+                }
+            } else {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("No response received for SUBSCRIBE");
+                }
+
+                // No response received: timeout
+                handleError(new ChatError(ChatError.SUBSCRIBE_CONFERENCE_FAILED));
+            }
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException(
+                    "Unable to set authorization header for subscribe "
+                            .concat(subscribe.toString()),
+                    e);
         }
     }
 
@@ -641,9 +656,12 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * Handle 407 response
      * 
      * @param ctx SIP transaction context
-     * @throws Exception
+     * @throws InvalidArgumentException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void handle407Authentication(SipTransactionContext ctx) throws Exception {
+    private void handle407Authentication(SipTransactionContext ctx)
+            throws InvalidArgumentException, SipPayloadException, SipNetworkException {
         // 407 response received
         if (sLogger.isActivated()) {
             sLogger.info("407 response received");
@@ -676,9 +694,12 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * Handle 423 response
      * 
      * @param ctx SIP transaction context
-     * @throws Exception
+     * @throws InvalidArgumentException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void handle423IntervalTooBrief(SipTransactionContext ctx) throws Exception {
+    private void handle423IntervalTooBrief(SipTransactionContext ctx)
+            throws InvalidArgumentException, SipPayloadException, SipNetworkException {
         // 423 response received
         if (sLogger.isActivated()) {
             sLogger.info("423 interval too brief response received");

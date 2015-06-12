@@ -33,6 +33,7 @@ import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
@@ -895,9 +896,10 @@ public class InstantMessagingService extends ImsService {
      * @param invite Initial invite
      * @param timestamp Local timestamp when got SipRequest
      * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     public void receiveOne2OneChatSession(SipRequest invite, long timestamp)
-            throws SipPayloadException {
+            throws SipPayloadException, SipNetworkException {
         boolean logActivated = sLogger.isActivated();
         /*
          * Invitation will be rejected if it is OMA SIMPLE IM solution but it doesn't contains first

@@ -25,6 +25,8 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -168,6 +170,15 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
                 return;
             }
             handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
+        } catch (SipPayloadException e) {
+            mLogger.error("Download of file has failed for mRemoteInstanceId : "
+                    .concat(mRemoteInstanceId), e);
+            handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
+        } catch (SipNetworkException e) {
+            if (mLogger.isActivated()) {
+                mLogger.debug(e.getMessage());
+            }
+            handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
@@ -213,8 +224,11 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
      * @param status Report status
      * @param timestamp Local timestamp
      * @throws MsrpException
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    protected void sendDeliveryReport(String status, long timestamp) throws MsrpException {
+    protected void sendDeliveryReport(String status, long timestamp) throws MsrpException,
+            SipPayloadException, SipNetworkException {
         String msgId = getFileTransferId();
         if (mLogger.isActivated()) {
             mLogger.debug("Send delivery report ".concat(status));
@@ -283,6 +297,15 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
                     /* Don't call handleError in case of Pause or Cancel */
                     if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
                         return;
+                    }
+                    handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
+                } catch (SipPayloadException e) {
+                    mLogger.error("Download of file has failed for mRemoteInstanceId : "
+                            .concat(mRemoteInstanceId), e);
+                    handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
+                } catch (SipNetworkException e) {
+                    if (mLogger.isActivated()) {
+                        mLogger.debug(e.getMessage());
                     }
                     handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
                 } catch (RuntimeException e) {

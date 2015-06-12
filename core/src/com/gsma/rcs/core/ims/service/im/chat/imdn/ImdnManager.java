@@ -28,6 +28,8 @@ import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.gsma.rcs.core.ims.service.ImsService;
@@ -40,6 +42,8 @@ import com.gsma.rcs.utils.FifoBuffer;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
+
+import javax2.sip.InvalidArgumentException;
 
 /**
  * IMDN manager (see RFC5438)
@@ -180,17 +184,15 @@ public class ImdnManager extends Thread {
      * @param status Delivery status
      * @param remoteInstanceId
      * @param timestamp Timestamp sent in payload for IMDN datetime
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     public void sendMessageDeliveryStatusImmediately(ContactId contact, String msgId,
-            String status, final String remoteInstanceId, long timestamp) {
+            String status, final String remoteInstanceId, long timestamp)
+            throws SipPayloadException, SipNetworkException {
         // Execute request in background
         final DeliveryStatus delivery = new DeliveryStatus(contact, msgId, status, timestamp);
-        new Thread() {
-            public void run() {
-                // Send SIP MESSAGE
-                sendSipMessageDeliveryStatus(delivery, remoteInstanceId);
-            }
-        }.start();
+        sendSipMessageDeliveryStatus(delivery, remoteInstanceId);
     }
 
     /**
@@ -198,8 +200,11 @@ public class ImdnManager extends Thread {
      * 
      * @param deliveryStatus Delivery status
      * @param remoteInstanceId Remote SIP instance
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void sendSipMessageDeliveryStatus(DeliveryStatus deliveryStatus, String remoteInstanceId) {
+    private void sendSipMessageDeliveryStatus(DeliveryStatus deliveryStatus, String remoteInstanceId)
+            throws SipPayloadException, SipNetworkException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.debug("Send delivery status " + deliveryStatus.getStatus()
@@ -291,10 +296,11 @@ public class ImdnManager extends Thread {
                             + " response received");
                 }
             }
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Delivery report has failed", e);
-            }
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException(
+                    "Unable to set authorization header for remoteInstanceId : "
+                            .concat(remoteInstanceId),
+                    e);
         }
     }
 
