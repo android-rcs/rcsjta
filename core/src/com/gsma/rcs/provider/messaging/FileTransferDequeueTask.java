@@ -86,6 +86,7 @@ public class FileTransferDequeueTask extends DequeueTask {
                 int contactIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_CONTACT);
                 int chatIdIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_CHAT_ID);
                 int stateIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_STATE);
+                int fileSizeIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FILESIZE);
                 while (cursor.moveToNext()) {
                     if (mCore.isStopping()) {
                         if (logActivated) {
@@ -99,6 +100,18 @@ public class FileTransferDequeueTask extends DequeueTask {
                     ContactId contact = contactNumber != null ? ContactUtil
                             .createContactIdFromTrustedData(contactNumber) : null;
                     boolean isGroupFileTransfer = !chatId.equals(contactNumber);
+                    if (mImService.isFileSizeExceeded(cursor.getLong(fileSizeIdx))) {
+                        if (isGroupFileTransfer) {
+                            mFileTransferService.setGroupFileTransferStateAndReasonCode(
+                                    fileTransferId, chatId, State.FAILED,
+                                    ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
+                        } else {
+                            mFileTransferService.setOneToOneFileTransferStateAndReasonCode(
+                                    fileTransferId, contact, State.FAILED,
+                                    ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
+                        }
+                        continue;
+                    }
                     try {
                         State state = State.valueOf(cursor.getInt(stateIdx));
                         switch (state) {

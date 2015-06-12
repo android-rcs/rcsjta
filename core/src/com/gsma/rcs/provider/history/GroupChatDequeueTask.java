@@ -94,6 +94,7 @@ public class GroupChatDequeueTask extends DequeueTask {
                 int mimeTypeIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_MIME_TYPE);
                 int fileIconIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_FILEICON);
                 int statusIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_STATUS);
+                int fileSizeIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_FILESIZE);
                 GroupChatImpl groupChat = mChatService.getOrCreateGroupChat(mChatId);
                 while (cursor.moveToNext()) {
                     if (mCore.isStopping()) {
@@ -131,6 +132,12 @@ public class GroupChatDequeueTask extends DequeueTask {
                                 }
                                 break;
                             case FileTransferData.HISTORYLOG_MEMBER_ID:
+                                if (mImService.isFileSizeExceeded(cursor.getLong(fileSizeIdx))) {
+                                    mFileTransferService.setGroupFileTransferStateAndReasonCode(id,
+                                            mChatId, State.FAILED,
+                                            ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
+                                    continue;
+                                }
                                 State state = State.valueOf(cursor.getInt(statusIdx));
                                 switch (state) {
                                     case QUEUED:

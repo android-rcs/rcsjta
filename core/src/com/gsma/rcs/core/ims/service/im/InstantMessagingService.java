@@ -1582,7 +1582,7 @@ public class InstantMessagingService extends ImsService {
      * @param size of file
      * @return {@code true} if file size limit is exceeded, otherwise {@code false}
      */
-    private boolean isFileSizeExceeded(long size) {
+    public boolean isFileSizeExceeded(long size) {
         // Auto reject if file too big
         long maxSize = mRcsSettings.getMaxFileTransferSize();
         if (maxSize > 0 && size > maxSize) {
