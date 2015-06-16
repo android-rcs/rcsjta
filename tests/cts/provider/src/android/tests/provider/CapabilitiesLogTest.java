@@ -18,27 +18,23 @@
 
 package android.tests.provider;
 
+//import android.os.*;
+import com.gsma.services.rcs.capability.CapabilitiesLog;
+
 import android.content.ContentProviderClient;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.test.InstrumentationTestCase;
 
-//import android.os.*;
-import com.gsma.services.rcs.capability.CapabilitiesLog;
-
 public class CapabilitiesLogTest extends InstrumentationTestCase {
 
     private static final String[] CAPABILITIES_LOG_PROJECTION = new String[] {
-            CapabilitiesLog.CONTACT,
-            CapabilitiesLog.CAPABILITY_IMAGE_SHARE,
-            CapabilitiesLog.CAPABILITY_VIDEO_SHARE,
-            CapabilitiesLog.CAPABILITY_IM_SESSION,
-            CapabilitiesLog.CAPABILITY_FILE_TRANSFER,
-            CapabilitiesLog.CAPABILITY_GEOLOC_PUSH,
-            CapabilitiesLog.CAPABILITY_EXTENSIONS,
-            CapabilitiesLog.AUTOMATA,
-            CapabilitiesLog.TIMESTAMP
+            CapabilitiesLog.BASECOLUMN_ID, CapabilitiesLog.CONTACT,
+            CapabilitiesLog.CAPABILITY_IMAGE_SHARE, CapabilitiesLog.CAPABILITY_VIDEO_SHARE,
+            CapabilitiesLog.CAPABILITY_IM_SESSION, CapabilitiesLog.CAPABILITY_FILE_TRANSFER,
+            CapabilitiesLog.CAPABILITY_GEOLOC_PUSH, CapabilitiesLog.CAPABILITY_EXTENSIONS,
+            CapabilitiesLog.AUTOMATA, CapabilitiesLog.TIMESTAMP
     };
 
     private ContentProviderClient mProvider;
@@ -61,7 +57,7 @@ public class CapabilitiesLogTest extends InstrumentationTestCase {
         try {
             String where = CapabilitiesLog.CONTACT.concat("=?");
             String[] whereArgs = new String[] {
-                    "+339000000"
+                "+339000000"
             };
             cursor = mProvider.query(CapabilitiesLog.CONTENT_URI, CAPABILITIES_LOG_PROJECTION,
                     where, whereArgs, null);
@@ -148,7 +144,7 @@ public class CapabilitiesLogTest extends InstrumentationTestCase {
         try {
             String where = CapabilitiesLog.CONTACT.concat("=?");
             String[] whereArgs = new String[] {
-                    "+339000000"
+                "+339000000"
             };
             mProvider.update(CapabilitiesLog.CONTENT_URI, values, where, whereArgs);
             fail("CapabilitiesLog is read only");

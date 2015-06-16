@@ -31,17 +31,10 @@ import android.test.InstrumentationTestCase;
 public class ImageSharingLogTest extends InstrumentationTestCase {
 
     private final String[] IMAGE_SHARING_LOG_PROJECTION = new String[] {
-            ImageSharingLog.CONTACT,
-            ImageSharingLog.DIRECTION,
-            ImageSharingLog.FILE,
-            ImageSharingLog.FILENAME,
-            ImageSharingLog.FILESIZE,
-            ImageSharingLog.SHARING_ID,
-            ImageSharingLog.MIME_TYPE,
-            ImageSharingLog.STATE,
-            ImageSharingLog.REASON_CODE,
-            ImageSharingLog.TIMESTAMP,
-            ImageSharingLog.TRANSFERRED
+            ImageSharingLog.BASECOLUMN_ID, ImageSharingLog.CONTACT, ImageSharingLog.DIRECTION,
+            ImageSharingLog.FILE, ImageSharingLog.FILENAME, ImageSharingLog.FILESIZE,
+            ImageSharingLog.SHARING_ID, ImageSharingLog.MIME_TYPE, ImageSharingLog.STATE,
+            ImageSharingLog.REASON_CODE, ImageSharingLog.TIMESTAMP, ImageSharingLog.TRANSFERRED
     };
 
     private ContentProviderClient mProvider;
@@ -69,7 +62,7 @@ public class ImageSharingLogTest extends InstrumentationTestCase {
         try {
             String where = ImageSharingLog.SHARING_ID.concat("=?");
             String[] whereArgs = new String[] {
-                    "123456789"
+                "123456789"
             };
             cursor = mProvider.query(ImageSharingLog.CONTENT_URI, IMAGE_SHARING_LOG_PROJECTION,
                     where, whereArgs, null);
@@ -165,7 +158,7 @@ public class ImageSharingLogTest extends InstrumentationTestCase {
         try {
             String where = ImageSharingLog.SHARING_ID.concat("=?");
             String[] whereArgs = new String[] {
-                    "123456789"
+                "123456789"
             };
             mProvider.update(ImageSharingLog.CONTENT_URI, values, where, whereArgs);
             fail("ImageSharingLog is read only");

@@ -500,7 +500,6 @@
 
         <activity
             android:name="com.orangelabs.rcs.ri.settings.SettingsDisplay"
-            android:clearTaskOnLaunch="true"
             android:icon="@drawable/rcs_icon"
             android:label="@string/rcs_settings_title_settings"
             android:launchMode="singleTask" >

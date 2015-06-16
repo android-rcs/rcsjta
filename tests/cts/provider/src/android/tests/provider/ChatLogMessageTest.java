@@ -30,19 +30,12 @@ import android.test.InstrumentationTestCase;
 public class ChatLogMessageTest extends InstrumentationTestCase {
 
     private static final String[] CHAT_LOG_MESSAGE_PROJECTION = new String[] {
-            ChatLog.Message.CHAT_ID,
-            ChatLog.Message.CONTENT,
-            ChatLog.Message.CONTACT,
-            ChatLog.Message.DIRECTION,
-            ChatLog.Message.READ_STATUS,
-            ChatLog.Message.MESSAGE_ID,
-            ChatLog.Message.MIME_TYPE,
-            ChatLog.Message.TIMESTAMP,
-            ChatLog.Message.REASON_CODE,
-            ChatLog.Message.STATUS,
-            ChatLog.Message.TIMESTAMP_SENT,
-            ChatLog.Message.TIMESTAMP_DELIVERED,
-            ChatLog.Message.TIMESTAMP_DISPLAYED
+            ChatLog.Message.BASECOLUMN_ID, ChatLog.Message.CHAT_ID, ChatLog.Message.CONTENT,
+            ChatLog.Message.CONTACT, ChatLog.Message.DIRECTION, ChatLog.Message.READ_STATUS,
+            ChatLog.Message.MESSAGE_ID, ChatLog.Message.MIME_TYPE, ChatLog.Message.TIMESTAMP,
+            ChatLog.Message.REASON_CODE, ChatLog.Message.STATUS, ChatLog.Message.TIMESTAMP_SENT,
+            ChatLog.Message.TIMESTAMP_DELIVERED, ChatLog.Message.TIMESTAMP_DISPLAYED,
+            ChatLog.Message.EXPIRED_DELIVERY
     };
 
     private ContentProviderClient mProvider;
@@ -71,7 +64,7 @@ public class ChatLogMessageTest extends InstrumentationTestCase {
         try {
             String where = ChatLog.Message.CHAT_ID.concat("=?");
             String[] whereArgs = new String[] {
-                    "123456789"
+                "123456789"
             };
             cursor = mProvider.query(ChatLog.Message.CONTENT_URI, CHAT_LOG_MESSAGE_PROJECTION,
                     where, whereArgs, null);
@@ -131,7 +124,8 @@ public class ChatLogMessageTest extends InstrumentationTestCase {
         values.put(ChatLog.Message.MESSAGE_ID, "012345789");
         values.put(ChatLog.Message.MIME_TYPE, ChatLog.Message.MimeType.TEXT_MESSAGE);
         values.put(ChatLog.Message.STATUS, ChatLog.Message.Content.Status.RECEIVED.toInt());
-        values.put(ChatLog.Message.REASON_CODE, ChatLog.Message.Content.ReasonCode.UNSPECIFIED.toInt());
+        values.put(ChatLog.Message.REASON_CODE,
+                ChatLog.Message.Content.ReasonCode.UNSPECIFIED.toInt());
         values.put(ChatLog.Message.TIMESTAMP, System.currentTimeMillis());
         values.put(ChatLog.Message.TIMESTAMP_DELIVERED, 0);
         values.put(ChatLog.Message.TIMESTAMP_DISPLAYED, 0);
@@ -163,7 +157,7 @@ public class ChatLogMessageTest extends InstrumentationTestCase {
         try {
             String where = ChatLog.Message.MESSAGE_ID.concat("=?");
             String[] whereArgs = new String[] {
-                    "123456789"
+                "123456789"
             };
             mProvider.update(ChatLog.Message.CONTENT_URI, values, where, whereArgs);
             fail("ChatLog is read only");

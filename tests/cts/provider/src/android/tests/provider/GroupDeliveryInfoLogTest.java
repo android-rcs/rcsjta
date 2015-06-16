@@ -34,7 +34,8 @@ public class GroupDeliveryInfoLogTest extends InstrumentationTestCase {
 
     private ContentProviderClient mProvider;
     private static final String[] GROUPDELIVERYINFO_LOG_PROJECTION = new String[] {
-            GroupDeliveryInfoLog.ID, GroupDeliveryInfoLog.CONTACT, GroupDeliveryInfoLog.CHAT_ID,
+            GroupDeliveryInfoLog.BASECOLUMN_ID, GroupDeliveryInfoLog.ID,
+            GroupDeliveryInfoLog.CONTACT, GroupDeliveryInfoLog.CHAT_ID,
             GroupDeliveryInfoLog.REASON_CODE, GroupDeliveryInfoLog.STATUS,
             GroupDeliveryInfoLog.TIMESTAMP_DELIVERED, GroupDeliveryInfoLog.TIMESTAMP_DISPLAYED
     };

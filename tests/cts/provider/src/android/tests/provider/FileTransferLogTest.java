@@ -31,24 +31,16 @@ import android.test.InstrumentationTestCase;
 public class FileTransferLogTest extends InstrumentationTestCase {
 
     private final String[] FILE_TRANSFER_LOG_PROJECTION = new String[] {
-            FileTransferLog.FT_ID,
-            FileTransferLog.CHAT_ID,
-            FileTransferLog.CONTACT,
-            FileTransferLog.FILE,
-            FileTransferLog.FILENAME,
-            FileTransferLog.MIME_TYPE,
-            FileTransferLog.FILEICON,
-            FileTransferLog.FILEICON_MIME_TYPE,
-            FileTransferLog.DIRECTION,
-            FileTransferLog.FILESIZE,
-            FileTransferLog.TRANSFERRED,
-            FileTransferLog.TIMESTAMP,
-            FileTransferLog.TIMESTAMP_SENT,
-            FileTransferLog.TIMESTAMP_DELIVERED,
-            FileTransferLog.TIMESTAMP_DISPLAYED,
-            FileTransferLog.STATE,
-            FileTransferLog.REASON_CODE,
-            FileTransferLog.READ_STATUS
+            FileTransferLog.BASECOLUMN_ID, FileTransferLog.FT_ID, FileTransferLog.CHAT_ID,
+            FileTransferLog.CONTACT, FileTransferLog.FILE, FileTransferLog.FILENAME,
+            FileTransferLog.MIME_TYPE, FileTransferLog.FILEICON,
+            FileTransferLog.FILEICON_MIME_TYPE, FileTransferLog.DIRECTION,
+            FileTransferLog.FILESIZE, FileTransferLog.TRANSFERRED, FileTransferLog.TIMESTAMP,
+            FileTransferLog.TIMESTAMP_SENT, FileTransferLog.TIMESTAMP_DELIVERED,
+            FileTransferLog.TIMESTAMP_DISPLAYED, FileTransferLog.STATE,
+            FileTransferLog.REASON_CODE, FileTransferLog.READ_STATUS,
+            FileTransferLog.FILE_EXPIRATION, FileTransferLog.FILEICON_EXPIRATION,
+            FileTransferLog.EXPIRED_DELIVERY
     };
 
     private ContentProviderClient mProvider;
@@ -76,7 +68,7 @@ public class FileTransferLogTest extends InstrumentationTestCase {
         try {
             String where = FileTransferLog.FT_ID.concat("=?");
             String[] whereArgs = new String[] {
-                    "0123456789"
+                "0123456789"
             };
             cursor = mProvider.query(FileTransferLog.CONTENT_URI, FILE_TRANSFER_LOG_PROJECTION,
                     where, whereArgs, null);
@@ -178,7 +170,7 @@ public class FileTransferLogTest extends InstrumentationTestCase {
         try {
             String where = FileTransferLog.FT_ID.concat("=?");
             String[] whereArgs = new String[] {
-                    "0123456789"
+                "0123456789"
             };
             mProvider.update(FileTransferLog.CONTENT_URI, values, where, whereArgs);
             fail("FileTransferLog is read only");

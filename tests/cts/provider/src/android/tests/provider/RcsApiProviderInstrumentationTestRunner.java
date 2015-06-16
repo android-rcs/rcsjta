@@ -18,9 +18,10 @@
 
 package android.tests.provider;
 
-import junit.framework.TestSuite;
 import android.test.InstrumentationTestRunner;
 import android.test.InstrumentationTestSuite;
+
+import junit.framework.TestSuite;
 
 public class RcsApiProviderInstrumentationTestRunner extends InstrumentationTestRunner {
 
@@ -35,6 +36,7 @@ public class RcsApiProviderInstrumentationTestRunner extends InstrumentationTest
         suite.addTestSuite(ImageSharingLogTest.class);
         suite.addTestSuite(VideoSharingLogTest.class);
         suite.addTestSuite(GroupDeliveryInfoLogTest.class);
+        suite.addTestSuite(GeolocSharingLogTest.class);
         return suite;
     }
 

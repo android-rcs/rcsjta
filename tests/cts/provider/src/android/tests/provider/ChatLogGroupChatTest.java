@@ -31,13 +31,9 @@ import android.test.InstrumentationTestCase;
 public class ChatLogGroupChatTest extends InstrumentationTestCase {
 
     private final String[] CHAT_LOG_GROUPCHAT_PROJECTION = new String[] {
-            ChatLog.GroupChat.CHAT_ID,
-            ChatLog.GroupChat.CONTACT,
-            ChatLog.GroupChat.DIRECTION,
-            ChatLog.GroupChat.PARTICIPANTS,
-            ChatLog.GroupChat.REASON_CODE,
-            ChatLog.GroupChat.STATE,
-            ChatLog.GroupChat.SUBJECT,
+            ChatLog.GroupChat.BASECOLUMN_ID, ChatLog.GroupChat.CHAT_ID, ChatLog.GroupChat.CONTACT,
+            ChatLog.GroupChat.DIRECTION, ChatLog.GroupChat.PARTICIPANTS,
+            ChatLog.GroupChat.REASON_CODE, ChatLog.GroupChat.STATE, ChatLog.GroupChat.SUBJECT,
             ChatLog.GroupChat.TIMESTAMP
     };
 
@@ -66,11 +62,10 @@ public class ChatLogGroupChatTest extends InstrumentationTestCase {
         try {
             String where = ChatLog.GroupChat.CHAT_ID.concat("=?");
             String[] whereArgs = new String[] {
-                    "123456789"
+                "123456789"
             };
             cursor = mProvider.query(ChatLog.GroupChat.CONTENT_URI, CHAT_LOG_GROUPCHAT_PROJECTION,
-                    where, whereArgs,
-                    null);
+                    where, whereArgs, null);
             assertNotNull(cursor);
         } catch (Exception e) {
             fail("query of ChatLog.GroupChat failed " + e.getMessage());
@@ -151,7 +146,7 @@ public class ChatLogGroupChatTest extends InstrumentationTestCase {
         try {
             String where = ChatLog.GroupChat.CHAT_ID.concat("=?");
             String[] whereArgs = new String[] {
-                    "123456789"
+                "123456789"
             };
             mProvider.update(ChatLog.GroupChat.CONTENT_URI, values, where, whereArgs);
             fail("ChatLog is read only");

@@ -31,16 +31,10 @@ import android.test.InstrumentationTestCase;
 public class VideoSharingLogTest extends InstrumentationTestCase {
 
     private final String[] VIDEO_SHARING_LOG_PROJECTION = new String[] {
-            VideoSharingLog.CONTACT,
-            VideoSharingLog.DIRECTION,
-            VideoSharingLog.DURATION,
-            VideoSharingLog.HEIGHT,
-            VideoSharingLog.REASON_CODE,
-            VideoSharingLog.SHARING_ID,
-            VideoSharingLog.STATE,
-            VideoSharingLog.TIMESTAMP,
-            VideoSharingLog.VIDEO_ENCODING,
-            VideoSharingLog.WIDTH
+            VideoSharingLog.BASECOLUMN_ID, VideoSharingLog.CONTACT, VideoSharingLog.DIRECTION,
+            VideoSharingLog.DURATION, VideoSharingLog.HEIGHT, VideoSharingLog.REASON_CODE,
+            VideoSharingLog.SHARING_ID, VideoSharingLog.STATE, VideoSharingLog.TIMESTAMP,
+            VideoSharingLog.VIDEO_ENCODING, VideoSharingLog.WIDTH
     };
 
     private ContentProviderClient mProvider;
@@ -68,7 +62,7 @@ public class VideoSharingLogTest extends InstrumentationTestCase {
         try {
             String where = VideoSharingLog.SHARING_ID.concat("=?");
             String[] whereArgs = new String[] {
-                    "123456789"
+                "123456789"
             };
             cursor = mProvider.query(VideoSharingLog.CONTENT_URI, VIDEO_SHARING_LOG_PROJECTION,
                     where, whereArgs, null);
@@ -155,7 +149,7 @@ public class VideoSharingLogTest extends InstrumentationTestCase {
         try {
             String where = VideoSharingLog.SHARING_ID.concat("=?");
             String[] whereArgs = new String[] {
-                    "123456789"
+                "123456789"
             };
             mProvider.update(VideoSharingLog.CONTENT_URI, values, where, whereArgs);
             fail("VideoSharingLog is read only");

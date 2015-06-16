@@ -37,7 +37,7 @@ public class Utils extends InstrumentationTestCase {
                     }
                 }
                 if (!found) {
-                    fail("field1 is not present");
+                    fail("field is not present: ".concat(field1));
                 }
             }
         } else {
