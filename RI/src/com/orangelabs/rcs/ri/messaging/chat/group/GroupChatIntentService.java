@@ -292,7 +292,7 @@ public class GroupChatIntentService extends IntentService {
      */
     private String getGcDisplayNameOfRemoteContact(String chatId) {
         try {
-            GroupChat gc = ConnectionManager.getInstance(this).getChatApi().getGroupChat(chatId);
+            GroupChat gc = ConnectionManager.getInstance().getChatApi().getGroupChat(chatId);
             if (gc != null) {
                 ContactId contact = gc.getRemoteContact();
                 return RcsDisplayName.getInstance(this).getDisplayName(contact);

@@ -132,7 +132,7 @@ public class ContactListAdapter extends CursorAdapter {
     public static ContactListAdapter createRcsContactListAdapter(Context context) {
         ContentResolver content = context.getContentResolver();
         Cursor cursor = null;
-        ConnectionManager apiConnectionManager = ConnectionManager.getInstance(context);
+        ConnectionManager apiConnectionManager = ConnectionManager.getInstance();
         MatrixCursor matrix = new MatrixCursor(PROJECTION_PHONE);
         ContactService contactsApi = apiConnectionManager.getContactApi();
         try {

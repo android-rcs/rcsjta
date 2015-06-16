@@ -90,7 +90,7 @@ public class TestChatApi extends ListActivity {
 
             case 2:
                 /* Check if Group chat initialization is allowed */
-                ChatService chatService = ConnectionManager.getInstance(this).getChatApi();
+                ChatService chatService = ConnectionManager.getInstance().getChatApi();
                 try {
                     if (chatService.isAllowedToInitiateGroupChat()) {
                         startActivity(new Intent(this, InitiateGroupChat.class));

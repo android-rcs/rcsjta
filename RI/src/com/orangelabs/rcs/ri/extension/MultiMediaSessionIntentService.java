@@ -82,7 +82,7 @@ public class MultiMediaSessionIntentService extends IntentService {
             }
         }
         /* Since there is no provider associated to multimedia sessions, we must connect to the API */
-        mCnxManager = ConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance();
         if (!mCnxManager.isServiceConnected(RcsServiceName.MULTIMEDIA)) {
             return;
         }

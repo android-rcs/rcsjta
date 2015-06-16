@@ -132,7 +132,7 @@ public abstract class SendMultiFile extends Activity implements ISendMultiFile {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mCnxManager = ConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance();
 
         mTransferIds = new ArrayList<String>();
         if (!parseIntent(getIntent())) {

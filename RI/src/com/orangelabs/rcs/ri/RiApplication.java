@@ -21,12 +21,15 @@ package com.orangelabs.rcs.ri;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceControl;
 
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
+
 import android.app.Application;
 import android.content.Context;
 import android.content.res.Resources;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -177,7 +180,8 @@ public class RiApplication extends Application {
                 resources.getString(R.string.label_direction_unknown));
 
         mRcsServiceControl = RcsServiceControl.getInstance(mContext);
-        ConnectionManager.getInstance(mContext).connectApis();
+        List<RcsServiceName> services = Arrays.asList(RcsServiceName.values());
+        ConnectionManager.createInstance(mContext, new HashSet<RcsServiceName>(services)).start();
     }
 
     private String[] convertForUI(String[] strings) {

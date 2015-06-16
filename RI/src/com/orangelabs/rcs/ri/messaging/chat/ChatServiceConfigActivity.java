@@ -73,7 +73,7 @@ public class ChatServiceConfigActivity extends Activity {
         setContentView(R.layout.chat_service_config);
 
         // Register to API connection manager
-        mCnxManager = ConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance();
         if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);

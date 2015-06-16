@@ -123,7 +123,7 @@ public class VideoSharingList extends FragmentActivity implements
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.video_sharing_list);
 
-        mCnxManager = ConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance();
         mVideoSharingService = mCnxManager.getVideoSharingApi();
 
         mListView = (ListView) findViewById(android.R.id.list);

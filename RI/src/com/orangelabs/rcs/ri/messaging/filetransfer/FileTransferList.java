@@ -117,7 +117,7 @@ public class FileTransferList extends FragmentActivity implements
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.filetransfer_list);
 
-        mCnxManager = ConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance();
         mFileTransferService = mCnxManager.getFileTransferApi();
 
         /* Set list adapter */

@@ -124,7 +124,7 @@ public abstract class SendFile extends Activity implements ISendFile {
         selectBtn.setOnClickListener(btnSelectListener);
 
         // Register to API connection manager
-        mCnxManager = ConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance();
         if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.FILE_TRANSFER,
                 RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),

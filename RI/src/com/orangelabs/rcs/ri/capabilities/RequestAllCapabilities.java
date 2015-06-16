@@ -61,7 +61,7 @@ public class RequestAllCapabilities extends Activity {
         refreshBtn.setOnClickListener(btnSyncListener);
 
         // Register to API connection manager
-        mCnxManager = ConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance();
         if (!mCnxManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);

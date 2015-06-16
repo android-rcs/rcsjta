@@ -57,7 +57,7 @@ public class MessagingSettingsDisplay extends PreferenceActivity implements
 
         addPreferencesFromResource(R.xml.rcs_settings_messaging_preferences);
 
-        mCnxManager = ConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance();
         if (!mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER, RcsServiceName.CHAT)) {
             Utils.showMessage(this, getString(R.string.label_service_not_available));
             return;

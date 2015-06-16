@@ -109,7 +109,7 @@ public class MessagingListView extends HistoryListView {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.history_log_messaging);
 
-        mCnxManager = ConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance();
 
         mArrayAdapter = new MessagingLogAdapter(this);
         TextView emptyView = (TextView) findViewById(android.R.id.empty);

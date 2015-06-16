@@ -123,7 +123,7 @@ public class ServiceConfigurationActivity extends Activity {
         mTextRcsServiceActivation = (TextView) findViewById(R.id.text_service_activation);
 
         /* Register to API connection manager */
-        mCnxManager = ConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance();
         if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);

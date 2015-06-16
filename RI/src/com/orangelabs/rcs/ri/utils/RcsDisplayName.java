@@ -58,7 +58,7 @@ public class RcsDisplayName {
      */
     private RcsDisplayName(Context context) {
         mContext = context;
-        mService = ConnectionManager.getInstance(mContext).getContactApi();
+        mService = ConnectionManager.getInstance().getContactApi();
         sDefaultDisplayName = context.getString(R.string.label_no_contact);
     }
 
@@ -94,7 +94,7 @@ public class RcsDisplayName {
         }
         try {
             if (mService == null) {
-                mService = ConnectionManager.getInstance(mContext).getContactApi();
+                mService = ConnectionManager.getInstance().getContactApi();
             }
             RcsContact rcsContact = mService.getRcsContact(contact);
             String displayName = rcsContact.getDisplayName();

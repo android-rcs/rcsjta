@@ -123,7 +123,7 @@ public class ImageSharingList extends FragmentActivity implements
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.image_sharing_list);
 
-        mCnxManager = ConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance();
         mImageSharingService = mCnxManager.getImageSharingApi();
 
         mListView = (ListView) findViewById(android.R.id.list);

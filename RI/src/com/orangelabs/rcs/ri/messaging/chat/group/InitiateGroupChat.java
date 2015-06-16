@@ -75,8 +75,9 @@ public class InitiateGroupChat extends Activity implements OnItemClickListener {
         mContactList = (ListView) findViewById(R.id.contacts);
 
         /* Check if Group chat initialization is allowed */
-        ContactService contactService = ConnectionManager.getInstance(this).getContactApi();
-        ChatService chatService = ConnectionManager.getInstance(this).getChatApi();
+        ConnectionManager cnxManager = ConnectionManager.getInstance();
+        ContactService contactService = cnxManager.getContactApi();
+        ChatService chatService = cnxManager.getChatApi();
         try {
             Set<RcsContact> rcsContacts = contactService.getRcsContacts();
             mAllowedContactIds = new ArrayList<ContactId>();

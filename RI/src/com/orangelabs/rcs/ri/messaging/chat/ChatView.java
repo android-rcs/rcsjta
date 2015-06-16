@@ -148,7 +148,7 @@ public abstract class ChatView extends FragmentActivity implements
         setContentView(R.layout.chat_view);
 
         /* Register to API connection manager */
-        mCnxManager = ConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance();
 
         /* Set message composer callbacks */
         mComposeText = (EditText) findViewById(R.id.userText);

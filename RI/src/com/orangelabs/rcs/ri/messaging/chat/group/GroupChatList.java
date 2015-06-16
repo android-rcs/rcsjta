@@ -123,7 +123,7 @@ public class GroupChatList extends FragmentActivity implements
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.chat_list);
 
-        mCnxManager = ConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance();
         mChatService = mCnxManager.getChatApi();
 
         /* Set list adapter */

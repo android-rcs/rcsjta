@@ -59,7 +59,7 @@ public class BlockingContact extends Activity {
         setContentView(R.layout.contacts_blocking);
 
         // Register to API connection manager
-        mCnxManager = ConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance();
         if (!mCnxManager.isServiceConnected(RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     exitOnce);

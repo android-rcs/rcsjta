@@ -202,7 +202,7 @@ public class StreamingSessionView extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        connectionManager = ConnectionManager.getInstance(this);
+        connectionManager = ConnectionManager.getInstance();
 
         /* Set layout */
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);

@@ -56,7 +56,7 @@ public abstract class MultimediaSessionList extends ListActivity {
         setContentView(R.layout.extension_session_list);
 
         // Register to API connection manager
-        mCnxManager = ConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance();
         if (!mCnxManager.isServiceConnected(RcsServiceName.MULTIMEDIA)) {
             Utils.showMessageAndExit(MultimediaSessionList.this,
                     getString(R.string.label_service_not_available), mExitOnce);

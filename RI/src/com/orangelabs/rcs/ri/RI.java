@@ -70,7 +70,6 @@ public class RI extends ListActivity {
                 getString(R.string.menu_history_log), getString(R.string.menu_about)
         };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
-        ConnectionManager.getInstance(this);
 
         ContactUtil contactUtil = ContactUtil.getInstance(this);
         try {

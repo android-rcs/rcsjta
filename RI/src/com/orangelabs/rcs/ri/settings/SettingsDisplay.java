@@ -115,7 +115,7 @@ public class SettingsDisplay extends PreferenceActivity implements
         mBatteryLevel = (ListPreference) findPreference("min_battery_level");
 
         mRcsServiceControl = RiApplication.getRcsServiceControl();
-        mCnxManager = ConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance();
     }
 
     @Override

@@ -81,7 +81,7 @@ public class RequestCapabilities extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.capabilities_request);
 
-        mCnxManager = ConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance();
 
         /* Set the contact selector */
         mSpinner = (Spinner) findViewById(R.id.contact);
