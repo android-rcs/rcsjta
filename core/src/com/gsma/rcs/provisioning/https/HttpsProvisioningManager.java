@@ -45,6 +45,7 @@ import com.gsma.rcs.utils.StringUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
 import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.app.PendingIntent;
 import android.content.Context;
@@ -343,7 +344,7 @@ public class HttpsProvisioningManager {
      * @return {@link String} with the HTTPS request arguments.
      */
     private String getHttpsRequestArguments(String imsi, String imei, String smsPort, String token,
-            String msisdn) {
+            ContactId msisdn) {
 
         if (sHttpsReqUriBuilder == null) {
             sHttpsReqUriBuilder = new Uri.Builder();
@@ -385,7 +386,7 @@ public class HttpsProvisioningManager {
             uriBuilder.appendQueryParameter(PARAM_SMS_PORT, smsPort);
         }
         if (msisdn != null) {
-            uriBuilder.appendQueryParameter(PARAM_MSISDN, msisdn);
+            uriBuilder.appendQueryParameter(PARAM_MSISDN, msisdn.toString());
         }
         if (token != null) {
             uriBuilder.appendQueryParameter(PARAM_TOKEN, token);
@@ -405,7 +406,7 @@ public class HttpsProvisioningManager {
      * @return Instance of {@link HttpsProvisioningResult} or null in case of internal exception
      */
     protected HttpsProvisioningResult sendFirstRequestsToRequireOTP(String imsi, String imei,
-            String msisdn, String primaryUri, String secondaryUri, DefaultHttpClient client,
+            ContactId msisdn, String primaryUri, String secondaryUri, DefaultHttpClient client,
             HttpContext localContext) {
         HttpsProvisioningResult result = new HttpsProvisioningResult();
         boolean logActivated = sLogger.isActivated();
@@ -444,7 +445,6 @@ public class HttpsProvisioningManager {
                                 + msisdn);
                     }
 
-                    msisdn = mRcsSettings.getMsisdn();
                     msisdn = HttpsProvionningMSISDNInput.getInstance().displayPopupAndWaitResponse(
                             mCtx);
 
@@ -474,9 +474,6 @@ public class HttpsProvisioningManager {
                 // Register SMS provisioning receiver
                 mSmsManager.registerSmsProvisioningReceiver(smsPortForOTP, primaryUri, client,
                         localContext);
-
-                // Save the MSISDN
-                mRcsSettings.setMsisdn(msisdn);
 
                 // If the content is empty, means that the configuration XML is not present
                 // and the Token is invalid then we need to wait for the SMS with OTP
@@ -630,7 +627,8 @@ public class HttpsProvisioningManager {
             // If network is not mobile network, use request with OTP
             if (networkInfo != null && networkInfo.getType() != ConnectivityManager.TYPE_MOBILE) {
                 // Proceed with non mobile network registration
-                return sendFirstRequestsToRequireOTP(imsi, imei, null, primaryUri, secondaryUri,
+                ContactId contactId = mRcsSettings.getUserProfileImsUserName();
+                return sendFirstRequestsToRequireOTP(imsi, imei, contactId, primaryUri, secondaryUri,
                         client, localContext);
             }
 

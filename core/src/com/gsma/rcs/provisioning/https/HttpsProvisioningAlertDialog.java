@@ -19,6 +19,8 @@
 package com.gsma.rcs.provisioning.https;
 
 import com.gsma.rcs.R;
+import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -38,6 +40,7 @@ import java.lang.ref.WeakReference;
 public class HttpsProvisioningAlertDialog extends Activity {
 
     private AlertDialog mAlertDialog;
+    private AlertDialog mErrorDialog;
     private AutoDismissRunnable mDialogRunnable;
     private Handler mDialogHandler;
 
@@ -54,9 +57,24 @@ public class HttpsProvisioningAlertDialog extends Activity {
 
         builder.setPositiveButton(R.string.label_ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-                String value = input.getText().toString();
-                HttpsProvionningMSISDNInput.getInstance().responseReceived(value);
-                finish();
+                PhoneNumber phoneNumber = ContactUtil.getValidPhoneNumberFromAndroid(input
+                        .getText().toString());
+                if (phoneNumber == null) {
+                    mErrorDialog = new AlertDialog.Builder(HttpsProvisioningAlertDialog.this)
+                            .setTitle(R.string.label_invalid_phone_number)
+                            .setPositiveButton(R.string.label_ok,
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int whichButton) {
+                                            mErrorDialog.dismiss();
+                                            mErrorDialog = null;
+                                            mAlertDialog.show();
+                                        }
+                                    }).show();
+                } else {
+                    HttpsProvionningMSISDNInput.getInstance().responseReceived(
+                            ContactUtil.createContactIdFromValidatedData(phoneNumber));
+                    finish();
+                }
             }
         });
 
@@ -111,6 +129,9 @@ public class HttpsProvisioningAlertDialog extends Activity {
             HttpsProvisioningAlertDialog activity = activityWeak.get();
 
             if (activity != null) {
+                if (mErrorDialog != null) {
+                    mErrorDialog.dismiss();
+                }
                 activity.mAlertDialog.dismiss();
                 activity.finish();
             }

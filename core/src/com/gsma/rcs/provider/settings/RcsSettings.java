@@ -335,24 +335,6 @@ public class RcsSettings {
     }
 
     /**
-     * Get the value of the MSISDN
-     * 
-     * @return MSISDN
-     */
-    public String getMsisdn() {
-        return readString(RcsSettingsData.MSISDN);
-    }
-
-    /**
-     * Set the value of the MSISDN
-     * 
-     * @param value
-     */
-    public void setMsisdn(String value) {
-        writeParameter(RcsSettingsData.MSISDN, value);
-    }
-
-    /**
      * Get UUID(Universally Unique Identifier) format: 8-4-4-4-12 hex digits
      * 
      * @return uuid value
@@ -1725,7 +1707,6 @@ public class RcsSettings {
         setXdmServer("");
         setProvisioningVersion("0");
         setProvisioningToken("");
-        setMsisdn("");
     }
 
     /**

@@ -36,4 +36,11 @@
     <string name="rcs_core_terms_decline">Decline</string>
     <string name="rcs_core_terms_ok">Ok</string>
 
+    <!-- WIFI provisioning -->
+    <string name="label_ok">OK</string>
+    <string name="label_cancel">Cancel</string>
+    <string name="label_save">Save</string>  
+    <string name="label_edit_msisdn">Enter your phone number:</string>
+    <string name="label_invalid_phone_number">This phone number is not valid</string>
+    
 </resources>

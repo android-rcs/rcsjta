@@ -712,12 +712,6 @@ public class RcsSettingsData {
     /* package private */static final String DEFAULT_ENDUSER_CONFIRMATION_URI = "";
 
     /**
-     * Msisdn
-     */
-    public static final String MSISDN = "MSISDN";
-    /* package private */static final String DEFAULT_MSISDN = "";
-
-    /**
      * UUID value for populating SIP instance
      */
     public static final String UUID = "UUID";

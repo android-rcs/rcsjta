@@ -198,7 +198,6 @@ public class RcsSettingsProvider extends ContentProvider {
             addParameter(db, RcsSettingsData.IM_CONF_URI, RcsSettingsData.DEFAULT_IM_CONF_URI);
             addParameter(db, RcsSettingsData.ENDUSER_CONFIRMATION_URI,
                     RcsSettingsData.DEFAULT_ENDUSER_CONFIRMATION_URI);
-            addParameter(db, RcsSettingsData.MSISDN, RcsSettingsData.DEFAULT_MSISDN);
             addParameter(db, RcsSettingsData.UUID, RcsSettingsData.DEFAULT_UUID);
             addParameter(db, RcsSettingsData.CAPABILITY_CS_VIDEO,
                     RcsSettingsData.DEFAULT_CAPABILITY_CS_VIDEO);

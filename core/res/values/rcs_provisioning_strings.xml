@@ -2,11 +2,7 @@
 <resources>
 
     <string name="provisioning_app_name">Provisioning</string>
-    <string name="label_ok">OK</string>
-    <string name="label_cancel">Cancel</string>
-    <string name="label_save">Save</string>
     <string name="label_reboot_service">The RCS service should be restarted before to take into account the modifications</string>
-    <string name="label_edit_msisdn">Enter your phone number in international format:</string>
     <string name="label_select_provisioning_file">Select XML provisioning from /sdcard:</string>
     <string name="label_generate_profile">Load profile</string>
     <string name="label_no_certificate">No certificate</string>

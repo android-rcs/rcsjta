@@ -34,55 +34,46 @@ public class HttpsProvisioningUtils {
     /**
      * Input MSISDN timeout
      */
-    protected static final int INPUT_MSISDN_TIMEOUT = 30000;
-
-    /**
-     * Unknown value
-     */
-    protected static final String UNKNOWN = "unknown";
+    /* package private */static final int INPUT_MSISDN_TIMEOUT = 60000;
 
     /**
      * Retry base timeout - 5min (in milliseconds)
      */
-    protected static final int RETRY_BASE_TIMEOUT = 300000;
+    /* package private */static final int RETRY_BASE_TIMEOUT = 300000;
 
     /**
      * Retry after an 511 "Network authentication required" timeout (in milliseconds)
      */
-    protected static final int RETRY_AFTER_511_ERROR_TIMEOUT = 5000;
+    /* package private */static final int RETRY_AFTER_511_ERROR_TIMEOUT = 5000;
 
     /**
      * The action if a binary SMS received
      */
-    public static final String ACTION_BINARY_SMS_RECEIVED = "android.intent.action.DATA_SMS_RECEIVED";
+    /* package private */static final String ACTION_BINARY_SMS_RECEIVED = "android.intent.action.DATA_SMS_RECEIVED";
 
     /**
      * Char sequence in a binary SMS to indicate a network initiated configuration
      */
-    public static final String RESET_CONFIG_SUFFIX = "-rcscfg";
+    /* package private */static final String RESET_CONFIG_SUFFIX = "-rcscfg";
 
     /**
      * Retry max count
      */
-    protected static final int RETRY_MAX_COUNT = 5;
+    /* package private */static final int RETRY_MAX_COUNT = 5;
 
     /**
      * Retry after 511 "Network authentication required" max count
      */
-    protected static final int RETRY_AFTER_511_ERROR_MAX_COUNT = 5;
-
-    /**
-     * Default SMS port
-     */
-    public static final int DEFAULT_SMS_PORT = 37273;
+    /* package private */static final int RETRY_AFTER_511_ERROR_MAX_COUNT = 5;
 
     /**
      * Get the current device language
      * 
      * @return Device language (like fr-FR)
      */
-    protected static String getUserLanguage() {
-        return Locale.getDefault().getLanguage() + "-" + Locale.getDefault().getCountry();
+    /* package private */static String getUserLanguage() {
+        return new StringBuilder(Locale.getDefault().getLanguage()).append("-")
+                .append(Locale.getDefault().getCountry()).toString();
     }
 
     /**
@@ -90,7 +81,7 @@ public class HttpsProvisioningUtils {
      * 
      * @return String(4)
      */
-    protected static String getRcsVersion() {
+    /* package private */ static String getRcsVersion() {
         return "5.1B";
     }
 
@@ -99,7 +90,7 @@ public class HttpsProvisioningUtils {
      * 
      * @return String(15)
      */
-    protected static String getRcsProfile() {
+    /* package private */ static String getRcsProfile() {
         return "joyn_blackbird";
     }
 }

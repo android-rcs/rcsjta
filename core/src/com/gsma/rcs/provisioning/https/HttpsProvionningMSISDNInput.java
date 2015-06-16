@@ -18,6 +18,8 @@
 
 package com.gsma.rcs.provisioning.https;
 
+import com.gsma.services.rcs.contact.ContactId;
+
 import android.content.Context;
 import android.content.Intent;
 
@@ -31,12 +33,12 @@ public final class HttpsProvionningMSISDNInput {
     /**
      * HttpsProvionningMSISDNInput instance
      */
-    private static volatile HttpsProvionningMSISDNInput instance = null;
+    private static volatile HttpsProvionningMSISDNInput sInstance;
 
     /**
      * MSISDN
      */
-    private String inputMSISDN;
+    private ContactId mMsisdn;
 
     /**
      * Constructor
@@ -50,8 +52,8 @@ public final class HttpsProvionningMSISDNInput {
      * 
      * @return MSISDN
      */
-    protected String getMsisdn() {
-        return inputMSISDN;
+    protected ContactId getMsisdn() {
+        return mMsisdn;
     }
 
     /**
@@ -60,14 +62,15 @@ public final class HttpsProvionningMSISDNInput {
      * @return Instance of HttpsProvionningMSISDNDialog
      */
     public final static HttpsProvionningMSISDNInput getInstance() {
-        if (HttpsProvionningMSISDNInput.instance == null) {
-            synchronized (HttpsProvionningMSISDNInput.class) {
-                if (HttpsProvionningMSISDNInput.instance == null) {
-                    HttpsProvionningMSISDNInput.instance = new HttpsProvionningMSISDNInput();
-                }
+        if (sInstance != null) {
+            return sInstance;
+        }
+        synchronized (HttpsProvionningMSISDNInput.class) {
+            if (sInstance == null) {
+                sInstance = new HttpsProvionningMSISDNInput();
             }
         }
-        return HttpsProvionningMSISDNInput.instance;
+        return sInstance;
     }
 
     /**
@@ -76,29 +79,28 @@ public final class HttpsProvionningMSISDNInput {
      * @param context
      * @return
      */
-    protected String displayPopupAndWaitResponse(Context context) {
+    protected ContactId displayPopupAndWaitResponse(Context context) {
         Intent intent = new Intent(context, HttpsProvisioningAlertDialog.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
         try {
-            synchronized (HttpsProvionningMSISDNInput.instance) {
+            synchronized (sInstance) {
                 super.wait();
             }
         } catch (InterruptedException e) {
             // nothing to do
         }
-
-        return inputMSISDN;
+        return mMsisdn;
     }
 
     /**
      * Callback of the MSISDN
      * 
-     * @param value
+     * @param contact
      */
-    protected void responseReceived(String value) {
-        synchronized (HttpsProvionningMSISDNInput.instance) {
-            inputMSISDN = value;
+    protected void responseReceived(ContactId contact) {
+        synchronized (sInstance) {
+            mMsisdn = contact;
             super.notify();
         }
     }

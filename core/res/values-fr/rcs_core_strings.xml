@@ -36,4 +36,10 @@
     <string name="rcs_core_terms_decline">Décliner</string>
     <string name="rcs_core_terms_ok">Ok</string>
 
+    <!-- WIFI provisioning -->
+    <string name="label_ok">OK</string>
+    <string name="label_cancel">Annuler</string>
+    <string name="label_save">Sauvegarder</string>  
+    <string name="label_edit_msisdn">Veuillez renseigner votre numéro de téléphone:</string>
+    <string name="label_invalid_phone_number">Ce numéro est incorrect</string>
 </resources>
