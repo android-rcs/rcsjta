@@ -35,9 +35,9 @@ import com.gsma.rcs.service.api.OneToOneChatImpl;
 import com.gsma.rcs.service.api.OneToOneFileTransferImpl;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 
@@ -47,22 +47,18 @@ import android.net.Uri;
  */
 public class OneToOneChatDequeueTask extends DequeueTask {
 
-    private final ChatServiceImpl mChatService;
-
-    private final FileTransferServiceImpl mFileTransferService;
-
     private final HistoryLog mHistoryLog;
 
     private final boolean mDisplayedReportEnabled;
 
     private final boolean mDeliveryReportEnabled;
 
-    public OneToOneChatDequeueTask(Object lock, Core core, ChatServiceImpl chatService,
-            FileTransferServiceImpl fileTransferService, HistoryLog historyLog,
-            MessagingLog messagingLog, ContactManager contactManager, RcsSettings rcsSettings) {
-        super(lock, core, contactManager, messagingLog, rcsSettings);
-        mChatService = chatService;
-        mFileTransferService = fileTransferService;
+    public OneToOneChatDequeueTask(Object lock, Context ctx, Core core,
+            ChatServiceImpl chatService, FileTransferServiceImpl fileTransferService,
+            HistoryLog historyLog, MessagingLog messagingLog, ContactManager contactManager,
+            RcsSettings rcsSettings) {
+        super(lock, ctx, core, contactManager, messagingLog, rcsSettings, chatService,
+                fileTransferService);
         mHistoryLog = historyLog;
         final ImdnManager imdnManager = mImService.getImdnManager();
         mDisplayedReportEnabled = imdnManager.isRequestGroupDeliveryDisplayedReportsEnabled();
@@ -74,6 +70,10 @@ public class OneToOneChatDequeueTask extends DequeueTask {
         if (logActivated) {
             mLogger.debug("Execute task to dequeue all one-to-one chat messages and one-to-one file transfers.");
         }
+        int providerId = -1;
+        String id = null;
+        ContactId contact = null;
+        String mimeType = null;
         Cursor cursor = null;
         try {
             synchronized (mLock) {
@@ -100,129 +100,122 @@ public class OneToOneChatDequeueTask extends DequeueTask {
                         }
                         return;
                     }
-                    int providerId = cursor.getInt(providerIdIdx);
-                    String id = cursor.getString(idIdx);
+                    providerId = cursor.getInt(providerIdIdx);
+                    id = cursor.getString(idIdx);
                     String phoneNumber = cursor.getString(contactIdx);
-                    ContactId contact = ContactUtil.createContactIdFromTrustedData(phoneNumber);
+                    contact = ContactUtil.createContactIdFromTrustedData(phoneNumber);
                     OneToOneChatImpl oneToOneChat = mChatService.getOrCreateOneToOneChat(contact);
-                    try {
-                        switch (providerId) {
-                            case MessageData.HISTORYLOG_MEMBER_ID:
-                                if (!isAllowedToDequeueOneToOneChatMessage(contact)) {
-                                    continue;
+                    mimeType = cursor.getString(mimeTypeIdx);
+                    switch (providerId) {
+                        case MessageData.HISTORYLOG_MEMBER_ID:
+                            if (!isPossibleToDequeueOneToOneChatMessage(contact)) {
+                                setOneToOneChatMessageAsFailed(contact, id, mimeType);
+                                continue;
+                            }
+                            if (!isAllowedToDequeueOneToOneChatMessage(contact)) {
+                                continue;
+                            }
+                            String content = cursor.getString(contentIdx);
+                            long timestamp = System.currentTimeMillis();
+                            /* For outgoing message, timestampSent = timestamp */
+                            ChatMessage message = ChatUtils.createChatMessage(id, mimeType,
+                                    content, contact, null, timestamp, timestamp);
+                            try {
+                                oneToOneChat.dequeueOneToOneChatMessage(message);
+                            } catch (MsrpException e) {
+                                if (logActivated) {
+                                    mLogger.debug(new StringBuilder(
+                                            "Failed to dequeue one-one chat message '").append(id)
+                                            .append("' message for contact '").append(contact)
+                                            .append("' due to: ").append(e.getMessage()).toString());
                                 }
-                                String msgId = cursor.getString(idIdx);
-                                String content = cursor.getString(contentIdx);
-                                String mimeType = cursor.getString(mimeTypeIdx);
-                                long timestamp = System.currentTimeMillis();
-                                /* For outgoing message, timestampSent = timestamp */
-                                ChatMessage message = ChatUtils.createChatMessage(msgId, mimeType,
-                                        content, contact, null, timestamp, timestamp);
-                                try {
-                                    oneToOneChat.dequeueOneToOneChatMessage(message);
-                                } catch (MsrpException e) {
-                                    if (logActivated) {
-                                        mLogger.debug(new StringBuilder(
-                                                "Failed to dequeue one-one chat message '")
-                                                .append(id).append("' message for contact '")
-                                                .append(contact).append("' due to: ")
-                                                .append(e.getMessage()).toString());
+                            }
+                            break;
+                        case FileTransferData.HISTORYLOG_MEMBER_ID:
+                            Uri file = Uri.parse(cursor.getString(contentIdx));
+                            if (!isPossibleToDequeueOneToOneFileTransfer(contact, file,
+                                    cursor.getLong(fileSizeIdx))) {
+                                setOneToOneFileTransferAsFailed(contact, id);
+                                continue;
+                            }
+                            State state = State.valueOf(cursor.getInt(statusIdx));
+                            switch (state) {
+                                case QUEUED:
+                                    if (!isAllowedToDequeueOneToOneFileTransfer(contact,
+                                            mFileTransferService)) {
+                                        continue;
                                     }
-                                }
-                                break;
-                            case FileTransferData.HISTORYLOG_MEMBER_ID:
-                                if (mImService.isFileSizeExceeded(cursor.getLong(fileSizeIdx))) {
-                                    mFileTransferService.setOneToOneFileTransferStateAndReasonCode(
-                                            id, contact, State.FAILED,
-                                            ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
-                                    continue;
-                                }
-                                State state = State.valueOf(cursor.getInt(statusIdx));
-                                switch (state) {
-                                    case QUEUED:
-                                        if (!isAllowedToDequeueOneToOneFileTransfer()) {
-                                            continue;
+                                    MmContent fileContent = FileTransferUtils.createMmContent(file);
+                                    MmContent fileIconContent = null;
+                                    String fileIcon = cursor.getString(fileIconIdx);
+                                    if (fileIcon != null) {
+                                        Uri fileIconUri = Uri.parse(fileIcon);
+                                        fileIconContent = FileTransferUtils
+                                                .createMmContent(fileIconUri);
+                                    }
+                                    mFileTransferService.dequeueOneToOneFileTransfer(id, contact,
+                                            fileContent, fileIconContent);
+                                    break;
+                                case STARTED:
+                                    if (!isPossibleToDequeueOneToOneChatMessage(contact)) {
+                                        setOneToOneFileTransferAsFailed(contact, id);
+                                        continue;
+                                    }
+                                    if (!isAllowedToDequeueOneToOneChatMessage(contact)) {
+                                        continue;
+                                    }
+                                    try {
+                                        OneToOneFileTransferImpl oneToOneFileTransfer = mFileTransferService
+                                                .getOrCreateOneToOneFileTransfer(contact, id);
+                                        String fileInfo = FileTransferUtils
+                                                .createHttpFileTransferXml(mMessagingLog
+                                                        .getGroupFileDownloadInfo(id));
+                                        oneToOneChat.dequeueOneToOneFileInfo(id, fileInfo,
+                                                mDisplayedReportEnabled, mDeliveryReportEnabled,
+                                                oneToOneFileTransfer);
+                                    } catch (MsrpException e) {
+                                        if (logActivated) {
+                                            mLogger.debug(new StringBuilder(
+                                                    "Failed to dequeue one-one file info '")
+                                                    .append(id).append("' message for contact '")
+                                                    .append(contact).append("' due to: ")
+                                                    .append(e.getMessage()).toString());
                                         }
-                                        try {
-                                            Uri file = Uri.parse(cursor.getString(contentIdx));
-                                            MmContent fileContent = FileTransferUtils
-                                                    .createMmContent(file);
-                                            MmContent fileIconContent = null;
-                                            String fileIcon = cursor.getString(fileIconIdx);
-                                            if (fileIcon != null) {
-                                                Uri fileIconUri = Uri.parse(fileIcon);
-                                                fileIconContent = FileTransferUtils
-                                                        .createMmContent(fileIconUri);
-                                            }
-                                            mFileTransferService.dequeueOneToOneFileTransfer(id,
-                                                    contact, fileContent, fileIconContent);
-                                        } catch (SecurityException e) {
-                                            mLogger.error(
-                                                    new StringBuilder(
-                                                            "Security exception occured while dequeueing file transfer with transferId '")
-                                                            .append(id)
-                                                            .append("', so mark as failed")
-                                                            .toString(), e);
-                                            mFileTransferService
-                                                    .setOneToOneFileTransferStateAndReasonCode(id,
-                                                            contact, State.FAILED,
-                                                            ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
-                                        }
-                                        break;
-                                    case STARTED:
-                                        if (!isAllowedToDequeueOneToOneChatMessage(contact)) {
-                                            continue;
-                                        }
-                                        try {
-                                            OneToOneFileTransferImpl oneToOneFileTransfer = mFileTransferService
-                                                    .getOrCreateOneToOneFileTransfer(contact, id);
-                                            String fileInfo = FileTransferUtils
-                                                    .createHttpFileTransferXml(mMessagingLog
-                                                            .getGroupFileDownloadInfo(id));
-                                            oneToOneChat.dequeueOneToOneFileInfo(id, fileInfo,
-                                                    mDisplayedReportEnabled,
-                                                    mDeliveryReportEnabled, oneToOneFileTransfer);
-                                        } catch (MsrpException e) {
-                                            if (logActivated) {
-                                                mLogger.debug(new StringBuilder(
-                                                        "Failed to dequeue one-one file info '")
-                                                        .append(id)
-                                                        .append("' message for contact '")
-                                                        .append(contact).append("' due to: ")
-                                                        .append(e.getMessage()).toString());
-                                            }
-                                        } catch (SecurityException e) {
-                                            mLogger.error(
-                                                    new StringBuilder(
-                                                            "Security exception occured while dequeueing file info with transferId '")
-                                                            .append(id)
-                                                            .append("', so mark as failed")
-                                                            .toString(), e);
-                                            mFileTransferService
-                                                    .setOneToOneFileTransferStateAndReasonCode(id,
-                                                            contact, State.FAILED,
-                                                            ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
-                                        }
-                                        break;
-                                    default:
-                                        break;
-                                }
-                                break;
-                            default:
-                                break;
-                        }
-                    } catch (RuntimeException e) {
-                        /*
-                         * Break only for terminal exception, in rest of the cases dequeue and try
-                         * to send other messages.
-                         */
-                        mLogger.error(
-                                new StringBuilder(
-                                        "Exception occured while dequeueing one-to-one chat message and one-to-one file transfer with id '")
-                                        .append(id).append("' for contact '").append(contact)
-                                        .append("'!").toString(), e);
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        default:
+                            break;
                     }
                 }
+            }
+        } catch (RuntimeException e) {
+            /*
+             * Normally all the terminal and non-terminal cases should be handled above so if we
+             * come here that means that there is a bug and so we output a stack trace so the bug
+             * can then be properly tracked down and fixed. We also mark the respective entry that
+             * failed to dequeue as FAILED.
+             */
+            mLogger.error(
+                    new StringBuilder(
+                            "Exception occured while dequeueing one-to-one chat message and one-to-one file transfer with id '")
+                            .append(id).append("' for contact '").append(contact).append("'!")
+                            .toString(), e);
+            if (id == null) {
+                return;
+            }
+            switch (providerId) {
+                case MessageData.HISTORYLOG_MEMBER_ID:
+                    setOneToOneChatMessageAsFailed(contact, id, mimeType);
+                    break;
+                case FileTransferData.HISTORYLOG_MEMBER_ID:
+                    setOneToOneFileTransferAsFailed(contact, id);
+                    break;
+                default:
+                    break;
             }
         } finally {
             if (cursor != null) {

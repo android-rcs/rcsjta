@@ -1023,8 +1023,8 @@ public class RcsCoreService extends Service implements CoreListener {
         mImOperationExecutor.execute(new FtHttpResumeManager(imService, mRcsSettings,
                 mMessagingLog, mContactManager));
         /* Try to dequeue one-to-one chat messages and one-to-one file transfers. */
-        mImOperationExecutor.execute(new OneToOneChatDequeueTask(mOperationLock, core, mChatApi,
-                mFtApi, mHistoryLog, mMessagingLog, mContactManager, mRcsSettings));
+        mImOperationExecutor.execute(new OneToOneChatDequeueTask(mOperationLock, mContext, core,
+                mChatApi, mFtApi, mHistoryLog, mMessagingLog, mContactManager, mRcsSettings));
 
         ImdnManager imdnManager = imService.getImdnManager();
         if (imdnManager.isSendOneToOneDeliveryDisplayedReportsEnabled()
@@ -1054,26 +1054,26 @@ public class RcsCoreService extends Service implements CoreListener {
 
     @Override
     public void tryToDequeueGroupChatMessagesAndGroupFileTransfers(String chatId, Core core) {
-        mImOperationExecutor.execute(new GroupChatDequeueTask(mOperationLock, core, chatId,
-                mMessagingLog, mChatApi, mFtApi, mRcsSettings, mHistoryLog, mContactManager));
+        mImOperationExecutor.execute(new GroupChatDequeueTask(mOperationLock, mContext, core,
+                chatId, mMessagingLog, mChatApi, mFtApi, mRcsSettings, mHistoryLog, mContactManager));
     }
 
     @Override
     public void tryToDequeueOneToOneChatMessages(ContactId contact, Core core) {
-        mImOperationExecutor.execute(new OneToOneChatMessageDequeueTask(mOperationLock, core,
-                contact, mMessagingLog, mChatApi, mRcsSettings, mContactManager));
+        mImOperationExecutor.execute(new OneToOneChatMessageDequeueTask(mOperationLock, mContext,
+                core, contact, mMessagingLog, mChatApi, mRcsSettings, mContactManager, mFtApi));
     }
 
     @Override
     public void tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(Core core) {
-        mImOperationExecutor.execute(new OneToOneChatDequeueTask(mOperationLock, core, mChatApi,
-                mFtApi, mHistoryLog, mMessagingLog, mContactManager, mRcsSettings));
+        mImOperationExecutor.execute(new OneToOneChatDequeueTask(mOperationLock, mContext, core,
+                mChatApi, mFtApi, mHistoryLog, mMessagingLog, mContactManager, mRcsSettings));
     }
 
     @Override
     public void tryToDequeueFileTransfers(Core core) {
-        mImOperationExecutor.execute(new FileTransferDequeueTask(mOperationLock, core,
-                mMessagingLog, mChatApi, mFtApi, mContactManager, mRcsSettings));
+        mImOperationExecutor.execute(new FileTransferDequeueTask(mOperationLock, mContext,
+                core, mMessagingLog, mChatApi, mFtApi, mContactManager, mRcsSettings));
     }
 
     @Override

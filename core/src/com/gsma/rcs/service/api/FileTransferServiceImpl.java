@@ -459,7 +459,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 recipients, state, FileTransfer.ReasonCode.UNSPECIFIED, timestamp, timestampSent);
     }
 
-    private FileTransferProtocol getFileTransferProtocolForOneToOneFileTransfer(ContactId contact) {
+    public FileTransferProtocol getFileTransferProtocolForOneToOneFileTransfer(ContactId contact) {
         Capabilities myCapabilities = mRcsSettings.getMyCapabilities();
         Capabilities remoteCapabilities = mContactManager.getContactCapabilities(contact);
         if (remoteCapabilities == null) {

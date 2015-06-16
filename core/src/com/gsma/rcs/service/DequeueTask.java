@@ -24,15 +24,28 @@ import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ChatServiceImpl;
+import com.gsma.rcs.service.api.FileTransferServiceImpl;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Process;
 import android.text.TextUtils;
 
 public abstract class DequeueTask implements Runnable {
 
     protected final Object mLock;
+
+    protected final Context mCtx;
 
     protected final Core mCore;
 
@@ -44,16 +57,24 @@ public abstract class DequeueTask implements Runnable {
 
     protected final RcsSettings mRcsSettings;
 
+    protected final ChatServiceImpl mChatService;
+
+    protected final FileTransferServiceImpl mFileTransferService;
+
     protected final Logger mLogger = Logger.getLogger(getClass().getName());
 
-    public DequeueTask(Object lock, Core core, ContactManager contactManager,
-            MessagingLog messagingLog, RcsSettings rcsSettings) {
+    public DequeueTask(Object lock, Context ctx, Core core, ContactManager contactManager,
+            MessagingLog messagingLog, RcsSettings rcsSettings, ChatServiceImpl chatService,
+            FileTransferServiceImpl fileTransferService) {
         mLock = lock;
+        mCtx = ctx;
         mCore = core;
         mImService = mCore.getImService();
         mContactManager = contactManager;
         mMessagingLog = messagingLog;
         mRcsSettings = rcsSettings;
+        mChatService = chatService;
+        mFileTransferService = fileTransferService;
     }
 
     /**
@@ -78,21 +99,42 @@ public abstract class DequeueTask implements Runnable {
     }
 
     /**
-     * Check if dequeueing and sending of 1-1 chat messages to specified contact is possible
+     * Check if it is possible to dequeue and transfer one-one file
      * 
      * @param contact
+     * @param fileTransferService
      * @return boolean
      */
-    protected boolean isAllowedToDequeueOneToOneChatMessage(ContactId contact) {
-        Capabilities remoteCapabilities = mContactManager.getContactCapabilities(contact);
-        if (remoteCapabilities == null) {
+    protected boolean isAllowedToDequeueOneToOneFileTransfer(ContactId contact,
+            FileTransferServiceImpl fileTransferService) {
+        if (fileTransferService.getFileTransferProtocolForOneToOneFileTransfer(contact) == null) {
             if (mLogger.isActivated()) {
                 mLogger.debug(new StringBuilder(
-                        "Cannot dequeue one-to-one chat messages right now as the capabilities are not known for remote contact ")
-                        .append(contact).toString());
+                        "Cannot dequeue one-to-one file transfer right now as there are no enough capabilities for remote contact '")
+                        .append(contact).append("'").toString());
             }
             return false;
         }
+        return isAllowedToDequeueFileTransfer();
+    }
+
+    /**
+     * Check if it is possible to dequeue and transfer one-one file
+     * 
+     * @return boolean
+     */
+    protected boolean isAllowedToDequeueGroupFileTransfer() {
+        return isAllowedToDequeueFileTransfer();
+    }
+
+    /**
+     * Check if dequeueing and sending of 1-1 chat messages to specified contact is allowed
+     * 
+     * @param contact
+     * @return
+     */
+    protected boolean isAllowedToDequeueOneToOneChatMessage(ContactId contact) {
+        Capabilities remoteCapabilities = mContactManager.getContactCapabilities(contact);
         if (!remoteCapabilities.isImSessionSupported()) {
             if (mLogger.isActivated()) {
                 mLogger.debug(new StringBuilder(
@@ -105,12 +147,31 @@ public abstract class DequeueTask implements Runnable {
     }
 
     /**
+     * Check if dequeueing and sending of 1-1 chat messages to specified contact is possible
+     * 
+     * @param contact
+     * @return boolean
+     */
+    protected boolean isPossibleToDequeueOneToOneChatMessage(ContactId contact) {
+        Capabilities remoteCapabilities = mContactManager.getContactCapabilities(contact);
+        if (remoteCapabilities == null) {
+            if (mLogger.isActivated()) {
+                mLogger.debug(new StringBuilder(
+                        "Cannot dequeue one-to-one chat messages as the capabilities are not known for remote contact ")
+                        .append(contact).toString());
+            }
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Check if it is possible to dequeue group chat messages and group file transfers
      * 
      * @param chatId
      * @return boolean
      */
-    private boolean isAllowedToDequeueGroupChatMessagesAndGroupFileTransfers(String chatId) {
+    private boolean isPossibleToDequeueGroupChatMessagesAndGroupFileTransfers(String chatId) {
         if (!mRcsSettings.isGroupChatActivated()) {
             if (mLogger.isActivated()) {
                 mLogger.debug("Cannot dequeue group chat messages and file transfers right now as group chat feature is not activated!");
@@ -168,30 +229,82 @@ public abstract class DequeueTask implements Runnable {
      * @param chatId
      * @return boolean
      */
-    protected boolean isAllowedToDequeueGroupChatMessage(String chatId) {
-        if (!isAllowedToDequeueGroupChatMessagesAndGroupFileTransfers(chatId)) {
+    protected boolean isPossibleToDequeueGroupChatMessage(String chatId) {
+        return isPossibleToDequeueGroupChatMessagesAndGroupFileTransfers(chatId);
+    }
+
+    /**
+     * Does the stack process have permissions to read the Uri
+     * 
+     * @param file
+     * @return
+     */
+    private boolean isReadFromUriAllowed(Uri file) {
+        return PackageManager.PERMISSION_GRANTED == mCtx.checkUriPermission(file, Process.myPid(),
+                Process.myUid(), Intent.FLAG_GRANT_READ_URI_PERMISSION);
+    }
+
+    /**
+     * Check if it is possible to dequeue file transfer
+     * 
+     * @return boolean
+     */
+    private boolean isPossibleToDequeueFileTransfer(Uri file, long size) {
+        if (!isReadFromUriAllowed(file)) {
+            if (mLogger.isActivated()) {
+                mLogger.debug("Cannot dequeue file as there is no Uri permission available for file "
+                        .concat(file.toString()));
+            }
+            return false;
+        }
+        if (mImService.isFileSizeExceeded(size)) {
+            if (mLogger.isActivated()) {
+                mLogger.debug(new StringBuilder(
+                        "Cannot dequeue file as there the maximum allowed size is exceeded by the file ")
+                        .append(file).append(" size: ").append(size).toString());
+            }
             return false;
         }
         return true;
     }
 
     /**
-     * Check if it is allowed to dequeue one-one file transfer
+     * Check if it is possible to dequeue one-one file transfer
      * 
+     * @param contact
+     * @param file
+     * @param size
      * @return boolean
      */
-    protected boolean isAllowedToDequeueOneToOneFileTransfer() {
-        return isAllowedToDequeueFileTransfer();
+    protected boolean isPossibleToDequeueOneToOneFileTransfer(ContactId contact, Uri file, long size) {
+        Capabilities remoteCapabilities = mContactManager.getContactCapabilities(contact);
+        if (remoteCapabilities == null) {
+            if (mLogger.isActivated()) {
+                mLogger.debug(new StringBuilder(
+                        "Cannot dequeue one-to-one file transfer as the capabilities are not known for remote contact ")
+                        .append(contact).toString());
+            }
+            return false;
+        }
+        if (!isPossibleToDequeueFileTransfer(file, size)) {
+            return false;
+        }
+        return true;
     }
 
     /**
-     * Check if it is allowed to dequeue group file transfer
+     * Check if it is possible to dequeue group file transfer
      * 
      * @param chatId
+     * @param file
+     * @param size
      * @return boolean
      */
-    protected boolean isAllowedToDequeueGroupFileTransfer(String chatId) {
-        if (!isAllowedToDequeueGroupChatMessagesAndGroupFileTransfers(chatId)) {
+    protected boolean isPossibleToDequeueGroupFileTransfer(String chatId, Uri file, long size) {
+        if (!isPossibleToDequeueFileTransfer(file, size)) {
+            return false;
+        }
+        if (!isPossibleToDequeueGroupChatMessagesAndGroupFileTransfers(chatId)) {
             return false;
         }
         if (!mRcsSettings.getMyCapabilities().isFileTransferHttpSupported()) {
@@ -200,9 +313,51 @@ public abstract class DequeueTask implements Runnable {
             }
             return false;
         }
-        if (!isAllowedToDequeueFileTransfer()) {
-            return false;
-        }
         return true;
+    }
+
+    /**
+     * Set one-one chat message as failed
+     * 
+     * @param contact
+     * @param msgId
+     * @param mimeType
+     */
+    protected void setOneToOneChatMessageAsFailed(ContactId contact, String msgId, String mimeType) {
+        mChatService.setOneToOneChatMessageStatusAndReasonCode(msgId, mimeType, contact,
+                Status.FAILED, Content.ReasonCode.FAILED_SEND);
+    }
+
+    /**
+     * Set group chat message as failed
+     * 
+     * @param chatId
+     * @param msgId
+     */
+    protected void setGroupChatMessageAsFailed(String chatId, String msgId) {
+        mChatService.setGroupChatMessageStatusAndReasonCode(msgId, chatId, Status.FAILED,
+                Content.ReasonCode.FAILED_SEND);
+    }
+
+    /**
+     * Set one-one file transfer as failed
+     * 
+     * @param contact
+     * @param fileTransferId
+     */
+    protected void setOneToOneFileTransferAsFailed(ContactId contact, String fileTransferId) {
+        mFileTransferService.setOneToOneFileTransferStateAndReasonCode(fileTransferId, contact,
+                State.FAILED, FileTransfer.ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
+    }
+
+    /**
+     * Set group file transfer as failed
+     * 
+     * @param chatId
+     * @param fileTransferId
+     */
+    protected void setGroupFileTransferAsFailed(String chatId, String fileTransferId) {
+        mFileTransferService.setGroupFileTransferStateAndReasonCode(fileTransferId, chatId,
+                State.FAILED, FileTransfer.ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
     }
 }
