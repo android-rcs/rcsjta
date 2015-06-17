@@ -35,6 +35,7 @@ public class OneToOneChatIntent {
      * Intent includes the following extras:
      * <ul>
      * <li> {@link #EXTRA_MESSAGE_ID} containing the message ID of chat message.
+     * <li> {@link #EXTRA_MIME_TYPE} containing the MIME-type of chat message.
      * </ul>
      */
     public final static String ACTION_NEW_ONE_TO_ONE_CHAT_MESSAGE = "com.gsma.services.rcs.chat.action.NEW_ONE_TO_ONE_CHAT_MESSAGE";
