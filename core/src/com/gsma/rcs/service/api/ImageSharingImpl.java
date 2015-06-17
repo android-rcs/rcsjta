@@ -24,6 +24,7 @@ package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
+import com.gsma.rcs.core.ims.service.ImsServiceSession.InvitationStatus;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
@@ -435,12 +436,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
                 throw new ServerApiGenericException(new StringBuilder("Session with sharing ID '")
                         .append(mSharingId).append("' not available!").toString());
             }
-            new Thread() {
-                public void run() {
-                    session.acceptSession();
-                }
-            }.start();
-
+            session.acceptSession();
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
                 mLogger.error(ExceptionUtil.getFullStackTrace(e));
@@ -469,12 +465,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
                 throw new ServerApiGenericException(new StringBuilder("Session with sharing ID '")
                         .append(mSharingId).append("' not available!").toString());
             }
-            new Thread() {
-                public void run() {
-                    session.rejectSession(Response.DECLINE);
-                }
-            }.start();
-
+            session.rejectSession(InvitationStatus.INVITATION_REJECTED_DECLINE);
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
                 mLogger.error(ExceptionUtil.getFullStackTrace(e));

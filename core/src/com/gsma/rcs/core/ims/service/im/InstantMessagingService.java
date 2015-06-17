@@ -38,6 +38,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
+import com.gsma.rcs.core.ims.service.ImsServiceSession.InvitationStatus;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
@@ -1509,9 +1510,11 @@ public class InstantMessagingService extends ImsService {
      * @param ftinfo File transfer info document
      * @param timestamp Local timestamp when got SipRequest
      * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     public void receiveStoredAndForwardOneToOneHttpFileTranferInvitation(SipRequest invite,
-            FileTransferHttpInfoDocument ftinfo, long timestamp) throws SipPayloadException {
+            FileTransferHttpInfoDocument ftinfo, long timestamp) throws SipPayloadException,
+            SipNetworkException {
         boolean logActivated = sLogger.isActivated();
         String referredId = ChatUtils.getReferredIdentityAsContactUri(invite);
         ContactId remote = ChatUtils.getReferredIdentityAsContactId(invite);
@@ -1545,7 +1548,7 @@ public class InstantMessagingService extends ImsService {
 
             // TODO add warning header "xxx Size exceeded"
             oneToOneChatSession.sendErrorResponse(invite, oneToOneChatSession.getDialogPath()
-                    .getLocalTag(), Response.FORBIDDEN);
+                    .getLocalTag(), InvitationStatus.INVITATION_REJECTED_FORBIDDEN);
 
             // Close session
             oneToOneChatSession.handleError(new FileSharingError(
@@ -1564,7 +1567,7 @@ public class InstantMessagingService extends ImsService {
             } catch (IOException e) {
                 sLogger.error("Failed to download file icon", e);
                 oneToOneChatSession.sendErrorResponse(invite, oneToOneChatSession.getDialogPath()
-                        .getLocalTag(), Response.DECLINE);
+                        .getLocalTag(), InvitationStatus.INVITATION_REJECTED_DECLINE);
 
                 /* Close session */
                 oneToOneChatSession.handleError(new FileSharingError(

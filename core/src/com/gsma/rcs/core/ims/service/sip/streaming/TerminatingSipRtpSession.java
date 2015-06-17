@@ -23,6 +23,7 @@
 
 package com.gsma.rcs.core.ims.service.sip.streaming;
 
+import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
@@ -86,7 +87,8 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
             sLogger.info("Initiate a new RTP session as terminating");
         }
         try {
-            send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+            SipDialogPath dialogPath = getDialogPath();
+            send180Ringing(dialogPath.getInvite(), dialogPath.getLocalTag());
 
             Collection<ImsSessionListener> listeners = getListeners();
             ContactId contact = getRemoteContact();
@@ -96,11 +98,13 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
 
             InvitationStatus answer = waitInvitationAnswer();
             switch (answer) {
-                case INVITATION_REJECTED:
+                case INVITATION_REJECTED_DECLINE:
+                    /* Intentional fall through */
+                case INVITATION_REJECTED_BUSY_HERE:
                     if (logActivated) {
                         sLogger.debug("Session has been rejected by user");
                     }
-
+                    sendErrorResponse(dialogPath.getInvite(), dialogPath.getLocalTag(), answer);
                     removeSession();
 
                     for (ImsSessionListener listener : listeners) {
@@ -115,7 +119,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                     }
 
                     // Ringing period timeout
-                    send486Busy(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+                    send486Busy(dialogPath.getInvite(), dialogPath.getLocalTag());
 
                     removeSession();
 
@@ -161,18 +165,16 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                     return;
 
                 default:
-                    if (logActivated) {
-                        sLogger.debug("Unknown invitation answer in run; answer=".concat(String
-                                .valueOf(answer)));
-                    }
-                    return;
+                    throw new IllegalArgumentException(
+                            "Unknown invitation answer in run; answer=".concat(String
+                                    .valueOf(answer)));
             }
 
             // Build SDP part
             String sdp = generateSdp();
 
             // Set the local SDP part in the dialog path
-            getDialogPath().setLocalContent(sdp);
+            dialogPath.setLocalContent(sdp);
 
             // Test if the session should be interrupted
             if (isInterrupted()) {
@@ -192,12 +194,12 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
             SipResponse resp = create200OKResponse();
 
             // The signalisation is established
-            getDialogPath().sigEstablished();
+            dialogPath.sigEstablished();
 
             // Send response
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
                     .sendSipMessageAndWait(resp);
-            
+
             // Analyze the received response
             if (ctx.isSipAck()) {
                 // ACK received
@@ -206,7 +208,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                 }
 
                 // The session is established
-                getDialogPath().sessionEstablished();
+                dialogPath.sessionEstablished();
 
                 /* Start Media transfer */
                 startMediaTransfer();
@@ -214,8 +216,8 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                 // Start session timer
                 SessionTimerManager sessionTimerManager = getSessionTimerManager();
                 if (sessionTimerManager.isSessionTimerActivated(resp)) {
-                    sessionTimerManager.start(SessionTimerManager.UAS_ROLE, getDialogPath()
-                            .getSessionExpireTime());
+                    sessionTimerManager.start(SessionTimerManager.UAS_ROLE,
+                            dialogPath.getSessionExpireTime());
                 }
 
                 // Notify listeners

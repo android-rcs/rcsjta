@@ -97,7 +97,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             send180Ringing(dialogPath.getInvite(), dialogPath.getLocalTag());
 
             // Parse the remote SDP part
-            SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(UTF8));
+            SdpParser parser = new SdpParser(dialogPath.getRemoteContent().getBytes(UTF8));
             MediaDescription mediaVideo = parser.getMediaDescription("video");
             String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaVideo);
             int remotePort = mediaVideo.port;
@@ -119,11 +119,13 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             // Wait invitation answer
             InvitationStatus answer = waitInvitationAnswer();
             switch (answer) {
-                case INVITATION_REJECTED:
+                case INVITATION_REJECTED_DECLINE:
+                    /* Intentional fall through */
+                case INVITATION_REJECTED_BUSY_HERE:
                     if (mLogger.isActivated()) {
                         mLogger.debug("Session has been rejected by user");
                     }
-
+                    sendErrorResponse(dialogPath.getInvite(), dialogPath.getLocalTag(), answer);
                     removeSession();
 
                     for (ImsSessionListener listener : listeners) {
@@ -184,11 +186,9 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                     return;
 
                 default:
-                    if (mLogger.isActivated()) {
-                        mLogger.debug("Unknown invitation answer in run; answer=".concat(String
-                                .valueOf(answer)));
-                    }
-                    return;
+                    throw new IllegalArgumentException(
+                            "Unknown invitation answer in run; answer=".concat(String
+                                    .valueOf(answer)));
             }
 
             IVideoPlayer player = getPlayer();
@@ -255,7 +255,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             // Send response
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
                     .sendSipMessageAndWait(resp);
-            
+
             // Analyze the received response
             if (ctx.isSipAck()) {
                 // ACK received

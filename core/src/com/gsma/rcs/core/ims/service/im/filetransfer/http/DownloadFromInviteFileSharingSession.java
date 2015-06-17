@@ -24,6 +24,8 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
@@ -218,10 +220,16 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
                 /* Wait invitation answer */
                 InvitationStatus answer = waitInvitationAnswer(delay);
                 switch (answer) {
-                    case INVITATION_REJECTED:
+                    case INVITATION_REJECTED_DECLINE:
+                        /* Intentional fall through */
+                    case INVITATION_REJECTED_BUSY_HERE:
                         if (logActivated) {
                             mLogger.debug("Transfer has been rejected by user");
                         }
+                        /*
+                         * If session is rejected by user, session cannot be rejected at SIP level
+                         * (already accepted200OK)
+                         */
                         removeSession();
                         for (ImsSessionListener listener : listeners) {
                             listener.handleSessionRejected(contact,
@@ -268,11 +276,9 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
                         return;
 
                     default:
-                        if (logActivated) {
-                            mLogger.debug("Unknown invitation answer in run; answer=".concat(answer
-                                    .toString()));
-                        }
-                        return;
+                        throw new IllegalArgumentException(
+                                "Unknown invitation answer in run; answer=".concat(String
+                                        .valueOf(answer)));
 
                 }
             }

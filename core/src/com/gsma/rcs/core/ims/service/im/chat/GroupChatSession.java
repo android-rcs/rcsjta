@@ -37,6 +37,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionAuthenticationAgent;
+import com.gsma.rcs.core.ims.service.ImsServiceSession.InvitationStatus;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimIdentity;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
@@ -617,7 +618,7 @@ public abstract class GroupChatSession extends ChatSession {
      * Reject the session invitation
      */
     public void rejectSession() {
-        rejectSession(603);
+        rejectSession(InvitationStatus.INVITATION_REJECTED_DECLINE);
     }
 
     /**

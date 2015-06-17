@@ -26,6 +26,7 @@ import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
+import com.gsma.rcs.core.ims.service.ImsServiceSession.InvitationStatus;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
@@ -596,14 +597,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                             .append("': already accepted").toString());
 
                 }
-                new Thread() {
-                    public void run() {
-                        ongoingSession.acceptSession();
-                    }
-                }.start();
-
+                ongoingSession.acceptSession();
                 return;
-
             }
             /* No active session: restore session from provider */
             FtHttpResume resume = mPersistentStorage.getFileTransferResumeInfo();
@@ -683,12 +678,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                                         .concat(mFileTransferId));
                 }
             }
-            new Thread() {
-                public void run() {
-                    session.rejectSession(Response.DECLINE);
-                }
-            }.start();
-
+            session.rejectSession(InvitationStatus.INVITATION_REJECTED_DECLINE);
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
                 sLogger.error(ExceptionUtil.getFullStackTrace(e));

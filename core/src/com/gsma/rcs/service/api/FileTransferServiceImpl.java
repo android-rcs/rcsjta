@@ -931,11 +931,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                             .append(chatId).append("' is pending for acceptance, accept it.")
                             .toString());
                 }
-                new Thread() {
-                    public void run() {
-                        groupChatSession.acceptSession();
-                    }
-                }.start();
+                groupChatSession.acceptSession();
             }
         } else {
             mCore.getListener().handleRejoinGroupChatAsPartOfSendOperation(chatId);

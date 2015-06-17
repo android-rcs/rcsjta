@@ -56,7 +56,7 @@ public abstract class ImsServiceSession extends Thread {
      */
     public enum InvitationStatus {
 
-        INVITATION_NOT_ANSWERED, INVITATION_ACCEPTED, INVITATION_REJECTED, INVITATION_CANCELED, INVITATION_TIMEOUT, INVITATION_REJECTED_BY_SYSTEM, INVITATION_DELETED;
+        INVITATION_NOT_ANSWERED, INVITATION_ACCEPTED, INVITATION_REJECTED, INVITATION_CANCELED, INVITATION_TIMEOUT, INVITATION_REJECTED_BY_SYSTEM, INVITATION_DELETED, INVITATION_REJECTED_DECLINE, INVITATION_REJECTED_BUSY_HERE, INVITATION_REJECTED_FORBIDDEN;
     }
 
     /**
@@ -428,24 +428,17 @@ public abstract class ImsServiceSession extends Thread {
     /**
      * Reject the session invitation
      * 
-     * @param code Error code
+     * @param status InvitationStatus
      */
-    public void rejectSession(int code) {
+    public void rejectSession(InvitationStatus status) {
         if (sLogger.isActivated()) {
             sLogger.debug("Session invitation has been rejected");
         }
-        mInvitationStatus = InvitationStatus.INVITATION_REJECTED;
+        mInvitationStatus = status;
 
-        // Unblock semaphore
         synchronized (mWaitUserAnswer) {
             mWaitUserAnswer.notifyAll();
         }
-
-        // Decline the invitation
-        sendErrorResponse(getDialogPath().getInvite(), getDialogPath().getLocalTag(), code);
-
-        // Remove the session in the session manager
-        removeSession();
     }
 
     /**
@@ -456,7 +449,7 @@ public abstract class ImsServiceSession extends Thread {
             sLogger.debug("Session invitation has been accepted");
         }
         mInvitationStatus = InvitationStatus.INVITATION_ACCEPTED;
-        // Unblock semaphore
+
         synchronized (mWaitUserAnswer) {
             mWaitUserAnswer.notifyAll();
         }
@@ -797,21 +790,32 @@ public abstract class ImsServiceSession extends Thread {
      * 
      * @param request SIP request
      * @param localTag Local tag
-     * @param code Response code
+     * @param status InvitationStatus
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void sendErrorResponse(SipRequest request, String localTag, int code) {
-        try {
-            // Send error
-            if (sLogger.isActivated()) {
-                sLogger.info("Send " + code + " error response");
-            }
-            SipResponse resp = SipMessageFactory.createResponse(request, localTag, code);
-            getImsService().getImsModule().getSipManager().sendSipResponse(resp);
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Can't send error response", e);
-            }
+    public void sendErrorResponse(SipRequest request, String localTag, InvitationStatus status)
+            throws SipPayloadException, SipNetworkException {
+        if (sLogger.isActivated()) {
+            sLogger.info(new StringBuilder("Send ").append(status).append(" error response")
+                    .toString());
         }
+        SipResponse resp;
+        switch (status) {
+            case INVITATION_REJECTED_BUSY_HERE:
+                resp = SipMessageFactory.createResponse(request, localTag, Response.BUSY_HERE);
+                break;
+            case INVITATION_REJECTED_DECLINE:
+                resp = SipMessageFactory.createResponse(request, localTag, Response.DECLINE);
+                break;
+            case INVITATION_REJECTED_FORBIDDEN:
+                resp = SipMessageFactory.createResponse(request, localTag, Response.FORBIDDEN);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown InvitationStatus ".concat(status
+                        .toString()));
+        }
+        getImsService().getImsModule().getSipManager().sendSipResponse(resp);
     }
 
     /**

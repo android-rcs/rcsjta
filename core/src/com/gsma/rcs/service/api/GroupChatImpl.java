@@ -958,11 +958,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             sLogger.debug(new StringBuilder("Group chat session with chatId '").append(mChatId)
                     .append("' is pending for acceptance, accept it.").toString());
         }
-        new Thread() {
-            public void run() {
-                groupChatSession.acceptSession();
-            }
-        }.start();
+        groupChatSession.acceptSession();
     }
 
     /**

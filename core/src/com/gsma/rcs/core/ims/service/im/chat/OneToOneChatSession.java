@@ -30,6 +30,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
+import com.gsma.rcs.core.ims.service.ImsServiceSession.InvitationStatus;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.core.ims.service.im.chat.geoloc.GeolocInfoDocument;
@@ -206,7 +207,7 @@ public abstract class OneToOneChatSession extends ChatSession {
      * Reject the session invitation
      */
     public void rejectSession() {
-        rejectSession(486);
+        rejectSession(InvitationStatus.INVITATION_REJECTED_BUSY_HERE);
     }
 
     /**

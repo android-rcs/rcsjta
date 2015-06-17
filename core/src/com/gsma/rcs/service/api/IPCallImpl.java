@@ -25,6 +25,7 @@ package com.gsma.rcs.service.api;
 import com.gsma.rcs.core.content.AudioContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
+import com.gsma.rcs.core.ims.service.ImsServiceSession.InvitationStatus;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.ipcall.IPCallError;
 import com.gsma.rcs.core.ims.service.ipcall.IPCallService;
@@ -253,22 +254,12 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
         }
         final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
         if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new IllegalStateException("Session with call ID '" + mCallId + "' not available.");
+            throw new ServerApiGenericException("No session with call ID:".concat(mCallId));
         }
 
-        // Set player and renderer
         session.setPlayer(player);
         session.setRenderer(renderer);
-
-        // Accept invitation
-        new Thread() {
-            public void run() {
-                session.acceptSession();
-            }
-        }.start();
+        session.acceptSession();
     }
 
     /**
@@ -280,18 +271,9 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
         }
         final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
         if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new IllegalStateException("Session with call ID '" + mCallId + "' not available.");
+            throw new ServerApiGenericException("No session with call ID:".concat(mCallId));
         }
-
-        // Reject invitation
-        new Thread() {
-            public void run() {
-                session.rejectSession(Response.DECLINE);
-            }
-        }.start();
+        session.rejectSession(InvitationStatus.INVITATION_REJECTED_DECLINE);
     }
 
     /**

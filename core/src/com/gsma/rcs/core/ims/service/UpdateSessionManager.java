@@ -316,7 +316,7 @@ public class UpdateSessionManager {
                                 sLogger.debug("reInvite has been rejected by user");
                             }
                             mSession.sendErrorResponse(reInvite, mSession.getDialogPath()
-                                    .getLocalTag(), Response.DECLINE);
+                                    .getLocalTag(), InvitationStatus.INVITATION_REJECTED_DECLINE);
                             mSession.handleReInviteUserAnswer(InvitationStatus.INVITATION_REJECTED,
                                     reInviteContext);
                             break;
@@ -328,7 +328,7 @@ public class UpdateSessionManager {
 
                             // send error to remote client
                             mSession.sendErrorResponse(reInvite, mSession.getDialogPath()
-                                    .getLocalTag(), Response.DECLINE);
+                                    .getLocalTag(), InvitationStatus.INVITATION_REJECTED_DECLINE);
                             mSession.handleReInviteUserAnswer(
                                     InvitationStatus.INVITATION_NOT_ANSWERED, reInviteContext);
                             break;

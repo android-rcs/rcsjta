@@ -33,6 +33,7 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
+import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
@@ -133,18 +134,18 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
             if (logActivated) {
                 mLogger.info("Initiate a store & forward session for messages");
             }
+            SipDialogPath dialogPath = getDialogPath();
 
             /* Send message delivery report if requested */
             if (mImdnManager.isDeliveryDeliveredReportsEnabled()
-                    && ChatUtils.isImdnDeliveredRequested(getDialogPath().getInvite())) {
+                    && ChatUtils.isImdnDeliveredRequested(dialogPath.getInvite())) {
                 /* Check notification disposition */
-                String msgId = ChatUtils.getMessageId(getDialogPath().getInvite());
+                String msgId = ChatUtils.getMessageId(dialogPath.getInvite());
                 if (msgId != null) {
                     /* Send message delivery status via a SIP MESSAGE */
                     mImdnManager.sendMessageDeliveryStatusImmediately(getRemoteContact(), msgId,
                             ImdnDocument.DELIVERY_STATUS_DELIVERED,
-                            SipUtils.getRemoteInstanceID(getDialogPath().getInvite()),
-                            getTimestamp());
+                            SipUtils.getRemoteInstanceID(dialogPath.getInvite()), getTimestamp());
                 }
             }
 
@@ -168,15 +169,17 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
                     ((OneToOneChatSessionListener) listener).handleSessionInvited(contact);
                 }
 
-                send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+                send180Ringing(dialogPath.getInvite(), dialogPath.getLocalTag());
 
                 InvitationStatus answer = waitInvitationAnswer();
                 switch (answer) {
-                    case INVITATION_REJECTED:
+                    case INVITATION_REJECTED_DECLINE:
+                        /* Intentional fall through */
+                    case INVITATION_REJECTED_BUSY_HERE:
                         if (logActivated) {
                             mLogger.debug("Session has been rejected by user");
                         }
-
+                        sendErrorResponse(dialogPath.getInvite(), dialogPath.getLocalTag(), answer);
                         removeSession();
 
                         for (ImsSessionListener listener : listeners) {
@@ -191,7 +194,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
                         }
 
                         /* Ringing period timeout */
-                        send486Busy(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+                        send486Busy(dialogPath.getInvite(), dialogPath.getLocalTag());
 
                         removeSession();
 
@@ -230,16 +233,14 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
                         break;
 
                     default:
-                        if (logActivated) {
-                            mLogger.debug("Unknown invitation answer in run; answer=".concat(String
-                                    .valueOf(answer)));
-                        }
-                        return;
+                        throw new IllegalArgumentException(
+                                "Unknown invitation answer in run; answer=".concat(String
+                                        .valueOf(answer)));
                 }
             }
 
             /* Parse the remote SDP part */
-            final SipRequest invite = getDialogPath().getInvite();
+            final SipRequest invite = dialogPath.getInvite();
             String remoteSdp = invite.getSdpContent();
             SipUtils.assertContentIsNotNull(remoteSdp, invite);
             SdpParser parser = new SdpParser(remoteSdp.getBytes(UTF8));
@@ -278,13 +279,13 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
             }
 
             /* Build SDP part */
-            String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
+            String ipAddress = dialogPath.getSipStack().getLocalIpAddress();
             String sdp = SdpUtils.buildChatSDP(ipAddress, localMsrpPort, getMsrpMgr()
                     .getLocalSocketProtocol(), getAcceptTypes(), getWrappedTypes(), localSetup,
                     getMsrpMgr().getLocalMsrpPath(), getSdpDirection());
 
             /* Set the local SDP part in the dialog path */
-            getDialogPath().setLocalContent(sdp);
+            dialogPath.setLocalContent(sdp);
 
             /* Test if the session should be interrupted */
             if (isInterrupted()) {
@@ -298,9 +299,9 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
             if (logActivated) {
                 mLogger.info("Send 200 OK");
             }
-            SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
+            SipResponse resp = SipMessageFactory.create200OkInviteResponse(dialogPath,
                     getFeatureTags(), sdp);
-            getDialogPath().sigEstablished();
+            dialogPath.sigEstablished();
 
             /* Send response */
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
@@ -336,7 +337,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
                 if (logActivated) {
                     mLogger.info("ACK request received");
                 }
-                getDialogPath().sessionEstablished();
+                dialogPath.sessionEstablished();
 
                 /* Create the MSRP client session */
                 if (localSetup.equals("active")) {
@@ -354,8 +355,8 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
                 }
                 SessionTimerManager sessionTimerManager = getSessionTimerManager();
                 if (sessionTimerManager.isSessionTimerActivated(resp)) {
-                    sessionTimerManager.start(SessionTimerManager.UAS_ROLE, getDialogPath()
-                            .getSessionExpireTime());
+                    sessionTimerManager.start(SessionTimerManager.UAS_ROLE,
+                            dialogPath.getSessionExpireTime());
                 }
                 getActivityManager().start();
 

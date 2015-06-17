@@ -23,6 +23,7 @@
 package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
+import com.gsma.rcs.core.ims.service.ImsServiceSession.InvitationStatus;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.sip.SipSessionError;
@@ -277,12 +278,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                         .append(mSessionId).append("' not available!").toString());
             }
             ServerApiUtils.testApiExtensionPermission(session.getServiceId());
-            new Thread() {
-                public void run() {
-                    session.acceptSession();
-                }
-            }.start();
-
+            session.acceptSession();
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
                 mLogger.error(ExceptionUtil.getFullStackTrace(e));
@@ -312,12 +308,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                         .append(mSessionId).append("' not available!").toString());
             }
             ServerApiUtils.testApiExtensionPermission(session.getServiceId());
-            new Thread() {
-                public void run() {
-                    session.rejectSession(Response.DECLINE);
-                }
-            }.start();
-
+            session.rejectSession(InvitationStatus.INVITATION_REJECTED_DECLINE);
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
                 mLogger.error(ExceptionUtil.getFullStackTrace(e));

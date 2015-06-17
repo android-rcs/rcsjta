@@ -35,6 +35,7 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
+import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
@@ -103,8 +104,8 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
             if (mLogger.isActivated()) {
                 mLogger.info("Initiate a new sharing session as terminating");
             }
-
-            send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+            SipDialogPath dialogPath = getDialogPath();
+            send180Ringing(dialogPath.getInvite(), dialogPath.getLocalTag());
 
             // Check if the MIME type is supported
             if (getContent() == null) {
@@ -113,7 +114,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                 }
 
                 // Send a 415 Unsupported media type response
-                send415Error(getDialogPath().getInvite());
+                send415Error(dialogPath.getInvite());
 
                 // Unsupported media type
                 handleError(new ContentSharingError(ContentSharingError.UNSUPPORTED_MEDIA_TYPE));
@@ -129,11 +130,13 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
 
             InvitationStatus answer = waitInvitationAnswer();
             switch (answer) {
-                case INVITATION_REJECTED:
+                case INVITATION_REJECTED_DECLINE:
+                    /* Intentional fall through */
+                case INVITATION_REJECTED_BUSY_HERE:
                     if (mLogger.isActivated()) {
                         mLogger.debug("Session has been rejected by user");
                     }
-
+                    sendErrorResponse(dialogPath.getInvite(), dialogPath.getLocalTag(), answer);
                     removeSession();
 
                     for (ImsSessionListener listener : listeners) {
@@ -148,7 +151,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                     }
 
                     // Ringing period timeout
-                    send486Busy(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+                    send486Busy(dialogPath.getInvite(), dialogPath.getLocalTag());
 
                     removeSession();
 
@@ -193,15 +196,13 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                     return;
 
                 default:
-                    if (mLogger.isActivated()) {
-                        mLogger.debug("Unknown invitation answer in run; answer=".concat(String
-                                .valueOf(answer)));
-                    }
-                    return;
+                    throw new IllegalArgumentException(
+                            "Unknown invitation answer in run; answer=".concat(String
+                                    .valueOf(answer)));
             }
 
             // Parse the remote SDP part
-            final SipRequest invite = getDialogPath().getInvite();
+            final SipRequest invite = dialogPath.getInvite();
             String remoteSdp = invite.getSdpContent();
             SipUtils.assertContentIsNotNull(remoteSdp, invite);
             SdpParser parser = new SdpParser(remoteSdp.getBytes(UTF8));
@@ -247,7 +248,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
 
             // Build SDP part
             String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
-            String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
+            String ipAddress = dialogPath.getSipStack().getLocalIpAddress();
             String sdp = "v=0" + SipUtils.CRLF + "o=- " + ntpTime + " " + ntpTime + " "
                     + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF + "s=-" + SipUtils.CRLF
                     + "c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF + "t=0 0"
@@ -258,7 +259,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                     + SipUtils.CRLF + "a=recvonly" + SipUtils.CRLF;
 
             // Set the local SDP part in the dialog path
-            getDialogPath().setLocalContent(sdp);
+            dialogPath.setLocalContent(sdp);
 
             // Test if the session should be interrupted
             if (isInterrupted()) {
@@ -272,11 +273,11 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
             if (mLogger.isActivated()) {
                 mLogger.info("Send 200 OK");
             }
-            SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
+            SipResponse resp = SipMessageFactory.create200OkInviteResponse(dialogPath,
                     RichcallService.FEATURE_TAGS_GEOLOC_SHARE, sdp);
 
             // The signalisation is established
-            getDialogPath().sigEstablished();
+            dialogPath.sigEstablished();
 
             // Send response
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
@@ -324,7 +325,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                 }
 
                 // The session is established
-                getDialogPath().sessionEstablished();
+                dialogPath.sessionEstablished();
                 for (ImsSessionListener listener : listeners) {
                     listener.handleSessionStarted(contact);
                 }
@@ -332,8 +333,8 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                 // Start session timer
                 SessionTimerManager sessionTimerManager = getSessionTimerManager();
                 if (sessionTimerManager.isSessionTimerActivated(resp)) {
-                    sessionTimerManager.start(SessionTimerManager.UAS_ROLE, getDialogPath()
-                            .getSessionExpireTime());
+                    sessionTimerManager.start(SessionTimerManager.UAS_ROLE,
+                            dialogPath.getSessionExpireTime());
                 }
             } else {
                 if (mLogger.isActivated()) {

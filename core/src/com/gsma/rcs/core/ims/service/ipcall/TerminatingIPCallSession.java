@@ -32,6 +32,7 @@ import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
+import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -91,7 +92,8 @@ public class TerminatingIPCallSession extends IPCallSession {
                 logger.info("Initiate a new IP call session as terminating");
             }
 
-            send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+            SipDialogPath dialogPath = getDialogPath();
+            send180Ringing(dialogPath.getInvite(), dialogPath.getLocalTag());
 
             Collection<ImsSessionListener> listeners = getListeners();
             ContactId contact = getRemoteContact();
@@ -105,11 +107,13 @@ public class TerminatingIPCallSession extends IPCallSession {
 
             InvitationStatus answer = waitInvitationAnswer();
             switch (answer) {
-                case INVITATION_REJECTED:
+                case INVITATION_REJECTED_DECLINE:
+                    /* Intentional fall through */
+                case INVITATION_REJECTED_BUSY_HERE:
                     if (logger.isActivated()) {
                         logger.debug("Session has been rejected by user");
                     }
-
+                    sendErrorResponse(dialogPath.getInvite(), dialogPath.getLocalTag(), answer);
                     removeSession();
 
                     for (ImsSessionListener listener : listeners) {
@@ -124,7 +128,7 @@ public class TerminatingIPCallSession extends IPCallSession {
                     }
 
                     /* Ringing period timeout */
-                    send603Decline(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+                    send603Decline(dialogPath.getInvite(), dialogPath.getLocalTag());
 
                     removeSession();
 
@@ -156,11 +160,9 @@ public class TerminatingIPCallSession extends IPCallSession {
                     break;
 
                 default:
-                    if (logger.isActivated()) {
-                        logger.debug("Unknown invitation answer in run; answer=".concat(String
-                                .valueOf(answer)));
-                    }
-                    return;
+                    throw new IllegalArgumentException(
+                            "Unknown invitation answer in run; answer=".concat(String
+                                    .valueOf(answer)));
             }
 
             if (getRenderer() == null) {
@@ -188,7 +190,7 @@ public class TerminatingIPCallSession extends IPCallSession {
 
             String sdp = buildSdpAnswer();
 
-            getDialogPath().setLocalContent(sdp);
+            dialogPath.setLocalContent(sdp);
 
             prepareMediaSession();
 
@@ -198,15 +200,15 @@ public class TerminatingIPCallSession extends IPCallSession {
             SipResponse resp = null;
             if ((getPlayer().getVideoCodec() != null) && (getRenderer().getVideoCodec() != null)) {
                 /* Video Call */
-                resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
+                resp = SipMessageFactory.create200OkInviteResponse(dialogPath,
                         IPCallService.FEATURE_TAGS_IP_VIDEO_CALL, sdp);
             } else {
                 /* Audio Call */
-                resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
+                resp = SipMessageFactory.create200OkInviteResponse(dialogPath,
                         IPCallService.FEATURE_TAGS_IP_VOICE_CALL, sdp);
             }
 
-            getDialogPath().sigEstablished();
+            dialogPath.sigEstablished();
 
             /* Send response */
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
@@ -218,15 +220,15 @@ public class TerminatingIPCallSession extends IPCallSession {
                     logger.info("ACK request received");
                 }
 
-                getDialogPath().sessionEstablished();
+                dialogPath.sessionEstablished();
 
                 startMediaTransfer();
 
                 /* Start session timer */
                 SessionTimerManager sessionTimerManager = getSessionTimerManager();
                 if (sessionTimerManager.isSessionTimerActivated(resp)) {
-                    sessionTimerManager.start(SessionTimerManager.UAS_ROLE, getDialogPath()
-                            .getSessionExpireTime());
+                    sessionTimerManager.start(SessionTimerManager.UAS_ROLE,
+                            dialogPath.getSessionExpireTime());
                 }
 
                 for (int i = 0; i < getListeners().size(); i++) {
