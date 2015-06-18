@@ -7,12 +7,9 @@ import com.gsma.services.rcs.RcsServiceListener;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.chat.OneToOneChat;
-import com.gsma.services.rcs.chat.OneToOneChatIntent;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
 
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.test.AndroidTestCase;
 import android.util.Log;
 

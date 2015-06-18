@@ -60,10 +60,35 @@ public class CapabilitySampleTest extends AndroidTestCase {
     }
 
     /**
+     * Gets my capabilities
+     */
+    public void testGetMyCapabilities() {
+        try {
+            Capabilities capa = capabilityApi.getMyCapabilities();
+            if (capa != null) {
+                Log.i(TAG, "Capabilities:");
+                Log.i(TAG, "- chat support: " + capa.isImSessionSupported());
+                Log.i(TAG, "- FT support: " + capa.isFileTransferSupported());
+                Log.i(TAG, "- Video share support: " + capa.isVideoSharingSupported());
+                Log.i(TAG, "- Image share support: " + capa.isImageSharingSupported());
+                Log.i(TAG, "- Geoloc share support: " + capa.isGeolocPushSupported());
+                Log.i(TAG, "- Extensions: " + capa.getSupportedExtensions().size());
+            } else {
+                Log.i(TAG, "Capabilities not found");
+            }
+        } catch (RcsServiceNotAvailableException e) {
+            Log.e(TAG, "RCS service not available");
+        } catch (RcsPersistentStorageException e) {
+            Log.e(TAG, "RCS service not available");
+        } catch (RcsGenericException e) {
+            Log.e(TAG, "Unexpected error", e);
+        }
+    }
+
+    /**
      * Gets capabilities of a remote contact
      */
-    public void testGetCapabilities() {
-        Log.i(TAG, "testGetCapabilities");
+    public void testGetContactCapabilities() {
         try {
             Capabilities capa = capabilityApi.getContactCapabilities(remote);
             if (capa != null) {
@@ -86,8 +111,7 @@ public class CapabilitySampleTest extends AndroidTestCase {
     /**
      * Reads capabilities of a remote contact
      */
-    public void testReadCapabilities() {
-        Log.i(TAG, "testReadCapabilities");
+    public void testReadContactCapabilities() {
         String contactNumber = remote.toString();
         Uri uri = Uri.withAppendedPath(CapabilitiesLog.CONTENT_URI, contactNumber);
         Cursor cursor = mContext.getContentResolver().query(uri, null, null, null, null);
@@ -109,8 +133,7 @@ public class CapabilitySampleTest extends AndroidTestCase {
     /**
      * Requests a refresh of the capabilities for a remote contact
      */
-    public void testRefreshCapabilities() {
-        Log.i(TAG, "testRefreshCapabilities");
+    public void testRefreshContactCapabilities() {
         try {
             capabilityApi.requestContactCapabilities(remote);
         } catch (RcsServiceNotAvailableException e) {
@@ -125,7 +148,7 @@ public class CapabilitySampleTest extends AndroidTestCase {
     /**
      * Receives capabilities updates from remote contacts
      */
-    public void testReceiveCapabilities() {
+    public void testReceiveContactCapabilities() {
         // TODO
     }
 

@@ -61,7 +61,6 @@ public class ContactSampleTest extends AndroidTestCase {
      * Format a contact
      */
     public void testFormatContact() {
-        Log.i(TAG, "testFormatContact");
         try {
             ContactId contact =  ContactUtil.getInstance(mContext).formatContact("06 81 63 90 59");
             Log.i(TAG, "Formatted contact: " + contact.toString());
@@ -75,7 +74,6 @@ public class ContactSampleTest extends AndroidTestCase {
      * Blocks a remote contact
      */
     public void testBlockContact() {
-        Log.i(TAG, "testBlockContact");
         try {
             contactApi.blockContact(remote);
         } catch (RcsServiceNotAvailableException e) {
@@ -91,7 +89,6 @@ public class ContactSampleTest extends AndroidTestCase {
      * Unblocks a remote contact
      */
     public void testUnblockContact() {
-        Log.i(TAG, "testUnblockContact");
         try {
             contactApi.unblockContact(remote);
         } catch (RcsServiceNotAvailableException e) {
@@ -107,7 +104,6 @@ public class ContactSampleTest extends AndroidTestCase {
      * Gets RCS info of a remote contact
      */
     public void testGetRcsContactInfo() {
-        Log.i(TAG, "testGetRcsContactInfo");
         try {
             RcsContact contact = contactApi.getRcsContact(remote);
             if (contact != null) {
@@ -131,7 +127,6 @@ public class ContactSampleTest extends AndroidTestCase {
      * Gets online RCS contacts
      */
     public void testGetRcsContactOnline() {
-        Log.i(TAG, "testGetRcsContactOnline");
         try {
             Set<RcsContact> contacts = contactApi.getRcsContactsOnline();
             Log.i(TAG, "Number of contacts online: " + contacts.size());
@@ -148,7 +143,6 @@ public class ContactSampleTest extends AndroidTestCase {
      * Gets all RCS contacts
      */
     public void testGetRcsContacts() {
-        Log.i(TAG, "testGetRcsContacts");
         try {
             Set<RcsContact> contacts = contactApi.getRcsContacts();
             Log.i(TAG, "Number of RCS contacts: " + contacts.size());
@@ -165,7 +159,6 @@ public class ContactSampleTest extends AndroidTestCase {
      * Gets RCS contacts supporting a given extension
      */
     public void testGetRcsContactExt() {
-        Log.i(TAG, "testGetRcsContactExt");
         try {
             Set<RcsContact> contacts = contactApi.getRcsContactsSupporting("ext.game");
             Log.i(TAG, "Number of contacts supporting the extension 'ext.game': " + contacts.size());
