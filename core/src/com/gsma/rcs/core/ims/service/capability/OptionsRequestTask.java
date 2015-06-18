@@ -35,6 +35,7 @@ import com.gsma.rcs.core.ims.service.ContactInfo;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.gsma.rcs.core.ims.service.SessionAuthenticationAgent;
+import com.gsma.rcs.core.ims.service.capability.OptionsManager.IOptionsRequestTaskListener;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PhoneUtils;
@@ -49,39 +50,23 @@ import javax2.sip.InvalidArgumentException;
  * @author Jean-Marc AUFFRET
  */
 public class OptionsRequestTask implements Runnable {
-    /**
-     * IMS module
-     */
-    private ImsModule mImsModule;
+    private final ImsModule mImsModule;
 
-    /**
-     * Remote contact
-     */
-    private ContactId mContact;
+    private final ContactId mContact;
 
-    /**
-     * Feature tags
-     */
-    private String[] mFeatureTags;
+    private final String[] mFeatureTags;
 
-    /**
-     * Dialog path
-     */
     private SipDialogPath mDialogPath;
 
-    /**
-     * Authentication agent
-     */
-    private SessionAuthenticationAgent mAuthenticationAgent;
+    private final SessionAuthenticationAgent mAuthenticationAgent;
 
-    /**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private final static Logger logger = Logger.getLogger(OptionsRequestTask.class.getName());
 
     private final RcsSettings mRcsSettings;
 
     private final ContactManager mContactManager;
+
+    private final IOptionsRequestTaskListener mCallback;
 
     /**
      * Constructor
@@ -91,15 +76,18 @@ public class OptionsRequestTask implements Runnable {
      * @param featureTags Feature tags
      * @param rcsSettings accessor to RCS settings
      * @param contactManager accessor to contact manager
+     * @param callback Callback to be executed at end of task
      */
     public OptionsRequestTask(ImsModule parent, ContactId contact, String[] featureTags,
-            RcsSettings rcsSettings, ContactManager contactManager) {
+            RcsSettings rcsSettings, ContactManager contactManager,
+            IOptionsRequestTaskListener callback) {
         mImsModule = parent;
         mContact = contact;
         mFeatureTags = featureTags;
         mAuthenticationAgent = new SessionAuthenticationAgent(mImsModule);
         mRcsSettings = rcsSettings;
         mContactManager = contactManager;
+        mCallback = callback;
     }
 
     /**
@@ -139,21 +127,23 @@ public class OptionsRequestTask implements Runnable {
             SipRequest options = SipMessageFactory.createOptions(mDialogPath, mFeatureTags);
 
             // Send OPTIONS request
-            sendOptions(options);
+            sendAndWaitOptions(options);
         } catch (SipException e) {
             logger.error("OPTIONS request has failed! Contact=".concat(mContact.toString()), e);
             handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, e));
+        } finally {
+            mCallback.endOfTask(mContact);
         }
     }
 
     /**
-     * Send OPTIONS message
+     * Sends OPTIONS message and waits for response
      * 
      * @param options SIP OPTIONS
      * @throws SipPayloadException
      * @throws SipNetworkException
      */
-    private void sendOptions(SipRequest options) throws SipPayloadException, SipNetworkException {
+    private void sendAndWaitOptions(SipRequest options) throws SipPayloadException, SipNetworkException {
         if (logger.isActivated()) {
             logger.info("Send OPTIONS");
         }
@@ -215,8 +205,8 @@ public class OptionsRequestTask implements Runnable {
              * There are info on this contact: update the database with its previous info and set
              * the registration state to offline.
              */
-            mContactManager.setContactCapabilities(mContact, info.getCapabilities(), info.getRcsStatus(),
-                    RegistrationState.OFFLINE);
+            mContactManager.setContactCapabilities(mContact, info.getCapabilities(),
+                    info.getRcsStatus(), RegistrationState.OFFLINE);
 
             mImsModule.getCore().getListener()
                     .handleCapabilitiesNotification(mContact, info.getCapabilities());
@@ -236,7 +226,8 @@ public class OptionsRequestTask implements Runnable {
         /* The contact is not RCS */
         mContactManager.setContactCapabilities(mContact, Capabilities.sDefaultCapabilities,
                 RcsStatus.NOT_RCS, RegistrationState.UNKNOWN);
-        mImsModule.getCore().getListener().handleCapabilitiesNotification(mContact, Capabilities.sDefaultCapabilities);
+        mImsModule.getCore().getListener()
+                .handleCapabilitiesNotification(mContact, Capabilities.sDefaultCapabilities);
     }
 
     /**
@@ -309,7 +300,7 @@ public class OptionsRequestTask implements Runnable {
 
             mAuthenticationAgent.setProxyAuthorizationHeader(options);
 
-            sendOptions(options);
+            sendAndWaitOptions(options);
         } catch (InvalidArgumentException e) {
             throw new SipPayloadException("Unable to fetch Authorization header!", e);
         }

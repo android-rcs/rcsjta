@@ -23,7 +23,6 @@
 package com.gsma.rcs.core.ims.service.capability;
 
 import com.gsma.rcs.addressbook.AddressBookEventListener;
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
@@ -78,10 +77,9 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      * @param parent IMS module
      * @param rcsSettings RcsSettings
      * @param contactsManager ContactManager
-     * @throws CoreException
      */
     public CapabilityService(ImsModule parent, RcsSettings rcsSettings,
-            ContactManager contactsManager) throws CoreException {
+            ContactManager contactsManager) {
         super(parent, true);
         mRcsSettings = rcsSettings;
         mContactManager = contactsManager;
@@ -133,10 +131,10 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
             return;
         }
         setServiceStarted(false);
-        mOptionsManager.stop();
         mPollingManager.stop();
         /* Stop listening to address book changes */
         getImsModule().getCore().getAddressBookManager().removeAddressBookListener(this);
+        mOptionsManager.stop();
     }
 
     /**
@@ -170,7 +168,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      */
     public synchronized void requestContactCapabilities(ContactId contact) {
         if (sLogger.isActivated()) {
-            sLogger.debug("Request capabilities to ".concat(contact.toString()));
+            sLogger.debug("Request capabilities for ".concat(contact.toString()));
         }
         mOptionsManager.requestCapabilities(contact);
     }
@@ -181,29 +179,27 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      * @param contacts Set of contact identifiers
      */
     public void requestContactCapabilities(Set<ContactId> contacts) {
-        if ((contacts != null) && (contacts.size() > 0)) {
-            if (sLogger.isActivated()) {
-                sLogger.debug("Request capabilities for " + contacts.size() + " contacts");
-            }
-            mOptionsManager.requestCapabilities(contacts);
+        if (sLogger.isActivated()) {
+            sLogger.debug("Request capabilities for ".concat(Arrays.toString(contacts.toArray())));
         }
+        mOptionsManager.requestCapabilities(contacts);
     }
 
     /**
      * Receive a capability request (options procedure)
      * 
      * @param options Received options message
-     * @throws SipException
+     * @throws SipException thrown if sending the capability response fails
      */
     public void receiveCapabilityRequest(SipRequest options) throws SipException {
         mOptionsManager.receiveCapabilityRequest(options);
     }
 
     /**
-     * Receive a notification (anonymous fecth procedure)
+     * Receive a notification (anonymous fetch procedure)
      * 
      * @param notify Received notify
-     * @throws IOException
+     * @throws IOException thrown if notification parsing fails
      */
     public void receiveNotification(SipRequest notify) throws IOException {
         mAnonymousFetchManager.receiveNotification(notify);

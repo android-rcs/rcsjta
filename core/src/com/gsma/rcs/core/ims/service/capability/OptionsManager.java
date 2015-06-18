@@ -31,13 +31,14 @@ import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
-import java.text.ParseException;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -53,9 +54,6 @@ public class OptionsManager implements DiscoveryManager {
      */
     private final static int MAX_PROCESSING_THREADS = 15;
 
-    /**
-     * IMS module
-     */
     private ImsModule mImsModule;
 
     /**
@@ -67,28 +65,42 @@ public class OptionsManager implements DiscoveryManager {
 
     private final ContactManager mContactManager;
 
-    /**
-     * The logger
-     */
+    private final Set<ContactId> mContactsWithPendingRequest;
+
+    private final IOptionsRequestTaskListener mOptionsRequestTaskListener;
+
     private final static Logger sLogger = Logger.getLogger(OptionsManager.class.getSimpleName());
 
     /**
      * Constructor
      * 
      * @param parent IMS module
-     * @param rcsSettings
-     * @param contactManager
+     * @param rcsSettings RCS settings accessor
+     * @param contactManager Contact manager accessor
      */
     public OptionsManager(ImsModule parent, RcsSettings rcsSettings, ContactManager contactManager) {
         mImsModule = parent;
         mRcsSettings = rcsSettings;
         mContactManager = contactManager;
+        mContactsWithPendingRequest = new HashSet<ContactId>();
+        mOptionsRequestTaskListener = new IOptionsRequestTaskListener() {
+
+            @Override
+            public void endOfTask(ContactId contact) {
+                synchronized (mContactsWithPendingRequest) {
+                    mContactsWithPendingRequest.remove(contact);
+                }
+            }
+        };
     }
 
     /**
      * Start the manager
      */
     public void start() {
+        synchronized (mContactsWithPendingRequest) {
+            mContactsWithPendingRequest.clear();
+        }
         mThreadPool = Executors.newFixedThreadPool(MAX_PROCESSING_THREADS);
     }
 
@@ -106,22 +118,52 @@ public class OptionsManager implements DiscoveryManager {
     }
 
     /**
+     * Interface listener for OptionRequestTask
+     *
+     */
+    public interface IOptionsRequestTaskListener {
+        /**
+         * Callback end of task
+         * 
+         * @param contact ID
+         */
+        public void endOfTask(ContactId contact);
+    }
+
+    /**
      * Request capabilities in background
      * 
      * @param contact
+     * @throws ContactManagerException
      */
     private void requestCapabilitiesInBackground(ContactId contact) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Request capabilities in background for " + contact);
+        if (mThreadPool.isShutdown()) {
+            if (sLogger.isActivated()) {
+                sLogger.warn("Request capabilities in background for " + contact
+                        + " rejected: manager is stopped!");
+            }
+            return;
         }
+        synchronized (mContactsWithPendingRequest) {
+            if (mContactsWithPendingRequest.contains(contact)) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Discard contact " + contact + " : option request is pending");
+                }
+                return;
+            }
+            if (sLogger.isActivated()) {
+                sLogger.debug("Request capabilities in background for ".concat(contact.toString()));
+            }
 
-        mContactManager.updateCapabilitiesTimeLastRequest(contact);
+            boolean richcall = mImsModule.getRichcallService().isCallConnectedWith(contact);
+            OptionsRequestTask task = new OptionsRequestTask(mImsModule, contact,
+                    CapabilityUtils.getSupportedFeatureTags(richcall, mRcsSettings), mRcsSettings,
+                    mContactManager, mOptionsRequestTaskListener);
+            mContactsWithPendingRequest.add(contact);
+            mThreadPool.submit(task);
 
-        boolean richcall = mImsModule.getRichcallService().isCallConnectedWith(contact);
-        OptionsRequestTask task = new OptionsRequestTask(mImsModule, contact,
-                CapabilityUtils.getSupportedFeatureTags(richcall, mRcsSettings), mRcsSettings,
-                mContactManager);
-        mThreadPool.submit(task);
+            mContactManager.updateCapabilitiesTimeLastRequest(contact);
+        }
     }
 
     /**
@@ -177,10 +219,6 @@ public class OptionsManager implements DiscoveryManager {
      * @param contacts Contact set
      */
     public void requestCapabilities(Set<ContactId> contacts) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Request capabilities for " + contacts.size() + " contacts");
-        }
-
         for (ContactId contact : contacts) {
             requestCapabilities(contact);
         }
@@ -190,7 +228,7 @@ public class OptionsManager implements DiscoveryManager {
      * Receive a capability request (options procedure)
      * 
      * @param options Received options message
-     * @throws SipException
+     * @throws SipException thrown if capability request fails
      */
     public void receiveCapabilityRequest(SipRequest options) throws SipException {
         String sipId = SipUtils.getAssertedIdentity(options);

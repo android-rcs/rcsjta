@@ -22,7 +22,6 @@
 
 package com.gsma.rcs.core.ims.service;
 
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
@@ -77,17 +76,14 @@ public abstract class ImsService {
     /**
      * Activation flag
      */
-    private boolean activated = true;
+    private boolean mActivated = true;
 
     /**
      * Service state
      */
-    private boolean started = false;
+    private boolean mStarted = false;
 
-    /**
-     * IMS module
-     */
-    private ImsModule imsModule;
+    private ImsModule mImsModule;
 
     /**
      * ImsServiceSessionCache with session dialog path's CallId as key
@@ -99,10 +95,7 @@ public abstract class ImsService {
      */
     private Map<String, ImsServiceSession> mImsServiceSessionWithoutDialogPathCache = new HashMap<String, ImsServiceSession>();
 
-    /**
-     * The logger
-     */
-    private static final Logger logger = Logger.getLogger(ImsService.class.getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(ImsService.class.getSimpleName());
 
     protected final static class SharingDirection {
 
@@ -116,11 +109,10 @@ public abstract class ImsService {
      * 
      * @param parent IMS module
      * @param activated Activation flag
-     * @throws CoreException
      */
-    public ImsService(ImsModule parent, boolean activated) throws CoreException {
-        this.imsModule = parent;
-        this.activated = activated;
+    public ImsService(ImsModule parent, boolean activated) {
+        mImsModule = parent;
+        mActivated = activated;
     }
 
     /**
@@ -129,7 +121,7 @@ public abstract class ImsService {
      * @return Boolean
      */
     public boolean isActivated() {
-        return activated;
+        return mActivated;
     }
 
     /**
@@ -138,7 +130,7 @@ public abstract class ImsService {
      * @param activated Activation flag
      */
     public void setActivated(boolean activated) {
-        this.activated = activated;
+        mActivated = activated;
     }
 
     /**
@@ -147,7 +139,7 @@ public abstract class ImsService {
      * @return IMS module
      */
     public ImsModule getImsModule() {
-        return imsModule;
+        return mImsModule;
     }
 
     /*
@@ -171,7 +163,7 @@ public abstract class ImsService {
     /**
      * Gets IMS session from callId
      * 
-     * @param callId
+     * @param callId call ID
      * @return ImsServiceSession
      */
     public ImsServiceSession getImsServiceSession(String callId) {
@@ -208,7 +200,7 @@ public abstract class ImsService {
      * @return Boolean
      */
     public boolean isServiceStarted() {
-        return started;
+        return mStarted;
     }
 
     /**
@@ -217,7 +209,7 @@ public abstract class ImsService {
      * @param state State
      */
     public void setServiceStarted(boolean state) {
-        started = state;
+        mStarted = state;
     }
 
     /**
@@ -239,7 +231,7 @@ public abstract class ImsService {
      * This function is used when all session needs to terminated in both invitation pending and
      * started state.
      * 
-     * @param reason
+     * @param reason termination reason
      */
     public void terminateAllSessions(TerminationReason reason) {
         synchronized (getImsServiceSessionOperationLock()) {
@@ -260,8 +252,8 @@ public abstract class ImsService {
      */
     public void sendErrorResponse(SipRequest invite, int error) {
         try {
-            if (logger.isActivated()) {
-                logger.info("Send error " + error);
+            if (sLogger.isActivated()) {
+                sLogger.info("Send error " + error);
             }
             SipResponse resp = SipMessageFactory.createResponse(invite,
                     IdGenerator.getIdentifier(), error);
@@ -269,8 +261,8 @@ public abstract class ImsService {
             // Send response
             getImsModule().getSipManager().sendSipResponse(resp);
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't send error " + error, e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't send error " + error, e);
             }
         }
     }

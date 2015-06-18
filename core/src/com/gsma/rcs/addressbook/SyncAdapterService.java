@@ -22,27 +22,17 @@
 
 package com.gsma.rcs.addressbook;
 
-import com.gsma.rcs.core.Core;
-import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.contact.ContactManager;
-import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.service.api.ServerApiServiceNotRegisteredException;
-import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.contact.ContactId;
 
 import android.accounts.Account;
 import android.app.Service;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SyncResult;
 import android.os.Bundle;
 import android.os.IBinder;
-
-import java.util.Set;
 
 /**
  * Service to handle account sync. This is invoked with an intent with action
@@ -59,19 +49,11 @@ public class SyncAdapterService extends Service {
 
     private static final Logger logger = Logger.getLogger(SyncAdapterService.class.getSimpleName());
 
-    private ContactManager mContactManager;
-
     /**
      * Called when the activity is first created.
      */
     @Override
     public void onCreate() {
-        Context ctx = getApplicationContext();
-        ContentResolver contentResolver = ctx.getContentResolver();
-        LocalContentResolver localContentResolver = new LocalContentResolver(ctx);
-        RcsSettings rcsSettings = RcsSettings.createInstance(localContentResolver);
-        mContactManager = ContactManager.createInstance(ctx, contentResolver, localContentResolver,
-                rcsSettings);
         mSyncAdapter = new RcsContactsSyncAdapter(this);
     }
 
@@ -105,23 +87,8 @@ public class SyncAdapterService extends Service {
         public void onPerformSync(Account account, Bundle extras, String authority,
                 ContentProviderClient provider, SyncResult syncResult) {
             if (logger.isActivated()) {
-                logger.debug("Performing a refresh on contact capabilities");
+                logger.debug("On performing sync has been called, but nothing to be done");
             }
-
-            /* Test IMS connection */
-            try {
-                ServerApiUtils.testIms();
-            } catch (ServerApiServiceNotRegisteredException e) {
-                if (logger.isActivated()) {
-                    logger.debug("IMS connection failed");
-                }
-                syncResult.stats.numIoExceptions++;
-                return;
-            }
-
-            // Update all contacts capabilities
-            Set<ContactId> contacts = mContactManager.getAllContactsFromRcsContactProvider();
-            Core.getInstance().getCapabilityService().requestContactCapabilities(contacts);
         }
     }
 }
