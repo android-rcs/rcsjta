@@ -20,18 +20,6 @@ import android.util.Log;
 public class CapabilitySampleTest extends AndroidTestCase {
     private static final String TAG = "RCSAPI";
 
-    private RcsServiceListener apiServiceListener = new RcsServiceListener() {
-        @Override
-        public void onServiceDisconnected(ReasonCode error) {
-            Log.i(TAG, "Disconnected from the RCS service");
-        }
-
-        @Override
-        public void onServiceConnected() {
-            Log.i(TAG, "Connected to the RCS service");
-        }   
-    };
-    
     private ContactId remote; 
     
     private CapabilityService capabilityApi;
@@ -46,8 +34,8 @@ public class CapabilitySampleTest extends AndroidTestCase {
             Log.e(TAG, "Permission denied");
         }
         assertNotNull(remote);
-
-        // Instanciate the API
+        
+        // Instanciate the API        
         capabilityApi = new CapabilityService(mContext, apiServiceListener);
         assertNotNull(capabilityApi);
         
@@ -57,7 +45,22 @@ public class CapabilitySampleTest extends AndroidTestCase {
    
     protected void tearDown() throws Exception {
         super.tearDown();
+        
+        // Disconnect to the API
+        capabilityApi.disconnect();
     }
+
+    private RcsServiceListener apiServiceListener = new RcsServiceListener() {
+        @Override
+        public void onServiceDisconnected(ReasonCode error) {
+            Log.i(TAG, "Disconnected from the RCS service");
+        }
+
+        @Override
+        public void onServiceConnected() {
+            Log.i(TAG, "Connected to the RCS service");
+        }   
+    };
 
     /**
      * Gets my capabilities
@@ -109,6 +112,21 @@ public class CapabilitySampleTest extends AndroidTestCase {
     }
 
     /**
+     * Requests a refresh of the capabilities for a remote contact
+     */
+    public void testRequestContactCapabilities() {
+        try {
+            capabilityApi.requestContactCapabilities(remote);
+        } catch (RcsServiceNotAvailableException e) {
+            Log.e(TAG, "RCS service not available");
+        } catch (RcsServiceNotRegisteredException e) {
+            Log.e(TAG, "RCS service not registered");
+        } catch (RcsGenericException e) {
+            Log.e(TAG, "Unexpected error", e);
+        }
+    }
+
+    /**
      * Reads capabilities of a remote contact
      */
     public void testReadContactCapabilities() {
@@ -128,21 +146,6 @@ public class CapabilitySampleTest extends AndroidTestCase {
             Log.i(TAG, "Capabilities not found");
         }
         cursor.close();
-    }
-
-    /**
-     * Requests a refresh of the capabilities for a remote contact
-     */
-    public void testRefreshContactCapabilities() {
-        try {
-            capabilityApi.requestContactCapabilities(remote);
-        } catch (RcsServiceNotAvailableException e) {
-            Log.e(TAG, "RCS service not available");
-        } catch (RcsServiceNotRegisteredException e) {
-            Log.e(TAG, "RCS service not registered");
-        } catch (RcsGenericException e) {
-            Log.e(TAG, "Unexpected error", e);
-        }
     }
 
     /**
