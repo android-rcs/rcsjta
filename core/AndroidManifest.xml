@@ -66,7 +66,9 @@
 
         <!-- RCS settings application -->
 
-        <activity android:name="com.gsma.rcs.provisioning.https.HttpsProvisioningAlertDialog" />
+        <activity
+            android:name="com.gsma.rcs.provisioning.https.HttpsProvisioningAlertDialog"
+            android:theme="@style/Theme.UserDialog" />
 
         <!-- RCS account: authenticator service for user's account information -->
 
@@ -251,8 +253,7 @@
         <activity android:name=".provisioning.local.ServiceProvisioning" />
         <activity android:name=".provisioning.local.LoggerProvisioning" />
 
-        <service
-            android:name="com.gsma.rcs.service.api.OneToOneDeliveryExpirationService">
+        <service android:name="com.gsma.rcs.service.api.OneToOneDeliveryExpirationService" >
             <intent-filter>
                 <action android:name="com.gsma.rcs.action.ONE_TO_ONE_CHAT_MESSAGE_DELIVERY_TIMEOUT" />
                 <action android:name="com.gsma.rcs.action.ONE_TO_ONE_FILE_TRANSFER_DELIVERY_TIMEOUT" />
