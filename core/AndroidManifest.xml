@@ -216,7 +216,9 @@
         </service>
 
         <!-- Provisioning - Terms and conditions activity -->
-        <activity android:name="com.gsma.rcs.provisioning.TermsAndConditionsRequest" >
+        <activity
+            android:name="com.gsma.rcs.provisioning.TermsAndConditionsRequest"
+            android:theme="@style/Theme.UserDialog" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
