@@ -208,7 +208,7 @@ public class TerminatingIPCallSession extends IPCallSession {
                         IPCallService.FEATURE_TAGS_IP_VOICE_CALL, sdp);
             }
 
-            dialogPath.sigEstablished();
+            dialogPath.setSigEstablished();
 
             /* Send response */
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
@@ -220,7 +220,7 @@ public class TerminatingIPCallSession extends IPCallSession {
                     logger.info("ACK request received");
                 }
 
-                dialogPath.sessionEstablished();
+                dialogPath.setSessionEstablished();
 
                 startMediaTransfer();
 

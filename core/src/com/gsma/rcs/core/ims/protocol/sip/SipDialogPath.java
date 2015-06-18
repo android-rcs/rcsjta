@@ -427,7 +427,7 @@ public class SipDialogPath {
     /**
      * The session has been cancelled
      */
-    public synchronized void sessionCancelled() {
+    public synchronized void setSessionCancelled() {
         mSessionCancelled = true;
     }
 
@@ -443,7 +443,7 @@ public class SipDialogPath {
     /**
      * Session is established
      */
-    public synchronized void sessionEstablished() {
+    public synchronized void setSessionEstablished() {
         mSessionEstablished = true;
     }
 
@@ -459,7 +459,7 @@ public class SipDialogPath {
     /**
      * Session is terminated
      */
-    public synchronized void sessionTerminated() {
+    public synchronized void setSessionTerminated() {
         mSessionTerminated = true;
         mSessionTerminationReasonCode = -1;
         mSessionTerminationReasonPhrase = null;
@@ -471,7 +471,7 @@ public class SipDialogPath {
      * @param code Reason code
      * @param phrase Reason phrase
      */
-    public synchronized void sessionTerminated(int code, String phrase) {
+    public synchronized void setSessionTerminated(int code, String phrase) {
         mSessionTerminated = true;
         mSessionTerminationReasonCode = code;
         mSessionTerminationReasonPhrase = phrase;
@@ -507,7 +507,7 @@ public class SipDialogPath {
     /**
      * Signalisation is established with success
      */
-    public synchronized void sigEstablished() {
+    public synchronized void setSigEstablished() {
         mSigEstablished = true;
     }
 

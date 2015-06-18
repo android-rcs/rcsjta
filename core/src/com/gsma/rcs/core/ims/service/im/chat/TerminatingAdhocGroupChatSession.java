@@ -348,7 +348,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
             SipResponse resp = SipMessageFactory.create200OkInviteResponse(dialogPath,
                     getFeatureTags(), getAcceptContactTags(), sdp);
 
-            dialogPath.sigEstablished();
+            dialogPath.setSigEstablished();
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
                     .sendSipMessage(resp);
 
@@ -382,7 +382,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
                 if (logActivated) {
                     mLogger.info("ACK request received");
                 }
-                dialogPath.sessionEstablished();
+                dialogPath.setSessionEstablished();
 
                 /* Create the MSRP client session */
                 if (localSetup.equals("active")) {

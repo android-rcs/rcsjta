@@ -227,4 +227,34 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
         return FileTransferData.UNKNOWN_EXPIRATION;
     }
 
+    @Override
+    public void receiveBye(SipRequest bye) {
+        if (logger.isActivated()) {
+            logger.info("Receive a BYE message from the remote");
+        }
+
+        getSessionTimerManager().stop();
+
+        closeMediaSession();
+
+        getDialogPath().setSessionTerminated();
+
+        removeSession();
+
+        ContactId contact = getRemoteContact();
+        /*
+         * SIP BYE can be received from the sender if either the sender wishes to abort the session
+         * or when the transfer of file is completed. In both cases, we need to close the session
+         * and perform the clean up activities of the session. We will broadcast the state as
+         * ABORTED and ABORTED_BY_REMOTE only if the file was not received successfully.
+         */
+        if (!isFileTransfered()) {
+            for (ImsSessionListener listener : getListeners()) {
+                listener.handleSessionAborted(contact, TerminationReason.TERMINATION_BY_REMOTE);
+            }
+        }
+
+        getImsService().getImsModule().getCapabilityService()
+                .requestContactCapabilities(contact);
+    }
 }

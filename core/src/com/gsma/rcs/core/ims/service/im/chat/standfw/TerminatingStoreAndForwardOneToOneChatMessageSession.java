@@ -301,7 +301,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
             }
             SipResponse resp = SipMessageFactory.create200OkInviteResponse(dialogPath,
                     getFeatureTags(), sdp);
-            dialogPath.sigEstablished();
+            dialogPath.setSigEstablished();
 
             /* Send response */
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
@@ -337,7 +337,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
                 if (logActivated) {
                     mLogger.info("ACK request received");
                 }
-                dialogPath.sessionEstablished();
+                dialogPath.setSessionEstablished();
 
                 /* Create the MSRP client session */
                 if (localSetup.equals("active")) {

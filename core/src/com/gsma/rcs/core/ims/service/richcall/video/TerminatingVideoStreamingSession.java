@@ -250,7 +250,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                     RichcallService.FEATURE_TAGS_VIDEO_SHARE, sdp);
 
             // The signalisation is established
-            dialogPath.sigEstablished();
+            dialogPath.setSigEstablished();
 
             // Send response
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
@@ -264,7 +264,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                 }
 
                 // The session is established
-                dialogPath.sessionEstablished();
+                dialogPath.setSessionEstablished();
 
                 // Start session timer
                 SessionTimerManager sessionTimerManager = getSessionTimerManager();

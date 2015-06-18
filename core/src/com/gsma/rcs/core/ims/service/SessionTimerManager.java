@@ -237,7 +237,7 @@ public class SessionTimerManager extends PeriodicRefresher {
                             mLogger.debug("Session timer refresh with success");
                         }
 
-                        mSession.getDialogPath().sigEstablished();
+                        mSession.getDialogPath().setSigEstablished();
                         mLastSessionRefresh = System.currentTimeMillis();
 
                         if (mLogger.isActivated()) {
@@ -246,7 +246,7 @@ public class SessionTimerManager extends PeriodicRefresher {
                         mSession.getImsService().getImsModule().getSipManager()
                                 .sendSipAck(mSession.getDialogPath());
 
-                        mSession.getDialogPath().sessionEstablished();
+                        mSession.getDialogPath().setSessionEstablished();
 
                         /* Increment internal stack CSeq (NIST stack issue?) */
                         Dialog dlg = mSession.getDialogPath().getStackDialog();
@@ -363,7 +363,7 @@ public class SessionTimerManager extends PeriodicRefresher {
                     mSession.getDialogPath(), reInvite);
 
             // The signalisation is established
-            mSession.getDialogPath().sigEstablished();
+            mSession.getDialogPath().setSigEstablished();
 
             // Send response
             SipTransactionContext ctx = mSession.getImsService().getImsModule().getSipManager()
@@ -376,7 +376,7 @@ public class SessionTimerManager extends PeriodicRefresher {
                     mLogger.info("ACK request received");
                 }
                 // The session is established
-                mSession.getDialogPath().sessionEstablished();
+                mSession.getDialogPath().setSessionEstablished();
             } else {
                 if (mLogger.isActivated()) {
                     mLogger.debug("No ACK received for INVITE");

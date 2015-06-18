@@ -341,7 +341,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                     InstantMessagingService.FT_FEATURE_TAGS, sdp);
 
             /* The signalisation is established */
-            dialogPath.sigEstablished();
+            dialogPath.setSigEstablished();
 
             /* Send response */
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
@@ -388,7 +388,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                 }
 
                 /* The session is established */
-                dialogPath.sessionEstablished();
+                dialogPath.setSessionEstablished();
 
                 for (ImsSessionListener listener : listeners) {
                     listener.handleSessionStarted(contact);

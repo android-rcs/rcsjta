@@ -604,9 +604,9 @@ public abstract class ImsServiceSession extends Thread {
 
         // Update dialog path
         if (TerminationReason.TERMINATION_BY_USER == reason) {
-            mDialogPath.sessionTerminated(200, "Call completed");
+            mDialogPath.setSessionTerminated(200, "Call completed");
         } else {
-            mDialogPath.sessionTerminated();
+            mDialogPath.setSessionTerminated();
         }
 
         // Unblock semaphore (used for terminating side only)
@@ -651,7 +651,7 @@ public abstract class ImsServiceSession extends Thread {
         closeMediaSession();
 
         // Update the dialog path status
-        getDialogPath().sessionTerminated();
+        getDialogPath().setSessionTerminated();
         mSessionTerminatedByRemote = true;
 
         // Remove the current session
@@ -688,7 +688,7 @@ public abstract class ImsServiceSession extends Thread {
         closeMediaSession();
 
         // Update dialog path
-        getDialogPath().sessionCancelled();
+        getDialogPath().setSessionCancelled();
 
         // Send a 487 Request terminated
         try {
@@ -1077,7 +1077,7 @@ public abstract class ImsServiceSession extends Thread {
             if (sLogger.isActivated()) {
                 sLogger.info("200 OK response received");
             }
-            getDialogPath().sigEstablished();
+            getDialogPath().setSigEstablished();
 
             getDialogPath().setRemoteTag(resp.getToTag());
 
@@ -1104,7 +1104,7 @@ public abstract class ImsServiceSession extends Thread {
             }
             getImsService().getImsModule().getSipManager().sendSipAck(getDialogPath());
 
-            getDialogPath().sessionEstablished();
+            getDialogPath().setSessionEstablished();
 
             openMediaSession();
 

@@ -290,7 +290,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                     RichcallService.FEATURE_TAGS_IMAGE_SHARE, sdp);
 
             // The signalisation is established
-            dialogPath.sigEstablished();
+            dialogPath.setSigEstablished();
 
             // Send response
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
@@ -343,7 +343,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                 }
 
                 // The session is established
-                dialogPath.sessionEstablished();
+                dialogPath.setSessionEstablished();
 
                 for (ImsSessionListener listener : listeners) {
                     listener.handleSessionStarted(contact);

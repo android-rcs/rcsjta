@@ -179,7 +179,7 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
             SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
                     InstantMessagingService.CHAT_FEATURE_TAGS, sdp);
 
-            getDialogPath().sigEstablished();
+            getDialogPath().setSigEstablished();
 
             /* Send response */
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
@@ -215,7 +215,7 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
                 if (logActivated) {
                     mLogger.info("ACK request received");
                 }
-                getDialogPath().sessionEstablished();
+                getDialogPath().setSessionEstablished();
 
                 /* Create the MSRP client session */
                 if (localSetup.equals("active")) {

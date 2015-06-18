@@ -194,7 +194,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
             SipResponse resp = create200OKResponse();
 
             // The signalisation is established
-            dialogPath.sigEstablished();
+            dialogPath.setSigEstablished();
 
             // Send response
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
@@ -208,7 +208,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                 }
 
                 // The session is established
-                dialogPath.sessionEstablished();
+                dialogPath.setSessionEstablished();
 
                 /* Start Media transfer */
                 startMediaTransfer();
