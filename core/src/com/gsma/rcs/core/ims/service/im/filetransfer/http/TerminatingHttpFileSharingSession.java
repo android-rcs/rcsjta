@@ -27,12 +27,13 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
+import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
+import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -316,5 +317,54 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
     @Override
     public boolean isInitiatedByRemote() {
         return true;
+    }
+
+    @Override
+    public void terminateSession(TerminationReason reason) {
+        if (mLogger.isActivated()) {
+            mLogger.debug("terminateSession reason=".concat(reason.toString()));
+        }
+        closeHttpSession(reason);
+        /*
+         * If reason is TERMINATION_BY_SYSTEM or TERMINATION_BY_CONNECTION_LOST and session already
+         * started, then it's a pause
+         */
+        boolean sessionAccepted = isSessionAccepted();
+        ContactId contact = getRemoteContact();
+        switch (reason) {
+            case TERMINATION_BY_SYSTEM:
+                /* Intentional fall through */
+            case TERMINATION_BY_CONNECTION_LOST:
+                if (isFileTransferPaused()) {
+                    return;
+                }
+                /*
+                 * File transfer invitation is valid until file transfer validity expires and hence
+                 * the state of file transfer is not altered if the invitation was not yet answered.
+                 */
+                if (!sessionAccepted) {
+                    return;
+                }
+                if (mLogger.isActivated()) {
+                    mLogger.debug("Pause the session (session terminated, but can be resumed)");
+                }
+                for (ImsSessionListener listener : getListeners()) {
+                    ((FileSharingSessionListener) listener)
+                            .handleFileTransferPausedBySystem(contact);
+                }
+                return;
+            default:
+                break;
+        }
+
+        if (sessionAccepted) {
+            for (ImsSessionListener listener : getListeners()) {
+                listener.handleSessionAborted(contact, reason);
+            }
+            return;
+        }
+        for (ImsSessionListener listener : getListeners()) {
+            listener.handleSessionRejected(contact, reason);
+        }
     }
 }

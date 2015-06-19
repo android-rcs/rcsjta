@@ -160,52 +160,12 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
         return null;
     }
 
-    private void closeHttpSession(TerminationReason reason) {
+    protected void closeHttpSession(TerminationReason reason) {
         interruptSession();
 
         closeSession(reason);
 
         removeSession();
-    }
-
-    @Override
-    public void terminateSession(TerminationReason reason) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("terminateSession reason=".concat(reason.toString()));
-        }
-
-        /*
-         * If reason is TERMINATION_BY_SYSTEM or TERMINATION_BY_CONNECTION_LOST and session already
-         * started, then it's a pause
-         */
-        switch (reason) {
-            case TERMINATION_BY_SYSTEM:
-                /* Intentional fall through */
-            case TERMINATION_BY_CONNECTION_LOST:
-                if (getDialogPath() != null && getDialogPath().isSigEstablished()) {
-                    closeHttpSession(reason);
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("Pause the session (session terminated, but can be resumed)");
-                    }
-                    if (isSessionAccepted()) {
-                        ContactId contact = getRemoteContact();
-                        for (ImsSessionListener listener : getListeners()) {
-                            ((FileSharingSessionListener) listener)
-                                    .handleFileTransferPausedBySystem(contact);
-                        }
-                    }
-                    return;
-                }
-                // TODO: Re-look into the possibility of calling closeHttpSession anyhow, may be
-                // there is no need for below check before closing the session.
-                if (isInitiatedByRemote() || isFileTransferPaused()) {
-                    closeHttpSession(reason);
-                    return;
-                }
-            default:
-                break;
-        }
-        super.terminateSession(reason);
     }
 
     /**

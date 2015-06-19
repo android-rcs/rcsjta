@@ -30,13 +30,17 @@ import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
+import com.gsma.rcs.core.ims.service.ImsSessionListener;
+import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
+import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
+import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession.State;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.provider.messaging.FileTransferData;
@@ -340,5 +344,46 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
      */
     public void setFileExpiration(long timestamp) {
         mFileExpiration = timestamp;
+    }
+
+    @Override
+    public void terminateSession(TerminationReason reason) {
+        if (mLogger.isActivated()) {
+            mLogger.debug("terminateSession reason=".concat(reason.toString()));
+        }
+        closeHttpSession(reason);
+        /*
+         * If reason is TERMINATION_BY_SYSTEM or TERMINATION_BY_CONNECTION_LOST and session already
+         * started, then it's a pause
+         */
+        ContactId contact = getRemoteContact();
+        switch (reason) {
+            case TERMINATION_BY_SYSTEM:
+                /* Intentional fall through */
+            case TERMINATION_BY_CONNECTION_LOST:
+                if (isFileTransferPaused()) {
+                    return;
+                }
+                /*
+                 * TId id needed for resuming the file transfer. Hence pausing the file transfer
+                 * only if TId is present.
+                 */
+                if (State.ESTABLISHED == getSessionState() && mUploadManager.getTId() != null) {
+                    if (mLogger.isActivated()) {
+                        mLogger.debug("Pause the session (session terminated, but can be resumed)");
+                    }
+                    for (ImsSessionListener listener : getListeners()) {
+                        ((FileSharingSessionListener) listener)
+                                .handleFileTransferPausedBySystem(contact);
+                    }
+                    return;
+                }
+                break;
+            default:
+                break;
+        }
+        for (ImsSessionListener listener : getListeners()) {
+            listener.handleSessionAborted(contact, reason);
+        }
     }
 }
