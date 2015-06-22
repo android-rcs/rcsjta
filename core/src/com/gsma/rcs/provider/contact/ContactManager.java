@@ -127,6 +127,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 /**
  * Contains utility methods for interfacing with the Android SDK ContactProvider and the RCS contact
@@ -281,19 +282,12 @@ public final class ContactManager {
      */
     private static final int PRESENCE_STATUS_NOT_SET = 1; // StatusUpdates.INVISIBLE;
 
-    /**
-     * Account name for SIM contacts
+    /*
+     * For account persisted on SIM card, type may be "vnd.sec.contact.sim" (Samsung) or
+     * "com.android.contacts.sim" (normal case)
      */
-    private static final String SIM_ACCOUNT_NAME = "com.android.contacts.sim";
-
-    private final static String NOT_SIM_ACCOUNT_SELECTION = new StringBuilder("(")
-            .append(RawContacts.ACCOUNT_TYPE).append(" IS NULL OR ")
-            .append(RawContacts.ACCOUNT_TYPE).append("<>'").append(SIM_ACCOUNT_NAME)
-            .append("') AND ").append(RawContacts._ID).append("=?").toString();
-
     private final static String SIM_ACCOUNT_SELECTION = new StringBuilder(RawContacts.ACCOUNT_TYPE)
-            .append("='").append(SIM_ACCOUNT_NAME).append("' AND ").append(RawContacts._ID)
-            .append("=?").toString();
+            .append(" LIKE '%.sim' AND ").append(RawContacts._ID).append("=?").toString();
 
     /**
      * Contact for "Me"
@@ -2211,7 +2205,14 @@ public final class ContactManager {
             if (cursor.moveToFirst()) {
                 int contactColumnIdx = cursor.getColumnIndexOrThrow(Data.RAW_CONTACT_ID);
                 do {
-                    rawContactsIds.add(cursor.getLong(contactColumnIdx));
+                    long rawContactId = cursor.getLong(contactColumnIdx);
+                    /*
+                     * We exclude the SIM only contacts, as they cannot be aggregated to a RCS raw
+                     * contact (only if OS version if gingerbread or less).
+                     */
+                    if (!isSimAccount(rawContactId)) {
+                        rawContactsIds.add(rawContactId);
+                    }
                 } while (cursor.moveToNext());
             }
         } finally {
@@ -2238,7 +2239,14 @@ public final class ContactManager {
             }
             int contactColumnIdx = cursor.getColumnIndexOrThrow(Data.RAW_CONTACT_ID);
             do {
-                rawContactsIds.add(cursor.getLong(contactColumnIdx));
+                long rawContactId = cursor.getLong(contactColumnIdx);
+                /*
+                 * We exclude the SIM only contacts, as they cannot be aggregated to a RCS raw
+                 * contact (only if OS version if gingerbread or less).
+                 */
+                if (!isSimAccount(rawContactId)) {
+                    rawContactsIds.add(cursor.getLong(contactColumnIdx));
+                }
             } while (cursor.moveToNext());
             return rawContactsIds;
 
@@ -2297,35 +2305,6 @@ public final class ContactManager {
                 cursor.close();
             }
         }
-    }
-
-    /**
-     * Utility method to check if a raw contact is only associated to a SIM account
-     * 
-     * @param contact the contact Identifier
-     * @return true if the raw contact is only associated to a SIM account, else false
-     */
-    public boolean isOnlySimAssociated(final ContactId contact) {
-        Set<Long> rawContactIds = getRawContactIdsFromPhoneNumber(contact);
-        for (Long rawContactId : rawContactIds) {
-            String[] selectionArgs = new String[] {
-                Long.toString(rawContactId)
-            };
-            Cursor cursor = null;
-            try {
-                cursor = mContentResolver.query(RawContacts.CONTENT_URI, PROJ_RAW_CONTACT_ID,
-                        NOT_SIM_ACCOUNT_SELECTION, selectionArgs, null);
-                CursorUtil.assertCursorIsNotNull(cursor, RawContacts.CONTENT_URI);
-                if (cursor.moveToFirst()) {
-                    return false;
-                }
-            } finally {
-                if (cursor != null) {
-                    cursor.close();
-                }
-            }
-        }
-        return true;
     }
 
     /**
@@ -3045,5 +3024,37 @@ public final class ContactManager {
                 cursor.close();
             }
         }
+    }
+
+    /**
+     * Checks if a set of raw contact IDs is only associated to a SIM account
+     * 
+     * @param rawContactIds the set of raw contact Identifiers
+     * @return true if the raw contact identifiers are only associated to a SIM account, else false
+     */
+    private boolean isOnlySimAssociated(Set<Long> rawContactIds) {
+        for (Long rawContactId : rawContactIds) {
+            if (isSimAccount(rawContactId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets the set of contacts only SIM associated
+     * 
+     * @param contacts the map of contacts with their raw contact IDs
+     * @return the set of contacts only SIM associated
+     */
+    public Set<ContactId> getContactsOnlySimAssociated(Map<ContactId, Set<Long>> contacts) {
+        Set<ContactId> result = new HashSet<ContactId>();
+        for (Entry<ContactId, Set<Long>> contactEntry : contacts.entrySet()) {
+            Set<Long> nativeRawContactIds = contactEntry.getValue();
+            if (isOnlySimAssociated(nativeRawContactIds)) {
+                result.add(contactEntry.getKey());
+            }
+        }
+        return result;
     }
 }

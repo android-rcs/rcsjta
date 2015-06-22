@@ -277,6 +277,11 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
         Set<ContactId> contactsWithNoRcsAggregation = getContactsNotAssociatedWithRcsRawContact(
                 nativeContacts, rcsContacts);
 
+        Set<ContactId> contactsOnlySimAssociated = mContactManager.getContactsOnlySimAssociated(nativeContacts);
+        
+        /* Remove contacts which are only SIM associated since they cannot be aggregated */
+        contactsWithNoRcsAggregation.removeAll(contactsOnlySimAssociated);
+        
         for (ContactId contact : contactsWithNoRcsAggregation) {
             ContactInfo contactInfo = mContactManager.getContactInfo(contact);
             if (!contactInfo.isRcsContact()) {
