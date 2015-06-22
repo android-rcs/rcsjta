@@ -24,11 +24,11 @@ package com.gsma.rcs.core.ims.protocol.msrp;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.utils.logger.Logger;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Chunks sender
@@ -163,7 +163,11 @@ public class ChunkSender extends Thread {
      * @throws IOException
      */
     private synchronized void writeData(byte chunk[]) throws IOException {
-        mStream.write(chunk);
-        mStream.flush();
+        try {
+            mStream.write(chunk);
+            mStream.flush();
+        } catch (IOException e) {
+            throw new IOException("Failed to write data!", e);
+        }
     }
 }
