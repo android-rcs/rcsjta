@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +15,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.access;
-
-import android.content.Context;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 
 import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.security.cert.KeyStoreManager;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.utils.logger.Logger;
+
+import android.content.Context;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+
+import java.net.ConnectException;
+import java.security.cert.CertificateException;
 
 /**
  * Wifi access network
@@ -64,14 +71,15 @@ public class WifiNetworkAccess extends NetworkAccess {
      * Connect to the network access
      * 
      * @param ipAddress Local IP address
+     * @throws CertificateException
      */
-    public void connect(String ipAddress) {
-        if (logger.isActivated()) {
-            logger.info("Network access connected (" + ipAddress + ")");
-        }
-        this.ipAddress = ipAddress;
+    public void connect(String ipAddress) throws CertificateException {
+            if (logger.isActivated()) {
+                logger.info("Network access connected (" + ipAddress + ")");
+            }
+            this.ipAddress = ipAddress;
 
-        // Changed by Deutsche Telekom
+            // Changed by Deutsche Telekom
         KeyStoreManager.updateClientCertificate(ipAddress);
     }
 

@@ -43,6 +43,8 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsServiceException;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.HandlerThread;
 
 /**
  * Core (singleton pattern)
@@ -50,6 +52,9 @@ import android.content.Context;
  * @author JM. Auffret
  */
 public class Core {
+
+    private static final String BACKGROUND_THREAD_NAME = Core.class.getSimpleName();
+
     /**
      * Singleton instance
      */
@@ -81,6 +86,11 @@ public class Core {
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
     private final RcsSettings mRcsSettings;
+
+    /**
+     * Handler to process messages & runnable associated with background thread.
+     */
+    private final Handler mBackgroundHandler;
 
     /**
      * Boolean to check is the Core is stopping
@@ -174,6 +184,11 @@ public class Core {
         // Create the IMS module
         mImsModule = new ImsModule(this, context, mRcsSettings, contactsManager, messagingLog);
 
+        final HandlerThread backgroundThread = new HandlerThread(BACKGROUND_THREAD_NAME);
+        backgroundThread.start();
+
+        mBackgroundHandler = new Handler(backgroundThread.getLooper());
+
         if (logActivated) {
             logger.info("Terminal core is created with success");
         }
@@ -195,6 +210,13 @@ public class Core {
      */
     public ImsModule getImsModule() {
         return mImsModule;
+    }
+
+    /**
+     * Schedule a background task on Handler for execution
+     */
+    public void scheduleForBackgroundExecution(Runnable task) {
+        mBackgroundHandler.post(task);
     }
 
     /**

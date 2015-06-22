@@ -1043,7 +1043,7 @@ public class RcsCoreService extends Service implements CoreListener {
     @Override
     public void tryToInviteQueuedGroupChatParticipantInvitations(String chatId,
             InstantMessagingService imService) {
-        mImOperationExecutor.execute(new GroupChatInviteQueuedParticipants(chatId, mChatApi,
+        mImOperationExecutor.execute(new GroupChatInviteQueuedParticipantsTask(chatId, mChatApi,
                 imService));
     }
 

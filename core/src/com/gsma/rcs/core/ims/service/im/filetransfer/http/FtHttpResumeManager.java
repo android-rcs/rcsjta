@@ -134,13 +134,7 @@ public class FtHttpResumeManager implements Runnable {
                         mImsService, downloadContent, downloadInfo, mRcsSettings, mMessagingLog,
                         mContactManager);
                 resumeDownload.addListener(getFileSharingSessionListener());
-                // Start the download HTTP FT session object
-                new Thread() {
-                    public void run() {
-                        resumeDownload.startSession();
-                    }
-                }.start();
-                // Notify the UI and update rich messaging
+                resumeDownload.startSession();
                 mImsService
                         .getImsModule()
                         .getCore()
@@ -164,15 +158,7 @@ public class FtHttpResumeManager implements Runnable {
                             mImsService, uploadContent, uploadInfo, mRcsSettings, mMessagingLog,
                             mContactManager);
                     resumeUpload.addListener(getFileSharingSessionListener());
-
-                    // Start Resume Upload session
-                    new Thread() {
-                        public void run() {
-                            resumeUpload.startSession();
-                        }
-                    }.start();
-
-                    // Notify the UI and update rich messaging
+                    resumeUpload.startSession();
                     mImsService.getImsModule().getCore().getListener()
                             .handleOutgoingFileTransferResuming(resumeUpload, false);
                 }

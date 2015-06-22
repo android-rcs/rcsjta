@@ -18,6 +18,8 @@
 
 package com.gsma.rcs.core.access;
 
+import java.security.cert.CertificateException;
+
 /**
  * Abstract network access
  * 
@@ -68,8 +70,9 @@ public abstract class NetworkAccess {
      * Connect to the network access
      * 
      * @param ipAddress Local IP address
+     * @throws CertificateException
      */
-    public abstract void connect(String ipAddress);
+    public abstract void connect(String ipAddress) throws CertificateException;
 
     /**
      * Disconnect from the network access

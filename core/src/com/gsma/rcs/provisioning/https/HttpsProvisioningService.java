@@ -105,92 +105,113 @@ public class HttpsProvisioningService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        boolean logActivated = sLogger.isActivated();
-        if (logActivated) {
-            sLogger.debug("Start HTTPS provisioning");
-        }
-
-        boolean first = false;
-        boolean user = false;
-        if (intent != null) {
-            first = intent.getBooleanExtra(FIRST_KEY, false);
-            user = intent.getBooleanExtra(USER_KEY, false);
-        }
-        String version = mRcsSettings.getProvisioningVersion();
-        /*
-         * It makes no sense to start service if version is 0 (unconfigured). If version = 0, then
-         * (re)set first to true.
-         */
         try {
-            int ver = Integer.parseInt(version);
-            if (ver == 0) {
-                first = true;
+            // @FIXME: Below code block needs a complete refactor, However at this
+            // moment due to other prior tasks the refactoring task has been kept in
+            // backlog.
+            boolean logActivated = sLogger.isActivated();
+            if (logActivated) {
+                sLogger.debug("Start HTTPS provisioning");
             }
-        } catch (NumberFormatException e) {
-            // Nothing to do
-        }
-        registerReceiver(retryReceiver, new IntentFilter(ACTION_RETRY));
 
-        mHttpsProvisioningMng = new HttpsProvisioningManager(mContext, mLocalContentResolver,
-                mRetryIntent, first, user, mRcsSettings, mMessagingLog, mContactManager);
-        if (logActivated) {
-            sLogger.debug(new StringBuilder("Provisioning (boot=").append(first).append(") (user=")
-                    .append(user).append(") (version=").append(version).append(")").toString());
-        }
-
-        boolean requestConfig = false;
-        if (first) {
-            requestConfig = true;
-        } else if (ProvisioningInfo.Version.RESETED_NOQUERY.equals(version)) {
-            // Nothing to do
-        } else if (ProvisioningInfo.Version.DISABLED_NOQUERY.equals(version)) {
-            if (user == true) {
-                requestConfig = true;
+            boolean first = false;
+            boolean user = false;
+            if (intent != null) {
+                first = intent.getBooleanExtra(FIRST_KEY, false);
+                user = intent.getBooleanExtra(USER_KEY, false);
             }
-        } else if (ProvisioningInfo.Version.DISABLED_DORMANT.equals(version) && user == true) {
-            requestConfig = true;
-        } else { // version > 0
-            long expiration = LauncherUtils.getProvisioningExpirationDate(this);
-            if (expiration <= 0) {
+            String version = mRcsSettings.getProvisioningVersion();
+            /*
+             * It makes no sense to start service if version is 0 (unconfigured). If version = 0,
+             * then (re)set first to true.
+             */
+            try {
+                int ver = Integer.parseInt(version);
+                if (ver == 0) {
+                    first = true;
+                }
+            } catch (NumberFormatException e) {
+                // Nothing to do
+            }
+            registerReceiver(retryReceiver, new IntentFilter(ACTION_RETRY));
+
+            mHttpsProvisioningMng = new HttpsProvisioningManager(mContext, mLocalContentResolver,
+                    mRetryIntent, first, user, mRcsSettings, mMessagingLog, mContactManager);
+            if (logActivated) {
+                sLogger.debug(new StringBuilder("Provisioning (boot=").append(first)
+                        .append(") (user=").append(user).append(") (version=").append(version)
+                        .append(")").toString());
+            }
+
+            boolean requestConfig = false;
+            if (first) {
                 requestConfig = true;
-            } else {
-                long now = System.currentTimeMillis();
-                if (expiration <= now) {
-                    if (logActivated) {
-                        sLogger.debug("Configuration validity expired at ".concat(String
-                                .valueOf(expiration)));
-                    }
+            } else if (ProvisioningInfo.Version.RESETED_NOQUERY.equals(version)) {
+                // Nothing to do
+            } else if (ProvisioningInfo.Version.DISABLED_NOQUERY.equals(version)) {
+                if (user == true) {
+                    requestConfig = true;
+                }
+            } else if (ProvisioningInfo.Version.DISABLED_DORMANT.equals(version) && user == true) {
+                requestConfig = true;
+            } else { // version > 0
+                long expiration = LauncherUtils.getProvisioningExpirationDate(this);
+                if (expiration <= 0) {
                     requestConfig = true;
                 } else {
-                    long delay = expiration - now;
-                    long validity = LauncherUtils.getProvisioningValidity(this);
-                    if (validity > 0 && delay > validity) {
-                        delay = validity;
+                    long now = System.currentTimeMillis();
+                    if (expiration <= now) {
+                        if (logActivated) {
+                            sLogger.debug("Configuration validity expired at ".concat(String
+                                    .valueOf(expiration)));
+                        }
+                        requestConfig = true;
+                    } else {
+                        long delay = expiration - now;
+                        long validity = LauncherUtils.getProvisioningValidity(this);
+                        if (validity > 0 && delay > validity) {
+                            delay = validity;
+                        }
+                        if (logActivated) {
+                            sLogger.debug(new StringBuilder("Configuration will expire in ")
+                                    .append(delay).append(" millisecs at ").append(expiration)
+                                    .toString());
+                        }
+                        startRetryAlarm(this, mRetryIntent, delay);
                     }
-                    if (logActivated) {
-                        sLogger.debug(new StringBuilder("Configuration will expire in ")
-                                .append(delay).append(" millisecs at ").append(expiration)
-                                .toString());
-                    }
-                    startRetryAlarm(this, mRetryIntent, delay);
                 }
             }
-        }
 
-        if (requestConfig) {
-            if (logActivated)
-                sLogger.debug("Request HTTP configuration update");
-            // Send default connection event
-            if (!mHttpsProvisioningMng.connectionEvent(ConnectivityManager.CONNECTIVITY_ACTION)) {
-                // If the UpdateConfig has NOT been done:
-                mHttpsProvisioningMng.registerNetworkStateListener();
+            if (requestConfig) {
+                if (logActivated)
+                    sLogger.debug("Request HTTP configuration update");
+                // Send default connection event
+                if (!mHttpsProvisioningMng.connectionEvent(ConnectivityManager.CONNECTIVITY_ACTION)) {
+                    // If the UpdateConfig has NOT been done:
+                    mHttpsProvisioningMng.registerNetworkStateListener();
+                }
             }
+            /*
+             * We want this service to continue running until it is explicitly stopped, so return
+             * sticky.
+             */
+            return START_STICKY;
+
+        } catch (RcsAccountException e) {
+            /**
+             * This is a non revocable use-case as the RCS account itself was not created, So we log
+             * this as error and stop the service itself.
+             */
+            sLogger.error(
+                    "Failed to start the service for intent action : ".concat(intent.getAction()),
+                    e);
+            stopSelf();
+            /**
+             * Since we are not able to create RCS account itself , the intent here is to just kill
+             * the service and do nothing else.
+             */
+            return -1;
         }
-        /*
-         * We want this service to continue running until it is explicitly stopped, so return
-         * sticky.
-         */
-        return START_STICKY;
     }
 
     /**

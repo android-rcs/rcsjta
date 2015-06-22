@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.network;
 
+import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.ImsNetworkInterface.DnsResolvedFields;
@@ -45,6 +46,9 @@ import android.net.NetworkInfo;
 import android.os.BatteryManager;
 import android.telephony.TelephonyManager;
 
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.security.cert.CertificateException;
 import java.util.Random;
 
 /**
@@ -54,6 +58,12 @@ import java.util.Random;
  * @author Deutsche Telekom
  */
 public class ImsConnectionManager implements Runnable {
+
+    /**
+     * Core
+     */
+    private final Core mCore;
+
     /**
      * IMS module
      */
@@ -119,12 +129,13 @@ public class ImsConnectionManager implements Runnable {
     /**
      * Constructor
      * 
-     * @param imsModule IMS module
+     * @param core Core
      * @param rcsSettings RcsSettings instance
      * @throws CoreException
      */
-    public ImsConnectionManager(ImsModule imsModule, RcsSettings rcsSettings) throws CoreException {
-        mImsModule = imsModule;
+    public ImsConnectionManager(Core core, RcsSettings rcsSettings) throws CoreException {
+        mCore = core;
+        mImsModule = mCore.getImsModule();
         mRcsSettings = rcsSettings;
 
         // Get network access parameters
@@ -139,8 +150,8 @@ public class ImsConnectionManager implements Runnable {
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
 
         // Instantiates the IMS network interfaces
-        mNetworkInterfaces[0] = new MobileNetworkInterface(imsModule, rcsSettings);
-        mNetworkInterfaces[1] = new WifiNetworkInterface(imsModule, rcsSettings);
+        mNetworkInterfaces[0] = new MobileNetworkInterface(mImsModule, rcsSettings);
+        mNetworkInterfaces[1] = new WifiNetworkInterface(mImsModule, rcsSettings);
 
         // Set the mobile network interface by default
         mCurrentNetworkInterface = getMobileNetworkInterface();
@@ -151,10 +162,10 @@ public class ImsConnectionManager implements Runnable {
         // Register network state listener
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        appContext.registerReceiver(networkStateListener, intentFilter);
+        appContext.registerReceiver(mNetworkStateListener, intentFilter);
 
         // Battery management
-        appContext.registerReceiver(batteryLevelListener, new IntentFilter(
+        appContext.registerReceiver(mBatteryLevelListener, new IntentFilter(
                 Intent.ACTION_BATTERY_CHANGED));
     }
 
@@ -235,14 +246,14 @@ public class ImsConnectionManager implements Runnable {
 
         // Unregister battery listener
         try {
-            AndroidFactory.getApplicationContext().unregisterReceiver(batteryLevelListener);
+            AndroidFactory.getApplicationContext().unregisterReceiver(mBatteryLevelListener);
         } catch (IllegalArgumentException e) {
             // Nothing to do
         }
 
         // Unregister network state listener
         try {
-            AndroidFactory.getApplicationContext().unregisterReceiver(networkStateListener);
+            AndroidFactory.getApplicationContext().unregisterReceiver(mNetworkStateListener);
         } catch (IllegalArgumentException e) {
             // Nothing to do
         }
@@ -261,15 +272,34 @@ public class ImsConnectionManager implements Runnable {
     /**
      * Network state listener
      */
-    private BroadcastReceiver networkStateListener = new BroadcastReceiver() {
+    private BroadcastReceiver mNetworkStateListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, final Intent intent) {
-            Thread t = new Thread() {
+            mCore.scheduleForBackgroundExecution(new Runnable() {
+                @Override
                 public void run() {
-                    connectionEvent(intent);
+
+                    try {
+                        connectionEvent(intent);
+                    } catch (SipPayloadException e) {
+                        sLogger.error("Unable to handle connection event for intent action : "
+                                .concat(intent.getAction()), e);
+                    } catch (CertificateException e) {
+                        sLogger.error("Unable to handle connection event for intent action : "
+                                .concat(intent.getAction()), e);
+                    } catch (RuntimeException e) {
+                        /*
+                         * Normally we are not allowed to catch runtime exceptions as these are
+                         * genuine bugs which should be handled/fixed within the code. However the
+                         * cases when we are executing operations on a thread unhandling such
+                         * exceptions will eventually lead to exit the system and thus can bring the
+                         * whole system down, which is not intended.
+                         */
+                        sLogger.error("Unable to handle connection event for intent action : "
+                                .concat(intent.getAction()), e);
+                    }
                 }
-            };
-            t.start();
+            });
         }
     };
 
@@ -277,120 +307,111 @@ public class ImsConnectionManager implements Runnable {
      * Connection event
      * 
      * @param intent Intent
+     * @throws SipPayloadException
+     * @throws CertificateException
      */
-    private synchronized void connectionEvent(Intent intent) {
-        if (mDisconnectedByBattery) {
-            return;
-        }
-
-        if (!intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-            return;
-        }
-
-        boolean connectivity = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY,
-                false);
-        String reason = intent.getStringExtra(ConnectivityManager.EXTRA_REASON);
-        boolean failover = intent.getBooleanExtra(ConnectivityManager.EXTRA_IS_FAILOVER, false);
-        if (sLogger.isActivated()) {
-            sLogger.debug("Connectivity event change: failover=" + failover + ", connectivity="
-                    + !connectivity + ", reason=" + reason);
-        }
-
-        // Check received network info
-        NetworkInfo networkInfo = mCnxManager.getActiveNetworkInfo();
-        if (networkInfo == null) {
-            // Disconnect from IMS network interface
-            if (sLogger.isActivated()) {
-                sLogger.debug("Disconnect from IMS: no network (e.g. air plane mode)");
+    // @FIXME: This method is doing so many things at this moment and has become too complex thus
+    // needs a complete refactor, However at this moment due to other prior tasks the refactoring
+    // task has been kept in backlog.
+    private void connectionEvent(Intent intent) throws SipPayloadException, CertificateException {
+        try {
+            if (mDisconnectedByBattery) {
+                return;
             }
-            disconnectFromIms();
-            return;
-        }
 
-        // Check if SIM account has changed (i.e. hot SIM swap)
-        if (networkInfo.getType() == ConnectivityManager.TYPE_MOBILE) {
-            String lastUserAccount = LauncherUtils.getLastUserAccount(AndroidFactory
-                    .getApplicationContext());
-            String currentUserAccount = LauncherUtils.getCurrentUserAccount(AndroidFactory
-                    .getApplicationContext());
-            if (lastUserAccount != null) {
-                if ((currentUserAccount == null)
-                        || !currentUserAccount.equalsIgnoreCase(lastUserAccount)) {
-                    mImsModule.getCoreListener().handleSimHasChanged();
-                    return;
+            if (!intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+                return;
+            }
+
+            boolean connectivity = intent.getBooleanExtra(
+                    ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
+            String reason = intent.getStringExtra(ConnectivityManager.EXTRA_REASON);
+            boolean failover = intent.getBooleanExtra(ConnectivityManager.EXTRA_IS_FAILOVER, false);
+            if (sLogger.isActivated()) {
+                sLogger.debug("Connectivity event change: failover=" + failover + ", connectivity="
+                        + !connectivity + ", reason=" + reason);
+            }
+            NetworkInfo networkInfo = mCnxManager.getActiveNetworkInfo();
+            if (networkInfo == null) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Disconnect from IMS: no network (e.g. air plane mode)");
                 }
+                disconnectFromIms();
+                return;
             }
-        }
-
-        // Get the current local IP address
-        String localIpAddr = null;
-
-        // Check if the network access type has changed
-        if (networkInfo.getType() != mCurrentNetworkInterface.getType()) {
-            // Network interface changed
-            if (sLogger.isActivated()) {
-                sLogger.info("Data connection state: NETWORK ACCESS CHANGED");
-            }
-
-            // Disconnect from current IMS network interface
-            if (sLogger.isActivated()) {
-                sLogger.debug("Disconnect from IMS: network access has changed");
-            }
-            disconnectFromIms();
-
-            // Change current network interface
             if (networkInfo.getType() == ConnectivityManager.TYPE_MOBILE) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Change the network interface to mobile");
-                }
-                mCurrentNetworkInterface = getMobileNetworkInterface();
-            } else if (networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Change the network interface to Wi-Fi");
-                }
-                mCurrentNetworkInterface = getWifiNetworkInterface();
-            }
-
-            // Load the user profile for the new network interface
-            loadUserProfile();
-
-            // update DNS entry
-            try {
-                mDnsResolvedFields = mCurrentNetworkInterface.getDnsResolvedFields();
-            } catch (Exception e) {
-                if (sLogger.isActivated()) {
-                    sLogger.error(
-                            "Resolving remote IP address to figure out initial local IP address failed!",
-                            e);
+                String lastUserAccount = LauncherUtils.getLastUserAccount(AndroidFactory
+                        .getApplicationContext());
+                String currentUserAccount = LauncherUtils.getCurrentUserAccount(AndroidFactory
+                        .getApplicationContext());
+                if (lastUserAccount != null) {
+                    if ((currentUserAccount == null)
+                            || !currentUserAccount.equalsIgnoreCase(lastUserAccount)) {
+                        mImsModule.getCoreListener().handleSimHasChanged();
+                        return;
+                    }
                 }
             }
+            String localIpAddr = null;
+            if (networkInfo.getType() != mCurrentNetworkInterface.getType()) {
+                if (sLogger.isActivated()) {
+                    sLogger.info("Data connection state: NETWORK ACCESS CHANGED");
+                }
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Disconnect from IMS: network access has changed");
+                }
+                disconnectFromIms();
 
-            // get latest local IP address
-            localIpAddr = NetworkFactory.getFactory().getLocalIpAddress(mDnsResolvedFields,
-                    networkInfo.getType());
+                if (networkInfo.getType() == ConnectivityManager.TYPE_MOBILE) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Change the network interface to mobile");
+                    }
+                    mCurrentNetworkInterface = getMobileNetworkInterface();
+                } else if (networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Change the network interface to Wi-Fi");
+                    }
+                    mCurrentNetworkInterface = getWifiNetworkInterface();
+                }
 
-        } else {
-            // Check if the IP address has changed
-            try {
-                if (mDnsResolvedFields == null) {
+                loadUserProfile();
+
+                try {
                     mDnsResolvedFields = mCurrentNetworkInterface.getDnsResolvedFields();
+                } catch (UnknownHostException e) {
+                    /*
+                     * Even if we are not able to resolve host name , we should still continue to
+                     * get local IP as this is a very obvious case, Specially for networks
+                     * supporting IPV4 protocol.
+                     */
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(e.getMessage());
+                    }
                 }
-            } catch (Exception e) {
-                if (sLogger.isActivated()) {
-                    sLogger.error(
-                            "Resolving remote IP address to figure out initial local IP address failed!",
-                            e);
+                localIpAddr = NetworkFactory.getFactory().getLocalIpAddress(mDnsResolvedFields,
+                        networkInfo.getType());
+            } else {
+                /* Check if the IP address has changed */
+                try {
+                    if (mDnsResolvedFields == null) {
+                        mDnsResolvedFields = mCurrentNetworkInterface.getDnsResolvedFields();
+                    }
+                } catch (UnknownHostException e) {
+                    /*
+                     * Even if we are not able to resolve host name , we should still continue to
+                     * get local IP as this is a very obvious case, Specially for networks
+                     * supporting IPV4 protocol.
+                     */
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(e.getMessage());
+                    }
                 }
-            }
-            localIpAddr = NetworkFactory.getFactory().getLocalIpAddress(mDnsResolvedFields,
-                    networkInfo.getType());
-
-            if (localIpAddr != null) {
+                localIpAddr = NetworkFactory.getFactory().getLocalIpAddress(mDnsResolvedFields,
+                        networkInfo.getType());
                 String lastIpAddr = mCurrentNetworkInterface.getNetworkAccess().getIpAddress();
                 if (!localIpAddr.equals(lastIpAddr)) {
                     // Changed by Deutsche Telekom
                     if (lastIpAddr != null) {
-                        // Disconnect from current IMS network interface
                         if (sLogger.isActivated()) {
                             sLogger.debug("Disconnect from IMS: IP address has changed");
                         }
@@ -408,67 +429,56 @@ public class ImsConnectionManager implements Runnable {
                     return;
                 }
             }
-        }
-
-        // Check if there is an IP connectivity
-        if (networkInfo.isConnected() && (localIpAddr != null)) {
-            String remoteAddress;
-            if (mDnsResolvedFields != null) {
-                remoteAddress = mDnsResolvedFields.mIpAddress;
-            } else {
-                remoteAddress = new String("unresolved");
-            }
-
-            if (sLogger.isActivated()) {
-                sLogger.info("Data connection state: CONNECTED to " + networkInfo.getTypeName()
-                        + " with local IP " + localIpAddr + " valid for " + remoteAddress);
-            }
-
-            // Test network access type
-            if (!NetworkAccessType.ANY.equals(mNetwork)
-                    && (mNetwork.toInt() != networkInfo.getType())) {
-                if (sLogger.isActivated()) {
-                    sLogger.warn("Network access " + networkInfo.getTypeName()
-                            + " is not authorized");
+            if (networkInfo.isConnected()) {
+                String remoteAddress;
+                if (mDnsResolvedFields != null) {
+                    remoteAddress = mDnsResolvedFields.mIpAddress;
+                } else {
+                    remoteAddress = new String("unresolved");
                 }
-                return;
-            }
 
-            // Test the operator id
-            TelephonyManager tm = (TelephonyManager) AndroidFactory.getApplicationContext()
-                    .getSystemService(Context.TELEPHONY_SERVICE);
-            String currentOpe = tm.getSimOperatorName();
-            if ((mOperator.length() > 0) && !currentOpe.equalsIgnoreCase(mOperator)) {
                 if (sLogger.isActivated()) {
-                    sLogger.warn("Operator not authorized");
+                    sLogger.info("Data connection state: CONNECTED to " + networkInfo.getTypeName()
+                            + " with local IP " + localIpAddr + " valid for " + remoteAddress);
                 }
-                return;
-            }
 
-            // Test the configuration
-            if (!mCurrentNetworkInterface.isInterfaceConfigured()) {
+                if (!NetworkAccessType.ANY.equals(mNetwork)
+                        && (mNetwork.toInt() != networkInfo.getType())) {
+                    if (sLogger.isActivated()) {
+                        sLogger.warn("Network access " + networkInfo.getTypeName()
+                                + " is not authorized");
+                    }
+                    return;
+                }
+
+                TelephonyManager tm = (TelephonyManager) AndroidFactory.getApplicationContext()
+                        .getSystemService(Context.TELEPHONY_SERVICE);
+                String currentOpe = tm.getSimOperatorName();
+                if ((mOperator.length() > 0) && !currentOpe.equalsIgnoreCase(mOperator)) {
+                    if (sLogger.isActivated()) {
+                        sLogger.warn("Operator not authorized");
+                    }
+                    return;
+                }
+
+                if (!mCurrentNetworkInterface.isInterfaceConfigured()) {
+                    if (sLogger.isActivated()) {
+                        sLogger.warn("IMS network interface not well configured");
+                    }
+                    return;
+                }
+
                 if (sLogger.isActivated()) {
-                    sLogger.warn("IMS network interface not well configured");
+                    sLogger.debug("Connect to IMS");
                 }
-                return;
+                connectToIms(localIpAddr);
             }
-
-            // Connect to IMS network interface
+        } catch (SocketException e) {
             if (sLogger.isActivated()) {
-                sLogger.debug("Connect to IMS");
-            }
-            connectToIms(localIpAddr);
-        } else {
-            if (sLogger.isActivated()) {
-                sLogger.info("Data connection state: DISCONNECTED from "
-                        + networkInfo.getTypeName());
-            }
-
-            // Disconnect from IMS network interface
-            if (sLogger.isActivated()) {
-                sLogger.debug("Disconnect from IMS: IP connection lost");
+                sLogger.error("Disconnect from IMS: IP connection lost", e);
             }
             disconnectFromIms();
+
         }
     }
 
@@ -476,8 +486,9 @@ public class ImsConnectionManager implements Runnable {
      * Connect to IMS network interface
      * 
      * @param ipAddr IP address
+     * @throws CertificateException
      */
-    private void connectToIms(String ipAddr) {
+    private void connectToIms(String ipAddr) throws CertificateException {
         // Connected to the network access
         mCurrentNetworkInterface.getNetworkAccess().connect(ipAddr);
 
@@ -694,36 +705,59 @@ public class ImsConnectionManager implements Runnable {
     /**
      * Battery level listener
      */
-    private BroadcastReceiver batteryLevelListener = new BroadcastReceiver() {
+    private BroadcastReceiver mBatteryLevelListener = new BroadcastReceiver() {
         @Override
-        public void onReceive(Context context, Intent intent) {
-            MinimumBatteryLevel batteryLimit = mRcsSettings.getMinBatteryLevel();
-            if (MinimumBatteryLevel.NEVER_STOP == batteryLimit) {
-                mDisconnectedByBattery = false;
-                return;
+        public void onReceive(Context context, final Intent intent) {
+            mCore.scheduleForBackgroundExecution(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        MinimumBatteryLevel batteryLimit = mRcsSettings.getMinBatteryLevel();
+                        if (MinimumBatteryLevel.NEVER_STOP == batteryLimit) {
+                            mDisconnectedByBattery = false;
+                            return;
 
-            }
-            int batteryLevel = intent.getIntExtra("level", 0);
-            int batteryPlugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 1);
-            if (sLogger.isActivated()) {
-                sLogger.info(new StringBuilder("Battery level: ").append(batteryLevel)
-                        .append("% plugged: ").append(batteryPlugged).toString());
-            }
-            if (batteryLevel <= batteryLimit.toInt() && batteryPlugged == 0) {
-                if (!mDisconnectedByBattery) {
-                    mDisconnectedByBattery = true;
+                        }
+                        int batteryLevel = intent.getIntExtra("level", 0);
+                        int batteryPlugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 1);
+                        if (sLogger.isActivated()) {
+                            sLogger.info(new StringBuilder("Battery level: ").append(batteryLevel)
+                                    .append("% plugged: ").append(batteryPlugged).toString());
+                        }
+                        if (batteryLevel <= batteryLimit.toInt() && batteryPlugged == 0) {
+                            if (!mDisconnectedByBattery) {
+                                mDisconnectedByBattery = true;
 
-                    // Disconnect
-                    disconnectFromIms();
+                                // Disconnect
+                                disconnectFromIms();
+                            }
+                        } else {
+                            if (mDisconnectedByBattery) {
+                                mDisconnectedByBattery = false;
+
+                                // Reconnect with a connection event
+                                connectionEvent(new Intent(ConnectivityManager.CONNECTIVITY_ACTION));
+                            }
+                        }
+                    } catch (SipPayloadException e) {
+                        sLogger.error("Unable to handle connection event for intent action : "
+                                .concat(intent.getAction()), e);
+                    } catch (CertificateException e) {
+                        sLogger.error("Unable to handle connection event for intent action : "
+                                .concat(intent.getAction()), e);
+                    } catch (RuntimeException e) {
+                        /*
+                         * Normally we are not allowed to catch runtime exceptions as these are
+                         * genuine bugs which should be handled/fixed within the code. However the
+                         * cases when we are executing operations on a thread unhandling such
+                         * exceptions will eventually lead to exit the system and thus can bring the
+                         * whole system down, which is not intended.
+                         */
+                        sLogger.error("Unable to handle connection event for intent action : "
+                                .concat(intent.getAction()), e);
+                    }
                 }
-            } else {
-                if (mDisconnectedByBattery) {
-                    mDisconnectedByBattery = false;
-
-                    // Reconnect with a connection event
-                    connectionEvent(new Intent(ConnectivityManager.CONNECTIVITY_ACTION));
-                }
-            }
+            });
         }
     };
 

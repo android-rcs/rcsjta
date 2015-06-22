@@ -200,12 +200,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
                 throw new ServerApiGenericException(
                         "Cannot cancel session with ID= ".concat(mUploadId));
             }
-            new Thread() {
-                public void run() {
-                    session.interrupt();
-                }
-            }.start();
-
+            session.interrupt();
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
                 mLogger.error(ExceptionUtil.getFullStackTrace(e));

@@ -510,22 +510,13 @@ public abstract class ImsServiceSession extends Thread {
         if (sLogger.isActivated()) {
             sLogger.debug("Interrupt the session");
         }
+        synchronized (mWaitUserAnswer) {
+            mWaitUserAnswer.notifyAll();
+        }
 
-        try {
-            // Unblock semaphore
-            synchronized (mWaitUserAnswer) {
-                mWaitUserAnswer.notifyAll();
-            }
-
-            if (!isSessionInterrupted()) {
-                // Interrupt thread
-                mSessionInterrupted = true;
-                interrupt();
-            }
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Can't interrupt the session correctly", e);
-            }
+        if (!isSessionInterrupted()) {
+            mSessionInterrupted = true;
+            interrupt();
         }
         if (sLogger.isActivated()) {
             sLogger.debug("Session has been interrupted");

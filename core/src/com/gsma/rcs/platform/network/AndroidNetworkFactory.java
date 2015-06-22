@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +15,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.platform.network;
-
-import android.net.ConnectivityManager;
-
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.util.Enumeration;
 
 import com.gsma.rcs.core.ims.network.ImsNetworkInterface.DnsResolvedFields;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.IpAddressUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
+import android.net.ConnectivityManager;
+
 import org.apache.http.conn.util.InetAddressUtils;
+
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
 
 /**
  * Android network factory
@@ -65,42 +70,30 @@ public class AndroidNetworkFactory extends NetworkFactory {
      * @return Address
      */
     // Changed by Deutsche Telekom
-    public String getLocalIpAddress(DnsResolvedFields dnsEntry, int type) {
-        String ipAddress = null;
-        try {
-            // What kind of remote address (P-CSCF) are we trying to reach?
-            boolean isIpv4 = dnsEntry != null ? InetAddressUtils.isIPv4Address(dnsEntry.mIpAddress)
-                    : true;
-
-            // check all available interfaces
-            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); (en != null)
-                    && en.hasMoreElements();) {
-                NetworkInterface netIntf = (NetworkInterface) en.nextElement();
-                for (Enumeration<InetAddress> addr = netIntf.getInetAddresses(); addr
-                        .hasMoreElements();) {
-                    InetAddress inetAddress = addr.nextElement();
-                    ipAddress = IpAddressUtils.extractHostAddress(inetAddress.getHostAddress());
-                    // if IP address version doesn't match to remote address
-                    // version then skip
-                    if (!inetAddress.isLoopbackAddress() && !inetAddress.isLinkLocalAddress()
-                            && (InetAddressUtils.isIPv4Address(ipAddress) == isIpv4)) {
-                        String intfName = netIntf.getDisplayName().toLowerCase();
-                        // some devices do list several interfaces though only
-                        // one is active
-                        if (((type == ConnectivityManager.TYPE_WIFI) && intfName.startsWith("wlan"))
-                                || ((type == ConnectivityManager.TYPE_MOBILE) && !intfName
-                                        .startsWith("wlan"))) {
-                            return ipAddress;
-                        }
+    public String getLocalIpAddress(DnsResolvedFields dnsEntry, int type) throws SocketException {
+        /* What kind of remote address (P-CSCF) are we trying to reach? */
+        boolean isIpv4 = dnsEntry != null ? InetAddressUtils.isIPv4Address(dnsEntry.mIpAddress)
+                : true;
+        for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); (en != null)
+                && en.hasMoreElements();) {
+            NetworkInterface netIntf = (NetworkInterface) en.nextElement();
+            for (Enumeration<InetAddress> addr = netIntf.getInetAddresses(); addr.hasMoreElements();) {
+                InetAddress inetAddress = addr.nextElement();
+                String ipAddress = IpAddressUtils.extractHostAddress(inetAddress.getHostAddress());
+                if (!inetAddress.isLoopbackAddress() && !inetAddress.isLinkLocalAddress()
+                        && (InetAddressUtils.isIPv4Address(ipAddress) == isIpv4)) {
+                    String intfName = netIntf.getDisplayName().toLowerCase();
+                    /* Some devices do list several interfaces though only one is active */
+                    if (((type == ConnectivityManager.TYPE_WIFI) && intfName.startsWith("wlan"))
+                            || ((type == ConnectivityManager.TYPE_MOBILE) && !intfName
+                                    .startsWith("wlan"))) {
+                        return ipAddress;
                     }
                 }
             }
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("getLocalIpAddress failed with ", e);
-            }
         }
-        return ipAddress;
+        throw new SocketException(new StringBuilder("Unable to fetch local ip address for type : ")
+                .append(type).append("!").toString());
     }
 
     /**

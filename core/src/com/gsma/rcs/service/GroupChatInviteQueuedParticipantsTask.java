@@ -28,7 +28,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-/* package private */class GroupChatInviteQueuedParticipants implements Runnable {
+/* package private */class GroupChatInviteQueuedParticipantsTask implements Runnable {
 
     private static final Set<ParticipantStatus> INVITE_QUEUED_STATUSES = new HashSet<ParticipantStatus>();
     static {
@@ -41,9 +41,10 @@ import java.util.Set;
 
     private final InstantMessagingService mImService;
 
-    private final Logger mLogger = Logger.getLogger(getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(GroupChatInviteQueuedParticipantsTask.class
+            .getName());
 
-    /* package private */GroupChatInviteQueuedParticipants(String chatId,
+    /* package private */GroupChatInviteQueuedParticipantsTask(String chatId,
             ChatServiceImpl chatService, InstantMessagingService imService) {
         mChatId = chatId;
         mChatService = chatService;
@@ -62,8 +63,8 @@ import java.util.Set;
 
             final GroupChatSession session = mImService.getGroupChatSession(mChatId);
             if (session != null && session.isMediaEstablished()) {
-                if (mLogger.isActivated()) {
-                    mLogger.debug(new StringBuilder("Adding ")
+                if (sLogger.isActivated()) {
+                    sLogger.debug(new StringBuilder("Adding ")
                             .append(Arrays.toString(participantsToBeInvited.toArray()))
                             .append(" to the group chat session ").append(mChatId).append(".")
                             .toString());
@@ -76,23 +77,19 @@ import java.util.Set;
                     }
                     return;
                 }
-
-                new Thread() {
-                    public void run() {
-                        session.inviteParticipants(participantsToBeInvited);
-                    }
-                }.start();
+                session.inviteParticipants(participantsToBeInvited);
             }
 
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             /*
-             * Exception will be handled better in CR037.
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
              */
-            if (mLogger.isActivated()) {
-                mLogger.error(
-                        "Exception occured while trying to invite queued participants to group chat with chatId "
-                                .concat(mChatId), e);
-            }
+            sLogger.error(
+                    "Exception occured while trying to invite queued participants to group chat with chatId "
+                            .concat(mChatId), e);
         }
     }
 }

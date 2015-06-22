@@ -32,6 +32,7 @@ import com.gsma.rcs.addressbook.RcsAccountException;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.contact.ContactManager;
+
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.LauncherUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -50,6 +51,8 @@ import android.telephony.TelephonyManager;
  * @author Orange
  */
 public class HttpsProvisioningSMS {
+
+    private static final String OTP_SMS_ENCODING_FORMAT = "UCS2";
     /**
      * HttpsProvisioningManager manages HTTP and SMS reception to load provisioning from network
      */
@@ -126,115 +129,121 @@ public class HttpsProvisioningSMS {
         mSmsProvisioningReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(final Context ctx, final Intent intent) {
-                if (logActivated) {
-                    sLogger.debug("SMS provider receiver - Received broadcast: ".concat(intent
-                            .toString()));
-                }
-
-                if (!HttpsProvisioningUtils.ACTION_BINARY_SMS_RECEIVED.equals(intent.getAction())) {
-                    return;
-                }
-
-                Bundle bundle = intent.getExtras();
-                if (bundle == null) {
-                    return;
-                }
-
-                if (logActivated) {
-                    sLogger.debug("Receiving binary SMS");
-                }
-
-                Object[] pdus = (Object[]) bundle.get("pdus");
-                SmsMessage[] msgs = new SmsMessage[pdus.length];
-                byte[] data = null;
-                byte[] smsBuffer = new byte[0];
-                byte[] smsBufferTemp = null;
-
-                for (int i = 0; i < msgs.length; i++) {
-                    msgs[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
-
-                    data = msgs[i].getUserData();
-                    smsBufferTemp = new byte[smsBuffer.length + data.length];
-                    System.arraycopy(smsBuffer, 0, smsBufferTemp, 0, smsBuffer.length);
-                    System.arraycopy(data, 0, smsBufferTemp, smsBuffer.length, data.length);
-                    smsBuffer = smsBufferTemp;
-                }
-
-                try {
-                    final String smsData = new String(smsBuffer, "UCS2");
-
-                    if (logActivated) {
-                        sLogger.debug("Binary SMS received with :".concat(smsData));
-                    }
-
-                    if (logActivated) {
-                        sLogger.debug("Binary SMS reconfiguration received");
-                    }
-
-                    if (smsData.contains(HttpsProvisioningUtils.RESET_CONFIG_SUFFIX)) {
-                        if (logActivated) {
-                            sLogger.debug("Binary SMS reconfiguration received with suffix reconf");
-                        }
-
-                        TelephonyManager tm = (TelephonyManager) ctx
-                                .getSystemService(Context.TELEPHONY_SERVICE);
-
-                        if (!smsData.contains(tm.getSubscriberId())
-                                && !smsData.contains(mRcsSettings.getUserProfileImsPrivateId())) {
+                mManager.scheduleForBackgroundExecution(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            // @FIXME: Below code block needs a complete refactor, However at this
+                            // moment due to other prior tasks the refactoring task has been kept in
+                            // backlog.
                             if (logActivated) {
-                                sLogger.debug("Binary SMS reconfiguration received but not with my ID");
+                                sLogger.debug("SMS provider receiver - Received broadcast: "
+                                        .concat(intent.toString()));
                             }
-                            return;
-                        }
 
-                        new Thread() {
-                            public void run() {
+                            if (!HttpsProvisioningUtils.ACTION_BINARY_SMS_RECEIVED.equals(intent
+                                    .getAction())) {
+                                return;
+                            }
+
+                            Bundle bundle = intent.getExtras();
+                            if (bundle == null) {
+                                return;
+                            }
+
+                            if (logActivated) {
+                                sLogger.debug("Receiving binary SMS");
+                            }
+
+                            Object[] pdus = (Object[]) bundle.get("pdus");
+                            SmsMessage[] msgs = new SmsMessage[pdus.length];
+                            byte[] data = null;
+                            byte[] smsBuffer = new byte[0];
+                            byte[] smsBufferTemp = null;
+
+                            for (int i = 0; i < msgs.length; i++) {
+                                msgs[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
+
+                                data = msgs[i].getUserData();
+                                smsBufferTemp = new byte[smsBuffer.length + data.length];
+                                System.arraycopy(smsBuffer, 0, smsBufferTemp, 0, smsBuffer.length);
+                                System.arraycopy(data, 0, smsBufferTemp, smsBuffer.length,
+                                        data.length);
+                                smsBuffer = smsBufferTemp;
+                            }
+
+                            final String smsData = new String(smsBuffer, OTP_SMS_ENCODING_FORMAT);
+
+                            if (logActivated) {
+                                sLogger.debug("Binary SMS received with :".concat(smsData));
+                            }
+
+                            if (logActivated) {
+                                sLogger.debug("Binary SMS reconfiguration received");
+                            }
+
+                            if (smsData.contains(HttpsProvisioningUtils.RESET_CONFIG_SUFFIX)) {
+                                if (logActivated) {
+                                    sLogger.debug("Binary SMS reconfiguration received with suffix reconf");
+                                }
+
+                                TelephonyManager tm = (TelephonyManager) ctx
+                                        .getSystemService(Context.TELEPHONY_SERVICE);
+
+                                if (!smsData.contains(tm.getSubscriberId())
+                                        && !smsData.contains(mRcsSettings
+                                                .getUserProfileImsPrivateId())) {
+                                    if (logActivated) {
+                                        sLogger.debug("Binary SMS reconfiguration received but not with my ID");
+                                    }
+                                    return;
+                                }
                                 mRcsSettings.setProvisioningVersion("0");
                                 LauncherUtils.stopRcsService(ctx);
                                 LauncherUtils.resetRcsConfig(ctx, mLocalContentResolver,
                                         mRcsSettings, mMessagingLog, mContactManager);
                                 LauncherUtils.launchRcsService(ctx, true, false, mRcsSettings);
-                            }
-                        }.start();
-                    } else {
-                        if (logActivated) {
-                            sLogger.debug("Binary SMS received for OTP");
-                        }
+                            } else {
+                                if (logActivated) {
+                                    sLogger.debug("Binary SMS received for OTP");
+                                }
 
-                        if (mManager != null) {
-                            new Thread() {
-                                public void run() {
-                                    try {
-                                        mManager.updateConfigWithOTP(smsData, requestUri, client,
-                                                localContext);
-                                    } catch (RcsAccountException e) {
-                                        sLogger.error("Failed to update Config with OTP!", e);
-
-                                    } catch (RuntimeException e) {
-                                        /*
-                                         * Intentionally catch runtime exceptions as else it will
-                                         * abruptly end the thread and eventually bring the whole
-                                         * system down, which is not intended.
-                                         */
-                                        sLogger.error("Failed to update Config with OTP!", e);
+                                if (mManager != null) {
+                                    mManager.updateConfigWithOTP(smsData, requestUri, client,
+                                            localContext);
+                                    unregisterSmsProvisioningReceiver();
+                                } else {
+                                    if (logActivated) {
+                                        sLogger.warn("Binary sms received, no rcscfg requested and not waiting for OTP... Discarding SMS");
                                     }
                                 }
-                            }.start();
-
-                            // Unregister SMS provisioning receiver
-                            unregisterSmsProvisioningReceiver();
-                        } else {
-                            if (logActivated) {
-                                sLogger.warn("Binary sms received, no rcscfg requested and not waiting for OTP... Discarding SMS");
                             }
+
+                        } catch (UnsupportedEncodingException e) {
+                            sLogger.error(
+                                    new StringBuilder("'").append(OTP_SMS_ENCODING_FORMAT)
+                                            .append("'format not supported for requestUri : ")
+                                            .append(requestUri).toString(), e);
+                        } catch (RcsAccountException e) {
+                            sLogger.error(
+                                    new StringBuilder(
+                                            "Failed to update Config with OTP for requestUri : ")
+                                            .append(requestUri).toString(), e);
+                        } catch (RuntimeException e) {
+                            /*
+                             * Normally we are not allowed to catch runtime exceptions as these are
+                             * genuine bugs which should be handled/fixed within the code. However
+                             * the cases when we are executing operations on a thread unhandling
+                             * such exceptions will eventually lead to exit the system and thus can
+                             * bring the whole system down, which is not intended.
+                             */
+                            sLogger.error(
+                                    new StringBuilder(
+                                            "Failed to update Config with OTP for requestUri : ")
+                                            .append(requestUri).toString(), e);
                         }
                     }
-
-                } catch (UnsupportedEncodingException e) {
-                    if (logActivated) {
-                        sLogger.debug("Parsing sms OTP failed: " + e);
-                    }
-                }
+                });
             }
         };
 

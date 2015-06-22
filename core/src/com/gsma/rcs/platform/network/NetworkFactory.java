@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.platform.network;
@@ -21,6 +25,8 @@ package com.gsma.rcs.platform.network;
 import com.gsma.rcs.core.ims.network.ImsNetworkInterface.DnsResolvedFields;
 import com.gsma.rcs.platform.FactoryException;
 import com.gsma.rcs.provider.settings.RcsSettings;
+
+import java.net.SocketException;
 
 /**
  * Network factory
@@ -94,9 +100,11 @@ public abstract class NetworkFactory {
      *            {@link android.net.ConnectivityManager#TYPE_WIFI} or
      *            {@link android.net.ConnectivityManager#TYPE_MOBILE}
      * @return Address
+     * @throws SocketException
      */
     // Changed by Deutsche Telekom
-    public abstract String getLocalIpAddress(DnsResolvedFields dnsEntry, int type);
+    public abstract String getLocalIpAddress(DnsResolvedFields dnsEntry, int type)
+            throws SocketException;
 
     /**
      * Create a datagram connection

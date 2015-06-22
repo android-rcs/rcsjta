@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +15,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.provisioning.https;
 
+import com.gsma.rcs.addressbook.RcsAccountException;
 import com.gsma.rcs.utils.logger.Logger;
 
 import android.content.BroadcastReceiver;
@@ -37,27 +42,28 @@ public class HttpsProvisioningConnection {
     /**
      * HttpsProvisioningManager manages HTTP and SMS reception to load provisioning from network
      */
-    private HttpsProvisioningManager manager;
+    private HttpsProvisioningManager mProvisioningManager;
 
     /**
      * Network state listener
      */
-    private BroadcastReceiver networkStateListener = null;
+    private BroadcastReceiver mNetworkStateListener;
 
     /**
      * Connection manager
      */
-    private ConnectivityManager connMgr = null;
+    private ConnectivityManager mConnectionManager;
 
     /**
      * Wifi disabling listener
      */
-    private BroadcastReceiver wifiDisablingListener = null;
+    private BroadcastReceiver mWifiDisablingListener;
 
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(HttpsProvisioningConnection.class
+            .getName());
 
     /**
      * Constructor
@@ -65,13 +71,9 @@ public class HttpsProvisioningConnection {
      * @param httpsProvisioningManager HTTP provisioning manager
      */
     public HttpsProvisioningConnection(HttpsProvisioningManager httpsProvisioningManager) {
-        manager = httpsProvisioningManager;
-
-        // Get connectivity manager
-        if (connMgr == null) {
-            connMgr = (ConnectivityManager) httpsProvisioningManager.getContext().getSystemService(
-                    Context.CONNECTIVITY_SERVICE);
-        }
+        mProvisioningManager = httpsProvisioningManager;
+        mConnectionManager = (ConnectivityManager) httpsProvisioningManager.getContext()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
     /**
@@ -80,7 +82,7 @@ public class HttpsProvisioningConnection {
      * @return connection manager
      */
     public ConnectivityManager getConnectionMngr() {
-        return connMgr;
+        return mConnectionManager;
     }
 
     /**
@@ -88,56 +90,65 @@ public class HttpsProvisioningConnection {
      */
     protected void registerNetworkStateListener() {
         // Check if network state listener is already registered
-        if (networkStateListener != null) {
-            if (logger.isActivated()) {
-                logger.debug("Network state listener already registered");
+        if (mNetworkStateListener != null) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Network state listener already registered");
             }
             return;
         }
 
-        if (logger.isActivated()) {
-            logger.debug("Registering network state listener");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Registering network state listener");
         }
 
         // Instantiate the network state listener
-        networkStateListener = new BroadcastReceiver() {
+        mNetworkStateListener = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, final Intent intent) {
-                Thread t = new Thread() {
+                mProvisioningManager.scheduleForBackgroundExecution(new Runnable() {
+                    @Override
                     public void run() {
-                        if (logger.isActivated()) {
-                            logger.debug("Network state listener - Received broadcast: "
-                                    + intent.toString());
+                        try {
+                            if (sLogger.isActivated()) {
+                                sLogger.debug("Network state listener - Received broadcast: "
+                                        + intent.toString());
+                            }
+                            mProvisioningManager.connectionEvent(intent.getAction());
+                        } catch (RcsAccountException e) {
+                            sLogger.error("Unable to handle connection event for intent action : "
+                                    .concat(intent.getAction()), e);
+                        } catch (RuntimeException e) {
+                            /*
+                             * Normally we are not allowed to catch runtime exceptions as these are
+                             * genuine bugs which should be handled/fixed within the code. However
+                             * the cases when we are executing operations on a thread unhandling
+                             * such exceptions will eventually lead to exit the system and thus can
+                             * bring the whole system down, which is not intended.
+                             */
+                            sLogger.error("Unable to handle connection event for intent action : "
+                                    .concat(intent.getAction()), e);
                         }
-
-                        manager.connectionEvent(intent.getAction());
                     }
-                };
-                t.start();
+                });
             }
         };
 
         // Register network state listener
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        manager.getContext().registerReceiver(networkStateListener, intentFilter);
+        mProvisioningManager.getContext().registerReceiver(mNetworkStateListener, intentFilter);
     }
 
     /**
      * Unregister the broadcast receiver for network state
      */
     protected void unregisterNetworkStateListener() {
-        if (networkStateListener != null) {
-            if (logger.isActivated()) {
-                logger.debug("Unregistering network state listener");
+        if (mNetworkStateListener != null) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Unregistering network state listener");
             }
-
-            try {
-                manager.getContext().unregisterReceiver(networkStateListener);
-            } catch (IllegalArgumentException e) {
-                // Nothing to do
-            }
-            networkStateListener = null;
+            mProvisioningManager.getContext().unregisterReceiver(mNetworkStateListener);
+            mNetworkStateListener = null;
         }
     }
 
@@ -145,70 +156,71 @@ public class HttpsProvisioningConnection {
      * Register the broadcast receiver for wifi disabling
      */
     protected void registerWifiDisablingListener() {
-        // Check if wifi disabling listener is already registered
-        if (wifiDisablingListener != null) {
-            if (logger.isActivated()) {
-                logger.debug("WIFI disabling listener already registered");
+        if (mWifiDisablingListener != null) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("WIFI disabling listener already registered");
             }
             return;
         }
 
-        if (logger.isActivated()) {
-            logger.debug("Registering WIFI disabling listener");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Registering WIFI disabling listener");
         }
 
-        // Instantiate the wifi listener
-        wifiDisablingListener = new BroadcastReceiver() {
+        mWifiDisablingListener = new BroadcastReceiver() {
             @Override
             public void onReceive(final Context context, final Intent intent) {
-                Thread t = new Thread() {
+                mProvisioningManager.scheduleForBackgroundExecution(new Runnable() {
+                    @Override
                     public void run() {
-                        if (logger.isActivated()) {
-                            logger.debug("Wifi disabling listener - Received broadcast: "
-                                    + intent.toString());
-                        }
+                        try {
+                            if (sLogger.isActivated()) {
+                                sLogger.debug("Wifi disabling listener - Received broadcast: "
+                                        + intent.toString());
+                            }
 
-                        // Only notify the listener when the wifi is really
-                        // disabled
-                        if (intent != null
-                                && intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
-                                        WifiManager.WIFI_STATE_UNKNOWN) == WifiManager.WIFI_STATE_DISABLED) {
-
-                            manager.resetCounters();
-
-                            // Register network state listener
-                            registerNetworkStateListener();
-
-                            // Unregister wifi disabling listener
-                            unregisterWifiDisablingListener();
+                            if (intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
+                                    WifiManager.WIFI_STATE_UNKNOWN) == WifiManager.WIFI_STATE_DISABLED) {
+                                mProvisioningManager.resetCounters();
+                                registerNetworkStateListener();
+                                unregisterWifiDisablingListener();
+                            }
+                        } catch (RuntimeException e) {
+                            /*
+                             * Normally we are not allowed to catch runtime exceptions as these are
+                             * genuine bugs which should be handled/fixed within the code. However
+                             * the cases when we are executing operations on a thread unhandling
+                             * such exceptions will eventually lead to exit the system and thus can
+                             * bring the whole system down, which is not intended.
+                             */
+                            sLogger.error("Unable to handle wifi state change event for action : "
+                                    .concat(intent.getAction()), e);
                         }
                     }
-                };
-                t.start();
+                });
             }
         };
 
-        // Register wifi disabling listener
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-        manager.getContext().registerReceiver(wifiDisablingListener, intentFilter);
+        mProvisioningManager.getContext().registerReceiver(mWifiDisablingListener, intentFilter);
     }
 
     /**
      * Unregister the broadcast receiver for wifi disabling
      */
     protected void unregisterWifiDisablingListener() {
-        if (wifiDisablingListener != null) {
-            if (logger.isActivated()) {
-                logger.debug("Unregistering WIFI disabling listener");
+        if (mWifiDisablingListener != null) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Unregistering WIFI disabling listener");
             }
 
             try {
-                manager.getContext().unregisterReceiver(wifiDisablingListener);
+                mProvisioningManager.getContext().unregisterReceiver(mWifiDisablingListener);
             } catch (IllegalArgumentException e) {
                 // Nothing to do
             }
-            wifiDisablingListener = null;
+            mWifiDisablingListener = null;
         }
     }
 }

@@ -40,11 +40,13 @@ import local.org.bouncycastle.asn1.x509.GeneralNames;
 import local.org.bouncycastle.asn1.x509.KeyPurposeId;
 import local.org.bouncycastle.asn1.x509.KeyUsage;
 import local.org.bouncycastle.asn1.x509.X509Extension;
+import local.org.bouncycastle.cert.CertIOException;
 import local.org.bouncycastle.cert.X509v3CertificateBuilder;
 import local.org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import local.org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import local.org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import local.org.bouncycastle.operator.ContentSigner;
+import local.org.bouncycastle.operator.OperatorCreationException;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -56,13 +58,17 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStore.PrivateKeyEntry;
+import java.security.KeyStoreException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.security.UnrecoverableEntryException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Date;
@@ -234,42 +240,23 @@ public class KeyStoreManager {
      * update (or create) current client certificate to reflect latest IP address
      * 
      * @param ipAddress IP address to be set in subjectAltName according to RFC 4572
+     * @throws CertificateException
      */
-    public static void updateClientCertificate(final String ipAddress) {
-        try {
-            if (KeyStoreManager.isKeystoreExists()) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Update client certificate");
-                }
-
-                // move processing to a worker thread as key generation is time
-                // consuming
-                Thread t = new Thread() {
-                    /**
-                     * Processing
-                     */
-                    public void run() {
-                        createClientCertificate(ipAddress);
-                    }
-                };
-
-                t.start();
-            } else {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Client certificate not created as keystore file "
-                            + getKeystorePath() + " is not available");
-                }
-            }
-        } catch (Exception ex) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Updating client certificate while checking keystore failed: ", ex);
-            }
+    public static void updateClientCertificate(String ipAddress) throws CertificateException {
+        if (!KeyStoreManager.isKeystoreExists()) {
+            throw new CertificateException(new StringBuilder(
+                    "Client certificate not created as keystore file ").append(getKeystorePath())
+                    .append(" is not available").toString());
         }
-
+        if (sLogger.isActivated()) {
+            sLogger.debug("Update client certificate");
+        }
+        createClientCertificate(ipAddress);
     }
 
     // Changed by Deutsche Telekom
-    private static synchronized void createClientCertificate(String ipAddress) {
+    private static synchronized void createClientCertificate(String ipAddress)
+            throws CertificateException {
         try {
             // IP address hasn't changed
             if (ipAddress != null && ipAddress.equals(sLastIpAddress)) {
@@ -371,16 +358,30 @@ public class KeyStoreManager {
                         + ipAddress + " with fingerprint "
                         + KeyStoreManager.getClientCertificateFingerprint() + " added");
             }
-        } catch (Exception ex) {
-            // TODO: check whether Exception specific code is
-            // useful
-            // KeyStoreManagerException, FileNotFoundException,
-            // NoSuchAlgorithmException, KeyStoreException,
-            // CertificateException, IOException,
-            // OperatorCreationException
-            if (sLogger.isActivated()) {
-                sLogger.error("Creating client certificate failed: ", ex);
-            }
+        } catch (KeyStoreException e) {
+            throw new CertificateException(new StringBuilder(
+                    "Unable to create client certificate : ").append(CLIENT_CERT_ALIAS)
+                    .append(" for IP address : ").append(ipAddress).toString(), e);
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new CertificateException(new StringBuilder(
+                    "Unable to create client certificate : ").append(CLIENT_CERT_ALIAS)
+                    .append(" for IP address : ").append(ipAddress).toString(), e);
+
+        } catch (UnrecoverableEntryException e) {
+            throw new CertificateException(new StringBuilder(
+                    "Unable to create client certificate : ").append(CLIENT_CERT_ALIAS)
+                    .append(" for IP address : ").append(ipAddress).toString(), e);
+
+        } catch (CertIOException e) {
+            throw new CertificateException(new StringBuilder(
+                    "Unable to create client certificate : ").append(CLIENT_CERT_ALIAS)
+                    .append(" for IP address : ").append(ipAddress).toString(), e);
+
+        } catch (OperatorCreationException e) {
+            throw new CertificateException(new StringBuilder(
+                    "Unable to create client certificate : ").append(CLIENT_CERT_ALIAS)
+                    .append(" for IP address : ").append(ipAddress).toString(), e);
         }
     }
 

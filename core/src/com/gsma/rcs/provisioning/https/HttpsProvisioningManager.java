@@ -54,6 +54,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Proxy;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
@@ -138,6 +140,9 @@ public class HttpsProvisioningManager {
 
     private static final String PARAM_TOKEN = "token";
 
+    private static final String BACKGROUND_THREAD_NAME = HttpsProvisioningManager.class
+            .getSimpleName();
+
     /**
      * First launch flag
      */
@@ -150,14 +155,14 @@ public class HttpsProvisioningManager {
 
     private int mRetryCount = 0;
 
-    /**
-     * Check if a provisioning request is already pending
-     */
-    private boolean mProvisioningPending = false;
-
     private final LocalContentResolver mLocalContentResolver;
 
     private final Context mCtx;
+
+    /**
+     * Handler to process messages & runnable associated with background thread.
+     */
+    private final Handler mBackgroundHandler;
 
     /**
      * Provisioning SMS manager
@@ -226,6 +231,11 @@ public class HttpsProvisioningManager {
         mSmsManager = new HttpsProvisioningSMS(this, localContentResolver, rcsSettings,
                 messagingLog, contactManager);
         mRcsAccountManager = new RcsAccountManager(mCtx, contactManager);
+
+        final HandlerThread backgroundThread = new HandlerThread(BACKGROUND_THREAD_NAME);
+        backgroundThread.start();
+
+        mBackgroundHandler = new Handler(backgroundThread.getLooper());
     }
 
     /**
@@ -240,50 +250,33 @@ public class HttpsProvisioningManager {
      * 
      * @param action Connectivity action
      * @return true if the updateConfig has been done
+     * @throws RcsAccountException
      */
-    protected boolean connectionEvent(String action) {
-        if (mProvisioningPending) {
-            return false;
-        }
-        if (!ConnectivityManager.CONNECTIVITY_ACTION.equals(action)) {
-            return false;
-        }
-        // Check received network info
-        NetworkInfo networkInfo = mNetworkCnx.getConnectionMngr().getActiveNetworkInfo();
-        if (networkInfo == null) {
-            return false;
-        }
-        if (!networkInfo.isConnected()) {
-            if (sLogger.isActivated()) {
-                sLogger.debug("Disconnection from network");
+    protected boolean connectionEvent(String action) throws RcsAccountException {
+        try {
+            if (!ConnectivityManager.CONNECTIVITY_ACTION.equals(action)) {
+                return false;
             }
-            return false;
-        }
-        mProvisioningPending = true;
-        if (sLogger.isActivated()) {
-            sLogger.debug("Connected to data network");
-        }
-        new Thread() {
-            public void run() {
-                try {
-                    updateConfig();
-                } catch (RcsAccountException e) {
-                    sLogger.error("Failed to update configuration!", e);
-
-                } catch (RuntimeException e) {
-                    /*
-                     * Intentionally catch runtime exceptions as else it will abruptly end the
-                     * thread and eventually bring the whole system down, which is not intended.
-                     */
-                    sLogger.error("Failed to update configuration!", e);
+            // Check received network info
+            NetworkInfo networkInfo = mNetworkCnx.getConnectionMngr().getActiveNetworkInfo();
+            if (networkInfo == null) {
+                return false;
+            }
+            if (!networkInfo.isConnected()) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Disconnection from network");
                 }
+                return false;
             }
-        }.start();
+            if (sLogger.isActivated()) {
+                sLogger.debug("Connected to data network");
+            }
+            updateConfig();
+            return true;
 
-        // Unregister network state listener
-        mNetworkCnx.unregisterNetworkStateListener();
-        mProvisioningPending = false;
-        return true;
+        } finally {
+            mNetworkCnx.unregisterNetworkStateListener();
+        }
     }
 
     /**
@@ -628,8 +621,8 @@ public class HttpsProvisioningManager {
             if (networkInfo != null && networkInfo.getType() != ConnectivityManager.TYPE_MOBILE) {
                 // Proceed with non mobile network registration
                 ContactId contactId = mRcsSettings.getUserProfileImsUserName();
-                return sendFirstRequestsToRequireOTP(imsi, imei, contactId, primaryUri, secondaryUri,
-                        client, localContext);
+                return sendFirstRequestsToRequireOTP(imsi, imei, contactId, primaryUri,
+                        secondaryUri, client, localContext);
             }
 
             if (logActivated) {
@@ -1212,5 +1205,12 @@ public class HttpsProvisioningManager {
 
         // Reset after 511 counter
         mRetryAfter511ErrorCount = 0;
+    }
+
+    /**
+     * Schedule a background task on Handler for execution
+     */
+    /* package private */void scheduleForBackgroundExecution(Runnable task) {
+        mBackgroundHandler.post(task);
     }
 }
