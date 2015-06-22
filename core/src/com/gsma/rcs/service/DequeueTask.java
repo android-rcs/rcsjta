@@ -26,6 +26,7 @@ import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
@@ -359,5 +360,14 @@ public abstract class DequeueTask implements Runnable {
     protected void setGroupFileTransferAsFailed(String chatId, String fileTransferId) {
         mFileTransferService.setGroupFileTransferStateAndReasonCode(fileTransferId, chatId,
                 State.FAILED, FileTransfer.ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
+    }
+
+    /**
+     * Is IMS connected
+     * 
+     * @return boolean
+     */
+    protected boolean isImsConnected() {
+        return ServerApiUtils.isImsConnected();
     }
 }

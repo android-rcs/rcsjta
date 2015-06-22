@@ -77,6 +77,13 @@ public class GroupChatDequeueTask extends DequeueTask {
         Cursor cursor = null;
         try {
             synchronized (mLock) {
+                if (!isImsConnected()) {
+                    if (logActivated) {
+                        mLogger.debug("IMS not connected, exiting dequeue task to dequeue group chat messages and group file transfers for chatId "
+                                .concat(mChatId));
+                    }
+                    return;
+                }
                 if (mCore.isStopping()) {
                     if (logActivated) {
                         mLogger.debug("Core service is stopped, exiting dequeue task to dequeue group chat messages and group file transfers for chatId "
@@ -95,6 +102,13 @@ public class GroupChatDequeueTask extends DequeueTask {
                 int fileSizeIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_FILESIZE);
                 GroupChatImpl groupChat = mChatService.getOrCreateGroupChat(mChatId);
                 while (cursor.moveToNext()) {
+                    if (!isImsConnected()) {
+                        if (logActivated) {
+                            mLogger.debug("IMS not connected, exiting dequeue task to dequeue group chat messages and group file transfers for chatId "
+                                    .concat(mChatId));
+                        }
+                        return;
+                    }
                     if (mCore.isStopping()) {
                         if (logActivated) {
                             mLogger.debug("Core service is stopped, exiting dequeue task to dequeue group chat messages and group file transfers for chatId "

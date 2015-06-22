@@ -58,6 +58,13 @@ public class OneToOneChatMessageDequeueTask extends DequeueTask {
         Cursor cursor = null;
         try {
             synchronized (mLock) {
+                if (!isImsConnected()) {
+                    if (logActivated) {
+                        mLogger.debug("IMS not connected, exiting dequeue task to dequeue one-to-one chat messages for contact "
+                                .concat(mContact.toString()));
+                    }
+                    return;
+                }
                 if (mCore.isStopping()) {
                     if (logActivated) {
                         mLogger.debug("Core service is stopped, exiting dequeue task to dequeue one-to-one chat messages for contact "
@@ -72,6 +79,13 @@ public class OneToOneChatMessageDequeueTask extends DequeueTask {
                 int mimeTypeIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_MIME_TYPE);
                 OneToOneChatImpl oneToOneChat = mChatService.getOrCreateOneToOneChat(mContact);
                 while (cursor.moveToNext()) {
+                    if (!isImsConnected()) {
+                        if (logActivated) {
+                            mLogger.debug("IMS not connected, exiting dequeue task to dequeue one-to-one chat messages for contact "
+                                    .concat(mContact.toString()));
+                        }
+                        return;
+                    }
                     if (mCore.isStopping()) {
                         if (logActivated) {
                             mLogger.debug("Core service is stopped, exiting dequeue task to dequeue one-to-one chat messages for contact "

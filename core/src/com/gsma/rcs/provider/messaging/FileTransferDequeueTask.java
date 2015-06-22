@@ -70,6 +70,12 @@ public class FileTransferDequeueTask extends DequeueTask {
         Cursor cursor = null;
         try {
             synchronized (mLock) {
+                if (!isImsConnected()) {
+                    if (logActivated) {
+                        mLogger.debug("IMS not connected, exiting dequeue task to dequeue one-to-one and group file transfers");
+                    }
+                    return;
+                }
                 if (mCore.isStopping()) {
                     if (logActivated) {
                         mLogger.debug("Core service is stopped, exiting dequeue task to dequeue one-to-one and group file transfers");
@@ -86,6 +92,12 @@ public class FileTransferDequeueTask extends DequeueTask {
                 int stateIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_STATE);
                 int fileSizeIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FILESIZE);
                 while (cursor.moveToNext()) {
+                    if (!isImsConnected()) {
+                        if (logActivated) {
+                            mLogger.debug("IMS not connected, exiting dequeue task to dequeue one-to-one and group file transfers");
+                        }
+                        return;
+                    }
                     if (mCore.isStopping()) {
                         if (logActivated) {
                             mLogger.debug("Core service is stopped, exiting dequeue task to dequeue one-to-one and group file transfers");

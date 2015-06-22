@@ -77,6 +77,12 @@ public class OneToOneChatDequeueTask extends DequeueTask {
         Cursor cursor = null;
         try {
             synchronized (mLock) {
+                if (!isImsConnected()) {
+                    if (logActivated) {
+                        mLogger.debug("IMS not connected, exiting dequeue task to dequeue all one-to-one chat messages and one-to-one file transfers.");
+                    }
+                    return;
+                }
                 if (mCore.isStopping()) {
                     if (logActivated) {
                         mLogger.debug("Core service is stopped, exiting dequeue task to dequeue all one-to-one chat messages and one-to-one file transfers.");
@@ -94,6 +100,12 @@ public class OneToOneChatDequeueTask extends DequeueTask {
                 int statusIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_STATUS);
                 int fileSizeIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_FILESIZE);
                 while (cursor.moveToNext()) {
+                    if (!isImsConnected()) {
+                        if (logActivated) {
+                            mLogger.debug("IMS not connected, exiting dequeue task to dequeue all one-to-one chat messages and one-to-one file transfers.");
+                        }
+                        return;
+                    }
                     if (mCore.isStopping()) {
                         if (logActivated) {
                             mLogger.debug("Core service is stopped, exiting dequeue task to dequeue all one-to-one chat messages and one-to-one file transfers.");
