@@ -552,9 +552,12 @@ public class ChatUtils {
      * 
      * @param cpim CPIM document
      * @return IMDN document
-     * @throws Exception
+     * @throws IOException
+     * @throws ParserConfigurationException
+     * @throws SAXException
      */
-    public static ImdnDocument parseCpimDeliveryReport(String cpim) throws Exception {
+    public static ImdnDocument parseCpimDeliveryReport(String cpim) throws SAXException,
+            ParserConfigurationException, IOException {
         ImdnDocument imdn = null;
         // Parse CPIM document
         CpimParser cpimParser = new CpimParser(cpim);
@@ -575,9 +578,12 @@ public class ChatUtils {
      * 
      * @param xml XML document
      * @return IMDN document
-     * @throws Exception
+     * @throws IOException
+     * @throws ParserConfigurationException
+     * @throws SAXException
      */
-    public static ImdnDocument parseDeliveryReport(String xml) throws Exception {
+    public static ImdnDocument parseDeliveryReport(String xml) throws SAXException,
+            ParserConfigurationException, IOException {
         InputSource input = new InputSource(new ByteArrayInputStream(xml.getBytes()));
         ImdnParser parser = new ImdnParser(input);
         return parser.getImdnDocument();
@@ -683,16 +689,14 @@ public class ChatUtils {
      * 
      * @param xml XML document
      * @return File transfer resume info
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
      */
-    public static FileTransferHttpResumeInfo parseFileTransferHttpResumeInfo(byte[] xml) {
-        try {
-            InputSource ftHttpInput = new InputSource(new ByteArrayInputStream(xml));
-            FileTransferHttpResumeInfoParser ftHttpParser = new FileTransferHttpResumeInfoParser(
-                    ftHttpInput);
-            return ftHttpParser.getResumeInfo();
-        } catch (Exception e) {
-            return null;
-        }
+    public static FileTransferHttpResumeInfo parseFileTransferHttpResumeInfo(byte[] xml)
+            throws ParserConfigurationException, SAXException, IOException {
+        return new FileTransferHttpResumeInfoParser(new InputSource(new ByteArrayInputStream(xml)))
+                .getResumeInfo();
     }
 
     /**
@@ -858,26 +862,18 @@ public class ChatUtils {
      * Extract CPIM message from incoming INVITE request
      * 
      * @param request Request
-     * @return Boolean
+     * @return CpimMessage
      */
     public static CpimMessage extractCpimMessage(SipRequest request) {
-        CpimMessage message = null;
-        try {
-            // Extract message from content/CPIM
-            String content = request.getContent();
-            String boundary = request.getBoundaryContentType();
-            Multipart multi = new Multipart(content, boundary);
-            if (multi.isMultipart()) {
-                String cpimPart = multi.getPart(CpimMessage.MIME_TYPE);
-                if (cpimPart != null) {
-                    // CPIM part
-                    message = new CpimParser(cpimPart.getBytes(UTF8)).getCpimMessage();
-                }
-            }
-        } catch (Exception e) {
-            message = null;
+        Multipart multi = new Multipart(request.getContent(), request.getBoundaryContentType());
+        if (!multi.isMultipart()) {
+            return null;
         }
-        return message;
+        String cpimPart = multi.getPart(CpimMessage.MIME_TYPE);
+        if (cpimPart == null) {
+            return null;
+        }
+        return new CpimParser(cpimPart.getBytes(UTF8)).getCpimMessage();
     }
 
     /**

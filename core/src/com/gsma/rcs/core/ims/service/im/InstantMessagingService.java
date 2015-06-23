@@ -88,11 +88,15 @@ import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 
+import org.xml.sax.SAXException;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import javax2.sip.header.ContactHeader;
 import javax2.sip.message.Response;
@@ -1222,8 +1226,11 @@ public class InstantMessagingService extends ImsService {
      * Receive a message delivery status
      * 
      * @param message Received message
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void receiveMessageDeliveryStatus(SipRequest message) {
+    public void receiveMessageDeliveryStatus(SipRequest message) throws SipPayloadException,
+            SipNetworkException {
         try {
             /*
              * Begin by sending 200 OK, a failure before doing that may cause the sender to re-send
@@ -1273,13 +1280,14 @@ public class InstantMessagingService extends ImsService {
                     .append("not found in our database. Message id ").append(msgId)
                     .append(", ignoring.").toString());
 
-        } catch (SipException e) {
-            sLogger.error("Failed to send 200 OK response", e);
+        } catch (SAXException e) {
+            throw new SipPayloadException("Failed to send 200 OK response for message!", e);
 
-        } catch (Exception e) {
-            // TODO: This will be changed when ChatUtils.parseCpimDeliveryReport
-            // is changed to throw a less generic exception.
-            sLogger.error("Failed to parse imdn delivery report.", e);
+        } catch (ParserConfigurationException e) {
+            throw new SipPayloadException("Failed to send 200 OK response for message!", e);
+
+        } catch (IOException e) {
+            throw new SipNetworkException("Failed to send 200 OK response for message!", e);
         }
     }
 

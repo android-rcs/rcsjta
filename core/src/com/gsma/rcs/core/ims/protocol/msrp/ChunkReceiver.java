@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.util.Hashtable;
 
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.utils.logger.Logger;
 
 /**
@@ -278,6 +279,18 @@ public class ChunkReceiver extends Thread {
                 session.checkMsrpTransactionInfo();
                 mTerminated = true;
             }
+        } catch (SipPayloadException e) {
+            sLogger.error("Unable to receive chunks!", e);
+            if (!mTerminated) {
+                /* Notify the session listener that an error has occured */
+                final MsrpSession session = mConnection.getSession();
+                session.getMsrpEventListener().msrpTransferError(null, e.getMessage(),
+                        TypeMsrpChunk.Unknown);
+
+                /* Check transaction info data */
+                session.checkMsrpTransactionInfo();
+                mTerminated = true;
+            }
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
@@ -286,13 +299,11 @@ public class ChunkReceiver extends Thread {
             sLogger.error("Unable to receive chunks!", e);
             if (!mTerminated) {
                 /* Notify the session listener that an error has occured */
-                /* Changed by Deutsche Telekom */
                 final MsrpSession session = mConnection.getSession();
                 session.getMsrpEventListener().msrpTransferError(null, e.getMessage(),
                         TypeMsrpChunk.Unknown);
 
                 /* Check transaction info data */
-                /* Changed by Deutsche Telekom */
                 session.checkMsrpTransactionInfo();
                 mTerminated = true;
             }

@@ -33,6 +33,8 @@ import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsServiceSession;
@@ -63,10 +65,14 @@ import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 
+import org.xml.sax.SAXException;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import javax2.sip.message.Response;
 
@@ -472,8 +478,10 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param data Received data
      * @param mimeType Data mime-type
      * @throws MsrpException
+     * @throws SipPayloadException
      */
-    public void msrpDataReceived(String msgId, byte[] data, String mimeType) throws MsrpException {
+    public void msrpDataReceived(String msgId, byte[] data, String mimeType) throws MsrpException,
+            SipPayloadException {
         if (sLogger.isActivated()) {
             sLogger.info("Data received (type " + mimeType + ")");
         }
@@ -603,10 +611,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                         }
                     }
                 }
-            } catch (Exception e) {
-                if (sLogger.isActivated()) {
-                    sLogger.error("Can't parse the CPIM message", e);
-                }
+            } catch (SipNetworkException e) {
+                throw new MsrpException(
+                        "Unable to handle delivery status for msgId : ".concat(msgId), e);
             }
         } else {
             // Not supported content
@@ -979,8 +986,11 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * 
      * @param contact Contact identifier
      * @param xml XML document
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void receiveDeliveryStatus(ContactId contact, String xml) {
+    public void receiveDeliveryStatus(ContactId contact, String xml) throws SipPayloadException,
+            SipNetworkException {
         try {
             ImdnDocument imdn = ChatUtils.parseDeliveryReport(xml);
 
@@ -988,10 +998,17 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                 ((ChatSessionListener) listener).handleDeliveryStatus(mContributionId, contact,
                         imdn);
             }
-        } catch (Exception e) {
-            // TODO: This will be changed when ChatUtils.parseDeliveryReport
-            // is changed to throw a less generic exception.
-            sLogger.error("Failed to parse IMDN document", e);
+        } catch (SAXException e) {
+            throw new SipPayloadException(new StringBuilder(
+                    "Failed to parse IMDN document for contact : ").append(contact).toString(), e);
+
+        } catch (ParserConfigurationException e) {
+            throw new SipPayloadException(new StringBuilder(
+                    "Failed to parse IMDN document for contact : ").append(contact).toString(), e);
+
+        } catch (IOException e) {
+            throw new SipNetworkException(new StringBuilder(
+                    "Failed to parse IMDN document for contact : ").append(contact).toString(), e);
         }
     }
 

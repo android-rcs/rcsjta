@@ -29,6 +29,7 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
@@ -283,6 +284,12 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                 } catch (IOException e) {
                     handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
                 } catch (URISyntaxException e) {
+                    sLogger.error(
+                            new StringBuilder("Failed to resume upload for sessionId : ")
+                                    .append(getSessionID()).append(" with fileTransferId : ")
+                                    .append(getFileTransferId()).toString(), e);
+                    handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
+                } catch (SipPayloadException e) {
                     sLogger.error(
                             new StringBuilder("Failed to resume upload for sessionId : ")
                                     .append(getSessionID()).append(" with fileTransferId : ")

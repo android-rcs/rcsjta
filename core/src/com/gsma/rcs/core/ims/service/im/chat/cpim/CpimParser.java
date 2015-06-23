@@ -46,15 +46,14 @@ public class CpimParser {
     /**
      * CPIM message
      */
-    private CpimMessage cpim = null;
+    private CpimMessage mMessage = null;
 
     /**
      * Constructor
      * 
      * @param data Input data
-     * @throws Exception
      */
-    public CpimParser(byte data[]) throws Exception {
+    public CpimParser(byte data[]) {
         parse(new String(data, UTF8));
     }
 
@@ -62,9 +61,8 @@ public class CpimParser {
      * Constructor
      * 
      * @param data Input data
-     * @throws Exception
      */
-    public CpimParser(String data) throws Exception {
+    public CpimParser(String data) {
         parse(data);
     }
 
@@ -74,55 +72,49 @@ public class CpimParser {
      * @return CPIM message
      */
     public CpimMessage getCpimMessage() {
-        return cpim;
+        return mMessage;
     }
 
     /**
      * Parse message/CPIM document
      * 
      * @param data Input data
-     * @throws Exception
      */
-    private void parse(String data) throws Exception {
+    private void parse(String data) {
         /*
          * CPIM sample: From: MR SANDERS <im:piglet@100akerwood.com> To: Depressed Donkey
          * <im:eeyore@100akerwood.com> DateTime: 2000-12-13T13:40:00-08:00 Subject: the weather will
          * be fine today Content-type: text/plain Content-ID: <1234567890@foo.com> Here is the text
          * of my message.
          */
-        try {
-            // Read message headers
-            int begin = 0;
-            int end = data.indexOf(DOUBLE_CRLF, begin);
-            String block2 = data.substring(begin, end);
-            StringTokenizer lines = new StringTokenizer(block2, CRLF);
-            Hashtable<String, String> headers = new Hashtable<String, String>();
-            while (lines.hasMoreTokens()) {
-                String token = lines.nextToken();
-                CpimHeader hd = CpimHeader.parseHeader(token);
-                headers.put(hd.getName(), hd.getValue());
-            }
-
-            // Read the MIME-encapsulated content header
-            begin = end + 4;
-            end = data.indexOf(DOUBLE_CRLF, begin);
-            String block3 = data.substring(begin, end);
-            lines = new StringTokenizer(block3, CRLF);
-            Hashtable<String, String> contentHeaders = new Hashtable<String, String>();
-            while (lines.hasMoreTokens()) {
-                String token = lines.nextToken();
-                CpimHeader hd = CpimHeader.parseHeader(token);
-                contentHeaders.put(hd.getName(), hd.getValue());
-            }
-
-            // Read the message content
-            begin = end + 4;
-            String content = data.substring(begin);
-
-            // Create the CPIM message
-            cpim = new CpimMessage(headers, contentHeaders, content);
-        } catch (Exception e) {
-            throw new Exception("Bad CPIM message format");
+        /* Read message headers */
+        int begin = 0;
+        int end = data.indexOf(DOUBLE_CRLF, begin);
+        String block2 = data.substring(begin, end);
+        StringTokenizer lines = new StringTokenizer(block2, CRLF);
+        Hashtable<String, String> headers = new Hashtable<String, String>();
+        while (lines.hasMoreTokens()) {
+            String token = lines.nextToken();
+            CpimHeader hd = CpimHeader.parseHeader(token);
+            headers.put(hd.getName(), hd.getValue());
         }
+
+        /* Read the MIME-encapsulated content header */
+        begin = end + 4;
+        end = data.indexOf(DOUBLE_CRLF, begin);
+        String block3 = data.substring(begin, end);
+        lines = new StringTokenizer(block3, CRLF);
+        Hashtable<String, String> contentHeaders = new Hashtable<String, String>();
+        while (lines.hasMoreTokens()) {
+            String token = lines.nextToken();
+            CpimHeader hd = CpimHeader.parseHeader(token);
+            contentHeaders.put(hd.getName(), hd.getValue());
+        }
+
+        /* Read the message content */
+        begin = end + 4;
+        String content = data.substring(begin);
+
+        mMessage = new CpimMessage(headers, contentHeaders, content);
     }
 }

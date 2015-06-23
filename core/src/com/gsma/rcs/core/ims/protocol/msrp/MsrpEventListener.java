@@ -23,6 +23,7 @@
 package com.gsma.rcs.core.ims.protocol.msrp;
 
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 
 /**
  * MSRP event listener
@@ -45,8 +46,10 @@ public interface MsrpEventListener {
      * @param data Received data
      * @param mimeType Data mime-type
      * @throws MsrpException
+     * @throws SipPayloadException
      */
-    public void msrpDataReceived(String msgId, byte[] data, String mimeType) throws MsrpException;
+    public void msrpDataReceived(String msgId, byte[] data, String mimeType) throws MsrpException,
+            SipPayloadException;
 
     /**
      * Data transfer in progress

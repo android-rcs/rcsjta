@@ -34,6 +34,8 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -307,8 +309,11 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
      * @param msgId Message ID
      * @param data Received data
      * @param mimeType Data mime-type
+     * @throws MsrpException
+     * @throws SipPayloadException
      */
-    public void msrpDataReceived(String msgId, byte[] data, String mimeType) {
+    public void msrpDataReceived(String msgId, byte[] data, String mimeType) throws MsrpException,
+            SipPayloadException {
         final boolean logActivated = mLogger.isActivated();
         if (logActivated) {
             mLogger.info("Data received (type " + mimeType + ")");
@@ -347,10 +352,9 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
                     // Receive an IMDN report
                     receiveDeliveryStatus(getRemoteContact(), cpimMsg.getMessageContent());
                 }
-            } catch (Exception e) {
-                if (logActivated) {
-                    mLogger.error("Can't parse the CPIM message", e);
-                }
+            } catch (SipNetworkException e) {
+                throw new MsrpException(
+                        "Unable to handle delivery status for msgId : ".concat(msgId), e);
             }
         } else {
             // Not supported content

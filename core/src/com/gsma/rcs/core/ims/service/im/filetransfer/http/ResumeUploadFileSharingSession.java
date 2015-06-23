@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
@@ -83,6 +84,12 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
         } catch (IOException e) {
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
         } catch (URISyntaxException e) {
+            sLogger.error(
+                    new StringBuilder("Failed to resume a file transfer session for sessionId : ")
+                            .append(getSessionID()).append(" with fileTransferId : ")
+                            .append(getFileTransferId()).toString(), e);
+            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (SipPayloadException e) {
             sLogger.error(
                     new StringBuilder("Failed to resume a file transfer session for sessionId : ")
                             .append(getSessionID()).append(" with fileTransferId : ")

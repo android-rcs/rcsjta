@@ -25,12 +25,16 @@ package com.gsma.rcs.core.ims.service.im.chat.imdn;
 import com.gsma.rcs.utils.DateUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
+import org.apache.http.ParseException;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -63,9 +67,12 @@ public class ImdnParser extends DefaultHandler {
      * Constructor
      * 
      * @param inputSource Input source
-     * @throws Exception
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws IOException
      */
-    public ImdnParser(InputSource inputSource) throws Exception {
+    public ImdnParser(InputSource inputSource) throws SAXException, ParserConfigurationException,
+            IOException {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser parser = factory.newSAXParser();
         parser.parse(inputSource, this);

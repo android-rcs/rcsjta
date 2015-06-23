@@ -34,6 +34,7 @@ import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.IdGenerator;
@@ -856,9 +857,10 @@ public class MsrpSession {
      * @param totalSize Total size of the content
      * @throws IOException
      * @throws MsrpException
+     * @throws SipPayloadException
      */
     public void receiveMsrpSend(String txId, Hashtable<String, String> headers, int flag,
-            byte[] data, long totalSize) throws IOException, MsrpException {
+            byte[] data, long totalSize) throws IOException, MsrpException, SipPayloadException {
         // Consider media is established when we received something
         isEstablished = true;
 

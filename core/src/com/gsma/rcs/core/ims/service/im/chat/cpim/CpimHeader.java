@@ -68,9 +68,8 @@ public class CpimHeader {
      * 
      * @param data Input data
      * @return Header
-     * @throws Exception
      */
-    public static CpimHeader parseHeader(String data) throws Exception {
+    public static CpimHeader parseHeader(String data) {
         int index = data.indexOf(":");
         String key = data.substring(0, index);
         String value = data.substring(index + 1);

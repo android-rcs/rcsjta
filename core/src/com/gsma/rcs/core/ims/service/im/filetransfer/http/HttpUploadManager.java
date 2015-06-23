@@ -29,6 +29,7 @@ import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.http.HttpAuthenticationAgent;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -43,6 +44,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.util.EntityUtils;
+import org.xml.sax.SAXException;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -57,12 +59,15 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
+import javax.xml.parsers.ParserConfigurationException;
+
 import javax2.sip.InvalidArgumentException;
 
 /**
@@ -649,8 +654,9 @@ public class HttpUploadManager extends HttpTransferManager {
      * @return byte[] contains the info to send to terminating side
      * @throws IOException
      * @throws URISyntaxException
+     * @throws SipPayloadException
      */
-    public byte[] resumeUpload() throws IOException, URISyntaxException {
+    public byte[] resumeUpload() throws IOException, URISyntaxException, SipPayloadException {
         // Try to get upload info
         HttpResponse resp = null;
         resp = sendGetUploadInfo();
@@ -661,7 +667,9 @@ public class HttpUploadManager extends HttpTransferManager {
                 mLogger.debug("Unexpected Server response, will restart upload from begining");
             }
             return uploadFile();
-        } else {
+        }
+
+        try {
             String content = EntityUtils.toString(resp.getEntity());
             byte[] bytes = content.getBytes(UTF8);
             if (HTTP_TRACE_ENABLED) {
@@ -688,6 +696,12 @@ public class HttpUploadManager extends HttpTransferManager {
                 return getDownloadInfo();
             }
             return null;
+
+        } catch (ParserConfigurationException e) {
+            throw new SipPayloadException("Unable to parse file transfer resume info!", e);
+
+        } catch (SAXException e) {
+            throw new SipPayloadException("Unable to parse file transfer resume info!", e);
         }
     }
 
