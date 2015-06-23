@@ -23,6 +23,7 @@
 package com.gsma.rcs.core.ims.service.capability;
 
 import com.gsma.rcs.addressbook.AddressBookEventListener;
+import com.gsma.rcs.addressbook.AddressBookManager;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
@@ -59,17 +60,18 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
 
     private PollingManager mPollingManager;
 
-    /**
-     * Flag: set during the address book changed procedure, if we are notified of a change
-     */
-    private boolean mRecheckNeeded = false;
+    private Thread mSynchronizationThread;
 
-    /**
-     * Flag indicating if a check procedure is in progress
-     */
-    private boolean mCheckInProgress = false;
+    private final AddressBookManager mAddressBookManager;
 
     private final static Logger sLogger = Logger.getLogger(CapabilityService.class.getSimpleName());
+
+    /**
+     * 1 second latency before listening to native address book changes to avoid receiving
+     * notification for changes we made ourselves into the address book due to the
+     * re-synchronization.
+     */
+    private static final long LATENCY_BEFORE_LISTENING_TO_AB_CHANGES_MSEC = 1000;
 
     /**
      * Constructor
@@ -86,6 +88,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
         mPollingManager = new PollingManager(this, mRcsSettings, mContactManager);
         mOptionsManager = new OptionsManager(parent, mRcsSettings, mContactManager);
         mAnonymousFetchManager = new AnonymousFetchManager(parent, mRcsSettings, mContactManager);
+        mAddressBookManager = getImsModule().getCore().getAddressBookManager();
     }
 
     /**
@@ -98,28 +101,22 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
         }
         setServiceStarted(true);
         mOptionsManager.start();
-        /* Listen to address book changes */
-        getImsModule().getCore().getAddressBookManager().addAddressBookListener(this);
-        mPollingManager.start();
 
         /* Force a first capability check */
-        new Thread() {
-            public void run() {
-                try {
-                    handleAddressBookHasChanged();
-                } catch (ContactManagerException e) {
-                    // TODO CR037 exception handling
-                    sLogger.error("Failed to process change in address book!", e);
-                } catch (RuntimeException e) {
-                    /*
-                     * Intentionally catch runtime exceptions as else it will abruptly end the
-                     * thread and eventually bring the whole system down, which is not intended.
-                     */
-                    // TODO CR037 exception handling
-                    sLogger.error("Failed to process change in address book!", e);
-                }
-            }
-        }.start();
+        mSynchronizationThread = synchronizeContacts();
+
+        if (sLogger.isActivated()) {
+            sLogger.debug("Capability service start");
+        }
+    }
+
+    private void initialize() {
+        /* Listen to address book changes */
+        mAddressBookManager.addAddressBookListener(this);
+        mPollingManager.start();
+        if (sLogger.isActivated()) {
+            sLogger.debug("Capability service initialize");
+        }
     }
 
     /**
@@ -131,10 +128,19 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
             return;
         }
         setServiceStarted(false);
+
+        if (mSynchronizationThread != null) {
+            mSynchronizationThread.interrupt();
+            mSynchronizationThread = null;
+        }
+
         mPollingManager.stop();
         /* Stop listening to address book changes */
-        getImsModule().getCore().getAddressBookManager().removeAddressBookListener(this);
+        mAddressBookManager.removeAddressBookListener(this);
         mOptionsManager.stop();
+        if (sLogger.isActivated()) {
+            sLogger.debug("Capability service stop");
+        }
     }
 
     /**
@@ -240,6 +246,123 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
     }
 
     /**
+     * Interface listener for OptionManager
+     */
+    public interface IOptionsManagerListener {
+        /**
+         * Callback end of contact synchronization
+         */
+        public void endOfSynchronization();
+    }
+
+    private Set<ContactId> aggregateNewContactsAndGetUnqueriedOnes() throws ContactManagerException {
+        Map<ContactId, Set<Long>> nativeContacts = mContactManager.getAllRawIdsInPhoneAddressBook();
+        /*
+         * Remove my contact since already created in native address book and no need to query for
+         * capabilities.
+         */
+        nativeContacts.remove(ImsModule.IMS_USER_PROFILE.getUsername());
+
+        Set<ContactId> rcsContacts = mContactManager.getAllContactsFromRcsContactProvider();
+
+        /*
+         * Get contacts for which RCS contact aggregation is not done.
+         */
+        Set<ContactId> contactsWithNoRcsAggregation = getContactsNotAssociatedWithRcsRawContact(
+                nativeContacts, rcsContacts);
+
+        Set<ContactId> contactsOnlySimAssociated = mContactManager
+                .getContactsOnlySimAssociated(nativeContacts);
+
+        /* Remove contacts which are only SIM associated since they cannot be aggregated */
+        contactsWithNoRcsAggregation.removeAll(contactsOnlySimAssociated);
+
+        for (ContactId contact : contactsWithNoRcsAggregation) {
+            ContactInfo contactInfo = mContactManager.getContactInfo(contact);
+            if (!contactInfo.isRcsContact()) {
+                /* Do not aggregate non RCS contact */
+                continue;
+            }
+            if (sLogger.isActivated()) {
+                sLogger.debug("handleAddressBookHasChanged: aggregate contact ".concat(contact
+                        .toString()));
+            }
+            mContactManager.aggregateContactWithRcsRawContact(contactInfo);
+        }
+
+        Set<ContactId> unqueriedContacts = nativeContacts.keySet();
+        /* Remove all contacts known from RCS contact provider to keep only un-queried contacts */
+        unqueriedContacts.removeAll(rcsContacts);
+        return unqueriedContacts;
+    }
+
+    private Thread synchronizeContacts() {
+        Thread synchronizationThread = new Thread() {
+            public void run() {
+                try {
+                    /* Stop listening to address book changes */
+                    mAddressBookManager.removeAddressBookListener(CapabilityService.this);
+
+                    mPollingManager.stop();
+
+                    final Set<ContactId> treated = new HashSet<ContactId>();
+                    do {
+                        final Set<ContactId> unqueriedContacts = aggregateNewContactsAndGetUnqueriedOnes();
+                        unqueriedContacts.removeAll(treated);
+                        if (unqueriedContacts.isEmpty()) {
+                            /*
+                             * All contacts have been synchronized.
+                             */
+                            try {
+                                Thread.sleep(LATENCY_BEFORE_LISTENING_TO_AB_CHANGES_MSEC);
+                            } catch (InterruptedException e) {
+                                return;
+                            }
+                            initialize();
+                            return;
+                        }
+
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("Synchronize capabilities for contacts ".concat(Arrays
+                                    .toString(unqueriedContacts.toArray())));
+                        }
+                        mOptionsManager.requestCapabilities(unqueriedContacts,
+                                new IOptionsManagerListener() {
+
+                                    @Override
+                                    public void endOfSynchronization() {
+                                        synchronized (unqueriedContacts) {
+                                            unqueriedContacts.notify();
+                                        }
+                                    }
+                                });
+                        synchronized (unqueriedContacts) {
+                            try {
+                                unqueriedContacts.wait();
+                                treated.addAll(unqueriedContacts);
+                            } catch (InterruptedException e) {
+                                return;
+                            }
+                        }
+                    } while (true);
+                } catch (ContactManagerException e) {
+                    // TODO CR037 exception handling
+                    sLogger.error("Failed to synchronize contacts!", e);
+                } catch (RuntimeException e) {
+                    /*
+                     * Intentionally catch runtime exceptions as else it will abruptly end the
+                     * thread and eventually bring the whole system down, which is not intended.
+                     */
+                    // TODO CR037 exception handling
+                    sLogger.error("Failed to synchronize contacts!", e);
+                }
+            }
+        };
+        synchronizationThread.start();
+        return synchronizationThread;
+    }
+
+    /**
      * Address book content has changed.<br>
      * This method requests update of capabilities for non RCS contacts (which capabilities are
      * unknown).<br>
@@ -249,71 +372,10 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      */
     @Override
     public void handleAddressBookHasChanged() throws ContactManagerException {
-        if (mCheckInProgress) {
-            mRecheckNeeded = true;
-            return;
+        if (sLogger.isActivated()) {
+            sLogger.debug("handle address book changes");
         }
-        /* We are beginning the check procedure */
-        mCheckInProgress = true;
-
-        /* Reset re-check flag */
-        mRecheckNeeded = false;
-
-        Map<ContactId, Set<Long>> nativeContacts = mContactManager.getAllRawIdsInPhoneAddressBook();
-
-        /*
-         * Remove my contact since already created in native address book and no need to query for
-         * capabilities.
-         */
-        nativeContacts.remove(ImsModule.IMS_USER_PROFILE.getUsername());
-
-        Set<ContactId> rcsContacts = mContactManager.getAllContactsFromRcsContactProvider();
-
-        boolean logActivated = sLogger.isActivated();
-
-        /*
-         * Gets contacts for which RCS contact aggregation is not done.
-         */
-        Set<ContactId> contactsWithNoRcsAggregation = getContactsNotAssociatedWithRcsRawContact(
-                nativeContacts, rcsContacts);
-
-        Set<ContactId> contactsOnlySimAssociated = mContactManager.getContactsOnlySimAssociated(nativeContacts);
-        
-        /* Remove contacts which are only SIM associated since they cannot be aggregated */
-        contactsWithNoRcsAggregation.removeAll(contactsOnlySimAssociated);
-        
-        for (ContactId contact : contactsWithNoRcsAggregation) {
-            ContactInfo contactInfo = mContactManager.getContactInfo(contact);
-            if (!contactInfo.isRcsContact()) {
-                /* Do not aggregate non RCS contact */
-                continue;
-            }
-            if (logActivated) {
-                sLogger.debug("handleAddressBookHasChanged: aggregate contact ".concat(contact
-                        .toString()));
-            }
-            mContactManager.aggregateContactWithRcsRawContact(contactInfo);
-        }
-
-        Set<ContactId> unqueriedContacts = new HashSet<ContactId>(nativeContacts.keySet());
-        /* Remove all contacts known from RCS contact provider to keep only unqueried contacts */
-        unqueriedContacts.removeAll(rcsContacts);
-
-        if (!unqueriedContacts.isEmpty()) {
-            if (logActivated) {
-                sLogger.debug("handleAddressBookHasChanged: request capabilities for contacts "
-                        .concat(Arrays.toString(unqueriedContacts.toArray())));
-            }
-            mOptionsManager.requestCapabilities(unqueriedContacts);
-        }
-
-        /* End of the check procedure */
-        mCheckInProgress = false;
-
-        /* Check if we have to make another check */
-        if (mRecheckNeeded) {
-            handleAddressBookHasChanged();
-        }
+        mSynchronizationThread = synchronizeContacts();
     }
 
     /**

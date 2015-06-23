@@ -114,12 +114,12 @@ public class ImsModule implements SipEventListener {
      * @param core Core
      * @param context The context this module is part of
      * @param rcsSettings RCSsettings instance
-     * @param contactsManager
-     * @param messagingLog
-     * @throws CoreException
+     * @param contactManager Contact manager accessor
+     * @param messagingLog Messaging log accessor
+     * @throws CoreException Exception thrown if IMS module failed to be initialized
      */
     public ImsModule(Core core, Context context, RcsSettings rcsSettings,
-            ContactManager contactsManager, MessagingLog messagingLog) throws CoreException {
+            ContactManager contactManager, MessagingLog messagingLog) throws CoreException {
         mCore = core;
 
         if (logger.isActivated()) {
@@ -158,25 +158,25 @@ public class ImsModule implements SipEventListener {
 
         // Create capability discovery service
         mServices.put(ImsServiceType.CAPABILITY, new CapabilityService(this, rcsSettings,
-                contactsManager));
+                contactManager));
 
         // Create IM service (mandatory)
         mServices.put(ImsServiceType.INSTANT_MESSAGING, new InstantMessagingService(this, core,
-                rcsSettings, contactsManager, messagingLog));
+                rcsSettings, contactManager, messagingLog));
 
         // Create IP call service (optional)
-        mServices.put(ImsServiceType.IPCALL, new IPCallService(this, rcsSettings, contactsManager));
+        mServices.put(ImsServiceType.IPCALL, new IPCallService(this, rcsSettings, contactManager));
 
         // Create richcall service (optional)
-        mServices.put(ImsServiceType.RICHCALL, new RichcallService(this, core, contactsManager,
+        mServices.put(ImsServiceType.RICHCALL, new RichcallService(this, core, contactManager,
                 rcsSettings));
 
         // Create presence service (optional)
         mServices.put(ImsServiceType.PRESENCE, new PresenceService(this, rcsSettings,
-                contactsManager));
+                contactManager));
 
         // Create generic SIP service
-        mServices.put(ImsServiceType.SIP, new SipService(this, contactsManager, rcsSettings));
+        mServices.put(ImsServiceType.SIP, new SipService(this, contactManager, rcsSettings));
 
         // Create the service dispatcher
         mServiceDispatcher = new ImsServiceDispatcher(this, rcsSettings);
@@ -299,6 +299,7 @@ public class ImsModule implements SipEventListener {
 
     /**
      * Stop IMS services
+     * @param reasonCode The reason code
      */
     public void stopImsServices(TerminationReason reasonCode) {
         // Terminate all pending sessions
@@ -443,6 +444,7 @@ public class ImsModule implements SipEventListener {
     /**
      * This function is used when all session needs to terminated in both invitation pending and
      * started state.
+     * @param reasonCode The reason code
      */
     public void terminateAllSessions(TerminationReason reasonCode) {
         if (logger.isActivated()) {

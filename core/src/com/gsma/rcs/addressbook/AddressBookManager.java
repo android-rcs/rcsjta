@@ -22,7 +22,6 @@
 
 package com.gsma.rcs.addressbook;
 
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.contact.ContactManagerException;
@@ -37,7 +36,6 @@ import android.provider.ContactsContract.CommonDataKinds.Phone;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -57,9 +55,6 @@ public class AddressBookManager {
      */
     private List<AddressBookEventListener> listeners = new ArrayList<AddressBookEventListener>();
 
-    /**
-     * Content resolver
-     */
     private ContentResolver mContentResolver;
 
     /**
@@ -67,14 +62,8 @@ public class AddressBookManager {
      */
     private Cursor mContactsContractCursor;
 
-    /**
-     * Content observer
-     */
     private ContactsContractObserver mContactsContractObserver;
 
-    /**
-     * Check handler
-     */
     private CheckHandler mCheckHandler = new CheckHandler();
 
     /**
@@ -97,22 +86,18 @@ public class AddressBookManager {
      */
     private ExecutorService mCleanupExecutor;
 
-    /**
-     * The logger
-     */
-    private Logger mLogger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(AddressBookManager.class.getName());
 
     private ContactManager mContactManager;
 
     /**
      * Constructor
      * 
-     * @param contactManager
-     * @throws CoreException
+     * @param contactManager Contact manager accessor
      */
-    public AddressBookManager(ContactManager contactManager) throws CoreException {
-        if (mLogger.isActivated()) {
-            mLogger.info("Address book manager is created");
+    public AddressBookManager(ContactManager contactManager) {
+        if (sLogger.isActivated()) {
+            sLogger.info("Address book manager is created");
         }
         mContentResolver = AndroidFactory.getApplicationContext().getContentResolver();
         mContactManager = contactManager;
@@ -122,8 +107,8 @@ public class AddressBookManager {
      * Start address book monitoring
      */
     public void startAddressBookMonitoring() {
-        if (mLogger.isActivated()) {
-            mLogger.info("Start address book monitoring");
+        if (sLogger.isActivated()) {
+            sLogger.info("Start address book monitoring");
         }
 
         // Instanciate background executor
@@ -148,8 +133,8 @@ public class AddressBookManager {
      * Stop address book monitoring
      */
     public void stopAddressBookMonitoring() {
-        if (mLogger.isActivated()) {
-            mLogger.info("Stop address book monitoring");
+        if (sLogger.isActivated()) {
+            sLogger.info("Stop address book monitoring");
         }
 
         // Remove the messages that may still be scheduled
@@ -209,8 +194,8 @@ public class AddressBookManager {
             if (!mCheckHandler.hasMessages(CHECK_MESSAGE)) {
                 // If we do not have a check already scheduled, schedule a new one
                 mCheckHandler.sendEmptyMessageDelayed(CHECK_MESSAGE, MINIMUM_CHECK_PERIOD);
-                if (mLogger.isActivated()) {
-                    mLogger.debug(new StringBuilder("New address book checking scheduled in ")
+                if (sLogger.isActivated()) {
+                    sLogger.debug(new StringBuilder("New address book checking scheduled in ")
                             .append(MINIMUM_CHECK_PERIOD).append(" ms").toString());
                 }
             }
@@ -231,8 +216,8 @@ public class AddressBookManager {
 
             if (msg.what == CHECK_MESSAGE) {
                 /* Clean RCS entries associated to numbers that have been removed or modified */
-                if (mLogger.isActivated()) {
-                    mLogger.debug("Minimum check period elapsed, notify the listeners that a change occured in the address book");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Minimum check period elapsed, notify the listeners that a change occured in the address book");
                 }
 
                 /*
@@ -278,7 +263,7 @@ public class AddressBookManager {
                                 }
                             } catch (ContactManagerException e) {
                                 // TODO CR037 exception handling
-                                mLogger.error("Failed to check address book!", e);
+                                sLogger.error("Failed to check address book!", e);
                             } catch (RuntimeException e) {
                                 /*
                                  * Intentionally catch runtime exceptions as else it will abruptly
@@ -286,7 +271,7 @@ public class AddressBookManager {
                                  * is not intended.
                                  */
                                 // TODO CR037 exception handling
-                                mLogger.error("Failed to check address book!", e);
+                                sLogger.error("Failed to check address book!", e);
                             }
                         }
                     });

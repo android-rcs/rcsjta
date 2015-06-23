@@ -37,6 +37,7 @@ import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.gsma.rcs.core.ims.service.SessionAuthenticationAgent;
 import com.gsma.rcs.core.ims.service.capability.OptionsManager.IOptionsRequestTaskListener;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -60,7 +61,7 @@ public class OptionsRequestTask implements Runnable {
 
     private final SessionAuthenticationAgent mAuthenticationAgent;
 
-    private final static Logger logger = Logger.getLogger(OptionsRequestTask.class.getName());
+    private final static Logger sLogger = Logger.getLogger(OptionsRequestTask.class.getName());
 
     private final RcsSettings mRcsSettings;
 
@@ -101,14 +102,14 @@ public class OptionsRequestTask implements Runnable {
      * Send an OPTIONS request
      */
     private void sendOptions() {
-        if (logger.isActivated()) {
-            logger.info("Send an OPTIONS message to " + mContact);
+        if (sLogger.isActivated()) {
+            sLogger.info("Send an options request to ".concat(mContact.toString()));
         }
 
         try {
             if (!mImsModule.getCurrentNetworkInterface().isRegistered()) {
-                if (logger.isActivated()) {
-                    logger.debug("IMS not registered, do nothing");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("IMS not registered, do nothing");
                 }
                 return;
             }
@@ -121,18 +122,24 @@ public class OptionsRequestTask implements Runnable {
                             .getSipManager().getSipStack().getServiceRoutePath(), mRcsSettings);
 
             // Create OPTIONS request
-            if (logger.isActivated()) {
-                logger.debug("Send first OPTIONS");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Send first OPTIONS");
             }
             SipRequest options = SipMessageFactory.createOptions(mDialogPath, mFeatureTags);
 
             // Send OPTIONS request
             sendAndWaitOptions(options);
         } catch (SipException e) {
-            logger.error("OPTIONS request has failed! Contact=".concat(mContact.toString()), e);
+            sLogger.error("Options request failed for contact " + mContact + " !", e);
             handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, e));
+        } catch (ContactManagerException e) {
+            sLogger.error("Options request failed for contact " + mContact + " !", e);
+        } catch (RuntimeException e) {
+            sLogger.error("Options request failed for contact " + mContact + " !", e);
         } finally {
-            mCallback.endOfTask(mContact);
+            if (mCallback != null) {
+                mCallback.endOfTask(mContact);
+            }
         }
     }
 
@@ -142,10 +149,12 @@ public class OptionsRequestTask implements Runnable {
      * @param options SIP OPTIONS
      * @throws SipPayloadException
      * @throws SipNetworkException
+     * @throws ContactManagerException
      */
-    private void sendAndWaitOptions(SipRequest options) throws SipPayloadException, SipNetworkException {
-        if (logger.isActivated()) {
-            logger.info("Send OPTIONS");
+    private void sendAndWaitOptions(SipRequest options) throws SipPayloadException,
+            SipNetworkException, ContactManagerException {
+        if (sLogger.isActivated()) {
+            sLogger.info("Send OPTIONS");
         }
 
         // Send OPTIONS request
@@ -172,8 +181,8 @@ public class OptionsRequestTask implements Runnable {
                         + " " + ctx.getReasonPhrase()));
             }
         } else {
-            if (logger.isActivated()) {
-                logger.debug("No response received for OPTIONS");
+            if (sLogger.isActivated()) {
+                sLogger.debug("No response received for OPTIONS");
             }
 
             // No response received: timeout
@@ -189,14 +198,13 @@ public class OptionsRequestTask implements Runnable {
      */
     private void handleUserNotRegistered(SipTransactionContext ctx) {
         /* 408 or 480 response received */
-        if (logger.isActivated()) {
-            logger.info("User " + mContact + " is not registered");
+        if (sLogger.isActivated()) {
+            sLogger.info("User " + mContact + " is not registered");
         }
         ContactInfo info = mContactManager.getContactInfo(mContact);
         if (RcsStatus.NO_INFO.equals(info.getRcsStatus())) {
             /*
-             * If there is not already some info on this contact: update the database with default
-             * capabilities
+             * If there is no info on this contact: update the database with default capabilities
              */
             mContactManager.setContactCapabilities(mContact, Capabilities.sDefaultCapabilities,
                     RcsStatus.NO_INFO, RegistrationState.OFFLINE);
@@ -220,8 +228,8 @@ public class OptionsRequestTask implements Runnable {
      */
     private void handleUserNotFound(SipTransactionContext ctx) {
         /* 404 response received */
-        if (logger.isActivated()) {
-            logger.info("User " + mContact + " is not found");
+        if (sLogger.isActivated()) {
+            sLogger.info("User " + mContact + " is not found");
         }
         /* The contact is not RCS */
         mContactManager.setContactCapabilities(mContact, Capabilities.sDefaultCapabilities,
@@ -236,25 +244,25 @@ public class OptionsRequestTask implements Runnable {
      * @param ctx SIP transaction context
      */
     private void handle200OK(SipTransactionContext ctx) {
-        // 200 OK response received
-        if (logger.isActivated()) {
-            logger.info("200 OK response received for " + mContact);
+        if (sLogger.isActivated()) {
+            sLogger.info("200 OK response received for " + mContact);
         }
 
-        // Read capabilities
+        /* Read capabilities */
         SipResponse resp = ctx.getSipResponse();
         Capabilities capabilities = CapabilityUtils.extractCapabilities(resp);
 
-        // Update capability time of last response
+        /* Update capability time of last response */
         mContactManager.updateCapabilitiesTimeLastResponse(mContact);
 
-        // Update the database capabilities
+        /* Update the database capabilities */
         if (capabilities.isImSessionSupported()) {
-            // The contact is RCS capable
+            /* The contact is RCS capable */
 
-            // Note RCS5.1 chapter 2.7.1.1: "a user shall be considered as unregistered when ... a
-            // response
-            // that included the automata tag defined in [RFC3840]".
+            /*
+             * Note RCS5.1 chapter 2.7.1.1: "a user shall be considered as unregistered when ... a
+             * response that included the automata tag defined in [RFC3840]".
+             */
             if (capabilities.isSipAutomata()) {
                 mContactManager.setContactCapabilities(mContact, capabilities,
                         RcsStatus.RCS_CAPABLE, RegistrationState.OFFLINE);
@@ -263,12 +271,10 @@ public class OptionsRequestTask implements Runnable {
                         RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE);
             }
         } else {
-            // The contact is not RCS
+            /* The contact is not RCS */
             mContactManager.setContactCapabilities(mContact, capabilities, RcsStatus.NOT_RCS,
                     RegistrationState.UNKNOWN);
         }
-
-        // Notify listener
         mImsModule.getCore().getListener().handleCapabilitiesNotification(mContact, capabilities);
     }
 
@@ -282,8 +288,8 @@ public class OptionsRequestTask implements Runnable {
     private void handle407Authentication(SipTransactionContext ctx) throws SipPayloadException,
             SipNetworkException {
         try {
-            if (logger.isActivated()) {
-                logger.info("407 response received");
+            if (sLogger.isActivated()) {
+                sLogger.info("407 response received");
             }
 
             SipResponse resp = ctx.getSipResponse();
@@ -293,8 +299,8 @@ public class OptionsRequestTask implements Runnable {
             mDialogPath.incrementCseq();
 
             /* Create a second OPTIONS request with the right token */
-            if (logger.isActivated()) {
-                logger.info("Send second OPTIONS");
+            if (sLogger.isActivated()) {
+                sLogger.info("Send second OPTIONS");
             }
             SipRequest options = SipMessageFactory.createOptions(mDialogPath, mFeatureTags);
 
@@ -302,6 +308,8 @@ public class OptionsRequestTask implements Runnable {
 
             sendAndWaitOptions(options);
         } catch (InvalidArgumentException e) {
+            throw new SipPayloadException("Unable to fetch Authorization header!", e);
+        } catch (ContactManagerException e) {
             throw new SipPayloadException("Unable to fetch Authorization header!", e);
         }
     }
@@ -312,13 +320,22 @@ public class OptionsRequestTask implements Runnable {
      * @param error Error
      */
     private void handleError(CapabilityError error) {
-        // Error
-        if (logger.isActivated()) {
-            logger.info("Options has failed for contact " + mContact + ": " + error.getErrorCode()
+        if (sLogger.isActivated()) {
+            sLogger.info("Options has failed for contact " + mContact + ": " + error.getErrorCode()
                     + ", reason=" + error.getMessage());
         }
-
-        // We update the database capabilities time of last request
-        mContactManager.updateCapabilitiesTimeLastRequest(mContact);
+        ContactInfo info = mContactManager.getContactInfo(mContact);
+        if (RcsStatus.NO_INFO.equals(info.getRcsStatus())) {
+            /*
+             * If there is no info on this contact: update the database with default capabilities
+             */
+            mContactManager.setContactCapabilities(mContact, Capabilities.sDefaultCapabilities,
+                    RcsStatus.NO_INFO, RegistrationState.OFFLINE);
+        } else {
+            /*
+             * There are info on this contact: update the database capabilities time of last request
+             */
+            mContactManager.updateCapabilitiesTimeLastRequest(mContact);
+        }
     }
 }
