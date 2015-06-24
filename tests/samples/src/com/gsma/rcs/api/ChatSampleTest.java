@@ -15,22 +15,12 @@ import android.util.Log;
 
 public class ChatSampleTest extends AndroidTestCase {
     private static final String TAG = "RCSAPI";
-
-    private RcsServiceListener apiServiceListener = new RcsServiceListener() {
-        @Override
-        public void onServiceDisconnected(ReasonCode error) {
-            Log.i(TAG, "Disconnected from the RCS service");
-        }
-
-        @Override
-        public void onServiceConnected() {
-            Log.i(TAG, "Connected to the RCS service");
-        }   
-    };
-    
+   
     private ContactId remote; 
     
     private ChatService chatApi;
+
+    private Synchronizer synchro = new Synchronizer();
 
     protected void setUp() throws Exception {
         super.setUp();
@@ -42,23 +32,55 @@ public class ChatSampleTest extends AndroidTestCase {
             Log.e(TAG, "Permission denied");
         }
         assertNotNull(remote);
-
-        // Instanciate the API
-        chatApi = new ChatService(mContext, apiServiceListener);
-        assertNotNull(chatApi);
-
-        // Connect to the API
-        chatApi.connect();
     }
    
     protected void tearDown() throws Exception {
         super.tearDown();
     }
+    
+    /**
+     * Test API methods
+     */
+    public void testApiMethods() {
+        Log.i(TAG, "testApiMethods");
+
+        // Instanciate the API
+        chatApi = new ChatService(mContext, new RcsServiceListener() {
+            @Override
+            public void onServiceDisconnected(ReasonCode error) {
+                Log.i(TAG, "Disconnected from the RCS service");
+            }
+
+            @Override
+            public void onServiceConnected() {
+                Log.i(TAG, "Connected to the RCS service");
+                
+                // Test any API method which requires a binding to the API
+                sendOneToOneChat();
+                
+                synchro.doNotify();
+            }   
+        });
+
+        // Connect to the API
+        try {
+            chatApi.connect();
+        } catch (RcsPermissionDeniedException e) {
+            Log.e(TAG, "Permission denied");
+        }
+        
+        synchro.doWait();
+        
+        // Disconnect from the API
+        chatApi.disconnect();       
+    }      
 
     /**
      * Sends a 1-1 chat message to a remote contact
      */
-    public void testSendOneToOneChat() {
+    public void sendOneToOneChat() {
+        Log.i(TAG, "testSendOneToOneChat");
+
         try {
             OneToOneChat chat = chatApi.getOneToOneChat(remote);
             chat.sendMessage("Hello world!");

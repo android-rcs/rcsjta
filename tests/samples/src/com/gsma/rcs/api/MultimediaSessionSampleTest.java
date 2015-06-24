@@ -16,24 +16,14 @@ import android.util.Log;
 public class MultimediaSessionSampleTest extends AndroidTestCase {
     private static final String TAG = "RCSAPI";
 
-    private RcsServiceListener apiServiceListener = new RcsServiceListener() {
-        @Override
-        public void onServiceDisconnected(ReasonCode error) {
-            Log.i(TAG, "Disconnected from the RCS service");
-        }
-
-        @Override
-        public void onServiceConnected() {
-            Log.i(TAG, "Connected to the RCS service");
-        }   
-    };
-    
     private ContactId remote; 
     
     private MultimediaSessionService sessionApi;
 
     private String serviceId = "ext.sample"; 
 
+    private Synchronizer synchro = new Synchronizer();  
+    
     protected void setUp() throws Exception {
         super.setUp();
         
@@ -44,13 +34,6 @@ public class MultimediaSessionSampleTest extends AndroidTestCase {
             Log.e(TAG, "Permission denied");
         }
         assertNotNull(remote);
-
-        // Instanciate the API
-        sessionApi = new MultimediaSessionService(mContext, apiServiceListener);
-        assertNotNull(sessionApi);
-
-        // Connect to the API
-        sessionApi.connect();
     }
    
     protected void tearDown() throws Exception {
@@ -58,9 +41,49 @@ public class MultimediaSessionSampleTest extends AndroidTestCase {
     }
 
     /**
-     * Initiaites a MM session with a remote contact
+     * Test API methods
      */
-    public void testInitiate() {
+    public void testApiMethods() {
+        Log.i(TAG, "testApiMethods");
+
+        // Instanciate the API
+        sessionApi = new MultimediaSessionService(mContext, new RcsServiceListener() {
+            @Override
+            public void onServiceDisconnected(ReasonCode error) {
+                Log.i(TAG, "Disconnected from the RCS service");
+            }
+
+            @Override
+            public void onServiceConnected() {
+                Log.i(TAG, "Connected to the RCS service");
+                
+                // Test any API method which requires a binding to the API
+                initiateSession();
+                
+                synchro.doNotify();
+            }   
+        });
+
+        // Connect to the API
+        try {
+            sessionApi.connect();
+        } catch (RcsPermissionDeniedException e) {
+            Log.e(TAG, "Permission denied");
+        }
+        
+        synchro.doWait();
+        
+        // Disconnect from the API
+        sessionApi.disconnect();       
+    }      
+    
+    
+    /**
+     * Initiates a MM session with a remote contact
+     */
+    public void initiateSession() {
+        Log.i(TAG, "testInitiateSession");
+        
         try {
             MultimediaMessagingSession session= sessionApi.initiateMessagingSession(serviceId, remote);
             // TODO

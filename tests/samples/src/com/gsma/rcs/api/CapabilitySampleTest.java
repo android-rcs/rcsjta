@@ -7,6 +7,7 @@ import com.gsma.services.rcs.RcsServiceListener;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.RcsServiceNotRegisteredException;
 import com.gsma.services.rcs.capability.Capabilities;
+import com.gsma.services.rcs.capability.CapabilitiesListener;
 import com.gsma.services.rcs.capability.CapabilitiesLog;
 import com.gsma.services.rcs.capability.CapabilityService;
 import com.gsma.services.rcs.contact.ContactId;
@@ -23,6 +24,8 @@ public class CapabilitySampleTest extends AndroidTestCase {
     private ContactId remote; 
     
     private CapabilityService capabilityApi;
+    
+    private Synchronizer synchro = new Synchronizer();    
 
     protected void setUp() throws Exception {
         super.setUp();
@@ -34,38 +37,58 @@ public class CapabilitySampleTest extends AndroidTestCase {
             Log.e(TAG, "Permission denied");
         }
         assertNotNull(remote);
-        
-        // Instanciate the API        
-        capabilityApi = new CapabilityService(mContext, apiServiceListener);
-        assertNotNull(capabilityApi);
-        
-        // Connect to the API
-        capabilityApi.connect();
     }
    
     protected void tearDown() throws Exception {
         super.tearDown();
-        
-        // Disconnect to the API
-        capabilityApi.disconnect();
     }
 
-    private RcsServiceListener apiServiceListener = new RcsServiceListener() {
-        @Override
-        public void onServiceDisconnected(ReasonCode error) {
-            Log.i(TAG, "Disconnected from the RCS service");
+    /**
+     * Test API methods
+     */
+    public void testApiMethods() {
+        Log.i(TAG, "testApiMethods");
+
+        // Instanciate the API
+        capabilityApi = new CapabilityService(mContext, new RcsServiceListener() {
+            @Override
+            public void onServiceDisconnected(ReasonCode error) {
+                Log.i(TAG, "Disconnected from the RCS service");
+            }
+
+            @Override
+            public void onServiceConnected() {
+                Log.i(TAG, "Connected to the RCS service");
+                
+                // Test any API method which requires a binding to the API
+                getMyCapabilities();
+                getContactCapabilities();
+                requestContactCapabilities();
+                receiveContactCapabilities();
+                
+                synchro.doNotify();
+            }   
+        });
+
+        // Connect to the API
+        try {
+            capabilityApi.connect();
+        } catch (RcsPermissionDeniedException e) {
+            Log.e(TAG, "Permission denied");
         }
-
-        @Override
-        public void onServiceConnected() {
-            Log.i(TAG, "Connected to the RCS service");
-        }   
-    };
-
+        
+        synchro.doWait();
+        
+        // Disconnect from the API
+        capabilityApi.disconnect();       
+    }    
+    
     /**
      * Gets my capabilities
      */
-    public void testGetMyCapabilities() {
+    public void getMyCapabilities() {
+        Log.i(TAG, "testGetMyCapabilities");
+
         try {
             Capabilities capa = capabilityApi.getMyCapabilities();
             if (capa != null) {
@@ -91,7 +114,9 @@ public class CapabilitySampleTest extends AndroidTestCase {
     /**
      * Gets capabilities of a remote contact
      */
-    public void testGetContactCapabilities() {
+    public void getContactCapabilities() {
+        Log.i(TAG, "testGetContactCapabilities");
+
         try {
             Capabilities capa = capabilityApi.getContactCapabilities(remote);
             if (capa != null) {
@@ -114,7 +139,9 @@ public class CapabilitySampleTest extends AndroidTestCase {
     /**
      * Requests a refresh of the capabilities for a remote contact
      */
-    public void testRequestContactCapabilities() {
+    public void requestContactCapabilities() {
+        Log.i(TAG, "testRequestContactCapabilities");
+        
         try {
             capabilityApi.requestContactCapabilities(remote);
         } catch (RcsServiceNotAvailableException e) {
@@ -127,9 +154,37 @@ public class CapabilitySampleTest extends AndroidTestCase {
     }
 
     /**
+     * Receives capabilities updates from remote contacts
+     */
+    public void receiveContactCapabilities() {
+        Log.i(TAG, "testReceiveContactCapabilities");
+
+        CapabilitiesListener listener = new CapabilitiesListener() {
+            public void onCapabilitiesReceived(ContactId contact, Capabilities capabilities) {
+                Log.i(TAG, "Capabilities of " + contact.toString() + ":");
+                Log.i(TAG, "- chat support: " + capabilities.isImSessionSupported());
+                Log.i(TAG, "- FT support: " + capabilities.isFileTransferSupported());
+                Log.i(TAG, "- Video share support: " + capabilities.isVideoSharingSupported());
+                Log.i(TAG, "- Image share support: " + capabilities.isImageSharingSupported());
+                Log.i(TAG, "- Geoloc share support: " + capabilities.isGeolocPushSupported());
+                Log.i(TAG, "- Extensions: " + capabilities.getSupportedExtensions().size());
+            }
+        };
+        try {
+            capabilityApi.addCapabilitiesListener(listener);
+        } catch (RcsServiceNotAvailableException e) {
+            Log.e(TAG, "RCS service not available");
+        } catch (RcsGenericException e) {
+            Log.e(TAG, "Unexpected error", e);
+        }
+    }
+
+    /**
      * Reads capabilities of a remote contact
      */
     public void testReadContactCapabilities() {
+        Log.i(TAG, "testReadContactCapabilities");
+
         String contactNumber = remote.toString();
         Uri uri = Uri.withAppendedPath(CapabilitiesLog.CONTENT_URI, contactNumber);
         Cursor cursor = mContext.getContentResolver().query(uri, null, null, null, null);
@@ -146,13 +201,6 @@ public class CapabilitySampleTest extends AndroidTestCase {
             Log.i(TAG, "Capabilities not found");
         }
         cursor.close();
-    }
-
-    /**
-     * Receives capabilities updates from remote contacts
-     */
-    public void testReceiveContactCapabilities() {
-        // TODO
     }
 
     // TODO: create an extension

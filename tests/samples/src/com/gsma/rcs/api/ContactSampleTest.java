@@ -18,21 +18,11 @@ import java.util.Set;
 public class ContactSampleTest extends AndroidTestCase {
     private static final String TAG = "RCSAPI";
 
-    private RcsServiceListener apiServiceListener = new RcsServiceListener() {
-        @Override
-        public void onServiceDisconnected(ReasonCode error) {
-            Log.i(TAG, "Disconnected from the RCS service");
-        }
-
-        @Override
-        public void onServiceConnected() {
-            Log.i(TAG, "Connected to the RCS service");
-        }   
-    };
-    
     private ContactId remote; 
     
     private ContactService contactApi;
+    
+    private Synchronizer synchro = new Synchronizer();
 
     protected void setUp() throws Exception {
         super.setUp();
@@ -44,13 +34,6 @@ public class ContactSampleTest extends AndroidTestCase {
             Log.e(TAG, "Permission denied");
         }
         assertNotNull(remote);
-
-        // Instanciate the API
-        contactApi = new ContactService(mContext, apiServiceListener);
-        assertNotNull(contactApi);        
-
-        // Connect to the API
-        contactApi.connect();
     }
    
     protected void tearDown() throws Exception {
@@ -61,6 +44,8 @@ public class ContactSampleTest extends AndroidTestCase {
      * Format a contact
      */
     public void testFormatContact() {
+        Log.i(TAG, "testFormatContact");
+        
         try {
             ContactId contact =  ContactUtil.getInstance(mContext).formatContact("06 81 63 90 59");
             Log.i(TAG, "Formatted contact: " + contact.toString());
@@ -70,40 +55,55 @@ public class ContactSampleTest extends AndroidTestCase {
         assertNotNull(remote);
     }
         
-    /**
-     * Blocks a remote contact
-     */
-    public void testBlockContact() {
-        try {
-            contactApi.blockContact(remote);
-        } catch (RcsServiceNotAvailableException e) {
-            Log.e(TAG, "RCS service not available");
-        } catch (RcsPersistentStorageException e) {
-            Log.e(TAG, "RCS service not available");
-        } catch (RcsGenericException e) {
-            Log.e(TAG, "Unexpected error", e);
-        }
-    }
-
-    /**
-     * Unblocks a remote contact
-     */
-    public void testUnblockContact() {
-        try {
-            contactApi.unblockContact(remote);
-        } catch (RcsServiceNotAvailableException e) {
-            Log.e(TAG, "RCS service not available");
-        } catch (RcsPersistentStorageException e) {
-            Log.e(TAG, "RCS service not available");
-        } catch (RcsGenericException e) {
-            Log.e(TAG, "Unexpected error", e);
-        }
-    }
     
+    /**
+     * Test API methods
+     */
+    public void testApiMethods() {
+        Log.i(TAG, "testApiMethods");
+
+        // Instanciate the API
+        contactApi = new ContactService(mContext, new RcsServiceListener() {
+            @Override
+            public void onServiceDisconnected(ReasonCode error) {
+                Log.i(TAG, "Disconnected from the RCS service");
+            }
+
+            @Override
+            public void onServiceConnected() {
+                Log.i(TAG, "Connected to the RCS service");
+                
+                // Test any API method which requires a binding to the API
+                getRcsContactInfo();
+                getRcsContactOnline();
+                getRcsContacts();
+                getRcsContactExt();
+                blockContact();
+                unblockContact();
+
+                synchro.doNotify();
+            }   
+        });
+
+        // Connect to the API
+        try {
+            contactApi.connect();
+        } catch (RcsPermissionDeniedException e) {
+            Log.e(TAG, "Permission denied");
+        }
+        
+        synchro.doWait();
+        
+        // Disconnect from the API
+        contactApi.disconnect();       
+    }
+       
     /**
      * Gets RCS info of a remote contact
      */
-    public void testGetRcsContactInfo() {
+    public void getRcsContactInfo() {
+        Log.i(TAG, "testGetRcsContactInfo");
+
         try {
             RcsContact contact = contactApi.getRcsContact(remote);
             if (contact != null) {
@@ -126,7 +126,9 @@ public class ContactSampleTest extends AndroidTestCase {
     /**
      * Gets online RCS contacts
      */
-    public void testGetRcsContactOnline() {
+    public void getRcsContactOnline() {
+        Log.i(TAG, "testGetRcsContactOnline");
+
         try {
             Set<RcsContact> contacts = contactApi.getRcsContactsOnline();
             Log.i(TAG, "Number of contacts online: " + contacts.size());
@@ -142,7 +144,9 @@ public class ContactSampleTest extends AndroidTestCase {
     /**
      * Gets all RCS contacts
      */
-    public void testGetRcsContacts() {
+    public void getRcsContacts() {
+        Log.i(TAG, "testGetRcsContacts");
+
         try {
             Set<RcsContact> contacts = contactApi.getRcsContacts();
             Log.i(TAG, "Number of RCS contacts: " + contacts.size());
@@ -158,7 +162,9 @@ public class ContactSampleTest extends AndroidTestCase {
     /**
      * Gets RCS contacts supporting a given extension
      */
-    public void testGetRcsContactExt() {
+    public void getRcsContactExt() {
+        Log.i(TAG, "testGetRcsContactExt");
+
         try {
             Set<RcsContact> contacts = contactApi.getRcsContactsSupporting("ext.game");
             Log.i(TAG, "Number of contacts supporting the extension 'ext.game': " + contacts.size());
@@ -170,4 +176,41 @@ public class ContactSampleTest extends AndroidTestCase {
             Log.e(TAG, "Unexpected error", e);
         }
     }
+    
+    /**
+     * Blocks a remote contact
+     */
+    public void blockContact() {
+        Log.i(TAG, "testBlockContact");
+        
+        try {
+            contactApi.blockContact(remote);
+            RcsContact contact = contactApi.getRcsContact(remote);
+            assertTrue(contact.isBlocked());
+        } catch (RcsServiceNotAvailableException e) {
+            Log.e(TAG, "RCS service not available");
+        } catch (RcsPersistentStorageException e) {
+            Log.e(TAG, "RCS service not available");
+        } catch (RcsGenericException e) {
+            Log.e(TAG, "Unexpected error", e);
+        }
+    }
+
+    /**
+     * Unblocks a remote contact
+     */
+    public void unblockContact() {
+        Log.i(TAG, "testUnblockContact");
+        try {
+            contactApi.unblockContact(remote);
+            RcsContact contact = contactApi.getRcsContact(remote);
+            assertFalse(contact.isBlocked());
+        } catch (RcsServiceNotAvailableException e) {
+            Log.e(TAG, "RCS service not available");
+        } catch (RcsPersistentStorageException e) {
+            Log.e(TAG, "RCS service not available");
+        } catch (RcsGenericException e) {
+            Log.e(TAG, "Unexpected error", e);
+        }
+    }    
 }
