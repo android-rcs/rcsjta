@@ -173,8 +173,7 @@ public class LauncherUtils {
         mMessagingLog.deleteAllEntries();
 
         /* Clear all entries in IP call table */
-        IPCallHistory.createInstance(localContentResolver);
-        IPCallHistory.getInstance().deleteAllEntries();
+        IPCallHistory.createInstance(localContentResolver).deleteAllEntries();
 
         /* Clear all entries in Rich Call tables (image and video) */
         RichCallHistory.createInstance(localContentResolver);

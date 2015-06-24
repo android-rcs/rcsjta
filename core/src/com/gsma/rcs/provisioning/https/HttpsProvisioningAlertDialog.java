@@ -82,7 +82,7 @@ public class HttpsProvisioningAlertDialog extends Activity {
                     if (sLogger.isActivated())  {
                         sLogger.debug("User entered MSISDN ".concat(phoneNumber.getNumber()));
                     }
-                    HttpsProvionningMSISDNInput.getInstance().responseReceived(
+                    HttpsProvisioningMSISDNInput.getInstance().responseReceived(
                             ContactUtil.createContactIdFromValidatedData(phoneNumber));
                     finish();
                 }
@@ -96,7 +96,7 @@ public class HttpsProvisioningAlertDialog extends Activity {
                 if (sLogger.isActivated())  {
                     sLogger.warn("User cancelled the MSISDN dialog!");
                 }
-                HttpsProvionningMSISDNInput.getInstance().responseReceived(null);
+                HttpsProvisioningMSISDNInput.getInstance().responseReceived(null);
                 finish();
             }
         });
@@ -111,7 +111,7 @@ public class HttpsProvisioningAlertDialog extends Activity {
                 if (sLogger.isActivated())  {
                     sLogger.warn("MSISDN dialog has expired!");
                 }
-                HttpsProvionningMSISDNInput.getInstance().responseReceived(null);
+                HttpsProvisioningMSISDNInput.getInstance().responseReceived(null);
                 mCountDownTimer = null;
                 finish();
             }
@@ -125,7 +125,7 @@ public class HttpsProvisioningAlertDialog extends Activity {
                 if (sLogger.isActivated())  {
                     sLogger.warn("User exited the MSISDN dialog!");
                 }
-                HttpsProvionningMSISDNInput.getInstance().responseReceived(null);
+                HttpsProvisioningMSISDNInput.getInstance().responseReceived(null);
                 finish();
                 return true;
         }

@@ -336,8 +336,7 @@ public class RcsCoreService extends Service implements CoreListener {
 
             IPCallHistory.createInstance(mLocalContentResolver);
 
-            HistoryLog.createInstance(mLocalContentResolver);
-            mHistoryLog = HistoryLog.getInstance();
+            mHistoryLog = HistoryLog.createInstance(mLocalContentResolver);
 
             // Create the core
             Core.createCore(this, mRcsSettings, mContactManager, mMessagingLog);
@@ -368,8 +367,9 @@ public class RcsCoreService extends Service implements CoreListener {
                     mRichCallHistory, mRcsSettings, mLocalContentResolver, mRcOperationExecutor,
                     mOperationLock);
             mHistoryApi = new HistoryServiceImpl(getApplicationContext());
-            mIpcallApi = new IPCallServiceImpl(ipCallService, IPCallHistory.getInstance(),
-                    mContactManager, mRcsSettings);
+            mIpcallApi = new IPCallServiceImpl(ipCallService,
+                    IPCallHistory.createInstance(mLocalContentResolver), mContactManager,
+                    mRcsSettings);
             mSessionApi = new MultimediaSessionServiceImpl(sipService, mRcsSettings,
                     mContactManager);
             mUploadApi = new FileUploadServiceImpl(imService, mRcsSettings);
@@ -1053,8 +1053,9 @@ public class RcsCoreService extends Service implements CoreListener {
 
     @Override
     public void tryToDequeueGroupChatMessagesAndGroupFileTransfers(String chatId, Core core) {
-        mImOperationExecutor.execute(new GroupChatDequeueTask(mOperationLock, mContext, core,
-                chatId, mMessagingLog, mChatApi, mFtApi, mRcsSettings, mHistoryLog, mContactManager));
+        mImOperationExecutor
+                .execute(new GroupChatDequeueTask(mOperationLock, mContext, core, chatId,
+                        mMessagingLog, mChatApi, mFtApi, mRcsSettings, mHistoryLog, mContactManager));
     }
 
     @Override
@@ -1071,8 +1072,8 @@ public class RcsCoreService extends Service implements CoreListener {
 
     @Override
     public void tryToDequeueFileTransfers(Core core) {
-        mImOperationExecutor.execute(new FileTransferDequeueTask(mOperationLock, mContext,
-                core, mMessagingLog, mChatApi, mFtApi, mContactManager, mRcsSettings));
+        mImOperationExecutor.execute(new FileTransferDequeueTask(mOperationLock, mContext, core,
+                mMessagingLog, mChatApi, mFtApi, mContactManager, mRcsSettings));
     }
 
     @Override

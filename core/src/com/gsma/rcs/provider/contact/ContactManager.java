@@ -126,8 +126,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * Contains utility methods for interfacing with the Android SDK ContactProvider and the RCS contact
@@ -458,9 +458,6 @@ public final class ContactManager {
      */
     public static ContactManager createInstance(Context ctx, ContentResolver contentResolver,
             LocalContentResolver localContentResolver, RcsSettings rcsSettings) {
-        if (sInstance != null) {
-            return sInstance;
-        }
         synchronized (ContactManager.class) {
             if (sInstance == null) {
                 sInstance = new ContactManager(ctx, contentResolver, localContentResolver,

@@ -81,9 +81,6 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      */
     public static MessagingLog createInstance(LocalContentResolver localContentResolver,
             RcsSettings rcsSettings) {
-        if (sInstance != null) {
-            return sInstance;
-        }
         synchronized (MessagingLog.class) {
             if (sInstance == null) {
                 sInstance = new MessagingLog(localContentResolver, rcsSettings);

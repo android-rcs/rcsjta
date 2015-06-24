@@ -45,7 +45,7 @@ public class ServiceExtensionManager {
     /**
      * Singleton of ServiceExtensionManager
      */
-    private static volatile ServiceExtensionManager mInstance;
+    private static volatile ServiceExtensionManager sInstance;
 
     private static final String EXTENSION_SEPARATOR = ";";
 
@@ -70,14 +70,12 @@ public class ServiceExtensionManager {
      * @return the singleton instance.
      */
     public static ServiceExtensionManager getInstance(RcsSettings rcsSettings) {
-        if (mInstance == null) {
-            synchronized (ServiceExtensionManager.class) {
-                if (mInstance == null) {
-                    mInstance = new ServiceExtensionManager(rcsSettings);
-                }
+        synchronized (ServiceExtensionManager.class) {
+            if (sInstance == null) {
+                sInstance = new ServiceExtensionManager(rcsSettings);
             }
+            return sInstance;
         }
-        return mInstance;
     }
 
     /**

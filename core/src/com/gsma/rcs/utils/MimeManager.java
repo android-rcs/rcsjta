@@ -22,12 +22,12 @@
 
 package com.gsma.rcs.utils;
 
+import android.text.TextUtils;
+import android.webkit.MimeTypeMap;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-
-import android.text.TextUtils;
-import android.webkit.MimeTypeMap;
 
 /**
  * MIME manager
@@ -42,7 +42,7 @@ public class MimeManager {
      * Singleton instance to access Two-way map that maps MIME-types to file extensions and vice
      * versa.
      */
-    private static MimeManager instance;
+    private static MimeManager sInstance;
 
     /**
      * Mime-Type to file extension mapping:
@@ -72,30 +72,32 @@ public class MimeManager {
      * @return The singleton instance of the MIME-type map.
      */
     public static MimeManager getInstance() {
-        if (instance == null) {
-            instance = new MimeManager();
+        synchronized (MimeManager.class) {
+            if (sInstance == null) {
+                sInstance = new MimeManager();
 
-            // Image type
-            instance.loadMap("jpg", "image/jpeg");
-            instance.loadMap("jpeg", "image/jpeg");
-            instance.loadMap("png", "image/png");
-            instance.loadMap("bmp", "image/bmp");
+                // Image type
+                sInstance.loadMap("jpg", "image/jpeg");
+                sInstance.loadMap("jpeg", "image/jpeg");
+                sInstance.loadMap("png", "image/png");
+                sInstance.loadMap("bmp", "image/bmp");
 
-            // Video type
-            instance.loadMap("3gp", "video/3gpp");
-            instance.loadMap("mp4", "video/mp4");
-            instance.loadMap("mp4a", "video/mp4");
-            instance.loadMap("mpeg4", "video/mp4");
-            instance.loadMap("mpeg", "video/mpeg");
-            instance.loadMap("mpg", "video/mpeg");
+                // Video type
+                sInstance.loadMap("3gp", "video/3gpp");
+                sInstance.loadMap("mp4", "video/mp4");
+                sInstance.loadMap("mp4a", "video/mp4");
+                sInstance.loadMap("mpeg4", "video/mp4");
+                sInstance.loadMap("mpeg", "video/mpeg");
+                sInstance.loadMap("mpg", "video/mpeg");
 
-            // Visit Card type
-            instance.loadMap("vcf", "text/vcard");
+                // Visit Card type
+                sInstance.loadMap("vcf", "text/vcard");
 
-            // Geoloc type
-            instance.loadMap("xml", "application/vnd.gsma.rcspushlocation+xml");
+                // Geoloc type
+                sInstance.loadMap("xml", "application/vnd.gsma.rcspushlocation+xml");
+            }
+            return sInstance;
         }
-        return instance;
     }
 
     /**
@@ -160,7 +162,7 @@ public class MimeManager {
      * @return Set of image MIME-types
      */
     public Set<String> getSupportedImageMimeTypes() {
-        return instance.imageMimeTypeSet;
+        return sInstance.imageMimeTypeSet;
     }
 
     /**

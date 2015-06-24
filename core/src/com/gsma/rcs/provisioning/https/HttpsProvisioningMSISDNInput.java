@@ -28,12 +28,12 @@ import android.content.Intent;
  * 
  * @author Orange
  */
-public final class HttpsProvionningMSISDNInput {
+public final class HttpsProvisioningMSISDNInput {
 
     /**
-     * HttpsProvionningMSISDNInput instance
+     * HttpsProvisioningMSISDNInput instance
      */
-    private static volatile HttpsProvionningMSISDNInput sInstance;
+    private static volatile HttpsProvisioningMSISDNInput sInstance;
 
     /**
      * MSISDN
@@ -43,7 +43,7 @@ public final class HttpsProvionningMSISDNInput {
     /**
      * Constructor
      */
-    private HttpsProvionningMSISDNInput() {
+    private HttpsProvisioningMSISDNInput() {
         super();
     }
 
@@ -57,20 +57,17 @@ public final class HttpsProvionningMSISDNInput {
     }
 
     /**
-     * Returns the Instance of HttpsProvionningMSISDNDialog
+     * Returns the Instance of HttpsProvisioningMSISDNDialog
      * 
-     * @return Instance of HttpsProvionningMSISDNDialog
+     * @return Instance of HttpsProvisioningMSISDNDialog
      */
-    public final static HttpsProvionningMSISDNInput getInstance() {
-        if (sInstance != null) {
+    public final static HttpsProvisioningMSISDNInput getInstance() {
+        synchronized (HttpsProvisioningMSISDNInput.class) {
+            if (sInstance == null) {
+                sInstance = new HttpsProvisioningMSISDNInput();
+            }
             return sInstance;
         }
-        synchronized (HttpsProvionningMSISDNInput.class) {
-            if (sInstance == null) {
-                sInstance = new HttpsProvionningMSISDNInput();
-            }
-        }
-        return sInstance;
     }
 
     /**

@@ -445,7 +445,7 @@ public class HttpsProvisioningManager {
                                 + msisdn);
                     }
 
-                    msisdn = HttpsProvionningMSISDNInput.getInstance().displayPopupAndWaitResponse(
+                    msisdn = HttpsProvisioningMSISDNInput.getInstance().displayPopupAndWaitResponse(
                             mCtx);
 
                     if (msisdn == null) {

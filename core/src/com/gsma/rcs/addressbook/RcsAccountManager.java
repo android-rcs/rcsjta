@@ -76,9 +76,6 @@ public class RcsAccountManager {
      * @return singleton instance of RcsAccountManager
      */
     public static RcsAccountManager createInstance(Context context, ContactManager contactManager) {
-        if (sInstance != null) {
-            return sInstance;
-        }
         synchronized (RcsAccountManager.class) {
             if (sInstance == null) {
                 sInstance = new RcsAccountManager(context, contactManager);

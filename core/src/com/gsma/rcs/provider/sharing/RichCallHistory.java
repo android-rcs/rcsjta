@@ -48,7 +48,7 @@ public class RichCallHistory {
     /**
      * Current instance
      */
-    private static RichCallHistory mInstance;
+    private static RichCallHistory sInstance;
 
     private final LocalContentResolver mLocalContentResolver;
 
@@ -170,9 +170,11 @@ public class RichCallHistory {
      * 
      * @param localContentResolver Local content resolver
      */
-    public static synchronized void createInstance(LocalContentResolver localContentResolver) {
-        if (mInstance == null) {
-            mInstance = new RichCallHistory(localContentResolver);
+    public static void createInstance(LocalContentResolver localContentResolver) {
+        synchronized (RichCallHistory.class) {
+            if (sInstance == null) {
+                sInstance = new RichCallHistory(localContentResolver);
+            }
         }
     }
 
@@ -182,7 +184,9 @@ public class RichCallHistory {
      * @return Instance
      */
     public static RichCallHistory getInstance() {
-        return mInstance;
+        synchronized (RichCallHistory.class) {
+            return sInstance;
+        }
     }
 
     /**

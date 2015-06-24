@@ -30,7 +30,7 @@ import android.net.Uri;
 
 public class HistoryLog {
 
-    private static HistoryLog sHistoryLog;
+    private static HistoryLog sInstance;
 
     private final LocalContentResolver mLocalContentResolver;
 
@@ -65,7 +65,8 @@ public class HistoryLog {
     private static final String SELECTION_QUEUED_ONETOONECHATMESSAGES_AND_ONETOONE_FILETRANSFERS = new StringBuilder(
             HistoryLogData.KEY_CHAT_ID).append("=").append(HistoryLogData.KEY_CONTACT)
             .append(" AND (").append(SELECTION_QUEUED_CHATMESSAGES_AND_FILETRANSFERS)
-            .append(" OR ").append(SELECTION_UPLOADED_BUT_NOT_TRANSFERRED_FILETRANSFERS).append(')').toString();
+            .append(" OR ").append(SELECTION_UPLOADED_BUT_NOT_TRANSFERRED_FILETRANSFERS)
+            .append(')').toString();
 
     private static final String ORDER_BY_TIMESTAMP_ASC = HistoryLogData.KEY_TIMESTAMP
             .concat(" ASC");
@@ -78,20 +79,15 @@ public class HistoryLog {
      * Create instance
      * 
      * @param localContentResolver Local content resolver
+     * @return HistoryLog instance
      */
-    public static synchronized void createInstance(LocalContentResolver localContentResolver) {
-        if (sHistoryLog == null) {
-            sHistoryLog = new HistoryLog(localContentResolver);
+    public static HistoryLog createInstance(LocalContentResolver localContentResolver) {
+        synchronized (HistoryLog.class) {
+            if (sInstance == null) {
+                sInstance = new HistoryLog(localContentResolver);
+            }
+            return sInstance;
         }
-    }
-
-    /**
-     * Returns instance
-     * 
-     * @return Instance
-     */
-    public static HistoryLog getInstance() {
-        return sHistoryLog;
     }
 
     public Cursor getQueuedGroupChatMessagesAndGroupFileTransfers(String chatId) {
