@@ -112,13 +112,13 @@ public class ImsModule implements SipEventListener {
      * Constructor
      * 
      * @param core Core
-     * @param context The context this module is part of
+     * @param ctx The context this module is part of
      * @param rcsSettings RCSsettings instance
      * @param contactManager Contact manager accessor
      * @param messagingLog Messaging log accessor
      * @throws CoreException Exception thrown if IMS module failed to be initialized
      */
-    public ImsModule(Core core, Context context, RcsSettings rcsSettings,
+    public ImsModule(Core core, Context ctx, RcsSettings rcsSettings,
             ContactManager contactManager, MessagingLog messagingLog) throws CoreException {
         mCore = core;
 
@@ -127,7 +127,7 @@ public class ImsModule implements SipEventListener {
         }
 
         // Get capability extensions
-        ServiceExtensionManager.getInstance(rcsSettings).updateSupportedExtensions(context);
+        ServiceExtensionManager.getInstance(rcsSettings).updateSupportedExtensions(ctx);
 
         // Create the IMS connection manager
         try {
@@ -172,7 +172,7 @@ public class ImsModule implements SipEventListener {
                 rcsSettings));
 
         // Create presence service (optional)
-        mServices.put(ImsServiceType.PRESENCE, new PresenceService(this, rcsSettings,
+        mServices.put(ImsServiceType.PRESENCE, new PresenceService(this, ctx, rcsSettings,
                 contactManager));
 
         // Create generic SIP service
@@ -182,7 +182,7 @@ public class ImsModule implements SipEventListener {
         mServiceDispatcher = new ImsServiceDispatcher(this, rcsSettings);
 
         // Create the call manager
-        mCallManager = new CallManager(this, context);
+        mCallManager = new CallManager(this, ctx);
 
         mInitializationFinished = true;
 
@@ -299,6 +299,7 @@ public class ImsModule implements SipEventListener {
 
     /**
      * Stop IMS services
+     * 
      * @param reasonCode The reason code
      */
     public void stopImsServices(TerminationReason reasonCode) {
@@ -444,6 +445,7 @@ public class ImsModule implements SipEventListener {
     /**
      * This function is used when all session needs to terminated in both invitation pending and
      * started state.
+     * 
      * @param reasonCode The reason code
      */
     public void terminateAllSessions(TerminationReason reasonCode) {

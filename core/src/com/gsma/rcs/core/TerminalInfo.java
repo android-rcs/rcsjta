@@ -47,7 +47,7 @@ public class TerminalInfo {
     /**
      * Product version
      */
-    private static String productVersion = "v2.2";
+    private static String sProductVersion;
 
     /**
      * RCS client version. Client Version Value = Platform "-" VersionMajor "." VersionMinor
@@ -82,17 +82,18 @@ public class TerminalInfo {
      * 
      * @return Version
      */
-    public static String getProductVersion() {
-        return productVersion;
-    }
-
-    /**
-     * Set the product version
-     * 
-     * @param version Version
-     */
-    public static void setProductVersion(String version) {
-        TerminalInfo.productVersion = version;
+    public static String getProductVersion(Context ctx) {
+        if (sProductVersion == null) {
+            try {
+                sProductVersion = ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0).versionName;
+            } catch (NameNotFoundException e) {
+                if (sLogger.isActivated()) {
+                    sLogger.error("Version Name not defined in Manifest", e);
+                }
+                sProductVersion = UNKNOWN;
+            }
+        }
+        return sProductVersion;
     }
 
     /**
@@ -101,7 +102,8 @@ public class TerminalInfo {
      * @return product information
      */
     public static String getProductInfo() {
-        return productName + "/" + productVersion;
+        return new StringBuilder(productName).append(FORWARD_SLASH).append(sProductVersion)
+                .toString();
     }
 
     /**
@@ -116,17 +118,8 @@ public class TerminalInfo {
      */
     public static String getClientVersion(Context ctx) {
         if (sClientVersion == null) {
-            try {
-                final String versionFromManifest = ctx.getPackageManager().getPackageInfo(
-                        ctx.getPackageName(), 0).versionName;
-                sClientVersion = new StringBuilder(CLIENT_VERSION_PREFIX).append(
-                        versionFromManifest).toString();
-            } catch (NameNotFoundException e) {
-                if (sLogger.isActivated()) {
-                    sLogger.error("Version Name not defined in Manifest", e);
-                }
-                sClientVersion = UNKNOWN;
-            }
+            sClientVersion = new StringBuilder(CLIENT_VERSION_PREFIX)
+                    .append(getProductVersion(ctx)).toString();
         }
         return sClientVersion;
     }

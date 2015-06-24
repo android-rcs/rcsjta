@@ -28,6 +28,7 @@ import static com.gsma.rcs.utils.StringUtils.UTF8_STR;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
@@ -177,8 +178,10 @@ public class FileTransferUtils {
      * @param request Request
      * @param rcsSettings
      * @return fileIcon the file icon content persisted on disk
+     * @throws SipNetworkException
      */
-    public static MmContent extractFileIcon(SipRequest request, RcsSettings rcsSettings) {
+    public static MmContent extractFileIcon(SipRequest request, RcsSettings rcsSettings)
+            throws SipNetworkException {
         try {
             // Extract message from content/CPIM
             String content = request.getContent();
@@ -211,12 +214,11 @@ public class FileTransferUtils {
                     return result;
                 }
             }
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error(e.getMessage(), e);
-            }
+            return null;
+
+        } catch (IOException e) {
+            throw new SipNetworkException("Failed to extract file icon!", e);
         }
-        return null;
     }
 
     /**

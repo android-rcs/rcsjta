@@ -25,6 +25,8 @@ package com.gsma.rcs.core.ims.service.im.chat;
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.im.chat.resourcelist.ResourceListDocument;
 import com.gsma.rcs.core.ims.service.im.chat.resourcelist.ResourceListParser;
 import com.gsma.rcs.utils.ContactUtil;
@@ -34,10 +36,14 @@ import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Utilities for ParticipantInfo
@@ -58,9 +64,11 @@ public class ParticipantInfoUtils {
      * @param xml Resource-list document in XML
      * @param status Participant info status
      * @return the set of participants
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
     public static Map<ContactId, ParticipantStatus> parseResourceList(String xml,
-            ParticipantStatus status) {
+            ParticipantStatus status) throws SipNetworkException, SipPayloadException {
         Map<ContactId, ParticipantStatus> participants = new HashMap<ContactId, ParticipantStatus>();
         try {
             InputSource pidfInput = new InputSource(new ByteArrayInputStream(xml.getBytes(UTF8)));
@@ -81,10 +89,14 @@ public class ParticipantInfoUtils {
                     }
                 }
             }
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't parse resource-list document", e);
-            }
+        } catch (IOException e) {
+            throw new SipNetworkException("Can't parse resource-list document!", e);
+
+        } catch (ParserConfigurationException e) {
+            throw new SipPayloadException("Can't parse resource-list document!", e);
+
+        } catch (SAXException e) {
+            throw new SipPayloadException("Can't parse resource-list document!", e);
         }
         return participants;
     }

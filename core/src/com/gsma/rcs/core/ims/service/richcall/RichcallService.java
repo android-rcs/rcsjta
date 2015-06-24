@@ -33,6 +33,7 @@ import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
@@ -481,9 +482,10 @@ public class RichcallService extends ImsService {
      * @param invite Initial invite
      * @param timestamp Local timestamp when got SipRequest
      * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     public void receiveImageSharingInvitation(SipRequest invite, long timestamp)
-            throws SipPayloadException {
+            throws SipPayloadException, SipNetworkException {
         boolean logActivated = sLogger.isActivated();
         if (logActivated) {
             sLogger.info("Receive an image sharing session invitation");

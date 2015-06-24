@@ -16,13 +16,12 @@
 
 package com.gsma.rcs.utils;
 
-import com.gsma.rcs.utils.logger.Logger;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
 import android.content.Intent;
 import android.os.Build;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * IntentUtils class sets appropriate flags to an intent using reflection
@@ -42,8 +41,6 @@ public class IntentUtils {
     private static final String FLAG_EXCLUDE_STOPPED_PACKAGES = "FLAG_EXCLUDE_STOPPED_PACKAGES";
 
     private static final String FLAG_RECEIVER_FOREGROUND = "FLAG_RECEIVER_FOREGROUND";
-
-    private static final Logger logger = Logger.getLogger(IntentUtils.class.getSimpleName());
 
     /**
      * Using reflection to add FLAG_EXCLUDE_STOPPED_PACKAGES support backward compatibility.
@@ -67,11 +64,21 @@ public class IntentUtils {
             Field flagExcludeStoppedPackages = intent.getClass().getDeclaredField(
                     FLAG_EXCLUDE_STOPPED_PACKAGES);
             addflagsMethod.invoke(intent, flagExcludeStoppedPackages.getInt(IntentUtils.class));
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Could not add FLAG_EXCLUDE_STOPPED_PACKAGES to intent."
-                        + e.getClass().toString());
-            }
+        } catch (NoSuchMethodException e) {
+            throw new UnsupportedOperationException(
+                    "Could not add FLAG_EXCLUDE_STOPPED_PACKAGES to intent!", e);
+
+        } catch (NoSuchFieldException e) {
+            throw new UnsupportedOperationException(
+                    "Could not add FLAG_EXCLUDE_STOPPED_PACKAGES to intent!", e);
+
+        } catch (IllegalAccessException e) {
+            throw new UnsupportedOperationException(
+                    "Could not add FLAG_EXCLUDE_STOPPED_PACKAGES to intent!", e);
+
+        } catch (InvocationTargetException e) {
+            throw new UnsupportedOperationException(
+                    "Could not add FLAG_EXCLUDE_STOPPED_PACKAGES to intent!", e);
         }
     }
 
@@ -97,11 +104,21 @@ public class IntentUtils {
             Field flagReceiverForeground = intent.getClass().getDeclaredField(
                     FLAG_RECEIVER_FOREGROUND);
             addflagsMethod.invoke(intent, flagReceiverForeground.getInt(IntentUtils.class));
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Could not add FLAG_RECEIVER_FOREGROUND to intent."
-                        + e.getClass().toString());
-            }
+        } catch (NoSuchMethodException e) {
+            throw new UnsupportedOperationException(
+                    "Could not add FLAG_RECEIVER_FOREGROUND to intent!", e);
+
+        } catch (NoSuchFieldException e) {
+            throw new UnsupportedOperationException(
+                    "Could not add FLAG_RECEIVER_FOREGROUND to intent!", e);
+
+        } catch (IllegalAccessException e) {
+            throw new UnsupportedOperationException(
+                    "Could not add FLAG_RECEIVER_FOREGROUND to intent!", e);
+
+        } catch (InvocationTargetException e) {
+            throw new UnsupportedOperationException(
+                    "Could not add FLAG_RECEIVER_FOREGROUND to intent!", e);
         }
     }
 }

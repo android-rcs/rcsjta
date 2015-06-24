@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +15,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.im.chat.resourcelist;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
+
+import java.io.IOException;
 
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -48,15 +56,18 @@ public class ResourceListParser extends DefaultHandler {
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(ResourceListParser.class.getName());
 
     /**
      * Constructor
      * 
      * @param inputSource Input source
-     * @throws Exception
+     * @throws SAXException
+     * @throws IOException
+     * @throws ParserConfigurationException
      */
-    public ResourceListParser(InputSource inputSource) throws Exception {
+    public ResourceListParser(InputSource inputSource) throws ParserConfigurationException,
+            SAXException, IOException {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser parser = factory.newSAXParser();
         parser.parse(inputSource, this);
@@ -67,8 +78,8 @@ public class ResourceListParser extends DefaultHandler {
     }
 
     public void startDocument() {
-        if (logger.isActivated()) {
-            logger.debug("Start document");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Start document");
         }
         accumulator = new StringBuffer();
     }
@@ -90,15 +101,15 @@ public class ResourceListParser extends DefaultHandler {
 
     public void endElement(String namespaceURL, String localName, String qname) {
         if (localName.equals("resource-lists")) {
-            if (logger.isActivated()) {
-                logger.debug("Resource-list document complete");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Resource-list document complete");
             }
         }
     }
 
     public void endDocument() {
-        if (logger.isActivated()) {
-            logger.debug("End document");
+        if (sLogger.isActivated()) {
+            sLogger.debug("End document");
         }
     }
 }

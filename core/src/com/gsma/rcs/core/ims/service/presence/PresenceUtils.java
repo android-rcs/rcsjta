@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.presence;
@@ -29,8 +33,10 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.RemoteException;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
@@ -144,8 +150,11 @@ public class PresenceUtils {
      * @param context Application context
      * @param values Contact values
      * @return URI of the created contact
+     * @throws OperationApplicationException
+     * @throws RemoteException
      */
-    private static Uri createContact(Context context, ContentValues values) throws Exception {
+    private static Uri createContact(Context context, ContentValues values) throws RemoteException,
+            OperationApplicationException {
         ContentResolver mResolver = context.getContentResolver();
         /* We will associate the newly created contact to the null contact account (Phone) */
         ArrayList<ContentProviderOperation> operations = new ArrayList<ContentProviderOperation>();
@@ -202,10 +211,11 @@ public class PresenceUtils {
      * @param contactId Contact ID
      * @return URI of the newly created contact or URI of the corresponding contact if there is
      *         already a match
-     * @throws Exception
+     * @throws OperationApplicationException
+     * @throws RemoteException
      */
     /* package private */static Uri createRcsContactIfNeeded(Context context, ContactId contactId)
-            throws Exception {
+            throws RemoteException, OperationApplicationException {
         /* Check if contact is already in address book */
         int phoneId = getContactIdOfAddressBook(context, contactId);
         if (phoneId != INVALID_CONTACT_ID) {

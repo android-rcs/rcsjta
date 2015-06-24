@@ -29,6 +29,7 @@ import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
@@ -883,9 +884,11 @@ public class ChatUtils {
      * @param request Request
      * @param status Status to assign to created participants
      * @return Participants based on contacts in the request
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     public static Map<ContactId, ParticipantStatus> getParticipants(SipRequest request,
-            ParticipantStatus status) {
+            ParticipantStatus status) throws SipNetworkException, SipPayloadException {
         Map<ContactId, ParticipantStatus> participants = new HashMap<ContactId, ParticipantStatus>();
         String content = request.getContent();
         String boundary = request.getBoundaryContentType();

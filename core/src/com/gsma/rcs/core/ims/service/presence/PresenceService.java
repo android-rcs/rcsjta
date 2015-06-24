@@ -45,6 +45,8 @@ import com.gsma.rcs.utils.StringUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
+import android.content.Context;
+
 import java.util.Set;
 
 /**
@@ -98,11 +100,12 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * 
      * @param parent IMS module
      * @param rcsSettings RcsSettings
+     * @param ctx Context
      * @param contactsManager ContactManager
      * @throws CoreException
      */
-    public PresenceService(ImsModule parent, RcsSettings rcsSettings, ContactManager contactsManager)
-            throws CoreException {
+    public PresenceService(ImsModule parent, Context ctx, RcsSettings rcsSettings,
+            ContactManager contactsManager) throws CoreException {
         super(parent, rcsSettings.isSocialPresenceSupported());
         mRcsSettings = rcsSettings;
         mContactManager = contactsManager;
@@ -110,7 +113,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         this.permanentState = mRcsSettings.isPermanentStateModeActivated();
 
         // Instantiate the XDM manager
-        xdm = new XdmManager(parent);
+        xdm = new XdmManager(parent, ctx);
 
         // Instantiate the publish manager
         publisher = new PublishManager(parent, mRcsSettings);

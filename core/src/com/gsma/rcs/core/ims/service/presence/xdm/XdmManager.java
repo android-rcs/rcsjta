@@ -40,15 +40,17 @@ import com.gsma.rcs.core.ims.service.presence.directory.XcapDirectoryParser;
 import com.gsma.rcs.platform.network.NetworkFactory;
 import com.gsma.rcs.platform.network.SocketConnection;
 import com.gsma.rcs.utils.Base64;
+import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
-import com.gsma.rcs.utils.HttpUtils;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 
 import org.xml.sax.InputSource;
 
@@ -70,6 +72,14 @@ import javax2.sip.InvalidArgumentException;
  * @author Jean-Marc AUFFRET
  */
 public class XdmManager {
+
+    /**
+     * CRLF constant
+     */
+    private static final String CRLF = "\r\n";
+
+    private static final char FORWARD_SLASH = '/';
+
     /**
      * XDM server address
      */
@@ -90,20 +100,24 @@ public class XdmManager {
      */
     private Hashtable<String, Folder> documents = new Hashtable<String, Folder>();
 
+    private Context mCtx;
+
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(XdmManager.class.getName());
 
     /**
      * Constructor
      * 
      * @param parent IMS module
+     * @param ctx Context
      */
-    public XdmManager(ImsModule parent) {
+    public XdmManager(ImsModule parent, Context ctx) {
         xdmServerAddr = ImsModule.IMS_USER_PROFILE.getXdmServerAddr();
         xdmServerLogin = ImsModule.IMS_USER_PROFILE.getXdmServerLogin();
         xdmServerPwd = ImsModule.IMS_USER_PROFILE.getXdmServerPassword();
+        mCtx = ctx;
     }
 
     /**
@@ -134,8 +148,8 @@ public class XdmManager {
             // Analyze the response
             if (response.getResponseCode() == 401) {
                 // 401 response received
-                if (logger.isActivated()) {
-                    logger.debug("401 Unauthorized response received");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("401 Unauthorized response received");
                 }
 
                 if (authenticationAgent != null) {
@@ -152,8 +166,8 @@ public class XdmManager {
                 response = sendRequestToXDMS(request, authenticationAgent);
             } else if (response.getResponseCode() == 412) {
                 // 412 response received
-                if (logger.isActivated()) {
-                    logger.debug("412 Precondition failed");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("412 Precondition failed");
                 }
 
                 // Reset the etag
@@ -163,8 +177,8 @@ public class XdmManager {
                 response = sendRequestToXDMS(request);
             } else {
                 // Other response received
-                if (logger.isActivated()) {
-                    logger.debug(response.getResponseCode() + " response received");
+                if (sLogger.isActivated()) {
+                    sLogger.debug(response.getResponseCode() + " response received");
                 }
             }
             return response;
@@ -185,163 +199,164 @@ public class XdmManager {
      * @throws CoreException
      * @throws InvalidArgumentException
      */
+    // @FIXME: This method needs a complete refactor, However at this moment due to other prior
+    // tasks the refactoring task has been kept in backlog.
     private HttpResponse sendHttpRequest(HttpRequest request,
             HttpAuthenticationAgent authenticationAgent) throws IOException,
             InvalidArgumentException {
-        // Extract host & port
-        String[] parts = xdmServerAddr.substring(7).split(":|/");
-        String host = parts[0];
-        int port = Integer.parseInt(parts[1]);
-        String serviceRoot = "";
-        if (parts.length > 2) {
-            serviceRoot = "/" + parts[2];
-        }
-
-        // Open connection with the XCAP server
-        SocketConnection conn = NetworkFactory.getFactory().createSocketClientConnection();
-        conn.open(host, port);
-        InputStream is = conn.getInputStream();
-        OutputStream os = conn.getOutputStream();
-
-        // Create the HTTP request
-        String requestUri = serviceRoot + request.getUrl();
-        String httpRequest = request.getMethod() + " " + requestUri + " HTTP/1.1" + HttpUtils.CRLF
-                + "Host: " + host + ":" + port + HttpUtils.CRLF + "User-Agent: "
-                + TerminalInfo.getProductName() + " " + TerminalInfo.getProductVersion()
-                + HttpUtils.CRLF;
-
-        if (authenticationAgent != null) {
-            // Set the Authorization header
-            String authorizationHeader = authenticationAgent.generateAuthorizationHeader(
-                    request.getMethod(), requestUri, request.getContent());
-            httpRequest += authorizationHeader + HttpUtils.CRLF;
-        }
-
-        String cookie = request.getCookie();
-        if (cookie != null) {
-            // Set the cookie header
-            httpRequest += "Cookie: " + cookie + HttpUtils.CRLF;
-        }
-
-        httpRequest += "X-3GPP-Intended-Identity: \""
-                + ImsModule.IMS_USER_PROFILE.getXdmServerLogin() + "\"" + HttpUtils.CRLF;
-
-        // Set the If-match header
-        Folder folder = (Folder) documents.get(request.getAUID());
-        if ((folder != null) && (folder.getEntry() != null)
-                && (folder.getEntry().getEtag() != null)) {
-            httpRequest += "If-match: \"" + folder.getEntry().getEtag() + "\"" + HttpUtils.CRLF;
-        }
-
-        if (request.getContent() != null) {
-            // Set the content type
-            httpRequest += "Content-type: " + request.getContentType() + HttpUtils.CRLF;
-            httpRequest += "Content-Length:" + request.getContentLength() + HttpUtils.CRLF
-                    + HttpUtils.CRLF;
-        } else {
-            httpRequest += "Content-Length: 0" + HttpUtils.CRLF + HttpUtils.CRLF;
-        }
-
-        // Write HTTP request headers
-        os.write(httpRequest.getBytes(UTF8));
-        os.flush();
-
-        // Write HTTP content
-        if (request.getContent() != null) {
-            os.write(request.getContent().getBytes(UTF8));
-            os.flush();
-        }
-
-        if (logger.isActivated()) {
-            if (request.getContent() != null) {
-                logger.debug("Send HTTP request:\n" + httpRequest + request.getContent());
-            } else {
-                logger.debug("Send HTTP request:\n" + httpRequest);
-            }
-        }
-
-        // Read HTTP headers response
-        StringBuffer respTrace = new StringBuffer();
-        HttpResponse response = new HttpResponse();
-        int ch = -1;
-        String line = "";
-        while ((ch = is.read()) != -1) {
-            line += (char) ch;
-
-            if (line.endsWith(HttpUtils.CRLF)) {
-                if (line.equals(HttpUtils.CRLF)) {
-                    // All headers has been read
-                    break;
-                }
-
-                if (logger.isActivated()) {
-                    respTrace.append(line);
-                }
-
-                // Remove CRLF
-                line = line.substring(0, line.length() - 2);
-
-                if (line.startsWith("HTTP/")) {
-                    // Status line
-                    response.setStatusLine(line);
-                } else {
-                    // Header
-                    int index = line.indexOf(":");
-                    String name = line.substring(0, index).trim().toLowerCase();
-                    String value = line.substring(index + 1).trim();
-                    response.addHeader(name, value);
-                }
-
-                line = "";
-            }
-        }
-
-        // Extract content length
-        int length = -1;
+        SocketConnection conn = null;
+        InputStream is = null;
+        OutputStream os = null;
         try {
-            String value = response.getHeader("content-length");
-            length = Integer.parseInt(value);
-        } catch (Exception e) {
-            length = -1;
-        }
+            /* Extract host & port */
+            String[] parts = xdmServerAddr.substring(7).split(":|/");
+            String host = parts[0];
+            int port = Integer.parseInt(parts[1]);
+            StringBuilder serviceRoot = new StringBuilder();
+            if (parts.length > 2) {
+                serviceRoot.append(FORWARD_SLASH).append(parts[2]);
+            }
 
-        // Read HTTP content response
-        if (length > 0) {
-            byte[] content = new byte[length];
-            int nb = -1;
-            int pos = 0;
-            byte[] buffer = new byte[1024];
-            while ((nb = is.read(buffer)) != -1) {
-                System.arraycopy(buffer, 0, content, pos, nb);
-                pos += nb;
+            /* Open connection with the XCAP server */
+            conn = NetworkFactory.getFactory().createSocketClientConnection();
+            conn.open(host, port);
+            is = conn.getInputStream();
+            os = conn.getOutputStream();
 
-                if (pos >= length) {
-                    // End of content
-                    break;
+            /* Create the HTTP request */
+            String requestUri = serviceRoot.append(request.getUrl()).toString();
+            StringBuilder httpRequest = new StringBuilder(request.getMethod()).append(" ")
+                    .append(requestUri).append(" HTTP/1.1").append(CRLF).append("Host: ")
+                    .append(host).append(":").append(port).append(CRLF).append("User-Agent: ")
+                    .append(TerminalInfo.getProductName()).append(" ")
+                    .append(TerminalInfo.getProductVersion(mCtx)).append(CRLF);
+
+            if (authenticationAgent != null) {
+                String authorizationHeader = authenticationAgent.generateAuthorizationHeader(
+                        request.getMethod(), requestUri, request.getContent());
+                httpRequest.append(authorizationHeader).append(CRLF);
+            }
+
+            String cookie = request.getCookie();
+            if (cookie != null) {
+                httpRequest.append("Cookie: ").append(cookie).append(CRLF);
+            }
+
+            httpRequest.append("X-3GPP-Intended-Identity: \"")
+                    .append(ImsModule.IMS_USER_PROFILE.getXdmServerLogin()).append("\"")
+                    .append(CRLF);
+
+            /* Set the If-match header */
+            Folder folder = (Folder) documents.get(request.getAUID());
+            if ((folder != null) && (folder.getEntry() != null)
+                    && (folder.getEntry().getEtag() != null)) {
+                httpRequest.append("If-match: \"").append(folder.getEntry().getEtag()).append("\"")
+                        .append(CRLF);
+            }
+
+            if (request.getContent() != null) {
+                httpRequest.append("Content-type: ").append(request.getContentType()).append(CRLF);
+                httpRequest.append("Content-Length:").append(request.getContentLength())
+                        .append(CRLF).append(CRLF);
+            } else {
+                httpRequest.append("Content-Length: 0").append(CRLF).append(CRLF);
+            }
+
+            /* Write HTTP request headers */
+            os.write(httpRequest.toString().getBytes(UTF8));
+            os.flush();
+
+            /* Write HTTP content */
+            if (request.getContent() != null) {
+                os.write(request.getContent().getBytes(UTF8));
+                os.flush();
+            }
+
+            if (sLogger.isActivated()) {
+                if (request.getContent() != null) {
+                    sLogger.debug("Send HTTP request:\n" + httpRequest + request.getContent());
+                } else {
+                    sLogger.debug("Send HTTP request:\n" + httpRequest);
                 }
             }
-            if (logger.isActivated()) {
-                respTrace.append(HttpUtils.CRLF).append(new String(content, UTF8));
+
+            /* Read HTTP headers response */
+            StringBuffer respTrace = new StringBuffer();
+            HttpResponse response = new HttpResponse();
+            int ch = -1;
+            String line = "";
+            while ((ch = is.read()) != -1) {
+                line += (char) ch;
+
+                if (line.endsWith(CRLF)) {
+                    if (line.equals(CRLF)) {
+                        /* All headers has been read */
+                        break;
+                    }
+
+                    if (sLogger.isActivated()) {
+                        respTrace.append(line);
+                    }
+
+                    /* Remove CRLF */
+                    line = line.substring(0, line.length() - 2);
+
+                    if (line.startsWith("HTTP/")) {
+                        response.setStatusLine(line);
+                    } else {
+                        int index = line.indexOf(":");
+                        String name = line.substring(0, index).trim().toLowerCase();
+                        String value = line.substring(index + 1).trim();
+                        response.addHeader(name, value);
+                    }
+
+                    line = "";
+                }
             }
-            response.setContent(content);
+
+            int contentLength = -1;
+            try {
+                String value = response.getHeader("content-length");
+                contentLength = Integer.parseInt(value);
+            } catch (NumberFormatException e) {
+                contentLength = -1;
+            }
+
+            if (contentLength > 0) {
+                byte[] content = new byte[contentLength];
+                int nb = -1;
+                int pos = 0;
+                byte[] buffer = new byte[1024];
+                while ((nb = is.read(buffer)) != -1) {
+                    System.arraycopy(buffer, 0, content, pos, nb);
+                    pos += nb;
+
+                    if (pos >= contentLength) {
+                        break;
+                    }
+                }
+                if (sLogger.isActivated()) {
+                    respTrace.append(CRLF).append(new String(content, UTF8));
+                }
+                response.setContent(content);
+            }
+
+            if (sLogger.isActivated()) {
+                sLogger.debug("Receive HTTP response:\n" + respTrace.toString());
+            }
+
+            /* Save the Etag from the received response */
+            String etag = response.getHeader("etag");
+            if ((etag != null) && (folder != null) && (folder.getEntry() != null)) {
+                folder.getEntry().setEtag(etag);
+            }
+            return response;
+
+        } finally {
+            CloseableUtils.close(conn);
+            CloseableUtils.close(is);
+            CloseableUtils.close(os);
         }
-
-        if (logger.isActivated()) {
-            logger.debug("Receive HTTP response:\n" + respTrace.toString());
-        }
-
-        // Close the connection
-        is.close();
-        os.close();
-        conn.close();
-
-        // Save the Etag from the received response
-        String etag = response.getHeader("etag");
-        if ((etag != null) && (folder != null) && (folder.getEntry() != null)) {
-            folder.getEntry().setEtag(etag);
-        }
-
-        return response;
     }
 
     /**
@@ -360,51 +375,51 @@ public class XdmManager {
                 // Check RCS list document
                 Folder folder = (Folder) documents.get("rls-services");
                 if ((folder == null) || (folder.getEntry() == null)) {
-                    if (logger.isActivated()) {
-                        logger.debug("The rls-services document does not exist");
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("The rls-services document does not exist");
                     }
 
                     // Set RCS list document
                     setRcsList();
                 } else {
-                    if (logger.isActivated()) {
-                        logger.debug("The rls-services document already exists");
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("The rls-services document already exists");
                     }
                 }
 
                 // Check resource list document
                 folder = (Folder) documents.get("resource-lists");
                 if ((folder == null) || (folder.getEntry() == null)) {
-                    if (logger.isActivated()) {
-                        logger.debug("The resource-lists document does not exist");
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("The resource-lists document does not exist");
                     }
 
                     // Set resource list document
                     setResourcesList();
                 } else {
-                    if (logger.isActivated()) {
-                        logger.debug("The resource-lists document already exists");
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("The resource-lists document already exists");
                     }
                 }
 
                 // Check presence rules document
                 folder = (Folder) documents.get("org.openmobilealliance.pres-rules");
                 if ((folder == null) || (folder.getEntry() == null)) {
-                    if (logger.isActivated()) {
-                        logger.debug("The org.openmobilealliance.pres-rules document does not exist");
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("The org.openmobilealliance.pres-rules document does not exist");
                     }
 
                     // Set presence rules document
                     setPresenceRules();
                 } else {
-                    if (logger.isActivated()) {
-                        logger.debug("The org.openmobilealliance.pres-rules document already exists");
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("The org.openmobilealliance.pres-rules document already exists");
                     }
                 }
             }
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't parse the XCAP directory document", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't parse the XCAP directory document", e);
             }
         }
     }
@@ -416,14 +431,13 @@ public class XdmManager {
      */
     public HttpResponse getXcapDocuments() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Get XCAP documents");
+            if (sLogger.isActivated()) {
+                sLogger.info("Get XCAP documents");
             }
 
             // URL
             String url = "/org.openmobilealliance.xcap-directory/users/"
-                    + HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri())
-                    + "/directory.xml";
+                    + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri()) + "/directory.xml";
 
             // Create the request
             HttpGetRequest request = new HttpGetRequest(url);
@@ -431,19 +445,19 @@ public class XdmManager {
             // Send the request
             HttpResponse response = sendRequestToXDMS(request);
             if (response.isSuccessfullResponse()) {
-                if (logger.isActivated()) {
-                    logger.info("XCAP documents has been read with success");
+                if (sLogger.isActivated()) {
+                    sLogger.info("XCAP documents has been read with success");
                 }
             } else {
-                if (logger.isActivated()) {
-                    logger.info("Can't read XCAP documents: " + response.getResponseCode()
+                if (sLogger.isActivated()) {
+                    sLogger.info("Can't read XCAP documents: " + response.getResponseCode()
                             + " error");
                 }
             }
             return response;
         } catch (CoreException e) {
-            if (logger.isActivated()) {
-                logger.error("Can't read XCAP documents: unexpected exception", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't read XCAP documents: unexpected exception", e);
             }
             return null;
         }
@@ -456,13 +470,13 @@ public class XdmManager {
      */
     public HttpResponse getRcsList() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Get RCS list");
+            if (sLogger.isActivated()) {
+                sLogger.info("Get RCS list");
             }
 
             // URL
             String url = "/rls-services/users/"
-                    + HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + "/index";
+                    + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri()) + "/index";
 
             // Create the request
             HttpGetRequest request = new HttpGetRequest(url);
@@ -470,18 +484,18 @@ public class XdmManager {
             // Send the request
             HttpResponse response = sendRequestToXDMS(request);
             if (response.isSuccessfullResponse()) {
-                if (logger.isActivated()) {
-                    logger.info("RCS list has been read with success");
+                if (sLogger.isActivated()) {
+                    sLogger.info("RCS list has been read with success");
                 }
             } else {
-                if (logger.isActivated()) {
-                    logger.info("Can't read RCS list: " + response.getResponseCode() + " error");
+                if (sLogger.isActivated()) {
+                    sLogger.info("Can't read RCS list: " + response.getResponseCode() + " error");
                 }
             }
             return response;
         } catch (CoreException e) {
-            if (logger.isActivated()) {
-                logger.error("Can't read RCS list: unexpected exception", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't read RCS list: unexpected exception", e);
             }
             return null;
         }
@@ -494,30 +508,29 @@ public class XdmManager {
      */
     public HttpResponse setRcsList() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Set RCS list");
+            if (sLogger.isActivated()) {
+                sLogger.info("Set RCS list");
             }
 
             // URL
             String url = "/rls-services/users/"
-                    + HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + "/index";
+                    + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri()) + "/index";
 
             // Content
             String user = ImsModule.IMS_USER_PROFILE.getPublicUri();
-            String resList = xdmServerAddr + "/resource-lists/users/" + HttpUtils.encodeURL(user)
+            String resList = xdmServerAddr + "/resource-lists/users/" + Uri.encode(user)
                     + "/index/~~/resource-lists/list%5B@name=%22rcs%22%5D";
             String content = new StringBuilder("<?xml version=\"1.0\" encoding=\"")
                     .append(UTF8_STR)
                     .append("\"?>")
-                    .append(HttpUtils.CRLF)
+                    .append(CRLF)
                     .append("<rls-services xmlns=\"urn:ietf:params:xml:ns:rls-services\" xmlns:rl=\"urn:ietf:params:xml:ns:resource-lists\">")
-                    .append(HttpUtils.CRLF).append("<service uri=\"").append(user)
-                    .append(";pres-list=rcs\">").append(HttpUtils.CRLF).append("<resource-list>")
-                    .append(resList).append("</resource-list>").append(HttpUtils.CRLF)
-                    .append("<packages>").append(HttpUtils.CRLF)
-                    .append(" <package>presence</package>").append(HttpUtils.CRLF)
-                    .append("</packages>").append(HttpUtils.CRLF)
-                    .append("</service></rls-services>").toString();
+                    .append(CRLF).append("<service uri=\"").append(user)
+                    .append(";pres-list=rcs\">").append(CRLF).append("<resource-list>")
+                    .append(resList).append("</resource-list>").append(CRLF).append("<packages>")
+                    .append(CRLF).append(" <package>presence</package>").append(CRLF)
+                    .append("</packages>").append(CRLF).append("</service></rls-services>")
+                    .toString();
 
             // Create the request
             HttpPutRequest request = new HttpPutRequest(url, content,
@@ -526,18 +539,18 @@ public class XdmManager {
             // Send the request
             HttpResponse response = sendRequestToXDMS(request);
             if (response.isSuccessfullResponse()) {
-                if (logger.isActivated()) {
-                    logger.info("RCS list has been set with success");
+                if (sLogger.isActivated()) {
+                    sLogger.info("RCS list has been set with success");
                 }
             } else {
-                if (logger.isActivated()) {
-                    logger.info("Can't set RCS list: " + response.getResponseCode() + " error");
+                if (sLogger.isActivated()) {
+                    sLogger.info("Can't set RCS list: " + response.getResponseCode() + " error");
                 }
             }
             return response;
         } catch (CoreException e) {
-            if (logger.isActivated()) {
-                logger.error("Can't set RCS list: unexpected exception", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't set RCS list: unexpected exception", e);
             }
             return null;
         }
@@ -550,13 +563,13 @@ public class XdmManager {
      */
     public HttpResponse getResourcesList() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Get resources list");
+            if (sLogger.isActivated()) {
+                sLogger.info("Get resources list");
             }
 
             // URL
             String url = "/resource-lists/users/"
-                    + HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + "/index";
+                    + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri()) + "/index";
 
             // Create the request
             HttpGetRequest request = new HttpGetRequest(url);
@@ -564,19 +577,19 @@ public class XdmManager {
             // Send the request
             HttpResponse response = sendRequestToXDMS(request);
             if (response.isSuccessfullResponse()) {
-                if (logger.isActivated()) {
-                    logger.info("Resources list has been read with success");
+                if (sLogger.isActivated()) {
+                    sLogger.info("Resources list has been read with success");
                 }
             } else {
-                if (logger.isActivated()) {
-                    logger.info("Can't read resources list: " + response.getResponseCode()
+                if (sLogger.isActivated()) {
+                    sLogger.info("Can't read resources list: " + response.getResponseCode()
                             + " error");
                 }
             }
             return response;
         } catch (CoreException e) {
-            if (logger.isActivated()) {
-                logger.error("Can't read resources list: unexpected exception", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't read resources list: unexpected exception", e);
             }
             return null;
         }
@@ -589,43 +602,40 @@ public class XdmManager {
      */
     public HttpResponse setResourcesList() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Set resources list");
+            if (sLogger.isActivated()) {
+                sLogger.info("Set resources list");
             }
 
             // URL
             String url = "/resource-lists/users/"
-                    + HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + "/index";
+                    + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri()) + "/index";
 
             // Content
             String user = ImsModule.IMS_USER_PROFILE.getPublicUri();
-            String resList = xdmServerAddr + "/resource-lists/users/" + HttpUtils.encodeURL(user)
+            String resList = xdmServerAddr + "/resource-lists/users/" + Uri.encode(user)
                     + "/index/~~/resource-lists/list%5B";
             String content = new StringBuilder("<?xml version=\"1.0\" encoding=\"")
-                    .append(UTF8_STR).append("\"?>").append(HttpUtils.CRLF)
+                    .append(UTF8_STR).append("\"?>").append(CRLF)
                     .append("<resource-lists xmlns=\"urn:ietf:params:xml:ns:resource-lists\">")
-                    .append(HttpUtils.CRLF).append("<list name=\"oma_buddylist\">")
-                    .append(HttpUtils.CRLF).append(" <external anchor=\"").append(resList)
-                    .append("@name=%22rcs%22%5D\"/>").append(HttpUtils.CRLF).append("</list>")
-                    .append(HttpUtils.CRLF).append("<list name=\"oma_grantedcontacts\">")
-                    .append(HttpUtils.CRLF).append(" <external anchor=\"").append(resList)
-                    .append("@name=%22rcs%22%5D\"/>").append(HttpUtils.CRLF).append("</list>")
-                    .append(HttpUtils.CRLF).append("<list name=\"oma_blockedcontacts\">")
-                    .append(HttpUtils.CRLF).append(" <external anchor=\"").append(resList)
-                    .append("@name=%22rcs_blockedcontacts%22%5D\"/>").append(HttpUtils.CRLF)
+                    .append(CRLF).append("<list name=\"oma_buddylist\">").append(CRLF)
                     .append(" <external anchor=\"").append(resList)
-                    .append("@name=%22rcs_revokedcontacts%22%5D\"/>").append(HttpUtils.CRLF)
-                    .append("</list>").append(HttpUtils.CRLF).append("<list name=\"rcs\">")
-                    .append(HttpUtils.CRLF)
-                    .append(" <display-name>My presence buddies</display-name>")
-                    .append(HttpUtils.CRLF).append("</list>").append(HttpUtils.CRLF)
-                    .append("<list name=\"rcs_blockedcontacts\">").append(HttpUtils.CRLF)
-                    .append(" <display-name>My blocked contacts</display-name>")
-                    .append(HttpUtils.CRLF).append("</list>").append(HttpUtils.CRLF)
-                    .append("<list name=\"rcs_revokedcontacts\">").append(HttpUtils.CRLF)
-                    .append(" <display-name>My revoked contacts</display-name>")
-                    .append(HttpUtils.CRLF).append("</list>").append(HttpUtils.CRLF)
-                    .append("</resource-lists>").toString();
+                    .append("@name=%22rcs%22%5D\"/>").append(CRLF).append("</list>").append(CRLF)
+                    .append("<list name=\"oma_grantedcontacts\">").append(CRLF)
+                    .append(" <external anchor=\"").append(resList)
+                    .append("@name=%22rcs%22%5D\"/>").append(CRLF).append("</list>").append(CRLF)
+                    .append("<list name=\"oma_blockedcontacts\">").append(CRLF)
+                    .append(" <external anchor=\"").append(resList)
+                    .append("@name=%22rcs_blockedcontacts%22%5D\"/>").append(CRLF)
+                    .append(" <external anchor=\"").append(resList)
+                    .append("@name=%22rcs_revokedcontacts%22%5D\"/>").append(CRLF)
+                    .append("</list>").append(CRLF).append("<list name=\"rcs\">").append(CRLF)
+                    .append(" <display-name>My presence buddies</display-name>").append(CRLF)
+                    .append("</list>").append(CRLF).append("<list name=\"rcs_blockedcontacts\">")
+                    .append(CRLF).append(" <display-name>My blocked contacts</display-name>")
+                    .append(CRLF).append("</list>").append(CRLF)
+                    .append("<list name=\"rcs_revokedcontacts\">").append(CRLF)
+                    .append(" <display-name>My revoked contacts</display-name>").append(CRLF)
+                    .append("</list>").append(CRLF).append("</resource-lists>").toString();
 
             // Create the request
             HttpPutRequest request = new HttpPutRequest(url, content,
@@ -634,19 +644,19 @@ public class XdmManager {
             // Send the request
             HttpResponse response = sendRequestToXDMS(request);
             if (response.isSuccessfullResponse()) {
-                if (logger.isActivated()) {
-                    logger.info("Resources list has been set with success");
+                if (sLogger.isActivated()) {
+                    sLogger.info("Resources list has been set with success");
                 }
             } else {
-                if (logger.isActivated()) {
-                    logger.info("Can't set resources list: " + response.getResponseCode()
+                if (sLogger.isActivated()) {
+                    sLogger.info("Can't set resources list: " + response.getResponseCode()
                             + " error");
                 }
             }
             return response;
         } catch (CoreException e) {
-            if (logger.isActivated()) {
-                logger.error("Can't set resources list: unexpected exception", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't set resources list: unexpected exception", e);
             }
             return null;
         }
@@ -659,14 +669,13 @@ public class XdmManager {
      */
     public HttpResponse getPresenceRules() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Get presence rules");
+            if (sLogger.isActivated()) {
+                sLogger.info("Get presence rules");
             }
 
             // URL
             String url = "/org.openmobilealliance.pres-rules/users/"
-                    + HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri())
-                    + "/pres-rules";
+                    + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri()) + "/pres-rules";
 
             // Create the request
             HttpGetRequest request = new HttpGetRequest(url);
@@ -674,19 +683,19 @@ public class XdmManager {
             // Send the request
             HttpResponse response = sendRequestToXDMS(request);
             if (response.isSuccessfullResponse()) {
-                if (logger.isActivated()) {
-                    logger.info("Get presence rules has been requested with success");
+                if (sLogger.isActivated()) {
+                    sLogger.info("Get presence rules has been requested with success");
                 }
             } else {
-                if (logger.isActivated()) {
-                    logger.info("Can't get the presence rules: " + response.getResponseCode()
+                if (sLogger.isActivated()) {
+                    sLogger.info("Can't get the presence rules: " + response.getResponseCode()
                             + " error");
                 }
             }
             return response;
         } catch (CoreException e) {
-            if (logger.isActivated()) {
-                logger.error("Can't get the presence rules: unexpected exception", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't get the presence rules: unexpected exception", e);
             }
             return null;
         }
@@ -699,14 +708,13 @@ public class XdmManager {
      */
     public HttpResponse setPresenceRules() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Set presence rules");
+            if (sLogger.isActivated()) {
+                sLogger.info("Set presence rules");
             }
 
             // URL
             String url = "/org.openmobilealliance.pres-rules/users/"
-                    + HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri())
-                    + "/pres-rules";
+                    + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri()) + "/pres-rules";
 
             // Content
             String user = ImsModule.IMS_USER_PROFILE.getPublicUri();
@@ -717,62 +725,56 @@ public class XdmManager {
             String content = new StringBuilder("<?xml version=\"1.0\" encoding=\"")
                     .append(UTF8_STR)
                     .append("\"?>")
-                    .append(HttpUtils.CRLF)
+                    .append(CRLF)
                     .append("<cr:ruleset xmlns:ocp=\"urn:oma:xml:xdm:common-policy\" xmlns:pr=\"urn:ietf:params:xml:ns:pres-rules\" xmlns:cr=\"urn:ietf:params:xml:ns:common-policy\">")
-                    .append(HttpUtils.CRLF).append("<cr:rule id=\"wp_prs_allow_own\">")
-                    .append(HttpUtils.CRLF).append(" <cr:conditions>").append(HttpUtils.CRLF)
-                    .append("  <cr:identity><cr:one id=\"")
+                    .append(CRLF).append("<cr:rule id=\"wp_prs_allow_own\">").append(CRLF)
+                    .append(" <cr:conditions>").append(CRLF).append("  <cr:identity><cr:one id=\"")
                     .append(ImsModule.IMS_USER_PROFILE.getPublicUri()).append("\"/></cr:identity>")
-                    .append(HttpUtils.CRLF).append(" </cr:conditions>").append(HttpUtils.CRLF)
+                    .append(CRLF).append(" </cr:conditions>").append(CRLF)
                     .append(" <cr:actions><pr:sub-handling>allow</pr:sub-handling></cr:actions>")
-                    .append(HttpUtils.CRLF).append(" <cr:transformations>").append(HttpUtils.CRLF)
+                    .append(CRLF).append(" <cr:transformations>").append(CRLF)
                     .append("  <pr:provide-services><pr:all-services/></pr:provide-services>")
-                    .append(HttpUtils.CRLF)
+                    .append(CRLF)
                     .append("  <pr:provide-persons><pr:all-persons/></pr:provide-persons>")
-                    .append(HttpUtils.CRLF)
+                    .append(CRLF)
                     .append("  <pr:provide-devices><pr:all-devices/></pr:provide-devices>")
-                    .append(HttpUtils.CRLF).append("  <pr:provide-all-attributes/>")
-                    .append(HttpUtils.CRLF).append(" </cr:transformations>").append(HttpUtils.CRLF)
-                    .append("</cr:rule>").append(HttpUtils.CRLF)
-                    .append("<cr:rule id=\"rcs_allow_services_anonymous\">").append(HttpUtils.CRLF)
+                    .append(CRLF).append("  <pr:provide-all-attributes/>").append(CRLF)
+                    .append(" </cr:transformations>").append(CRLF).append("</cr:rule>")
+                    .append(CRLF).append("<cr:rule id=\"rcs_allow_services_anonymous\">")
+                    .append(CRLF)
                     .append(" <cr:conditions><ocp:anonymous-request/></cr:conditions>")
-                    .append(HttpUtils.CRLF)
+                    .append(CRLF)
                     .append(" <cr:actions><pr:sub-handling>allow</pr:sub-handling></cr:actions>")
-                    .append(HttpUtils.CRLF).append(" <cr:transformations>").append(HttpUtils.CRLF)
+                    .append(CRLF).append(" <cr:transformations>").append(CRLF)
                     .append("  <pr:provide-services><pr:all-services/></pr:provide-services>")
-                    .append(HttpUtils.CRLF).append("  <pr:provide-all-attributes/>")
-                    .append(HttpUtils.CRLF).append(" </cr:transformations>").append(HttpUtils.CRLF)
-                    .append("</cr:rule>").append(HttpUtils.CRLF)
-                    .append("<cr:rule id=\"wp_prs_unlisted\">").append(HttpUtils.CRLF)
-                    .append(" <cr:conditions><ocp:other-identity/></cr:conditions>")
-                    .append(HttpUtils.CRLF)
+                    .append(CRLF).append("  <pr:provide-all-attributes/>").append(CRLF)
+                    .append(" </cr:transformations>").append(CRLF).append("</cr:rule>")
+                    .append(CRLF).append("<cr:rule id=\"wp_prs_unlisted\">").append(CRLF)
+                    .append(" <cr:conditions><ocp:other-identity/></cr:conditions>").append(CRLF)
                     .append(" <cr:actions><pr:sub-handling>confirm</pr:sub-handling></cr:actions>")
-                    .append(HttpUtils.CRLF).append("</cr:rule>").append(HttpUtils.CRLF)
-                    .append("<cr:rule id=\"wp_prs_grantedcontacts\">").append(HttpUtils.CRLF)
-                    .append(" <cr:conditions>").append(HttpUtils.CRLF)
-                    .append(" <ocp:external-list>").append(HttpUtils.CRLF)
-                    .append("  <ocp:entry anc=\"").append(grantedList).append("\"/>")
-                    .append(HttpUtils.CRLF).append(" </ocp:external-list>").append(HttpUtils.CRLF)
-                    .append(" </cr:conditions>").append(HttpUtils.CRLF)
+                    .append(CRLF).append("</cr:rule>").append(CRLF)
+                    .append("<cr:rule id=\"wp_prs_grantedcontacts\">").append(CRLF)
+                    .append(" <cr:conditions>").append(CRLF).append(" <ocp:external-list>")
+                    .append(CRLF).append("  <ocp:entry anc=\"").append(grantedList).append("\"/>")
+                    .append(CRLF).append(" </ocp:external-list>").append(CRLF)
+                    .append(" </cr:conditions>").append(CRLF)
                     .append(" <cr:actions><pr:sub-handling>allow</pr:sub-handling></cr:actions>")
-                    .append(HttpUtils.CRLF).append(" <cr:transformations>").append(HttpUtils.CRLF)
+                    .append(CRLF).append(" <cr:transformations>").append(CRLF)
                     .append("   <pr:provide-services><pr:all-services/></pr:provide-services>")
-                    .append(HttpUtils.CRLF)
+                    .append(CRLF)
                     .append("   <pr:provide-persons><pr:all-persons/></pr:provide-persons>")
-                    .append(HttpUtils.CRLF)
+                    .append(CRLF)
                     .append("   <pr:provide-devices><pr:all-devices/></pr:provide-devices>")
-                    .append(HttpUtils.CRLF).append("   <pr:provide-all-attributes/>")
-                    .append(HttpUtils.CRLF).append(" </cr:transformations>").append(HttpUtils.CRLF)
-                    .append("</cr:rule>").append(HttpUtils.CRLF)
-                    .append("<cr:rule id=\"wp_prs_blockedcontacts\">").append(HttpUtils.CRLF)
-                    .append(" <cr:conditions>").append(HttpUtils.CRLF)
-                    .append("  <ocp:external-list>").append(HttpUtils.CRLF)
-                    .append("  <ocp:entry anc=\"").append(blockedList).append("\"/>")
-                    .append(HttpUtils.CRLF).append(" </ocp:external-list>").append(HttpUtils.CRLF)
-                    .append(" </cr:conditions>").append(HttpUtils.CRLF)
+                    .append(CRLF).append("   <pr:provide-all-attributes/>").append(CRLF)
+                    .append(" </cr:transformations>").append(CRLF).append("</cr:rule>")
+                    .append(CRLF).append("<cr:rule id=\"wp_prs_blockedcontacts\">").append(CRLF)
+                    .append(" <cr:conditions>").append(CRLF).append("  <ocp:external-list>")
+                    .append(CRLF).append("  <ocp:entry anc=\"").append(blockedList).append("\"/>")
+                    .append(CRLF).append(" </ocp:external-list>").append(CRLF)
+                    .append(" </cr:conditions>").append(CRLF)
                     .append(" <cr:actions><pr:sub-handling>block</pr:sub-handling></cr:actions>")
-                    .append(HttpUtils.CRLF).append("</cr:rule>").append(HttpUtils.CRLF)
-                    .append("</cr:ruleset>").toString();
+                    .append(CRLF).append("</cr:rule>").append(CRLF).append("</cr:ruleset>")
+                    .toString();
 
             // Create the request
             HttpPutRequest request = new HttpPutRequest(url, content, "application/auth-policy+xml");
@@ -780,19 +782,19 @@ public class XdmManager {
             // Send the request
             HttpResponse response = sendRequestToXDMS(request);
             if (response.isSuccessfullResponse()) {
-                if (logger.isActivated()) {
-                    logger.info("Presence rules has been set with success");
+                if (sLogger.isActivated()) {
+                    sLogger.info("Presence rules has been set with success");
                 }
             } else {
-                if (logger.isActivated()) {
-                    logger.info("Can't set presence rules: " + response.getResponseCode()
+                if (sLogger.isActivated()) {
+                    sLogger.info("Can't set presence rules: " + response.getResponseCode()
                             + " error");
                 }
             }
             return response;
         } catch (CoreException e) {
-            if (logger.isActivated()) {
-                logger.error("Can't set presence rules: unexpected exception", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't set presence rules: unexpected exception", e);
             }
             return null;
         }
@@ -806,15 +808,15 @@ public class XdmManager {
      */
     public HttpResponse addContactToGrantedList(ContactId contact) {
         try {
-            if (logger.isActivated()) {
-                logger.info("Add " + contact + " to granted list");
+            if (sLogger.isActivated()) {
+                sLogger.info("Add " + contact + " to granted list");
             }
 
             // URL
             String url = "/resource-lists/users/"
-                    + HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri())
+                    + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
                     + "/index/~~/resource-lists/list%5B@name=%22rcs%22%5D/entry%5B@uri=%22"
-                    + HttpUtils.encodeURL(PhoneUtils.formatContactIdToUri(contact)) + "%22%5D";
+                    + Uri.encode(PhoneUtils.formatContactIdToUri(contact)) + "%22%5D";
 
             // Content
             String content = "<entry uri='" + contact + "'></entry>";
@@ -825,19 +827,19 @@ public class XdmManager {
             // Send the request
             HttpResponse response = sendRequestToXDMS(request);
             if (response.isSuccessfullResponse()) {
-                if (logger.isActivated()) {
-                    logger.info(contact + " has been added with success to granted list");
+                if (sLogger.isActivated()) {
+                    sLogger.info(contact + " has been added with success to granted list");
                 }
             } else {
-                if (logger.isActivated()) {
-                    logger.info("Can't add " + contact + " to granted list: "
+                if (sLogger.isActivated()) {
+                    sLogger.info("Can't add " + contact + " to granted list: "
                             + response.getResponseCode() + " error");
                 }
             }
             return response;
         } catch (CoreException e) {
-            if (logger.isActivated()) {
-                logger.error("Can't add " + contact + " to granted list: unexpected exception", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't add " + contact + " to granted list: unexpected exception", e);
             }
             return null;
         }
@@ -851,15 +853,15 @@ public class XdmManager {
      */
     public HttpResponse removeContactFromGrantedList(ContactId contact) {
         try {
-            if (logger.isActivated()) {
-                logger.info("Remove " + contact + " from granted list");
+            if (sLogger.isActivated()) {
+                sLogger.info("Remove " + contact + " from granted list");
             }
 
             // URL
             String url = "/resource-lists/users/"
-                    + HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri())
+                    + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
                     + "/index/~~/resource-lists/list%5B@name=%22rcs%22%5D/entry%5B@uri=%22"
-                    + HttpUtils.encodeURL(PhoneUtils.formatContactIdToUri(contact)) + "%22%5D";
+                    + Uri.encode(PhoneUtils.formatContactIdToUri(contact)) + "%22%5D";
 
             // Create the request
             HttpDeleteRequest request = new HttpDeleteRequest(url);
@@ -867,20 +869,21 @@ public class XdmManager {
             // Send the request
             HttpResponse response = sendRequestToXDMS(request);
             if (response.isSuccessfullResponse()) {
-                if (logger.isActivated()) {
-                    logger.info(contact + " has been removed with success from granted list");
+                if (sLogger.isActivated()) {
+                    sLogger.info(contact + " has been removed with success from granted list");
                 }
             } else {
-                if (logger.isActivated()) {
-                    logger.info("Can't remove " + contact + " from granted list: "
+                if (sLogger.isActivated()) {
+                    sLogger.info("Can't remove " + contact + " from granted list: "
                             + response.getResponseCode() + " error");
                 }
             }
             return response;
+
         } catch (CoreException e) {
-            if (logger.isActivated()) {
-                logger.error(
-                        "Can't remove " + contact + " from granted list: unexpected exception", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't remove " + contact
+                        + " from granted list: unexpected exception", e);
             }
             return null;
         }
@@ -892,8 +895,8 @@ public class XdmManager {
             for (String uri : uris) {
                 PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(uri);
                 if (number == null) {
-                    if (logger.isActivated()) {
-                        logger.warn("Cannot parse uri " + uri);
+                    if (sLogger.isActivated()) {
+                        sLogger.warn("Cannot parse uri " + uri);
                     }
                     continue;
                 }
@@ -910,13 +913,13 @@ public class XdmManager {
      */
     public Set<ContactId> getGrantedContacts() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Get granted contacts list");
+            if (sLogger.isActivated()) {
+                sLogger.info("Get granted contacts list");
             }
 
             // URL
             String url = "/resource-lists/users/"
-                    + HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri())
+                    + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
                     + "/index/~~/resource-lists/list%5B@name=%22rcs%22%5D";
 
             // Create the request
@@ -925,8 +928,8 @@ public class XdmManager {
             // Send the request
             HttpResponse response = sendRequestToXDMS(request);
             if (response.isSuccessfullResponse()) {
-                if (logger.isActivated()) {
-                    logger.info("Granted contacts list has been read with success");
+                if (sLogger.isActivated()) {
+                    sLogger.info("Granted contacts list has been read with success");
                 }
 
                 // Parse response
@@ -934,14 +937,14 @@ public class XdmManager {
                 XcapResponseParser parser = new XcapResponseParser(input);
                 return convertListOfUrisToSetOfContactId(parser.getUris());
             } else {
-                if (logger.isActivated()) {
-                    logger.info("Can't get granted contacts list: " + response.getResponseCode()
+                if (sLogger.isActivated()) {
+                    sLogger.info("Can't get granted contacts list: " + response.getResponseCode()
                             + " error");
                 }
             }
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't get granted contacts list: unexpected exception", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't get granted contacts list: unexpected exception", e);
             }
         }
         return new HashSet<ContactId>();
@@ -955,15 +958,15 @@ public class XdmManager {
      */
     public HttpResponse addContactToBlockedList(String contact) {
         try {
-            if (logger.isActivated()) {
-                logger.info("Add " + contact + " to blocked list");
+            if (sLogger.isActivated()) {
+                sLogger.info("Add " + contact + " to blocked list");
             }
 
             // URL
             String url = "/resource-lists/users/"
-                    + HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri())
+                    + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
                     + "/index/~~/resource-lists/list%5B@name=%22rcs_blockedcontacts%22%5D/entry%5B@uri=%22"
-                    + HttpUtils.encodeURL(contact) + "%22%5D";
+                    + Uri.encode(contact) + "%22%5D";
 
             // Content
             String content = "<entry uri='" + contact + "'></entry>";
@@ -974,19 +977,19 @@ public class XdmManager {
             // Send the request
             HttpResponse response = sendRequestToXDMS(request);
             if (response.isSuccessfullResponse()) {
-                if (logger.isActivated()) {
-                    logger.info(contact + " has been added with success to blocked list");
+                if (sLogger.isActivated()) {
+                    sLogger.info(contact + " has been added with success to blocked list");
                 }
             } else {
-                if (logger.isActivated()) {
-                    logger.info("Can't add " + contact + " to granted list: "
+                if (sLogger.isActivated()) {
+                    sLogger.info("Can't add " + contact + " to granted list: "
                             + response.getResponseCode() + " error");
                 }
             }
             return response;
         } catch (CoreException e) {
-            if (logger.isActivated()) {
-                logger.error("Can't add " + contact + " to blocked list: unexpected exception", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't add " + contact + " to blocked list: unexpected exception", e);
             }
             return null;
         }
@@ -1000,15 +1003,15 @@ public class XdmManager {
      */
     public HttpResponse removeContactFromBlockedList(ContactId contact) {
         try {
-            if (logger.isActivated()) {
-                logger.info("Remove " + contact + " from blocked list");
+            if (sLogger.isActivated()) {
+                sLogger.info("Remove " + contact + " from blocked list");
             }
 
             // URL
             String url = "/resource-lists/users/"
-                    + HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri())
+                    + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
                     + "/index/~~/resource-lists/list%5B@name=%22rcs_blockedcontacts%22%5D/entry%5B@uri=%22"
-                    + HttpUtils.encodeURL(PhoneUtils.formatContactIdToUri(contact)) + "%22%5D";
+                    + Uri.encode(PhoneUtils.formatContactIdToUri(contact)) + "%22%5D";
 
             // Create the request
             HttpDeleteRequest request = new HttpDeleteRequest(url);
@@ -1016,20 +1019,20 @@ public class XdmManager {
             // Send the request
             HttpResponse response = sendRequestToXDMS(request);
             if (response.isSuccessfullResponse()) {
-                if (logger.isActivated()) {
-                    logger.info(contact + " has been removed with success from blocked list");
+                if (sLogger.isActivated()) {
+                    sLogger.info(contact + " has been removed with success from blocked list");
                 }
             } else {
-                if (logger.isActivated()) {
-                    logger.info("Can't remove " + contact + " from blocked list: "
+                if (sLogger.isActivated()) {
+                    sLogger.info("Can't remove " + contact + " from blocked list: "
                             + response.getResponseCode() + " error");
                 }
             }
             return response;
         } catch (CoreException e) {
-            if (logger.isActivated()) {
-                logger.error(
-                        "Can't remove " + contact + " from blocked list: unexpected exception", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't remove " + contact
+                        + " from blocked list: unexpected exception", e);
             }
             return null;
         }
@@ -1042,13 +1045,13 @@ public class XdmManager {
      */
     public Set<ContactId> getBlockedContacts() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Get blocked contacts list");
+            if (sLogger.isActivated()) {
+                sLogger.info("Get blocked contacts list");
             }
 
             // URL
             String url = "/resource-lists/users/"
-                    + HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri())
+                    + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
                     + "/index/~~/resource-lists/list%5B@name=%22rcs_blockedcontacts%22%5D";
 
             // Create the request
@@ -1057,8 +1060,8 @@ public class XdmManager {
             // Send the request
             HttpResponse response = sendRequestToXDMS(request);
             if (response.isSuccessfullResponse()) {
-                if (logger.isActivated()) {
-                    logger.info("Blocked contacts list has been read with success");
+                if (sLogger.isActivated()) {
+                    sLogger.info("Blocked contacts list has been read with success");
                 }
 
                 // Parse response
@@ -1066,14 +1069,14 @@ public class XdmManager {
                 XcapResponseParser parser = new XcapResponseParser(input);
                 return convertListOfUrisToSetOfContactId(parser.getUris());
             } else {
-                if (logger.isActivated()) {
-                    logger.info("Can't get blocked contacts list: " + response.getResponseCode()
+                if (sLogger.isActivated()) {
+                    sLogger.info("Can't get blocked contacts list: " + response.getResponseCode()
                             + " error");
                 }
             }
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't get blocked contacts list: unexpected exception", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't get blocked contacts list: unexpected exception", e);
             }
         }
         return new HashSet<ContactId>();
@@ -1087,38 +1090,35 @@ public class XdmManager {
      */
     public HttpResponse addContactToRevokedList(ContactId contact) {
         try {
-            if (logger.isActivated()) {
-                logger.info("Add " + contact + " to revoked list");
+            if (sLogger.isActivated()) {
+                sLogger.info("Add " + contact + " to revoked list");
             }
 
-            // URL
             String url = "/resource-lists/users/"
-                    + HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri())
+                    + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
                     + "/index/~~/resource-lists/list%5B@name=%22rcs_revokedcontacts%22%5D/entry%5B@uri=%22"
-                    + HttpUtils.encodeURL(PhoneUtils.formatContactIdToUri(contact)) + "%22%5D";
+                    + Uri.encode(PhoneUtils.formatContactIdToUri(contact)) + "%22%5D";
 
-            // Content
             String content = "<entry uri='" + contact + "'></entry>";
 
-            // Create the request
             HttpPutRequest request = new HttpPutRequest(url, content, "application/xcap-el+xml");
 
-            // Send the request
             HttpResponse response = sendRequestToXDMS(request);
             if (response.isSuccessfullResponse()) {
-                if (logger.isActivated()) {
-                    logger.info(contact + " has been added with success to revoked list");
+                if (sLogger.isActivated()) {
+                    sLogger.info(contact + " has been added with success to revoked list");
                 }
             } else {
-                if (logger.isActivated()) {
-                    logger.info("Can't add " + contact + " to revoked list: "
+                if (sLogger.isActivated()) {
+                    sLogger.info("Can't add " + contact + " to revoked list: "
                             + response.getResponseCode() + " error");
                 }
             }
             return response;
+
         } catch (CoreException e) {
-            if (logger.isActivated()) {
-                logger.error("Can't add " + contact + " to revoked list: unexpected exception", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't add " + contact + " to revoked list: unexpected exception", e);
             }
             return null;
         }
@@ -1132,36 +1132,34 @@ public class XdmManager {
      */
     public HttpResponse removeContactFromRevokedList(ContactId contact) {
         try {
-            if (logger.isActivated()) {
-                logger.info("Remove " + contact + " from revoked list");
+            if (sLogger.isActivated()) {
+                sLogger.info("Remove " + contact + " from revoked list");
             }
 
-            // URL
             String url = "/resource-lists/users/"
-                    + HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri())
+                    + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
                     + "/index/~~/resource-lists/list%5B@name=%22rcs_revokedcontacts%22%5D/entry%5B@uri=%22"
-                    + HttpUtils.encodeURL(PhoneUtils.formatContactIdToUri(contact)) + "%22%5D";
+                    + Uri.encode(PhoneUtils.formatContactIdToUri(contact)) + "%22%5D";
 
-            // Create the request
             HttpDeleteRequest request = new HttpDeleteRequest(url);
 
-            // Send the request
             HttpResponse response = sendRequestToXDMS(request);
             if (response.isSuccessfullResponse()) {
-                if (logger.isActivated()) {
-                    logger.info(contact + " has been removed with success from revoked list");
+                if (sLogger.isActivated()) {
+                    sLogger.info(contact + " has been removed with success from revoked list");
                 }
             } else {
-                if (logger.isActivated()) {
-                    logger.info("Can't remove " + contact + " from revoked list: "
+                if (sLogger.isActivated()) {
+                    sLogger.info("Can't remove " + contact + " from revoked list: "
                             + response.getResponseCode() + " error");
                 }
             }
             return response;
+
         } catch (CoreException e) {
-            if (logger.isActivated()) {
-                logger.error(
-                        "Can't remove " + contact + " from revoked list: unexpected exception", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't remove " + contact
+                        + " from revoked list: unexpected exception", e);
             }
             return null;
         }
@@ -1175,38 +1173,34 @@ public class XdmManager {
     public List<String> getRevokedContacts() {
         List<String> result = new ArrayList<String>();
         try {
-            if (logger.isActivated()) {
-                logger.info("Get revoked contacts list");
+            if (sLogger.isActivated()) {
+                sLogger.info("Get revoked contacts list");
             }
 
-            // URL
             String url = "/resource-lists/users/"
-                    + HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri())
+                    + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
                     + "/index/~~/resource-lists/list%5B@name=%22rcs_revokedcontacts%22%5D";
 
-            // Create the request
             HttpGetRequest request = new HttpGetRequest(url);
 
-            // Send the request
             HttpResponse response = sendRequestToXDMS(request);
             if (response.isSuccessfullResponse()) {
-                if (logger.isActivated()) {
-                    logger.info("Revoked contacts list has been read with success");
+                if (sLogger.isActivated()) {
+                    sLogger.info("Revoked contacts list has been read with success");
                 }
 
-                // Parse response
                 InputSource input = new InputSource(new ByteArrayInputStream(response.getContent()));
                 XcapResponseParser parser = new XcapResponseParser(input);
                 result = parser.getUris();
             } else {
-                if (logger.isActivated()) {
-                    logger.info("Can't get revoked contacts list: " + response.getResponseCode()
+                if (sLogger.isActivated()) {
+                    sLogger.info("Can't get revoked contacts list: " + response.getResponseCode()
                             + " error");
                 }
             }
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't get revoked contacts list: unexpected exception", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't get revoked contacts list: unexpected exception", e);
             }
         }
         return result;
@@ -1219,7 +1213,7 @@ public class XdmManager {
      */
     public String getEndUserPhotoIconUrl() {
         return xdmServerAddr + "/org.openmobilealliance.pres-content/users/"
-                + HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri())
+                + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
                 + "/oma_status-icon/rcs_status_icon";
     }
 
@@ -1231,24 +1225,23 @@ public class XdmManager {
      */
     public HttpResponse uploadEndUserPhoto(PhotoIcon photo) {
         try {
-            if (logger.isActivated()) {
-                logger.info("Upload the end user photo");
+            if (sLogger.isActivated()) {
+                sLogger.info("Upload the end user photo");
             }
 
             // Content
             String data = Base64.encodeBase64ToString(photo.getContent());
             String content = new StringBuilder("<?xml version=\"1.0\" encoding=\"")
-                    .append(UTF8_STR).append("\"?>").append(HttpUtils.CRLF)
-                    .append("<content xmlns=\"urn:oma:xml:prs:pres-content\">")
-                    .append(HttpUtils.CRLF).append("<mime-type>").append(photo.getType())
-                    .append("</mime-type>").append(HttpUtils.CRLF)
-                    .append("<encoding>base64</encoding>").append(HttpUtils.CRLF).append("<data>")
-                    .append(data).append("</data>").append(HttpUtils.CRLF).append("</content>")
-                    .toString();
+                    .append(UTF8_STR).append("\"?>").append(CRLF)
+                    .append("<content xmlns=\"urn:oma:xml:prs:pres-content\">").append(CRLF)
+                    .append("<mime-type>").append(photo.getType()).append("</mime-type>")
+                    .append(CRLF).append("<encoding>base64</encoding>").append(CRLF)
+                    .append("<data>").append(data).append("</data>").append(CRLF)
+                    .append("</content>").toString();
 
             // URL
             String url = "/org.openmobilealliance.pres-content/users/"
-                    + HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri())
+                    + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
                     + "/oma_status-icon/rcs_status_icon";
 
             // Create the request
@@ -1258,18 +1251,18 @@ public class XdmManager {
             // Send the request
             HttpResponse response = sendRequestToXDMS(request);
             if (response.isSuccessfullResponse()) {
-                if (logger.isActivated()) {
-                    logger.info("Photo has been uploaded with success");
+                if (sLogger.isActivated()) {
+                    sLogger.info("Photo has been uploaded with success");
                 }
             } else {
-                if (logger.isActivated()) {
-                    logger.info("Can't upload the photo: " + response.getResponseCode() + " error");
+                if (sLogger.isActivated()) {
+                    sLogger.info("Can't upload the photo: " + response.getResponseCode() + " error");
                 }
             }
             return response;
         } catch (CoreException e) {
-            if (logger.isActivated()) {
-                logger.error("Can't upload the photo: unexpected exception", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't upload the photo: unexpected exception", e);
             }
             return null;
         }
@@ -1282,13 +1275,13 @@ public class XdmManager {
      */
     public HttpResponse deleteEndUserPhoto() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Delete the end user photo");
+            if (sLogger.isActivated()) {
+                sLogger.info("Delete the end user photo");
             }
 
             // URL
             String url = "/org.openmobilealliance.pres-content/users/"
-                    + HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri())
+                    + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
                     + "/oma_status-icon/rcs_status_icon";
 
             // Create the request
@@ -1297,18 +1290,19 @@ public class XdmManager {
             // Send the request
             HttpResponse response = sendRequestToXDMS(request);
             if (response.isSuccessfullResponse()) {
-                if (logger.isActivated()) {
-                    logger.info("Photo has been deleted with success");
+                if (sLogger.isActivated()) {
+                    sLogger.info("Photo has been deleted with success");
                 }
             } else {
-                if (logger.isActivated()) {
-                    logger.info("Can't delete the photo: " + response.getResponseCode() + " error");
+                if (sLogger.isActivated()) {
+                    sLogger.info("Can't delete the photo: " + response.getResponseCode() + " error");
                 }
             }
             return response;
+
         } catch (CoreException e) {
-            if (logger.isActivated()) {
-                logger.error("Can't delete the photo: unexpected exception", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't delete the photo: unexpected exception", e);
             }
             return null;
         }
@@ -1323,8 +1317,8 @@ public class XdmManager {
      */
     public PhotoIcon downloadContactPhoto(String url, String etag) {
         try {
-            if (logger.isActivated()) {
-                logger.info("Download the photo at " + url);
+            if (sLogger.isActivated()) {
+                sLogger.info("Download the photo at " + url);
             }
 
             // Remove the beginning of the URL
@@ -1336,8 +1330,8 @@ public class XdmManager {
             // Send the request
             HttpResponse response = sendRequestToXDMS(request);
             if (response.isSuccessfullResponse()) {
-                if (logger.isActivated()) {
-                    logger.info("Download photo with success");
+                if (sLogger.isActivated()) {
+                    sLogger.info("Download photo with success");
                 }
 
                 // Parse response
@@ -1347,17 +1341,17 @@ public class XdmManager {
                 // Return data
                 byte[] data = parser.getData();
                 if (data != null) {
-                    if (logger.isActivated()) {
-                        logger.debug("Received photo: encoding=" + parser.getEncoding() + ", mime="
-                                + parser.getMime() + ", encoded size=" + data.length);
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Received photo: encoding=" + parser.getEncoding()
+                                + ", mime=" + parser.getMime() + ", encoded size=" + data.length);
                     }
                     byte[] dataArray = Base64.decodeBase64(data);
 
                     // Create a bitmap from the received photo data
                     Bitmap bitmap = BitmapFactory.decodeByteArray(dataArray, 0, dataArray.length);
                     if (bitmap != null) {
-                        if (logger.isActivated()) {
-                            logger.debug("Photo width=" + bitmap.getWidth() + " height="
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("Photo width=" + bitmap.getWidth() + " height="
                                     + bitmap.getHeight());
                         }
 
@@ -1366,21 +1360,21 @@ public class XdmManager {
                         return null;
                     }
                 } else {
-                    if (logger.isActivated()) {
-                        logger.warn("Can't download the photo: photo is null");
+                    if (sLogger.isActivated()) {
+                        sLogger.warn("Can't download the photo: photo is null");
                     }
                     return null;
                 }
             } else {
-                if (logger.isActivated()) {
-                    logger.warn("Can't download the photo: " + response.getResponseCode()
+                if (sLogger.isActivated()) {
+                    sLogger.warn("Can't download the photo: " + response.getResponseCode()
                             + " error");
                 }
                 return null;
             }
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't download the photo: unexpected exception", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't download the photo: unexpected exception", e);
             }
             return null;
         }
@@ -1394,34 +1388,31 @@ public class XdmManager {
      */
     public HttpResponse setPresenceInfo(String info) {
         try {
-            if (logger.isActivated()) {
-                logger.info("Update presence info");
+            if (sLogger.isActivated()) {
+                sLogger.info("Update presence info");
             }
 
-            // URL
             String url = "/pidf-manipulation/users/"
-                    + HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri())
-                    + "/perm-presence";
+                    + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri()) + "/perm-presence";
 
-            // Create the request
             HttpPutRequest request = new HttpPutRequest(url, info, "application/pidf+xml");
 
-            // Send the request
             HttpResponse response = sendRequestToXDMS(request);
             if (response.isSuccessfullResponse()) {
-                if (logger.isActivated()) {
-                    logger.info("Presence info has been updated with succes");
+                if (sLogger.isActivated()) {
+                    sLogger.info("Presence info has been updated with succes");
                 }
             } else {
-                if (logger.isActivated()) {
-                    logger.info("Can't update the presence info: " + response.getResponseCode()
+                if (sLogger.isActivated()) {
+                    sLogger.info("Can't update the presence info: " + response.getResponseCode()
                             + " error");
                 }
             }
             return response;
+
         } catch (CoreException e) {
-            if (logger.isActivated()) {
-                logger.error("Can't update the presence info: unexpected exception", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't update the presence info: unexpected exception", e);
             }
             return null;
         }

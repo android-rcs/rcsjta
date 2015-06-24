@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.utils;
@@ -67,44 +71,61 @@ public class NetworkUtils {
      * @return Type
      */
     public static int getNetworkAccessType() {
-        int result = NETWORK_ACCESS_UNKNOWN;
-        try {
-            ConnectivityManager connectivityMgr = (ConnectivityManager) AndroidFactory
-                    .getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo networkInfo = connectivityMgr.getActiveNetworkInfo();
-            if (networkInfo != null) {
-                int type = networkInfo.getType();
-                if (type == ConnectivityManager.TYPE_WIFI) {
-                    result = NETWORK_ACCESS_WIFI;
-                } else if (type == ConnectivityManager.TYPE_MOBILE) {
-                    int subtype = networkInfo.getSubtype();
-                    switch (subtype) {
-                        case TelephonyManager.NETWORK_TYPE_GPRS:
-                        case TelephonyManager.NETWORK_TYPE_EDGE:
-                            result = NETWORK_ACCESS_2G;
-                            break;
-                        case TelephonyManager.NETWORK_TYPE_UMTS: // ~ 400-7000 kbps
-                        case TelephonyManager.NETWORK_TYPE_HSPA: // ~ 700-1700 kbps
-                            result = NETWORK_ACCESS_3G;
-                            break;
-                        case TelephonyManager.NETWORK_TYPE_HSDPA: // ~ 2-14 Mbps
-                        case TelephonyManager.NETWORK_TYPE_HSUPA: // ~ 1-23 Mbps
-                        case 15: // TelephonyManager.NETWORK_TYPE_HSPAP (available on API level 13)
-                                 // // ~
-                                 // 10-20 Mbps
-                            result = NETWORK_ACCESS_3GPLUS;
-                            break;
-                        case 13: // TelephonyManager.NETWORK_TYPE_LTE (available on API level 11) //
-                                 // ~
-                                 // 10+ Mbps
-                            result = NETWORK_ACCESS_4G;
-                            break;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            // Nothing to do
+        ConnectivityManager connectivityMgr = (ConnectivityManager) AndroidFactory
+                .getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityMgr.getActiveNetworkInfo();
+        if (networkInfo == null) {
+            return NETWORK_ACCESS_UNKNOWN;
         }
-        return result;
+        int networkType = networkInfo.getType();
+        switch (networkType) {
+            case ConnectivityManager.TYPE_WIFI:
+                return NETWORK_ACCESS_WIFI;
+
+            case ConnectivityManager.TYPE_MOBILE:
+                return getNetworkSubType(networkInfo.getSubtype());
+
+            default:
+                throw new IllegalArgumentException(new StringBuilder("Unknown network type : ")
+                        .append(networkType).append("!").toString());
+        }
+    }
+
+    /**
+     * Returns network subType
+     */
+    private static int getNetworkSubType(int subType) {
+        switch (subType) {
+            case TelephonyManager.NETWORK_TYPE_GPRS:
+                /* Intentional fall back */
+            case TelephonyManager.NETWORK_TYPE_EDGE:
+                return NETWORK_ACCESS_2G;
+
+                /* ~ 400-7000 kbps */
+            case TelephonyManager.NETWORK_TYPE_UMTS:
+                /* Intentional fall back */
+                /* ~ 700-1700 kbps */
+            case TelephonyManager.NETWORK_TYPE_HSPA:
+                return NETWORK_ACCESS_3G;
+
+                /* ~ 2-14 Mbps */
+            case TelephonyManager.NETWORK_TYPE_HSDPA:
+                /* Intentional fall back */
+                /* ~ 1-23 Mbps */
+            case TelephonyManager.NETWORK_TYPE_HSUPA:
+                /* Intentional fall back */
+                /* TelephonyManager.NETWORK_TYPE_HSPAP (available on API level 13) ~10-20 Mbps */
+            case 15:
+                return NETWORK_ACCESS_3GPLUS;
+
+                /* TelephonyManager.NETWORK_TYPE_LTE (available on API level 11) ~10+ Mbps */
+            case 13:
+                return NETWORK_ACCESS_4G;
+
+            default:
+                throw new IllegalArgumentException(new StringBuilder(
+                        "Unknown sub-type for mobile network : ").append(subType).append("!")
+                        .toString());
+        }
     }
 }

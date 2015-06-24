@@ -40,6 +40,7 @@ import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
@@ -89,10 +90,11 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
      * @param timestamp Local timestamp for the session
      * @param contactManager
      * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     public TerminatingImageTransferSession(ImsService parent, SipRequest invite, ContactId contact,
             RcsSettings rcsSettings, long timestamp, ContactManager contactManager)
-            throws SipPayloadException {
+            throws SipPayloadException, SipNetworkException {
         super(parent, ContentManager.createMmContentFromSdp(invite, rcsSettings), contact,
                 FileTransferUtils.extractFileIcon(invite, rcsSettings), rcsSettings, timestamp,
                 contactManager);

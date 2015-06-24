@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.platform.network;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -31,7 +32,7 @@ import java.io.OutputStream;
  * 
  * @author jexa7410
  */
-public interface SocketConnection {
+public interface SocketConnection extends Closeable {
     /**
      * Open the socket
      * 

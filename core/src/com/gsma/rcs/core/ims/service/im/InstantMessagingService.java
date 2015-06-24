@@ -217,7 +217,7 @@ public class InstantMessagingService extends ImsService {
 
     private void handleFileTransferInvitationRejected(SipRequest invite, ContactId contact,
             FileTransfer.ReasonCode reasonCode, long timestamp, long timestampSent)
-            throws SipPayloadException {
+            throws SipPayloadException, SipNetworkException {
         MmContent content = ContentManager.createMmContentFromSdp(invite, mRcsSettings);
         MmContent fileIcon = FileTransferUtils.extractFileIcon(invite, mRcsSettings);
         mCore.getListener().handleFileTransferInvitationRejected(contact, content, fileIcon,
@@ -232,7 +232,7 @@ public class InstantMessagingService extends ImsService {
     }
 
     private void handleGroupChatInvitationRejected(SipRequest invite, ContactId contact,
-            ReasonCode reasonCode, long timestamp) {
+            ReasonCode reasonCode, long timestamp) throws SipNetworkException, SipPayloadException {
         String chatId = ChatUtils.getContributionId(invite);
         String subject = ChatUtils.getSubject(invite);
         Map<ContactId, ParticipantStatus> participants = ChatUtils.getParticipants(invite,
@@ -788,9 +788,10 @@ public class InstantMessagingService extends ImsService {
      * @param invite Initial invite
      * @param timestamp Local timestamp when got SipRequest
      * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     public void receiveMsrpFileTransferInvitation(SipRequest invite, long timestamp)
-            throws SipPayloadException {
+            throws SipPayloadException, SipNetworkException {
         boolean logActivated = sLogger.isActivated();
         String assertedId = SipUtils.getAssertedIdentity(invite);
         PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(assertedId);
@@ -1065,9 +1066,10 @@ public class InstantMessagingService extends ImsService {
      * @param invite Initial invite
      * @param timestamp Local timestamp when got SipRequest
      * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     public void receiveAdhocGroupChatSession(SipRequest invite, long timestamp)
-            throws SipPayloadException {
+            throws SipPayloadException, SipNetworkException {
         boolean logActivated = sLogger.isActivated();
         if (logActivated) {
             sLogger.info("Receive an ad-hoc group chat session invitation");
@@ -1416,9 +1418,11 @@ public class InstantMessagingService extends ImsService {
      * @param ftinfo File transfer info document
      * @param timestamp Local timestamp when got SipRequest
      * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     public void receiveOneToOneHttpFileTranferInvitation(SipRequest invite,
-            FileTransferHttpInfoDocument ftinfo, long timestamp) throws SipPayloadException {
+            FileTransferHttpInfoDocument ftinfo, long timestamp) throws SipPayloadException,
+            SipNetworkException {
         boolean logActivated = sLogger.isActivated();
         String referredId = ChatUtils.getReferredIdentityAsContactUri(invite);
         ContactId remote = ChatUtils.getReferredIdentityAsContactId(invite);

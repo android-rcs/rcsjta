@@ -22,19 +22,18 @@
 
 package com.gsma.rcs.utils;
 
+import android.content.ContentResolver;
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.OpenableColumns;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import com.gsma.rcs.utils.logger.Logger;
-
-import android.content.ContentResolver;
-import android.content.Context;
-import android.database.Cursor;
-import android.net.Uri;
-import android.provider.OpenableColumns;
 import javax2.sip.InvalidArgumentException;
 
 /**
@@ -43,8 +42,6 @@ import javax2.sip.InvalidArgumentException;
  * @author YPLO6403
  */
 public class FileUtils {
-
-    private static final Logger logger = Logger.getLogger(FileUtils.class.getSimpleName());
 
     /**
      * Copy a file to a directory
@@ -94,18 +91,8 @@ public class FileUtils {
                 output.write(buffer, 0, length);
             }
         } finally {
-            try {
-                if (output != null)
-                    output.close();
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-            }
-            try {
-                if (input != null)
-                    input.close();
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-            }
+            CloseableUtils.close(input);
+            CloseableUtils.close(output);
         }
         // check if full content is copied
         if (srcFile.length() != destFile.length()) {
