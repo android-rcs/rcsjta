@@ -2245,7 +2245,7 @@ public final class ContactManager {
                  * contact (only if OS version if gingerbread or less).
                  */
                 if (!isSimAccount(rawContactId)) {
-                    rawContactsIds.add(cursor.getLong(contactColumnIdx));
+                    rawContactsIds.add(rawContactId);
                 }
             } while (cursor.moveToNext());
             return rawContactsIds;

@@ -30,7 +30,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
-import com.gsma.rcs.core.ims.service.capability.CapabilityService.IOptionsManagerListener;
+import com.gsma.rcs.core.ims.service.capability.OptionsRequestTask.IOptionsRequestTaskListener;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtil;
@@ -91,25 +91,7 @@ public class OptionsManager implements DiscoveryManager {
      * Stop the manager
      */
     public void stop() {
-        try {
-            mThreadPool.shutdown();
-        } catch (SecurityException e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Could not stop all threads");
-            }
-        }
-    }
-
-    /**
-     * Interface listener for OptionRequestTask
-     */
-    public interface IOptionsRequestTaskListener {
-        /**
-         * Callback notify end of task
-         * 
-         * @param contact ID
-         */
-        public void endOfTask(ContactId contact);
+        mThreadPool.shutdownNow();
     }
 
     /**
@@ -120,6 +102,13 @@ public class OptionsManager implements DiscoveryManager {
      */
     private void requestCapabilitiesInBackground(ContactId contact,
             IOptionsRequestTaskListener listener) {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Request capabilities in background for ".concat(contact.toString()));
+        }
+        boolean richcall = mImsModule.getRichcallService().isCallConnectedWith(contact);
+        OptionsRequestTask task = new OptionsRequestTask(mImsModule, contact,
+                CapabilityUtils.getSupportedFeatureTags(richcall, mRcsSettings), mRcsSettings,
+                mContactManager, listener);
         if (mThreadPool.isShutdown()) {
             if (sLogger.isActivated()) {
                 sLogger.warn("Request capabilities in background for " + contact
@@ -127,14 +116,6 @@ public class OptionsManager implements DiscoveryManager {
             }
             return;
         }
-        if (sLogger.isActivated()) {
-            sLogger.debug("Request capabilities in background for ".concat(contact.toString()));
-        }
-
-        boolean richcall = mImsModule.getRichcallService().isCallConnectedWith(contact);
-        OptionsRequestTask task = new OptionsRequestTask(mImsModule, contact,
-                CapabilityUtils.getSupportedFeatureTags(richcall, mRcsSettings), mRcsSettings,
-                mContactManager, listener);
         mThreadPool.submit(task);
     }
 
@@ -261,11 +242,11 @@ public class OptionsManager implements DiscoveryManager {
             listener = new IOptionsRequestTaskListener() {
 
                 @Override
-                public void endOfTask(ContactId contact) {
+                public void endOfOptionsRequestTask(ContactId contact) {
                     synchronized (contactsToQuery) {
                         contactsToQuery.remove(contact);
                         if (contactsToQuery.isEmpty()) {
-                            callback.endOfSynchronization();
+                            callback.endOfCapabilitiesRequest();
                         }
                     }
                 }
@@ -276,4 +257,13 @@ public class OptionsManager implements DiscoveryManager {
         }
     }
 
+    /**
+     * Interface listener for OptionsManager
+     */
+    public interface IOptionsManagerListener {
+        /**
+         * Callback to notify end of capabilities request
+         */
+        public void endOfCapabilitiesRequest();
+    }
 }

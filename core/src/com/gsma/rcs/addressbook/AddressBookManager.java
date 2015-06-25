@@ -149,7 +149,7 @@ public class AddressBookManager {
         }
 
         // Shutdown background executor
-        mCleanupExecutor.shutdown();
+        mCleanupExecutor.shutdownNow();
     }
 
     /**
@@ -217,7 +217,7 @@ public class AddressBookManager {
             if (msg.what == CHECK_MESSAGE) {
                 /* Clean RCS entries associated to numbers that have been removed or modified */
                 if (sLogger.isActivated()) {
-                    sLogger.debug("Minimum check period elapsed, notify the listeners that a change occured in the address book");
+                    sLogger.debug("Minimum check period elapsed, notify listeners that a change occurred in the address book");
                 }
 
                 /*

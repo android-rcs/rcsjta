@@ -250,15 +250,12 @@ public class Capabilities {
 
     @Override
     public String toString() {
-        return "Capabilities [mImageSharing=" + mImageSharing + ", mVideoSharing=" + mVideoSharing
-                + ", mIpVoiceCall=" + mIpVoiceCall + ", mIpVideoCall=" + mIpVideoCall
-                + ", mImSession=" + mImSession + ", mFileTransfer=" + mFileTransfer + ", mCsVideo="
-                + mCsVideo + ", mPresenceDiscovery=" + mPresenceDiscovery + ", mSocialPresence="
-                + mSocialPresence + ", mFileTransferHttp=" + mFileTransferHttp
-                + ", mGeolocationPush=" + mGeolocationPush + ", mFileTransferThumbnail="
-                + mFileTransferThumbnail + ", mFileTransferStoreForward="
-                + mFileTransferStoreForward + ", mGroupChatStoreForward=" + mGroupChatStoreForward
-                + ", mSipAutomata=" + mSipAutomata + ", mExtensions=" + mExtensions + "]";
+        return "Caps [ImageShare=" + mImageSharing + ", VideoShare=" + mVideoSharing
+                + ", Im=" + mImSession + ", Ft=" + mFileTransfer + ", FtHttp=" + mFileTransferHttp
+                + ", GeoPush=" + mGeolocationPush + ", FtThumbnail="
+                + mFileTransferThumbnail + ", FtSF="
+                + mFileTransferStoreForward + ", GcSF=" + mGroupChatStoreForward
+                + ", SipAutomata=" + mSipAutomata + ", Exts=" + mExtensions + "]";
     }
 
     /* The equals method does not consider the 2 timestamps.

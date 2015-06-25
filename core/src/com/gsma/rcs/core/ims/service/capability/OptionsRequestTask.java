@@ -35,7 +35,6 @@ import com.gsma.rcs.core.ims.service.ContactInfo;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.gsma.rcs.core.ims.service.SessionAuthenticationAgent;
-import com.gsma.rcs.core.ims.service.capability.OptionsManager.IOptionsRequestTaskListener;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -91,44 +90,10 @@ public class OptionsRequestTask implements Runnable {
         mCallback = callback;
     }
 
-    /**
-     * Background processing
-     */
+    @Override
     public void run() {
-        sendOptions();
-    }
-
-    /**
-     * Send an OPTIONS request
-     */
-    private void sendOptions() {
-        if (sLogger.isActivated()) {
-            sLogger.info("Send an options request to ".concat(mContact.toString()));
-        }
-
         try {
-            if (!mImsModule.getCurrentNetworkInterface().isRegistered()) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("IMS not registered, do nothing");
-                }
-                return;
-            }
-
-            // Create a dialog path
-            String contactUri = PhoneUtils.formatContactIdToUri(mContact);
-            mDialogPath = new SipDialogPath(mImsModule.getSipManager().getSipStack(), mImsModule
-                    .getSipManager().getSipStack().generateCallId(), 1, contactUri,
-                    ImsModule.IMS_USER_PROFILE.getPublicUri(), contactUri, mImsModule
-                            .getSipManager().getSipStack().getServiceRoutePath(), mRcsSettings);
-
-            // Create OPTIONS request
-            if (sLogger.isActivated()) {
-                sLogger.debug("Send first OPTIONS");
-            }
-            SipRequest options = SipMessageFactory.createOptions(mDialogPath, mFeatureTags);
-
-            // Send OPTIONS request
-            sendAndWaitOptions(options);
+            sendOptions();
         } catch (SipException e) {
             sLogger.error("Options request failed for contact " + mContact + " !", e);
             handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, e));
@@ -138,9 +103,46 @@ public class OptionsRequestTask implements Runnable {
             sLogger.error("Options request failed for contact " + mContact + " !", e);
         } finally {
             if (mCallback != null) {
-                mCallback.endOfTask(mContact);
+                try {
+                    mCallback.endOfOptionsRequestTask(mContact);
+                } catch (RuntimeException e) {
+                    sLogger.error("Failed to notify end of options request for contact " + mContact
+                            + " !", e);
+                }
             }
         }
+    }
+
+    /**
+     * Send an OPTIONS request
+     * 
+     * @throws SipPayloadException
+     * @throws ContactManagerException
+     * @throws SipNetworkException
+     */
+    private void sendOptions() throws SipPayloadException, SipNetworkException,
+            ContactManagerException {
+        if (sLogger.isActivated()) {
+            sLogger.info("Send an options request to ".concat(mContact.toString()));
+        }
+        if (!mImsModule.getCurrentNetworkInterface().isRegistered()) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("IMS not registered, do nothing");
+            }
+            return;
+        }
+        String contactUri = PhoneUtils.formatContactIdToUri(mContact);
+        mDialogPath = new SipDialogPath(mImsModule.getSipManager().getSipStack(), mImsModule
+                .getSipManager().getSipStack().generateCallId(), 1, contactUri,
+                ImsModule.IMS_USER_PROFILE.getPublicUri(), contactUri, mImsModule.getSipManager()
+                        .getSipStack().getServiceRoutePath(), mRcsSettings);
+
+        if (sLogger.isActivated()) {
+            sLogger.debug("Send first OPTIONS");
+        }
+        SipRequest options = SipMessageFactory.createOptions(mDialogPath, mFeatureTags);
+
+        sendAndWaitOptions(options);
     }
 
     /**
@@ -337,5 +339,17 @@ public class OptionsRequestTask implements Runnable {
              */
             mContactManager.updateCapabilitiesTimeLastRequest(mContact);
         }
+    }
+
+    /**
+     * Interface listener for OptionRequestTask
+     */
+    public interface IOptionsRequestTaskListener {
+        /**
+         * Callback to notify end of options request task
+         * 
+         * @param contact ID
+         */
+        public void endOfOptionsRequestTask(ContactId contact);
     }
 }
