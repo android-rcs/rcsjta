@@ -146,13 +146,13 @@ public class StartService extends Service {
 
     @Override
     public void onDestroy() {
-        // Unregister network state listener
+        if (mPollingTelephonyManagerReceiver != null) {
+            unregisterReceiver(mPollingTelephonyManagerReceiver);
+            mPollingTelephonyManagerReceiver = null;
+        }
         if (mNetworkStateListener != null) {
-            try {
-                unregisterReceiver(mNetworkStateListener);
-            } catch (IllegalArgumentException e) {
-                // Nothing to do
-            }
+            unregisterReceiver(mNetworkStateListener);
+            mNetworkStateListener = null;
         }
     }
 
@@ -277,11 +277,7 @@ public class StartService extends Service {
         if (mNetworkStateListener == null) {
             return;
         }
-        try {
-            unregisterReceiver(mNetworkStateListener);
-        } catch (IllegalArgumentException e) {
-            // Nothing to do
-        }
+        unregisterReceiver(mNetworkStateListener);
         mNetworkStateListener = null;
     }
 
