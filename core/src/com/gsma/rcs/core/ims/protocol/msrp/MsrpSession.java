@@ -24,6 +24,12 @@ package com.gsma.rcs.core.ims.protocol.msrp;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.utils.CloseableUtils;
+import com.gsma.rcs.utils.IdGenerator;
+import com.gsma.rcs.utils.logger.Logger;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,12 +39,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
-
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
-import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.CloseableUtils;
-import com.gsma.rcs.utils.IdGenerator;
-import com.gsma.rcs.utils.logger.Logger;
 
 /**
  * MSRP session
@@ -794,57 +794,61 @@ public class MsrpSession {
      * @throws IOException
      */
     private void sendMsrpReportRequest(String txId, Hashtable<String, String> headers,
-            long lastByte, long totalSize) throws MsrpException, IOException {
-        // Create request
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream(4000);
-        buffer.reset();
-        buffer.write(MsrpConstants.MSRP_HEADER.getBytes(UTF8));
-        buffer.write(MsrpConstants.CHAR_SP);
-        buffer.write(txId.getBytes(UTF8));
-        buffer.write((" " + MsrpConstants.METHOD_REPORT).getBytes(UTF8));
-        buffer.write(NEW_LINE);
+            long lastByte, long totalSize) throws MsrpException {
+        try {
+            // Create request
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream(4000);
+            buffer.reset();
+            buffer.write(MsrpConstants.MSRP_HEADER.getBytes(UTF8));
+            buffer.write(MsrpConstants.CHAR_SP);
+            buffer.write(txId.getBytes(UTF8));
+            buffer.write((" " + MsrpConstants.METHOD_REPORT).getBytes(UTF8));
+            buffer.write(NEW_LINE);
 
-        buffer.write(MsrpConstants.HEADER_TO_PATH.getBytes(UTF8));
-        buffer.write(MsrpConstants.CHAR_DOUBLE_POINT);
-        buffer.write(MsrpConstants.CHAR_SP);
-        buffer.write(headers.get(MsrpConstants.HEADER_FROM_PATH).getBytes(UTF8));
-        buffer.write(NEW_LINE);
+            buffer.write(MsrpConstants.HEADER_TO_PATH.getBytes(UTF8));
+            buffer.write(MsrpConstants.CHAR_DOUBLE_POINT);
+            buffer.write(MsrpConstants.CHAR_SP);
+            buffer.write(headers.get(MsrpConstants.HEADER_FROM_PATH).getBytes(UTF8));
+            buffer.write(NEW_LINE);
 
-        buffer.write(MsrpConstants.HEADER_FROM_PATH.getBytes(UTF8));
-        buffer.write(MsrpConstants.CHAR_DOUBLE_POINT);
-        buffer.write(MsrpConstants.CHAR_SP);
-        buffer.write((headers.get(MsrpConstants.HEADER_TO_PATH)).getBytes(UTF8));
-        buffer.write(NEW_LINE);
+            buffer.write(MsrpConstants.HEADER_FROM_PATH.getBytes(UTF8));
+            buffer.write(MsrpConstants.CHAR_DOUBLE_POINT);
+            buffer.write(MsrpConstants.CHAR_SP);
+            buffer.write((headers.get(MsrpConstants.HEADER_TO_PATH)).getBytes(UTF8));
+            buffer.write(NEW_LINE);
 
-        buffer.write(MsrpConstants.HEADER_MESSAGE_ID.getBytes(UTF8));
-        buffer.write(MsrpConstants.CHAR_DOUBLE_POINT);
-        buffer.write(MsrpConstants.CHAR_SP);
-        buffer.write((headers.get(MsrpConstants.HEADER_MESSAGE_ID)).getBytes(UTF8));
-        buffer.write(NEW_LINE);
+            buffer.write(MsrpConstants.HEADER_MESSAGE_ID.getBytes(UTF8));
+            buffer.write(MsrpConstants.CHAR_DOUBLE_POINT);
+            buffer.write(MsrpConstants.CHAR_SP);
+            buffer.write((headers.get(MsrpConstants.HEADER_MESSAGE_ID)).getBytes(UTF8));
+            buffer.write(NEW_LINE);
 
-        buffer.write(MsrpConstants.HEADER_BYTE_RANGE.getBytes(UTF8));
-        buffer.write(MsrpConstants.CHAR_DOUBLE_POINT);
-        buffer.write(MsrpConstants.CHAR_SP);
-        String byteRange = "1-" + lastByte + "/" + totalSize;
-        buffer.write(byteRange.getBytes(UTF8));
-        buffer.write(NEW_LINE);
+            buffer.write(MsrpConstants.HEADER_BYTE_RANGE.getBytes(UTF8));
+            buffer.write(MsrpConstants.CHAR_DOUBLE_POINT);
+            buffer.write(MsrpConstants.CHAR_SP);
+            String byteRange = "1-" + lastByte + "/" + totalSize;
+            buffer.write(byteRange.getBytes(UTF8));
+            buffer.write(NEW_LINE);
 
-        buffer.write(MsrpConstants.HEADER_STATUS.getBytes(UTF8));
-        buffer.write(MsrpConstants.CHAR_DOUBLE_POINT);
-        buffer.write(MsrpConstants.CHAR_SP);
-        String status = "000 200 OK";
-        buffer.write(status.getBytes(UTF8));
-        buffer.write(NEW_LINE);
+            buffer.write(MsrpConstants.HEADER_STATUS.getBytes(UTF8));
+            buffer.write(MsrpConstants.CHAR_DOUBLE_POINT);
+            buffer.write(MsrpConstants.CHAR_SP);
+            String status = "000 200 OK";
+            buffer.write(status.getBytes(UTF8));
+            buffer.write(NEW_LINE);
 
-        buffer.write(MsrpConstants.END_MSRP_MSG.getBytes(UTF8));
-        buffer.write(txId.getBytes(UTF8));
-        buffer.write(MsrpConstants.FLAG_LAST_CHUNK);
-        buffer.write(NEW_LINE);
+            buffer.write(MsrpConstants.END_MSRP_MSG.getBytes(UTF8));
+            buffer.write(txId.getBytes(UTF8));
+            buffer.write(MsrpConstants.FLAG_LAST_CHUNK);
+            buffer.write(NEW_LINE);
 
-        // Send request
-        requestTransaction = new RequestTransaction(mRcsSettings);
-        connection.sendChunk(buffer.toByteArray());
-        buffer.close();
+            // Send request
+            requestTransaction = new RequestTransaction(mRcsSettings);
+            connection.sendChunk(buffer.toByteArray());
+            buffer.close();
+        } catch (IOException e) {
+            throw new MsrpException("Failed to send Msrp report request!", e);
+        }
     }
 
     /**
