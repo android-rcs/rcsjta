@@ -224,6 +224,13 @@ public class InstantMessagingService extends ImsService {
                 reasonCode, timestamp, timestampSent);
     }
 
+    private void handleResendFileTransferInvitationRejected(String fileTransferId,
+            ContactId contact, FileTransfer.ReasonCode reasonCode, long timestamp,
+            long timestampSent) {
+        mCore.getListener().handleResendFileTransferInvitationRejected(fileTransferId, contact,
+                reasonCode, timestamp, timestampSent);
+    }
+
     private void handleGroupChatInvitationRejected(SipRequest invite, ContactId contact,
             ReasonCode reasonCode, long timestamp) {
         String chatId = ChatUtils.getContributionId(invite);
@@ -1427,9 +1434,18 @@ public class InstantMessagingService extends ImsService {
         if (logActivated) {
             sLogger.info("Receive a single HTTP file transfer invitation");
         }
+        String fileTransferId = ChatUtils.getMessageId(invite);
+        if (isFileTransferAlreadyOngoing(fileTransferId)) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(new StringBuilder("File transfer with fileTransferId '")
+                        .append(fileTransferId).append("' already ongoing, so ignoring this one.")
+                        .toString());
+            }
+            return;
+        }
         CpimMessage cpimMessage = ChatUtils.extractCpimMessage(invite);
         long timestampSent = cpimMessage.getTimestampSent();
-        // Test if the contact is blocked
+        boolean fileResent = isFileTransferResentAndNotAlreadyOngoing(fileTransferId);
         if (mContactManager.isBlockedForContact(remote)) {
             if (logActivated) {
                 sLogger.debug(new StringBuilder("Contact ").append(remote)
@@ -1437,18 +1453,54 @@ public class InstantMessagingService extends ImsService {
                         .toString());
             }
             sendErrorResponse(invite, Response.DECLINE);
+            if (fileResent) {
+                handleResendFileTransferInvitationRejected(fileTransferId, remote,
+                        FileTransfer.ReasonCode.REJECTED_SPAM, timestamp, timestampSent);
+                return;
+            }
             handleFileTransferInvitationRejected(invite, remote,
                     FileTransfer.ReasonCode.REJECTED_SPAM, timestamp, timestampSent);
             return;
 
         }
-        /* Test number of sessions */
+
+        if (!isChatSessionAvailable()) {
+            if (logActivated) {
+                sLogger.debug("The max number of chat sessions is achieved: reject the invitation");
+            }
+            sendErrorResponse(invite, Response.BUSY_HERE);
+            /*
+             * The more abstracted reason code REJECTED_MAX_FILE_TRANSFERS is used since the client
+             * need not be aware of chat session dependency here.
+             */
+            if (fileResent) {
+                handleResendFileTransferInvitationRejected(fileTransferId, remote,
+                        FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp,
+                        timestampSent);
+                return;
+            }
+            handleFileTransferInvitationRejected(invite, remote,
+                    FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp, timestampSent);
+            return;
+        }
+
+        TerminatingOneToOneChatSession oneToOneChatSession = new TerminatingOneToOneChatSession(
+                this, invite, remote, mRcsSettings, mMessagingLog, timestamp, mContactManager);
+        CoreListener listener = mCore.getListener();
+        listener.handleOneOneChatSessionInitiation(oneToOneChatSession);
+        oneToOneChatSession.startSession();
+
         if (!isFileTransferSessionAvailable()) {
             if (logActivated) {
                 sLogger.debug("The max number of FT sessions is achieved, reject the HTTP File transfer");
             }
-            // Send a 603 Decline response
             sendErrorResponse(invite, Response.DECLINE);
+            if (fileResent) {
+                handleResendFileTransferInvitationRejected(fileTransferId, remote,
+                        FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp,
+                        timestampSent);
+                return;
+            }
             handleFileTransferInvitationRejected(invite, remote,
                     FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp, timestampSent);
             return;
@@ -1461,15 +1513,25 @@ public class InstantMessagingService extends ImsService {
         FileSharingError error = FileSharingSession.isFileCapacityAcceptable(ftinfo.getSize(),
                 mRcsSettings);
         if (error != null) {
-            // Send a 603 Decline response
             sendErrorResponse(invite, Response.DECLINE);
             int errorCode = error.getErrorCode();
             switch (errorCode) {
                 case FileSharingError.MEDIA_SIZE_TOO_BIG:
+                    if (fileResent) {
+                        handleResendFileTransferInvitationRejected(fileTransferId, remote,
+                                FileTransfer.ReasonCode.REJECTED_MAX_SIZE, timestamp, timestampSent);
+                        break;
+                    }
                     handleFileTransferInvitationRejected(invite, remote,
                             FileTransfer.ReasonCode.REJECTED_MAX_SIZE, timestamp, timestampSent);
                     break;
                 case FileSharingError.NOT_ENOUGH_STORAGE_SPACE:
+                    if (fileResent) {
+                        handleResendFileTransferInvitationRejected(fileTransferId, remote,
+                                FileTransfer.ReasonCode.REJECTED_LOW_SPACE, timestamp,
+                                timestampSent);
+                        break;
+                    }
                     handleFileTransferInvitationRejected(invite, remote,
                             FileTransfer.ReasonCode.REJECTED_LOW_SPACE, timestamp, timestampSent);
                     break;
@@ -1482,13 +1544,8 @@ public class InstantMessagingService extends ImsService {
             return;
         }
 
-        // Create and start a chat session
-        TerminatingOneToOneChatSession oneToOneChatSession = new TerminatingOneToOneChatSession(
-                this, invite, remote, mRcsSettings, mMessagingLog, timestamp, mContactManager);
-
-        // Create and start a new HTTP file transfer session
         DownloadFromInviteFileSharingSession fileSharingSession = new DownloadFromInviteFileSharingSession(
-                this, oneToOneChatSession, ftinfo, ChatUtils.getMessageId(invite),
+                this, oneToOneChatSession, ftinfo, fileTransferId,
                 oneToOneChatSession.getRemoteContact(), oneToOneChatSession.getRemoteDisplayName(),
                 mRcsSettings, mMessagingLog, timestamp, timestampSent, mContactManager);
         if (fileSharingSession.getFileicon() != null) {
@@ -1497,17 +1554,23 @@ public class InstantMessagingService extends ImsService {
             } catch (IOException e) {
                 sLogger.error("Failed to download file icon", e);
                 sendErrorResponse(invite, Response.DECLINE);
+                if (fileResent) {
+                    handleResendFileTransferInvitationRejected(fileTransferId, remote,
+                            FileTransfer.ReasonCode.REJECTED_MEDIA_FAILED, timestamp, timestampSent);
+                    return;
+                }
                 handleFileTransferInvitationRejected(invite, remote,
                         FileTransfer.ReasonCode.REJECTED_MEDIA_FAILED, timestamp, timestampSent);
                 return;
-
             }
         }
-        CoreListener listener = mCore.getListener();
-        listener.handleOneOneChatSessionInitiation(oneToOneChatSession);
-        listener.handleOneToOneFileTransferInvitation(fileSharingSession, oneToOneChatSession,
-                ftinfo.getExpiration());
-        oneToOneChatSession.startSession();
+        if (fileResent) {
+            listener.handleOneToOneResendFileTransferInvitation(fileSharingSession, remote,
+                    oneToOneChatSession.getRemoteDisplayName());
+        } else {
+            listener.handleOneToOneFileTransferInvitation(fileSharingSession, oneToOneChatSession,
+                    ftinfo.getExpiration());
+        }
         fileSharingSession.startSession();
     }
 
@@ -1534,39 +1597,64 @@ public class InstantMessagingService extends ImsService {
             /* We cannot refuse a S&F File transfer invitation */
             // TODO normally send a deliver to enable transmission of awaiting messages
             return;
-
         }
         if (logActivated) {
             sLogger.info("Receive a single S&F HTTP file transfer invitation");
         }
         CpimMessage cpimMessage = ChatUtils.extractCpimMessage(invite);
         long timestampSent = cpimMessage.getTimestampSent();
-        // Create and start a chat session
+        String fileTransferId = ChatUtils.getMessageId(invite);
+        boolean fileResent = isFileTransferResentAndNotAlreadyOngoing(fileTransferId);
+        if (!isChatSessionAvailable()) {
+            if (logActivated) {
+                sLogger.debug("The max number of chat sessions is achieved: reject the invitation");
+            }
+            sendErrorResponse(invite, Response.BUSY_HERE);
+            /*
+             * The more abstracted reason code REJECTED_MAX_FILE_TRANSFERS is used since the client
+             * need not be aware of chat session dependency here.
+             */
+            if (fileResent) {
+                handleResendFileTransferInvitationRejected(fileTransferId, remote,
+                        FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp,
+                        timestampSent);
+                return;
+            }
+            handleFileTransferInvitationRejected(invite, remote,
+                    FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp, timestampSent);
+            return;
+        }
+
         TerminatingStoreAndForwardOneToOneChatMessageSession oneToOneChatSession = new TerminatingStoreAndForwardOneToOneChatMessageSession(
                 this, invite, remote, mRcsSettings, mMessagingLog, timestamp, mContactManager);
         CoreListener listener = mCore.getListener();
         listener.handleOneOneChatSessionInitiation(oneToOneChatSession);
         oneToOneChatSession.startSession();
 
-        /* Auto reject if file too big */
+        if (isFileTransferAlreadyOngoing(fileTransferId)) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(new StringBuilder("File transfer with fileTransferId '")
+                        .append(fileTransferId).append("' already ongoing, so ignoring this one.")
+                        .toString());
+            }
+            return;
+        }
+
         if (isFileSizeExceeded(ftinfo.getSize())) {
             if (logActivated) {
                 sLogger.debug("File is too big, reject file transfer invitation");
             }
-
             // TODO add warning header "xxx Size exceeded"
             oneToOneChatSession.sendErrorResponse(invite, oneToOneChatSession.getDialogPath()
                     .getLocalTag(), InvitationStatus.INVITATION_REJECTED_FORBIDDEN);
-
             // Close session
             oneToOneChatSession.handleError(new FileSharingError(
                     FileSharingError.MEDIA_SIZE_TOO_BIG));
             return;
         }
 
-        /* Create and start a new HTTP file transfer session from INVITE */
         DownloadFromInviteFileSharingSession filetransferSession = new DownloadFromInviteFileSharingSession(
-                this, oneToOneChatSession, ftinfo, ChatUtils.getMessageId(invite),
+                this, oneToOneChatSession, ftinfo, fileTransferId,
                 oneToOneChatSession.getRemoteContact(), oneToOneChatSession.getRemoteDisplayName(),
                 mRcsSettings, mMessagingLog, timestamp, timestampSent, mContactManager);
         if (filetransferSession.getFileicon() != null) {
@@ -1584,8 +1672,13 @@ public class InstantMessagingService extends ImsService {
             }
 
         }
-        listener.handleOneToOneFileTransferInvitation(filetransferSession, oneToOneChatSession,
-                ftinfo.getExpiration());
+        if (fileResent) {
+            listener.handleOneToOneResendFileTransferInvitation(filetransferSession, remote,
+                    oneToOneChatSession.getRemoteDisplayName());
+        } else {
+            listener.handleOneToOneFileTransferInvitation(filetransferSession, oneToOneChatSession,
+                    ftinfo.getExpiration());
+        }
         filetransferSession.startSession();
     }
 
@@ -1761,5 +1854,28 @@ public class InstantMessagingService extends ImsService {
     public void acceptAllStoreAndForwardChatSessionsIfSuchExists(ContactId remoteContact) {
         acceptStoreAndForwardMessageSessionIfSuchExists(remoteContact);
         acceptStoreAndForwardNotifSessionIfSuchExists(remoteContact);
+    }
+
+    /**
+     * Is file transfer already ongoing with specific fileTransferId.
+     * 
+     * @param fileTransferId
+     * @return boolean
+     */
+    public boolean isFileTransferAlreadyOngoing(String fileTransferId) {
+        return getFileSharingSession(fileTransferId) != null;
+    }
+
+    /**
+     * Is file transfer resent and not already ongoing.
+     * 
+     * @param fileTransferId
+     * @return boolean
+     */
+    public boolean isFileTransferResentAndNotAlreadyOngoing(String fileTransferId) {
+        if (isFileTransferAlreadyOngoing(fileTransferId)) {
+            return false;
+        }
+        return mMessagingLog.isFileTransfer(fileTransferId);
     }
 }

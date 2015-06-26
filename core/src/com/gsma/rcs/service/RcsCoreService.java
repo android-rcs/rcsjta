@@ -799,6 +799,15 @@ public class RcsCoreService extends Service implements CoreListener {
     }
 
     @Override
+    public void handleOneToOneResendFileTransferInvitation(FileSharingSession session,
+            ContactId contact, String displayName) {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event file transfer resend invitation");
+        }
+        mFtApi.receiveResendFileTransferInvitation(session, contact, displayName);
+    }
+
+    @Override
     public void handleIncomingFileTransferResuming(FileSharingSession session, boolean isGroup,
             String chatSessionId, String chatId) {
         if (sLogger.isActivated()) {
@@ -959,43 +968,51 @@ public class RcsCoreService extends Service implements CoreListener {
     }
 
     @Override
-    public void handleFileTransferInvitationRejected(ContactId contact, MmContent content,
+    public void handleFileTransferInvitationRejected(ContactId remoteContact, MmContent content,
             MmContent fileicon, FileTransfer.ReasonCode reasonCode, long timestamp,
             long timestampSent) {
-        mFtApi.addFileTransferInvitationRejected(contact, content, fileicon, reasonCode, timestamp,
+        mFtApi.addFileTransferInvitationRejected(remoteContact, content, fileicon, reasonCode, timestamp,
                 timestampSent);
     }
 
     @Override
-    public void handleGroupChatInvitationRejected(String chatId, ContactId contact, String subject,
+    public void handleResendFileTransferInvitationRejected(String fileTransferId,
+            ContactId remoteContact, FileTransfer.ReasonCode reasonCode, long timestamp,
+            long timestampSent) {
+        mFtApi.setResendFileTransferInvitationRejected(fileTransferId, remoteContact, reasonCode,
+                timestamp, timestampSent);
+    }
+
+    @Override
+    public void handleGroupChatInvitationRejected(String chatId, ContactId remoteContact, String subject,
             Map<ContactId, ParticipantStatus> participants, GroupChat.ReasonCode reasonCode,
             long timestamp) {
-        mChatApi.addGroupChatInvitationRejected(chatId, contact, subject, participants, reasonCode,
+        mChatApi.addGroupChatInvitationRejected(chatId, remoteContact, subject, participants, reasonCode,
                 timestamp);
     }
 
     @Override
-    public void handleImageSharingInvitationRejected(ContactId contact, MmContent content,
+    public void handleImageSharingInvitationRejected(ContactId remoteContact, MmContent content,
             ImageSharing.ReasonCode reasonCode, long timestamp) {
-        mIshApi.addImageSharingInvitationRejected(contact, content, reasonCode, timestamp);
+        mIshApi.addImageSharingInvitationRejected(remoteContact, content, reasonCode, timestamp);
     }
 
     @Override
-    public void handleVideoSharingInvitationRejected(ContactId contact, VideoContent content,
+    public void handleVideoSharingInvitationRejected(ContactId remoteContact, VideoContent content,
             VideoSharing.ReasonCode reasonCode, long timestamp) {
-        mVshApi.addVideoSharingInvitationRejected(contact, content, reasonCode, timestamp);
+        mVshApi.addVideoSharingInvitationRejected(remoteContact, content, reasonCode, timestamp);
     }
 
     @Override
-    public void handleGeolocSharingInvitationRejected(ContactId contact, GeolocContent content,
+    public void handleGeolocSharingInvitationRejected(ContactId remoteContact, GeolocContent content,
             GeolocSharing.ReasonCode reasonCode, long timestamp) {
-        mGshApi.addGeolocSharingInvitationRejected(contact, content, reasonCode, timestamp);
+        mGshApi.addGeolocSharingInvitationRejected(remoteContact, content, reasonCode, timestamp);
     }
 
     @Override
-    public void handleIPCallInvitationRejected(ContactId contact, AudioContent audioContent,
+    public void handleIPCallInvitationRejected(ContactId remoteContact, AudioContent audioContent,
             VideoContent videoContent, IPCall.ReasonCode reasonCode, long timestamp) {
-        mIpcallApi.addIPCallInvitationRejected(contact, audioContent, videoContent, reasonCode,
+        mIpcallApi.addIPCallInvitationRejected(remoteContact, audioContent, videoContent, reasonCode,
                 timestamp);
     }
 

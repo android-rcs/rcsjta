@@ -175,6 +175,16 @@ public interface CoreListener {
             OneToOneChatSession oneToOneChatSession, long fileTransferValidity);
 
     /**
+     * Handle resend file transfer invitation
+     * 
+     * @param session
+     * @param contact
+     * @param displayName
+     */
+    public void handleOneToOneResendFileTransferInvitation(FileSharingSession session,
+            ContactId contact, String displayName);
+
+    /**
      * An incoming file transfer has been resumed
      * 
      * @param session File transfer session
@@ -314,7 +324,7 @@ public interface CoreListener {
     /**
      * Handle the case of rejected file transfer
      * 
-     * @param contact Remote contact
+     * @param remoteContact Remote contact
      * @param content File content
      * @param fileIcon Fileicon content
      * @param reasonCode Rejected reason code
@@ -322,67 +332,80 @@ public interface CoreListener {
      * @param timestampSent Remote timestamp sent in payload for the file transfer
      */
 
-    public void handleFileTransferInvitationRejected(ContactId contact, MmContent content,
+    public void handleFileTransferInvitationRejected(ContactId remoteContact, MmContent content,
             MmContent fileIcon, FileTransfer.ReasonCode reasonCode, long timestamp,
+            long timestampSent);
+
+    /**
+     * Handle the case of rejected resend file transfer
+     * 
+     * @param fileTransferId
+     * @param remoteContact Remote contact
+     * @param reasonCode Rejected reason code
+     * @param timestamp Local timestamp when got file transfer invitation
+     * @param timestampSent Remote timestamp sent in payload for the file transfer
+     */
+    public void handleResendFileTransferInvitationRejected(String fileTransferId,
+            ContactId remoteContact, FileTransfer.ReasonCode reasonCode, long timestamp,
             long timestampSent);
 
     /**
      * Handle the case of rejected group chat
      * 
      * @param chatId Chat ID
-     * @param contact Contact ID
+     * @param remoteContact Contact ID
      * @param subject Subject
      * @param participants Participants
      * @param reasonCode Rejected reason code
      * @param timestamp Local timestamp when got group chat invitation
      */
-    public void handleGroupChatInvitationRejected(String chatId, ContactId contact, String subject,
+    public void handleGroupChatInvitationRejected(String chatId, ContactId remoteContact, String subject,
             Map<ContactId, ParticipantStatus> participants, GroupChat.ReasonCode reasonCode,
             long timestamp);
 
     /**
      * Handles image sharing rejection
      * 
-     * @param contact Remote contact
+     * @param remoteContact Remote contact
      * @param content Multimedia content
      * @param reasonCode Rejected reason code
      * @param timestamp Local timestamp when got image sharing invitation
      */
-    public void handleImageSharingInvitationRejected(ContactId contact, MmContent content,
+    public void handleImageSharingInvitationRejected(ContactId remoteContact, MmContent content,
             ImageSharing.ReasonCode reasonCode, long timestamp);
 
     /**
      * Handle the case of rejected video sharing
      * 
-     * @param contact Remote contact
+     * @param remoteContact Remote contact
      * @param content Video content
      * @param reasonCode Rejected reason code
      * @param timestamp Local timestamp when got video sharing invitation
      */
-    public void handleVideoSharingInvitationRejected(ContactId contact, VideoContent content,
+    public void handleVideoSharingInvitationRejected(ContactId remoteContact, VideoContent content,
             VideoSharing.ReasonCode reasonCode, long timestamp);
 
     /**
      * Handle the case of rejected geoloc sharing
      * 
-     * @param contact Remote contact
+     * @param remoteContact Remote contact
      * @param content Geoloc content
      * @param reasonCode Rejected reason code
      * @param timestamp Local timestamp when got geoloc sharing invitation
      */
-    public void handleGeolocSharingInvitationRejected(ContactId contact, GeolocContent content,
+    public void handleGeolocSharingInvitationRejected(ContactId remoteContact, GeolocContent content,
             GeolocSharing.ReasonCode reasonCode, long timestamp);
 
     /**
      * Handle the case of rejected ip call
      * 
-     * @param contact Remote contact
+     * @param remoteContact Remote contact
      * @param audioContent Audio content
      * @param videoContent Video content
      * @param reasonCode Rejected reason code
      * @param timestamp Local timestamp when got IP call invitation
      */
-    public void handleIPCallInvitationRejected(ContactId contact, AudioContent audioContent,
+    public void handleIPCallInvitationRejected(ContactId remoteContact, AudioContent audioContent,
             VideoContent videoContent, IPCall.ReasonCode reasonCode, long timestamp);
 
     /**

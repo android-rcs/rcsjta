@@ -1418,9 +1418,12 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             sLogger.info("Invited to one-to-one file transfer session");
         }
         synchronized (mLock) {
-            mPersistentStorage.addOneToOneFileTransfer(contact, Direction.INCOMING, file, fileIcon,
-                    State.INVITED, ReasonCode.UNSPECIFIED, timestamp, timestampSent,
-                    fileExpiration, fileIconExpiration);
+            if (!mPersistentStorage.setStateAndTimestamps(State.INVITED, ReasonCode.UNSPECIFIED,
+                    timestamp, timestampSent)) {
+                mPersistentStorage.addOneToOneFileTransfer(contact, Direction.INCOMING, file,
+                        fileIcon, State.INVITED, ReasonCode.UNSPECIFIED, timestamp, timestampSent,
+                        fileExpiration, fileIconExpiration);
+            }
         }
 
         mBroadcaster.broadcastInvitation(mFileTransferId);
@@ -1433,9 +1436,12 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             sLogger.info("Session auto accepted");
         }
         synchronized (mLock) {
-            mPersistentStorage.addOneToOneFileTransfer(contact, Direction.INCOMING, file, fileIcon,
-                    State.ACCEPTING, ReasonCode.UNSPECIFIED, timestamp, timestampSent,
-                    fileExpiration, fileIconExpiration);
+            if (!mPersistentStorage.setStateAndTimestamps(State.ACCEPTING, ReasonCode.UNSPECIFIED,
+                    timestamp, timestampSent)) {
+                mPersistentStorage.addOneToOneFileTransfer(contact, Direction.INCOMING, file,
+                        fileIcon, State.ACCEPTING, ReasonCode.UNSPECIFIED, timestamp,
+                        timestampSent, fileExpiration, fileIconExpiration);
+            }
         }
 
         mBroadcaster.broadcastInvitation(mFileTransferId);

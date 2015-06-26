@@ -396,6 +396,33 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     }
 
     /**
+     * Receive a new resend file transfer invitation
+     * 
+     * @param session File transfer session
+     * @param remoteContact Contact ID of remote contact
+     * @param displayName the display name of the remote contact
+     */
+    public void receiveResendFileTransferInvitation(FileSharingSession session, ContactId remoteContact,
+            String displayName) {
+        if (sLogger.isActivated()) {
+            sLogger.info("Receive resend FT invitation from " + remoteContact + " displayName="
+                    + displayName);
+        }
+        if (remoteContact != null) {
+            mContactManager.setContactDisplayName(remoteContact, displayName);
+        }
+        String fileTransferId = session.getFileTransferId();
+        FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
+                fileTransferId, mMessagingLog);
+        OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
+                fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
+                this, mRcsSettings, mCore, mMessagingLog, mContactManager,
+                mOneToOneUndeliveredImManager);
+        session.addListener(oneToOneFileTransfer);
+        addOneToOneFileTransfer(fileTransferId, oneToOneFileTransfer);
+    }
+
+    /**
      * Returns the interface to the configuration of the file transfer service
      * 
      * @return IFileTransferServiceConfiguration instance
@@ -1607,6 +1634,22 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         mMessagingLog.addOneToOneFileTransfer(fileTransferId, contact, Direction.INCOMING, content,
                 fileIcon, State.REJECTED, reasonCode, timestamp, timestampSent,
                 FileTransferData.UNKNOWN_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION);
+
+        mOneToOneFileTransferBroadcaster.broadcastInvitation(fileTransferId);
+    }
+
+    /**
+     * Set and broadcast resend file transfer invitation rejections
+     * 
+     * @param contact Contact
+     * @param reasonCode Reason code
+     * @param timestamp Local timestamp when got invitation
+     * @param timestampSent Timestamp sent in payload for the file transfer
+     */
+    public void setResendFileTransferInvitationRejected(String fileTransferId, ContactId contact,
+            ReasonCode reasonCode, long timestamp, long timestampSent) {
+        mMessagingLog.setFileTransferStateAndTimestamps(fileTransferId, State.REJECTED, reasonCode,
+                timestamp, timestampSent);
 
         mOneToOneFileTransferBroadcaster.broadcastInvitation(fileTransferId);
     }
