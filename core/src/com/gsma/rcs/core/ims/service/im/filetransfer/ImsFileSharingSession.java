@@ -229,18 +229,7 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
 
     @Override
     public void receiveBye(SipRequest bye) {
-        if (logger.isActivated()) {
-            logger.info("Receive a BYE message from the remote");
-        }
-
-        getSessionTimerManager().stop();
-
-        closeMediaSession();
-
-        getDialogPath().setSessionTerminated();
-
-        removeSession();
-
+        super.receiveBye(bye);
         ContactId contact = getRemoteContact();
         /*
          * SIP BYE can be received from the sender if either the sender wishes to abort the session
@@ -253,8 +242,6 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
                 listener.handleSessionAborted(contact, TerminationReason.TERMINATION_BY_REMOTE);
             }
         }
-
-        getImsService().getImsModule().getCapabilityService()
-                .requestContactCapabilities(contact);
+        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(contact);
     }
 }

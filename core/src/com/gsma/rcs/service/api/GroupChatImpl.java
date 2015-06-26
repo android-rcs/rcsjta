@@ -251,6 +251,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         }
         switch (reasonCode) {
             case ABORTED_BY_USER:
+            case ABORTED_BY_REMOTE:
             case FAILED_INITIATION:
             case REJECTED_BY_REMOTE:
             case REJECTED_MAX_CHATS:
@@ -1449,13 +1450,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     setStateAndReasonCode(State.ABORTED, ReasonCode.ABORTED_BY_USER);
                     break;
                 case TERMINATION_BY_REMOTE:
-                    /*
-                     * In group chat there is no such thing as 'ABORTED_BY_REMOTE'. The remote just
-                     * leaves the session and in the end it is the messaging server that terminates
-                     * due to inactivity.
-                     */
-
-                    /* Intentional fall through. */
+                    setStateAndReasonCode(State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
+                    break;
+                    
                 case TERMINATION_BY_TIMEOUT:
                 case TERMINATION_BY_INACTIVITY:
                     setStateAndReasonCode(State.ABORTED, ReasonCode.ABORTED_BY_INACTIVITY);

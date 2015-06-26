@@ -845,6 +845,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             }
             switch (reasonCode) {
                 case ABORTED_BY_USER:
+                case ABORTED_BY_REMOTE:
                 case FAILED_INITIATION:
                 case REJECTED_BY_REMOTE:
                 case REJECTED_MAX_CHATS:

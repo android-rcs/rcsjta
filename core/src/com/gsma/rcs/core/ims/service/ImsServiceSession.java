@@ -165,9 +165,9 @@ public abstract class ImsServiceSession extends Thread {
      * @param imsService IMS service
      * @param contact Remote contact Identifier
      * @param remoteUri Remote URI
-     * @param rcsSettings
+     * @param rcsSettings RCS settings accessor
      * @param timestamp Local timestamp for the session
-     * @param contactManager
+     * @param contactManager Contact manager accessor
      */
     public ImsServiceSession(ImsService imsService, ContactId contact, String remoteUri,
             RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
@@ -264,7 +264,7 @@ public abstract class ImsServiceSession extends Thread {
     /**
      * Remove a listener
      * 
-     * @param listener
+     * @param listener Listener to remove
      */
     public void removeListener(ImsSessionListener listener) {
         mListeners.remove(listener);
@@ -392,7 +392,7 @@ public abstract class ImsServiceSession extends Thread {
     /**
      * Set display name of the remote contact
      * 
-     * @param remoteDisplayName
+     * @param remoteDisplayName The remote display name
      */
     public void setRemoteDisplayName(String remoteDisplayName) {
         mRemoteDisplayName = remoteDisplayName;
@@ -637,25 +637,15 @@ public abstract class ImsServiceSession extends Thread {
         if (sLogger.isActivated()) {
             sLogger.info("Receive a BYE message from the remote");
         }
-
-        // Close media session
         closeMediaSession();
 
-        // Update the dialog path status
         getDialogPath().setSessionTerminated();
+        
         mSessionTerminatedByRemote = true;
 
-        // Remove the current session
         removeSession();
 
-        // Stop session timer
         mSessionTimer.stop();
-
-        // Notify listeners
-        for (int i = 0; i < getListeners().size(); i++) {
-            getListeners().get(i).handleSessionAborted(mContact,
-                    TerminationReason.TERMINATION_BY_REMOTE);
-        }
     }
 
     /**
@@ -1099,8 +1089,8 @@ public abstract class ImsServiceSession extends Thread {
 
             openMediaSession();
 
-            for (int i = 0; i < getListeners().size(); i++) {
-                getListeners().get(i).handleSessionStarted(mContact);
+            for (ImsSessionListener listener : getListeners()) {
+                listener.handleSessionStarted(mContact);
             }
 
             /* Start session timer */

@@ -335,4 +335,14 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
             sLogger.debug("Resuming is not available");
         }
     }
+
+    @Override
+    public void receiveBye(SipRequest bye) {
+        super.receiveBye(bye);
+        ContactId remote = getRemoteContact();
+        for (ImsSessionListener listener : getListeners()) {
+            listener.handleSessionAborted(remote, TerminationReason.TERMINATION_BY_REMOTE);
+        }
+        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
+    }
 }

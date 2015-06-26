@@ -37,7 +37,6 @@ import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionAuthenticationAgent;
-import com.gsma.rcs.core.ims.service.ImsServiceSession.InvitationStatus;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimIdentity;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
@@ -62,6 +61,8 @@ import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 
+import gov2.nist.javax2.sip.header.Reason;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -69,6 +70,7 @@ import java.util.Set;
 
 import javax2.sip.InvalidArgumentException;
 import javax2.sip.header.ExtensionHeader;
+import javax2.sip.message.Response;
 
 /**
  * Abstract Group chat session
@@ -331,15 +333,26 @@ public abstract class GroupChatSession extends ChatSession {
         super.closeSession(reason);
     }
 
-    /**
-     * Receive BYE request
-     * 
-     * @param bye BYE request
-     */
+    @Override
     public void receiveBye(SipRequest bye) {
         mConferenceSubscriber.terminate();
 
         super.receiveBye(bye);
+
+        /*
+         * When group chat reaches the minimum number of active participants, the Controlling
+         * Function indicates this by including a Reason header field with the protocol set to SIP
+         * and the protocol-cause set to 410 (e.g. SIP;cause=410;text=”Gone”) in the SIP BYE request
+         * that it sends to the remaining participants.
+         */
+        TerminationReason reason = TerminationReason.TERMINATION_BY_INACTIVITY;
+        Reason sipByeReason = bye.getReason();
+        if (sipByeReason != null && Response.GONE == sipByeReason.getCause()) {
+            reason = TerminationReason.TERMINATION_BY_REMOTE;
+        }
+        for (ImsSessionListener listener : getListeners()) {
+            listener.handleSessionAborted(getRemoteContact(), reason);
+        }
     }
 
     /**

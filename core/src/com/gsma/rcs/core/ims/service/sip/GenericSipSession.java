@@ -32,6 +32,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsServiceSession;
+import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.capability.CapabilityUtils;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -64,9 +65,9 @@ public abstract class GenericSipSession extends ImsServiceSession {
      * @param parent IMS service
      * @param contact Remote contactId
      * @param featureTag Feature tag
-     * @param rcsSettings
+     * @param rcsSettings RCS settings accessor
      * @param timestamp Local timestamp for the session
-     * @param contactManager
+     * @param contactManager Contact manager accessor
      */
     public GenericSipSession(ImsService parent, ContactId contact, String featureTag,
             RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
@@ -179,19 +180,19 @@ public abstract class GenericSipSession extends ImsServiceSession {
         removeSession();
 
         ContactId contact = getRemoteContact();
-        for (int j = 0; j < getListeners().size(); j++) {
-            ((SipSessionListener) getListeners().get(j)).handleSessionError(contact,
-                    new SipSessionError(error));
+        for (ImsSessionListener listener : getListeners()) {
+            ((SipSessionListener) listener).handleSessionError(contact, new SipSessionError(error));
         }
     }
 
     @Override
     public void receiveBye(SipRequest bye) {
         super.receiveBye(bye);
-
-        // Request capabilities to the remote
-        getImsService().getImsModule().getCapabilityService()
-                .requestContactCapabilities(getRemoteContact());
+        ContactId remote = getRemoteContact();
+        for (ImsSessionListener listener : getListeners()) {
+            listener.handleSessionAborted(remote, TerminationReason.TERMINATION_BY_REMOTE);
+        }
+        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
     }
 
     @Override
@@ -206,7 +207,7 @@ public abstract class GenericSipSession extends ImsServiceSession {
     /**
      * Gets the IARI feature tag from the set of feature tags
      * 
-     * @param featureTags
+     * @param featureTags The set of feature tags
      * @return the IARI feature tag or null
      */
     public static String getIariFeatureTag(Set<String> featureTags) {

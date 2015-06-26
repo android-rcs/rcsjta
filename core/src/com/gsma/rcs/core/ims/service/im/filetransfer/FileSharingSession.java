@@ -95,10 +95,10 @@ public abstract class FileSharingSession extends ImsServiceSession {
      * @param contact Remote contactId
      * @param remoteUri the remote URI
      * @param fileIcon File icon
-     * @param filetransferId
-     * @param rcsSettings
+     * @param filetransferId File transfer identifier
+     * @param rcsSettings RCS settings accessor
      * @param timestamp Local timestamp for the session
-     * @param contactManager
+     * @param contactManager Contact manager accessor
      */
     public FileSharingSession(InstantMessagingService imService, MmContent content,
             ContactId contact, String remoteUri, MmContent fileIcon, String filetransferId,
@@ -225,7 +225,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
      * Check if file capacity is acceptable
      * 
      * @param fileSize File size in bytes
-     * @param rcsSettings
+     * @param rcsSettings RCS settings accessor
      * @return Error or null if file capacity is acceptable
      */
     public static FileSharingError isFileCapacityAcceptable(long fileSize, RcsSettings rcsSettings) {
@@ -247,15 +247,6 @@ public abstract class FileSharingSession extends ImsServiceSession {
             }
         }
         return null;
-    }
-
-    @Override
-    public void receiveBye(SipRequest bye) {
-        super.receiveBye(bye);
-
-        // Request capabilities to the remote
-        getImsService().getImsModule().getCapabilityService()
-                .requestContactCapabilities(getRemoteContact());
     }
 
     @Override

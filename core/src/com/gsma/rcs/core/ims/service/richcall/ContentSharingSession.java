@@ -26,6 +26,7 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceSession;
+import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.IdGenerator;
@@ -51,9 +52,9 @@ public abstract class ContentSharingSession extends ImsServiceSession {
      * @param parent IMS service
      * @param content Content to be shared
      * @param contact Remote contactId
-     * @param rcsSettings
+     * @param rcsSettings RCS settings accessor
      * @param timestamp Local timestamp for the session
-     * @param contactManager
+     * @param contactManager Contact manager accessor
      */
     public ContentSharingSession(ImsService parent, MmContent content, ContactId contact,
             RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
@@ -117,10 +118,11 @@ public abstract class ContentSharingSession extends ImsServiceSession {
     @Override
     public void receiveBye(SipRequest bye) {
         super.receiveBye(bye);
-
-        // Request capabilities to the remote
-        getImsService().getImsModule().getCapabilityService()
-                .requestContactCapabilities(getRemoteContact());
+        ContactId remote = getRemoteContact();
+        for (ImsSessionListener listener : getListeners()) {
+            listener.handleSessionAborted(remote, TerminationReason.TERMINATION_BY_REMOTE);
+        }
+        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
     }
 
     @Override

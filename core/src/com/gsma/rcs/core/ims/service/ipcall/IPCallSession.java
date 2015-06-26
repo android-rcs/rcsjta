@@ -361,17 +361,14 @@ public abstract class IPCallSession extends ImsServiceSession {
         }
     }
 
-    /**
-     * Receive BYE request
-     * 
-     * @param bye BYE request
-     */
+    @Override
     public void receiveBye(SipRequest bye) {
         super.receiveBye(bye);
-
-        // Request capabilities to the remote
-        getImsService().getImsModule().getCapabilityService()
-                .requestContactCapabilities(getRemoteContact());
+        ContactId remote = getRemoteContact();
+        for (ImsSessionListener listener : getListeners()) {
+            listener.handleSessionAborted(remote, TerminationReason.TERMINATION_BY_REMOTE);
+        }
+        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
     }
 
     /**

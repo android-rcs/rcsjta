@@ -30,7 +30,6 @@ import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
-import com.gsma.rcs.core.ims.service.ImsServiceSession.InvitationStatus;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.core.ims.service.im.chat.geoloc.GeolocInfoDocument;
@@ -68,7 +67,7 @@ public abstract class OneToOneChatSession extends ChatSession {
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp for the session
-     * @param contactManager
+     * @param contactManager Contact manager accessor
      */
     public OneToOneChatSession(InstantMessagingService imService, ContactId contact,
             String remoteUri, ChatMessage firstMsg, RcsSettings rcsSettings,
@@ -297,10 +296,11 @@ public abstract class OneToOneChatSession extends ChatSession {
     @Override
     public void receiveBye(SipRequest bye) {
         super.receiveBye(bye);
-
-        // Request capabilities to the remote
-        getImsService().getImsModule().getCapabilityService()
-                .requestContactCapabilities(getRemoteContact());
+        ContactId remote = getRemoteContact();
+        for (ImsSessionListener listener : getListeners()) {
+            listener.handleSessionAborted(remote, TerminationReason.TERMINATION_BY_REMOTE);
+        }
+        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
     }
 
     @Override

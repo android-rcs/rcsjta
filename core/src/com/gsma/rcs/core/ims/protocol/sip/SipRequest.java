@@ -22,7 +22,13 @@
 
 package com.gsma.rcs.core.ims.protocol.sip;
 
+import gov2.nist.javax2.sip.header.Reason;
+
+import java.util.ListIterator;
+
 import javax2.sip.header.ExpiresHeader;
+import javax2.sip.header.Header;
+import javax2.sip.header.ReasonHeader;
 import javax2.sip.message.Request;
 
 /**
@@ -79,5 +85,24 @@ public class SipRequest extends SipMessage {
             return expires.getExpires() * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
         }
         return -1;
+    }
+
+    /**
+     * Extract the reason from the SIP message header
+     * 
+     * @return the reason or null if none
+     */
+    public Reason getReason() {
+        ListIterator<Header> headers = getHeaders(ReasonHeader.NAME);
+        if (headers == null) {
+            return null;
+        }
+        while (headers.hasNext()) {
+            Header header = headers.next();
+            if (header instanceof Reason) {
+                return (Reason) header;
+            }
+        }
+        return null;
     }
 }

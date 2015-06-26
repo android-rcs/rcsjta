@@ -76,13 +76,13 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
      * @param imService InstantMessagingService
      * @param invite Initial INVITE request
      * @param contact remote contact
-     * @param participantsFromInvite
+     * @param participantsFromInvite Map of participants
      * @param remoteUri the remote Uri
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp for the session
-     * @param contactManager
-     * @throws SipPayloadException
+     * @param contactManager Contact manager accessor
+     * @throws SipPayloadException Thrown if constructor fails to get information from payload
      */
     public TerminatingAdhocGroupChatSession(InstantMessagingService imService, SipRequest invite,
             ContactId contact, Map<ContactId, ParticipantStatus> participantsFromInvite,
@@ -507,11 +507,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
         }
     }
 
-    /**
-     * Receive BYE request
-     * 
-     * @param bye BYE request
-     */
+    @Override
     public void receiveBye(SipRequest bye) {
         super.receiveBye(bye);
 
