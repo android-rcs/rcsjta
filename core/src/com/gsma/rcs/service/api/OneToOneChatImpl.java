@@ -131,13 +131,6 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         session.sendChatMessage(msg);
     }
 
-    private void acceptPendingSession(final OneToOneChatSession session) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Accept one-to-one chat session with contact ".concat(mContact.toString()));
-        }
-        session.acceptSession();
-    }
-
     /**
      * Sends a chat message
      * 
@@ -152,6 +145,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                         .append(msg.getMessageId()).append(" and mimeType ")
                         .append(msg.getMimeType()).toString());
             }
+            mImService.acceptAllStoreAndForwardChatSessionsIfSuchExists(mContact);
             final OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
             if (session == null) {
                 if (!mImService.isChatSessionAvailable()) {
@@ -182,7 +176,11 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
              */
             if (session.isInitiatedByRemote()) {
                 addOutgoingChatMessage(msg, Status.QUEUED);
-                acceptPendingSession(session);
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Accept one-to-one chat session with contact ".concat(mContact
+                            .toString()));
+                }
+                session.acceptSession();
             } else {
                 if (!mImService.isChatSessionAvailable()) {
                     if (sLogger.isActivated()) {
@@ -211,6 +209,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                 sLogger.debug(new StringBuilder("Resend chat message, msgId ").append(msgId)
                         .append(" and mimeType ").append(mimeType).toString());
             }
+            mImService.acceptAllStoreAndForwardChatSessionsIfSuchExists(mContact);
             final OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
             if (session == null) {
                 if (!mImService.isChatSessionAvailable()) {
@@ -242,7 +241,11 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
              */
             if (session.isInitiatedByRemote()) {
                 mMessagingLog.requeueChatMessage(msg);
-                acceptPendingSession(session);
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Accept one-to-one chat session with contact ".concat(mContact
+                            .toString()));
+                }
+                session.acceptSession();
             } else {
                 if (!mImService.isChatSessionAvailable()) {
                     if (sLogger.isActivated()) {
@@ -513,6 +516,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(mimeType);
         mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId, Status.SENDING,
                 ReasonCode.UNSPECIFIED);
+        mImService.acceptAllStoreAndForwardChatSessionsIfSuchExists(mContact);
         OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
         if (session == null) {
             if (mImService.isChatSessionAvailable()) {
@@ -525,6 +529,10 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         } else if (session.isMediaEstablished()) {
             sendChatMessageWithinSession(session, message);
         } else if (session.isInitiatedByRemote()) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Accept one-to-one chat session with contact ".concat(mContact
+                        .toString()));
+            }
             session.acceptSession();
         } else {
             if (mImService.isChatSessionAvailable()) {
@@ -573,6 +581,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     public void dequeueOneToOneFileInfo(String fileTransferId, String fileInfo,
             boolean displayReportsEnabled, boolean deliverReportsEnabled,
             OneToOneFileTransferImpl oneToOneFileTransfer) throws MsrpException {
+        mImService.acceptAllStoreAndForwardChatSessionsIfSuchExists(mContact);
         OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
         if (session == null) {
             if (mImService.isChatSessionAvailable()) {
@@ -586,6 +595,10 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             session.sendFileInfo(oneToOneFileTransfer, fileTransferId, fileInfo,
                     displayReportsEnabled, deliverReportsEnabled);
         } else if (session.isInitiatedByRemote()) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Accept one-to-one chat session with contact ".concat(mContact
+                        .toString()));
+            }
             session.acceptSession();
         } else {
             if (mImService.isChatSessionAvailable()) {
@@ -641,6 +654,15 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     public void setComposingStatus(final boolean status) throws RemoteException {
         try {
             mImService.removeOneToOneChatComposingStatus(mContact);
+            ImSessionStartMode imSessionStartMode = mRcsSettings.getImSessionStartMode();
+            switch (imSessionStartMode) {
+                case ON_OPENING:
+                case ON_COMPOSING:
+                    mImService.acceptAllStoreAndForwardChatSessionsIfSuchExists(mContact);
+                    break;
+                default:
+                    break;
+            }
             final OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
             if (session == null) {
                 if (sLogger.isActivated()) {
@@ -659,7 +681,6 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                 }
                 mImService.addOneToOneChatComposingStatus(mContact, status);
             } else {
-                ImSessionStartMode imSessionStartMode = mRcsSettings.getImSessionStartMode();
                 switch (imSessionStartMode) {
                     case ON_OPENING:
                     case ON_COMPOSING:
@@ -712,6 +733,10 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             sLogger.info("Open a 1-1 chat session with " + mContact);
         }
         try {
+            ImSessionStartMode imSessionStartMode = mRcsSettings.getImSessionStartMode();
+            if (ImSessionStartMode.ON_OPENING == imSessionStartMode) {
+                mImService.acceptAllStoreAndForwardChatSessionsIfSuchExists(mContact);
+            }
             final OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
             if (session == null) {
                 /*
@@ -723,7 +748,6 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                 return;
             }
             if (!session.getDialogPath().isSessionEstablished()) {
-                ImSessionStartMode imSessionStartMode = mRcsSettings.getImSessionStartMode();
                 if (!session.isInitiatedByRemote()) {
                     /*
                      * This method needs to accept pending invitation if IM_SESSION_START_MODE is 0,
@@ -733,7 +757,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                 }
                 if (ImSessionStartMode.ON_OPENING == imSessionStartMode) {
                     if (sLogger.isActivated()) {
-                        sLogger.debug("Core chat session is pending: auto accept it, as IM_SESSION_START mode = 0");
+                        sLogger.debug("Accept one-to-one chat session with contact "
+                                .concat(mContact.toString()));
                     }
                     session.acceptSession();
                 }
