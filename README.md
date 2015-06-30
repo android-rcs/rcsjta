@@ -30,7 +30,7 @@ Note: the cryptography API comes from Legion of the Bouncy Castle Inc (<a href='
 
 <font size='3'>- see <a href='https://github.com/android-rcs/rcsjta/blob/master/docs/RCSJTA_open_source.ppt'>Project management.</a></font><br>
 
-<font size='3'>- see <a href='https://github.com/android-rcs/rcsjta/blob/wiki/Branches.md'>GIT branches.</a></font><br>
+<font size='3'>- see [GIT branches](https://github.com/android-rcs/rcsjta/blob/wiki/Branches.md).</a></font><br>
 <br>
 
 <font size='3'><b>RCS API definition:</b></font><br>
