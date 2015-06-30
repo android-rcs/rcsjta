@@ -16,7 +16,7 @@ The RCS specifications (product, technical, API, Guidelines) are available at <a
 <br>
 Note: the <a href='https://rcsjta.googlecode.com/git/docs/SUPPORTED-STANDARDS.txt'>supported standards</a>.<br>
 <br>
-Note: the SIP stack comes from NIST-SIP project (<a href='http://jsip.java.net/'>http://jsip.java.net/</a>), see <a href='https://rcsjta.googlecode.com/git/core/LICENSE-NIST.txt'>License</a>.<br>
+Note: the SIP stack comes from [NIST-SIP project] (http://jsip.java.net/'>http://jsip.java.net/), see [License](https://rawgit.com/android-rcs/rcsjta/master/core/LICENSE-NIST.txt)</a>.<br>
 <br>
 Note: the DNS stack comes from [DNSJava project](http://www.dnsjava.org/), see [License](https://rawgit.com/android-rcs/rcsjta/master/core/LICENSE-DNS.txt)</a>.<br>
 <br>
