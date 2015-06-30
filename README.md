@@ -14,7 +14,7 @@ See also the RCS website at GSM Association, <a href='http://www.gsma.com/rcs/'>
 The RCS specifications (product, technical, API, Guidelines) are available at <a href='http://www.gsma.com/network2020/rcs/specs-and-product-docs/'>http://www.gsma.com/network2020/rcs/specs-and-product-docs/</a>.<br>
 <br>
 <br>
-Note: the <a href='https://rcsjta.googlecode.com/git/docs/SUPPORTED-STANDARDS.txt'>supported standards</a>.<br>
+Note: the [supported standards](https://rawgit.com/android-rcs/rcsjta/master/docs/SUPPORTED-STANDARDS.txt)</a>.<br>
 <br>
 Note: the SIP stack comes from [NIST-SIP project] (http://jsip.java.net/'>http://jsip.java.net/), see [License](https://rawgit.com/android-rcs/rcsjta/master/core/LICENSE-NIST.txt)</a>.<br>
 <br>
