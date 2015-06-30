@@ -1,8 +1,8 @@
-See source code at for [samples](https://github.com/android-rcs/rcsjta/tree/integration/samples)
+See source code at for [samples](https://github.com/android-rcs/rcsjta/tree/integration/tests/samples)
 
 # Contact service API #
 
-See source code at https://code.google.com/p/rcsjta/source/browse/tests/samples/src/com/gsma/rcs/api/ContactSampleTest.java?name=integration
+See [source code](https://github.com/android-rcs/rcsjta/tree/integration/tests/samples/src/com/gsma/rcs/api/ContactSampleTest.java)
 
 ## Example 1 - Format a contact phone number: ##
 
