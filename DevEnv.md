@@ -1,7 +1,7 @@
 # Build the RCS stack #
 
 Clone a GIT branch of the project:
-> _git clone https://code.google.com/p/rcsjta/ -b <a branch>_
+> _git clone https://github.com/android-rcs/rcsjta.git -b <a branch>_
 
 From a console, build the third party libraries (DNS, NIST-SIP and BouncyCastle) via the command line:
 > _ant libs_
