@@ -39,7 +39,7 @@ Note: the cryptography API comes from Legion of the Bouncy Castle Inc (<a href='
 
 <font size='3'>- see <a href='https://github.com/android-rcs/rcsjta/blob/master/docs/CR/CR_blackbird_5.2/RCSJTA_TT_BB_baseline_1.5.1.doc'>TAPI 1.5.1 specification</a> and <a href='https://rcsjta.googlecode.com/git/docs/CR/CR_blackbird_5.2/CR_reporting.htm'>Change Requests details.</a></font><br>
 
-<font size='3'>- see <a href='http://javadoc.rcsjta.googlecode.com/git-history/javadoc1.5/index.html'>TAPI 1.5.1 Javadoc</a> (Blackbird release under implementation, see <a href='https://code.google.com/p/rcsjta/source/browse/?name=integration'>integration</a> branch).</font><br>
+<font size='3'>- see [TAPI 1.5.1 Javadoc] (http://htmlpreview.github.com/?https://raw.githubusercontent.com/android-rcs/rcsjta/blob/master/docs/CR/CR_blackbird_5.2/CR_reporting.htm)</a> (Blackbird release under implementation, see [integration](https://github.com/android-rcs/rcsjta/tree/integration)</a> branch).</font><br>
 
 <font size='3'>- see <a href='http://javadoc.rcsjta.googlecode.com/git-history/javadoc1.0/index.html'>TAPI 1.0 Javadoc</a> (deprecated).</font><br>
 
