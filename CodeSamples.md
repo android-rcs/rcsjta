@@ -142,7 +142,7 @@ Here we get the list by calling a method of the API (see also the content provid
 
 # Capability service API #
 
-See [source code](/src/com/gsma/rcs/api/ContactSampleTest.java at https://code.google.com/p/rcsjta/source/browse/tests/samples/src/com/gsma/rcs/api/CapabilitySampleTest.java?name=integration
+See [source code](https://github.com/android-rcs/rcsjta/tree/integration/tests/samples/src/com/gsma/rcs/api/CapabilitySampleTest.java)
 
 ## Example 1 - Instanciates the Capability service API: ##
 
