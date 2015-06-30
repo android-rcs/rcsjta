@@ -133,9 +133,10 @@ public class ImsConnectionManager implements Runnable {
      * @param rcsSettings RcsSettings instance
      * @throws CoreException
      */
-    public ImsConnectionManager(Core core, RcsSettings rcsSettings) throws CoreException {
-        mCore = core;
-        mImsModule = mCore.getImsModule();
+    public ImsConnectionManager(ImsModule imsModule, RcsSettings rcsSettings) throws CoreException {
+        mImsModule = imsModule;
+        mCore = imsModule.getCore();
+
         mRcsSettings = rcsSettings;
 
         // Get network access parameters
@@ -150,8 +151,8 @@ public class ImsConnectionManager implements Runnable {
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
 
         // Instantiates the IMS network interfaces
-        mNetworkInterfaces[0] = new MobileNetworkInterface(mImsModule, rcsSettings);
-        mNetworkInterfaces[1] = new WifiNetworkInterface(mImsModule, rcsSettings);
+        mNetworkInterfaces[0] = new MobileNetworkInterface(imsModule, rcsSettings);
+        mNetworkInterfaces[1] = new WifiNetworkInterface(imsModule, rcsSettings);
 
         // Set the mobile network interface by default
         mCurrentNetworkInterface = getMobileNetworkInterface();

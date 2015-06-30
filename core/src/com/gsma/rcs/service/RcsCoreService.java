@@ -369,7 +369,7 @@ public class RcsCoreService extends Service implements CoreListener {
                 sLogger.info("RCS stack release is ".concat(TerminalInfo.getProductVersion(mCtx)));
             }
 
-            startCore();
+            core.startCore();
 
             // Create multimedia directory on sdcard
             FileFactory.createDirectory(mRcsSettings.getPhotoRootDirectory());

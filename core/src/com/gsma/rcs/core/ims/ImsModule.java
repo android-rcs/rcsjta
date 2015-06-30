@@ -131,7 +131,7 @@ public class ImsModule implements SipEventListener {
 
         // Create the IMS connection manager
         try {
-            mCnxManager = new ImsConnectionManager(core, rcsSettings);
+            mCnxManager = new ImsConnectionManager(this, rcsSettings);
         } catch (Exception e) {
             throw new CoreException("IMS connection manager initialization has failed", e);
         }
