@@ -9,12 +9,12 @@
 
 <b><code>integration</code></b> is a temporary branch for the integration of the new Blackbird release with SONY. When this branch will be well validated a merge will be done to the master branch and this branch will be the blackbird branch.<br>
 <br>
-<ul><li>RCS Blackbird 1.5 scope<br>
-</li><li>TAPI 1.5<br>
-</li><li>New MM Session API (RCS 5.2)<br>
-</li><li>[Supported CRs](https://rawgit.com/android-rcs/rcsjta/master/docs/CR/CR_blackbird_5.2/CR_reporting.htm).</a>
-</li><li>[Go to branch](https://github.com/android-rcs/rcsjta/tree/integration).</a>
-<br></li></ul>
+ * RCS Blackbird 1.5 scope<br>
+ * TAPI 1.5<br>
+ * New MM Session API (RCS 5.2)<br>
+ * [Supported CRs](https://rawgit.com/android-rcs/rcsjta/master/docs/CR/CR_blackbird_5.2/CR_reporting.htm).</a>
+ * [Go to branch](https://github.com/android-rcs/rcsjta/tree/integration).</a>
+<br>
 
 **`albatros`** contains the Albatros release.
   * RCS Albatros 2.0 scope
