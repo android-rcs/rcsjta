@@ -40,6 +40,6 @@ For the IMS settings of the folder "Profile": to facilitate the edition  it's po
 
 ![https://rcsjta.googlecode.com/git/docs/website/provisioning2.png](https://rcsjta.googlecode.com/git/docs/website/provisioning2.png)
 
-See template for [Albatros configuration](https://rawgit.com/android-rcs/rcsjta/master/tests/provisioning/template-ota_config-Albatros.xml).
+See template for [Albatros configuration](https://github.com/android-rcs/rcsjta/blob/master/tests/provisioning/template-ota_config-Albatros.xml).
 
-See template for [Blackbird configuration](https://rawgit.com/android-rcs/rcsjta/master/tests/provisioning/template-ota_config-Blackbird.xml).
+See template for [Blackbird configuration](https://github.com/android-rcs/rcsjta/blob/master/tests/provisioning/template-ota_config-Blackbird.xml).
