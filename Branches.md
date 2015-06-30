@@ -12,8 +12,8 @@
 <ul><li>RCS Blackbird 1.5 scope<br>
 </li><li>TAPI 1.5<br>
 </li><li>New MM Session API (RCS 5.2)<br>
-</li><li><a href='https://github.com/android-rcs/rcsjta/blob/master/docs/CR/CR_blackbird_5.2/CR_reporting.htm'>Supported CRs.</a>
-</li><li><a href='https://github.com/android-rcs/rcsjta/tree/integration'>Go to branch.</a>
+</li><li>[Supported CRs](https://rawgit.com/android-rcs/rcsjta/master/docs/CR/CR_blackbird_5.2/CR_reporting.htm).</a>
+</li><li>[Go to branch](https://github.com/android-rcs/rcsjta/tree/integration).</a>
 <br></li></ul>
 
 **`albatros`** contains the Albatros release.
