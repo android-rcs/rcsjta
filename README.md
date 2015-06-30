@@ -26,7 +26,7 @@ Note: the cryptography API comes from Legion of the Bouncy Castle Inc (<a href='
 
 <font size='3'><b>Project:</b></font><br>
 
-<font size='3'>- see <a href='https://github.com/android-rcs/rcsjta/blob/master/docs/RCSJTA_API_reporting.ppt'>Project reporting.</a></font><br>
+<font size='3'>- see [Project reporting](https://rawgit.com/android-rcs/rcsjta/master/docs/RCSJTA_API_reporting.ppt).</a></font><br>
 
 <font size='3'>- see [Project management](https://rawgit.com/android-rcs/rcsjta/master/docs/RCSJTA_open_source.ppt).</a></font><br>
 
