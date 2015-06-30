@@ -18,7 +18,7 @@ Note: the <a href='https://rcsjta.googlecode.com/git/docs/SUPPORTED-STANDARDS.tx
 <br>
 Note: the SIP stack comes from NIST-SIP project (<a href='http://jsip.java.net/'>http://jsip.java.net/</a>), see <a href='https://rcsjta.googlecode.com/git/core/LICENSE-NIST.txt'>License</a>.<br>
 <br>
-Note: the DNS stack comes from DNSJava project (<a href='http://www.dnsjava.org/'>http://www.dnsjava.org/</a>), see <a href='https://rcsjta.googlecode.com/git/core/LICENSE-DNS.txt'>License</a>.<br>
+Note: the DNS stack comes from [DNSJava project](http://www.dnsjava.org/), see [License](core/LICENSE-DNS.txt)</a>.<br>
 <br>
 Note: the cryptography API comes from Legion of the Bouncy Castle Inc (<a href='https://www.bouncycastle.org/'>https://www.bouncycastle.org/</a>), see <a href='https://rcsjta.googlecode.com/git/core/LICENSE-BOUNCYCASTLE.txt'>License</a>.<br>
 </font>
