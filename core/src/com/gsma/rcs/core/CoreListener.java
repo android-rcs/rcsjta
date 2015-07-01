@@ -35,6 +35,7 @@ import com.gsma.rcs.core.ims.service.im.chat.TerminatingAdhocGroupChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.TerminatingOneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatMessageSession;
+import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatNotificationSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.ipcall.IPCallSession;
 import com.gsma.rcs.core.ims.service.presence.pidf.PidfDocument;
@@ -224,6 +225,14 @@ public interface CoreListener {
      */
     public void handleStoreAndForwardMsgSessionInvitation(
             TerminatingStoreAndForwardOneToOneChatMessageSession session);
+
+    /**
+     * Handle store and forward notification session invitation
+     * 
+     * @param session
+     */
+    public void handleStoreAndForwardNotificationSessionInvitation(
+            TerminatingStoreAndForwardOneToOneChatNotificationSession session);
 
     /**
      * New one to one message delivery status

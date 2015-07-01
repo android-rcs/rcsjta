@@ -105,6 +105,9 @@ public class StoreAndForwardManager {
                 mImService, invite, contact, mRcsSettings, mMessagingLog, timestamp,
                 mContactManager);
 
+        mImService.getImsModule().getCore().getListener()
+                .handleStoreAndForwardNotificationSessionInvitation(session);
+
         session.startSession();
     }
 }

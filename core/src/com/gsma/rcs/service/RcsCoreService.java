@@ -42,6 +42,7 @@ import com.gsma.rcs.core.ims.service.im.chat.TerminatingOneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatMessageSession;
+import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatNotificationSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FtHttpResumeManager;
 import com.gsma.rcs.core.ims.service.ipcall.IPCallService;
@@ -819,8 +820,7 @@ public class RcsCoreService extends Service implements CoreListener {
             sLogger.debug("Handle event receive 1-1 chat session invitation");
         }
 
-        // Broadcast the invitation
-        mChatApi.receiveOneOneChatInvitation(session);
+        mChatApi.receiveOneToOneChatInvitation(session);
     }
 
     @Override
@@ -840,8 +840,17 @@ public class RcsCoreService extends Service implements CoreListener {
             sLogger.debug("Handle event S&F messages session invitation");
         }
 
-        // Broadcast the invitation
-        mChatApi.receiveOneOneChatInvitation(session);
+        mChatApi.receiveOneToOneChatInvitation(session);
+    }
+
+    @Override
+    public void handleStoreAndForwardNotificationSessionInvitation(
+            TerminatingStoreAndForwardOneToOneChatNotificationSession session) {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event S&F notification session invitation");
+        }
+
+        mChatApi.receiveOneToOneChatInvitation(session);
     }
 
     @Override

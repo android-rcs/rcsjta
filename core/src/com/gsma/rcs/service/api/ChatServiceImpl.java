@@ -308,7 +308,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * 
      * @param session Chat session
      */
-    public void receiveOneOneChatInvitation(OneToOneChatSession session) {
+    public void receiveOneToOneChatInvitation(OneToOneChatSession session) {
         ContactId contact = session.getRemoteContact();
         String displayName = session.getRemoteDisplayName();
         if (sLogger.isActivated()) {
