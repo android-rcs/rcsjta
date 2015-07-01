@@ -1,4 +1,4 @@
-See source code at for [samples](https://github.com/android-rcs/rcsjta/tree/integration/tests/samples)
+See [all source code](https://github.com/android-rcs/rcsjta/tree/integration/tests/samples)
 
 # Contact service API #
 
