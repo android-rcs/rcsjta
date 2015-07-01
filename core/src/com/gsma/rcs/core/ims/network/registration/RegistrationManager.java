@@ -623,13 +623,6 @@ public class RegistrationManager extends PeriodicRefresher {
 
         // Extract the Min-Expire value
         long minExpire = SipUtils.getMinExpiresPeriod(resp);
-        if (minExpire == -1) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Can't read the Min-Expires value");
-            }
-            handleError(new ImsError(ImsError.UNEXPECTED_EXCEPTION, "No Min-Expires value found"));
-            return;
-        }
 
         // Set the expire value
         mExpirePeriod = minExpire;

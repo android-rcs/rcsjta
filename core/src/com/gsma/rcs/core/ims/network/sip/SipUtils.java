@@ -26,11 +26,7 @@ import com.gsma.rcs.core.TerminalInfo;
 import com.gsma.rcs.core.ims.protocol.sip.SipMessage;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
-import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.PhoneUtils;
-
-import android.database.Cursor;
-import android.net.Uri;
 
 import java.text.ParseException;
 import java.util.ListIterator;
@@ -333,13 +329,15 @@ public class SipUtils {
      * 
      * @param message SIP message
      * @return Expire period in milliseconds or -1 in case of error
+     * @throws SipPayloadException
      */
-    public static long getMinExpiresPeriod(SipMessage message) {
+    public static long getMinExpiresPeriod(SipMessage message) throws SipPayloadException {
         MinExpiresHeader minHeader = (MinExpiresHeader) message.getHeader(MinExpiresHeader.NAME);
-        if (minHeader != null) {
-            return minHeader.getExpires() * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
+        if (minHeader == null) {
+            throw new SipPayloadException(
+                    "Unable to read value for header :".concat(MinExpiresHeader.NAME));
         }
-        return -1;
+        return minHeader.getExpires() * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
     }
 
     /**
