@@ -166,6 +166,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             mChatService.removeGroupChat(mChatId);
             setStateAndReasonCode(State.REJECTED, reasonCode);
         }
+        /*
+         * Try to dequeue all one-one chat messages and file transfers as a chat session is torn
+         * down now.
+         */
+        mCore.getListener().tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(mCore);
     }
 
     private void handleMessageDeliveryStatusDelivered(ContactId contact, String msgId,
@@ -1462,6 +1467,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                                     .append(reason).append("!").toString());
             }
         }
+        /*
+         * Try to dequeue all one-one chat messages and file transfers as a chat session is torn
+         * down now.
+         */
+        mCore.getListener().tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(mCore);
     }
 
     @Override
@@ -1551,6 +1561,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             }
         }
         setRejoinedAsPartOfSendOperation(false);
+        /*
+         * Try to dequeue all one-one chat messages and file transfers as a chat session is torn
+         * down now.
+         */
+        mCore.getListener().tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(mCore);
     }
 
     @Override
