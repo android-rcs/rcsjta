@@ -35,6 +35,7 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -251,7 +252,7 @@ public abstract class DequeueTask implements Runnable {
      * @return boolean
      */
     private boolean isPossibleToDequeueFileTransfer(Uri file, long size) {
-        if (!isReadFromUriAllowed(file)) {
+        if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme()) && !isReadFromUriAllowed(file)) {
             if (mLogger.isActivated()) {
                 mLogger.debug("Cannot dequeue file as there is no Uri permission available for file "
                         .concat(file.toString()));
