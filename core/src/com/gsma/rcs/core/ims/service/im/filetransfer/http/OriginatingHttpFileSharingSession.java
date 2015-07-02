@@ -357,6 +357,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
          * started, then it's a pause
          */
         ContactId contact = getRemoteContact();
+        State state = getSessionState();
         switch (reason) {
             case TERMINATION_BY_SYSTEM:
                 /* Intentional fall through */
@@ -368,7 +369,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                  * TId id needed for resuming the file transfer. Hence pausing the file transfer
                  * only if TId is present.
                  */
-                if (State.ESTABLISHED == getSessionState() && mUploadManager.getTId() != null) {
+                if (State.ESTABLISHED == state && mUploadManager.getTId() != null) {
                     if (mLogger.isActivated()) {
                         mLogger.debug("Pause the session (session terminated, but can be resumed)");
                     }
@@ -378,12 +379,19 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                     }
                     return;
                 }
-                break;
+                /* Intentional fall through */
             default:
+                if (State.ESTABLISHED == state) {
+                    for (ImsSessionListener listener : getListeners()) {
+                        listener.handleSessionAborted(contact, reason);
+                    }
+                } else {
+                    for (ImsSessionListener listener : getListeners()) {
+                        listener.handleSessionRejected(contact, reason);
+                    }
+                }
+                ;
                 break;
-        }
-        for (ImsSessionListener listener : getListeners()) {
-            listener.handleSessionAborted(contact, reason);
         }
     }
 }

@@ -234,6 +234,12 @@ public class HttpUploadManager extends HttpTransferManager {
                 }
         }
 
+        if (isCancelled()) {
+            if (mLogger.isActivated()) {
+                mLogger.debug("File transfer cancelled by user");
+            }
+            return null;
+        }
         // Notify listener
         getListener().httpTransferStarted();
 
