@@ -93,6 +93,7 @@
 		</jar>
 		<copy file="${terminal.api}" todir="${terminal.root}/../RI/libs"/>
 		<copy file="${terminal.api}" todir="${terminal.root}/../tests/multistack/libs"/>
+		<copy file="${terminal.api}" todir="${terminal.root}/../tests/samples/libs"/>
 		<copy file="${terminal.api}" todir="${terminal.root}/../samples/tts/libs"/>
 		<copy file="${terminal.api}" todir="${terminal.root}/../samples/extension/libs"/>
 		<copy file="${terminal.api}" todir="${terminal.root}/../samples/session/libs"/>
