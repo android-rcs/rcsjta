@@ -97,33 +97,20 @@ public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSha
             httpTransferStarted();
 
             /* Resume download file from the HTTP server */
-            if (mDownloadManager.isFileStreamAllocated()) {
-                mDownloadManager.resumeDownload();
-                if (logActivated) {
-                    mLogger.debug("Resume download success for ".concat(mResume.toString()));
-                }
-                /* Set file URL */
-                getContent().setUri(mDownloadManager.getDownloadedFileUri());
+            mDownloadManager.resumeDownload();
+            if (logActivated) {
+                mLogger.debug("Resume download success for ".concat(mResume.toString()));
+            }
+            /* Set file URL */
+            getContent().setUri(mDownloadManager.getDownloadedFileUri());
 
-                /* File transfered */
-                handleFileTransfered();
+            /* File transfered */
+            handleFileTransfered();
 
-                if (mImdnManager.isSendOneToOneDeliveryDisplayedReportsEnabled()) {
-                    /* Send delivery report "displayed" */
-                    sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
-                            System.currentTimeMillis());
-                }
-            } else {
-                /* Don't call handleError in case of Pause or Cancel */
-                if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
-                    return;
-                }
-
-                /* Upload error */
-                if (logActivated) {
-                    mLogger.info("Resume Download file has failed for ".concat(mResume.toString()));
-                }
-                handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED));
+            if (mImdnManager.isSendOneToOneDeliveryDisplayedReportsEnabled()) {
+                /* Send delivery report "displayed" */
+                sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
+                        System.currentTimeMillis());
             }
         } catch (FileNotFoundException e) {
             /* Don't call handleError in case of Pause or Cancel */
