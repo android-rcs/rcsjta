@@ -397,6 +397,19 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     }
 
     /**
+     * Checks if the group chat is active
+     * 
+     * @return boolean
+     */
+    public boolean isGroupChatActive() {
+        GroupChatSession session = mImService.getGroupChatSession(mChatId);
+        if (session != null) {
+            return true;
+        }
+        return State.STARTED == mPersistentStorage.getState();
+    }
+
+    /**
      * Get the participants of a group chat matching any of the specified statuses
      * 
      * @param statuses PatricipantStatues to match
@@ -1124,6 +1137,13 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             if (ServerApiUtils.isImsConnected()) {
                 sendChatMessage(msg);
             } else {
+                if (!isGroupChatActive()) {
+                    /*
+                     * Set inactive group chat as active as it now has a queued message that has to
+                     * be dequeued after rejoining to the group chat on regaining IMS connection.
+                     */
+                    setStateAndReasonCode(State.STARTED, ReasonCode.UNSPECIFIED);
+                }
                 /* If the IMS is NOT connected at this time then queue message. */
                 addOutgoingGroupChatMessage(msg, Content.Status.QUEUED,
                         Content.ReasonCode.UNSPECIFIED);
@@ -1181,6 +1201,13 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             if (ServerApiUtils.isImsConnected()) {
                 sendChatMessage(geolocMsg);
             } else {
+                if (!isGroupChatActive()) {
+                    /*
+                     * Set inactive group chat as active as it now has a queued message that has to
+                     * be dequeued after rejoining to the group chat on regaining IMS connection.
+                     */
+                    setStateAndReasonCode(State.STARTED, ReasonCode.UNSPECIFIED);
+                }
                 /* If the IMS is NOT connected at this time then queue message. */
                 addOutgoingGroupChatMessage(geolocMsg, Content.Status.QUEUED,
                         Content.ReasonCode.UNSPECIFIED);

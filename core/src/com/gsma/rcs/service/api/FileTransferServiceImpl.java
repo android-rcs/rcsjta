@@ -1057,6 +1057,14 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             if (ServerApiUtils.isImsConnected()) {
                 return sendGroupFile(content, fileIconContent, chatId, fileTransferId, timestamp);
             }
+            if (!mChatService.isGroupChatActive(chatId)) {
+                /*
+                 * Set inactive group chat as active as it now has a queued file that has to be
+                 * dequeued after rejoining to the group chat on regaining IMS connection.
+                 */
+                mChatService.setGroupChatStateAndReasonCode(chatId, GroupChat.State.STARTED,
+                        GroupChat.ReasonCode.UNSPECIFIED);
+            }
             /* If the IMS is NOT connected at this time then queue this group file. */
             /* For outgoing file transfer, timestampSent = timestamp */
             addOutgoingGroupFileTransfer(fileTransferId, chatId, content, fileIconContent,

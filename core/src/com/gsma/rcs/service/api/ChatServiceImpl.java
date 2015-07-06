@@ -58,6 +58,7 @@ import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
+import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.chat.IChatMessage;
 import com.gsma.services.rcs.chat.IChatService;
 import com.gsma.services.rcs.chat.IChatServiceConfiguration;
@@ -1110,4 +1111,27 @@ public class ChatServiceImpl extends IChatService.Stub {
         mOneToOneChatEventBroadcaster.broadcastMessagesDeleted(contact, msgIds);
     }
 
+    /**
+     * Set group chat state and reason code
+     * 
+     * @param chatId
+     * @param state
+     * @param reasonCode
+     */
+    public void setGroupChatStateAndReasonCode(String chatId, State state,
+            GroupChat.ReasonCode reasonCode) {
+        if (mMessagingLog.setGroupChatStateAndReasonCode(chatId, state, reasonCode)) {
+            mGroupChatEventBroadcaster.broadcastStateChanged(chatId, state, reasonCode);
+        }
+    }
+
+    /**
+     * Checks if the group chat with specific chatId is active
+     * 
+     * @param chatId
+     * @return boolean
+     */
+    public boolean isGroupChatActive(String chatId) {
+        return getOrCreateGroupChat(chatId).isGroupChatActive();
+    }
 }
