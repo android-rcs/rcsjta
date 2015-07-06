@@ -181,10 +181,9 @@ public class RegistrationManager extends PeriodicRefresher {
      * Restart registration procedure
      */
     public void restart() {
-        new Thread() {
-            /**
-             * Processing
-             */
+        mNetworkInterface.getImsModule().getCore().scheduleForBackgroundExecution(new Runnable() {
+
+            @Override
             public void run() {
                 // Stop the current registration
                 stopRegistration();
@@ -209,7 +208,7 @@ public class RegistrationManager extends PeriodicRefresher {
                 }
 
             }
-        }.start();
+        });
     }
 
     /**

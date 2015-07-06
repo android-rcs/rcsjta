@@ -34,6 +34,7 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
@@ -386,8 +387,11 @@ public abstract class IPCallSession extends ImsServiceSession {
      * Receive re-INVITE request
      * 
      * @param reInvite re-INVITE received request
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void receiveReInvite(SipRequest reInvite) {
+    public void receiveReInvite(SipRequest reInvite) throws SipPayloadException,
+            SipNetworkException {
         if (logger.isActivated()) {
             logger.info("receiveReInvite");
         }
@@ -500,8 +504,11 @@ public abstract class IPCallSession extends ImsServiceSession {
 
     /**
      * Add video in the current call
+     * 
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void addVideo() {
+    public void addVideo() throws SipPayloadException, SipNetworkException {
         if (logger.isActivated()) {
             logger.info("Add video");
         }
@@ -525,8 +532,11 @@ public abstract class IPCallSession extends ImsServiceSession {
 
     /**
      * Remove video from the current call
+     * 
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void removeVideo() {
+    public void removeVideo() throws SipPayloadException, SipNetworkException {
         if (logger.isActivated()) {
             logger.info("Remove video");
         }
@@ -545,7 +555,7 @@ public abstract class IPCallSession extends ImsServiceSession {
         getUpdateSessionManager().sendReInvite(reInvite, IPCallSession.REMOVE_VIDEO);
     }
 
-    public void setOnHold(boolean callHoldAction) {
+    public void setOnHold(boolean callHoldAction) throws SipPayloadException, SipNetworkException {
         // instanciate Hold Manager
         mHoldMgr = new IPCall_HoldInactive(this);
 
@@ -817,8 +827,11 @@ public abstract class IPCallSession extends ImsServiceSession {
      * 
      * @param response SipResponse
      * @param requestType type of request (addVideo/RemoveVideo/Set on Hold/Set on Resume)
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void handleReInvite407ProxyAuthent(SipResponse response, int requestType) {
+    public void handleReInvite407ProxyAuthent(SipResponse response, int requestType)
+            throws SipPayloadException, SipNetworkException {
 
         // // Set the remote tag
         getDialogPath().setRemoteTag(response.getToTag());

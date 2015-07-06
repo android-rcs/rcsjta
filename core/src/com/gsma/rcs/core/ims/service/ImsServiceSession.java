@@ -701,8 +701,11 @@ public abstract class ImsServiceSession extends Thread {
      * Receive re-INVITE request
      * 
      * @param reInvite re-INVITE request
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void receiveReInvite(SipRequest reInvite) {
+    public void receiveReInvite(SipRequest reInvite) throws SipPayloadException,
+            SipNetworkException {
         // Session refresh management
         mSessionTimer.receiveReInvite(reInvite);
     }
@@ -1313,8 +1316,11 @@ public abstract class ImsServiceSession extends Thread {
      * 
      * @param response reInvite SIP response
      * @param serviceContext context of reInvite
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void handleReInvite407ProxyAuthent(SipResponse response, int serviceContext) {
+    public void handleReInvite407ProxyAuthent(SipResponse response, int serviceContext)
+            throws SipPayloadException, SipNetworkException {
     }
 
     /**

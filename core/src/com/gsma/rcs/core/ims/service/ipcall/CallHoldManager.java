@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +15,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.ipcall;
 
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -54,9 +60,11 @@ public abstract class CallHoldManager {
         this.session = session;
     }
 
-    public abstract void setCallHold(boolean callHoldAction);
+    public abstract void setCallHold(boolean callHoldAction) throws SipPayloadException,
+            SipNetworkException;
 
-    public abstract void setCallHold(boolean callHoldAction, SipRequest reInvite);
+    public abstract void setCallHold(boolean callHoldAction, SipRequest reInvite)
+            throws SipPayloadException, SipNetworkException;
 
     public abstract void prepareSession();
 

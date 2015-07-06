@@ -22,6 +22,8 @@ import android.os.RemoteException;
 
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 
 public class IPCall_HoldInactive extends CallHoldManager {
@@ -31,7 +33,7 @@ public class IPCall_HoldInactive extends CallHoldManager {
     }
 
     @Override
-    public void setCallHold(boolean callHoldAction) {
+    public void setCallHold(boolean callHoldAction) throws SipPayloadException, SipNetworkException {
         // Build SDP
         String sdp = buildCallHoldSdpProposal(callHoldAction);
 

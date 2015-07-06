@@ -265,7 +265,7 @@ public class RcsCoreService extends Service implements CoreListener {
         }
 
         // Stop the core
-        new Thread() {
+        mHandler.post(new Runnable() {
             /**
              * Processing
              */
@@ -292,7 +292,7 @@ public class RcsCoreService extends Service implements CoreListener {
                     sLogger.error("Unable to stop IMS core!", e);
                 }
             }
-        }.start();
+        });
     }
 
     /**

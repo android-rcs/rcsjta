@@ -25,6 +25,9 @@ package com.gsma.rcs.service.api;
 import com.gsma.rcs.core.content.AudioContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.InvitationStatus;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.ipcall.IPCallError;
@@ -74,7 +77,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
     /**
      * The logger
      */
-    private final Logger logger = Logger.getLogger(getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(IPCallImpl.class.getName());
 
     /*
      * TODO: Fix reasoncode mapping in the switch.
@@ -125,8 +128,8 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
     }
 
     private void handleSessionRejected(ReasonCode reasonCode, ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Call rejected; reasonCode=" + reasonCode + ".");
+        if (sLogger.isActivated()) {
+            sLogger.info("Call rejected; reasonCode=" + reasonCode + ".");
         }
 
         synchronized (lock) {
@@ -249,8 +252,8 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      * @param renderer IP call renderer
      */
     public void acceptInvitation(IIPCallPlayer player, IIPCallRenderer renderer) {
-        if (logger.isActivated()) {
-            logger.info("Accept call invitation");
+        if (sLogger.isActivated()) {
+            sLogger.info("Accept call invitation");
         }
         final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
         if (session == null) {
@@ -266,8 +269,8 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      * Rejects call invitation
      */
     public void rejectInvitation() {
-        if (logger.isActivated()) {
-            logger.info("Reject session invitation");
+        if (sLogger.isActivated()) {
+            sLogger.info("Reject session invitation");
         }
         final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
         if (session == null) {
@@ -280,23 +283,20 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      * Aborts the call
      */
     public void abortCall() {
-        if (logger.isActivated()) {
-            logger.info("Abort session");
+        if (sLogger.isActivated()) {
+            sLogger.info("Abort session");
         }
         final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
         if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new IllegalStateException("Session with call ID '" + mCallId + "' not available.");
+            throw new ServerApiGenericException(new StringBuilder("Session with call ID '")
+                    .append(mCallId).append("' not available!").toString());
         }
-
-        /* Terminate the session */
-        new Thread() {
+        mIPCallService.getImsModule().getCore().scheduleForBackgroundExecution(new Runnable() {
+            @Override
             public void run() {
                 session.terminateSession(TerminationReason.TERMINATION_BY_USER);
             }
-        }.start();
+        });
     }
 
     /**
@@ -307,10 +307,8 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
     public boolean isVideo() {
         final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
         if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new IllegalStateException("Session with call ID '" + mCallId + "' not available.");
+            throw new ServerApiGenericException(new StringBuilder("Session with call ID '")
+                    .append(mCallId).append("' not available!").toString());
         }
         return session.isVideoActivated();
     }
@@ -319,48 +317,88 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      * Add video stream
      */
     public void addVideo() {
-        if (logger.isActivated()) {
-            logger.info("Add video");
+        if (sLogger.isActivated()) {
+            sLogger.info("Add video");
         }
         final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
         if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new IllegalStateException("Unale to add video since session with call ID '"
-                    + mCallId + "' not available.");
+            throw new ServerApiGenericException(new StringBuilder(
+                    "Unable to add video since session with call ID '").append(mCallId)
+                    .append("' not available!").toString());
         }
-
-        // Add video to session
-        new Thread() {
+        mIPCallService.getImsModule().getCore().scheduleForBackgroundExecution(new Runnable() {
+            @Override
             public void run() {
-                session.addVideo();
+                try {
+                    session.addVideo();
+                } catch (SipPayloadException e) {
+                    sLogger.error("Unable to add video for call ID : ".concat(mCallId), e);
+                    session.handleError(new ImsServiceError(IPCallError.SESSION_INITIATION_FAILED,
+                            e));
+                } catch (SipNetworkException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(e.getMessage());
+                    }
+                    session.handleError(new ImsServiceError(IPCallError.SESSION_INITIATION_FAILED,
+                            e));
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error("Unable to add video for call ID : ".concat(mCallId), e);
+                    session.handleError(new ImsServiceError(IPCallError.SESSION_INITIATION_FAILED,
+                            e));
+                }
             }
-        }.start();
+        });
     }
 
     /**
      * Remove video stream
      */
     public void removeVideo() {
-        if (logger.isActivated()) {
-            logger.info("Remove video");
+        if (sLogger.isActivated()) {
+            sLogger.info("Remove video");
         }
         final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
         if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new IllegalStateException("Unale to remove video since session with call ID '"
-                    + mCallId + "' not available.");
+            throw new ServerApiGenericException(new StringBuilder(
+                    "Unable to remove video since session with call ID '").append(mCallId)
+                    .append("' not available!").toString());
         }
-
-        // Remove video from session
-        new Thread() {
+        mIPCallService.getImsModule().getCore().scheduleForBackgroundExecution(new Runnable() {
+            @Override
             public void run() {
-                session.removeVideo();
+                try {
+                    session.removeVideo();
+                } catch (SipPayloadException e) {
+                    sLogger.error("Unable to remove video for call ID : ".concat(mCallId), e);
+                    session.handleError(new ImsServiceError(IPCallError.SESSION_INITIATION_FAILED,
+                            e));
+                } catch (SipNetworkException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(e.getMessage());
+                    }
+                    session.handleError(new ImsServiceError(IPCallError.SESSION_INITIATION_FAILED,
+                            e));
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error("Unable to remove video for call ID : ".concat(mCallId), e);
+                    session.handleError(new ImsServiceError(IPCallError.SESSION_INITIATION_FAILED,
+                            e));
+                }
             }
-        }.start();
+        });
     }
 
     /**
@@ -368,25 +406,21 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      */
     // TODO
     public void acceptAddVideo() {
-        if (logger.isActivated()) {
-            logger.info("Accept invitation to add video");
+        if (sLogger.isActivated()) {
+            sLogger.info("Accept invitation to add video");
         }
         final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
         if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new IllegalStateException(
-                    "Unale to accept add video since session with call ID '" + mCallId
-                            + "' not available.");
+            throw new ServerApiGenericException(new StringBuilder(
+                    "Unable to accept add video since session with call ID '").append(mCallId)
+                    .append("' not available!").toString());
         }
-
-        // Accept to add video
-        new Thread() {
+        mIPCallService.getImsModule().getCore().scheduleForBackgroundExecution(new Runnable() {
+            @Override
             public void run() {
                 session.getUpdateSessionManager().acceptReInvite();
             }
-        }.start();
+        });
     }
 
     /**
@@ -394,74 +428,110 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      */
     // TODO
     public void rejectAddVideo() {
-        if (logger.isActivated()) {
-            logger.info("Reject invitation to add video");
+        if (sLogger.isActivated()) {
+            sLogger.info("Reject invitation to add video");
         }
         final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
         if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new IllegalStateException(
-                    "Unale to reject add video since session with call ID '" + mCallId
-                            + "' not available.");
+            throw new ServerApiGenericException(new StringBuilder(
+                    "Unable to reject add video since session with call ID '").append(mCallId)
+                    .append("' not available!").toString());
         }
-
-        // set video content to null
         session.setVideoContent(null);
-
-        // Reject add video
-        new Thread() {
+        mIPCallService.getImsModule().getCore().scheduleForBackgroundExecution(new Runnable() {
+            @Override
             public void run() {
                 session.getUpdateSessionManager().rejectReInvite(603);
             }
-        }.start();
+        });
     }
 
     /**
      * Puts the call on hold
      */
     public void holdCall() {
-        if (logger.isActivated()) {
-            logger.info("Hold call");
+        if (sLogger.isActivated()) {
+            sLogger.info("Hold call");
         }
         final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
         if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new IllegalStateException("Unale to hold call since session with call ID '"
-                    + mCallId + "' not available.");
+            throw new ServerApiGenericException(new StringBuilder(
+                    "Unable to hold call since session with call ID '").append(mCallId)
+                    .append("' not available!").toString());
         }
-
-        new Thread() {
+        mIPCallService.getImsModule().getCore().scheduleForBackgroundExecution(new Runnable() {
+            @Override
             public void run() {
-                session.setOnHold(true);
+                try {
+                    session.setOnHold(true);
+                } catch (SipPayloadException e) {
+                    sLogger.error("Unable to hold call for call ID : ".concat(mCallId), e);
+                    session.handleError(new ImsServiceError(IPCallError.SESSION_INITIATION_FAILED,
+                            e));
+                } catch (SipNetworkException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(e.getMessage());
+                    }
+                    session.handleError(new ImsServiceError(IPCallError.SESSION_INITIATION_FAILED,
+                            e));
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error("Unable to hold call for call ID : ".concat(mCallId), e);
+                    session.handleError(new ImsServiceError(IPCallError.SESSION_INITIATION_FAILED,
+                            e));
+                }
             }
-        }.start();
+        });
     }
 
     /**
      * Continues the call that hold's on
      */
     public void continueCall() {
-        if (logger.isActivated()) {
-            logger.info("Continue call");
+        if (sLogger.isActivated()) {
+            sLogger.info("Continue call");
         }
         final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
         if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new IllegalStateException("Unale to continue call since session with call ID '"
-                    + mCallId + "' not available.");
+            throw new ServerApiGenericException(new StringBuilder(
+                    "Unable to continue call since session with call ID '").append(mCallId)
+                    .append("' not available!").toString());
         }
-
-        new Thread() {
+        mIPCallService.getImsModule().getCore().scheduleForBackgroundExecution(new Runnable() {
+            @Override
             public void run() {
-                session.setOnHold(false);
+                try {
+                    session.setOnHold(false);
+                } catch (SipPayloadException e) {
+                    sLogger.error("Unable to continue call for call ID : ".concat(mCallId), e);
+                    session.handleError(new ImsServiceError(IPCallError.SESSION_INITIATION_FAILED,
+                            e));
+                } catch (SipNetworkException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(e.getMessage());
+                    }
+                    session.handleError(new ImsServiceError(IPCallError.SESSION_INITIATION_FAILED,
+                            e));
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error("Unable to continue call for call ID : ".concat(mCallId), e);
+                    session.handleError(new ImsServiceError(IPCallError.SESSION_INITIATION_FAILED,
+                            e));
+                }
             }
-        }.start();
+        });
     }
 
     /**
@@ -482,17 +552,15 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
     public VideoCodec getVideoCodec() {
         final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
         if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new IllegalStateException("Unale to get VideoCodec since session with call ID '"
-                    + mCallId + "' not available.");
+            throw new ServerApiGenericException(new StringBuilder(
+                    "Unable to get VideoCodec since session with call ID '").append(mCallId)
+                    .append("' not available!").toString());
         }
         try {
             return session.getPlayer().getVideoCodec();
         } catch (RemoteException e) {
-            if (logger.isActivated()) {
-                logger.info("Unable to retrieve the video codec!");
+            if (sLogger.isActivated()) {
+                sLogger.info("Unable to retrieve the video codec!");
             }
             return null;
         }
@@ -506,17 +574,15 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
     public AudioCodec getAudioCodec() {
         final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
         if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new IllegalStateException("Unale to get AudioCodec since session with call ID '"
-                    + mCallId + "' not available.");
+            throw new ServerApiGenericException(new StringBuilder(
+                    "Unable to get AudioCodec since session with call ID '").append(mCallId)
+                    .append("' not available!").toString());
         }
         try {
             return session.getPlayer().getAudioCodec();
         } catch (RemoteException e) {
-            if (logger.isActivated()) {
-                logger.info("Unable to retrieve the audio codec!");
+            if (sLogger.isActivated()) {
+                sLogger.info("Unable to retrieve the audio codec!");
             }
             return null;
         }
@@ -528,8 +594,8 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      * Session is started
      */
     public void handleSessionStarted(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Call started");
+        if (sLogger.isActivated()) {
+            sLogger.info("Call started");
         }
         synchronized (lock) {
             mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, State.STARTED,
@@ -543,8 +609,8 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      * @param reason Termination reason
      */
     public void handleSessionAborted(ContactId contact, TerminationReason reason) {
-        if (logger.isActivated()) {
-            logger.info(new StringBuilder("Call aborted (reason ").append(reason).append(")")
+        if (sLogger.isActivated()) {
+            sLogger.info(new StringBuilder("Call aborted (reason ").append(reason).append(")")
                     .toString());
         }
         synchronized (lock) {
@@ -558,8 +624,8 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      * Session has been terminated by remote
      */
     public void handleSessionTerminatedByRemote(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Call terminated by remote");
+        if (sLogger.isActivated()) {
+            sLogger.info("Call terminated by remote");
         }
         synchronized (lock) {
             mIPCallServiceImpl.removeIPCall(mCallId);
@@ -574,8 +640,8 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      * @param error Error
      */
     public void handleCallError(ContactId contact, IPCallError error) {
-        if (logger.isActivated()) {
-            logger.info("Session error " + error.getErrorCode());
+        if (sLogger.isActivated()) {
+            sLogger.info("Session error " + error.getErrorCode());
         }
         IPCallStateAndReasonCode stateAndReasonCode = toStateAndReasonCode(error);
         State state = stateAndReasonCode.getState();
@@ -595,8 +661,8 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      */
     public void handleAddVideoInvitation(ContactId contact, String videoEncoding, int videoWidth,
             int videoHeight) {
-        if (logger.isActivated()) {
-            logger.info("Add video invitation");
+        if (sLogger.isActivated()) {
+            sLogger.info("Add video invitation");
         }
         synchronized (lock) {
             // TODO : Verify if the state change callback listener used is the right one!
@@ -609,8 +675,8 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      * Remove video invitation
      */
     public void handleRemoveVideo(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Remove video invitation");
+        if (sLogger.isActivated()) {
+            sLogger.info("Remove video invitation");
         }
         synchronized (lock) {
             // TODO : Verify if the state change callback listener used is the right one!
@@ -623,8 +689,8 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      * Add video has been accepted by user
      */
     public void handleAddVideoAccepted(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Add video accepted");
+        if (sLogger.isActivated()) {
+            sLogger.info("Add video accepted");
         }
         synchronized (lock) {
             // TODO : Verify if the state change callback listener used is the
@@ -638,8 +704,8 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      * Remove video has been accepted by user
      */
     public void handleRemoveVideoAccepted(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Remove video accepted");
+        if (sLogger.isActivated()) {
+            sLogger.info("Remove video accepted");
         }
         synchronized (lock) {
             // TODO : Verify if the state change callback listener used is the
@@ -655,8 +721,8 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      * @param reason Termination reason
      */
     public void handleAddVideoAborted(ContactId contact, TerminationReason reason) {
-        if (logger.isActivated()) {
-            logger.info(new StringBuilder("Add video aborted (reason ").append(reason).append(")")
+        if (sLogger.isActivated()) {
+            sLogger.info(new StringBuilder("Add video aborted (reason ").append(reason).append(")")
                     .toString());
         }
         ReasonCode reasonCode = sessionAbortedReasonToReasonCode(reason);
@@ -671,8 +737,8 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      * @param reason Termination reason
      */
     public void handleRemoveVideoAborted(ContactId contact, TerminationReason reason) {
-        if (logger.isActivated()) {
-            logger.info(new StringBuilder("Remove video aborted (reason ").append(reason)
+        if (sLogger.isActivated()) {
+            sLogger.info(new StringBuilder("Remove video aborted (reason ").append(reason)
                     .append(")").toString());
         }
         ReasonCode reasonCode = sessionAbortedReasonToReasonCode(reason);
@@ -685,8 +751,8 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      * Call Hold invitation
      */
     public void handleCallHold(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Call hold");
+        if (sLogger.isActivated()) {
+            sLogger.info("Call hold");
         }
         synchronized (lock) {
             setStateAndReasonCode(contact, State.HOLD, ReasonCode.UNSPECIFIED);
@@ -697,8 +763,8 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      * Call Resume invitation
      */
     public void handleCallResume(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Call Resume invitation");
+        if (sLogger.isActivated()) {
+            sLogger.info("Call Resume invitation");
         }
         synchronized (lock) {
             setStateAndReasonCode(contact, State.STARTED, ReasonCode.UNSPECIFIED);
@@ -709,8 +775,8 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      * Call Hold has been accepted
      */
     public void handleCallHoldAccepted(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Call Hold accepted");
+        if (sLogger.isActivated()) {
+            sLogger.info("Call Hold accepted");
         }
         synchronized (lock) {
             // TODO : Verify if the state change callback listener used is the right one!
@@ -725,8 +791,8 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      * @param reason Termination reason
      */
     public void handleCallHoldAborted(ContactId contact, TerminationReason reason) {
-        if (logger.isActivated()) {
-            logger.info(new StringBuilder("Call Hold aborted (reason ").append(reason).append(")")
+        if (sLogger.isActivated()) {
+            sLogger.info(new StringBuilder("Call Hold aborted (reason ").append(reason).append(")")
                     .toString());
         }
         ReasonCode reasonCode = sessionAbortedReasonToReasonCode(reason);
@@ -739,8 +805,8 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      * Call Resume has been accepted
      */
     public void handleCallResumeAccepted(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Call Resume accepted");
+        if (sLogger.isActivated()) {
+            sLogger.info("Call Resume accepted");
         }
         synchronized (lock) {
             // TODO : Verify if the state change callback listener used is the right one!
@@ -755,8 +821,8 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      * @param reason Termination reason
      */
     public void handleCallResumeAborted(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Call Resume aborted");
+        if (sLogger.isActivated()) {
+            sLogger.info("Call Resume aborted");
         }
         synchronized (lock) {
             // TODO : Verify if the state change callback listener used is the right one!
@@ -783,8 +849,8 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      */
     public void handleVideoResized(int width, int height) {
         synchronized (lock) {
-            if (logger.isActivated()) {
-                logger.info("Video resized to " + width + "x" + height);
+            if (sLogger.isActivated()) {
+                sLogger.info("Video resized to " + width + "x" + height);
             }
 
             // Notify event listeners
@@ -800,8 +866,8 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 
     @Override
     public void handleSessionAccepted(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Accepting call");
+        if (sLogger.isActivated()) {
+            sLogger.info("Accepting call");
         }
 
         synchronized (lock) {
@@ -835,8 +901,8 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
     @Override
     public void handleSessionInvited(ContactId contact, AudioContent audio, VideoContent video,
             long timestamp) {
-        if (logger.isActivated()) {
-            logger.info("Invited to ipcall session");
+        if (sLogger.isActivated()) {
+            sLogger.info("Invited to ipcall session");
         }
         synchronized (lock) {
             mPersistentStorage.addCall(contact, Direction.INCOMING, audio, video, State.INVITED,
