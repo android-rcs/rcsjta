@@ -22,13 +22,12 @@
 
 package com.gsma.rcs.core.ims.network;
 
-import android.net.ConnectivityManager;
-
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.access.MobileNetworkAccess;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
+
+import android.net.ConnectivityManager;
 
 /**
  * Mobile network interface
@@ -46,10 +45,8 @@ public class MobileNetworkInterface extends ImsNetworkInterface {
      * 
      * @param imsModule IMS module
      * @param rcsSettings
-     * @throws CoreException
      */
-    public MobileNetworkInterface(ImsModule imsModule, RcsSettings rcsSettings)
-            throws CoreException {
+    public MobileNetworkInterface(ImsModule imsModule, RcsSettings rcsSettings) {
         super(imsModule, ConnectivityManager.TYPE_MOBILE, new MobileNetworkAccess(), rcsSettings
                 .getImsProxyAddrForMobile(), rcsSettings.getImsProxyPortForMobile(), rcsSettings
                 .getSipDefaultProtocolForMobile(), rcsSettings

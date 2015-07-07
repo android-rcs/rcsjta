@@ -23,7 +23,6 @@
 package com.gsma.rcs.core.ims.network;
 
 import com.gsma.rcs.core.Core;
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.ImsNetworkInterface.DnsResolvedFields;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
@@ -131,9 +130,8 @@ public class ImsConnectionManager implements Runnable {
      * 
      * @param core Core
      * @param rcsSettings RcsSettings instance
-     * @throws CoreException
      */
-    public ImsConnectionManager(ImsModule imsModule, RcsSettings rcsSettings) throws CoreException {
+    public ImsConnectionManager(ImsModule imsModule, RcsSettings rcsSettings) {
         mImsModule = imsModule;
         mCore = imsModule.getCore();
 
@@ -516,25 +514,14 @@ public class ImsConnectionManager implements Runnable {
      */
     private synchronized void startImsConnection() {
         if (mImsPollingThreadId >= 0) {
-            // Already connected
             return;
         }
-
-        // Set the connection flag
         if (sLogger.isActivated()) {
             sLogger.info("Start the IMS connection manager");
         }
-
-        // Start background polling thread
-        try {
-            mImsPollingThread = new Thread(this);
-            mImsPollingThreadId = mImsPollingThread.getId();
-            mImsPollingThread.start();
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Internal exception while starting IMS polling thread", e);
-            }
-        }
+        mImsPollingThread = new Thread(this);
+        mImsPollingThreadId = mImsPollingThread.getId();
+        mImsPollingThread.start();
     }
 
     /**
@@ -542,27 +529,15 @@ public class ImsConnectionManager implements Runnable {
      */
     private synchronized void stopImsConnection(TerminationReason reasonCode) {
         if (mImsPollingThreadId == -1) {
-            // Already disconnected
             return;
         }
-
-        // Set the connection flag
         if (sLogger.isActivated()) {
             sLogger.info("Stop the IMS connection manager");
         }
         mImsPollingThreadId = -1;
+        mImsPollingThread.interrupt();
+        mImsPollingThread = null;
 
-        // Stop background polling thread
-        try {
-            mImsPollingThread.interrupt();
-            mImsPollingThread = null;
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Internal exception while stopping IMS polling thread", e);
-            }
-        }
-
-        // Stop IMS services
         if (mImsServicesStarted) {
             mImsModule.stopImsServices(reasonCode);
             mImsServicesStarted = false;

@@ -200,10 +200,9 @@ public class InstantMessagingService extends ImsService {
      * @param rcsSettings RcsSettings
      * @param contactsManager ContactManager
      * @param messagingLog MessagingLog
-     * @throws CoreException
      */
     public InstantMessagingService(ImsModule parent, Core core, RcsSettings rcsSettings,
-            ContactManager contactsManager, MessagingLog messagingLog) throws CoreException {
+            ContactManager contactsManager, MessagingLog messagingLog) {
         super(parent, true);
         mCore = core;
         mRcsSettings = rcsSettings;

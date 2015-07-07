@@ -91,6 +91,7 @@ import com.gsma.rcs.service.ipcalldraft.IIPCallService;
 import com.gsma.rcs.service.ipcalldraft.IPCall;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.capability.ICapabilityService;
@@ -119,6 +120,8 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.IBinder;
 
+import java.io.IOException;
+import java.security.KeyStoreException;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -317,14 +320,7 @@ public class RcsCoreService extends Service implements CoreListener {
 
         mRestartCoreRequested = false;
         try {
-            /* Instantiate the contactUtils instance */
-            com.gsma.services.rcs.contact.ContactUtil contactUtil = com.gsma.services.rcs.contact.ContactUtil
-                    .getInstance(this);
-            /* Read country code to check that we have permission to start the core stack */
-            String myCC = contactUtil.getMyCountryCode();
-            if (logActivated) {
-                sLogger.debug("Start RCS core service (country code=" + myCC + ")");
-            }
+            testIfPossibleToReadCountryCode();
 
             IPCallHistory.createInstance(mLocalContentResolver);
 
@@ -403,14 +399,15 @@ public class RcsCoreService extends Service implements CoreListener {
             if (logActivated) {
                 sLogger.info("RCS core service started with success");
             }
-        } catch (Exception e) {
-            // TODO CR037 exception handling
-            // Unexpected error
-            if (logActivated) {
-                sLogger.error("Can't instanciate the RCS core service", e);
+        } catch (IOException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
             }
-
-            // Exit service
+        } catch (KeyStoreException e) {
+            sLogger.error("Can't instanciate the RCS core service", e);
+            stopSelf();
+        } catch (RcsPermissionDeniedException e) {
+            sLogger.error("Can't instanciate the RCS core service", e);
             stopSelf();
         }
     }
@@ -1105,6 +1102,20 @@ public class RcsCoreService extends Service implements CoreListener {
     @Override
     public void handleChatMessageDisplayReportSent(String chatId, ContactId remote, String msgId) {
         mChatApi.handleDisplayReportSent(chatId, remote, msgId);
+    }
+
+    /**
+     * Read country code to check that we have permission to start the core stack
+     * 
+     * @throws RcsPermissionDeniedException
+     */
+    private void testIfPossibleToReadCountryCode() throws RcsPermissionDeniedException {
+        com.gsma.services.rcs.contact.ContactUtil contactUtil = com.gsma.services.rcs.contact.ContactUtil
+                .getInstance(this);
+        String myCC = contactUtil.getMyCountryCode();
+        if (sLogger.isActivated()) {
+            sLogger.debug("Start RCS core service (country code=" + myCC + ")");
+        }
     }
 
 }

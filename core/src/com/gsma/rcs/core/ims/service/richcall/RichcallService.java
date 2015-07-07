@@ -124,10 +124,9 @@ public class RichcallService extends ImsService {
      * @param parent IMS module
      * @param contactsManager ContactManager
      * @param rcsSettings
-     * @throws CoreException
      */
     public RichcallService(ImsModule parent, Core core, ContactManager contactsManager,
-            RcsSettings rcsSettings) throws CoreException {
+            RcsSettings rcsSettings) {
         super(parent, true);
         mContactManager = contactsManager;
         mRcsSettings = rcsSettings;

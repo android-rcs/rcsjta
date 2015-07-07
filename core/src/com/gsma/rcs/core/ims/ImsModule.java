@@ -35,8 +35,6 @@ import com.gsma.rcs.core.ims.protocol.sip.SipEventListener;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
-import com.gsma.rcs.core.ims.security.cert.KeyStoreManager;
-import com.gsma.rcs.core.ims.security.cert.KeyStoreManagerException;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsService.ImsServiceType;
 import com.gsma.rcs.core.ims.service.ImsServiceDispatcher;
@@ -119,69 +117,36 @@ public class ImsModule implements SipEventListener {
      * @throws CoreException Exception thrown if IMS module failed to be initialized
      */
     public ImsModule(Core core, Context ctx, RcsSettings rcsSettings,
-            ContactManager contactManager, MessagingLog messagingLog) throws CoreException {
+            ContactManager contactManager, MessagingLog messagingLog) {
         mCore = core;
 
         if (logger.isActivated()) {
             logger.info("IMS module initialization");
         }
-
-        // Get capability extensions
         ServiceExtensionManager.getInstance(rcsSettings).updateSupportedExtensions(ctx);
+        mCnxManager = new ImsConnectionManager(this, rcsSettings);
 
-        // Create the IMS connection manager
-        try {
-            mCnxManager = new ImsConnectionManager(this, rcsSettings);
-        } catch (Exception e) {
-            throw new CoreException("IMS connection manager initialization has failed", e);
-        }
-
-        // Set general parameters
         SipManager.TIMEOUT = rcsSettings.getSipTransactionTimeout();
         RtpSource.CNAME = ImsModule.IMS_USER_PROFILE.getPublicUri();
         MsrpConnection.MSRP_TRACE_ENABLED = rcsSettings.isMediaTraceActivated();
         HttpTransferManager.HTTP_TRACE_ENABLED = rcsSettings.isMediaTraceActivated();
 
-        // Load keystore for certificates
-        try {
-            KeyStoreManager.loadKeyStore(rcsSettings);
-        } catch (KeyStoreManagerException e) {
-            throw new CoreException("Can't load keystore manager", e);
-        }
-
-        // Instantiates the IMS services
         mServices = new HashMap<ImsServiceType, ImsService>();
-
-        // Create terms & conditions service
         mServices.put(ImsServiceType.TERMS_CONDITIONS,
                 new TermsConditionsService(this, rcsSettings));
-
-        // Create capability discovery service
         mServices.put(ImsServiceType.CAPABILITY, new CapabilityService(this, rcsSettings,
                 contactManager));
-
-        // Create IM service (mandatory)
         mServices.put(ImsServiceType.INSTANT_MESSAGING, new InstantMessagingService(this, core,
                 rcsSettings, contactManager, messagingLog));
-
-        // Create IP call service (optional)
         mServices.put(ImsServiceType.IPCALL, new IPCallService(this, rcsSettings, contactManager));
-
-        // Create richcall service (optional)
         mServices.put(ImsServiceType.RICHCALL, new RichcallService(this, core, contactManager,
                 rcsSettings));
-
-        // Create presence service (optional)
         mServices.put(ImsServiceType.PRESENCE, new PresenceService(this, ctx, rcsSettings,
                 contactManager));
-
-        // Create generic SIP service
         mServices.put(ImsServiceType.SIP, new SipService(this, contactManager, rcsSettings));
 
-        // Create the service dispatcher
         mServiceDispatcher = new ImsServiceDispatcher(this, rcsSettings);
 
-        // Create the call manager
         mCallManager = new CallManager(this, ctx);
 
         mInitializationFinished = true;

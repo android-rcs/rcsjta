@@ -22,7 +22,6 @@
 
 package com.gsma.rcs.core.access;
 
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.security.cert.KeyStoreManager;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.utils.logger.Logger;
@@ -31,7 +30,6 @@ import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 
-import java.net.ConnectException;
 import java.security.cert.CertificateException;
 
 /**
@@ -52,18 +50,14 @@ public class WifiNetworkAccess extends NetworkAccess {
 
     /**
      * Constructor
-     * 
-     * @throws CoreException
      */
-    public WifiNetworkAccess() throws CoreException {
+    public WifiNetworkAccess() {
         super();
-
-        // Get Wi-Fi info
         wifiManager = (WifiManager) AndroidFactory.getApplicationContext().getSystemService(
                 Context.WIFI_SERVICE);
-
         if (logger.isActivated()) {
-            logger.info("Wi-Fi access has been created (interface " + getType() + ")");
+            logger.info(new StringBuilder("Wi-Fi access has been created (interface ")
+                    .append(getType()).append(")").toString());
         }
     }
 
@@ -74,12 +68,12 @@ public class WifiNetworkAccess extends NetworkAccess {
      * @throws CertificateException
      */
     public void connect(String ipAddress) throws CertificateException {
-            if (logger.isActivated()) {
-                logger.info("Network access connected (" + ipAddress + ")");
-            }
-            this.ipAddress = ipAddress;
+        if (logger.isActivated()) {
+            logger.info("Network access connected (" + ipAddress + ")");
+        }
+        this.ipAddress = ipAddress;
 
-            // Changed by Deutsche Telekom
+        // Changed by Deutsche Telekom
         KeyStoreManager.updateClientCertificate(ipAddress);
     }
 

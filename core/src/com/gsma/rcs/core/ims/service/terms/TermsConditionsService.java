@@ -22,7 +22,6 @@
 
 package com.gsma.rcs.core.ims.service.terms;
 
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
@@ -90,9 +89,8 @@ public class TermsConditionsService extends ImsService {
      * 
      * @param parent IMS module
      * @param rcsSettings RcsSettings
-     * @throws CoreException
      */
-    public TermsConditionsService(ImsModule parent, RcsSettings rcsSettings) throws CoreException {
+    public TermsConditionsService(ImsModule parent, RcsSettings rcsSettings) {
         super(parent, true);
         mRcsSettings = rcsSettings;
     }

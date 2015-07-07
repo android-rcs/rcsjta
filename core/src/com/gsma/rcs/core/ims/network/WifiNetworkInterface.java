@@ -22,13 +22,12 @@
 
 package com.gsma.rcs.core.ims.network;
 
-import android.net.ConnectivityManager;
-
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.access.WifiNetworkAccess;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
+
+import android.net.ConnectivityManager;
 
 /**
  * Wi-Fi network interface
@@ -46,9 +45,8 @@ public class WifiNetworkInterface extends ImsNetworkInterface {
      * 
      * @param imsModule IMS module
      * @param rcsSettings
-     * @throws CoreException
      */
-    public WifiNetworkInterface(ImsModule imsModule, RcsSettings rcsSettings) throws CoreException {
+    public WifiNetworkInterface(ImsModule imsModule, RcsSettings rcsSettings) {
         super(imsModule, ConnectivityManager.TYPE_WIFI, new WifiNetworkAccess(), rcsSettings
                 .getImsProxyAddrForWifi(), rcsSettings.getImsProxyPortForWifi(), rcsSettings
                 .getSipDefaultProtocolForWifi(),

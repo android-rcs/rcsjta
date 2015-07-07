@@ -52,6 +52,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.KeyPair;
@@ -123,10 +124,11 @@ public class KeyStoreManager {
      * Load the keystore manager
      * 
      * @param rcsSettings
-     * @throws KeyStoreManagerException
+     * @throws IOException
+     * @throws KeyStoreException
      */
     // Changed by Deutsche Telekom
-    public static void loadKeyStore(RcsSettings rcsSettings) throws KeyStoreManagerException {
+    public static void loadKeyStore(RcsSettings rcsSettings) throws KeyStoreException, IOException {
         // Changed by Deutsche Telekom
         // List all registered providers for debug purpose
         if (sLogger.isActivated()) {
@@ -388,24 +390,26 @@ public class KeyStoreManager {
     /**
      * Create the RCS keystore
      * 
-     * @throws KeyStoreManagerException
+     * @throws KeyStoreException
+     * @@throws IOException
      */
-    private static void createKeyStore() throws KeyStoreManagerException {
+    private static void createKeyStore() throws KeyStoreException, IOException {
         File file = new File(getKeystorePath());
         if ((file == null) || (!file.exists())) {
             try {
-                // Build empty keystore
                 KeyStore ks = KeyStore.getInstance(getKeystoreType());
                 // Changed by Deutsche Telekom
                 synchronized (KeyStoreManager.class) {
                     ks.load(null, KEYSTORE_PASSWORD.toCharArray());
                 }
-
-                // Export keystore in a file
                 // Changed by Deutsche Telekom
                 KeyStoreManager.saveKeyStoreToFile(ks);
-            } catch (Exception e) {
-                throw new KeyStoreManagerException(e.getMessage());
+            } catch (NoSuchAlgorithmException e) {
+                throw new KeyStoreException("Unable to create key store!", e);
+
+            } catch (CertificateException e) {
+                throw new KeyStoreException("Unable to create key store!", e);
+
             }
         }
     }

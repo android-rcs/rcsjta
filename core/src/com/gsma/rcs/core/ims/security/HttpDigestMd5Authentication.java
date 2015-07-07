@@ -34,6 +34,9 @@ import javax2.sip.InvalidArgumentException;
  * @author jexa7410
  */
 public class HttpDigestMd5Authentication {
+
+    private static final char COLON = ':';
+
     /**
      * Constant
      */
@@ -266,8 +269,9 @@ public class HttpDigestMd5Authentication {
      */
     public String calculateResponse(String user, String password, String method, String uri,
             String nc, String body) throws InvalidArgumentException {
-        String a1 = user + ":" + realm + ":" + password;
-        String a2 = method + ":" + uri;
+        String a1 = new StringBuilder(user).append(COLON).append(realm).append(COLON)
+                .append(password).toString();
+        StringBuilder a2 = new StringBuilder(method).append(COLON).append(uri);
 
         if (qop != null) {
             if (!qop.startsWith("auth")) {
@@ -275,12 +279,15 @@ public class HttpDigestMd5Authentication {
             }
 
             if (qop.equals("auth-int")) {
-                a2 = a2 + ":" + H(body);
+                a2.append(COLON).append(H(body));
             }
 
-            return H(H(a1) + ":" + nonce + ":" + nc + ":" + cnonce + ":" + qop + ":" + H(a2));
+            return H(new StringBuilder(H(a1)).append(COLON).append(nonce).append(COLON).append(nc)
+                    .append(COLON).append(cnonce).append(COLON).append(qop).append(COLON)
+                    .append(H(a2.toString())).toString());
         } else {
-            return H(H(a1) + ":" + nonce + ":" + H(a2));
+            return H(new StringBuilder(H(a1)).append(COLON).append(nonce).append(COLON)
+                    .append(H(a2.toString())).toString());
         }
     }
 
@@ -291,20 +298,13 @@ public class HttpDigestMd5Authentication {
      * @return Hash key
      */
     private String H(String data) {
-        try {
-            if (data == null) {
-                data = "";
-            }
-            byte[] bytes = data.getBytes(UTF8);
-            md5Digest.update(bytes, 0, bytes.length);
-            byte returnValue[] = new byte[md5Digest.getDigestSize()];
-            md5Digest.doFinal(returnValue, 0);
-            return toHexString(returnValue);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("HTTP digest MD5 algo has failed", e);
-            }
-            return null;
+        if (data == null) {
+            data = "";
         }
+        byte[] bytes = data.getBytes(UTF8);
+        md5Digest.update(bytes, 0, bytes.length);
+        byte returnValue[] = new byte[md5Digest.getDigestSize()];
+        md5Digest.doFinal(returnValue, 0);
+        return toHexString(returnValue);
     }
 }

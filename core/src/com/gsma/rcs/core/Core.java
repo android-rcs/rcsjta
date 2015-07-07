@@ -26,6 +26,7 @@ import com.gsma.rcs.addressbook.AddressBookManager;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.security.cert.KeyStoreManager;
 import com.gsma.rcs.core.ims.service.capability.CapabilityService;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.ipcall.IPCallService;
@@ -45,6 +46,9 @@ import com.gsma.services.rcs.RcsServiceException;
 import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
+
+import java.io.IOException;
+import java.security.KeyStoreException;
 
 /**
  * Core (singleton pattern)
@@ -114,15 +118,18 @@ public class Core {
      * @param messagingLog
      * @param contactsManager
      * @return Core instance
-     * @throws CoreException
+     * @throws IOException
+     * @throws KeyStoreException
      */
     public static Core createCore(CoreListener listener, RcsSettings rcsSettings,
-            ContactManager contactsManager, MessagingLog messagingLog) throws CoreException {
+            ContactManager contactsManager, MessagingLog messagingLog) throws IOException,
+            KeyStoreException {
         if (sInstance != null) {
             return sInstance;
         }
         synchronized (Core.class) {
             if (sInstance == null) {
+                KeyStoreManager.loadKeyStore(rcsSettings);
                 sInstance = new Core(listener, rcsSettings, contactsManager, messagingLog);
             }
         }
@@ -149,10 +156,9 @@ public class Core {
      * @param listener Listener
      * @param messagingLog
      * @param contactsManager
-     * @throws CoreException
      */
     private Core(CoreListener listener, RcsSettings rcsSettings, ContactManager contactsManager,
-            MessagingLog messagingLog) throws CoreException {
+            MessagingLog messagingLog) {
         boolean logActivated = logger.isActivated();
         if (logActivated) {
             logger.info("Terminal core initialization");
@@ -239,10 +245,8 @@ public class Core {
 
     /**
      * Start the terminal core
-     * 
-     * @throws CoreException
      */
-    public synchronized void startCore() throws CoreException {
+    public synchronized void startCore() {
         if (mStarted) {
             // Already started
             return;

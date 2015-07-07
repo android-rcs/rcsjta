@@ -22,7 +22,6 @@
 
 package com.gsma.rcs.core.ims.service.sip;
 
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
@@ -83,10 +82,8 @@ public class SipService extends ImsService {
      * @param parent IMS module
      * @param contactManager ContactManager
      * @param rcsSettings
-     * @throws CoreException
      */
-    public SipService(ImsModule parent, ContactManager contactManager, RcsSettings rcsSettings)
-            throws CoreException {
+    public SipService(ImsModule parent, ContactManager contactManager, RcsSettings rcsSettings) {
         super(parent, true);
 
         mContactManager = contactManager;

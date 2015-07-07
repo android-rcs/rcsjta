@@ -25,7 +25,6 @@ package com.gsma.rcs.core.ims.service.presence;
 import static com.gsma.rcs.utils.StringUtils.UTF8_STR;
 
 import com.gsma.rcs.addressbook.AddressBookEventListener;
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.http.HttpResponse;
@@ -102,10 +101,9 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * @param rcsSettings RcsSettings
      * @param ctx Context
      * @param contactsManager ContactManager
-     * @throws CoreException
      */
     public PresenceService(ImsModule parent, Context ctx, RcsSettings rcsSettings,
-            ContactManager contactsManager) throws CoreException {
+            ContactManager contactsManager) {
         super(parent, rcsSettings.isSocialPresenceSupported());
         mRcsSettings = rcsSettings;
         mContactManager = contactsManager;

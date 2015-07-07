@@ -95,12 +95,9 @@ public class IPCallService extends ImsService {
      * @param parent IMS module
      * @param rcsSettings RcsSettings
      * @param contactsManager ContactManager
-     * @throws CoreException
      */
-    public IPCallService(ImsModule parent, RcsSettings rcsSettings, ContactManager contactsManager)
-            throws CoreException {
+    public IPCallService(ImsModule parent, RcsSettings rcsSettings, ContactManager contactsManager) {
         super(parent, true);
-
         mRcsSettings = rcsSettings;
         mContactManager = contactsManager;
     }
