@@ -320,7 +320,7 @@ public class CallManager {
      * @param contact Contact identifier
      */
     private void requestCapabilities(ContactId contact) {
-        if (mImsModule.getCapabilityService().isServiceStarted()) {
+        if (mImsModule.getCapabilityService().isServiceStarted() && (contact != null)) {
             mImsModule.getCapabilityService().requestContactCapabilities(contact);
         }
     }
