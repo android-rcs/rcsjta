@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.utils;
 
+import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.platform.AndroidFactory;
@@ -190,7 +191,8 @@ public abstract class PeriodicRefresher {
      */
     private class KeepAlive extends BroadcastReceiver {
         public void onReceive(Context context, Intent intent) {
-            Thread t = new Thread() {
+            Core.getInstance().scheduleForBackgroundExecution(new Runnable() {
+                @Override
                 public void run() {
                     try {
                         periodicProcessing();
@@ -203,15 +205,17 @@ public abstract class PeriodicRefresher {
                         }
                     } catch (RuntimeException e) {
                         /*
-                         * Intentionally catch runtime exceptions as else it will abruptly end the
-                         * thread and eventually bring the whole system down, which is not intended.
+                         * Normally we are not allowed to catch runtime exceptions as these are
+                         * genuine bugs which should be handled/fixed within the code. However the
+                         * cases when we are executing operations on a thread unhandling such
+                         * exceptions will eventually lead to exit the system and thus can bring the
+                         * whole system down, which is not intended.
                          */
                         sLogger.error("IMS re-registration unsuccessful!", e);
                         stopTimer();
                     }
                 }
-            };
-            t.start();
+            });
         }
     }
 }

@@ -342,7 +342,7 @@ public abstract class GroupChatSession extends ChatSession {
         /*
          * When group chat reaches the minimum number of active participants, the Controlling
          * Function indicates this by including a Reason header field with the protocol set to SIP
-         * and the protocol-cause set to 410 (e.g. SIP;cause=410;text=”Gone”) in the SIP BYE request
+         * and the protocol-cause set to 410 (e.g. SIP;cause=410;text="Gone") in the SIP BYE request
          * that it sends to the remaining participants.
          */
         TerminationReason reason = TerminationReason.TERMINATION_BY_INACTIVITY;

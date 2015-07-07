@@ -285,7 +285,7 @@ public class HttpsProvisioningService extends Service {
     private BroadcastReceiver retryReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            new Thread() {
+            mHttpsProvisioningMng.scheduleForBackgroundExecution(new Runnable() {
                 public void run() {
                     try {
                         mHttpsProvisioningMng.updateConfig();
@@ -300,7 +300,7 @@ public class HttpsProvisioningService extends Service {
                         sLogger.error("Failed to update configuration!", e);
                     }
                 }
-            }.start();
+            });
         }
     };
 

@@ -54,6 +54,8 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 
 /**
@@ -67,6 +69,8 @@ public class StartService extends Service {
      * RCS new user account
      */
     public static final String REGISTRY_NEW_USER_ACCOUNT = "NewUserAccount";
+
+    private static final String BACKGROUND_THREAD_NAME = StartService.class.getSimpleName();
 
     private LocalContentResolver mLocalContentResolver;
 
@@ -113,6 +117,11 @@ public class StartService extends Service {
 
     private String mRcsAccountUsername;
 
+    /**
+     * Handler to process messages & runnable associated with background thread.
+     */
+    private Handler mBackgroundHandler;
+
     @Override
     public void onCreate() {
         Context context = getApplicationContext();
@@ -142,6 +151,11 @@ public class StartService extends Service {
         }
         mPoolTelephonyManagerIntent = PendingIntent.getBroadcast(context, 0, new Intent(
                 ACTION_POOL_TELEPHONY_MANAGER), 0);
+
+        final HandlerThread backgroundThread = new HandlerThread(BACKGROUND_THREAD_NAME);
+        backgroundThread.start();
+
+        mBackgroundHandler = new Handler(backgroundThread.getLooper());
     }
 
     @Override
@@ -167,7 +181,7 @@ public class StartService extends Service {
         if (logActivated) {
             sLogger.debug("Start RCS service");
         }
-        new Thread() {
+        mBackgroundHandler.post(new Runnable() {
             @Override
             public void run() {
                 /* Check boot */
@@ -194,17 +208,26 @@ public class StartService extends Service {
                         retryPollingTelephonyManagerPooling(contactUtilReady);
                     }
                 } catch (RcsAccountException e) {
-                    sLogger.error("Failed to launch RCS service!", e);
-
+                    /**
+                     * This is a non revocable use-case as the RCS account itself was not created,
+                     * So we log this as error and stop the service itself.
+                     */
+                    sLogger.error("Failed to start the service for intent action : ".concat(intent
+                            .getAction()), e);
+                    stopSelf();
                 } catch (RuntimeException e) {
                     /*
-                     * Intentionally catch runtime exceptions as else it will abruptly end the
-                     * thread and eventually bring the whole system down, which is not intended.
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
                      */
-                    sLogger.error("Failed to launch RCS service!", e);
+                    sLogger.error("Unable to handle connection event for intent action : "
+                            .concat(intent.getAction()), e);
                 }
             }
-        }.start();
+        });
 
         /*
          * We want this service to continue running until it is explicitly stopped, so return
@@ -233,11 +256,24 @@ public class StartService extends Service {
                 if (action == null) {
                     return;
                 }
-                new Thread() {
+                mBackgroundHandler.post(new Runnable() {
+                    @Override
                     public void run() {
-                        connectionEvent(action);
+                        try {
+                            connectionEvent(action);
+                        } catch (RuntimeException e) {
+                            /*
+                             * Normally we are not allowed to catch runtime exceptions as these are
+                             * genuine bugs which should be handled/fixed within the code. However
+                             * the cases when we are executing operations on a thread unhandling
+                             * such exceptions will eventually lead to exit the system and thus can
+                             * bring the whole system down, which is not intended.
+                             */
+                            sLogger.error("Unable to handle connection event for intent action : "
+                                    .concat(intent.getAction()), e);
+                        }
                     }
-                }.start();
+                });
             }
         };
         // Register network state listener
@@ -538,8 +574,9 @@ public class StartService extends Service {
     private BroadcastReceiver getPollingTelephonyManagerReceiver() {
         return new BroadcastReceiver() {
             @Override
-            public void onReceive(Context context, Intent intent) {
-                new Thread() {
+            public void onReceive(Context context, final Intent intent) {
+                mBackgroundHandler.post(new Runnable() {
+                    @Override
                     public void run() {
                         try {
                             boolean contactUtilReady = mContactUtil.isMyCountryCodeDefined();
@@ -562,18 +599,26 @@ public class StartService extends Service {
                                 retryPollingTelephonyManagerPooling(contactUtilReady);
                             }
                         } catch (RcsAccountException e) {
-                            sLogger.error("Failed to launch RCS service!", e);
-
+                            /**
+                             * This is a non revocable use-case as the RCS account itself was not
+                             * created, So we log this as error and stop the service itself.
+                             */
+                            sLogger.error("Failed to start the service for intent action : "
+                                    .concat(intent.getAction()), e);
+                            stopSelf();
                         } catch (RuntimeException e) {
                             /*
-                             * Intentionally catch runtime exceptions as else it will abruptly end
-                             * the thread and eventually bring the whole system down, which is not
-                             * intended.
+                             * Normally we are not allowed to catch runtime exceptions as these are
+                             * genuine bugs which should be handled/fixed within the code. However
+                             * the cases when we are executing operations on a thread unhandling
+                             * such exceptions will eventually lead to exit the system and thus can
+                             * bring the whole system down, which is not intended.
                              */
-                            sLogger.error("Failed to launch RCS service!", e);
+                            sLogger.error("Unable to handle connection event for intent action : "
+                                    .concat(intent.getAction()), e);
                         }
                     }
-                }.start();
+                });
             }
         };
     }
