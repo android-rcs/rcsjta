@@ -61,7 +61,7 @@ public class UpdateFileTransferStateAfterUngracefulTerminationTask implements Ru
                 ContactId contact = contactNumber != null ? ContactUtil
                         .createContactIdFromTrustedData(contactNumber) : null;
                 State state = State.valueOf(cursor.getInt(stateIdx));
-                boolean groupFileTransfer = !chatId.equals(contact);
+                boolean groupFileTransfer = !chatId.equals(contactNumber);
                 if (cursor.getString(downloadUriIdx) == null
                         && cursor.getString(uploadIdIdx) == null) {
                     /* Msrp file transfer */
