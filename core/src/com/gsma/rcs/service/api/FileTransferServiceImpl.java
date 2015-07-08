@@ -833,33 +833,15 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 }
                 return false;
             }
-            GroupChat.ReasonCode reasonCode = mMessagingLog.getGroupChatReasonCode(chatId);
-            if (reasonCode == null) {
+            if (mChatService.isGroupChatAbandoned(chatId)) {
                 if (sLogger.isActivated()) {
                     sLogger.debug(new StringBuilder(
                             "Cannot transfer file to group chat with group chat Id '")
-                            .append(chatId).append("' as the group chat does not exist in DB.")
+                            .append(chatId)
+                            .append("' as the group chat is abandoned and can no more be used to send or receive messages.")
                             .toString());
                 }
                 return false;
-            }
-            switch (reasonCode) {
-                case ABORTED_BY_USER:
-                case ABORTED_BY_REMOTE:
-                case FAILED_INITIATION:
-                case REJECTED_BY_REMOTE:
-                case REJECTED_MAX_CHATS:
-                case REJECTED_SPAM:
-                case REJECTED_BY_TIMEOUT:
-                case REJECTED_BY_SYSTEM:
-                    if (sLogger.isActivated()) {
-                        sLogger.debug(new StringBuilder(
-                                "Cannot transfer file to group chat with group chat Id '")
-                                .append(chatId).append("' as ").append(reasonCode).toString());
-                    }
-                    return false;
-                default:
-                    break;
             }
             GroupChatSession session = mImService.getGroupChatSession(chatId);
             if (session == null) {

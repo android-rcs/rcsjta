@@ -1134,4 +1134,14 @@ public class ChatServiceImpl extends IChatService.Stub {
     public boolean isGroupChatActive(String chatId) {
         return getOrCreateGroupChat(chatId).isGroupChatActive();
     }
+
+    /**
+     * Checks if the group chat is abandoned and can never be used to send or receive messages.
+     * 
+     * @param chatId
+     * @return boolean
+     */
+    public boolean isGroupChatAbandoned(String chatId) {
+        return getOrCreateGroupChat(chatId).isGroupChatAbandoned();
+    }
 }

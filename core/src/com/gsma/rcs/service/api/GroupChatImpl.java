@@ -239,7 +239,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         }
     }
 
-    private boolean isGroupChatAbandoned() {
+    public boolean isGroupChatAbandoned() {
         GroupChatSession session = mImService.getGroupChatSession(mChatId);
         if (session != null) {
             /* Group chat is not abandoned if there exists a session */
@@ -681,6 +681,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                  */
                 mPersistentStorage.setStateAndReasonCode(State.ABORTED, ReasonCode.ABORTED_BY_USER);
                 mPersistentStorage.setRejectNextGroupChatNextInvitation();
+                mCore.getListener().tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(
+                        mChatId);
                 return;
             }
 
@@ -1475,11 +1477,14 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     break;
                 case TERMINATION_BY_USER:
                     setStateAndReasonCode(State.ABORTED, ReasonCode.ABORTED_BY_USER);
+                    mCore.getListener()
+                            .tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(mChatId);
                     break;
                 case TERMINATION_BY_REMOTE:
                     setStateAndReasonCode(State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
+                    mCore.getListener()
+                            .tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(mChatId);
                     break;
-                    
                 case TERMINATION_BY_TIMEOUT:
                 case TERMINATION_BY_INACTIVITY:
                     setStateAndReasonCode(State.ABORTED, ReasonCode.ABORTED_BY_INACTIVITY);
@@ -1738,6 +1743,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 break;
             case TERMINATION_BY_REMOTE:
                 handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE);
+                mCore.getListener().tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(
+                        mChatId);
                 break;
             default:
                 throw new IllegalArgumentException(new StringBuilder(

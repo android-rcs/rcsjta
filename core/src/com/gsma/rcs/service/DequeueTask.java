@@ -30,7 +30,6 @@ import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
-import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
@@ -180,22 +179,15 @@ public abstract class DequeueTask implements Runnable {
             }
             return false;
         }
-        ReasonCode reasonCode = mMessagingLog.getGroupChatReasonCode(chatId);
-        switch (reasonCode) {
-            case ABORTED_BY_USER:
-            case FAILED_INITIATION:
-            case REJECTED_BY_REMOTE:
-            case REJECTED_MAX_CHATS:
-            case REJECTED_SPAM:
-            case REJECTED_BY_TIMEOUT:
-                if (mLogger.isActivated()) {
-                    mLogger.debug(new StringBuilder(
-                            "Cannot dequeue group chat messages and group file transfers right now as it is ")
-                            .append(reasonCode).toString());
-                }
-                return false;
-            default:
-                break;
+        if (mChatService.isGroupChatAbandoned(chatId)) {
+            if (mLogger.isActivated()) {
+                mLogger.debug(new StringBuilder(
+                        "Cannot dequeue group chat messages and group file transfers right now as the group chat with chatId '")
+                        .append(chatId)
+                        .append("' is abandoned and can be no more used to send or receive messages.")
+                        .toString());
+            }
+            return false;
         }
         final GroupChatSession groupChatSession = mImService.getGroupChatSession(chatId);
         if (groupChatSession == null) {
