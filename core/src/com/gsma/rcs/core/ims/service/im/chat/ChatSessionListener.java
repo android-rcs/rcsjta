@@ -88,4 +88,11 @@ public interface ChatSessionListener extends ImsSessionListener {
      * @param imdn Imdn Document
      */
     public void handleDeliveryStatus(String contributionId, ContactId contact, ImdnDocument imdn);
+
+    /**
+     * Handle imdn DISPLAY report sent for message
+     * 
+     * @param msgId
+     */
+    public void handleChatMessageDisplayReportSent(String msgId);
 }

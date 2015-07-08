@@ -143,8 +143,9 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
                 String msgId = ChatUtils.getMessageId(dialogPath.getInvite());
                 if (msgId != null) {
                     /* Send message delivery status via a SIP MESSAGE */
-                    mImdnManager.sendMessageDeliveryStatusImmediately(getRemoteContact(), msgId,
-                            ImdnDocument.DELIVERY_STATUS_DELIVERED,
+                    ContactId remote = getRemoteContact();
+                    mImdnManager.sendMessageDeliveryStatusImmediately(remote.toString(), remote,
+                            msgId, ImdnDocument.DELIVERY_STATUS_DELIVERED,
                             SipUtils.getRemoteInstanceID(dialogPath.getInvite()), getTimestamp());
                 }
             }

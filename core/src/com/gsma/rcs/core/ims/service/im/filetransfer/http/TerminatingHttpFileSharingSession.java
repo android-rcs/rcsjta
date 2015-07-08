@@ -79,7 +79,7 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
      * 
      * @param imService InstantMessagingService
      * @param fileTransferId the File transfer Id
-     * @param contact the remote contact Id
+     * @param remote the remote contact Id
      * @param content
      * @param fileExpiration
      * @param fileIcon
@@ -95,12 +95,12 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
      * @param contactManager
      */
     public TerminatingHttpFileSharingSession(InstantMessagingService imService, MmContent content,
-            long fileExpiration, MmContent fileIcon, long iconExpiration, ContactId contact,
+            long fileExpiration, MmContent fileIcon, long iconExpiration, ContactId remote,
             String chatSessionId, String chatContributionId, String fileTransferId,
             boolean isGroup, Uri httpServerAddress, RcsSettings rcsSettings,
             MessagingLog messagingLog, long timestamp, String remoteInstanceId,
             ContactManager contactManager) {
-        super(imService, content, contact, PhoneUtils.formatContactIdToUri(contact), fileIcon,
+        super(imService, content, remote, PhoneUtils.formatContactIdToUri(remote), fileIcon,
                 chatSessionId, chatContributionId, fileTransferId, rcsSettings, messagingLog,
                 timestamp, fileExpiration, iconExpiration, contactManager);
         mGroupFileTransfer = isGroup;
@@ -217,19 +217,20 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
             mLogger.debug("Send delivery report ".concat(status));
         }
         ChatSession chatSession;
-        ContactId contact = getRemoteContact();
+        ContactId remote = getRemoteContact();
         InstantMessagingService imService = Core.getInstance().getImService();
         if (mGroupFileTransfer) {
             chatSession = imService.getGroupChatSession(getContributionID());
         } else {
-            chatSession = imService.getOneToOneChatSession(contact);
+            chatSession = imService.getOneToOneChatSession(remote);
         }
         if (chatSession != null && chatSession.isMediaEstablished()) {
             // Send message delivery status via a MSRP
-            chatSession.sendMsrpMessageDeliveryStatus(contact, msgId, status, timestamp);
+            chatSession.sendMsrpMessageDeliveryStatus(remote, msgId, status, timestamp);
         } else {
             // Send message delivery status via a SIP MESSAGE
-            mImdnManager.sendMessageDeliveryStatusImmediately(contact, msgId, status,
+            String chatId = mGroupFileTransfer ? getContributionID() : remote.toString();
+            mImdnManager.sendMessageDeliveryStatusImmediately(chatId, remote, msgId, status,
                     mRemoteInstanceId, timestamp);
         }
     }
@@ -330,7 +331,7 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
          * started, then it's a pause
          */
         boolean sessionAccepted = isSessionAccepted();
-        ContactId contact = getRemoteContact();
+        ContactId remote = getRemoteContact();
         switch (reason) {
             case TERMINATION_BY_SYSTEM:
                 /* Intentional fall through */
@@ -350,7 +351,7 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
                 }
                 for (ImsSessionListener listener : getListeners()) {
                     ((FileSharingSessionListener) listener)
-                            .handleFileTransferPausedBySystem(contact);
+                            .handleFileTransferPausedBySystem(remote);
                 }
                 return;
             default:
@@ -359,12 +360,12 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
 
         if (sessionAccepted) {
             for (ImsSessionListener listener : getListeners()) {
-                listener.handleSessionAborted(contact, reason);
+                listener.handleSessionAborted(remote, reason);
             }
             return;
         }
         for (ImsSessionListener listener : getListeners()) {
-            listener.handleSessionRejected(contact, reason);
+            listener.handleSessionRejected(remote, reason);
         }
     }
 }

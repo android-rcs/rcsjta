@@ -131,13 +131,6 @@ public interface IMessageLog {
     public boolean setChatMessageTimestamp(String msgId, long timestamp, long timestampSent);
 
     /**
-     * Mark incoming chat message status as received
-     * 
-     * @param msgId Message ID
-     */
-    public void markIncomingChatMessageAsReceived(String msgId);
-
-    /**
      * Check if the message is already persisted in db
      * 
      * @param msgId message ID

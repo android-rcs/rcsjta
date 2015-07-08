@@ -211,7 +211,7 @@ public class InstantMessagingService extends ImsService {
         mMessagingLog = messagingLog;
         mStoreAndFwdMgr = new StoreAndForwardManager(this, mRcsSettings, mContactManager,
                 mMessagingLog);
-        mImdnManager = new ImdnManager(this, mRcsSettings, mMessagingLog);
+        mImdnManager = new ImdnManager(this, mCore, mRcsSettings, mMessagingLog);
         mImdnManager.start();
     }
 
@@ -992,8 +992,9 @@ public class InstantMessagingService extends ImsService {
                                 .getParameter(SipUtils.SIP_INSTANCE_PARAM);
                     }
                     // Send message delivery status via a SIP MESSAGE
-                    mImdnManager.sendMessageDeliveryStatusImmediately(remote, msgId,
-                            ImdnDocument.DELIVERY_STATUS_DELIVERED, remoteInstanceId, timestamp);
+                    mImdnManager.sendMessageDeliveryStatusImmediately(remote.toString(), remote,
+                            msgId, ImdnDocument.DELIVERY_STATUS_DELIVERED, remoteInstanceId,
+                            timestamp);
                 }
             }
 

@@ -1101,4 +1101,10 @@ public class RcsCoreService extends Service implements CoreListener {
     public void handleOneToOneFileTransferDeliveryExpiration(Intent intent) {
         mOneToOneUndeliveredImManager.handleFileTransferDeliveryExpiration(intent);
     }
+
+    @Override
+    public void handleChatMessageDisplayReportSent(String chatId, ContactId remote, String msgId) {
+        mChatApi.handleDisplayReportSent(chatId, remote, msgId);
+    }
+
 }

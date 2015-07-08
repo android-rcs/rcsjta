@@ -1811,4 +1811,14 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             mBroadcaster.broadcastParticipantStatusChanged(mChatId, contact, status);
         }
     }
+
+    @Override
+    public void handleChatMessageDisplayReportSent(String msgId) {
+        if (mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Content.Status.RECEIVED,
+                Content.ReasonCode.UNSPECIFIED)) {
+            String apiMimeType = mMessagingLog.getMessageMimeType(msgId);
+            mBroadcaster.broadcastMessageStatusChanged(mChatId, apiMimeType, msgId,
+                    Content.Status.RECEIVED, Content.ReasonCode.UNSPECIFIED);
+        }
+    }
 }

@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.im.chat.imdn;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
@@ -56,6 +57,8 @@ public class ImdnManager extends Thread {
      */
     private ImsService mImsService;
 
+    private final Core mCore;
+
     /**
      * Buffer
      */
@@ -77,8 +80,10 @@ public class ImdnManager extends Thread {
      * @param rcsSettings
      * @param messagingLog
      */
-    public ImdnManager(ImsService imsService, RcsSettings rcsSettings, MessagingLog messagingLog) {
+    public ImdnManager(ImsService imsService, Core core, RcsSettings rcsSettings,
+            MessagingLog messagingLog) {
         mImsService = imsService;
+        mCore = core;
         mRcsSettings = rcsSettings;
         mMessagingLog = messagingLog;
     }
@@ -148,8 +153,10 @@ public class ImdnManager extends Thread {
                 // Update rich messaging history when sending DISPLAYED report
                 // Since the requested display report was now successfully send we mark this message
                 // as fully received
-                if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(delivery.getStatus()))
-                    mMessagingLog.markIncomingChatMessageAsReceived(delivery.getMsgId());
+                if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(delivery.getStatus())) {
+                    mCore.getListener().handleChatMessageDisplayReportSent(delivery.getChatId(),
+                            delivery.getRemote(), delivery.getMsgId());
+                }
             } catch (Exception e) {
                 if (sLogger.isActivated()) {
                     sLogger.error("Unexpected exception", e);
@@ -164,22 +171,24 @@ public class ImdnManager extends Thread {
     /**
      * Send a message delivery status
      * 
-     * @param contact Contact identifier
+     * @param chatId ChatId
+     * @param remote Remote contact
      * @param msgId Message ID
      * @param status Delivery status
      * @param timestamp Timestamp sent in payload for IMDN datetime
      */
-    public void sendMessageDeliveryStatus(ContactId contact, String msgId, String status,
-            long timestamp) {
+    public void sendMessageDeliveryStatus(String chatId, ContactId remote, String msgId,
+            String status, long timestamp) {
         // Add request in the buffer for background processing
-        DeliveryStatus delivery = new DeliveryStatus(contact, msgId, status, timestamp);
+        DeliveryStatus delivery = new DeliveryStatus(chatId, remote, msgId, status, timestamp);
         mBuffer.addObject(delivery);
     }
 
     /**
      * Send a message delivery status immediately
      * 
-     * @param contact Contact identifier
+     * @param chatId ChatId when targeting a group chat message, otherwise null
+     * @param remote Remote contact
      * @param msgId Message ID
      * @param status Delivery status
      * @param remoteInstanceId
@@ -187,11 +196,11 @@ public class ImdnManager extends Thread {
      * @throws SipPayloadException
      * @throws SipNetworkException
      */
-    public void sendMessageDeliveryStatusImmediately(ContactId contact, String msgId,
+    public void sendMessageDeliveryStatusImmediately(String chatId, ContactId remote, String msgId,
             String status, final String remoteInstanceId, long timestamp)
             throws SipPayloadException, SipNetworkException {
         // Execute request in background
-        final DeliveryStatus delivery = new DeliveryStatus(contact, msgId, status, timestamp);
+        final DeliveryStatus delivery = new DeliveryStatus(chatId, remote, msgId, status, timestamp);
         sendSipMessageDeliveryStatus(delivery, remoteInstanceId);
     }
 
@@ -225,7 +234,7 @@ public class ImdnManager extends Thread {
             SessionAuthenticationAgent authenticationAgent = new SessionAuthenticationAgent(
                     mImsService.getImsModule());
 
-            String toUri = PhoneUtils.formatContactIdToUri(deliveryStatus.getContact());
+            String toUri = PhoneUtils.formatContactIdToUri(deliveryStatus.getRemote());
             // Create a dialog path
             SipDialogPath dialogPath = new SipDialogPath(mImsService.getImsModule().getSipManager()
                     .getSipStack(), mImsService.getImsModule().getSipManager().getSipStack()
@@ -308,32 +317,40 @@ public class ImdnManager extends Thread {
      * Delivery status
      */
     private static class DeliveryStatus {
-        private ContactId contact;
-        private String msgId;
-        private String status;
-        private long timestamp;
+        private String mChatId;
+        private ContactId mRemote;
+        private String mMsgId;
+        private String mStatus;
+        private long mTimestamp;
 
-        public DeliveryStatus(ContactId contact, String msgId, String status, long timestamp) {
-            this.contact = contact;
-            this.msgId = msgId;
-            this.status = status;
-            this.timestamp = timestamp;
+        public DeliveryStatus(String chatId, ContactId remote, String msgId, String status,
+                long timestamp) {
+            mChatId = chatId;
+            mRemote = remote;
+            mMsgId = msgId;
+            mStatus = status;
+            mTimestamp = timestamp;
         }
 
-        public ContactId getContact() {
-            return contact;
+        public String getChatId() {
+            return mChatId;
+        }
+
+        public ContactId getRemote() {
+            return mRemote;
         }
 
         public String getMsgId() {
-            return msgId;
+            return mMsgId;
         }
 
         public String getStatus() {
-            return status;
+            return mStatus;
         }
 
         public long getTimestamp() {
-            return timestamp;
+            return mTimestamp;
         }
     }
+
 }

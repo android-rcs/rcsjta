@@ -27,7 +27,6 @@ import com.gsma.rcs.core.content.GeolocContent;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.ImsError;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
@@ -368,9 +367,9 @@ public interface CoreListener {
      * @param reasonCode Rejected reason code
      * @param timestamp Local timestamp when got group chat invitation
      */
-    public void handleGroupChatInvitationRejected(String chatId, ContactId remoteContact, String subject,
-            Map<ContactId, ParticipantStatus> participants, GroupChat.ReasonCode reasonCode,
-            long timestamp);
+    public void handleGroupChatInvitationRejected(String chatId, ContactId remoteContact,
+            String subject, Map<ContactId, ParticipantStatus> participants,
+            GroupChat.ReasonCode reasonCode, long timestamp);
 
     /**
      * Handles image sharing rejection
@@ -402,8 +401,8 @@ public interface CoreListener {
      * @param reasonCode Rejected reason code
      * @param timestamp Local timestamp when got geoloc sharing invitation
      */
-    public void handleGeolocSharingInvitationRejected(ContactId remoteContact, GeolocContent content,
-            GeolocSharing.ReasonCode reasonCode, long timestamp);
+    public void handleGeolocSharingInvitationRejected(ContactId remoteContact,
+            GeolocContent content, GeolocSharing.ReasonCode reasonCode, long timestamp);
 
     /**
      * Handle the case of rejected ip call
@@ -478,13 +477,14 @@ public interface CoreListener {
 
     /**
      * Try to dequeue all one-to-one chat messages and one-one file transfers
+     * 
      * @param core
      */
-    public void tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(
-            Core core);
+    public void tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(Core core);
 
     /**
      * Try to dequeue one-to-one and group file transfers
+     * 
      * @param core
      */
     public void tryToDequeueFileTransfers(Core core);
@@ -510,4 +510,13 @@ public interface CoreListener {
      * @param intent
      */
     public void handleOneToOneFileTransferDeliveryExpiration(Intent intent);
+
+    /**
+     * Handle imdn DISPLAY report sent for message
+     * 
+     * @param chatId ChatId
+     * @param contactId Remote contact
+     * @param msgId
+     */
+    public void handleChatMessageDisplayReportSent(String chatId, ContactId remote, String msgId);
 }

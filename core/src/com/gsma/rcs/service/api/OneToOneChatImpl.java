@@ -391,17 +391,6 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     }
 
     /**
-     * Update chat message timestamp
-     * 
-     * @param msgId
-     * @param timestamp New local timestamp
-     * @param timestampSent New timestamp sent in payload
-     */
-    private void updateChatMessageTimestamp(String msgId, long timestamp, long timestampSent) {
-        mMessagingLog.setChatMessageTimestamp(msgId, timestamp, timestampSent);
-    }
-
-    /**
      * Sends a plain text message
      * 
      * @param message Text message
@@ -621,12 +610,12 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     /**
      * Sends a displayed delivery report for a given message ID
      * 
-     * @param contact Contact ID
+     * @param remote Remote contact
      * @param msgId Message ID
      * @param timestamp Timestamp sent in payload for IMDN datetime
      * @throws MsrpException
      */
-    /* package private */void sendDisplayedDeliveryReport(final ContactId contact,
+    /* package private */void sendDisplayedDeliveryReport(final ContactId remote,
             final String msgId, final long timestamp) throws MsrpException {
         if (sLogger.isActivated()) {
             sLogger.debug("Set displayed delivery report for " + msgId);
@@ -639,14 +628,14 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             if (sLogger.isActivated()) {
                 sLogger.info("Use the original session to send the delivery status for " + msgId);
             }
-            session.sendMsrpMessageDeliveryStatus(contact, msgId,
+            session.sendMsrpMessageDeliveryStatus(remote, msgId,
                     ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp);
         } else {
             if (sLogger.isActivated()) {
                 sLogger.info("No suitable session found to send the delivery status for " + msgId
                         + " : use SIP message");
             }
-            mImService.getImdnManager().sendMessageDeliveryStatus(contact, msgId,
+            mImService.getImdnManager().sendMessageDeliveryStatus(remote.toString(), remote, msgId,
                     ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp);
         }
     }
@@ -1048,5 +1037,15 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     @Override
     public void handleSessionAutoAccepted(ContactId contact) {
         /* Not used by one-to-one chat */
+    }
+
+    @Override
+    public void handleChatMessageDisplayReportSent(String msgId) {
+        if (mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.RECEIVED,
+                ReasonCode.UNSPECIFIED)) {
+            String apiMimeType = mMessagingLog.getMessageMimeType(msgId);
+            mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId,
+                    Status.RECEIVED, ReasonCode.UNSPECIFIED);
+        }
     }
 }

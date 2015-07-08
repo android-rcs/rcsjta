@@ -126,7 +126,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
             if (logActivated) {
                 mLogger.info("Initiate a new 1-1 chat session as terminating");
             }
-            ContactId contact = getRemoteContact();
+            ContactId remote = getRemoteContact();
             SipDialogPath dialogPath = getDialogPath();
             /* Send message delivery report if requested */
             if (mImdnManager.isDeliveryDeliveredReportsEnabled()
@@ -136,8 +136,8 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
                 String msgId = ChatUtils.getMessageId(dialogPath.getInvite());
                 if (msgId != null) {
                     /* Send message delivery status via a SIP MESSAGE */
-                    mImdnManager.sendMessageDeliveryStatusImmediately(contact, msgId,
-                            ImdnDocument.DELIVERY_STATUS_DELIVERED,
+                    mImdnManager.sendMessageDeliveryStatusImmediately(remote.toString(), remote,
+                            msgId, ImdnDocument.DELIVERY_STATUS_DELIVERED,
                             SipUtils.getRemoteInstanceID(dialogPath.getInvite()), getTimestamp());
                 }
             }
@@ -151,7 +151,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
                 }
 
                 for (ImsSessionListener listener : listeners) {
-                    ((OneToOneChatSessionListener) listener).handleSessionAutoAccepted(contact);
+                    ((OneToOneChatSessionListener) listener).handleSessionAutoAccepted(remote);
                 }
             } else {
                 if (logActivated) {
@@ -159,7 +159,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
                 }
 
                 for (ImsSessionListener listener : listeners) {
-                    ((OneToOneChatSessionListener) listener).handleSessionInvited(contact);
+                    ((OneToOneChatSessionListener) listener).handleSessionInvited(remote);
                 }
 
                 send180Ringing(dialogPath.getInvite(), dialogPath.getLocalTag());
@@ -176,7 +176,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
                         removeSession();
 
                         for (ImsSessionListener listener : listeners) {
-                            listener.handleSessionRejected(contact,
+                            listener.handleSessionRejected(remote,
                                     TerminationReason.TERMINATION_BY_USER);
                         }
                         return;
@@ -192,7 +192,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
                         removeSession();
 
                         for (ImsSessionListener listener : listeners) {
-                            listener.handleSessionRejected(contact,
+                            listener.handleSessionRejected(remote,
                                     TerminationReason.TERMINATION_BY_TIMEOUT);
                         }
                         return;
@@ -212,7 +212,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
                         removeSession();
 
                         for (ImsSessionListener listener : listeners) {
-                            listener.handleSessionRejected(contact,
+                            listener.handleSessionRejected(remote,
                                     TerminationReason.TERMINATION_BY_REMOTE);
                         }
                         return;
@@ -221,7 +221,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
                         setSessionAccepted();
 
                         for (ImsSessionListener listener : listeners) {
-                            listener.handleSessionAccepted(contact);
+                            listener.handleSessionAccepted(remote);
                         }
                         break;
 
@@ -353,7 +353,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
                     sendEmptyDataChunk();
                 }
                 for (ImsSessionListener listener : listeners) {
-                    listener.handleSessionStarted(contact);
+                    listener.handleSessionStarted(remote);
                 }
                 SessionTimerManager sessionTimerManager = getSessionTimerManager();
                 if (sessionTimerManager.isSessionTimerActivated(resp)) {
@@ -401,13 +401,13 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
     @Override
     public void startSession() {
         final boolean logActivated = mLogger.isActivated();
-        ContactId contact = getRemoteContact();
+        ContactId remote = getRemoteContact();
         if (logActivated) {
-            mLogger.debug("Start OneToOneChatSession with '" + contact + "'");
+            mLogger.debug("Start OneToOneChatSession with '" + remote + "'");
         }
         InstantMessagingService imService = getImsService().getImsModule()
                 .getInstantMessagingService();
-        OneToOneChatSession currentSession = imService.getOneToOneChatSession(contact);
+        OneToOneChatSession currentSession = imService.getOneToOneChatSession(remote);
         if (currentSession != null) {
             boolean currentSessionInitiatedByRemote = currentSession.isInitiatedByRemote();
             boolean currentSessionEstablished = currentSession.getDialogPath()
@@ -419,7 +419,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
                  */
                 if (logActivated) {
                     mLogger.warn("Rejecting OneToOneChatSession (session id '" + getSessionID()
-                            + "') with '" + contact + "'");
+                            + "') with '" + remote + "'");
                 }
                 rejectSession();
                 return;
@@ -431,7 +431,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
              */
             if (logActivated) {
                 mLogger.warn("Rejecting/Aborting existing OneToOneChatSession (session id '"
-                        + getSessionID() + "') with '" + contact + "'");
+                        + getSessionID() + "') with '" + remote + "'");
             }
             if (currentSessionInitiatedByRemote) {
                 if (currentSessionEstablished) {

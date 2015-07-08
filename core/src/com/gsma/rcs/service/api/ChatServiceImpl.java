@@ -177,19 +177,19 @@ public class ChatServiceImpl extends IChatService.Stub {
      * Tries to send a displayed delivery report for a one to one chat
      * 
      * @param msgId Message ID
-     * @param contact Contact ID
+     * @param remote Remote contact
      * @param timestamp Timestamp sent in payload for IMDN datetime
      * @throws MsrpException
      */
-    public void tryToSendOne2OneDisplayedDeliveryReport(String msgId, ContactId contact,
+    public void tryToSendOne2OneDisplayedDeliveryReport(String msgId, ContactId remote,
             long timestamp) throws MsrpException {
 
-        OneToOneChatImpl chatImpl = mOneToOneChatCache.get(contact);
+        OneToOneChatImpl chatImpl = mOneToOneChatCache.get(remote);
         if (chatImpl != null) {
-            chatImpl.sendDisplayedDeliveryReport(contact, msgId, timestamp);
+            chatImpl.sendDisplayedDeliveryReport(remote, msgId, timestamp);
             return;
         }
-        mImService.getImdnManager().sendMessageDeliveryStatus(contact, msgId,
+        mImService.getImdnManager().sendMessageDeliveryStatus(remote.toString(), remote, msgId,
                 ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp);
     }
 
@@ -210,7 +210,7 @@ public class ChatServiceImpl extends IChatService.Stub {
                 sLogger.info("No suitable session found to send the delivery status for " + msgId
                         + " : use SIP message");
             }
-            mImService.getImdnManager().sendMessageDeliveryStatus(contact, msgId,
+            mImService.getImdnManager().sendMessageDeliveryStatus(chatId, contact, msgId,
                     ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp);
             return;
         }
@@ -1143,5 +1143,13 @@ public class ChatServiceImpl extends IChatService.Stub {
      */
     public boolean isGroupChatAbandoned(String chatId) {
         return getOrCreateGroupChat(chatId).isGroupChatAbandoned();
+    }
+
+    public void handleDisplayReportSent(String chatId, ContactId remote, String msgId) {
+        if (remote != null && chatId.equals(remote.toString())) {
+            getOrCreateOneToOneChat(remote).handleChatMessageDisplayReportSent(msgId);
+        } else {
+            getOrCreateGroupChat(chatId).handleChatMessageDisplayReportSent(msgId);
+        }
     }
 }

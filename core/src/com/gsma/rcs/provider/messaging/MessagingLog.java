@@ -196,11 +196,6 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public void markIncomingChatMessageAsReceived(String msgId) {
-        mMessageLog.markIncomingChatMessageAsReceived(msgId);
-    }
-
-    @Override
     public boolean isMessagePersisted(String msgId) {
         return mMessageLog.isMessagePersisted(msgId);
     }

@@ -388,16 +388,6 @@ public class MessageLog implements IMessageLog {
     }
 
     @Override
-    public void markIncomingChatMessageAsReceived(String msgId) {
-        if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder(
-                    "Mark incoming chat message status as received for msgId=").append(msgId)
-                    .toString());
-        }
-        setChatMessageStatusAndReasonCode(msgId, Status.RECEIVED, ReasonCode.UNSPECIFIED);
-    }
-
-    @Override
     public boolean isMessagePersisted(String msgId) {
         Cursor cursor = null;
         Uri contentUri = Uri.withAppendedPath(MessageData.CONTENT_URI, msgId);

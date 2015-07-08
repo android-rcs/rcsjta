@@ -685,7 +685,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             }
 
             // Send the delivered notification by SIP
-            mImdnManager.sendMessageDeliveryStatus(getRemoteContact(), msgId,
+            ContactId remote = getRemoteContact();
+            String chatId = isGroupChat() ? getContributionID() : remote.toString();
+            mImdnManager.sendMessageDeliveryStatus(chatId, remote, msgId,
                     ImdnDocument.DELIVERY_STATUS_DELIVERED, System.currentTimeMillis());
         } else if (TypeMsrpChunk.MessageDisplayedReport.equals(typeMsrpChunk)) {
             if (sLogger.isActivated()) {
@@ -694,7 +696,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             }
 
             // Send the displayed notification by SIP
-            mImdnManager.sendMessageDeliveryStatus(getRemoteContact(), msgId,
+            ContactId remote = getRemoteContact();
+            String chatId = isGroupChat() ? getContributionID() : remote.toString();
+            mImdnManager.sendMessageDeliveryStatus(chatId, remote, msgId,
                     ImdnDocument.DELIVERY_STATUS_DISPLAYED, System.currentTimeMillis());
         } else if ((msgId != null) && TypeMsrpChunk.TextMessage.equals(typeMsrpChunk)) {
             for (ImsSessionListener listener : getListeners()) {
@@ -976,13 +980,13 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     /**
      * Send message delivery status via MSRP
      * 
-     * @param contact Contact that requested the delivery status
+     * @param remote Contact that requested the delivery status
      * @param msgId Message ID
      * @param status Status
      * @param timestamp Timestamp sent in payload for IMDN datetime
      * @throws MsrpException
      */
-    public void sendMsrpMessageDeliveryStatus(ContactId contact, String msgId, String status,
+    public void sendMsrpMessageDeliveryStatus(ContactId remote, String msgId, String status,
             long timestamp) throws MsrpException {
         // Send status in CPIM + IMDN headers
         String from = ChatUtils.ANONYMOUS_URI;
@@ -1026,10 +1030,10 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         sendDataChunks(IdGenerator.generateMessageID(), content, CpimMessage.MIME_TYPE,
                 typeMsrpChunk);
         if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
-            if (mMessagingLog.isFileTransfer(msgId)) {
-                // TODO update file transfer status
-            } else {
-                mMessagingLog.markIncomingChatMessageAsReceived(msgId);
+            if (mMessagingLog.getMessageChatId(msgId) != null) {
+                for (ImsSessionListener listener : getListeners()) {
+                    ((ChatSessionListener) listener).handleChatMessageDisplayReportSent(msgId);
+                }
             }
         }
     }

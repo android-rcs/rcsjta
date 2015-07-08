@@ -446,6 +446,13 @@ public abstract class GroupChatSession extends ChatSession {
         // Send data
         sendDataChunks(IdGenerator.generateMessageID(), content, CpimMessage.MIME_TYPE,
                 TypeMsrpChunk.MessageDeliveredReport);
+        if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
+            if (mMessagingLog.getMessageChatId(msgId) != null) {
+                for (ImsSessionListener listener : getListeners()) {
+                    ((ChatSessionListener) listener).handleChatMessageDisplayReportSent(msgId);
+                }
+            }
+        }
     }
 
     /**
