@@ -435,8 +435,8 @@ public class ChatServiceImpl extends IChatService.Stub {
         OneToOneChatImpl oneToOneChat = mOneToOneChatCache.get(contact);
         if (oneToOneChat == null) {
             oneToOneChat = new OneToOneChatImpl(contact, mOneToOneChatEventBroadcaster, mImService,
-                    mMessagingLog, mRcsSettings, this, mContactManager, mCore,
-                    mOneToOneUndeliveredImManager);
+                    mMessagingLog, mRcsSettings, this, mFileTransferService, mContactManager,
+                    mCore, mOneToOneUndeliveredImManager);
             mOneToOneChatCache.put(contact, oneToOneChat);
         }
         return oneToOneChat;
@@ -1004,7 +1004,7 @@ public class ChatServiceImpl extends IChatService.Stub {
         ContactId contact = session.getRemoteContact();
         OneToOneChatImpl oneToOneChat = new OneToOneChatImpl(contact,
                 mOneToOneChatEventBroadcaster, mImService, mMessagingLog, mRcsSettings, this,
-                mContactManager, mCore, mOneToOneUndeliveredImManager);
+                mFileTransferService, mContactManager, mCore, mOneToOneUndeliveredImManager);
         session.addListener(oneToOneChat);
         addOneToOneChat(contact, oneToOneChat);
     }

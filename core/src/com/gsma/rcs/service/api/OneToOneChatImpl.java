@@ -34,6 +34,7 @@ import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatMessageSession;
+import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.ChatMessagePersistedStorageAccessor;
 import com.gsma.rcs.provider.messaging.MessagingLog;
@@ -50,6 +51,7 @@ import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.IChatMessage;
 import com.gsma.services.rcs.chat.IOneToOneChat;
 import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.filetransfer.FileTransfer;
 
 import android.os.RemoteException;
 import android.text.TextUtils;
@@ -70,6 +72,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     private final MessagingLog mMessagingLog;
 
     private final ChatServiceImpl mChatService;
+
+    private final FileTransferServiceImpl mFileTransferService;
 
     private final RcsSettings mRcsSettings;
 
@@ -98,19 +102,22 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * @param messagingLog MessagingLog
      * @param rcsSettings RcsSettings
      * @param chatService ChatServiceImpl
+     * @param fileTransferService FileTransferServiceImpl
      * @param contactManager ContactManager
      * @param core Core
      * @param undeliveredImManager OneToOneUndeliveredImManager
      */
     public OneToOneChatImpl(ContactId contact, IOneToOneChatEventBroadcaster broadcaster,
             InstantMessagingService imService, MessagingLog messagingLog, RcsSettings rcsSettings,
-            ChatServiceImpl chatService, ContactManager contactManager, Core core,
+            ChatServiceImpl chatService, FileTransferServiceImpl fileTransferService,
+            ContactManager contactManager, Core core,
             OneToOneUndeliveredImManager undeliveredImManager) {
         mContact = contact;
         mBroadcaster = broadcaster;
         mImService = imService;
         mMessagingLog = messagingLog;
         mChatService = chatService;
+        mFileTransferService = fileTransferService;
         mRcsSettings = rcsSettings;
         mContactManager = contactManager;
         mCore = core;
@@ -904,10 +911,15 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                         mUndeliveredImManager.cancelDeliveryTimeoutAlarm(msgId);
                         String mimeType = message.getMimeType();
                         String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(mimeType);
-                        mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.FAILED,
-                                ReasonCode.FAILED_SEND);
-                        mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId,
-                                Status.FAILED, ReasonCode.FAILED_SEND);
+                        if (FileTransferUtils.isFileTransferHttpType(apiMimeType)) {
+                            mFileTransferService.setOneToOneFileTransferStateAndReasonCode(msgId,
+                                    mContact, FileTransfer.State.FAILED,
+                                    FileTransfer.ReasonCode.FAILED_DATA_TRANSFER);
+                        } else if (ChatUtils.isTextPlainType(apiMimeType)
+                                || MimeType.GEOLOC_MESSAGE.equals(apiMimeType)) {
+                            mChatService.setOneToOneChatMessageStatusAndReasonCode(msgId,
+                                    apiMimeType, mContact, Status.FAILED, ReasonCode.FAILED_SEND);
+                        }
                     }
                     break;
                 /*
