@@ -115,8 +115,8 @@ public class OriginatingOneToOneChatSession extends OneToOneChatSession {
             ChatMessage chatMessage = getFirstMessage();
             if (chatMessage != null) {
                 // Build CPIM part
-                String from = ChatUtils.ANOMYNOUS_URI;
-                String to = ChatUtils.ANOMYNOUS_URI;
+                String from = ChatUtils.ANONYMOUS_URI;
+                String to = ChatUtils.ANONYMOUS_URI;
 
                 String cpim;
                 if (mImdnManager.isRequestOneToOneDeliveryDisplayedReportsEnabled()) {

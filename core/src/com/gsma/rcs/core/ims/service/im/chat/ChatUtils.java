@@ -83,7 +83,7 @@ public class ChatUtils {
     /**
      * Anonymous URI
      */
-    public final static String ANOMYNOUS_URI = "sip:anonymous@anonymous.invalid";
+    public final static String ANONYMOUS_URI = "sip:anonymous@anonymous.invalid";
 
     /**
      * Contribution ID header

@@ -191,16 +191,16 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
             String networkContent;
 
             if (mImdnManager.isRequestOneToOneDeliveryDisplayedReportsEnabled()) {
-                networkContent = ChatUtils.buildCpimMessageWithImdn(ChatUtils.ANOMYNOUS_URI,
-                        ChatUtils.ANOMYNOUS_URI, msgId, fileInfo,
+                networkContent = ChatUtils.buildCpimMessageWithImdn(ChatUtils.ANONYMOUS_URI,
+                        ChatUtils.ANONYMOUS_URI, msgId, fileInfo,
                         FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);
             } else if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
                 networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(
-                        ChatUtils.ANOMYNOUS_URI, ChatUtils.ANOMYNOUS_URI, msgId, fileInfo,
+                        ChatUtils.ANONYMOUS_URI, ChatUtils.ANONYMOUS_URI, msgId, fileInfo,
                         FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);
             } else {
-                networkContent = ChatUtils.buildCpimMessage(ChatUtils.ANOMYNOUS_URI,
-                        ChatUtils.ANOMYNOUS_URI, fileInfo, FileTransferHttpInfoDocument.MIME_TYPE,
+                networkContent = ChatUtils.buildCpimMessage(ChatUtils.ANONYMOUS_URI,
+                        ChatUtils.ANONYMOUS_URI, fileInfo, FileTransferHttpInfoDocument.MIME_TYPE,
                         mTimestampSent);
             }
             chatSession.sendDataChunks(IdGenerator.generateMessageID(), networkContent,

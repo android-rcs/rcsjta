@@ -375,7 +375,7 @@ public abstract class GroupChatSession extends ChatSession {
     @Override
     public void sendChatMessage(ChatMessage msg) throws MsrpException {
         String from = ImsModule.IMS_USER_PROFILE.getPublicAddress();
-        String to = ChatUtils.ANOMYNOUS_URI;
+        String to = ChatUtils.ANONYMOUS_URI;
         String msgId = msg.getMessageId();
         String networkContent;
         String mimeType = msg.getMimeType();
@@ -413,7 +413,7 @@ public abstract class GroupChatSession extends ChatSession {
     @Override
     public void sendIsComposingStatus(boolean status) throws MsrpException {
         String from = ImsModule.IMS_USER_PROFILE.getPublicUri();
-        String to = ChatUtils.ANOMYNOUS_URI;
+        String to = ChatUtils.ANONYMOUS_URI;
         String msgId = IdGenerator.generateMessageID();
         String content = ChatUtils.buildCpimMessage(from, to,
                 IsComposingInfo.buildIsComposingInfo(status), IsComposingInfo.MIME_TYPE,
@@ -425,7 +425,8 @@ public abstract class GroupChatSession extends ChatSession {
     public void sendMsrpMessageDeliveryStatus(ContactId remote, String msgId, String status,
             long timestamp) throws MsrpException {
         // Send status in CPIM + IMDN headers
-        String to = (remote != null) ? remote.toString() : ChatUtils.ANOMYNOUS_URI;
+        String to = (remote != null) ? remote.toString() : ChatUtils.ANONYMOUS_URI;
+
         sendMsrpMessageDeliveryStatus(null, to, msgId, status, timestamp);
     }
 
@@ -468,14 +469,14 @@ public abstract class GroupChatSession extends ChatSession {
         mMessagingLog.setFileTransferTimestamps(fileTransferId, timestamp, timestampSent);
         if (displayedReportEnabled) {
             networkContent = ChatUtils
-                    .buildCpimMessageWithImdn(from, ChatUtils.ANOMYNOUS_URI, fileTransferId,
+                    .buildCpimMessageWithImdn(from, ChatUtils.ANONYMOUS_URI, fileTransferId,
                             fileInfo, FileTransferHttpInfoDocument.MIME_TYPE, timestampSent);
         } else if (deliveredReportEnabled) {
             networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from,
-                    ChatUtils.ANOMYNOUS_URI, fileTransferId, fileInfo,
+                    ChatUtils.ANONYMOUS_URI, fileTransferId, fileInfo,
                     FileTransferHttpInfoDocument.MIME_TYPE, timestampSent);
         } else {
-            networkContent = ChatUtils.buildCpimMessage(from, ChatUtils.ANOMYNOUS_URI, fileInfo,
+            networkContent = ChatUtils.buildCpimMessage(from, ChatUtils.ANONYMOUS_URI, fileInfo,
                     FileTransferHttpInfoDocument.MIME_TYPE, timestampSent);
         }
         sendDataChunks(IdGenerator.generateMessageID(), networkContent, CpimMessage.MIME_TYPE,

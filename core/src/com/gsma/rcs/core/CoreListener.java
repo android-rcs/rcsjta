@@ -498,7 +498,7 @@ public interface CoreListener {
     public void tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(String chatId);
 
     /**
-     * Handle one-one chat messgae delivery expiration
+     * Handle one-one chat message delivery expiration
      * 
      * @param intent
      */

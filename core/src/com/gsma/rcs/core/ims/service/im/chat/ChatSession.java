@@ -24,7 +24,6 @@ package com.gsma.rcs.core.ims.service.im.chat;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
@@ -75,7 +74,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
-
 import javax2.sip.message.Response;
 
 /**
@@ -974,8 +972,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     public void sendMsrpMessageDeliveryStatus(ContactId contact, String msgId, String status,
             long timestamp) throws MsrpException {
         // Send status in CPIM + IMDN headers
-        String from = ChatUtils.ANOMYNOUS_URI;
-        String to = ChatUtils.ANOMYNOUS_URI;
+        String from = ChatUtils.ANONYMOUS_URI;
+        String to = ChatUtils.ANONYMOUS_URI;
         sendMsrpMessageDeliveryStatus(from, to, msgId, status, timestamp);
     }
 

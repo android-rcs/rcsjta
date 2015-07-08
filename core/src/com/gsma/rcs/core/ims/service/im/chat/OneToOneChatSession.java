@@ -123,8 +123,8 @@ public abstract class OneToOneChatSession extends ChatSession {
      */
     @Override
     public void sendChatMessage(ChatMessage msg) throws MsrpException {
-        String from = ChatUtils.ANOMYNOUS_URI;
-        String to = ChatUtils.ANOMYNOUS_URI;
+        String from = ChatUtils.ANONYMOUS_URI;
+        String to = ChatUtils.ANONYMOUS_URI;
         String msgId = msg.getMessageId();
         String networkContent;
         String mimeType = msg.getMimeType();
@@ -172,16 +172,16 @@ public abstract class OneToOneChatSession extends ChatSession {
         mMessagingLog.setFileTransferTimestamps(fileTransferId, timestamp, timestampSent);
 
         if (displayedReportEnabled) {
-            networkContent = ChatUtils.buildCpimMessageWithImdn(ChatUtils.ANOMYNOUS_URI,
-                    ChatUtils.ANOMYNOUS_URI, fileTransferId, fileInfo,
+            networkContent = ChatUtils.buildCpimMessageWithImdn(ChatUtils.ANONYMOUS_URI,
+                    ChatUtils.ANONYMOUS_URI, fileTransferId, fileInfo,
                     FileTransferHttpInfoDocument.MIME_TYPE, timestampSent);
         } else if (deliveredReportEnabled) {
             networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(
-                    ChatUtils.ANOMYNOUS_URI, ChatUtils.ANOMYNOUS_URI, fileTransferId, fileInfo,
+                    ChatUtils.ANONYMOUS_URI, ChatUtils.ANONYMOUS_URI, fileTransferId, fileInfo,
                     FileTransferHttpInfoDocument.MIME_TYPE, timestampSent);
         } else {
-            networkContent = ChatUtils.buildCpimMessage(ChatUtils.ANOMYNOUS_URI,
-                    ChatUtils.ANOMYNOUS_URI, fileInfo, FileTransferHttpInfoDocument.MIME_TYPE,
+            networkContent = ChatUtils.buildCpimMessage(ChatUtils.ANONYMOUS_URI,
+                    ChatUtils.ANONYMOUS_URI, fileInfo, FileTransferHttpInfoDocument.MIME_TYPE,
                     timestampSent);
         }
         sendDataChunks(IdGenerator.generateMessageID(), networkContent, CpimMessage.MIME_TYPE,

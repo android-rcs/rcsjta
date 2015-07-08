@@ -183,14 +183,14 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
         String msgId = getFileTransferId();
 
         if (mImdnManager.isRequestGroupDeliveryDisplayedReportsEnabled()) {
-            networkContent = ChatUtils.buildCpimMessageWithImdn(from, ChatUtils.ANOMYNOUS_URI,
+            networkContent = ChatUtils.buildCpimMessageWithImdn(from, ChatUtils.ANONYMOUS_URI,
                     msgId, mFileInfo, FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);
         } else if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
             networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from,
-                    ChatUtils.ANOMYNOUS_URI, msgId, mFileInfo,
+                    ChatUtils.ANONYMOUS_URI, msgId, mFileInfo,
                     FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);
         } else {
-            networkContent = ChatUtils.buildCpimMessage(from, ChatUtils.ANOMYNOUS_URI, mFileInfo,
+            networkContent = ChatUtils.buildCpimMessage(from, ChatUtils.ANONYMOUS_URI, mFileInfo,
                     FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);
         }
 

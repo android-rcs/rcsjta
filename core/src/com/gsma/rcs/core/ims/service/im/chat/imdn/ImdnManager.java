@@ -212,8 +212,8 @@ public class ImdnManager extends Thread {
             }
 
             // Create CPIM/IDMN document
-            String from = ChatUtils.ANOMYNOUS_URI;
-            String to = ChatUtils.ANOMYNOUS_URI;
+            String from = ChatUtils.ANONYMOUS_URI;
+            String to = ChatUtils.ANONYMOUS_URI;
             /* Timestamp for IMDN datetime */
             String imdn = ChatUtils.buildImdnDeliveryReport(deliveryStatus.getMsgId(),
                     deliveryStatus.getStatus(), deliveryStatus.getTimestamp());
