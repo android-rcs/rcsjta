@@ -41,10 +41,13 @@ import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.api.OneToOneFileTransferImpl;
 import com.gsma.rcs.utils.IdGenerator;
+import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.contact.ContactId;
 
 import java.util.List;
+
+import javax2.sip.message.Response;
 
 /**
  * Abstract 1-1 chat session
@@ -56,6 +59,9 @@ public abstract class OneToOneChatSession extends ChatSession {
      * Boundary tag
      */
     private final static String BOUNDARY_TAG = "boundary1";
+
+    private static final Logger sLogger = Logger.getLogger(OneToOneChatSession.class
+            .getSimpleName());
 
     /**
      * Constructor
@@ -285,9 +291,74 @@ public abstract class OneToOneChatSession extends ChatSession {
     @Override
     public void msrpTransferError(String msgId, String error,
             MsrpSession.TypeMsrpChunk typeMsrpChunk) {
-        super.msrpTransferError(msgId, error, typeMsrpChunk);
+        if (isSessionInterrupted()) {
+            return;
+        }
+        if (sLogger.isActivated()) {
+            sLogger.info(new StringBuilder("Data transfer error ").append(error)
+                    .append(" for message ").append(msgId).append(" (MSRP chunk type: ")
+                    .append(typeMsrpChunk).append(")").toString());
+        }
 
-        // Request capabilities to the remote
+        ContactId remote = getRemoteContact();
+        if (TypeMsrpChunk.MessageDeliveredReport.equals(typeMsrpChunk)) {
+            for (ImsSessionListener listener : getListeners()) {
+                ((OneToOneChatSessionListener) listener).handleDeliveryReportSendViaMsrpFailure(
+                        msgId, remote, typeMsrpChunk);
+            }
+        } else if (TypeMsrpChunk.MessageDisplayedReport.equals(typeMsrpChunk)) {
+            for (ImsSessionListener listener : getListeners()) {
+                ((OneToOneChatSessionListener) listener).handleDeliveryReportSendViaMsrpFailure(
+                        msgId, remote, typeMsrpChunk);
+            }
+        } else if ((msgId != null) && TypeMsrpChunk.TextMessage.equals(typeMsrpChunk)) {
+            for (ImsSessionListener listener : getListeners()) {
+                ImdnDocument imdn = new ImdnDocument(msgId, ImdnDocument.DELIVERY_NOTIFICATION,
+                        ImdnDocument.DELIVERY_STATUS_FAILED, ImdnDocument.IMDN_DATETIME_NOT_SET);
+                ContactId contact = null;
+                ((ChatSessionListener) listener).handleMessageDeliveryStatus(contact, imdn);
+            }
+        } else {
+            // do nothing
+            sLogger.error(new StringBuilder("MSRP transfer error not handled for message '")
+                    .append(msgId).append("' and chunk type : '").append(typeMsrpChunk)
+                    .append("'!").toString());
+        }
+
+        int errorCode;
+
+        if ((error != null)
+                && (error.contains(String.valueOf(Response.REQUEST_ENTITY_TOO_LARGE)) || error
+                        .contains(String.valueOf(Response.REQUEST_TIMEOUT)))) {
+            /*
+             * Session should not be torn down immediately as there may be more errors to come but
+             * as errors occurred we shouldn't use it for sending any longer. RFC 4975 408: An
+             * endpoint MUST treat a 408 response in the same manner as it would treat a local
+             * timeout. 413: If a message sender receives a 413 in a response, or in a REPORT
+             * request, it MUST NOT send any further chunks in the message, that is, any further
+             * chunks with the same Message-ID value. If the sender receives the 413 while in the
+             * process of sending a chunk, and the chunk is interruptible, the sender MUST interrupt
+             * it.
+             */
+
+            errorCode = ChatError.MEDIA_SESSION_BROKEN;
+        } else {
+            /*
+             * Default error; used e.g. for 481 or any other error RFC 4975 481: A 481 response
+             * indicates that the indicated session does not exist. The sender should terminate the
+             * session.
+             */
+
+            errorCode = ChatError.MEDIA_SESSION_FAILED;
+        }
+
+        ChatMessage message = getFirstMessage();
+        ChatError chatError = new ChatError(errorCode, error);
+        for (ImsSessionListener listener : getListeners()) {
+            ((ChatSessionListener) listener).handleImError(chatError, message);
+        }
+
+        /* Request capabilities to the remote */
         getImsService().getImsModule().getCapabilityService()
                 .requestContactCapabilities(getRemoteContact());
 

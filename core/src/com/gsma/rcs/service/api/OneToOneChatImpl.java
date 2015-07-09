@@ -24,6 +24,7 @@ package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -36,6 +37,7 @@ import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatMessageSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.history.HistoryLog;
 import com.gsma.rcs.provider.messaging.ChatMessagePersistedStorageAccessor;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -71,6 +73,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
 
     private final MessagingLog mMessagingLog;
 
+    private final HistoryLog mHistoryLog;
+
     private final ChatServiceImpl mChatService;
 
     private final FileTransferServiceImpl mFileTransferService;
@@ -100,6 +104,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * @param broadcaster IChatEventBroadcaster
      * @param imService InstantMessagingService
      * @param messagingLog MessagingLog
+     * @param historyLog HistoryLog
      * @param rcsSettings RcsSettings
      * @param chatService ChatServiceImpl
      * @param fileTransferService FileTransferServiceImpl
@@ -108,14 +113,15 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * @param undeliveredImManager OneToOneUndeliveredImManager
      */
     public OneToOneChatImpl(ContactId contact, IOneToOneChatEventBroadcaster broadcaster,
-            InstantMessagingService imService, MessagingLog messagingLog, RcsSettings rcsSettings,
-            ChatServiceImpl chatService, FileTransferServiceImpl fileTransferService,
-            ContactManager contactManager, Core core,
+            InstantMessagingService imService, MessagingLog messagingLog, HistoryLog historyLog,
+            RcsSettings rcsSettings, ChatServiceImpl chatService,
+            FileTransferServiceImpl fileTransferService, ContactManager contactManager, Core core,
             OneToOneUndeliveredImManager undeliveredImManager) {
         mContact = contact;
         mBroadcaster = broadcaster;
         mImService = imService;
         mMessagingLog = messagingLog;
+        mHistoryLog = historyLog;
         mChatService = chatService;
         mFileTransferService = fileTransferService;
         mRcsSettings = rcsSettings;
@@ -1057,6 +1063,32 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             String apiMimeType = mMessagingLog.getMessageMimeType(msgId);
             mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId,
                     Status.RECEIVED, ReasonCode.UNSPECIFIED);
+        }
+    }
+
+    @Override
+    public void handleDeliveryReportSendViaMsrpFailure(String msgId, ContactId contact,
+            TypeMsrpChunk typeMsrpChunk) {
+        if (TypeMsrpChunk.MessageDeliveredReport.equals(typeMsrpChunk)) {
+            if (sLogger.isActivated()) {
+                sLogger.info(new StringBuilder(
+                        "Failed to send delivered message via MSRP, so try to send via SIP message to ")
+                        .append(contact).append("(msgId = ").append(msgId).toString());
+            }
+            /* Send the delivered notification by SIP */
+            ContactId remote = getRemoteContact();
+            mImService.getImdnManager().sendMessageDeliveryStatus(remote.toString(), remote, msgId,
+                    ImdnDocument.DELIVERY_STATUS_DELIVERED, System.currentTimeMillis());
+        } else if (TypeMsrpChunk.MessageDisplayedReport.equals(typeMsrpChunk)) {
+            if (sLogger.isActivated()) {
+                sLogger.info(new StringBuilder(
+                        "Failed to send displayed message via MSRP, so try to send via SIP message to ")
+                        .append(contact).append("(msgId = ").append(msgId).toString());
+            }
+            /* Send the displayed notification by SIP */
+            ContactId remote = getRemoteContact();
+            mImService.getImdnManager().sendMessageDeliveryStatus(remote.toString(), remote, msgId,
+                    ImdnDocument.DELIVERY_STATUS_DISPLAYED, System.currentTimeMillis());
         }
     }
 }

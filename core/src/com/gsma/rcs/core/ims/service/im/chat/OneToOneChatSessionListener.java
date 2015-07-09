@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.service.im.chat;
 
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.services.rcs.contact.ContactId;
 
 /**
@@ -42,4 +43,14 @@ public interface OneToOneChatSessionListener extends ChatSessionListener {
      * @param contact Remote contact
      */
     public void handleSessionAutoAccepted(ContactId contact);
+
+    /**
+     * Handle Delivery report send via MSRP Failure
+     * 
+     * @param msgId
+     * @param contact
+     * @param TypeMsrpChunk
+     */
+    public void handleDeliveryReportSendViaMsrpFailure(String msgId, ContactId contact,
+            TypeMsrpChunk chunktype);
 }

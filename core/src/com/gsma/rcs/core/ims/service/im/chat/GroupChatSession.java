@@ -424,28 +424,33 @@ public abstract class GroupChatSession extends ChatSession {
     @Override
     public void sendMsrpMessageDeliveryStatus(ContactId remote, String msgId, String status,
             long timestamp) throws MsrpException {
-        // Send status in CPIM + IMDN headers
-        String to = (remote != null) ? remote.toString() : ChatUtils.ANONYMOUS_URI;
-
-        sendMsrpMessageDeliveryStatus(null, to, msgId, status, timestamp);
+        sendMsrpMessageDeliveryStatus(ImsModule.IMS_USER_PROFILE.getPublicUri(), remote.toString(),
+                msgId, status, timestamp);
     }
 
     @Override
     public void sendMsrpMessageDeliveryStatus(String fromUri, String toUri, String msgId,
             String status, long timestamp) throws MsrpException {
         if (sLogger.isActivated()) {
-            sLogger.debug("Send delivery status delivered for message " + msgId);
+            sLogger.debug(new StringBuilder("Send delivery status ").append(status)
+                    .append(" for message ").append(msgId).toString());
         }
         // Send status in CPIM + IMDN headers
         /* Timestamp for IMDN datetime */
         String imdn = ChatUtils.buildImdnDeliveryReport(msgId, status, timestamp);
         /* Timestamp for CPIM DateTime */
         String content = ChatUtils.buildCpimDeliveryReport(
-                ImsModule.IMS_USER_PROFILE.getPublicUri(), toUri, imdn, System.currentTimeMillis());
+                fromUri, toUri, imdn, System.currentTimeMillis());
 
         // Send data
+        TypeMsrpChunk typeMsrpChunk = TypeMsrpChunk.OtherMessageDeliveredReportStatus;
+        if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equalsIgnoreCase(status)) {
+            typeMsrpChunk = TypeMsrpChunk.MessageDisplayedReport;
+        } else if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equalsIgnoreCase(status)) {
+            typeMsrpChunk = TypeMsrpChunk.MessageDeliveredReport;
+        }
         sendDataChunks(IdGenerator.generateMessageID(), content, CpimMessage.MIME_TYPE,
-                TypeMsrpChunk.MessageDeliveredReport);
+                typeMsrpChunk);
         if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
             if (mMessagingLog.getMessageChatId(msgId) != null) {
                 for (ImsSessionListener listener : getListeners()) {
@@ -882,4 +887,72 @@ public abstract class GroupChatSession extends ChatSession {
         mImsModule.getInstantMessagingService().removeSession(this);
     }
 
+    @Override
+    public void msrpTransferError(String msgId, String error, TypeMsrpChunk typeMsrpChunk) {
+        if (isSessionInterrupted()) {
+            return;
+        }
+        if (sLogger.isActivated()) {
+            sLogger.info(new StringBuilder("Data transfer error ").append(error)
+                    .append(" for message ").append(msgId).append(" (MSRP chunk type: ")
+                    .append(typeMsrpChunk).append(")").toString());
+        }
+
+        String chatId = getContributionID();
+        if (TypeMsrpChunk.MessageDeliveredReport.equals(typeMsrpChunk)) {
+            for (ImsSessionListener listener : getListeners()) {
+                ((GroupChatSessionListener) listener).handleDeliveryReportSendViaMsrpFailure(msgId,
+                        chatId, typeMsrpChunk);
+            }
+        } else if (TypeMsrpChunk.MessageDisplayedReport.equals(typeMsrpChunk)) {
+            for (ImsSessionListener listener : getListeners()) {
+                ((GroupChatSessionListener) listener).handleDeliveryReportSendViaMsrpFailure(msgId,
+                        chatId, typeMsrpChunk);
+            }
+        } else if ((msgId != null) && TypeMsrpChunk.TextMessage.equals(typeMsrpChunk)) {
+            for (ImsSessionListener listener : getListeners()) {
+                ImdnDocument imdn = new ImdnDocument(msgId, ImdnDocument.DELIVERY_NOTIFICATION,
+                        ImdnDocument.DELIVERY_STATUS_FAILED, ImdnDocument.IMDN_DATETIME_NOT_SET);
+                ContactId contact = null;
+                ((ChatSessionListener) listener).handleMessageDeliveryStatus(contact, imdn);
+            }
+        } else {
+            // do nothing
+            sLogger.error(new StringBuilder("MSRP transfer error not handled for message '")
+                    .append(msgId).append("' and chunk type : '").append(typeMsrpChunk)
+                    .append("'!").toString());
+        }
+
+        int errorCode;
+
+        if ((error != null)
+                && (error.contains(String.valueOf(Response.REQUEST_ENTITY_TOO_LARGE)) || error
+                        .contains(String.valueOf(Response.REQUEST_TIMEOUT)))) {
+            /*
+             * Session should not be torn down immediately as there may be more errors to come but
+             * as errors occurred we shouldn't use it for sending any longer RFC 4975 408: An
+             * endpoint MUST treat a 408 response in the same manner as it would treat a local
+             * timeout. 413: If a message sender receives a 413 in a response, or in a REPORT
+             * request, it MUST NOT send any further chunks in the message, that is, any further
+             * chunks with the same Message-ID value. If the sender receives the 413 while in the
+             * process of sending a chunk, and the chunk is interruptible, the sender MUST interrupt
+             * it.
+             */
+
+            errorCode = ChatError.MEDIA_SESSION_BROKEN;
+        } else {
+            /*
+             * Default error; used e.g. for 481 or any other error RFC 4975 481: A 481 response
+             * indicates that the indicated session does not exist. The sender should terminate the
+             * session.
+             */
+
+            errorCode = ChatError.MEDIA_SESSION_FAILED;
+        }
+
+        ChatError chatError = new ChatError(errorCode, error);
+        for (ImsSessionListener listener : getListeners()) {
+            ((ChatSessionListener) listener).handleImError(chatError, null);
+        }
+    }
 }

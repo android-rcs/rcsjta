@@ -375,9 +375,9 @@ public class RcsCoreService extends Service implements CoreListener {
             IPCallService ipCallService = core.getIPCallService();
             SipService sipService = core.getSipService();
 
-            mChatApi = new ChatServiceImpl(imService, mMessagingLog, mRcsSettings, mContactManager,
-                    core, mLocalContentResolver, mImOperationExecutor, mOperationLock, mFtApi,
-                    mOneToOneUndeliveredImManager);
+            mChatApi = new ChatServiceImpl(imService, mMessagingLog, mHistoryLog, mRcsSettings,
+                    mContactManager, core, mLocalContentResolver, mImOperationExecutor, mOperationLock,
+                    mFtApi, mOneToOneUndeliveredImManager);
             mFtApi = new FileTransferServiceImpl(imService, mChatApi, mMessagingLog, mRcsSettings,
                     mContactManager, core, mLocalContentResolver, mImOperationExecutor,
                     mOperationLock, mOneToOneUndeliveredImManager);

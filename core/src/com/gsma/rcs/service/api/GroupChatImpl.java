@@ -25,6 +25,7 @@ package com.gsma.rcs.service.api;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.CoreListener;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
@@ -38,6 +39,7 @@ import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.history.HistoryLog;
 import com.gsma.rcs.provider.messaging.ChatMessagePersistedStorageAccessor;
 import com.gsma.rcs.provider.messaging.GroupChatPersistedStorageAccessor;
 import com.gsma.rcs.provider.messaging.MessagingLog;
@@ -91,6 +93,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     private final MessagingLog mMessagingLog;
 
+    private final HistoryLog mHistoryLog;
+
     private final Core mCore;
 
     private boolean mGroupChatRejoinedAsPartOfSendOperation = false;
@@ -124,12 +128,13 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * @param contactManager ContactManager
      * @param chatService ChatServiceImpl
      * @param messagingLog MessagingLog
+     * @param historyLog HistoryLog
      * @param core Core
      */
     public GroupChatImpl(String chatId, IGroupChatEventBroadcaster broadcaster,
             InstantMessagingService imService, GroupChatPersistedStorageAccessor persistentStorage,
             RcsSettings rcsSettings, ContactManager contactManager, ChatServiceImpl chatService,
-            MessagingLog messagingLog, Core core) {
+            MessagingLog messagingLog, HistoryLog historyLog, Core core) {
         mChatId = chatId;
         mBroadcaster = broadcaster;
         mImService = imService;
@@ -138,6 +143,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         mRcsSettings = rcsSettings;
         mContactManager = contactManager;
         mMessagingLog = messagingLog;
+        mHistoryLog = historyLog;
         mCore = core;
     }
 
@@ -1834,6 +1840,31 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             String apiMimeType = mMessagingLog.getMessageMimeType(msgId);
             mBroadcaster.broadcastMessageStatusChanged(mChatId, apiMimeType, msgId,
                     Content.Status.RECEIVED, Content.ReasonCode.UNSPECIFIED);
+        }
+    }
+
+    @Override
+    public void handleDeliveryReportSendViaMsrpFailure(String msgId, String chatId,
+            TypeMsrpChunk typeMsrpChunk) {
+        ContactId remote = mHistoryLog.getRemoteContact(msgId);
+        if (TypeMsrpChunk.MessageDeliveredReport.equals(typeMsrpChunk)) {
+            if (sLogger.isActivated()) {
+                sLogger.info(new StringBuilder(
+                        "Failed to send delivered message via MSRP, so try to send via SIP message to ")
+                        .append(remote).append("(msgId = ").append(msgId).toString());
+            }
+            /* Send the delivered notification by SIP */
+            mImService.getImdnManager().sendMessageDeliveryStatus(chatId, remote, msgId,
+                    ImdnDocument.DELIVERY_STATUS_DELIVERED, System.currentTimeMillis());
+        } else if (TypeMsrpChunk.MessageDisplayedReport.equals(typeMsrpChunk)) {
+            if (sLogger.isActivated()) {
+                sLogger.info(new StringBuilder(
+                        "Failed to send displayed message via MSRP, so try to send via SIP message to ")
+                        .append(remote).append("(msgId = ").append(msgId).toString());
+            }
+            /* Send the displayed notification by SIP */
+            mImService.getImdnManager().sendMessageDeliveryStatus(chatId, remote, msgId,
+                    ImdnDocument.DELIVERY_STATUS_DISPLAYED, System.currentTimeMillis());
         }
     }
 }

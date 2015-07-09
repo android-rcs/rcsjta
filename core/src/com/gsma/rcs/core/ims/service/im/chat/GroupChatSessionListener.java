@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.service.im.chat;
 
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
@@ -72,4 +73,14 @@ public interface GroupChatSessionListener extends ChatSessionListener {
      */
     public void handleParticipantUpdates(Map<ContactId, ParticipantStatus> updatedParticipants,
             Map<ContactId, ParticipantStatus> allParticipants);
+
+    /**
+     * Handle Delivery report send via MSRP Failure
+     * 
+     * @param msgId
+     * @param chatId
+     * @param chunktype
+     */
+    public void handleDeliveryReportSendViaMsrpFailure(String msgId, String chatId,
+            TypeMsrpChunk chunktype);
 }
