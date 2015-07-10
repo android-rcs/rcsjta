@@ -152,7 +152,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                         .append(msg.getMessageId()).append(" and mimeType ")
                         .append(msg.getMimeType()).toString());
             }
-            mImService.acceptAllStoreAndForwardChatSessionsIfSuchExists(mContact);
+            mImService.acceptStoreAndForwardMessageSessionIfSuchExists(mContact);
             final OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
             if (session == null) {
                 if (!mImService.isChatSessionAvailable()) {
@@ -216,7 +216,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                 sLogger.debug(new StringBuilder("Resend chat message, msgId ").append(msgId)
                         .append(" and mimeType ").append(mimeType).toString());
             }
-            mImService.acceptAllStoreAndForwardChatSessionsIfSuchExists(mContact);
+            mImService.acceptStoreAndForwardMessageSessionIfSuchExists(mContact);
             final OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
             if (session == null) {
                 if (!mImService.isChatSessionAvailable()) {
@@ -512,7 +512,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(mimeType);
         mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId, Status.SENDING,
                 ReasonCode.UNSPECIFIED);
-        mImService.acceptAllStoreAndForwardChatSessionsIfSuchExists(mContact);
+        mImService.acceptStoreAndForwardMessageSessionIfSuchExists(mContact);
         OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
         if (session == null) {
             if (mImService.isChatSessionAvailable()) {
@@ -577,7 +577,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     public void dequeueOneToOneFileInfo(String fileTransferId, String fileInfo,
             boolean displayReportsEnabled, boolean deliverReportsEnabled,
             OneToOneFileTransferImpl oneToOneFileTransfer) throws MsrpException {
-        mImService.acceptAllStoreAndForwardChatSessionsIfSuchExists(mContact);
+        mImService.acceptStoreAndForwardMessageSessionIfSuchExists(mContact);
         OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
         if (session == null) {
             if (mImService.isChatSessionAvailable()) {
@@ -654,7 +654,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             switch (imSessionStartMode) {
                 case ON_OPENING:
                 case ON_COMPOSING:
-                    mImService.acceptAllStoreAndForwardChatSessionsIfSuchExists(mContact);
+                    mImService.acceptStoreAndForwardMessageSessionIfSuchExists(mContact);
                     break;
                 default:
                     break;
@@ -731,7 +731,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         try {
             ImSessionStartMode imSessionStartMode = mRcsSettings.getImSessionStartMode();
             if (ImSessionStartMode.ON_OPENING == imSessionStartMode) {
-                mImService.acceptAllStoreAndForwardChatSessionsIfSuchExists(mContact);
+                mImService.acceptStoreAndForwardMessageSessionIfSuchExists(mContact);
             }
             final OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
             if (session == null) {

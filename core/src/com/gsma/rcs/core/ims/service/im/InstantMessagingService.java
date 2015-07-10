@@ -1825,7 +1825,7 @@ public class InstantMessagingService extends ImsService {
      * 
      * @param remoteContact
      */
-    private void acceptStoreAndForwardMessageSessionIfSuchExists(ContactId remoteContact) {
+    public void acceptStoreAndForwardMessageSessionIfSuchExists(ContactId remoteContact) {
         TerminatingStoreAndForwardOneToOneChatMessageSession session = getStoreAndForwardMsgSession(remoteContact);
         if (session == null) {
             return;
@@ -1838,37 +1838,6 @@ public class InstantMessagingService extends ImsService {
                     .concat(remoteContact.toString()));
         }
         session.acceptSession();
-    }
-
-    /**
-     * Accept store and forward notification session with this remoteContact that is not yet
-     * accepted.
-     * 
-     * @param remoteContact
-     */
-    private void acceptStoreAndForwardNotifSessionIfSuchExists(ContactId remoteContact) {
-        TerminatingStoreAndForwardOneToOneChatNotificationSession session = getStoreAndForwardNotifSession(remoteContact);
-        if (session == null) {
-            return;
-        }
-        if (session.getDialogPath().isSessionEstablished()) {
-            return;
-        }
-        if (sLogger.isActivated()) {
-            sLogger.debug("Accept store and forward notification session with contact "
-                    .concat(remoteContact.toString()));
-        }
-        session.acceptSession();
-    }
-
-    /**
-     * Accept all store and forward chat sessions with this remoteContact that are not yet accepted.
-     * 
-     * @param remoteContact
-     */
-    public void acceptAllStoreAndForwardChatSessionsIfSuchExists(ContactId remoteContact) {
-        acceptStoreAndForwardMessageSessionIfSuchExists(remoteContact);
-        acceptStoreAndForwardNotifSessionIfSuchExists(remoteContact);
     }
 
     /**
