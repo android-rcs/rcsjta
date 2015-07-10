@@ -609,93 +609,100 @@ public class MsrpSession {
     // Changed by Deutsche Telekom
     private void sendMsrpSendRequest(String txId, String to, String from, String msrpMsgId,
             String contentType, int dataSize, byte data[], long firstByte, long lastByte,
-            long totalSize) throws MsrpException, IOException {
+            long totalSize) throws MsrpException {
         boolean isLastChunk = (lastByte == totalSize);
+        try {
+            // Create request
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream(4000);
+            buffer.reset();
+            buffer.write(MsrpConstants.MSRP_HEADER.getBytes(UTF8));
+            buffer.write(MsrpConstants.CHAR_SP);
+            buffer.write(txId.getBytes(UTF8));
+            buffer.write((" " + MsrpConstants.METHOD_SEND).getBytes(UTF8));
+            buffer.write(NEW_LINE);
 
-        // Create request
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream(4000);
-        buffer.reset();
-        buffer.write(MsrpConstants.MSRP_HEADER.getBytes(UTF8));
-        buffer.write(MsrpConstants.CHAR_SP);
-        buffer.write(txId.getBytes(UTF8));
-        buffer.write((" " + MsrpConstants.METHOD_SEND).getBytes(UTF8));
-        buffer.write(NEW_LINE);
-
-        String toHeader = MsrpConstants.HEADER_TO_PATH + ": " + to + MsrpConstants.NEW_LINE;
-        buffer.write(toHeader.getBytes(UTF8));
-        String fromHeader = MsrpConstants.HEADER_FROM_PATH + ": " + from + MsrpConstants.NEW_LINE;
-        buffer.write(fromHeader.getBytes(UTF8));
-        // Changed by Deutsche Telekom
-        String msgIdHeader = MsrpConstants.HEADER_MESSAGE_ID + ": " + msrpMsgId
-                + MsrpConstants.NEW_LINE;
-        buffer.write(msgIdHeader.getBytes(UTF8));
-
-        // Write byte range
-        String byteRange = MsrpConstants.HEADER_BYTE_RANGE + ": " + firstByte + "-" + lastByte
-                + "/" + totalSize + MsrpConstants.NEW_LINE;
-        buffer.write(byteRange.getBytes(UTF8));
-
-        // Write optional headers
-        // Changed by Deutsche Telekom
-        // According with GSMA guidelines
-        if (failureReportOption) {
-            String header = MsrpConstants.HEADER_FAILURE_REPORT + ": yes" + MsrpConstants.NEW_LINE;
-            buffer.write(header.getBytes(UTF8));
-        }
-        if (successReportOption) {
-            String header = MsrpConstants.HEADER_SUCCESS_REPORT + ": yes" + MsrpConstants.NEW_LINE;
-            buffer.write(header.getBytes(UTF8));
-        }
-
-        // Write content type
-        if (contentType != null) {
-            String content = MsrpConstants.HEADER_CONTENT_TYPE + ": " + contentType
+            String toHeader = MsrpConstants.HEADER_TO_PATH + ": " + to + MsrpConstants.NEW_LINE;
+            buffer.write(toHeader.getBytes(UTF8));
+            String fromHeader = MsrpConstants.HEADER_FROM_PATH + ": " + from
                     + MsrpConstants.NEW_LINE;
-            buffer.write(content.getBytes(UTF8));
-        }
+            buffer.write(fromHeader.getBytes(UTF8));
+            // Changed by Deutsche Telekom
+            String msgIdHeader = MsrpConstants.HEADER_MESSAGE_ID + ": " + msrpMsgId
+                    + MsrpConstants.NEW_LINE;
+            buffer.write(msgIdHeader.getBytes(UTF8));
 
-        // Write data
-        if (data != null) {
-            buffer.write(NEW_LINE);
-            buffer.write(data, 0, dataSize);
-            buffer.write(NEW_LINE);
-        }
+            // Write byte range
+            String byteRange = MsrpConstants.HEADER_BYTE_RANGE + ": " + firstByte + "-" + lastByte
+                    + "/" + totalSize + MsrpConstants.NEW_LINE;
+            buffer.write(byteRange.getBytes(UTF8));
 
-        // Write end of request
-        buffer.write(MsrpConstants.END_MSRP_MSG.getBytes(UTF8));
-        buffer.write(txId.getBytes(UTF8));
-        if (isLastChunk) {
-            // '$' -> last chunk
-            buffer.write(MsrpConstants.FLAG_LAST_CHUNK);
-        } else {
-            // '+' -> more chunk
-            buffer.write(MsrpConstants.FLAG_MORE_CHUNK);
-        }
-        buffer.write(NEW_LINE);
-
-        // Send chunk
-        if (failureReportOption) {
-            if (msrpTransaction != null) {
-                msrpTransaction.handleRequest();
-                requestTransaction = null;
-            } else {
-                requestTransaction = new RequestTransaction(mRcsSettings);
+            // Write optional headers
+            // Changed by Deutsche Telekom
+            // According with GSMA guidelines
+            if (failureReportOption) {
+                String header = MsrpConstants.HEADER_FAILURE_REPORT + ": yes"
+                        + MsrpConstants.NEW_LINE;
+                buffer.write(header.getBytes(UTF8));
             }
-            connection.sendChunk(buffer.toByteArray());
-            buffer.close();
-            if (requestTransaction != null) {
-                requestTransaction.waitResponse();
-                if (!requestTransaction.isResponseReceived()) {
-                    throw new MsrpException("timeout");
+            if (successReportOption) {
+                String header = MsrpConstants.HEADER_SUCCESS_REPORT + ": yes"
+                        + MsrpConstants.NEW_LINE;
+                buffer.write(header.getBytes(UTF8));
+            }
+
+            // Write content type
+            if (contentType != null) {
+                String content = MsrpConstants.HEADER_CONTENT_TYPE + ": " + contentType
+                        + MsrpConstants.NEW_LINE;
+                buffer.write(content.getBytes(UTF8));
+            }
+
+            // Write data
+            if (data != null) {
+                buffer.write(NEW_LINE);
+                buffer.write(data, 0, dataSize);
+                buffer.write(NEW_LINE);
+            }
+
+            // Write end of request
+            buffer.write(MsrpConstants.END_MSRP_MSG.getBytes(UTF8));
+            buffer.write(txId.getBytes(UTF8));
+            if (isLastChunk) {
+                // '$' -> last chunk
+                buffer.write(MsrpConstants.FLAG_LAST_CHUNK);
+            } else {
+                // '+' -> more chunk
+                buffer.write(MsrpConstants.FLAG_MORE_CHUNK);
+            }
+            buffer.write(NEW_LINE);
+
+            // Send chunk
+            if (failureReportOption) {
+                if (msrpTransaction != null) {
+                    msrpTransaction.handleRequest();
+                    requestTransaction = null;
+                } else {
+                    requestTransaction = new RequestTransaction(mRcsSettings);
+                }
+                connection.sendChunk(buffer.toByteArray());
+                buffer.close();
+                if (requestTransaction != null) {
+                    requestTransaction.waitResponse();
+                    if (!requestTransaction.isResponseReceived()) {
+                        throw new MsrpException("timeout");
+                    }
+                }
+            } else {
+                connection.sendChunk(buffer.toByteArray());
+                buffer.close();
+                if (msrpTransaction != null) {
+                    msrpTransaction.handleRequest();
                 }
             }
-        } else {
-            connection.sendChunk(buffer.toByteArray());
-            buffer.close();
-            if (msrpTransaction != null) {
-                msrpTransaction.handleRequest();
-            }
+        } catch (IOException e) {
+            throw new MsrpException("Failed to read chunk data!", e);
         }
+
     }
 
     /**
@@ -710,39 +717,44 @@ public class MsrpSession {
      */
     // Changed by Deutsche Telekom
     private void sendEmptyMsrpSendRequest(String txId, String to, String from, String msrpMsgId)
-            throws MsrpException, IOException {
-        // Create request
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream(4000);
-        buffer.reset();
-        buffer.write(MsrpConstants.MSRP_HEADER.getBytes(UTF8));
-        buffer.write(MsrpConstants.CHAR_SP);
-        buffer.write(txId.getBytes(UTF8));
-        buffer.write((" " + MsrpConstants.METHOD_SEND).getBytes(UTF8));
-        buffer.write(NEW_LINE);
+            throws MsrpException {
+        try {
+            // Create request
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream(4000);
+            buffer.reset();
+            buffer.write(MsrpConstants.MSRP_HEADER.getBytes(UTF8));
+            buffer.write(MsrpConstants.CHAR_SP);
+            buffer.write(txId.getBytes(UTF8));
+            buffer.write((" " + MsrpConstants.METHOD_SEND).getBytes(UTF8));
+            buffer.write(NEW_LINE);
 
-        String toHeader = MsrpConstants.HEADER_TO_PATH + ": " + to + MsrpConstants.NEW_LINE;
-        buffer.write(toHeader.getBytes(UTF8));
-        String fromHeader = MsrpConstants.HEADER_FROM_PATH + ": " + from + MsrpConstants.NEW_LINE;
-        buffer.write(fromHeader.getBytes(UTF8));
-        // Changed by Deutsche Telekom
-        String msgIdHeader = MsrpConstants.HEADER_MESSAGE_ID + ": " + msrpMsgId
-                + MsrpConstants.NEW_LINE;
-        buffer.write(msgIdHeader.getBytes(UTF8));
+            String toHeader = MsrpConstants.HEADER_TO_PATH + ": " + to + MsrpConstants.NEW_LINE;
+            buffer.write(toHeader.getBytes(UTF8));
+            String fromHeader = MsrpConstants.HEADER_FROM_PATH + ": " + from
+                    + MsrpConstants.NEW_LINE;
+            buffer.write(fromHeader.getBytes(UTF8));
+            // Changed by Deutsche Telekom
+            String msgIdHeader = MsrpConstants.HEADER_MESSAGE_ID + ": " + msrpMsgId
+                    + MsrpConstants.NEW_LINE;
+            buffer.write(msgIdHeader.getBytes(UTF8));
 
-        // Write end of request
-        buffer.write(MsrpConstants.END_MSRP_MSG.getBytes(UTF8));
-        buffer.write(txId.getBytes(UTF8));
-        // '$' -> last chunk
-        buffer.write(MsrpConstants.FLAG_LAST_CHUNK);
-        buffer.write(NEW_LINE);
+            // Write end of request
+            buffer.write(MsrpConstants.END_MSRP_MSG.getBytes(UTF8));
+            buffer.write(txId.getBytes(UTF8));
+            // '$' -> last chunk
+            buffer.write(MsrpConstants.FLAG_LAST_CHUNK);
+            buffer.write(NEW_LINE);
 
-        // Send chunk
-        requestTransaction = new RequestTransaction(mRcsSettings);
-        connection.sendChunkImmediately(buffer.toByteArray());
-        buffer.close();
-        requestTransaction.waitResponse();
-        if (!requestTransaction.isResponseReceived()) {
-            throw new MsrpException("timeout");
+            // Send chunk
+            requestTransaction = new RequestTransaction(mRcsSettings);
+            connection.sendChunkImmediately(buffer.toByteArray());
+            buffer.close();
+            requestTransaction.waitResponse();
+            if (!requestTransaction.isResponseReceived()) {
+                throw new MsrpException("timeout");
+            }
+        } catch (IOException e) {
+            throw new MsrpException("Failed to send empty Msrp send request!", e);
         }
     }
 
@@ -755,34 +767,38 @@ public class MsrpSession {
      * @throws IOException
      */
     private void sendMsrpResponse(String code, String txId, Hashtable<String, String> headers)
-            throws IOException {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream(4000);
-        buffer.write(MsrpConstants.MSRP_HEADER.getBytes(UTF8));
-        buffer.write(MsrpConstants.CHAR_SP);
-        buffer.write(txId.getBytes(UTF8));
-        buffer.write(MsrpConstants.CHAR_SP);
-        buffer.write(code.getBytes(UTF8));
-        buffer.write(NEW_LINE);
+            throws MsrpException {
+        try {
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream(4000);
+            buffer.write(MsrpConstants.MSRP_HEADER.getBytes(UTF8));
+            buffer.write(MsrpConstants.CHAR_SP);
+            buffer.write(txId.getBytes(UTF8));
+            buffer.write(MsrpConstants.CHAR_SP);
+            buffer.write(code.getBytes(UTF8));
+            buffer.write(NEW_LINE);
 
-        buffer.write(MsrpConstants.HEADER_TO_PATH.getBytes(UTF8));
-        buffer.write(MsrpConstants.CHAR_DOUBLE_POINT);
-        buffer.write(MsrpConstants.CHAR_SP);
-        buffer.write((headers.get(MsrpConstants.HEADER_FROM_PATH)).getBytes(UTF8));
-        buffer.write(NEW_LINE);
+            buffer.write(MsrpConstants.HEADER_TO_PATH.getBytes(UTF8));
+            buffer.write(MsrpConstants.CHAR_DOUBLE_POINT);
+            buffer.write(MsrpConstants.CHAR_SP);
+            buffer.write((headers.get(MsrpConstants.HEADER_FROM_PATH)).getBytes(UTF8));
+            buffer.write(NEW_LINE);
 
-        buffer.write(MsrpConstants.HEADER_FROM_PATH.getBytes(UTF8));
-        buffer.write(MsrpConstants.CHAR_DOUBLE_POINT);
-        buffer.write(MsrpConstants.CHAR_SP);
-        buffer.write((headers.get(MsrpConstants.HEADER_TO_PATH)).getBytes(UTF8));
-        buffer.write(NEW_LINE);
+            buffer.write(MsrpConstants.HEADER_FROM_PATH.getBytes(UTF8));
+            buffer.write(MsrpConstants.CHAR_DOUBLE_POINT);
+            buffer.write(MsrpConstants.CHAR_SP);
+            buffer.write((headers.get(MsrpConstants.HEADER_TO_PATH)).getBytes(UTF8));
+            buffer.write(NEW_LINE);
 
-        buffer.write(MsrpConstants.END_MSRP_MSG.getBytes(UTF8));
-        buffer.write(txId.getBytes(UTF8));
-        buffer.write(MsrpConstants.FLAG_LAST_CHUNK);
-        buffer.write(NEW_LINE);
+            buffer.write(MsrpConstants.END_MSRP_MSG.getBytes(UTF8));
+            buffer.write(txId.getBytes(UTF8));
+            buffer.write(MsrpConstants.FLAG_LAST_CHUNK);
+            buffer.write(NEW_LINE);
 
-        connection.sendChunk(buffer.toByteArray());
-        buffer.close();
+            connection.sendChunk(buffer.toByteArray());
+            buffer.close();
+        } catch (IOException e) {
+            throw new MsrpException("Failed to send Msrp response!", e);
+        }
     }
 
     /**

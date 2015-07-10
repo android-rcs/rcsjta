@@ -24,13 +24,13 @@ package com.gsma.rcs.core.ims.protocol.msrp;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Hashtable;
-
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.utils.logger.Logger;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Hashtable;
 
 /**
  * Chunks receiver
@@ -317,17 +317,21 @@ public class ChunkReceiver extends Thread {
      * @throws IOException
      */
     private StringBuilder readLine() throws IOException {
-        StringBuilder line = new StringBuilder();
-        int previous = -1;
-        int current = -1;
-        while ((current = mStream.read()) != -1) {
-            line.append((char) current);
-            if ((previous == MsrpConstants.CHAR_LF) && (current == MsrpConstants.CHAR_CR)) {
-                return line.delete(line.length() - 2, line.length());
+        try {
+            StringBuilder line = new StringBuilder();
+            int previous = -1;
+            int current = -1;
+            while ((current = mStream.read()) != -1) {
+                line.append((char) current);
+                if ((previous == MsrpConstants.CHAR_LF) && (current == MsrpConstants.CHAR_CR)) {
+                    return line.delete(line.length() - 2, line.length());
+                }
+                previous = current;
             }
-            previous = current;
+            return line;
+        } catch (IOException e) {
+            throw new IOException("Failed to read line!", e);
         }
-        return line;
     }
 
     /**
@@ -338,63 +342,69 @@ public class ChunkReceiver extends Thread {
      * @throws IOException
      */
     private byte[] readChunkedData(int chunkSize, String endTag) throws IOException {
-        // Read data until chunk size is reached
-        byte[] result = null;
-        if (chunkSize != 0) {
-            result = new byte[chunkSize];
-            int nbRead = 0;
-            int nbData = -1;
-            while ((nbRead < chunkSize)
-                    && ((nbData = mStream.read(result, nbRead, chunkSize - nbRead)) != -1)) {
-                nbRead += nbData;
-            }
-        } else {
-            int b;
-            int tagLength = endTag.length();
-            int[] tail = new int[tagLength];
-            byte[] buffer = new byte[mBufferLength + tagLength + 2];
+        try {
+            // Read data until chunk size is reached
+            byte[] result = null;
+            if (chunkSize != 0) {
+                result = new byte[chunkSize];
+                int nbRead = 0;
+                int nbData = -1;
+                while ((nbRead < chunkSize)
+                        && ((nbData = mStream.read(result, nbRead, chunkSize - nbRead)) != -1)) {
+                    nbRead += nbData;
+                }
+            } else {
+                int b;
+                int tagLength = endTag.length();
+                int[] tail = new int[tagLength];
+                byte[] buffer = new byte[mBufferLength + tagLength + 2];
 
-            // MSRP end tag in reverse order
-            int[] match = new int[tagLength];
-            for (int i = 0; i < tagLength; i++) {
-                match[i] = (int) endTag.charAt(tagLength - i - 1);
-            }
+                // MSRP end tag in reverse order
+                int[] match = new int[tagLength];
+                for (int i = 0; i < tagLength; i++) {
+                    match[i] = (int) endTag.charAt(tagLength - i - 1);
+                }
 
-            // Read stream byte by byte
-            for (int j = 0; (b = mStream.read()) != -1; j++) {
-                // Sliding window over last received bytes
-                System.arraycopy(tail, 0, tail, 1, tagLength - 1);
-                tail[0] = b;
+                // Read stream byte by byte
+                for (int j = 0; (b = mStream.read()) != -1; j++) {
+                    // Sliding window over last received bytes
+                    System.arraycopy(tail, 0, tail, 1, tagLength - 1);
+                    tail[0] = b;
 
-                if (b != match[0]) {
-                    buffer[j] = (byte) b;
-                } else {
-                    // First char matches; let's check for the others
-                    boolean tagFound = true;
-                    for (int k = 1; k < tagLength - 1; k++) {
-                        if (tail[k] != match[k]) {
-                            buffer[j] = (byte) b;
-                            tagFound = false;
+                    if (b != match[0]) {
+                        buffer[j] = (byte) b;
+                    } else {
+                        // First char matches; let's check for the others
+                        boolean tagFound = true;
+                        for (int k = 1; k < tagLength - 1; k++) {
+                            if (tail[k] != match[k]) {
+                                buffer[j] = (byte) b;
+                                tagFound = false;
+                                break;
+                            }
+                        }
+                        if (tagFound) {
+                            // Strip off MSRP end tag
+                            // j+1 characters read; remove tagLength characters and CR/LF plus one
+                            // extra
+                            // character for continuation flag
+                            result = new byte[j - tagLength];
+                            System.arraycopy(buffer, 0, result, 0, j - tagLength - 1); // remove tag
+                                                                                       // and
+                                                                                       // CR/LF
+
+                            // read continuation flag
+                            result[j - tagLength - 1] = (byte) mStream.read();
                             break;
                         }
                     }
-                    if (tagFound) {
-                        // Strip off MSRP end tag
-                        // j+1 characters read; remove tagLength characters and CR/LF plus one extra
-                        // character for continuation flag
-                        result = new byte[j - tagLength];
-                        System.arraycopy(buffer, 0, result, 0, j - tagLength - 1); // remove tag and
-                                                                                   // CR/LF
-
-                        // read continuation flag
-                        result[j - tagLength - 1] = (byte) mStream.read();
-                        break;
-                    }
                 }
             }
+            mStream.read(); // Read LF
+            mStream.read(); // Read CR
+            return result;
+        } catch (IOException e) {
+            throw new IOException("Failed to read chunk data!", e);
         }
-        mStream.read(); // Read LF
-        mStream.read(); // Read CR
-        return result;
     }
 }
