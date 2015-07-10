@@ -118,6 +118,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 
 import java.io.IOException;
@@ -133,6 +134,8 @@ import java.util.concurrent.Executors;
  * @author Jean-Marc AUFFRET
  */
 public class RcsCoreService extends Service implements CoreListener {
+
+    private static final String BACKGROUND_THREAD_NAME = RcsCoreService.class.getSimpleName();
 
     private final Object mOperationLock = new Object();
 
@@ -214,11 +217,6 @@ public class RcsCoreService extends Service implements CoreListener {
      */
     private boolean mRestartCoreRequested = false;
 
-    /**
-     * Handler to restart core
-     */
-    private Handler mHandler;
-
     private Context mCtx;
 
     private RcsSettings mRcsSettings;
@@ -234,6 +232,11 @@ public class RcsCoreService extends Service implements CoreListener {
     private HistoryLog mHistoryLog;
 
     private ContactManager mContactManager;
+
+    /**
+     * Handler to process messages & runnable associated with background thread.
+     */
+    private Handler mBackgroundHandler;
 
     /**
      * The logger
@@ -252,8 +255,33 @@ public class RcsCoreService extends Service implements CoreListener {
         mContactManager = ContactManager.createInstance(mCtx, mContentResolver,
                 mLocalContentResolver, mRcsSettings);
         AndroidFactory.setApplicationContext(mCtx, mRcsSettings);
-        mHandler = new Handler();
-        startCore();
+        final HandlerThread backgroundThread = new HandlerThread(BACKGROUND_THREAD_NAME);
+        backgroundThread.start();
+
+        mBackgroundHandler = new Handler(backgroundThread.getLooper());
+
+        // @FIXME: This is not the final implementation, this is certainly an improvement over the
+        // previous implementation as for now start core will run on worker thread instead of
+        // main thread. However there is a need to properly refactor the whole start & stop core
+        // functionality to properly handle simultaneous start/stop request's.
+        mBackgroundHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    startCore();
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error("Unable to start IMS core!", e);
+                }
+
+            }
+        });
     }
 
     @Override
@@ -267,8 +295,11 @@ public class RcsCoreService extends Service implements CoreListener {
             }
         }
 
-        // Stop the core
-        mHandler.post(new Runnable() {
+        // @FIXME: This is not the final implementation, this is certainly an improvement over the
+        // previous Handler implementation as for now stop core will run on worker thread instead of
+        // main thread. However there is a need to properly refactor the whole start & stop core
+        // functionality to properly handle simultaneous start/stop request's.
+        mBackgroundHandler.post(new Runnable() {
             /**
              * Processing
              */
@@ -319,9 +350,16 @@ public class RcsCoreService extends Service implements CoreListener {
         }
 
         mRestartCoreRequested = false;
+        com.gsma.services.rcs.contact.ContactUtil contactUtil = com.gsma.services.rcs.contact.ContactUtil
+                .getInstance(this);
+        if (!contactUtil.isMyCountryCodeDefined()) {
+            if (logActivated) {
+                sLogger.debug("Can't instanciate RCS core service, Reason : Country code not defined!");
+            }
+            stopSelf();
+            return;
+        }
         try {
-            testIfPossibleToReadCountryCode();
-
             IPCallHistory.createInstance(mLocalContentResolver);
 
             mHistoryLog = HistoryLog.createInstance(mLocalContentResolver);
@@ -404,9 +442,6 @@ public class RcsCoreService extends Service implements CoreListener {
                 sLogger.debug(e.getMessage());
             }
         } catch (KeyStoreException e) {
-            sLogger.error("Can't instanciate the RCS core service", e);
-            stopSelf();
-        } catch (RcsPermissionDeniedException e) {
             sLogger.error("Can't instanciate the RCS core service", e);
             stopSelf();
         }
@@ -654,10 +689,27 @@ public class RcsCoreService extends Service implements CoreListener {
         if (logActivated) {
             sLogger.debug("Start the core after previous instance is stopped");
         }
-        mHandler.post(new Runnable() {
+
+        // @FIXME: This is not the final implementation, this is certainly an improvement over the
+        // previous implementation as for now start core will run on worker thread instead of
+        // main thread. However there is a need to properly refactor the whole start & stop core
+        // functionality to properly handle simultaneous start/stop request's.
+        mBackgroundHandler.post(new Runnable() {
             @Override
             public void run() {
-                startCore();
+                try {
+                    startCore();
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error("Unable to start IMS core!", e);
+                }
+
             }
         });
     }
@@ -1103,19 +1155,4 @@ public class RcsCoreService extends Service implements CoreListener {
     public void handleChatMessageDisplayReportSent(String chatId, ContactId remote, String msgId) {
         mChatApi.handleDisplayReportSent(chatId, remote, msgId);
     }
-
-    /**
-     * Read country code to check that we have permission to start the core stack
-     * 
-     * @throws RcsPermissionDeniedException
-     */
-    private void testIfPossibleToReadCountryCode() throws RcsPermissionDeniedException {
-        com.gsma.services.rcs.contact.ContactUtil contactUtil = com.gsma.services.rcs.contact.ContactUtil
-                .getInstance(this);
-        String myCC = contactUtil.getMyCountryCode();
-        if (sLogger.isActivated()) {
-            sLogger.debug("Start RCS core service (country code=" + myCC + ")");
-        }
-    }
-
 }
