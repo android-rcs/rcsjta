@@ -187,13 +187,13 @@ public class Core {
         // Create the address book manager
         mAddressBookManager = new AddressBookManager(contactsManager);
 
-        // Create the IMS module
-        mImsModule = new ImsModule(this, context, mRcsSettings, contactsManager, messagingLog);
-
         final HandlerThread backgroundThread = new HandlerThread(BACKGROUND_THREAD_NAME);
         backgroundThread.start();
 
         mBackgroundHandler = new Handler(backgroundThread.getLooper());
+
+        /* Create the IMS module */
+        mImsModule = new ImsModule(this, context, mRcsSettings, contactsManager, messagingLog);
 
         if (logActivated) {
             logger.info("Terminal core is created with success");
