@@ -65,14 +65,16 @@ public class GroupChatTerminalExceptionTask implements Runnable {
                 /* TODO: Handle cursor when null. */
                 int providerIdIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_PROVIDER_ID);
                 int idIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_ID);
+                int mimeTypeIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_MIME_TYPE);
 
                 while (cursor.moveToNext()) {
                     int providerId = cursor.getInt(providerIdIdx);
                     String id = cursor.getString(idIdx);
+                    String mimeType = cursor.getString(mimeTypeIdx);
                     switch (providerId) {
                         case MessageData.HISTORYLOG_MEMBER_ID:
-                            mChatService.setGroupChatMessageStatusAndReasonCode(id, mChatId,
-                                    Status.FAILED, Content.ReasonCode.FAILED_SEND);
+                            mChatService.setGroupChatMessageStatusAndReasonCode(id, mimeType,
+                                    mChatId, Status.FAILED, Content.ReasonCode.FAILED_SEND);
                             break;
                         case FileTransferData.HISTORYLOG_MEMBER_ID:
                             mFileTransferService.setGroupFileTransferStateAndReasonCode(id,

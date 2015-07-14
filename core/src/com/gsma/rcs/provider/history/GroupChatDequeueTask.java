@@ -74,6 +74,7 @@ public class GroupChatDequeueTask extends DequeueTask {
         }
         int providerId = -1;
         String id = null;
+        String mimeType = null;
         Cursor cursor = null;
         try {
             synchronized (mLock) {
@@ -118,15 +119,15 @@ public class GroupChatDequeueTask extends DequeueTask {
                     }
                     providerId = cursor.getInt(providerIdIdx);
                     id = cursor.getString(idIdx);
+                    mimeType = cursor.getString(mimeTypeIdx);
                     switch (providerId) {
                         case MessageData.HISTORYLOG_MEMBER_ID:
                             if (!isPossibleToDequeueGroupChatMessage(mChatId)) {
-                                setGroupChatMessageAsFailed(mChatId, id);
+                                setGroupChatMessageAsFailed(mChatId, id, mimeType);
                                 continue;
                             }
                             try {
                                 String content = cursor.getString(contentIdx);
-                                String mimeType = cursor.getString(mimeTypeIdx);
                                 long timestamp = System.currentTimeMillis();
                                 /* For outgoing message, timestampSent = timestamp */
                                 ChatMessage message = ChatUtils.createChatMessage(id, mimeType,
@@ -228,7 +229,7 @@ public class GroupChatDequeueTask extends DequeueTask {
             }
             switch (providerId) {
                 case MessageData.HISTORYLOG_MEMBER_ID:
-                    setGroupChatMessageAsFailed(mChatId, id);
+                    setGroupChatMessageAsFailed(mChatId, id, mimeType);
                     break;
                 case FileTransferData.HISTORYLOG_MEMBER_ID:
                     setGroupFileTransferAsFailed(mChatId, id);

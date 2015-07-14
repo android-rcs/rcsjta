@@ -1087,14 +1087,14 @@ public class ChatServiceImpl extends IChatService.Stub {
      * Set group chat message status and reason code
      * 
      * @param msgId
+     * @param mimeType
      * @param chatId
      * @param status
      * @param reasonCode
      */
-    public void setGroupChatMessageStatusAndReasonCode(String msgId, String chatId, Status status,
-            ReasonCode reasonCode) {
+    public void setGroupChatMessageStatusAndReasonCode(String msgId, String mimeType,
+            String chatId, Status status, ReasonCode reasonCode) {
         mMessagingLog.setChatMessageStatusAndReasonCode(msgId, status, reasonCode);
-        String mimeType = mMessagingLog.getMessageMimeType(msgId);
         mGroupChatEventBroadcaster.broadcastMessageStatusChanged(chatId, mimeType, msgId, status,
                 reasonCode);
     }

@@ -133,18 +133,25 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         handleMessageSent(msg.getMessageId(), msg.getMimeType());
     }
 
-    private void sendChatMessageWithinSession(final OneToOneChatSession session, ChatMessage msg)
-            throws MsrpException {
-        session.sendChatMessage(msg);
+    private void sendChatMessageWithinSession(final OneToOneChatSession session, ChatMessage msg) {
+        try {
+            session.sendChatMessage(msg);
+        } catch (MsrpException e) {
+            String msgId = msg.getMessageId();
+            sLogger.error(
+                    new StringBuilder("Failed to send chat message with msgId '").append(msgId)
+                            .append("' within chat session").toString(), e);
+            mChatService.setOneToOneChatMessageStatusAndReasonCode(msgId, msg.getMimeType(),
+                    mContact, Status.FAILED, ReasonCode.FAILED_SEND);
+        }
     }
 
     /**
      * Sends a chat message
      * 
      * @param msg Message
-     * @throws MsrpException
      */
-    private void sendChatMessage(final ChatMessage msg) throws MsrpException {
+    private void sendChatMessage(final ChatMessage msg) {
         synchronized (lock) {
             boolean loggerActivated = sLogger.isActivated();
             if (loggerActivated) {
@@ -206,9 +213,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * Resends a chat message
      * 
      * @param msg Message
-     * @throws MsrpException
      */
-    private void resendChatMessage(final ChatMessage msg) throws MsrpException {
+    private void resendChatMessage(final ChatMessage msg) {
         synchronized (lock) {
             String msgId = msg.getMessageId();
             String mimeType = msg.getMimeType();
@@ -496,6 +502,13 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         }
     }
 
+    private void dequeueChatMessageAndBroadcastStatusChange(ChatMessage message) {
+        mMessagingLog.dequeueChatMessage(message);
+        String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(message.getMimeType());
+        mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, message.getMessageId(),
+                Status.SENDING, ReasonCode.UNSPECIFIED);
+    }
+
     /**
      * Dequeue one-one chat message
      * 
@@ -504,18 +517,14 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      */
     public void dequeueOneToOneChatMessage(ChatMessage message) throws MsrpException {
         String msgId = message.getMessageId();
-        String mimeType = message.getMimeType();
         if (sLogger.isActivated()) {
             sLogger.debug("Dequeue chat message msgId=".concat(msgId));
         }
-        mMessagingLog.dequeueChatMessage(message);
-        String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(mimeType);
-        mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId, Status.SENDING,
-                ReasonCode.UNSPECIFIED);
         mImService.acceptStoreAndForwardMessageSessionIfSuchExists(mContact);
         OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
         if (session == null) {
             if (mImService.isChatSessionAvailable()) {
+                dequeueChatMessageAndBroadcastStatusChange(message);
                 sendChatMessageInNewSession(message);
             } else {
                 throw new MsrpException(new StringBuilder(
@@ -523,6 +532,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                         .append("'!").toString());
             }
         } else if (session.isMediaEstablished()) {
+            dequeueChatMessageAndBroadcastStatusChange(message);
             sendChatMessageWithinSession(session, message);
         } else if (session.isInitiatedByRemote()) {
             if (sLogger.isActivated()) {
@@ -532,6 +542,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             session.acceptSession();
         } else {
             if (mImService.isChatSessionAvailable()) {
+                dequeueChatMessageAndBroadcastStatusChange(message);
                 sendChatMessageInNewSession(message);
             } else {
                 throw new MsrpException(new StringBuilder(

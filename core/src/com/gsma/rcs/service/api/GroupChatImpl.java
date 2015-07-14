@@ -942,13 +942,25 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         }.start();
     }
 
+    private void sendChatMessageWithinSession(GroupChatSession session, ChatMessage message) {
+        try {
+            session.sendChatMessage(message);
+        } catch (MsrpException e) {
+            String msgId = message.getMessageId();
+            sLogger.error(
+                    new StringBuilder("Failed to send chat message with msgId '").append(msgId)
+                            .append("' within chat session").toString(), e);
+            mChatService.setGroupChatMessageStatusAndReasonCode(msgId, message.getMimeType(),
+                    mChatId, Status.FAILED, Content.ReasonCode.FAILED_SEND);
+        }
+    }
+
     /**
      * Actual send operation of message performed
      * 
      * @param msg Chat message
-     * @throws MsrpException
      */
-    private void sendChatMessage(final ChatMessage msg) throws MsrpException {
+    private void sendChatMessage(final ChatMessage msg) {
         final GroupChatSession groupChatSession = mImService.getGroupChatSession(mChatId);
         if (groupChatSession == null) {
             /*
@@ -968,7 +980,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         if (chatSessionDialogPath != null && chatSessionDialogPath.isSessionEstablished()) {
             // TODO: Handle the failure of insert + exception use case later.
             addOutgoingGroupChatMessage(msg, Content.Status.SENDING, Content.ReasonCode.UNSPECIFIED);
-            groupChatSession.sendChatMessage(msg);
+            sendChatMessageWithinSession(groupChatSession, msg);
             return;
         }
         addOutgoingGroupChatMessage(msg, Content.Status.QUEUED, Content.ReasonCode.UNSPECIFIED);
@@ -980,6 +992,13 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     .append("' is pending for acceptance, accept it.").toString());
         }
         groupChatSession.acceptSession();
+    }
+
+    private void dequeueChatMessageAndBroadcastStatusChange(ChatMessage message) {
+        mMessagingLog.dequeueChatMessage(message);
+        String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(message.getMimeType());
+        mBroadcaster.broadcastMessageStatusChanged(mChatId, apiMimeType, message.getMessageId(),
+                Status.SENDING, Content.ReasonCode.UNSPECIFIED);
     }
 
     /**
@@ -995,12 +1014,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             mCore.getListener().handleRejoinGroupChatAsPartOfSendOperation(mChatId);
             return;
         } else if (session.isMediaEstablished()) {
-            mMessagingLog.dequeueChatMessage(message);
-            String mimeType = message.getMimeType();
-            String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(mimeType);
-            mBroadcaster.broadcastMessageStatusChanged(mChatId, apiMimeType, msgId, Status.SENDING,
-                    Content.ReasonCode.UNSPECIFIED);
-            session.sendChatMessage(message);
+            dequeueChatMessageAndBroadcastStatusChange(message);
+            sendChatMessageWithinSession(session, message);
         } else if (session.isInitiatedByRemote()) {
             if (sLogger.isActivated()) {
                 sLogger.debug(new StringBuilder("Group chat session with chatId '").append(mChatId)

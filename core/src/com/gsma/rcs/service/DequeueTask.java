@@ -327,10 +327,11 @@ public abstract class DequeueTask implements Runnable {
      * 
      * @param chatId
      * @param msgId
+     * @param mimeType
      */
-    protected void setGroupChatMessageAsFailed(String chatId, String msgId) {
-        mChatService.setGroupChatMessageStatusAndReasonCode(msgId, chatId, Status.FAILED,
-                Content.ReasonCode.FAILED_SEND);
+    protected void setGroupChatMessageAsFailed(String chatId, String msgId, String mimeType) {
+        mChatService.setGroupChatMessageStatusAndReasonCode(msgId, mimeType, chatId,
+                Status.FAILED, Content.ReasonCode.FAILED_SEND);
     }
 
     /**
