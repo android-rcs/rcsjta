@@ -32,7 +32,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Looper;
 import android.util.Log;
 
 import java.lang.reflect.Field;
@@ -48,11 +47,14 @@ public class RcsServiceControl {
      */
     public final static String RCS_STACK_PACKAGENAME = "com.gsma.rcs";
 
+    public static final String TIME_SPENT = "dur";
+
     /**
      * Singleton of RcsServiceControl
      */
     private static volatile RcsServiceControl sInstance;
 
+    private final Handler mHandler;
     private final Context mContext;
 
     private static final long INTENT_RESPONSE_TIMEOUT = 2000;
@@ -60,12 +62,15 @@ public class RcsServiceControl {
     private final static String LOG_TAG = "[RCS][" + RcsServiceControl.class.getSimpleName() + "]";
 
     private RcsServiceControl(Context ctx) {
+        HandlerThread handlerThread = new HandlerThread(getClass().getSimpleName());
+        handlerThread.start();
+        mHandler = new Handler(handlerThread.getLooper());
         mContext = ctx;
     }
 
     /**
      * Gets an instance of RcsServiceControl
-     * 
+     *
      * @param ctx the context.
      * @return RcsServiceControl the singleton instance.
      */
@@ -80,7 +85,7 @@ public class RcsServiceControl {
                     throw new IllegalArgumentException("Context is null");
 
                 }
-                sInstance = new RcsServiceControl(ctx);
+                sInstance = new RcsServiceControl(ctx.getApplicationContext());
             }
         }
         return sInstance;
@@ -89,7 +94,7 @@ public class RcsServiceControl {
     /**
      * IntentUtils class sets appropriate flags to an intent using reflection
      */
-    static class IntentUtils {
+    private static class IntentUtils {
 
         private static final int HONEYCOMB_MR1_VERSION_CODE = 12;
 
@@ -107,10 +112,10 @@ public class RcsServiceControl {
 
         /**
          * Using reflection to add FLAG_EXCLUDE_STOPPED_PACKAGES support backward compatibility.
-         * 
+         *
          * @param intent Intent to set flags
          */
-        static void tryToSetExcludeStoppedPackagesFlag(Intent intent) {
+        private static void tryToSetExcludeStoppedPackagesFlag(Intent intent) {
 
             if (Build.VERSION.SDK_INT < HONEYCOMB_MR1_VERSION_CODE) {
                 /*
@@ -126,19 +131,18 @@ public class RcsServiceControl {
                         ADD_FLAGS_PARAM);
                 Field flagExcludeStoppedPackages = intent.getClass().getDeclaredField(
                         FLAG_EXCLUDE_STOPPED_PACKAGES);
-                addflagsMethod.invoke(intent, flagExcludeStoppedPackages.getInt(IntentUtils.class));
+                addflagsMethod.invoke(intent, flagExcludeStoppedPackages.getInt(Intent.class));
             } catch (Exception e) {
-                // Do nothing
+                Log.e(LOG_TAG, "Could not add FLAG_EXCLUDE_STOPPED_PACKAGES to intent!");
             }
         }
 
         /**
          * Using reflection to add FLAG_RECEIVER_FOREGROUND support backward compatibility.
-         * 
+         *
          * @param intent Intent to set flags
          */
-        static void tryToSetReceiverForegroundFlag(Intent intent) {
-
+        private static void tryToSetReceiverForegroundFlag(Intent intent) {
             if (Build.VERSION.SDK_INT < JELLY_BEAN_VERSION_CODE) {
                 /*
                  * Since FLAG_RECEIVER_FOREGROUND is introduced only from API level
@@ -153,11 +157,29 @@ public class RcsServiceControl {
                         ADD_FLAGS_PARAM);
                 Field flagReceiverForeground = intent.getClass().getDeclaredField(
                         FLAG_RECEIVER_FOREGROUND);
-                addflagsMethod.invoke(intent, flagReceiverForeground.getInt(IntentUtils.class));
+                addflagsMethod.invoke(intent, flagReceiverForeground.getInt(Intent.class));
             } catch (Exception e) {
-                // do nothing
+                Log.e(LOG_TAG, "Could not add FLAG_RECEIVER_FOREGROUND to intent!");
             }
         }
+    }
+
+    private Intent generateIsCompatibeIntent(String service) {
+        Intent intent = new Intent(Intents.Service.ACTION_GET_COMPATIBILITY);
+        intent.putExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_SERVICE, service);
+        intent.putExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_CODENAME,
+                RcsService.Build.API_CODENAME);
+        intent.putExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_VERSION,
+                RcsService.Build.API_VERSION);
+        intent.putExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_INCREMENT,
+                RcsService.Build.API_INCREMENTAL);
+        return intent;
+    }
+
+    private Intent generateSetActivationModeIntent(boolean active) {
+        Intent intent = new Intent(Intents.Service.ACTION_SET_ACTIVATION_MODE);
+        intent.putExtra(Intents.Service.EXTRA_SET_ACTIVATION_MODE, active);
+        return intent;
     }
 
     private class SyncBroadcastReceiver extends BroadcastReceiver {
@@ -174,58 +196,51 @@ public class RcsServiceControl {
 
     /**
      * Query RCS stack by sending broadcast intent.
-     * 
+     *
      * @param action of the intent
      * @return the result extra data bundle or null if no response is received due to timeout
      * @throws RcsGenericException raised if timeout
      */
-    private Bundle queryRcsStackByIntent(String action) throws RcsGenericException {
-        return queryRcsStackByIntent(new Intent(action));
-    }
-
     private Bundle queryRcsStackByIntent(Intent intent) throws RcsGenericException {
+        final String action = intent.getAction();
         final SyncBroadcastReceiver broadcastReceiver = new SyncBroadcastReceiver();
-        final Intent broadcastIntent = intent.setPackage(RCS_STACK_PACKAGENAME);
-
-        /*
-         * Update flags of the broadcast intent to increase performance
-         */
-        trySetIntentForActivePackageAndReceiverInForeground(broadcastIntent);
-
-        synchronized (broadcastReceiver) {
-            /* Create a dedicate handler to schedule the Broadcast onReceiver callback */
-            HandlerThread handlerThread = new HandlerThread("ht");
-            handlerThread.start();
-            Looper looper = handlerThread.getLooper();
-            mContext.sendOrderedBroadcast(broadcastIntent, null, broadcastReceiver, new Handler(
-                    looper), Activity.RESULT_OK, null, null);
-
-            long endTime = System.currentTimeMillis() + INTENT_RESPONSE_TIMEOUT;
-
-            while (!broadcastReceiver.mHaveResult) {
-                long delay = endTime - System.currentTimeMillis();
-                if (delay <= 0) {
-                    if (!broadcastReceiver.mHaveResult) {
-                        throw new RcsGenericException(
-                                "No response to broadcast intent ".concat(intent.getAction()));
+        intent.setPackage(RCS_STACK_PACKAGENAME);
+        trySetIntentForActivePackageAndReceiverInForeground(intent);
+        synchronized (sInstance) {
+            synchronized (broadcastReceiver) {
+                mContext.sendOrderedBroadcast(intent, null, broadcastReceiver, mHandler,
+                        Activity.RESULT_OK, null, null);
+                long endTime = System.currentTimeMillis() + INTENT_RESPONSE_TIMEOUT;
+                while (!broadcastReceiver.mHaveResult) {
+                    long delay = endTime - System.currentTimeMillis();
+                    if (delay <= 0) {
+                        Log.w(LOG_TAG, "Waiting for result for " + action
+                                + " has reached deadline!");
+                        break;
                     }
-                    break;
-                }
+                    try {
+                        Log.d(LOG_TAG, "Waiting for result for " + action + " during max " + delay
+                                + "ms");
+                        broadcastReceiver.wait(delay);
 
-                try {
-                    /* Wait to receive callback response */
-                    broadcastReceiver.wait(delay);
-                } catch (InterruptedException e) {
-                    /* do nothing */
+                    } catch (InterruptedException e) {
+                        Log.w(LOG_TAG, "Waiting for result for " + action + " was interrupted!");
+                    }
                 }
+                Bundle result = broadcastReceiver.getResultExtras(false);
+                if (result == null) {
+                    throw new RcsGenericException("Failed to get result for " + action + "!");
+                }
+                result.putLong(TIME_SPENT, System.currentTimeMillis() - endTime
+                        + INTENT_RESPONSE_TIMEOUT);
+                return result;
             }
-            return broadcastReceiver.getResultExtras(false);
         }
     }
 
     /**
      * Update flags of the broadcast intent to increase performance
-     * 
+     *
      * @param intent
      */
     private void trySetIntentForActivePackageAndReceiverInForeground(Intent intent) {
@@ -235,7 +250,7 @@ public class RcsServiceControl {
 
     /**
      * Returns true if the RCS stack is installed and not disabled on the device.
-     * 
+     *
      * @return boolean true if the RCS stack is installed and not disabled on the device.
      */
     public boolean isAvailable() {
@@ -250,72 +265,61 @@ public class RcsServiceControl {
 
     /**
      * Returns true if the RCS stack de-activation/activation is allowed by the client.
-     * 
+     *
      * @return boolean true if the RCS stack de-activation/activation is allowed by the client.
      * @throws RcsGenericException
      */
     public boolean isActivationModeChangeable() throws RcsGenericException {
-        Log.d(LOG_TAG, "Query activation mode changeable");
-        Bundle resultExtraData = queryRcsStackByIntent(Intents.Service.ACTION_GET_ACTIVATION_MODE_CHANGEABLE);
-        if (resultExtraData == null) {
-            // No response
-            throw new RcsGenericException("Failed to read stack activation mode changeable!");
-        }
-        return resultExtraData.getBoolean(Intents.Service.EXTRA_GET_ACTIVATION_MODE_CHANGEABLE,
-                false);
+        Log.d(LOG_TAG, "isActivationModeChangeable: Request()");
+        Bundle result = queryRcsStackByIntent(new Intent(
+                Intents.Service.ACTION_GET_ACTIVATION_MODE_CHANGEABLE));
+        boolean activationModeChangeable = result.getBoolean(
+                Intents.Service.EXTRA_GET_ACTIVATION_MODE_CHANGEABLE, false);
+        Log.d(LOG_TAG, "isActivationModeChangeable: Response() = " + activationModeChangeable
+                + " (in " + result.getLong(TIME_SPENT, -1) + "ms)");
+        return activationModeChangeable;
     }
 
     /**
      * Returns true if the RCS stack is marked as active on the device.
-     * 
+     *
      * @return boolean true if the RCS stack is marked as active on the device.
      * @throws RcsGenericException
      */
     public boolean isActivated() throws RcsGenericException {
-        Log.d(LOG_TAG, "Query activation mode");
-        Bundle resultExtraData = queryRcsStackByIntent(Intents.Service.ACTION_GET_ACTIVATION_MODE);
-        if (resultExtraData == null) {
-            // No response
-            throw new RcsGenericException("Failed to read stack activation mode!");
-        }
-        return resultExtraData.getBoolean(Intents.Service.EXTRA_GET_ACTIVATION_MODE, false);
+        Log.d(LOG_TAG, "isActivated: Request()");
+        Bundle result = queryRcsStackByIntent(new Intent(Intents.Service.ACTION_GET_ACTIVATION_MODE));
+        boolean activated = result.getBoolean(Intents.Service.EXTRA_GET_ACTIVATION_MODE, false);
+        Log.d(LOG_TAG,
+                "isActivated: Response() -> " + activated + " (in "
+                        + result.getLong(TIME_SPENT, -1) + "ms)");
+        return activated;
     }
 
     /**
      * Deactive/Activate the RCS stack in case these operations are allowed (see
      * isStackActivationStatusChangeable) or else throws an RcsPermissionDeniedException.
-     * 
+     *
      * @param active True is activation is enabled.
      * @throws RcsPermissionDeniedException
      * @throws RcsGenericException
      */
     public void setActivationMode(boolean active) throws RcsPermissionDeniedException,
             RcsGenericException {
-        Log.d(LOG_TAG, "Query activation mode changeable");
-        Bundle resultExtraData = queryRcsStackByIntent(Intents.Service.ACTION_GET_ACTIVATION_MODE_CHANGEABLE);
-        if (resultExtraData == null) {
-            // No response to check if change is allowed
-            throw new RcsPermissionDeniedException("Failed to set stack activation mode!");
+        Log.d(LOG_TAG, "setActivationMode: Request(" + active + ")");
+        Bundle result = queryRcsStackByIntent(generateSetActivationModeIntent(active));
+        boolean activationMode = result
+                .getBoolean(Intents.Service.EXTRA_SET_ACTIVATION_MODE, false);
+        Log.d(LOG_TAG, "setActivationMode: Response(" + active + ") -> " + activationMode + " (in "
+                + result.getLong(TIME_SPENT, -1) + "ms)");
+        if (active != activationMode) {
+            throw new RcsPermissionDeniedException("Stack activation mode is not changeable!");
         }
-        boolean activationChangeable = resultExtraData.getBoolean(
-                Intents.Service.EXTRA_GET_ACTIVATION_MODE_CHANGEABLE, false);
-        if (!activationChangeable) {
-            throw new RcsPermissionDeniedException("Stack activation mode not changeable");
-        }
-        final Intent broadcastIntent = new Intent(Intents.Service.ACTION_SET_ACTIVATION_MODE);
-        broadcastIntent.setPackage(RCS_STACK_PACKAGENAME);
-        broadcastIntent.putExtra(Intents.Service.EXTRA_SET_ACTIVATION_MODE, active);
-
-        /* Update flags of the broadcast intent to increase performance */
-        trySetIntentForActivePackageAndReceiverInForeground(broadcastIntent);
-
-        Log.d(LOG_TAG, "Set activation mode ".concat(Boolean.toString(active)));
-        mContext.sendBroadcast(broadcastIntent);
     }
 
     /**
      * Returns true if the client RCS API and core RCS stack are compatible for the given service.
-     * 
+     *
      * @param service the RCS service
      * @return boolean true if the client RCS stack and RCS API are compatible for the given
      *         service.
@@ -324,38 +328,30 @@ public class RcsServiceControl {
      */
     public boolean isCompatible(RcsService service) throws RcsGenericException {
         String serviceName = service.getClass().getSimpleName();
-        Intent intent = new Intent(Intents.Service.ACTION_GET_COMPATIBILITY);
-        intent.putExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_SERVICE, serviceName);
-        intent.putExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_CODENAME,
-                RcsService.Build.API_CODENAME);
-        intent.putExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_VERSION,
-                RcsService.Build.API_VERSION);
-        intent.putExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_INCREMENT,
-                RcsService.Build.API_INCREMENTAL);
-        Log.d(LOG_TAG, "Query compatibility for service ".concat(serviceName));
-        Bundle resultExtraData = queryRcsStackByIntent(intent);
-        if (resultExtraData == null) {
-            // No response
-            throw new RcsGenericException(
-                    "Failed to check client RCS API compatibility for service " + serviceName
-                            + " !");
-        }
-        return resultExtraData.getBoolean(Intents.Service.EXTRA_GET_COMPATIBILITY_RESPONSE, false);
+        Log.d(LOG_TAG, "isCompatible: Request(" + serviceName + ")");
+        Bundle result = queryRcsStackByIntent(generateIsCompatibeIntent(serviceName));
+        boolean compatible = result.getBoolean(Intents.Service.EXTRA_GET_COMPATIBILITY_RESPONSE,
+                false);
+        Log.d(LOG_TAG, "isCompatible: Response(" + serviceName + ") -> " + compatible + " (in "
+                + result.getLong(TIME_SPENT, -1) + "ms)");
+        return compatible;
     }
 
     /**
      * Returns true if the RCS stack is started.
-     * 
+     *
      * @return boolean true if the RCS stack is started.
      * @throws RcsGenericException
      */
     public boolean isServiceStarted() throws RcsGenericException {
-        Log.d(LOG_TAG, "Query service started");
-        Bundle resultExtraData = queryRcsStackByIntent(Intents.Service.ACTION_GET_SERVICE_STARTING_STATE);
-        if (resultExtraData == null) {
-            // No response
-            throw new RcsGenericException("Failed to query service started!");
-        }
-        return resultExtraData.getBoolean(Intents.Service.EXTRA_GET_SERVICE_STARTING_STATE, false);
+        Log.d(LOG_TAG, "isServiceStarted: Request()");
+        Bundle result = queryRcsStackByIntent(new Intent(
+                Intents.Service.ACTION_GET_SERVICE_STARTING_STATE));
+        boolean started = result
+                .getBoolean(Intents.Service.EXTRA_GET_SERVICE_STARTING_STATE, false);
+        Log.d(LOG_TAG,
+                "isServiceStarted: Response() -> " + started + " (in "
+                        + result.getLong(TIME_SPENT, -1) + "ms)");
+        return started;
     }
 }

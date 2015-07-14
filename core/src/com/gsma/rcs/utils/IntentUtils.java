@@ -44,7 +44,7 @@ public class IntentUtils {
 
     /**
      * Using reflection to add FLAG_EXCLUDE_STOPPED_PACKAGES support backward compatibility.
-     * 
+     *
      * @param intent Intent to set flags
      */
     public static void tryToSetExcludeStoppedPackagesFlag(Intent intent) {
@@ -63,7 +63,7 @@ public class IntentUtils {
                     ADD_FLAGS_PARAM);
             Field flagExcludeStoppedPackages = intent.getClass().getDeclaredField(
                     FLAG_EXCLUDE_STOPPED_PACKAGES);
-            addflagsMethod.invoke(intent, flagExcludeStoppedPackages.getInt(IntentUtils.class));
+            addflagsMethod.invoke(intent, flagExcludeStoppedPackages.getInt(Intent.class));
         } catch (NoSuchMethodException e) {
             throw new UnsupportedOperationException(
                     "Could not add FLAG_EXCLUDE_STOPPED_PACKAGES to intent!", e);
@@ -84,7 +84,7 @@ public class IntentUtils {
 
     /**
      * Using reflection to add FLAG_RECEIVER_FOREGROUND support backward compatibility.
-     * 
+     *
      * @param intent Intent to set flags
      */
     public static void tryToSetReceiverForegroundFlag(Intent intent) {
@@ -103,7 +103,7 @@ public class IntentUtils {
                     ADD_FLAGS_PARAM);
             Field flagReceiverForeground = intent.getClass().getDeclaredField(
                     FLAG_RECEIVER_FOREGROUND);
-            addflagsMethod.invoke(intent, flagReceiverForeground.getInt(IntentUtils.class));
+            addflagsMethod.invoke(intent, flagReceiverForeground.getInt(Intent.class));
         } catch (NoSuchMethodException e) {
             throw new UnsupportedOperationException(
                     "Could not add FLAG_RECEIVER_FOREGROUND to intent!", e);

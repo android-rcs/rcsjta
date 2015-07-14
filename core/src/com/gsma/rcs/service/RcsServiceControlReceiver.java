@@ -25,7 +25,6 @@ package com.gsma.rcs.service;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.provider.settings.RcsSettingsData.EnableRcseSwitch;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Intents;
 import com.gsma.services.rcs.RcsService;
@@ -52,26 +51,25 @@ import java.util.Map;
 
 /**
  * A class to control the service activation.
- * 
+ *
  * @author yplo6403
  */
 public class RcsServiceControlReceiver extends BroadcastReceiver {
 
-    private final static Logger sLogger = Logger.getLogger(RcsServiceControlReceiver.class
-            .getSimpleName());
-
-    private RcsSettings mRcsSettings;
-
-    private Context mContext;
+    private static final long INTENT_RESPONSE_TIMEOUT = 1000;
 
     private static final int INVALID_EXTRA = -1;
+
+    private static final Logger sLogger = Logger.getLogger(RcsServiceControlReceiver.class
+            .getName());
+
+    private RcsSettings mRcsSettings;
 
     private interface IRcsCompatibility {
         public boolean isCompatible(String serviceName, String codename, int version, int increment);
     }
 
     private static IRcsCompatibility sRcsCompatibility = new IRcsCompatibility() {
-
         @Override
         public boolean isCompatible(String serviceName, String codename, int version, int increment) {
             if (!RcsService.Build.API_CODENAME.equals(codename)) {
@@ -106,25 +104,24 @@ public class RcsServiceControlReceiver extends BroadcastReceiver {
         sServiceCompatibilityMap.put(VideoSharingService.class.getSimpleName(), sRcsCompatibility);
     }
 
-    private boolean getActivationModeChangeable() {
-        EnableRcseSwitch enableRcseSwitch = mRcsSettings.getEnableRcseSwitch();
-        switch (enableRcseSwitch) {
+    private boolean getActivationModeChangeable(Context ctx) {
+        switch (mRcsSettings.getEnableRcseSwitch()) {
             case ALWAYS_SHOW:
                 return true;
             case ONLY_SHOW_IN_ROAMING:
-                return IsDataRoamingEnabled();
+                return isDataRoamingEnabled(ctx);
             case NEVER_SHOW:
             default:
                 return false;
         }
     }
 
-    private boolean getActivationMode(Context context) {
+    private boolean getActivationMode() {
         return mRcsSettings.isServiceActivated();
     }
 
-    private boolean IsDataRoamingEnabled() {
-        ConnectivityManager cm = (ConnectivityManager) mContext
+    private boolean isDataRoamingEnabled(Context ctx) {
+        ConnectivityManager cm = (ConnectivityManager) ctx
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
         if (cm.getActiveNetworkInfo() == null) {
             return false;
@@ -132,28 +129,28 @@ public class RcsServiceControlReceiver extends BroadcastReceiver {
         return cm.getActiveNetworkInfo().isRoaming();
     }
 
-    private void setActivationMode(Context context, boolean active) {
-        if (!getActivationModeChangeable()) {
+    private boolean setActivationMode(Context ctx, boolean active) {
+        boolean wasActivated = mRcsSettings.isServiceActivated();
+        if (wasActivated == active) {
             if (sLogger.isActivated()) {
-                sLogger.error("Cannot set activation mode: permission denied");
+                sLogger.warn("setActivationMode: Already set to " + active);
             }
-            return;
+            return active;
         }
-        if (mRcsSettings.isServiceActivated() == active) {
-            if (sLogger.isActivated()) {
-                sLogger.warn("Activation mode already set to ".concat(String.valueOf(active)));
-            }
-            return;
+        if (!getActivationModeChangeable(ctx)) {
+            sLogger.warn("setActivationMode: Cannot change activation mode - permission denied!");
+            return wasActivated;
         }
         if (sLogger.isActivated()) {
-            sLogger.debug("setActivationMode: ".concat(String.valueOf(active)));
+            sLogger.debug("setActivationMode: " + active);
         }
         mRcsSettings.setServiceActivationState(active);
         if (active) {
-            LauncherUtils.launchRcsService(mContext, false, true, mRcsSettings);
+            LauncherUtils.launchRcsService(ctx, false, true, mRcsSettings);
         } else {
-            LauncherUtils.stopRcsService(mContext);
+            LauncherUtils.stopRcsService(ctx);
         }
+        return active;
     }
 
     private boolean isCompatible(String serviceName, String codename, int version, int increment) {
@@ -169,75 +166,103 @@ public class RcsServiceControlReceiver extends BroadcastReceiver {
         return iRcsCompatibility.isCompatible(serviceName, codename, version, increment);
     }
 
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        LocalContentResolver localContentResolver = new LocalContentResolver(context);
-        mRcsSettings = RcsSettings.createInstance(localContentResolver);
-        mContext = context;
-        String action = intent.getAction();
-        if (Intents.Service.ACTION_GET_ACTIVATION_MODE_CHANGEABLE.equals(action)) {
-            Bundle results = getResultExtras(true);
-            if (results == null) {
-                return;
-            }
-            boolean activationChangeable = getActivationModeChangeable();
-            if (sLogger.isActivated()) {
-                sLogger.debug("Activation changeable=".concat(Boolean
-                        .toString(activationChangeable)));
-            }
-            results.putBoolean(Intents.Service.EXTRA_GET_ACTIVATION_MODE_CHANGEABLE,
-                    activationChangeable);
-            setResultExtras(results);
-        } else if (Intents.Service.ACTION_GET_ACTIVATION_MODE.equals(action)) {
-            Bundle results = getResultExtras(true);
-            if (results == null) {
-                return;
-            }
-            boolean activationMode = getActivationMode(context);
-            if (sLogger.isActivated()) {
-                sLogger.debug("Get activation=".concat(Boolean.toString(activationMode)));
-            }
-            results.putBoolean(Intents.Service.EXTRA_GET_ACTIVATION_MODE, activationMode);
-            setResultExtras(results);
-        } else if (Intents.Service.ACTION_SET_ACTIVATION_MODE.equals(action)) {
-            boolean active = intent
-                    .getBooleanExtra(Intents.Service.EXTRA_SET_ACTIVATION_MODE, true);
-            setActivationMode(context, active);
-            if (sLogger.isActivated()) {
-                sLogger.debug("Set activation=".concat(Boolean.toString(active)));
-            }
-        } else if (Intents.Service.ACTION_GET_COMPATIBILITY.equals(action)) {
-            Bundle results = getResultExtras(true);
-            if (results == null) {
-                return;
-            }
-            String servicename = intent
-                    .getStringExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_SERVICE);
-            String codename = intent
-                    .getStringExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_CODENAME);
-            int version = intent.getIntExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_VERSION,
-                    INVALID_EXTRA);
-            int increment = intent.getIntExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_INCREMENT,
-                    INVALID_EXTRA);
+    private class IntentProcessor extends Thread {
 
-            boolean compatible = isCompatible(servicename, codename, version, increment);
-            if (sLogger.isActivated()) {
-                sLogger.debug("Compatible " + servicename + ":" + compatible);
+        public volatile boolean mHaveResult = false;
+
+        private final Context mCtx;
+        private final Intent mIntent;
+        private final Bundle mResult;
+
+        private IntentProcessor(Context ctx, Intent intent, Bundle result) {
+            mCtx = ctx;
+            mIntent = intent;
+            mResult = result;
+        }
+
+        @Override
+        public void run() {
+            String action = mIntent.getAction();
+            synchronized (mResult) {
+                if (Intents.Service.ACTION_GET_ACTIVATION_MODE.equals(action)) {
+                    boolean activationMode = getActivationMode();
+                    mResult.putBoolean(Intents.Service.EXTRA_GET_ACTIVATION_MODE, activationMode);
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("isActivated() -> " + activationMode);
+                    }
+                } else if (Intents.Service.ACTION_GET_COMPATIBILITY.equals(action)) {
+                    String servicename = mIntent
+                            .getStringExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_SERVICE);
+                    String codename = mIntent
+                            .getStringExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_CODENAME);
+                    int version = mIntent.getIntExtra(
+                            Intents.Service.EXTRA_GET_COMPATIBILITY_VERSION, INVALID_EXTRA);
+                    int increment = mIntent.getIntExtra(
+                            Intents.Service.EXTRA_GET_COMPATIBILITY_INCREMENT, INVALID_EXTRA);
+                    boolean compatible = isCompatible(servicename, codename, version, increment);
+                    mResult.putBoolean(Intents.Service.EXTRA_GET_COMPATIBILITY_RESPONSE, compatible);
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("isCompatible(" + servicename + ") -> " + compatible);
+                    }
+                } else if (Intents.Service.ACTION_GET_SERVICE_STARTING_STATE.equals(action)) {
+                    Core core = Core.getInstance();
+                    boolean started = core != null && core.isStarted();
+                    mResult.putBoolean(Intents.Service.EXTRA_GET_SERVICE_STARTING_STATE, started);
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("isServiceStarted() -> " + started);
+                    }
+                } else if (Intents.Service.ACTION_GET_ACTIVATION_MODE_CHANGEABLE.equals(action)) {
+                    boolean activationModeChangeable = getActivationModeChangeable(mCtx);
+                    mResult.putBoolean(Intents.Service.EXTRA_GET_ACTIVATION_MODE_CHANGEABLE,
+                            activationModeChangeable);
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("isActivationModeChangeAble() -> " + activationModeChangeable);
+                    }
+                } else if (Intents.Service.ACTION_SET_ACTIVATION_MODE.equals(action)) {
+                    boolean active = mIntent.getBooleanExtra(
+                            Intents.Service.EXTRA_SET_ACTIVATION_MODE, true);
+                    boolean activationMode = setActivationMode(mCtx, active);
+                    mResult.putBoolean(Intents.Service.EXTRA_SET_ACTIVATION_MODE, activationMode);
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("setActivationMode(" + active + ") -> " + activationMode);
+                    }
+                }
+                mHaveResult = true;
+                mResult.notify();
             }
-            results.putBoolean(Intents.Service.EXTRA_GET_COMPATIBILITY_RESPONSE, compatible);
-            setResultExtras(results);
-        } else if (Intents.Service.ACTION_GET_SERVICE_STARTING_STATE.equals(action)) {
-            Bundle results = getResultExtras(true);
-            if (results == null) {
-                return;
+        }
+
+    }
+
+    @Override
+    public void onReceive(Context ctx, Intent intent) {
+        final String action = intent.getAction();
+        if (sLogger.isActivated()) {
+            sLogger.debug("Received: " + action);
+        }
+        LocalContentResolver localContentResolver = new LocalContentResolver(ctx);
+        mRcsSettings = RcsSettings.createInstance(localContentResolver);
+
+        Bundle result = getResultExtras(true);
+        IntentProcessor intentProcessor = new IntentProcessor(ctx, intent, result);
+        intentProcessor.start();
+        long endTime = System.currentTimeMillis() + INTENT_RESPONSE_TIMEOUT;
+        synchronized (result) {
+            while (!intentProcessor.mHaveResult) {
+                long delay = endTime - System.currentTimeMillis();
+                if (delay <= 0) {
+                    sLogger.warn("Waiting for result for " + action + " has reached deadline!");
+                    break;
+                }
+                try {
+                    sLogger.debug("Waiting for result for " + action + " during max " + delay
+                            + "ms");
+                    result.wait(delay);
+
+                } catch (InterruptedException e) {
+                    sLogger.warn("Waiting for result for " + action + " was interrupted!");
+                }
             }
-            Core core = Core.getInstance();
-            boolean started = core != null && core.isStarted();
-            if (sLogger.isActivated()) {
-                sLogger.debug("Service started ".concat(Boolean.toString(started)));
-            }
-            results.putBoolean(Intents.Service.EXTRA_GET_SERVICE_STARTING_STATE, started);
-            setResultExtras(results);
         }
     }
 }
