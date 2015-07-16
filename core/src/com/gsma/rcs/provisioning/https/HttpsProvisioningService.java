@@ -27,7 +27,8 @@ import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.provisioning.ProvisioningInfo;
+import com.gsma.rcs.provisioning.ProvisioningFailureReasons;
+import com.gsma.rcs.provisioning.ProvisioningInfo.Version;
 import com.gsma.rcs.service.LauncherUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -41,6 +42,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.IBinder;
+import android.telephony.TelephonyManager;
+
+import java.io.IOException;
 
 /**
  * HTTPS auto configuration service
@@ -119,23 +123,24 @@ public class HttpsProvisioningService extends Service {
             first = intent.getBooleanExtra(FIRST_KEY, false);
             user = intent.getBooleanExtra(USER_KEY, false);
         }
-        String version = mRcsSettings.getProvisioningVersion();
+        int version = mRcsSettings.getProvisioningVersion();
         /*
          * It makes no sense to start service if version is 0 (unconfigured). If version = 0, then
          * (re)set first to true.
          */
-        try {
-            int ver = Integer.parseInt(version);
-            if (ver == 0) {
-                first = true;
-            }
-        } catch (NumberFormatException e) {
-            // Nothing to do
+        if (Version.RESETED.toInt() == version) {
+            first = true;
         }
         registerReceiver(retryReceiver, new IntentFilter(ACTION_RETRY));
 
-        mHttpsProvisioningMng = new HttpsProvisioningManager(mContext, mLocalContentResolver,
-                mRetryIntent, first, user, mRcsSettings, mMessagingLog, mContactManager);
+        TelephonyManager tm = (TelephonyManager) mContext
+                .getSystemService(Context.TELEPHONY_SERVICE);
+        String imsi = tm.getSubscriberId();
+        String imei = tm.getDeviceId();
+
+        mHttpsProvisioningMng = new HttpsProvisioningManager(imei, imsi, mContext,
+                mLocalContentResolver, mRetryIntent, first, user, mRcsSettings, mMessagingLog,
+                mContactManager);
         if (logActivated) {
             sLogger.debug(new StringBuilder("Provisioning (boot=").append(first).append(") (user=")
                     .append(user).append(") (version=").append(version).append(")").toString());
@@ -144,13 +149,13 @@ public class HttpsProvisioningService extends Service {
         boolean requestConfig = false;
         if (first) {
             requestConfig = true;
-        } else if (ProvisioningInfo.Version.RESETED_NOQUERY.equals(version)) {
+        } else if (Version.RESETED_NOQUERY.toInt() == version) {
             // Nothing to do
-        } else if (ProvisioningInfo.Version.DISABLED_NOQUERY.equals(version)) {
+        } else if (Version.DISABLED_NOQUERY.toInt() == version) {
             if (user == true) {
                 requestConfig = true;
             }
-        } else if (ProvisioningInfo.Version.DISABLED_DORMANT.equals(version) && user == true) {
+        } else if (Version.DISABLED_DORMANT.toInt() == version && user == true) {
             requestConfig = true;
         } else { // version > 0
             long expiration = LauncherUtils.getProvisioningExpirationDate(this);
@@ -198,8 +203,7 @@ public class HttpsProvisioningService extends Service {
                          * This is a non revocable use-case as the RCS account itself was not
                          * created, So we log this as error and stop the service itself.
                          */
-                        sLogger.error("Failed to start the service for intent action : "
-                                .concat(intent.getAction()), e);
+                        sLogger.error("Failed to handle connection event!", e);
                         stopSelf();
                     } catch (RuntimeException e) {
                         /*
@@ -209,8 +213,21 @@ public class HttpsProvisioningService extends Service {
                          * exceptions will eventually lead to exit the system and thus can bring the
                          * whole system down, which is not intended.
                          */
-                        sLogger.error("Unable to handle connection event for intent action : "
-                                .concat(intent.getAction()), e);
+                        sLogger.error("Unable to handle connection event!", e);
+                    } catch (IOException e) {
+                        sLogger.error("Unable to handle connection event!", e);
+                        /* Start the RCS service */
+                        if (mHttpsProvisioningMng.isFirstProvisioningAfterBoot()) {
+                            /* Reason: No configuration present */
+                            if (sLogger.isActivated()) {
+                                sLogger.error("Initial provisioning failed!");
+                            }
+                            mHttpsProvisioningMng
+                                    .provisioningFails(ProvisioningFailureReasons.CONNECTIVITY_ISSUE);
+                            mHttpsProvisioningMng.retry();
+                        } else {
+                            mHttpsProvisioningMng.tryLaunchRcsCoreService(mContext, -1);
+                        }
                     }
                 }
             });
@@ -284,7 +301,7 @@ public class HttpsProvisioningService extends Service {
      */
     private BroadcastReceiver retryReceiver = new BroadcastReceiver() {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(Context context, final Intent intent) {
             mHttpsProvisioningMng.scheduleForBackgroundExecution(new Runnable() {
                 public void run() {
                     try {
@@ -298,6 +315,20 @@ public class HttpsProvisioningService extends Service {
                          * thread and eventually bring the whole system down, which is not intended.
                          */
                         sLogger.error("Failed to update configuration!", e);
+                    } catch (IOException e) {
+                        sLogger.error("Unable to update configuration!", e);
+                        /* Start the RCS service */
+                        if (mHttpsProvisioningMng.isFirstProvisioningAfterBoot()) {
+                            /* Reason: No configuration present */
+                            if (sLogger.isActivated()) {
+                                sLogger.error("Initial provisioning failed!");
+                            }
+                            mHttpsProvisioningMng
+                                    .provisioningFails(ProvisioningFailureReasons.CONNECTIVITY_ISSUE);
+                            mHttpsProvisioningMng.retry();
+                        } else {
+                            mHttpsProvisioningMng.tryLaunchRcsCoreService(mContext, -1);
+                        }
                     }
                 }
             });
@@ -324,4 +355,5 @@ public class HttpsProvisioningService extends Service {
         provisioningIntent.putExtra(USER_KEY, userLaunch);
         context.startService(provisioningIntent);
     }
+
 }

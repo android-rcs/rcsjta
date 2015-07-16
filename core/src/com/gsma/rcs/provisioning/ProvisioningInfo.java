@@ -27,7 +27,7 @@ public class ProvisioningInfo {
     /**
      * Version of the provisioning document
      */
-    private String mVersion;
+    private int mVersion;
 
     /**
      * Validity of the provisioning document
@@ -68,11 +68,22 @@ public class ProvisioningInfo {
      * Enumerated for the provisioning version
      */
     public enum Version {
-        RESETED(0), // the configuration is reseted : RCS client is temporary disabled
-        RESETED_NOQUERY(-1), // The configuration is reseted : RCS client is forbidden
-        DISABLED_NOQUERY(-2), // The RCS client is disabled and configuration query stopped
-        DISABLED_DORMANT(-3); // The RCS client is in dormant state: RCS is disabled but
-                              // provisioning is still running
+        /**
+         * The configuration is reseted : RCS client is temporary disabled.
+         */
+        RESETED(0),
+        /**
+         * The configuration is reseted : RCS client is forbidden.
+         */
+        RESETED_NOQUERY(-1),
+        /**
+         * The RCS client is disabled and configuration query stopped.
+         */
+        DISABLED_NOQUERY(-2),
+        /**
+         * The RCS client is in dormant state: RCS is disabled but provisioning is still running.
+         */
+        DISABLED_DORMANT(-3);
 
         private int mVers;
 
@@ -80,18 +91,10 @@ public class ProvisioningInfo {
             mVers = vers;
         }
 
-        public int getVersion() {
+        public int toInt() {
             return mVers;
         }
 
-        @Override
-        public String toString() {
-            return Integer.toString(mVers);
-        }
-
-        public boolean equals(String vers) {
-            return toString().equals(vers);
-        }
     }
 
     /**
@@ -99,7 +102,7 @@ public class ProvisioningInfo {
      * 
      * @param version
      */
-    public void setVersion(String version) {
+    public void setVersion(int version) {
         mVersion = version;
     }
 
@@ -153,7 +156,7 @@ public class ProvisioningInfo {
      * 
      * @return version
      */
-    public String getVersion() {
+    public int getVersion() {
         return mVersion;
     }
 
