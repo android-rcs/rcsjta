@@ -29,10 +29,15 @@ package com.gsma.rcs.provisioning.https;
  * @author Deutsche Telekom
  */
 public class HttpsProvisioningResult {
+
+    public static int UNKNOWN_REASON_CODE = -1;
+
+    public static int UNKNOWN_MSISDN_CODE = -2;
+
     /**
      * Return code
      */
-    public int code = -1;
+    public int code = UNKNOWN_REASON_CODE;
 
     /**
      * Value of header RetryAfter

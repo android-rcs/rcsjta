@@ -1318,4 +1318,16 @@ public class RcsSettingsData {
      */
     /* package private */static final String PROV_USER_MSG_TITLE = "title";
     /* package private */static final String DEFAULT_PROV_USER_MSG_TITLE = "";
+
+    /**
+     * Mobile Country Code (0 if undefined)
+     */
+    public static final String MOBILE_COUNTRY_CODE = "mcc";
+    /* package private */static final Integer DEFAULT_MOBILE_COUNTRY_CODE = 0;
+
+    /**
+     * Mobile Network Code (0 if undefined)
+     */
+    public static final String MOBILE_NETWORK_CODE = "mnc";
+    /* package private */static final Integer DEFAULT_MOBILE_NETWORK_CODE = 0;
 }

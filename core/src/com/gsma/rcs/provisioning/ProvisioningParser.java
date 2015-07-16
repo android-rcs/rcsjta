@@ -49,7 +49,6 @@ import java.io.ByteArrayInputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
 import javax2.sip.ListeningPoint;
 
 /**
@@ -277,7 +276,7 @@ public class ProvisioningParser {
             do {
                 if (version == null) {
                     if ((version = getValueByParamName("version", versionchild, TYPE_TXT)) != null) {
-                        provisioningInfo.setVersion(version);
+                        provisioningInfo.setVersion(Integer.parseInt(version));
                         continue;
                     }
                 }
@@ -1006,10 +1005,10 @@ public class ProvisioningParser {
                          * According to "Rich Communication Suite 5.1 Advanced Communications
                          * Services and Client Specification Version 4.0" 3.5.4.8.3 File transfer
                          * procedure 3.5.4.8.3.1 Sender procedures This specification uses the term
-                         * 'HTTP POST' and 'HTTP GET' as a generic reference to the action
-                         * of using the POST or GET method. However, it is strongly recommended that
-                         * whenever the POST action contains sensitive information such as a user ID
-                         * or password, the action should take place over a secure connection and/or
+                         * 'HTTP POST' and 'HTTP GET' as a generic reference to the action of using
+                         * the POST or GET method. However, it is strongly recommended that whenever
+                         * the POST action contains sensitive information such as a user ID or
+                         * password, the action should take place over a secure connection and/or
                          * via HTTPS explicitly.
                          */
                         if (!ftHttpCsUri.startsWith(PROTOCOL_HTTPS)) {

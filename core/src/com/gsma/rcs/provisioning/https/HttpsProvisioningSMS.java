@@ -22,18 +22,13 @@
 
 package com.gsma.rcs.provisioning.https;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Random;
-
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.HttpContext;
-
 import com.gsma.rcs.addressbook.RcsAccountException;
 import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.contact.ContactManager;
-
+import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provisioning.ProvisioningFailureReasons;
+import com.gsma.rcs.provisioning.ProvisioningInfo.Version;
 import com.gsma.rcs.service.LauncherUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -44,6 +39,13 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
+
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.HttpContext;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Random;
 
 /**
  * HTTPS provisioning - SMS management
@@ -85,11 +87,11 @@ public class HttpsProvisioningSMS {
      * @param messagingLog Message log accessor
      * @param contactManager Contact manager accessor
      */
-    public HttpsProvisioningSMS(HttpsProvisioningManager httpsProvisioningManager,
+    public HttpsProvisioningSMS(HttpsProvisioningManager httpsProvisioningManager, Context context,
             LocalContentResolver localContentResolver, RcsSettings rcsSettings,
             MessagingLog messagingLog, ContactManager contactManager) {
         mManager = httpsProvisioningManager;
-        mContext = mManager.getContext();
+        mContext = context;
         mLocalContentResolver = localContentResolver;
         mRcsSettings = rcsSettings;
         mMessagingLog = messagingLog;
@@ -115,8 +117,7 @@ public class HttpsProvisioningSMS {
      * @param client Instance of {@link DefaultHttpClient}
      * @param localContext Instance of {@link HttpContext}
      */
-    public void registerSmsProvisioningReceiver(final String smsPort, final String requestUri,
-            final DefaultHttpClient client, final HttpContext localContext) {
+    public void registerSmsProvisioningReceiver(final String smsPort, final String requestUri) {
         // Unregister previous one
         unregisterSmsProvisioningReceiver();
 
@@ -198,7 +199,7 @@ public class HttpsProvisioningSMS {
                                     }
                                     return;
                                 }
-                                mRcsSettings.setProvisioningVersion("0");
+                                mRcsSettings.setProvisioningVersion(Version.RESETED.toInt());
                                 LauncherUtils.stopRcsService(ctx);
                                 LauncherUtils.resetRcsConfig(ctx, mLocalContentResolver,
                                         mRcsSettings, mMessagingLog, mContactManager);
@@ -209,8 +210,7 @@ public class HttpsProvisioningSMS {
                                 }
 
                                 if (mManager != null) {
-                                    mManager.updateConfigWithOTP(smsData, requestUri, client,
-                                            localContext);
+                                    mManager.updateConfigWithOTP(smsData, requestUri);
                                     unregisterSmsProvisioningReceiver();
                                 } else {
                                     if (logActivated) {
@@ -241,6 +241,19 @@ public class HttpsProvisioningSMS {
                                     new StringBuilder(
                                             "Failed to update Config with OTP for requestUri : ")
                                             .append(requestUri).toString(), e);
+                        } catch (IOException e) {
+                            sLogger.error(
+                                    new StringBuilder(
+                                            "Failed to update Config with OTP for requestUri : ")
+                                            .append(requestUri).toString(), e);
+                            /* Start the RCS service */
+                            if (mManager.isFirstProvisioningAfterBoot()) {
+                                // Reason: No configuration present
+                                mManager.provisioningFails(ProvisioningFailureReasons.CONNECTIVITY_ISSUE);
+                                mManager.retry();
+                            } else {
+                                mManager.tryLaunchRcsCoreService(ctx, -1);
+                            }
                         }
                     }
                 });

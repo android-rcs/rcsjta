@@ -29,6 +29,7 @@ import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provisioning.ProvisioningInfo.Version;
 import com.gsma.rcs.service.LauncherUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -150,7 +151,7 @@ public class TermsAndConditionsRequest extends Activity {
         LauncherUtils.stopRcsService(ctx);
         LauncherUtils.resetRcsConfig(ctx, localContentResolver, rcsSettings, messaginLog,
                 contactManager);
-        rcsSettings.setProvisioningVersion("0");
+        rcsSettings.setProvisioningVersion(Version.RESETED.toInt());
     }
 
     private void acceptTermsAndConditions() {

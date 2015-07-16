@@ -23,6 +23,7 @@
 package com.gsma.rcs.provisioning.https;
 
 import com.gsma.rcs.addressbook.RcsAccountException;
+import com.gsma.rcs.provisioning.ProvisioningFailureReasons;
 import com.gsma.rcs.utils.logger.Logger;
 
 import android.content.BroadcastReceiver;
@@ -31,6 +32,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
+
+import java.io.IOException;
 
 /**
  * HTTPS provisioning connection management
@@ -44,14 +47,8 @@ public class HttpsProvisioningConnection {
      */
     private HttpsProvisioningManager mProvisioningManager;
 
-    /**
-     * Network state listener
-     */
     private BroadcastReceiver mNetworkStateListener;
 
-    /**
-     * Connection manager
-     */
     private ConnectivityManager mConnectionManager;
 
     /**
@@ -59,9 +56,8 @@ public class HttpsProvisioningConnection {
      */
     private BroadcastReceiver mWifiDisablingListener;
 
-    /**
-     * The logger
-     */
+    private final Context mContext;
+
     private static final Logger sLogger = Logger.getLogger(HttpsProvisioningConnection.class
             .getName());
 
@@ -69,10 +65,13 @@ public class HttpsProvisioningConnection {
      * Constructor
      * 
      * @param httpsProvisioningManager HTTP provisioning manager
+     * @param context The context
      */
-    public HttpsProvisioningConnection(HttpsProvisioningManager httpsProvisioningManager) {
+    public HttpsProvisioningConnection(HttpsProvisioningManager httpsProvisioningManager,
+            Context context) {
         mProvisioningManager = httpsProvisioningManager;
-        mConnectionManager = (ConnectivityManager) httpsProvisioningManager.getContext()
+        mContext = context;
+        mConnectionManager = (ConnectivityManager) context
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
@@ -104,19 +103,20 @@ public class HttpsProvisioningConnection {
         // Instantiate the network state listener
         mNetworkStateListener = new BroadcastReceiver() {
             @Override
-            public void onReceive(Context context, final Intent intent) {
+            public void onReceive(final Context context, final Intent intent) {
                 mProvisioningManager.scheduleForBackgroundExecution(new Runnable() {
                     @Override
                     public void run() {
+                        String action = intent.getAction();
                         try {
                             if (sLogger.isActivated()) {
                                 sLogger.debug("Network state listener - Received broadcast: "
-                                        + intent.toString());
+                                        + action);
                             }
-                            mProvisioningManager.connectionEvent(intent.getAction());
+                            mProvisioningManager.connectionEvent(action);
                         } catch (RcsAccountException e) {
-                            sLogger.error("Unable to handle connection event for intent action : "
-                                    .concat(intent.getAction()), e);
+                            sLogger.error("Unable to handle connection event for intent action: "
+                                    +action, e);
                         } catch (RuntimeException e) {
                             /*
                              * Normally we are not allowed to catch runtime exceptions as these are
@@ -125,8 +125,23 @@ public class HttpsProvisioningConnection {
                              * such exceptions will eventually lead to exit the system and thus can
                              * bring the whole system down, which is not intended.
                              */
-                            sLogger.error("Unable to handle connection event for intent action : "
-                                    .concat(intent.getAction()), e);
+                            sLogger.error("Unable to handle connection event for intent action: "
+                                    +action, e);
+                        } catch (IOException e) {
+                            sLogger.error("Unable to handle connection event for intent action: "
+                                    +action, e);
+                            /* Start the RCS service */
+                            if (mProvisioningManager.isFirstProvisioningAfterBoot()) {
+                                /* Reason: No configuration present */
+                                if (sLogger.isActivated()) {
+                                    sLogger.error("Initial provisioning faile!");
+                                }
+                                mProvisioningManager
+                                        .provisioningFails(ProvisioningFailureReasons.CONNECTIVITY_ISSUE);
+                                mProvisioningManager.retry();
+                            } else {
+                                mProvisioningManager.tryLaunchRcsCoreService(context, -1);
+                            }
                         }
                     }
                 });
@@ -136,7 +151,7 @@ public class HttpsProvisioningConnection {
         // Register network state listener
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        mProvisioningManager.getContext().registerReceiver(mNetworkStateListener, intentFilter);
+        mContext.registerReceiver(mNetworkStateListener, intentFilter);
     }
 
     /**
@@ -147,7 +162,7 @@ public class HttpsProvisioningConnection {
             if (sLogger.isActivated()) {
                 sLogger.debug("Unregistering network state listener");
             }
-            mProvisioningManager.getContext().unregisterReceiver(mNetworkStateListener);
+            mContext.unregisterReceiver(mNetworkStateListener);
             mNetworkStateListener = null;
         }
     }
@@ -203,7 +218,7 @@ public class HttpsProvisioningConnection {
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-        mProvisioningManager.getContext().registerReceiver(mWifiDisablingListener, intentFilter);
+        mContext.registerReceiver(mWifiDisablingListener, intentFilter);
     }
 
     /**
@@ -214,9 +229,8 @@ public class HttpsProvisioningConnection {
             if (sLogger.isActivated()) {
                 sLogger.debug("Unregistering WIFI disabling listener");
             }
-
             try {
-                mProvisioningManager.getContext().unregisterReceiver(mWifiDisablingListener);
+                mContext.unregisterReceiver(mWifiDisablingListener);
             } catch (IllegalArgumentException e) {
                 // Nothing to do
             }
