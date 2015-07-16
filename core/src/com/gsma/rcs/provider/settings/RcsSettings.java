@@ -35,6 +35,7 @@ import com.gsma.rcs.provider.settings.RcsSettingsData.GsmaRelease;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ImMsgTech;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ImSessionStartMode;
 import com.gsma.rcs.provider.settings.RcsSettingsData.NetworkAccessType;
+import com.gsma.rcs.provisioning.ProvisioningInfo;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMethod;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
@@ -1630,8 +1631,8 @@ public class RcsSettings {
      * 
      * @return Version
      */
-    public String getProvisioningVersion() {
-        return readString(RcsSettingsData.PROVISIONING_VERSION);
+    public int getProvisioningVersion() {
+        return readInteger(RcsSettingsData.PROVISIONING_VERSION);
     }
 
     /**
@@ -1639,8 +1640,8 @@ public class RcsSettings {
      * 
      * @param version Version
      */
-    public void setProvisioningVersion(String version) {
-        writeParameter(RcsSettingsData.PROVISIONING_VERSION, version);
+    public void setProvisioningVersion(int version) {
+        writeInteger(RcsSettingsData.PROVISIONING_VERSION, version);
     }
 
     /**
@@ -1702,7 +1703,7 @@ public class RcsSettings {
         setXdmLogin("");
         setXdmPassword("");
         setXdmServer("");
-        setProvisioningVersion("0");
+        setProvisioningVersion(ProvisioningInfo.Version.RESETED.toInt());
         setProvisioningToken("");
     }
 
@@ -2228,4 +2229,39 @@ public class RcsSettings {
         return readString(RcsSettingsData.PROV_USER_MSG_TITLE);
     }
 
+    /**
+     * Get mobile country code
+     * 
+     * @return mobile country code or 0 if undefined
+     */
+    public int getMobileCountryCode() {
+        return readInteger(RcsSettingsData.MOBILE_COUNTRY_CODE);
+    }
+
+    /**
+     * Set the mobile country code
+     * 
+     * @param mcc the mobile country code
+     */
+    public void setMobileCountryCode(int mcc) {
+        writeInteger(RcsSettingsData.MOBILE_COUNTRY_CODE, mcc);
+    }
+
+    /**
+     * Get mobile network code
+     * 
+     * @return mobile network code or 0 if undefined
+     */
+    public int getMobileNetworkCode() {
+        return readInteger(RcsSettingsData.MOBILE_NETWORK_CODE);
+    }
+
+    /**
+     * Set the mobile network code
+     * 
+     * @param mnc the mobile network code
+     */
+    public void setMobileNetworkCode(int mnc) {
+        writeInteger(RcsSettingsData.MOBILE_NETWORK_CODE, mnc);
+    }
 }

@@ -32,6 +32,7 @@ import com.gsma.rcs.provider.ipcall.IPCallHistory;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.sharing.RichCallHistory;
+import com.gsma.rcs.provisioning.ProvisioningInfo;
 import com.gsma.rcs.provisioning.https.HttpsProvisioningService;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -252,29 +253,26 @@ public class LauncherUtils {
      * @param context Application context
      * @return the latest positive provisioning version
      */
-    public static String getProvisioningVersion(Context context) {
+    public static int getProvisioningVersion(Context context) {
         SharedPreferences preferences = context.getSharedPreferences(
                 AndroidRegistryFactory.RCS_PREFS_NAME, Activity.MODE_PRIVATE);
-        return preferences.getString(REGISTRY_PROVISIONING_VERSION, "0");
+        return preferences.getInt(REGISTRY_PROVISIONING_VERSION,
+                ProvisioningInfo.Version.RESETED.toInt());
     }
 
     /**
      * Save the latest positive provisioning version in shared preferences
      * 
      * @param context Application context
-     * @param value the latest positive provisioning version
+     * @param version the latest positive provisioning version
      */
-    public static void saveProvisioningVersion(Context context, String value) {
-        try {
-            int vers = Integer.parseInt(value);
-            if (vers > 0) {
-                SharedPreferences preferences = context.getSharedPreferences(
-                        AndroidRegistryFactory.RCS_PREFS_NAME, Activity.MODE_PRIVATE);
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putString(REGISTRY_PROVISIONING_VERSION, value);
-                editor.commit();
-            }
-        } catch (NumberFormatException e) {
+    public static void saveProvisioningVersion(Context context, int version) {
+        if (version > 0) {
+            SharedPreferences preferences = context.getSharedPreferences(
+                    AndroidRegistryFactory.RCS_PREFS_NAME, Activity.MODE_PRIVATE);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putInt(REGISTRY_PROVISIONING_VERSION, version);
+            editor.commit();
         }
     }
 
