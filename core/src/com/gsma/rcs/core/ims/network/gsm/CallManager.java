@@ -23,6 +23,7 @@
 package com.gsma.rcs.core.ims.network.gsm;
 
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.service.capability.CapabilityService;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
@@ -81,19 +82,10 @@ public class CallManager {
 
     private final TelephonyManager mPhonyManager;
 
-    /**
-     * Receiver for outgoing calls
-     */
-    private BroadcastReceiver mOutgoingCallReceiver;
+    private final BroadcastReceiver mOutgoingCallReceiver;
 
-    /**
-     * The context this manager is part of
-     */
-    private Context mContext;
+    private final Context mContext;
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(CallManager.class.getSimpleName());
 
     /**
@@ -106,7 +98,6 @@ public class CallManager {
         mImsModule = parent;
         mContext = context;
 
-        // Instantiate the telephony manager
         mPhonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 
         mOutgoingCallReceiver = new BroadcastReceiver() {
@@ -215,8 +206,10 @@ public class CallManager {
 
                             case TelephonyManager.CALL_STATE_OFFHOOK:
                                 if (State.CONNECTED == callState) {
-                                    // Request capabilities only if not a multiparty call or call
-                                    // hold
+                                    /*
+                                     * Request capabilities only if not a multiparty call or call
+                                     * hold.
+                                     */
                                     if (logActivated) {
                                         sLogger.debug("Multiparty call established");
                                     }
@@ -227,17 +220,20 @@ public class CallManager {
                                     sLogger.debug("Call is CONNECTED: connected number=" + sContact);
                                 }
 
-                                // Both parties are connected
+                                /* Both parties are connected. */
                                 callState = State.CONNECTED;
 
-                                // Delay option request 2 seconds according to implementation
-                                // guideline ID_4_20
+                                /*
+                                 * Delay option request 2 seconds according to implementation
+                                 * guideline ID_4_20.
+                                 */
                                 Timer timer = new Timer();
                                 timer.schedule(new TimerTask() {
                                     @Override
                                     public void run() {
-                                        // Request capabilities
-                                        requestCapabilities(sContact);
+                                        if (sContact != null) {
+                                            requestCapabilities(sContact);
+                                        }
                                     }
                                 }, 2000);
                                 break;
@@ -348,8 +344,9 @@ public class CallManager {
      * @param contact Contact identifier
      */
     private void requestCapabilities(ContactId contact) {
-        if (mImsModule.getCapabilityService().isServiceStarted() && (contact != null)) {
-            mImsModule.getCapabilityService().requestContactCapabilities(contact);
+        CapabilityService capabilityService = mImsModule.getCapabilityService();
+        if (capabilityService.isServiceStarted()) {
+            capabilityService.requestContactCapabilities(contact);
         }
     }
 
@@ -361,9 +358,9 @@ public class CallManager {
             /* Terminate richcall sessions if call hold or multiparty call */
             mImsModule.getRichcallService().terminateAllSessions();
         }
-
-        // Request new capabilities
-        requestCapabilities(sContact);
+        if (sContact != null) {
+            requestCapabilities(sContact);
+        }
     }
 
     /**
