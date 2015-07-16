@@ -59,6 +59,7 @@ import com.gsma.services.rcs.chat.IGroupChat;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
+import android.os.Binder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
@@ -108,10 +109,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      */
     private final Object lock = new Object();
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(GroupChatImpl.class.getName());
+
+    private final ServerApiUtils mServerApiUtils;
 
     /**
      * Constructor
@@ -125,11 +125,12 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * @param chatService ChatServiceImpl
      * @param messagingLog MessagingLog
      * @param core Core
+     * @param serverApiUtils
      */
     public GroupChatImpl(String chatId, IGroupChatEventBroadcaster broadcaster,
             InstantMessagingService imService, GroupChatPersistedStorageAccessor persistentStorage,
             RcsSettings rcsSettings, ContactManager contactManager, ChatServiceImpl chatService,
-            MessagingLog messagingLog, Core core) {
+            MessagingLog messagingLog, Core core, ServerApiUtils serverApiUtils) {
         mChatId = chatId;
         mBroadcaster = broadcaster;
         mImService = imService;
@@ -139,6 +140,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         mContactManager = contactManager;
         mMessagingLog = messagingLog;
         mCore = core;
+        mServerApiUtils = serverApiUtils;
     }
 
     private Content.ReasonCode imdnToMessageFailedReasonCode(ImdnDocument imdn) {
@@ -674,7 +676,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                         "Cannot leave group chat with group chat Id : ".concat(mChatId));
             }
             final GroupChatSession session = mImService.getGroupChatSession(mChatId);
-            if (session == null || !ServerApiUtils.isImsConnected()) {
+            if (session == null || !mServerApiUtils.isImsConnected()) {
                 /*
                  * Quitting group chat that is inactive/ not available due to network drop should
                  * reject the next group chat invitation that is received
@@ -898,7 +900,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             }
 
             if (session == null) {
-                if (isGroupChatRejoinable() && ServerApiUtils.isImsConnected()) {
+                if (isGroupChatRejoinable() && mServerApiUtils.isImsConnected()) {
                     rejoinGroupChat();
                 }
             }
@@ -991,7 +993,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             sLogger.debug(new StringBuilder("Group chat session with chatId '").append(mChatId)
                     .append("' is pending for acceptance, accept it.").toString());
         }
-        groupChatSession.acceptSession();
+        groupChatSession.acceptSession(Binder.getCallingUid());
     }
 
     private void dequeueChatMessageAndBroadcastStatusChange(ChatMessage message) {
@@ -1151,7 +1153,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     MimeType.TEXT_MESSAGE, mChatId, Direction.OUTGOING);
 
             /* If the IMS is connected at this time then send this message. */
-            if (ServerApiUtils.isImsConnected()) {
+            if (mServerApiUtils.isImsConnected()) {
                 sendChatMessage(msg);
             } else {
                 if (!isGroupChatActive()) {
@@ -1165,7 +1167,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 addOutgoingGroupChatMessage(msg, Content.Status.QUEUED,
                         Content.ReasonCode.UNSPECIFIED);
             }
-            return new ChatMessageImpl(persistentStorage);
+            return new ChatMessageImpl(persistentStorage, mServerApiUtils);
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -1215,7 +1217,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     geolocMsg.toString(), MimeType.GEOLOC_MESSAGE, mChatId, Direction.OUTGOING);
 
             /* If the IMS is connected at this time then send this message. */
-            if (ServerApiUtils.isImsConnected()) {
+            if (mServerApiUtils.isImsConnected()) {
                 sendChatMessage(geolocMsg);
             } else {
                 if (!isGroupChatActive()) {
@@ -1229,7 +1231,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 addOutgoingGroupChatMessage(geolocMsg, Content.Status.QUEUED,
                         Content.ReasonCode.UNSPECIFIED);
             }
-            return new ChatMessageImpl(persistentStorage);
+            return new ChatMessageImpl(persistentStorage, mServerApiUtils);
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -1322,7 +1324,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             sLogger.info("Rejoin group chat session related to the conversation " + mChatId);
         }
 
-        ServerApiUtils.testIms();
+        mServerApiUtils.testIms();
         final ChatSession session = mImService.rejoinGroupChatSession(mChatId);
 
         session.addListener(this);
@@ -1341,7 +1343,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             sLogger.info("Restart group chat session related to the conversation " + mChatId);
         }
 
-        ServerApiUtils.testIms();
+        mServerApiUtils.testIms();
         final GroupChatSession session = mImService.restartGroupChatSession(mChatId);
 
         session.addListener(this);
@@ -1387,7 +1389,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 if (sLogger.isActivated()) {
                     sLogger.debug("Core chat session is pending: auto accept it, as IM_SESSION_START mode = 0");
                 }
-                session.acceptSession();
+                session.acceptSession(Binder.getCallingUid());
             }
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -1835,5 +1837,18 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             mBroadcaster.broadcastMessageStatusChanged(mChatId, apiMimeType, msgId,
                     Content.Status.RECEIVED, Content.ReasonCode.UNSPECIFIED);
         }
+    }
+
+    /**
+     * Override the onTransact Binder method. It is used to check authorization for an application
+     * before calling API method. Control of authorization is made for third party applications (vs.
+     * native application) by comparing the client application fingerprint with the RCS application
+     * fingerprint
+     */
+    @Override
+    public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags)
+            throws android.os.RemoteException {
+        mServerApiUtils.assertApiIsAuthorized(Binder.getCallingUid());
+        return super.onTransact(code, data, reply, flags);
     }
 }

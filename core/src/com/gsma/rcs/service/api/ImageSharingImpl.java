@@ -42,9 +42,8 @@ import com.gsma.services.rcs.sharing.image.ImageSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.image.ImageSharing.State;
 
 import android.net.Uri;
+import android.os.Binder;
 import android.os.RemoteException;
-
-import javax2.sip.message.Response;
 
 /**
  * Image sharing implementation
@@ -68,10 +67,9 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
      */
     private final Object lock = new Object();
 
-    /**
-     * The logger
-     */
     private final Logger mLogger = Logger.getLogger(getClass().getName());
+
+    private final ServerApiUtils mServerApiUtils;
 
     /**
      * Constructor
@@ -81,16 +79,18 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
      * @param broadcaster IImageSharingEventBroadcaster
      * @param persistentStorage ImageSharingPersistedStorageAccessor
      * @param imageSharingService ImageSharingServiceImpl
+     * @param serverApiUtils
      */
     public ImageSharingImpl(String sharingId, RichcallService richcallService,
             IImageSharingEventBroadcaster broadcaster,
             ImageSharingPersistedStorageAccessor persistentStorage,
-            ImageSharingServiceImpl imageSharingService) {
+            ImageSharingServiceImpl imageSharingService, ServerApiUtils serverApiUtils) {
         mSharingId = sharingId;
         mRichcallService = richcallService;
         mBroadcaster = broadcaster;
         mPersistentStorage = persistentStorage;
         mImageSharingService = imageSharingService;
+        mServerApiUtils = serverApiUtils;
     }
 
     /*
@@ -436,7 +436,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
                 throw new ServerApiGenericException(new StringBuilder("Session with sharing ID '")
                         .append(mSharingId).append("' not available!").toString());
             }
-            session.acceptSession();
+            session.acceptSession(Binder.getCallingUid());
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
                 mLogger.error(ExceptionUtil.getFullStackTrace(e));
@@ -671,5 +671,18 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
         synchronized (lock) {
             setStateAndReasonCode(contact, ImageSharing.State.RINGING, ReasonCode.UNSPECIFIED);
         }
+    }
+
+    /**
+     * Override the onTransact Binder method. It is used to check authorization for an application
+     * before calling API method. Control of authorization is made for third party applications (vs.
+     * native application) by comparing the client application fingerprint with the RCS application
+     * fingerprint
+     */
+    @Override
+    public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags)
+            throws android.os.RemoteException {
+        mServerApiUtils.assertApiIsAuthorized(Binder.getCallingUid());
+        return super.onTransact(code, data, reply, flags);
     }
 }

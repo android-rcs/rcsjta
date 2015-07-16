@@ -49,6 +49,7 @@ import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.Base64;
 import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.IdGenerator;
@@ -97,13 +98,14 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * @param rcsSettings RCS settings
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param serverApiUtils
      */
     public OriginatingMsrpFileSharingSession(String fileTransferId,
             InstantMessagingService imService, MmContent content, ContactId contact,
             MmContent fileIcon, RcsSettings rcsSettings, long timestamp,
-            ContactManager contactManager) {
+            ContactManager contactManager, ServerApiUtils serverApiUtils) {
         super(imService, content, contact, fileIcon, fileTransferId, rcsSettings, timestamp,
-                contactManager);
+                contactManager, serverApiUtils);
 
         if (mLogger.isActivated()) {
             mLogger.debug(new StringBuilder("OriginatingFileSharingSession contact=")

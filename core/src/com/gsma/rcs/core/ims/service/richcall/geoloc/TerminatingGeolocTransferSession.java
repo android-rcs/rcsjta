@@ -46,9 +46,9 @@ import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
-import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Geoloc;
@@ -84,13 +84,15 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param serverApiUtils
      * @throws SipPayloadException
      */
     public TerminatingGeolocTransferSession(ImsService parent, SipRequest invite,
             ContactId contact, RcsSettings rcsSettings, long timestamp,
-            ContactManager contactManager) throws SipPayloadException {
+            ContactManager contactManager, ServerApiUtils serverApiUtils)
+            throws SipPayloadException {
         super(parent, ContentManager.createMmContentFromSdp(invite, rcsSettings), contact,
-                rcsSettings, timestamp, contactManager);
+                rcsSettings, timestamp, contactManager, serverApiUtils);
 
         // Create dialog path
         createTerminatingDialogPath(invite);
@@ -274,7 +276,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                 mLogger.info("Send 200 OK");
             }
             SipResponse resp = SipMessageFactory.create200OkInviteResponse(dialogPath,
-                    RichcallService.FEATURE_TAGS_GEOLOC_SHARE, sdp);
+                    getFeatureTags(), sdp);
 
             // The signalisation is established
             dialogPath.setSigEstablished();

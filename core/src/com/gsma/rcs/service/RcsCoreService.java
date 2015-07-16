@@ -34,6 +34,8 @@ import com.gsma.rcs.core.ims.ImsError;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
+import com.gsma.rcs.core.ims.service.extension.ExtensionManager;
+import com.gsma.rcs.core.ims.service.extension.SupportedExtensionUpdater;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatAutoRejoinTask;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
@@ -70,6 +72,7 @@ import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.messaging.OneToOneChatMessageDequeueTask;
 import com.gsma.rcs.provider.messaging.RecreateDeliveryExpirationAlarms;
 import com.gsma.rcs.provider.messaging.UpdateFileTransferStateAfterUngracefulTerminationTask;
+import com.gsma.rcs.provider.security.SecurityLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.sharing.RichCallHistory;
 import com.gsma.rcs.provider.sharing.UpdateGeolocSharingStateAfterUngracefulTerminationTask;
@@ -86,6 +89,7 @@ import com.gsma.rcs.service.api.IPCallServiceImpl;
 import com.gsma.rcs.service.api.ImageSharingServiceImpl;
 import com.gsma.rcs.service.api.MultimediaSessionServiceImpl;
 import com.gsma.rcs.service.api.OneToOneUndeliveredImManager;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.service.api.VideoSharingServiceImpl;
 import com.gsma.rcs.service.ipcalldraft.IIPCallService;
 import com.gsma.rcs.service.ipcalldraft.IPCall;
@@ -243,6 +247,12 @@ public class RcsCoreService extends Service implements CoreListener {
      */
     private final static Logger sLogger = Logger.getLogger(RcsCoreService.class.getSimpleName());
 
+    private ServerApiUtils mServerApiUtils;
+
+    private SecurityLog mSecurityLog;
+
+    private ExtensionManager mExtensionManager;
+
     @Override
     public void onCreate() {
         mCtx = getApplicationContext();
@@ -268,6 +278,9 @@ public class RcsCoreService extends Service implements CoreListener {
             @Override
             public void run() {
                 try {
+        mSecurityLog = SecurityLog.getInstance(mLocalContentResolver);
+        mExtensionManager = ExtensionManager.getInstance(mCtx, mRcsSettings, mSecurityLog);
+        mServerApiUtils = ServerApiUtils.getInstance(mExtensionManager);
                     startCore();
                 } catch (RuntimeException e) {
                     /*
@@ -364,10 +377,12 @@ public class RcsCoreService extends Service implements CoreListener {
 
             mHistoryLog = HistoryLog.createInstance(mLocalContentResolver);
 
-            Core.createCore(this, mRcsSettings, mContactManager, mMessagingLog);
+            Core.createCore(this, mRcsSettings, mContactManager, mMessagingLog, mSecurityLog,
+                    mExtensionManager, mServerApiUtils);
 
-            mContactApi = new ContactServiceImpl(mContactManager, mRcsSettings);
-            mCapabilityApi = new CapabilityServiceImpl(mContactManager, mRcsSettings);
+            mContactApi = new ContactServiceImpl(mContactManager, mRcsSettings, mServerApiUtils);
+            mCapabilityApi = new CapabilityServiceImpl(mContactManager, mRcsSettings,
+                    mServerApiUtils);
             mOneToOneUndeliveredImManager = new OneToOneUndeliveredImManager(mCtx, mMessagingLog);
             core = Core.getInstance();
             InstantMessagingService imService = core.getImService();
@@ -377,25 +392,26 @@ public class RcsCoreService extends Service implements CoreListener {
 
             mChatApi = new ChatServiceImpl(imService, mMessagingLog, mRcsSettings, mContactManager,
                     core, mLocalContentResolver, mImOperationExecutor, mOperationLock, mFtApi,
-                    mOneToOneUndeliveredImManager);
+                    mOneToOneUndeliveredImManager, mServerApiUtils);
             mFtApi = new FileTransferServiceImpl(imService, mChatApi, mMessagingLog, mRcsSettings,
                     mContactManager, core, mLocalContentResolver, mImOperationExecutor,
-                    mOperationLock, mOneToOneUndeliveredImManager);
+                    mOperationLock, mOneToOneUndeliveredImManager, mServerApiUtils);
             mVshApi = new VideoSharingServiceImpl(richCallService, mRichCallHistory, mRcsSettings,
                     mContactManager, core, mLocalContentResolver, mRcOperationExecutor,
-                    mOperationLock);
+                    mOperationLock, mServerApiUtils);
             mIshApi = new ImageSharingServiceImpl(richCallService, mRichCallHistory, mRcsSettings,
-                    mContactManager, mLocalContentResolver, mRcOperationExecutor, mOperationLock);
+                    mContactManager, mLocalContentResolver, mRcOperationExecutor, mOperationLock,
+                    mServerApiUtils);
             mGshApi = new GeolocSharingServiceImpl(richCallService, mContactManager,
                     mRichCallHistory, mRcsSettings, mLocalContentResolver, mRcOperationExecutor,
-                    mOperationLock);
+                    mOperationLock, mServerApiUtils);
             mHistoryApi = new HistoryServiceImpl(getApplicationContext());
             mIpcallApi = new IPCallServiceImpl(ipCallService,
                     IPCallHistory.createInstance(mLocalContentResolver), mContactManager,
-                    mRcsSettings);
+                    mRcsSettings, mServerApiUtils);
             mSessionApi = new MultimediaSessionServiceImpl(sipService, mRcsSettings,
-                    mContactManager);
-            mUploadApi = new FileUploadServiceImpl(imService, mRcsSettings);
+                    mContactManager, mServerApiUtils);
+            mUploadApi = new FileUploadServiceImpl(imService, mRcsSettings, mServerApiUtils);
 
             Logger.activationFlag = mRcsSettings.isTraceActivated();
             Logger.traceLevel = mRcsSettings.getTraceLevel();
@@ -1080,10 +1096,11 @@ public class RcsCoreService extends Service implements CoreListener {
         InstantMessagingService imService = core.getImService();
         /* Try to start auto resuming of HTTP file transfers marked as PAUSED_BY_SYSTEM */
         mImOperationExecutor.execute(new FtHttpResumeManager(imService, mRcsSettings,
-                mMessagingLog, mContactManager));
+                mMessagingLog, mContactManager, mServerApiUtils));
         /* Try to dequeue one-to-one chat messages and one-to-one file transfers. */
         mImOperationExecutor.execute(new OneToOneChatDequeueTask(mOperationLock, mCtx, core,
-                mChatApi, mFtApi, mHistoryLog, mMessagingLog, mContactManager, mRcsSettings));
+                mChatApi, mFtApi, mHistoryLog, mMessagingLog, mContactManager, mRcsSettings,
+                mServerApiUtils));
 
         ImdnManager imdnManager = imService.getImdnManager();
         if (imdnManager.isSendOneToOneDeliveryDisplayedReportsEnabled()
@@ -1114,25 +1131,28 @@ public class RcsCoreService extends Service implements CoreListener {
     @Override
     public void tryToDequeueGroupChatMessagesAndGroupFileTransfers(String chatId, Core core) {
         mImOperationExecutor.execute(new GroupChatDequeueTask(mOperationLock, mCtx, core, chatId,
-                mMessagingLog, mChatApi, mFtApi, mRcsSettings, mHistoryLog, mContactManager));
+                mMessagingLog, mChatApi, mFtApi, mRcsSettings, mHistoryLog, mContactManager,
+                mServerApiUtils));
     }
 
     @Override
     public void tryToDequeueOneToOneChatMessages(ContactId contact, Core core) {
         mImOperationExecutor.execute(new OneToOneChatMessageDequeueTask(mOperationLock, mCtx, core,
-                contact, mMessagingLog, mChatApi, mRcsSettings, mContactManager, mFtApi));
+                contact, mMessagingLog, mChatApi, mRcsSettings, mContactManager, mFtApi,
+                mServerApiUtils));
     }
 
     @Override
     public void tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(Core core) {
         mImOperationExecutor.execute(new OneToOneChatDequeueTask(mOperationLock, mCtx, core,
-                mChatApi, mFtApi, mHistoryLog, mMessagingLog, mContactManager, mRcsSettings));
+                mChatApi, mFtApi, mHistoryLog, mMessagingLog, mContactManager, mRcsSettings,
+                mServerApiUtils));
     }
 
     @Override
     public void tryToDequeueFileTransfers(Core core) {
         mImOperationExecutor.execute(new FileTransferDequeueTask(mOperationLock, mCtx, core,
-                mMessagingLog, mChatApi, mFtApi, mContactManager, mRcsSettings));
+                mMessagingLog, mChatApi, mFtApi, mContactManager, mRcsSettings, mServerApiUtils));
     }
 
     @Override
@@ -1154,5 +1174,18 @@ public class RcsCoreService extends Service implements CoreListener {
     @Override
     public void handleChatMessageDisplayReportSent(String chatId, ContactId remote, String msgId) {
         mChatApi.handleDisplayReportSent(chatId, remote, msgId);
+    }
+    @Override
+    public void checkIfSupportedExtensionsHaveChanged() {
+        mImOperationExecutor.execute(new SupportedExtensionUpdater(mCtx, mRcsSettings,
+                mSecurityLog, mExtensionManager, mServerApiUtils));
+    }
+
+    @Override
+    public void updateSupportedExtensionsForPackage(Integer uid, String packageName,
+            boolean packageRemoved) {
+        mImOperationExecutor.execute(new SupportedExtensionUpdater(uid, packageName,
+                packageRemoved, mCtx, mRcsSettings, mSecurityLog, mExtensionManager,
+                mServerApiUtils));
     }
 }

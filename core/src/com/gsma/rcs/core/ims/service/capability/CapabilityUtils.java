@@ -33,6 +33,7 @@ import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipMessage;
 import com.gsma.rcs.core.ims.service.richcall.image.ImageTransferSession;
+import com.gsma.rcs.provider.security.SecurityLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.MimeManager;
 import com.gsma.rcs.utils.NetworkUtils;
@@ -57,9 +58,11 @@ public class CapabilityUtils {
      * 
      * @param richcall Rich call supported
      * @param rcsSettings the accessor to RCS settings
+     * @param securityLog
      * @return List of tags
      */
-    public static String[] getSupportedFeatureTags(boolean richcall, RcsSettings rcsSettings) {
+    public static String[] getSupportedFeatureTags(boolean richcall, RcsSettings rcsSettings,
+            SecurityLog securityLog) {
         List<String> tags = new ArrayList<String>();
         List<String> icsiTags = new ArrayList<String>();
         List<String> iariTags = new ArrayList<String>();
@@ -139,7 +142,7 @@ public class CapabilityUtils {
 
         // Extensions
         if (rcsSettings.isExtensionsAllowed()) {
-            for (String extension : rcsSettings.getSupportedRcsExtensions()) {
+            for (String extension : securityLog.getSupportedExtensions()) {
                 StringBuilder sb = new StringBuilder(FeatureTags.FEATURE_RCSE_EXTENSION)
                         .append(".").append(extension);
                 iariTags.add(sb.toString());
@@ -227,10 +230,7 @@ public class CapabilityUtils {
             } else if (tag.contains(FeatureTags.FEATURE_RCSE_GC_SF)) {
                 capaBuilder.setGroupChatStoreForward(true);
 
-            } else
-            // TODO if (tag.contains(FeatureTags.FEATURE_RCSE_EXTENSION + ".ext") ||
-            // TODO tag.contains(FeatureTags.FEATURE_RCSE_EXTENSION + ".mnc")) {
-            if (tag.contains(FeatureTags.FEATURE_RCSE_EXTENSION)) {
+            } else if (tag.contains(FeatureTags.FEATURE_RCSE_EXTENSION)) {
                 // Support an RCS extension
                 capaBuilder.addExtension(extractServiceId(tag));
 

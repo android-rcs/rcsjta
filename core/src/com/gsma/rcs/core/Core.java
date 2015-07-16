@@ -28,6 +28,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.security.cert.KeyStoreManager;
 import com.gsma.rcs.core.ims.service.capability.CapabilityService;
+import com.gsma.rcs.core.ims.service.extension.ExtensionManager;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.ipcall.IPCallService;
 import com.gsma.rcs.core.ims.service.presence.PresenceService;
@@ -37,7 +38,9 @@ import com.gsma.rcs.core.ims.service.terms.TermsConditionsService;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
+import com.gsma.rcs.provider.security.SecurityLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.DeviceUtils;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -79,14 +82,8 @@ public class Core {
      */
     private ImsModule mImsModule;
 
-    /**
-     * Address book manager
-     */
     private AddressBookManager mAddressBookManager;
 
-    /**
-     * The logger
-     */
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
     private final RcsSettings mRcsSettings;
@@ -117,12 +114,16 @@ public class Core {
      * @param rcsSettings RcsSettings instance
      * @param messagingLog
      * @param contactsManager
+     * @param securityLog
+     * @param extensionManager
+     * @param serverApiUtils
      * @return Core instance
      * @throws IOException
      * @throws KeyStoreException
      */
     public static Core createCore(CoreListener listener, RcsSettings rcsSettings,
-            ContactManager contactsManager, MessagingLog messagingLog) throws IOException,
+            ContactManager contactsManager, MessagingLog messagingLog, SecurityLog securityLog,
+            ExtensionManager extensionManager, ServerApiUtils serverApiUtils) throws IOException,
             KeyStoreException {
         if (sInstance != null) {
             return sInstance;
@@ -130,7 +131,8 @@ public class Core {
         synchronized (Core.class) {
             if (sInstance == null) {
                 KeyStoreManager.loadKeyStore(rcsSettings);
-                sInstance = new Core(listener, rcsSettings, contactsManager, messagingLog);
+                sInstance = new Core(listener, rcsSettings, contactsManager, messagingLog,
+                        securityLog, extensionManager, serverApiUtils);
             }
         }
         return sInstance;
@@ -150,15 +152,9 @@ public class Core {
         sInstance = null;
     }
 
-    /**
-     * Constructor
-     * 
-     * @param listener Listener
-     * @param messagingLog
-     * @param contactsManager
-     */
     private Core(CoreListener listener, RcsSettings rcsSettings, ContactManager contactsManager,
-            MessagingLog messagingLog) {
+            MessagingLog messagingLog, SecurityLog securityLog, ExtensionManager extensionManager,
+            ServerApiUtils serverApiUtils) {
         boolean logActivated = logger.isActivated();
         if (logActivated) {
             logger.info("Terminal core initialization");
@@ -193,7 +189,8 @@ public class Core {
         mBackgroundHandler = new Handler(backgroundThread.getLooper());
 
         /* Create the IMS module */
-        mImsModule = new ImsModule(this, context, mRcsSettings, contactsManager, messagingLog);
+        mImsModule = new ImsModule(this, context, mRcsSettings, contactsManager, messagingLog,
+                securityLog, extensionManager, serverApiUtils);
 
         if (logActivated) {
             logger.info("Terminal core is created with success");
@@ -220,6 +217,8 @@ public class Core {
 
     /**
      * Schedule a background task on Handler for execution
+     * 
+     * @param task
      */
     public void scheduleForBackgroundExecution(Runnable task) {
         mBackgroundHandler.post(task);

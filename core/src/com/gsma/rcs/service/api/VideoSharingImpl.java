@@ -44,9 +44,8 @@ import com.gsma.services.rcs.sharing.video.VideoDescriptor;
 import com.gsma.services.rcs.sharing.video.VideoSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.video.VideoSharing.State;
 
+import android.os.Binder;
 import android.os.RemoteException;
-
-import javax2.sip.message.Response;
 
 /**
  * Video sharing session
@@ -72,10 +71,9 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
      */
     private final Object mLock = new Object();
 
-    /**
-     * The logger
-     */
     private final Logger mLogger = Logger.getLogger(getClass().getName());
+
+    private final ServerApiUtils mServerApiUtils;
 
     /**
      * Constructor
@@ -85,16 +83,18 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
      * @param broadcaster IVideoSharingEventBroadcaster
      * @param persistentStorage VideoSharingPersistedStorageAccessor
      * @param videoSharingService VideoSharingServiceImpl
+     * @param serverApiUtils
      */
     public VideoSharingImpl(String sharingId, RichcallService richcallService,
             IVideoSharingEventBroadcaster broadcaster,
             VideoSharingPersistedStorageAccessor persistentStorage,
-            VideoSharingServiceImpl videoSharingService) {
+            VideoSharingServiceImpl videoSharingService, ServerApiUtils serverApiUtils) {
         mSharingId = sharingId;
         mRichcallService = richcallService;
         mBroadcaster = broadcaster;
         mPersistentStorage = persistentStorage;
         mVideoSharingService = videoSharingService;
+        mServerApiUtils = serverApiUtils;
     }
 
     /*
@@ -314,7 +314,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
                         "No session with sharing ID:".concat(mSharingId));
             }
             session.setPlayer(player);
-            session.acceptSession();
+            session.acceptSession(Binder.getCallingUid());
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
                 mLogger.error(ExceptionUtil.getFullStackTrace(e));
@@ -645,5 +645,18 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         synchronized (mLock) {
             setStateAndReasonCode(contact, State.RINGING, ReasonCode.UNSPECIFIED);
         }
+    }
+
+    /**
+     * Override the onTransact Binder method. It is used to check authorization for an application
+     * before calling API method. Control of authorization is made for third party applications (vs.
+     * native application) by comparing the client application fingerprint with the RCS application
+     * fingerprint
+     */
+    @Override
+    public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags)
+            throws android.os.RemoteException {
+        mServerApiUtils.assertApiIsAuthorized(Binder.getCallingUid());
+        return super.onTransact(code, data, reply, flags);
     }
 }

@@ -46,6 +46,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
@@ -82,14 +83,16 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp for the session
      * @param contactManager Contact manager accessor
+     * @param serverApiUtils
      * @throws SipPayloadException Thrown if constructor fails to get information from payload
      */
     public TerminatingAdhocGroupChatSession(InstantMessagingService imService, SipRequest invite,
             ContactId contact, Map<ContactId, ParticipantStatus> participantsFromInvite,
             String remoteUri, RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
-            ContactManager contactManager) throws SipPayloadException {
+            ContactManager contactManager, ServerApiUtils serverApiUtils)
+            throws SipPayloadException {
         super(imService, contact, remoteUri, participantsFromInvite, rcsSettings, messagingLog,
-                timestamp, contactManager);
+                timestamp, contactManager, serverApiUtils);
 
         mMessagingLog = messagingLog;
 

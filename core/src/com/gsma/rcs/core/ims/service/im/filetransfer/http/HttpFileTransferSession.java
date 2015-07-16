@@ -35,6 +35,7 @@ import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -91,14 +92,15 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * @param messagingLog
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param serverApiUtils
      */
     public HttpFileTransferSession(InstantMessagingService imService, MmContent content,
             ContactId contact, String remoteUri, MmContent fileIcon, String chatSessionId,
             String chatContributionId, String fileTransferId, RcsSettings rcsSettings,
             MessagingLog messagingLog, long timestamp, long fileExpiration, long iconExpiration,
-            ContactManager contactManager) {
+            ContactManager contactManager, ServerApiUtils serverApiUtils) {
         super(imService, content, contact, remoteUri, fileIcon, fileTransferId, rcsSettings,
-                timestamp, contactManager);
+                timestamp, contactManager, serverApiUtils);
 
         mChatSessionId = chatSessionId;
         setContributionID(chatContributionId);

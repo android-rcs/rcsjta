@@ -54,6 +54,7 @@ import com.gsma.services.rcs.sharing.image.ImageSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.image.ImageSharing.State;
 
 import android.net.Uri;
+import android.os.Binder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
@@ -97,6 +98,8 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 
     private final Object mImsLock;
 
+    private final ServerApiUtils mServerApiUtils;
+
     /**
      * Constructor
      * 
@@ -107,11 +110,12 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * @param localContentResolver LocalContentResolver
      * @param imOperationExecutor IM ExecutorService
      * @param imsLock ims lock object
+     * @param serverApiUtils
      */
     public ImageSharingServiceImpl(RichcallService richcallService, RichCallHistory richCallLog,
             RcsSettings rcsSettings, ContactManager contactManager,
             LocalContentResolver localContentResolver, ExecutorService imOperationExecutor,
-            Object imsLock) {
+            Object imsLock, ServerApiUtils serverApiUtils) {
         if (sLogger.isActivated()) {
             sLogger.info("Image sharing service API is loaded");
         }
@@ -122,6 +126,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
         mLocalContentResolver = localContentResolver;
         mImOperationExecutor = imOperationExecutor;
         mImsLock = imsLock;
+        mServerApiUtils = serverApiUtils;
     }
 
     /**
@@ -171,7 +176,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * @return Returns true if registered else returns false
      */
     public boolean isServiceRegistered() {
-        return ServerApiUtils.isImsConnected();
+        return mServerApiUtils.isImsConnected();
     }
 
     /**
@@ -180,7 +185,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * @return the reason code for IMS service registration
      */
     public int getServiceRegistrationReasonCode() {
-        return ServerApiUtils.getServiceRegistrationReasonCode().toInt();
+        return mServerApiUtils.getServiceRegistrationReasonCode().toInt();
     }
 
     /**
@@ -258,7 +263,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
         ImageSharingPersistedStorageAccessor storageAccessor = new ImageSharingPersistedStorageAccessor(
                 sharingId, mRichCallLog);
         ImageSharingImpl imageSharing = new ImageSharingImpl(sharingId, mRichcallService,
-                mBroadcaster, storageAccessor, this);
+                mBroadcaster, storageAccessor, this, mServerApiUtils);
         addImageSharing(imageSharing, sharingId);
         session.addListener(imageSharing);
     }
@@ -307,7 +312,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
         if (sLogger.isActivated()) {
             sLogger.info("Initiate an image sharing session with ".concat(contact.toString()));
         }
-        ServerApiUtils.testIms();
+        mServerApiUtils.testIms();
         try {
             FileDescription desc = FileFactory.getFactory().getFileDescription(file);
             MmContent content = ContentManager
@@ -315,7 +320,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
             long timestamp = System.currentTimeMillis();
             final ImageTransferSession session = mRichcallService.initiateImageSharingSession(
                     contact, content, null, timestamp);
-
+            session.setCallingUid(Binder.getCallingUid());
             String sharingId = session.getSessionID();
             mRichCallLog.addImageSharing(session.getSessionID(), contact, Direction.OUTGOING,
                     session.getContent(), ImageSharing.State.INITIATING, ReasonCode.UNSPECIFIED,
@@ -325,7 +330,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
                     sharingId, contact, Direction.OUTGOING, file, content.getName(),
                     content.getEncoding(), content.getSize(), mRichCallLog, timestamp);
             ImageSharingImpl imageSharing = new ImageSharingImpl(sharingId, mRichcallService,
-                    mBroadcaster, storageAccessor, this);
+                    mBroadcaster, storageAccessor, this, mServerApiUtils);
 
             addImageSharing(imageSharing, sharingId);
             session.addListener(imageSharing);
@@ -366,7 +371,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
             ImageSharingPersistedStorageAccessor storageAccessor = new ImageSharingPersistedStorageAccessor(
                     sharingId, mRichCallLog);
             return new ImageSharingImpl(sharingId, mRichcallService, mBroadcaster, storageAccessor,
-                    this);
+                    this, mServerApiUtils);
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -549,5 +554,18 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 
     public void broadcastDeleted(ContactId contact, Set<String> sharingIds) {
         mBroadcaster.broadcastDeleted(contact, sharingIds);
+    }
+
+    /**
+     * Override the onTransact Binder method. It is used to check authorization for an application
+     * before calling API method. Control of authorization is made for third party applications (vs.
+     * native application) by comparing the client application fingerprint with the RCS application
+     * fingerprint
+     */
+    @Override
+    public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags)
+            throws android.os.RemoteException {
+        mServerApiUtils.assertApiIsAuthorized(Binder.getCallingUid());
+        return super.onTransact(code, data, reply, flags);
     }
 }

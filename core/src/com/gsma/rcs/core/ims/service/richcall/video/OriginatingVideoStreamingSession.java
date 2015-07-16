@@ -37,9 +37,9 @@ import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
-import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.video.IVideoPlayer;
@@ -72,11 +72,12 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param serverApiUtils
      */
     public OriginatingVideoStreamingSession(ImsService parent, IVideoPlayer player,
             MmContent content, ContactId contact, RcsSettings rcsSettings, long timestamp,
-            ContactManager contactManager) {
-        super(parent, content, contact, rcsSettings, timestamp, contactManager);
+            ContactManager contactManager, ServerApiUtils serverApiUtils) {
+        super(parent, content, contact, rcsSettings, timestamp, contactManager, serverApiUtils);
 
         // Create dialog path
         createOriginatingDialogPath();
@@ -109,8 +110,7 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
             if (mLogger.isActivated()) {
                 mLogger.info("Send INVITE");
             }
-            SipRequest invite = SipMessageFactory.createInvite(dialogPath,
-                    RichcallService.FEATURE_TAGS_VIDEO_SHARE, sdp);
+            SipRequest invite = SipMessageFactory.createInvite(dialogPath, getFeatureTags(), sdp);
 
             // Set the Authorization header
             getAuthenticationAgent().setAuthorizationHeader(invite);

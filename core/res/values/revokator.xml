@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+        <string-array name="revokator_duration">
+             <item>-1</item>
+             <item>0</item>
+             <item>3600</item>
+        </string-array>
+        <string-array name="revokator_phone">
+             <item>+33674969515</item>
+             <item>+33786589041</item>
+        </string-array>        
+        
+<!-- 	<string name="rcs_client_vendor">OrangeLabs</string>
+	<string name="rcs_client_version">Android-%s</string>
+        <string name="sony_client_vendor">sony</string>
+        <string name="sony_client_version">RCSAndr-1.1</string>
+ --></resources>

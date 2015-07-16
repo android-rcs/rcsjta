@@ -79,6 +79,7 @@ import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ImMsgTech;
 import com.gsma.rcs.service.api.ServerApiMaxAllowedSessionLimitReachedException;
 import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.IdGenerator;
@@ -175,9 +176,6 @@ public class InstantMessagingService extends ImsService {
         FeatureTags.FEATURE_OMA_IM
     };
 
-    /**
-     * IMDN manager
-     */
     private final ImdnManager mImdnManager;
 
     /**
@@ -185,12 +183,11 @@ public class InstantMessagingService extends ImsService {
      */
     private final StoreAndForwardManager mStoreAndFwdMgr;
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(InstantMessagingService.class.getName());
 
     private static final String sSizeExceededMsg = "133 Size exceeded";
+
+    private final ServerApiUtils mServerApiUtils;
 
     /**
      * Constructor
@@ -200,16 +197,18 @@ public class InstantMessagingService extends ImsService {
      * @param rcsSettings RcsSettings
      * @param contactsManager ContactManager
      * @param messagingLog MessagingLog
+     * @param serverApiUtils
      */
     public InstantMessagingService(ImsModule parent, Core core, RcsSettings rcsSettings,
-            ContactManager contactsManager, MessagingLog messagingLog) {
+            ContactManager contactsManager, MessagingLog messagingLog, ServerApiUtils serverApiUtils) {
         super(parent, true);
         mCore = core;
         mRcsSettings = rcsSettings;
         mContactManager = contactsManager;
         mMessagingLog = messagingLog;
+        mServerApiUtils = serverApiUtils;
         mStoreAndFwdMgr = new StoreAndForwardManager(this, mRcsSettings, mContactManager,
-                mMessagingLog);
+                mMessagingLog, serverApiUtils);
         mImdnManager = new ImdnManager(this, mCore, mRcsSettings, mMessagingLog);
         mImdnManager.start();
     }
@@ -740,14 +739,15 @@ public class InstantMessagingService extends ImsService {
             case HTTP:
                 return new OriginatingHttpFileSharingSession(fileTransferId, this, content,
                         contact, fileIcon, UUID.randomUUID().toString(), mCore, mMessagingLog,
-                        mRcsSettings, timestamp, timestampSent, mContactManager);
+                        mRcsSettings, timestamp, timestampSent, mContactManager, mServerApiUtils);
             case MSRP:
                 /*
                  * Since in MSRP communication we do not have a timestampSent to be sent in payload,
                  * then we don't need to pass the timestampSent to OriginatingMsrpFileSharingSession
                  */
                 return new OriginatingMsrpFileSharingSession(fileTransferId, this, content,
-                        contact, fileIcon, mRcsSettings, timestamp, mContactManager);
+                        contact, fileIcon, mRcsSettings, timestamp, mContactManager,
+                        mServerApiUtils);
             default:
                 throw new IllegalArgumentException(
                         "Unknown FileTransferProtocol ".concat(ftProtocol.toString()));
@@ -776,7 +776,7 @@ public class InstantMessagingService extends ImsService {
         FileSharingSession session = new OriginatingHttpGroupFileSharingSession(fileTransferId,
                 this, content, fileIcon, ImsModule.IMS_USER_PROFILE.getImConferenceUri(),
                 groupChatSessionId, groupChatId, UUID.randomUUID().toString(), mCore, mRcsSettings,
-                mMessagingLog, timestamp, timestampSent, mContactManager);
+                mMessagingLog, timestamp, timestampSent, mContactManager, mServerApiUtils);
 
         return session;
     }
@@ -877,7 +877,7 @@ public class InstantMessagingService extends ImsService {
         }
 
         FileSharingSession session = new TerminatingMsrpFileSharingSession(this, invite, remote,
-                mRcsSettings, timestamp, timestampSent, mContactManager);
+                mRcsSettings, timestamp, timestampSent, mContactManager, mServerApiUtils);
 
         mCore.getListener().handleFileTransferInvitation(session, false, remote,
                 session.getRemoteDisplayName(), FileTransferData.UNKNOWN_EXPIRATION);
@@ -899,7 +899,7 @@ public class InstantMessagingService extends ImsService {
         }
         long timestamp = firstMsg.getTimestamp();
         return new OriginatingOneToOneChatSession(this, contact, firstMsg, mRcsSettings,
-                mMessagingLog, timestamp, mContactManager);
+                mMessagingLog, timestamp, mContactManager, mServerApiUtils);
     }
 
     /**
@@ -1027,7 +1027,8 @@ public class InstantMessagingService extends ImsService {
         }
 
         TerminatingOneToOneChatSession session = new TerminatingOneToOneChatSession(this, invite,
-                remote, mRcsSettings, mMessagingLog, firstMsg.getTimestamp(), mContactManager);
+                remote, mRcsSettings, mMessagingLog, firstMsg.getTimestamp(), mContactManager,
+                mServerApiUtils);
 
         mCore.getListener().handleOneOneChatSessionInvitation(session);
 
@@ -1055,7 +1056,7 @@ public class InstantMessagingService extends ImsService {
 
         OriginatingAdhocGroupChatSession session = new OriginatingAdhocGroupChatSession(this,
                 ImsModule.IMS_USER_PROFILE.getImConferenceUri(), subject, participants,
-                mRcsSettings, mMessagingLog, timestamp, mContactManager);
+                mRcsSettings, mMessagingLog, timestamp, mContactManager, mServerApiUtils);
 
         return session;
     }
@@ -1114,7 +1115,7 @@ public class InstantMessagingService extends ImsService {
 
         TerminatingAdhocGroupChatSession session = new TerminatingAdhocGroupChatSession(this,
                 invite, contact, inviteParticipants, remoteUri, mRcsSettings, mMessagingLog,
-                timestamp, mContactManager);
+                timestamp, mContactManager, mServerApiUtils);
 
         /*--
          * 6.3.3.1 Leaving a Group Chat that is idle
@@ -1174,7 +1175,7 @@ public class InstantMessagingService extends ImsService {
         }
         long timestamp = groupChat.getTimestamp();
         return new RejoinGroupChatSession(this, groupChat, mRcsSettings, mMessagingLog, timestamp,
-                mContactManager);
+                mContactManager, mServerApiUtils);
     }
 
     /**
@@ -1215,7 +1216,7 @@ public class InstantMessagingService extends ImsService {
         long timestamp = groupChat.getTimestamp();
         return new RestartGroupChatSession(this, ImsModule.IMS_USER_PROFILE.getImConferenceUri(),
                 groupChat.getSubject(), chatId, storedParticipants, mRcsSettings, mMessagingLog,
-                timestamp, mContactManager);
+                timestamp, mContactManager, mServerApiUtils);
     }
 
     /**
@@ -1489,7 +1490,8 @@ public class InstantMessagingService extends ImsService {
         }
 
         TerminatingOneToOneChatSession oneToOneChatSession = new TerminatingOneToOneChatSession(
-                this, invite, remote, mRcsSettings, mMessagingLog, timestamp, mContactManager);
+                this, invite, remote, mRcsSettings, mMessagingLog, timestamp, mContactManager,
+                mServerApiUtils);
         CoreListener listener = mCore.getListener();
         listener.handleOneOneChatSessionInitiation(oneToOneChatSession);
         oneToOneChatSession.startSession();
@@ -1551,7 +1553,8 @@ public class InstantMessagingService extends ImsService {
         DownloadFromInviteFileSharingSession fileSharingSession = new DownloadFromInviteFileSharingSession(
                 this, oneToOneChatSession, ftinfo, fileTransferId,
                 oneToOneChatSession.getRemoteContact(), oneToOneChatSession.getRemoteDisplayName(),
-                mRcsSettings, mMessagingLog, timestamp, timestampSent, mContactManager);
+                mRcsSettings, mMessagingLog, timestamp, timestampSent, mContactManager,
+                mServerApiUtils);
         if (fileSharingSession.getFileicon() != null) {
             try {
                 fileSharingSession.downloadFileIcon();
@@ -1641,7 +1644,8 @@ public class InstantMessagingService extends ImsService {
         }
 
         TerminatingStoreAndForwardOneToOneChatMessageSession oneToOneChatSession = new TerminatingStoreAndForwardOneToOneChatMessageSession(
-                this, invite, remote, mRcsSettings, mMessagingLog, timestamp, mContactManager);
+                this, invite, remote, mRcsSettings, mMessagingLog, timestamp, mContactManager,
+                mServerApiUtils);
         CoreListener listener = mCore.getListener();
         listener.handleOneOneChatSessionInitiation(oneToOneChatSession);
         oneToOneChatSession.startSession();
@@ -1671,7 +1675,8 @@ public class InstantMessagingService extends ImsService {
         DownloadFromInviteFileSharingSession filetransferSession = new DownloadFromInviteFileSharingSession(
                 this, oneToOneChatSession, ftinfo, fileTransferId,
                 oneToOneChatSession.getRemoteContact(), oneToOneChatSession.getRemoteDisplayName(),
-                mRcsSettings, mMessagingLog, timestamp, timestampSent, mContactManager);
+                mRcsSettings, mMessagingLog, timestamp, timestampSent, mContactManager,
+                mServerApiUtils);
         if (filetransferSession.getFileicon() != null) {
             try {
                 filetransferSession.downloadFileIcon();

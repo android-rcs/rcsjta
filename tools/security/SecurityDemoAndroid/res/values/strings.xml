@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Security Demo Android</string>
+    <string name="action_settings">Settings</string>
+    <string name="validation">Security validation</string>
+    <string name="title">Security Model Validation</string>
+    <string name="prompt">Select IARI authorization document to check</string>
+
+</resources>

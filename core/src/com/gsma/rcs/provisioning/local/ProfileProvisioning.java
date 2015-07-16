@@ -25,11 +25,14 @@ import static com.gsma.rcs.provisioning.local.Provisioning.setEditTextParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.setSpinnerParameter;
 
 import com.gsma.rcs.R;
+import com.gsma.rcs.core.ims.service.extension.ExtensionManager;
 import com.gsma.rcs.provider.LocalContentResolver;
+import com.gsma.rcs.provider.security.SecurityLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData;
 import com.gsma.rcs.provider.settings.RcsSettingsData.AuthenticationProcedure;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ConfigurationMode;
+import com.gsma.rcs.provider.settings.RcsSettingsData.ExtensionPolicy;
 import com.gsma.rcs.provider.settings.RcsSettingsData.GsmaRelease;
 import com.gsma.rcs.provisioning.ProvisioningParser;
 import com.gsma.rcs.utils.ContactUtil;
@@ -95,6 +98,8 @@ public class ProfileProvisioning extends Activity {
 
     private RcsSettings mRcsSettings;
 
+    private ExtensionManager mExtensionManager;
+
     /**
      * Folder path for provisioning file
      */
@@ -114,7 +119,10 @@ public class ProfileProvisioning extends Activity {
         btn = (Button) findViewById(R.id.gen_btn);
         btn.setOnClickListener(genBtnListener);
 
-        mRcsSettings = RcsSettings.createInstance(new LocalContentResolver(this));
+        LocalContentResolver localContentResolver = new LocalContentResolver(this);
+        mRcsSettings = RcsSettings.createInstance(localContentResolver);
+        SecurityLog securityLog = SecurityLog.getInstance(localContentResolver);
+        mExtensionManager = ExtensionManager.getInstance(this, mRcsSettings, securityLog);
 
         updateProfileProvisioningUI(savedInstanceState);
         mInFront = true;
@@ -440,6 +448,7 @@ public class ProfileProvisioning extends Activity {
      * Asynchronous Tasks that loads the provisioning file.
      */
     private class ProvisionTask extends AsyncTask<String, Void, Boolean> {
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -464,6 +473,7 @@ public class ProfileProvisioning extends Activity {
             String configToParse = xmlFileContent
                     .replaceAll(TOKEN_MSISDN, phoneNumber.substring(1));
             ProvisioningParser parser = new ProvisioningParser(configToParse, mRcsSettings);
+
             // Save GSMA release set into the provider
             GsmaRelease release = mRcsSettings.getGsmaRelease();
             // Save client Messaging Mode set into the provider
@@ -474,6 +484,9 @@ public class ProfileProvisioning extends Activity {
             // Before parsing the provisioning, the client Messaging mode is set to NONE
             mRcsSettings.setMessagingMode(MessagingMode.NONE);
 
+            ExtensionPolicy extensionPolicy = mRcsSettings.getExtensionspolicy();
+            boolean extensionAllowed = mRcsSettings.isExtensionsAllowed();
+
             if (parser.parse(release, messagingMode, true)) {
                 /* Customize display name with user phone number */
                 mRcsSettings.setUserProfileImsDisplayName(phoneNumber);
@@ -481,6 +494,14 @@ public class ProfileProvisioning extends Activity {
                         .setFileTransferHttpSupported(mRcsSettings.getFtHttpServer().length() > 0
                                 && mRcsSettings.getFtHttpLogin().length() > 0
                                 && mRcsSettings.getFtHttpPassword().length() > 0);
+
+                if (extensionPolicy != mRcsSettings.getExtensionspolicy()
+                        || extensionAllowed != mRcsSettings.isExtensionsAllowed()) {
+                    /*
+                     * A provisioning setting has changed which may impact managed extensions
+                     */
+                    mExtensionManager.updateSupportedExtensions();
+                }
                 return true;
             } else {
                 if (logger.isActivated()) {

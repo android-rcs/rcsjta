@@ -31,7 +31,6 @@ import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
-import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
@@ -40,12 +39,12 @@ import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
-import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession.State;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -89,16 +88,17 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
      * @param timestamp Local timestamp for the session
      * @param timestampSent the timestamp sent in payload for the file sharing
      * @param contactManager
+     * @param serverApiUtils
      */
     public OriginatingHttpFileSharingSession(String fileTransferId,
             InstantMessagingService imService, MmContent content, ContactId contact,
             MmContent fileIcon, String tId, Core core, MessagingLog messagingLog,
             RcsSettings rcsSettings, long timestamp, long timestampSent,
-            ContactManager contactManager) {
+            ContactManager contactManager, ServerApiUtils serverApiUtils) {
         super(imService, content, contact, PhoneUtils.formatContactIdToUri(contact), fileIcon,
                 null, null, fileTransferId, rcsSettings, messagingLog, timestamp,
                 FileTransferData.UNKNOWN_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION,
-                contactManager);
+                contactManager, serverApiUtils);
         mCore = core;
         mTimestampSent = timestampSent;
         if (mLogger.isActivated()) {
@@ -222,6 +222,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                 return;
             }
             chatSession = imService.initiateOneToOneChatSession(getRemoteContact(), firstMsg);
+            chatSession.setCallingUid(getCallingUid());
             setChatSessionID(chatSession.getSessionID());
             setContributionID(chatSession.getContributionID());
 

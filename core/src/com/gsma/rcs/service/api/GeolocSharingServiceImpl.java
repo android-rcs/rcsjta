@@ -56,6 +56,7 @@ import com.gsma.services.rcs.sharing.geoloc.IGeolocSharing;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharingListener;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharingService;
 
+import android.os.Binder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
@@ -99,6 +100,8 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 
     private final RcsSettings mRcsSettings;
 
+    private final ServerApiUtils mServerApiUtils;
+
     /**
      * Constructor
      * 
@@ -109,11 +112,12 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * @param localContentResolver LocalContentResolver
      * @param imOperationExecutor IM ExecutorService
      * @param imsLock ims lock object
+     * @param serverApiUtils
      */
     public GeolocSharingServiceImpl(RichcallService richcallService, ContactManager contactManager,
             RichCallHistory richCallHistory, RcsSettings rcsSettings,
             LocalContentResolver localContentResolver, ExecutorService imOperationExecutor,
-            Object imsLock) {
+            Object imsLock, ServerApiUtils serverApiUtils) {
         if (sLogger.isActivated()) {
             sLogger.info("Geoloc sharing service API is loaded.");
         }
@@ -124,6 +128,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
         mLocalContentResolver = localContentResolver;
         mImOperationExecutor = imOperationExecutor;
         mImsLock = imsLock;
+        mServerApiUtils = serverApiUtils;
     }
 
     /**
@@ -173,7 +178,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * @return Returns true if registered else returns false
      */
     public boolean isServiceRegistered() {
-        return ServerApiUtils.isImsConnected();
+        return mServerApiUtils.isImsConnected();
     }
 
     /**
@@ -182,7 +187,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * @return the reason code for IMS service registration
      */
     public int getServiceRegistrationReasonCode() {
-        return ServerApiUtils.getServiceRegistrationReasonCode().toInt();
+        return mServerApiUtils.getServiceRegistrationReasonCode().toInt();
     }
 
     /**
@@ -258,7 +263,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
                 sharingId, contact, session.getGeoloc(), Direction.INCOMING, mRichcallLog,
                 session.getTimestamp());
         GeolocSharingImpl geolocSharing = new GeolocSharingImpl(sharingId, mBroadcaster,
-                mRichcallService, this, persistedStorage);
+                mRichcallService, this, persistedStorage, mServerApiUtils);
         addGeolocSharing(geolocSharing, sharingId);
         session.addListener(geolocSharing);
     }
@@ -295,7 +300,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
         if (sLogger.isActivated()) {
             sLogger.info("Initiate a geoloc sharing session with ".concat(contact.toString()));
         }
-        ServerApiUtils.testIms();
+        mServerApiUtils.testIms();
         try {
             String msgId = IdGenerator.generateMessageID();
             long timestamp = System.currentTimeMillis();
@@ -305,7 +310,8 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
             MmContent content = new GeolocContent("geoloc.xml", data.length, data);
 
             final GeolocTransferSession session = mRichcallService.initiateGeolocSharingSession(
-                    contact, content, geoloc, timestamp);
+                    contact, content, geoloc, timestamp, mServerApiUtils);
+            session.setCallingUid(Binder.getCallingUid());
             String sharingId = session.getSessionID();
             mRichcallLog.addOutgoingGeolocSharing(contact, sharingId, geoloc, State.INITIATING,
                     ReasonCode.UNSPECIFIED, timestamp);
@@ -315,7 +321,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
             GeolocSharingPersistedStorageAccessor persistedStorage = new GeolocSharingPersistedStorageAccessor(
                     sharingId, contact, geoloc, Direction.OUTGOING, mRichcallLog, timestamp);
             GeolocSharingImpl geolocSharing = new GeolocSharingImpl(sharingId, mBroadcaster,
-                    mRichcallService, this, persistedStorage);
+                    mRichcallService, this, persistedStorage, mServerApiUtils);
 
             session.addListener(geolocSharing);
             addGeolocSharing(geolocSharing, sharingId);
@@ -356,7 +362,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
             GeolocSharingPersistedStorageAccessor persistedStorage = new GeolocSharingPersistedStorageAccessor(
                     sharingId, mRichcallLog);
             return new GeolocSharingImpl(sharingId, mBroadcaster, mRichcallService, this,
-                    persistedStorage);
+                    persistedStorage, mServerApiUtils);
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -544,5 +550,18 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 
     public void broadcastDeleted(ContactId contact, Set<String> sharingIds) {
         mBroadcaster.broadcastDeleted(contact, sharingIds);
+    }
+
+    /**
+     * Override the onTransact Binder method. It is used to check authorization for an application
+     * before calling API method. Control of authorization is made for third party applications (vs.
+     * native application) by comparing the client application fingerprint with the RCS application
+     * fingerprint
+     */
+    @Override
+    public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags)
+            throws android.os.RemoteException {
+        mServerApiUtils.assertApiIsAuthorized(Binder.getCallingUid());
+        return super.onTransact(code, data, reply, flags);
     }
 }

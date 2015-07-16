@@ -26,7 +26,6 @@ import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.text.format.DateUtils;
@@ -70,7 +69,6 @@ public class CapabilitiesList extends Activity {
         super.onCreate(savedInstanceState);
 
         // Set layout
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.capabilities_list);
 
         // Set list adapter

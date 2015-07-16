@@ -52,6 +52,7 @@ import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.api.GroupFileTransferImpl;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.IdGenerator;
@@ -115,13 +116,14 @@ public abstract class GroupChatSession extends ChatSession {
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param serverApiUtils
      */
     public GroupChatSession(InstantMessagingService imService, ContactId contact,
             String conferenceId, Map<ContactId, ParticipantStatus> participants,
             RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
-            ContactManager contactManager) {
+            ContactManager contactManager, ServerApiUtils serverApiUtils) {
         super(imService, contact, conferenceId, rcsSettings, messagingLog, null, timestamp,
-                contactManager);
+                contactManager, serverApiUtils);
 
         mMaxParticipants = rcsSettings.getMaxChatParticipants();
 

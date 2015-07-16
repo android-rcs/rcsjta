@@ -73,7 +73,7 @@ import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.capability.Capabilities.CapabilitiesBuilder;
-import com.gsma.rcs.core.ims.service.extension.ServiceExtensionManager;
+import com.gsma.rcs.core.ims.service.extension.ExtensionManager;
 import com.gsma.rcs.core.ims.service.presence.FavoriteLink;
 import com.gsma.rcs.core.ims.service.presence.Geoloc;
 import com.gsma.rcs.core.ims.service.presence.PhotoIcon;
@@ -540,7 +540,7 @@ public final class ContactManager {
         values.put(KEY_AUTOMATA, newCapa.isSipAutomata());
         values.put(KEY_CAPABILITY_GROUP_CHAT_SF, newCapa.isGroupChatStoreForwardSupported());
         values.put(KEY_CAPABILITY_EXTENSIONS,
-                ServiceExtensionManager.getExtensions(newCapa.getSupportedExtensions()));
+                ExtensionManager.getExtensions(newCapa.getSupportedExtensions()));
         values.put(KEY_CAPABILITY_TIMESTAMP_LAST_REQUEST, newCapa.getTimestampOfLastRequest());
         values.put(KEY_CAPABILITY_TIMESTAMP_LAST_RESPONSE, newCapa.getTimestampOfLastResponse());
         values.put(KEY_CAPABILITY_PRESENCE_DISCOVERY, newCapa.isPresenceDiscoverySupported());
@@ -897,8 +897,8 @@ public final class ContactManager {
                 capaBuilder.setGroupChatStoreForward(isCapabilitySupported(cursor,
                         KEY_CAPABILITY_GROUP_CHAT_SF));
                 capaBuilder.setSipAutomata(isCapabilitySupported(cursor, KEY_AUTOMATA));
-                capaBuilder.setExtensions(ServiceExtensionManager.getExtensions(cursor
-                        .getString(cursor.getColumnIndexOrThrow(KEY_CAPABILITY_EXTENSIONS))));
+                capaBuilder.setExtensions(ExtensionManager.getExtensions(cursor.getString(cursor
+                        .getColumnIndexOrThrow(KEY_CAPABILITY_EXTENSIONS))));
                 capaBuilder.setTimestampOfLastRequest(cursor.getLong(cursor
                         .getColumnIndexOrThrow(KEY_CAPABILITY_TIMESTAMP_LAST_REQUEST)));
                 capaBuilder.setTimestampOfLastResponse(cursor.getLong(cursor
@@ -1463,8 +1463,7 @@ public final class ContactManager {
                         new String[] {
                                 Long.toString(rawContactId), MIMETYPE_CAPABILITY_EXTENSIONS,
                                 contact.toString()
-                        })
-                .withValue(Data.DATA2, ServiceExtensionManager.getExtensions(newExtensions))
+                        }).withValue(Data.DATA2, ExtensionManager.getExtensions(newExtensions))
                 .build();
     }
 
@@ -1994,7 +1993,7 @@ public final class ContactManager {
                     .withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
                     .withValue(Data.MIMETYPE, MIMETYPE_CAPABILITY_EXTENSIONS)
                     .withValue(Data.DATA1, contactNumber)
-                    .withValue(Data.DATA2, ServiceExtensionManager.getExtensions(exts))
+                    .withValue(Data.DATA2, ExtensionManager.getExtensions(exts))
                     .withValue(Data.DATA3,
                             getMimeTypeDescriptionDetails(MIMETYPE_CAPABILITY_EXTENSIONS)).build());
         }
@@ -2520,8 +2519,8 @@ public final class ContactManager {
                             /* Set RCS extensions capability */
                             int columnIndex = cursor.getColumnIndex(Data.DATA2);
                             if (INVALID_ID != columnIndex) {
-                                capaBuilder.setExtensions(ServiceExtensionManager
-                                        .getExtensions(cursor.getString(columnIndex)));
+                                capaBuilder.setExtensions(ExtensionManager.getExtensions(cursor
+                                        .getString(columnIndex)));
                             }
                         }
                             break;

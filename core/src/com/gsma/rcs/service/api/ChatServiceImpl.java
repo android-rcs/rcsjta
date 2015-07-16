@@ -68,6 +68,7 @@ import com.gsma.services.rcs.chat.IOneToOneChat;
 import com.gsma.services.rcs.chat.IOneToOneChatListener;
 import com.gsma.services.rcs.contact.ContactId;
 
+import android.os.Binder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
@@ -111,9 +112,6 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     private final Map<String, GroupChatImpl> mGroupChatCache = new HashMap<String, GroupChatImpl>();
 
-    /**
-     * The sLogger
-     */
     private static final Logger sLogger = Logger.getLogger(ChatServiceImpl.class.getSimpleName());
 
     /**
@@ -124,6 +122,8 @@ public class ChatServiceImpl extends IChatService.Stub {
     private final Object mImsLock;
 
     private final FileTransferServiceImpl mFileTransferService;
+
+    private final ServerApiUtils mServerApiUtils;
 
     /**
      * Constructor
@@ -138,12 +138,13 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param fileTransferService FileTransferServiceImpl
      * @param imsLock ims operations lock
      * @param oneToOneUndeliveredImManager OneToOneUndeliveredImManager
+     * @param serverApiUtils
      */
     public ChatServiceImpl(InstantMessagingService imService, MessagingLog messagingLog,
             RcsSettings rcsSettings, ContactManager contactManager, Core core,
             LocalContentResolver localContentResolver, ExecutorService imOperationExecutor,
             Object imsLock, FileTransferServiceImpl fileTransferService,
-            OneToOneUndeliveredImManager oneToOneUndeliveredImManager) {
+            OneToOneUndeliveredImManager oneToOneUndeliveredImManager, ServerApiUtils serverApiUtils) {
         if (sLogger.isActivated()) {
             sLogger.info("Chat service API is loaded");
         }
@@ -157,6 +158,7 @@ public class ChatServiceImpl extends IChatService.Stub {
         mImsLock = imsLock;
         mFileTransferService = fileTransferService;
         mOneToOneUndeliveredImManager = oneToOneUndeliveredImManager;
+        mServerApiUtils = serverApiUtils;
     }
 
     private ReasonCode imdnToFailedReasonCode(ImdnDocument imdn) {
@@ -242,7 +244,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @return Returns true if registered else returns false
      */
     public boolean isServiceRegistered() {
-        return ServerApiUtils.isImsConnected();
+        return mServerApiUtils.isImsConnected();
     }
 
     /**
@@ -251,7 +253,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @return the reason code for IMS service registration
      */
     public int getServiceRegistrationReasonCode() {
-        return ServerApiUtils.getServiceRegistrationReasonCode().toInt();
+        return mServerApiUtils.getServiceRegistrationReasonCode().toInt();
     }
 
     /**
@@ -436,7 +438,7 @@ public class ChatServiceImpl extends IChatService.Stub {
         if (oneToOneChat == null) {
             oneToOneChat = new OneToOneChatImpl(contact, mOneToOneChatEventBroadcaster, mImService,
                     mMessagingLog, mRcsSettings, this, mFileTransferService, mContactManager,
-                    mCore, mOneToOneUndeliveredImManager);
+                    mCore, mOneToOneUndeliveredImManager, mServerApiUtils);
             mOneToOneChatCache.put(contact, oneToOneChat);
         }
         return oneToOneChat;
@@ -486,7 +488,8 @@ public class ChatServiceImpl extends IChatService.Stub {
         GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
                 chatId, mMessagingLog, mRcsSettings);
         GroupChatImpl groupChat = new GroupChatImpl(chatId, mGroupChatEventBroadcaster, mImService,
-                storageAccessor, mRcsSettings, mContactManager, this, mMessagingLog, mCore);
+                storageAccessor, mRcsSettings, mContactManager, this, mMessagingLog, mCore,
+                mServerApiUtils);
         session.addListener(groupChat);
         addGroupChat(groupChat);
     }
@@ -544,7 +547,7 @@ public class ChatServiceImpl extends IChatService.Stub {
                     "The GroupChat feature is not activated on the connected IMS server!");
         }
         // Test IMS connection
-        ServerApiUtils.testIms();
+        mServerApiUtils.testIms();
         if (sLogger.isActivated()) {
             sLogger.info("Initiate an ad-hoc group chat session");
         }
@@ -553,12 +556,13 @@ public class ChatServiceImpl extends IChatService.Stub {
             long timestamp = System.currentTimeMillis();
             final GroupChatSession session = mImService.initiateAdhocGroupChatSession(
                     contactToInvite, subject, timestamp);
+            session.setCallingUid(Binder.getCallingUid());
             String chatId = session.getContributionID();
             GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
                     chatId, subject, Direction.OUTGOING, mMessagingLog, mRcsSettings, timestamp);
             GroupChatImpl groupChat = new GroupChatImpl(chatId, mGroupChatEventBroadcaster,
                     mImService, storageAccessor, mRcsSettings, mContactManager, this,
-                    mMessagingLog, mCore);
+                    mMessagingLog, mCore, mServerApiUtils);
             session.addListener(groupChat);
 
             mMessagingLog.addGroupChat(session.getContributionID(), session.getRemoteContact(),
@@ -587,7 +591,8 @@ public class ChatServiceImpl extends IChatService.Stub {
             GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
                     chatId, mMessagingLog, mRcsSettings);
             groupChat = new GroupChatImpl(chatId, mGroupChatEventBroadcaster, mImService,
-                    storageAccessor, mRcsSettings, mContactManager, this, mMessagingLog, mCore);
+                    storageAccessor, mRcsSettings, mContactManager, this, mMessagingLog, mCore,
+                    mServerApiUtils);
             mGroupChatCache.put(chatId, groupChat);
         }
         return groupChat;
@@ -639,7 +644,7 @@ public class ChatServiceImpl extends IChatService.Stub {
                 }
                 return false;
             }
-            if (!ServerApiUtils.isImsConnected()) {
+            if (!mServerApiUtils.isImsConnected()) {
                 if (sLogger.isActivated()) {
                     sLogger.debug("Cannot initiate group chat as IMS is not connected.");
                 }
@@ -1004,7 +1009,8 @@ public class ChatServiceImpl extends IChatService.Stub {
         ContactId contact = session.getRemoteContact();
         OneToOneChatImpl oneToOneChat = new OneToOneChatImpl(contact,
                 mOneToOneChatEventBroadcaster, mImService, mMessagingLog, mRcsSettings, this,
-                mFileTransferService, mContactManager, mCore, mOneToOneUndeliveredImManager);
+                mFileTransferService, mContactManager, mCore, mOneToOneUndeliveredImManager,
+                mServerApiUtils);
         session.addListener(oneToOneChat);
         addOneToOneChat(contact, oneToOneChat);
     }
@@ -1023,7 +1029,7 @@ public class ChatServiceImpl extends IChatService.Stub {
         try {
             ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
                     mMessagingLog, msgId);
-            return new ChatMessageImpl(persistentStorage);
+            return new ChatMessageImpl(persistentStorage, mServerApiUtils);
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -1151,5 +1157,18 @@ public class ChatServiceImpl extends IChatService.Stub {
         } else {
             getOrCreateGroupChat(chatId).handleChatMessageDisplayReportSent(msgId);
         }
+    }
+
+    /**
+     * Override the onTransact Binder method. It is used to check authorization for an application
+     * before calling API method. Control of authorization is made for third party applications (vs.
+     * native application) by comparing the client application fingerprint with the RCS application
+     * fingerprint
+     */
+    @Override
+    public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags)
+            throws android.os.RemoteException {
+        mServerApiUtils.assertApiIsAuthorized(Binder.getCallingUid());
+        return super.onTransact(code, data, reply, flags);
     }
 }

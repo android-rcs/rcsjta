@@ -48,9 +48,8 @@ import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 import com.gsma.services.rcs.filetransfer.IFileTransfer;
 
 import android.net.Uri;
+import android.os.Binder;
 import android.os.RemoteException;
-
-import javax2.sip.message.Response;
 
 /**
  * File transfer implementation
@@ -82,6 +81,8 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
     private final static Logger sLogger = Logger.getLogger(GroupFileTransferImpl.class
             .getSimpleName());
 
+    private final ServerApiUtils mServerApiUtils;
+
     /**
      * Constructor
      * 
@@ -94,12 +95,13 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
      * @param core Core
      * @param messagingLog
      * @param contactManager
+     * @param serverApiUtils
      */
     public GroupFileTransferImpl(String transferId, IGroupFileTransferBroadcaster broadcaster,
             InstantMessagingService imService,
             FileTransferPersistedStorageAccessor storageAccessor,
             FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings, Core core,
-            MessagingLog messagingLog, ContactManager contactManager) {
+            MessagingLog messagingLog, ContactManager contactManager, ServerApiUtils serverApiUtils) {
         mFileTransferId = transferId;
         mBroadcaster = broadcaster;
         mImService = imService;
@@ -109,6 +111,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         mCore = core;
         mMessagingLog = messagingLog;
         mContactManager = contactManager;
+        mServerApiUtils = serverApiUtils;
     }
 
     /**
@@ -124,14 +127,15 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
      * @param core Core
      * @param messagingLog
      * @param contactManager
+     * @param serverApiUtils
      */
     public GroupFileTransferImpl(String transferId, String chatId,
             GroupFileTransferBroadcaster broadcaster, InstantMessagingService imService,
             FileTransferPersistedStorageAccessor storageAccessor,
             FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings, Core core,
-            MessagingLog messagingLog, ContactManager contactManager) {
+            MessagingLog messagingLog, ContactManager contactManager, ServerApiUtils serverApiUtils) {
         this(transferId, broadcaster, imService, storageAccessor, fileTransferService, rcsSettings,
-                core, messagingLog, contactManager);
+                core, messagingLog, contactManager, serverApiUtils);
         mChatId = chatId;
     }
 
@@ -593,7 +597,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                             .append("': already accepted").toString());
 
                 }
-                ongoingSession.acceptSession();
+                ongoingSession.acceptSession(Binder.getCallingUid());
                 return;
             }
             /* No active session: restore session from provider */
@@ -621,7 +625,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             FileSharingSession session = new DownloadFromAcceptFileSharingSession(mImService,
                     ContentManager.createMmContent(resume.getFile(), resume.getSize(),
                             resume.getFileName()), download, mRcsSettings, mMessagingLog,
-                    mContactManager);
+                    mContactManager, mServerApiUtils);
             session.addListener(this);
             session.startSession();
         } catch (ServerApiBaseException e) {
@@ -835,7 +839,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                 }
                 return false;
             }
-            if (!ServerApiUtils.isImsConnected()) {
+            if (!mServerApiUtils.isImsConnected()) {
                 if (sLogger.isActivated()) {
                     sLogger.debug(new StringBuilder(
                             "Cannot resume transfer with file transfer Id '")
@@ -903,12 +907,12 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                     session = new ResumeUploadFileSharingSession(mImService,
                             ContentManager.createMmContent(resume.getFile(), resume.getSize(),
                                     resume.getFileName()), (FtHttpResumeUpload) resume,
-                            mRcsSettings, mMessagingLog, mContactManager);
+                            mRcsSettings, mMessagingLog, mContactManager, mServerApiUtils);
                 } else {
                     session = new DownloadFromResumeFileSharingSession(mImService,
                             ContentManager.createMmContent(resume.getFile(), resume.getSize(),
                                     resume.getFileName()), (FtHttpResumeDownload) resume,
-                            mRcsSettings, mMessagingLog, mContactManager);
+                            mRcsSettings, mMessagingLog, mContactManager, mServerApiUtils);
                 }
                 session.addListener(this);
                 session.startSession();
@@ -1348,5 +1352,18 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
     public boolean isExpiredDelivery() throws RemoteException {
         /* Delivery expiration is not applicable for group file transfers. */
         return false;
+    }
+
+    /**
+     * Override the onTransact Binder method. It is used to check authorization for an application
+     * before calling API method. Control of authorization is made for third party applications (vs.
+     * native application) by comparing the client application fingerprint with the RCS application
+     * fingerprint
+     */
+    @Override
+    public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags)
+            throws android.os.RemoteException {
+        mServerApiUtils.assertApiIsAuthorized(Binder.getCallingUid());
+        return super.onTransact(code, data, reply, flags);
     }
 }

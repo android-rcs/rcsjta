@@ -21,24 +21,27 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.chat.IChatMessage;
 import com.gsma.services.rcs.contact.ContactId;
 
+import android.os.Binder;
 import android.os.RemoteException;
 
 public class ChatMessageImpl extends IChatMessage.Stub {
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(ChatMessageImpl.class.getSimpleName());
 
     private final ChatMessagePersistedStorageAccessor mPersistentStorage;
+
+    private final ServerApiUtils mServerApiUtils;
 
     /**
      * Constructor
      * 
      * @param persistentStorage ChatMessagePersistedStorageAccessor
+     * @param serverApiUtils
      */
-    public ChatMessageImpl(ChatMessagePersistedStorageAccessor persistentStorage) {
+    public ChatMessageImpl(ChatMessagePersistedStorageAccessor persistentStorage,
+            ServerApiUtils serverApiUtils) {
         mPersistentStorage = persistentStorage;
+        mServerApiUtils = serverApiUtils;
     }
 
     public ContactId getContact() throws RemoteException {
@@ -263,5 +266,18 @@ public class ChatMessageImpl extends IChatMessage.Stub {
             sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
+    }
+
+    /**
+     * Override the onTransact Binder method. It is used to check authorization for an application
+     * before calling API method. Control of authorization is made for third party applications (vs.
+     * native application) by comparing the client application fingerprint with the RCS application
+     * fingerprint
+     */
+    @Override
+    public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags)
+            throws android.os.RemoteException {
+        mServerApiUtils.assertApiIsAuthorized(Binder.getCallingUid());
+        return super.onTransact(code, data, reply, flags);
     }
 }

@@ -23,7 +23,6 @@
 package com.gsma.rcs.core.ims;
 
 import com.gsma.rcs.core.Core;
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.CoreListener;
 import com.gsma.rcs.core.ims.network.ImsConnectionManager;
 import com.gsma.rcs.core.ims.network.ImsNetworkInterface;
@@ -40,18 +39,21 @@ import com.gsma.rcs.core.ims.service.ImsService.ImsServiceType;
 import com.gsma.rcs.core.ims.service.ImsServiceDispatcher;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.capability.CapabilityService;
-import com.gsma.rcs.core.ims.service.extension.ServiceExtensionManager;
+import com.gsma.rcs.core.ims.service.extension.ExtensionManager;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpTransferManager;
 import com.gsma.rcs.core.ims.service.ipcall.IPCallService;
 import com.gsma.rcs.core.ims.service.presence.PresenceService;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.sip.SipService;
+import com.gsma.rcs.core.ims.service.system.SystemRequestService;
 import com.gsma.rcs.core.ims.service.terms.TermsConditionsService;
 import com.gsma.rcs.core.ims.userprofile.UserProfile;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
+import com.gsma.rcs.provider.security.SecurityLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
 import android.content.Context;
@@ -86,14 +88,8 @@ public class ImsModule implements SipEventListener {
      */
     private Map<ImsServiceType, ImsService> mServices;
 
-    /**
-     * Service dispatcher
-     */
     private ImsServiceDispatcher mServiceDispatcher;
 
-    /**
-     * Call manager
-     */
     private CallManager mCallManager;
 
     /**
@@ -101,9 +97,8 @@ public class ImsModule implements SipEventListener {
      */
     private boolean mInitializationFinished = false;
 
-    /**
-     * The logger
-     */
+    private final ExtensionManager mExtensionManager;
+
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
     /**
@@ -112,18 +107,21 @@ public class ImsModule implements SipEventListener {
      * @param core Core
      * @param ctx The context this module is part of
      * @param rcsSettings RCSsettings instance
-     * @param contactManager Contact manager accessor
-     * @param messagingLog Messaging log accessor
-     * @throws CoreException Exception thrown if IMS module failed to be initialized
+     * @param contactManager
+     * @param messagingLog
+     * @param securityLog
+     * @param extensionManager
+     * @param serverApiUtils
      */
     public ImsModule(Core core, Context ctx, RcsSettings rcsSettings,
-            ContactManager contactManager, MessagingLog messagingLog) {
+            ContactManager contactManager, MessagingLog messagingLog, SecurityLog securityLog,
+            ExtensionManager extensionManager, ServerApiUtils serverApiUtils) {
         mCore = core;
-
+        mExtensionManager = extensionManager;
         if (logger.isActivated()) {
             logger.info("IMS module initialization");
         }
-        ServiceExtensionManager.getInstance(rcsSettings).updateSupportedExtensions(ctx);
+
         mCnxManager = new ImsConnectionManager(this, rcsSettings);
 
         SipManager.TIMEOUT = rcsSettings.getSipTransactionTimeout();
@@ -135,16 +133,21 @@ public class ImsModule implements SipEventListener {
         mServices.put(ImsServiceType.TERMS_CONDITIONS,
                 new TermsConditionsService(this, rcsSettings));
         mServices.put(ImsServiceType.CAPABILITY, new CapabilityService(this, rcsSettings,
-                contactManager));
+                contactManager, securityLog));
         mServices.put(ImsServiceType.INSTANT_MESSAGING, new InstantMessagingService(this, core,
-                rcsSettings, contactManager, messagingLog));
-        mServices.put(ImsServiceType.IPCALL, new IPCallService(this, rcsSettings, contactManager));
+                rcsSettings, contactManager, messagingLog, serverApiUtils));
+        mServices.put(ImsServiceType.IPCALL, new IPCallService(this, rcsSettings, contactManager,
+                serverApiUtils));
         mServices.put(ImsServiceType.RICHCALL, new RichcallService(this, core, contactManager,
-                rcsSettings));
+                rcsSettings, serverApiUtils));
         mServices.put(ImsServiceType.PRESENCE, new PresenceService(this, ctx, rcsSettings,
                 contactManager));
-        mServices.put(ImsServiceType.SIP, new SipService(this, contactManager, rcsSettings));
+        mServices.put(ImsServiceType.SIP, new SipService(this, contactManager, rcsSettings,
+                serverApiUtils));
+        mServices.put(ImsServiceType.SYSTEM_SERVICE, new SystemRequestService(this,
+                mExtensionManager));
 
+        // Create the service dispatcher
         mServiceDispatcher = new ImsServiceDispatcher(this, rcsSettings);
 
         mCallManager = new CallManager(this, ctx);
@@ -208,6 +211,8 @@ public class ImsModule implements SipEventListener {
         if (logger.isActivated()) {
             logger.info("Start the IMS module");
         }
+
+        mExtensionManager.updateSupportedExtensions();
 
         // Start the service dispatcher
         mServiceDispatcher.start();
@@ -377,6 +382,15 @@ public class ImsModule implements SipEventListener {
      */
     public SipService getSipService() {
         return (SipService) mServices.get(ImsServiceType.SIP);
+    }
+
+    /**
+     * Returns the system request service
+     * 
+     * @return System request service
+     */
+    public SystemRequestService getSystemRequestService() {
+        return (SystemRequestService) mServices.get(ImsServiceType.SYSTEM_SERVICE);
     }
 
     /**

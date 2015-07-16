@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<iari-authorization xmlns="http://gsma.com/ns/iari-authorization#">
+<iari Id="iari"/>
+<package-name Id="package-name"/>
+<package-signer Id="package-signer"/>
+<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Id="Signature"/>
+</iari-authorization>

@@ -41,6 +41,7 @@ import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.contact.ContactId;
@@ -80,11 +81,12 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param serverApiUtils
      */
     public OriginatingGeolocTransferSession(ImsService parent, MmContent content,
             ContactId contact, Geoloc geoloc, RcsSettings rcsSettings, long timestamp,
-            ContactManager contactManager) {
-        super(parent, content, contact, rcsSettings, timestamp, contactManager);
+            ContactManager contactManager, ServerApiUtils serverApiUtils) {
+        super(parent, content, contact, rcsSettings, timestamp, contactManager, serverApiUtils);
 
         // Create dialog path
         createOriginatingDialogPath();

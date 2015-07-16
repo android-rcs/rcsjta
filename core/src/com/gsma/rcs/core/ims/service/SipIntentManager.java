@@ -18,13 +18,6 @@
 
 package com.gsma.rcs.core.ims.service;
 
-import java.util.List;
-import java.util.Set;
-
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.capability.CapabilityUtils;
 import com.gsma.rcs.platform.AndroidFactory;
@@ -32,6 +25,13 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.capability.CapabilityService;
 import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
 import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
+
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * SIP intent manager
@@ -93,7 +93,8 @@ public class SipIntentManager {
         if (intent != null) {
             String mime = formatIntentMimeType(featureTag);
             intent.addCategory(Intent.CATEGORY_DEFAULT);
-            intent.setType(mime.toLowerCase());
+            /* Third party extensions are case sensitives */
+            intent.setType(mime);
         }
 
         return intent;

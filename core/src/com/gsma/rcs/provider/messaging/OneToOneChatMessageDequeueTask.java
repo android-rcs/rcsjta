@@ -26,6 +26,7 @@ import com.gsma.rcs.service.DequeueTask;
 import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
 import com.gsma.rcs.service.api.OneToOneChatImpl;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.Context;
@@ -41,9 +42,9 @@ public class OneToOneChatMessageDequeueTask extends DequeueTask {
 
     public OneToOneChatMessageDequeueTask(Object lock, Context ctx, Core core, ContactId contact,
             MessagingLog messagingLog, ChatServiceImpl chatService, RcsSettings rcsSettings,
-            ContactManager contactManager, FileTransferServiceImpl fileTransferService) {
+            ContactManager contactManager, FileTransferServiceImpl fileTransferService, ServerApiUtils serverApiUtils) {
         super(lock, ctx, core, contactManager, messagingLog, rcsSettings, chatService,
-                fileTransferService);
+                fileTransferService, serverApiUtils);
         mContact = contact;
     }
 

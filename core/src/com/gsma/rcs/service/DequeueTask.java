@@ -63,10 +63,12 @@ public abstract class DequeueTask implements Runnable {
     protected final FileTransferServiceImpl mFileTransferService;
 
     protected final Logger mLogger = Logger.getLogger(getClass().getName());
+    
+    protected final ServerApiUtils mServerApiUtils;
 
     public DequeueTask(Object lock, Context ctx, Core core, ContactManager contactManager,
             MessagingLog messagingLog, RcsSettings rcsSettings, ChatServiceImpl chatService,
-            FileTransferServiceImpl fileTransferService) {
+            FileTransferServiceImpl fileTransferService, ServerApiUtils serverApiUtils) {
         mLock = lock;
         mCtx = ctx;
         mCore = core;
@@ -76,6 +78,7 @@ public abstract class DequeueTask implements Runnable {
         mRcsSettings = rcsSettings;
         mChatService = chatService;
         mFileTransferService = fileTransferService;
+        mServerApiUtils = serverApiUtils;
     }
 
     /**
@@ -362,6 +365,6 @@ public abstract class DequeueTask implements Runnable {
      * @return boolean
      */
     protected boolean isImsConnected() {
-        return ServerApiUtils.isImsConnected();
+        return mServerApiUtils.isImsConnected();
     }
 }

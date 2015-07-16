@@ -34,6 +34,7 @@ import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
 import java.io.FileNotFoundException;
@@ -58,11 +59,12 @@ public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSha
      * @param rcsSettings
      * @param messagingLog
      * @param contactManager
+     * @param serverApiUtils
      */
 
     public DownloadFromResumeFileSharingSession(InstantMessagingService imService,
             MmContent content, FtHttpResumeDownload resume, RcsSettings rcsSettings,
-            MessagingLog messagingLog, ContactManager contactManager) {
+            MessagingLog messagingLog, ContactManager contactManager, ServerApiUtils serverApiUtils) {
         // @formatter:off
         super(imService,
                 content,
@@ -79,7 +81,8 @@ public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSha
                 messagingLog,
                 resume.getTimestamp(),
                 resume.getRemoteSipInstance(),
-                contactManager);
+                contactManager,
+                serverApiUtils);
         // @formatter:on
         mResume = resume;
         setSessionAccepted();

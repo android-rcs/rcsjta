@@ -32,6 +32,7 @@ import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
 import java.io.IOException;
@@ -56,15 +57,16 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
      * @param rcsSettings
      * @param messagingLog
      * @param contactManager
+     * @param serverApiUtils
      */
     public ResumeUploadFileSharingSession(InstantMessagingService imService, MmContent content,
             FtHttpResumeUpload resumeUpload, RcsSettings rcsSettings, MessagingLog messagingLog,
-            ContactManager contactManager) {
+            ContactManager contactManager, ServerApiUtils serverApiUtils) {
         super(resumeUpload.getFileTransferId(), imService, content, resumeUpload.getContact(),
                 resumeUpload.getFileicon() != null ? FileTransferUtils.createMmContent(resumeUpload
                         .getFileicon()) : null, resumeUpload.getTId(), Core.getInstance(),
                 messagingLog, rcsSettings, resumeUpload.getTimestamp(), resumeUpload
-                        .getTimestampSent(), contactManager);
+                        .getTimestampSent(), contactManager, serverApiUtils);
     }
 
     /**

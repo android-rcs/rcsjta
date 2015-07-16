@@ -680,6 +680,13 @@
                 android:layout_marginLeft="5dip"
                 android:layout_marginRight="5dip"
                 android:text="@string/Allow_extensions" />
+            <CheckBox
+                android:id="@+id/ExtensionPolicy"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:text="@string/ExtensionPolicy" />
         </LinearLayout>
     </ScrollView>
 

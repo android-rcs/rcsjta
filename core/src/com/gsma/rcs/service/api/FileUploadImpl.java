@@ -35,6 +35,7 @@ import com.gsma.services.rcs.upload.FileUploadInfo;
 import com.gsma.services.rcs.upload.IFileUpload;
 
 import android.net.Uri;
+import android.os.Binder;
 import android.os.RemoteException;
 
 /**
@@ -58,6 +59,8 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 
     private final Logger mLogger = Logger.getLogger(getClass().getName());
 
+    private final ServerApiUtils mServerApiUtils;
+
     /**
      * Constructor
      * 
@@ -66,14 +69,17 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
      * @param imService InstantMessagingService
      * @param fileUploadService FileUploadServiceImpl
      * @param file the URI of file to upload
+     * @param serverApiUtils
      */
     public FileUploadImpl(String uploadId, IFileUploadEventBroadcaster broadcaster,
-            InstantMessagingService imService, FileUploadServiceImpl fileUploadService, Uri file) {
+            InstantMessagingService imService, FileUploadServiceImpl fileUploadService, Uri file,
+            ServerApiUtils serverApiUtils) {
         mUploadId = uploadId;
         mBroadcaster = broadcaster;
         mImService = imService;
         mFileUploadService = fileUploadService;
         mFileUploadStorageAccessor = new FileUploadStorageAccessor(file, State.INITIATING);
+        mServerApiUtils = serverApiUtils;
     }
 
     /**
@@ -316,5 +322,18 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
             mFileUploadService.removeFileUpload(mUploadId);
             setState(mUploadId, FileUpload.State.FAILED);
         }
+    }
+
+    /**
+     * Override the onTransact Binder method. It is used to check authorization for an application
+     * before calling API method. Control of authorization is made for third party applications (vs.
+     * native application) by comparing the client application fingerprint with the RCS application
+     * fingerprint
+     */
+    @Override
+    public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags)
+            throws android.os.RemoteException {
+        mServerApiUtils.assertApiIsAuthorized(Binder.getCallingUid());
+        return super.onTransact(code, data, reply, flags);
     }
 }

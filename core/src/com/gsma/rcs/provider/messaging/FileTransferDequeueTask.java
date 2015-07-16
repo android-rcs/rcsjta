@@ -30,6 +30,7 @@ import com.gsma.rcs.service.api.GroupChatImpl;
 import com.gsma.rcs.service.api.GroupFileTransferImpl;
 import com.gsma.rcs.service.api.OneToOneChatImpl;
 import com.gsma.rcs.service.api.OneToOneFileTransferImpl;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
@@ -50,9 +51,9 @@ public class FileTransferDequeueTask extends DequeueTask {
 
     public FileTransferDequeueTask(Object lock, Context ctx, Core core, MessagingLog messagingLog,
             ChatServiceImpl chatService, FileTransferServiceImpl fileTransferService,
-            ContactManager contactManager, RcsSettings rcsSettings) {
+            ContactManager contactManager, RcsSettings rcsSettings, ServerApiUtils serverApiUtils) {
         super(lock, ctx, core, contactManager, messagingLog, rcsSettings, chatService,
-                fileTransferService);
+                fileTransferService, serverApiUtils);
         final ImdnManager imdnManager = mImService.getImdnManager();
         mDisplayedReportEnabled = imdnManager.isRequestGroupDeliveryDisplayedReportsEnabled();
         mDeliveryReportEnabled = imdnManager.isDeliveryDeliveredReportsEnabled();

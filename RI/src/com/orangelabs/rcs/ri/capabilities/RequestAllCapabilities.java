@@ -25,7 +25,6 @@ import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.Activity;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -53,7 +52,6 @@ public class RequestAllCapabilities extends Activity {
         super.onCreate(savedInstanceState);
 
         // Set layout
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.capabilities_refresh);
 
         // Set buttons callback

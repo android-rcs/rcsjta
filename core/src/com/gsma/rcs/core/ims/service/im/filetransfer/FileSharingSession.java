@@ -29,6 +29,7 @@ import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.StorageUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
@@ -99,11 +100,13 @@ public abstract class FileSharingSession extends ImsServiceSession {
      * @param rcsSettings RCS settings accessor
      * @param timestamp Local timestamp for the session
      * @param contactManager Contact manager accessor
+     * @param serverApiUtils
      */
     public FileSharingSession(InstantMessagingService imService, MmContent content,
             ContactId contact, String remoteUri, MmContent fileIcon, String filetransferId,
-            RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
-        super(imService, contact, remoteUri, rcsSettings, timestamp, contactManager);
+            RcsSettings rcsSettings, long timestamp, ContactManager contactManager,
+            ServerApiUtils serverApiUtils) {
+        super(imService, contact, remoteUri, rcsSettings, timestamp, contactManager, serverApiUtils);
 
         mContent = content;
         mFileIcon = fileIcon;

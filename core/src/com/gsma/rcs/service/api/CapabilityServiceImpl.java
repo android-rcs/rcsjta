@@ -61,15 +61,11 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      */
     private final Object lock = new Object();
 
-    /**
-     * The logger
-     */
     private final Logger logger = Logger.getLogger(getClass().getName());
 
-    /**
-     * Contacts manager
-     */
     private final ContactManager mContactManager;
+
+    private final ServerApiUtils mServerApiUtils;
 
     /**
      * This purpose of this handler is to make the request asynchronous with the mechanisms provider
@@ -106,7 +102,8 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
         }
 
         public void run() {
-            mCapabilityService.requestContactCapabilities(mContactManager.getAllContactsFromRcsContactProvider());
+            mCapabilityService.requestContactCapabilities(mContactManager
+                    .getAllContactsFromRcsContactProvider());
         }
     }
 
@@ -115,15 +112,17 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      * 
      * @param contactManager Contacts manager
      * @param rcsSettings
+     * @param serverApiUtils
      */
-    public CapabilityServiceImpl(ContactManager contactManager, RcsSettings rcsSettings) {
+    public CapabilityServiceImpl(ContactManager contactManager, RcsSettings rcsSettings,
+            ServerApiUtils serverApiUtils) {
         if (logger.isActivated()) {
             logger.info("Capability service API is loaded");
         }
-
         mContactManager = contactManager;
         mOptionsExchangeRequestHandler = new Handler();
         mRcsSettings = rcsSettings;
+        mServerApiUtils = serverApiUtils;
     }
 
     /**
@@ -141,7 +140,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      * @return Returns true if registered else returns false
      */
     public boolean isServiceRegistered() {
-        return ServerApiUtils.isImsConnected();
+        return mServerApiUtils.isImsConnected();
     }
 
     /**
@@ -150,7 +149,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      * @return the reason code for IMS service registration
      */
     public int getServiceRegistrationReasonCode() {
-        return ServerApiUtils.getServiceRegistrationReasonCode().toInt();
+        return mServerApiUtils.getServiceRegistrationReasonCode().toInt();
     }
 
     /**
@@ -291,7 +290,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
         }
 
         // Test IMS connection
-        ServerApiUtils.testIms();
+        mServerApiUtils.testIms();
         try {
             mOptionsExchangeRequestHandler.post(new CapabilitiesRequester(Core.getInstance()
                     .getCapabilityService(), contact));
@@ -354,7 +353,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
             logger.info("Request all contacts capabilities");
         }
         // Test IMS connection
-        ServerApiUtils.testIms();
+        mServerApiUtils.testIms();
 
         try {
             mOptionsExchangeRequestHandler.post(new AllCapabilitiesRequester(mContactManager, Core

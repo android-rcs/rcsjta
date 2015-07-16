@@ -171,6 +171,10 @@
             android:exported="true"
             android:readPermission="com.gsma.services.permission.RCS"
             android:writePermission="com.gsma.services.permission.RCS_INTERNAL_ACCESS_ONLY" />
+        <provider
+            android:name="com.gsma.rcs.provider.security.SecurityProvider"
+            android:authorities="com.gsma.rcs.security"
+            android:exported="false" />
 
         <!-- Device events receiver -->
 
@@ -198,6 +202,8 @@
             <intent-filter>
                 <action android:name="android.intent.action.PACKAGE_ADDED" />
                 <action android:name="android.intent.action.PACKAGE_REMOVED" />
+                <action android:name="android.intent.action.ACTION_PACKAGE_CHANGED" />
+                <action android:name="android.intent.action.ACTION_PACKAGE_REPLACED" />
 
                 <data android:scheme="package" />
             </intent-filter>
@@ -261,6 +267,18 @@
                 <action android:name="com.gsma.rcs.action.ONE_TO_ONE_FILE_TRANSFER_DELIVERY_TIMEOUT" />
             </intent-filter>
         </service>
+
+        <!-- Revocator -->
+        <activity
+            android:name=".revocator.RevocatorActivity"
+            android:icon="@drawable/revocator"
+            android:label="Revocator" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

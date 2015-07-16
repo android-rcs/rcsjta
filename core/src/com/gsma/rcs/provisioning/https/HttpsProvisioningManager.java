@@ -28,10 +28,12 @@ import com.gsma.rcs.R;
 import com.gsma.rcs.addressbook.RcsAccountException;
 import com.gsma.rcs.addressbook.RcsAccountManager;
 import com.gsma.rcs.core.TerminalInfo;
+import com.gsma.rcs.core.ims.service.extension.ExtensionManager;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.settings.RcsSettingsData.ExtensionPolicy;
 import com.gsma.rcs.provider.settings.RcsSettingsData.GsmaRelease;
 import com.gsma.rcs.provisioning.ProvisioningFailureReasons;
 import com.gsma.rcs.provisioning.ProvisioningInfo;
@@ -189,6 +191,8 @@ public class HttpsProvisioningManager {
 
     private final RcsAccountManager mRcsAccountManager;
 
+    private final ExtensionManager mExtensionManager;
+
     /**
      * Builds HTTPS request parameters that are related to Terminal, PARAM_RCS_VERSION &
      * PARAM_RCS_PROFILE.
@@ -215,10 +219,12 @@ public class HttpsProvisioningManager {
      * @param rcsSettings RCS settings accessor
      * @param messagingLog Message log accessor
      * @param contactManager Contact manager accessor
+     * @param extensionManager Extension manager singleton
      */
     public HttpsProvisioningManager(Context context, LocalContentResolver localContentResolver,
             final PendingIntent retryIntent, boolean first, boolean user, RcsSettings rcsSettings,
-            MessagingLog messagingLog, ContactManager contactManager) {
+            MessagingLog messagingLog, ContactManager contactManager,
+            ExtensionManager extensionManager) {
         mCtx = context;
         mLocalContentResolver = localContentResolver;
         mRetryIntent = retryIntent;
@@ -231,6 +237,7 @@ public class HttpsProvisioningManager {
         mSmsManager = new HttpsProvisioningSMS(this, localContentResolver, rcsSettings,
                 messagingLog, contactManager);
         mRcsAccountManager = new RcsAccountManager(mCtx, contactManager);
+        mExtensionManager = extensionManager;
 
         final HandlerThread backgroundThread = new HandlerThread(BACKGROUND_THREAD_NAME);
         backgroundThread.start();
@@ -438,8 +445,8 @@ public class HttpsProvisioningManager {
                                 + msisdn);
                     }
 
-                    msisdn = HttpsProvisioningMSISDNInput.getInstance().displayPopupAndWaitResponse(
-                            mCtx);
+                    msisdn = HttpsProvisioningMSISDNInput.getInstance()
+                            .displayPopupAndWaitResponse(mCtx);
 
                     if (msisdn == null) {
                         return null;
@@ -856,6 +863,9 @@ public class HttpsProvisioningManager {
                 /* Before parsing the provisioning, the client Messaging mode is set to NONE */
                 mRcsSettings.setMessagingMode(MessagingMode.NONE);
 
+                ExtensionPolicy extensionPolicy = mRcsSettings.getExtensionspolicy();
+                boolean extensionAllowed = mRcsSettings.isExtensionsAllowed();
+
                 if (parser.parse(gsmaRelease, messagingMode, mFirst)) {
                     // Successfully provisioned, 1st time reg finalized
                     mFirst = false;
@@ -954,6 +964,15 @@ public class HttpsProvisioningManager {
                         mRcsSettings.setConfigurationValid(true);
                         // Start the RCS core service
                         LauncherUtils.launchRcsCoreService(mCtx, mRcsSettings);
+
+                        if (extensionPolicy != mRcsSettings.getExtensionspolicy()
+                                || extensionAllowed != mRcsSettings.isExtensionsAllowed()) {
+                            /*
+                             * A provisioning setting has changed which may impact managed
+                             * extensions
+                             */
+                            mExtensionManager.updateSupportedExtensions();
+                        }
                     }
 
                     // Send service provisioning intent

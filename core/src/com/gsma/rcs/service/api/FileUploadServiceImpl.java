@@ -40,6 +40,7 @@ import com.gsma.services.rcs.upload.IFileUploadService;
 import com.gsma.services.rcs.upload.IFileUploadServiceConfiguration;
 
 import android.net.Uri;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
@@ -62,9 +63,6 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 
     private final Map<String, IFileUpload> mFileUploadCache = new HashMap<String, IFileUpload>();
 
-    /**
-     * The sLogger
-     */
     private static final Logger sLogger = Logger.getLogger(FileUploadServiceImpl.class
             .getSimpleName());
 
@@ -75,18 +73,23 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 
     private final RcsSettings mRcsSettings;
 
+    private final ServerApiUtils mServerApiUtils;
+
     /**
      * Constructor
      * 
      * @param imService InstantMessagingService
      * @param rcsSettings
+     * @param serverApiUtils
      */
-    public FileUploadServiceImpl(InstantMessagingService imService, RcsSettings rcsSettings) {
+    public FileUploadServiceImpl(InstantMessagingService imService, RcsSettings rcsSettings,
+            ServerApiUtils serverApiUtils) {
         if (sLogger.isActivated()) {
             sLogger.info("File upload service API is loaded");
         }
         mImService = imService;
         mRcsSettings = rcsSettings;
+        mServerApiUtils = serverApiUtils;
     }
 
     /**
@@ -166,8 +169,8 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
         if (sLogger.isActivated()) {
             sLogger.info("Initiate a file upload session (thumbnail option " + fileicon + ")");
         }
-        ServerApiUtils.testCore();
-        ServerApiUtils.testIms();
+        mServerApiUtils.testCore();
+        mServerApiUtils.testIms();
         try {
             mImService.assertAvailableFileTransferSession("Max file transfer sessions achieved.");
 
@@ -181,7 +184,7 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
             final FileUploadSession session = new FileUploadSession(content, fileicon, mRcsSettings);
 
             FileUploadImpl fileUpload = new FileUploadImpl(session.getUploadID(), mBroadcaster,
-                    mImService, this, file);
+                    mImService, this, file, mServerApiUtils);
 
             session.addListener(fileUpload);
             addFileUpload(fileUpload);
@@ -208,7 +211,7 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      */
     public boolean canUploadFile() throws RemoteException {
         try {
-            if (!ServerApiUtils.isImsConnected()) {
+            if (!mServerApiUtils.isImsConnected()) {
                 if (sLogger.isActivated()) {
                     sLogger.debug("Cannot upload file now as IMS is not connected.");
                 }
@@ -367,5 +370,18 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      */
     public ICommonServiceConfiguration getCommonConfiguration() {
         return new CommonServiceConfigurationImpl(mRcsSettings);
+    }
+
+    /**
+     * Override the onTransact Binder method. It is used to check authorization for an application
+     * before calling API method. Control of authorization is made for third party applications (vs.
+     * native application) by comparing the client application fingerprint with the RCS application
+     * fingerprint
+     */
+    @Override
+    public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags)
+            throws android.os.RemoteException {
+        mServerApiUtils.assertApiIsAuthorized(Binder.getCallingUid());
+        return super.onTransact(code, data, reply, flags);
     }
 }

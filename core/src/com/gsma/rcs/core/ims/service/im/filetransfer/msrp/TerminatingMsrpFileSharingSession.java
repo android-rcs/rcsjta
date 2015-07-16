@@ -56,6 +56,7 @@ import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
@@ -99,15 +100,18 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * @param timestamp Local timestamp for the session
      * @param timestampSent the remote timestamp sent in payload for the file sharing
      * @param contactManager
+     * @param serverApiUtils
      * @throws SipPayloadException
      * @throws SipNetworkException
      */
     public TerminatingMsrpFileSharingSession(InstantMessagingService imService, SipRequest invite,
             ContactId remote, RcsSettings rcsSettings, long timestamp, long timestampSent,
-            ContactManager contactManager) throws SipPayloadException, SipNetworkException {
+            ContactManager contactManager, ServerApiUtils serverApiUtils)
+            throws SipPayloadException, SipNetworkException {
         super(imService, ContentManager.createMmContentFromSdp(invite, rcsSettings), remote,
                 FileTransferUtils.extractFileIcon(invite, rcsSettings), IdGenerator
-                        .generateMessageID(), rcsSettings, timestamp, contactManager);
+                        .generateMessageID(), rcsSettings, timestamp, contactManager,
+                serverApiUtils);
         mTimestampSent = timestampSent;
 
         // Create dialog path
@@ -340,7 +344,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                 mLogger.info("Send 200 OK");
             }
             SipResponse resp = SipMessageFactory.create200OkInviteResponse(dialogPath,
-                    InstantMessagingService.FT_FEATURE_TAGS, sdp);
+                    getFeatureTags(), sdp);
 
             /* The signalisation is established */
             dialogPath.setSigEstablished();

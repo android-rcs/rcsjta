@@ -269,12 +269,12 @@
 
     <!-- MM session menu -->
     <string name="menu_mm_session">Multimedia session</string>
-    <string name="menu_initiate_messaging_session">Initiate messaging session</string>
-    <string name="menu_messaging_sessions_list">Current messaging sessions</string>
-    <string name="menu_initiate_streaming_session">Initiate streaming session</string>
-    <string name="menu_streaming_sessions_list">Current streaming sessions</string>
-    <string name="label_initiate_session">Initiate session</string>
-    <string name="label_no_session">No session</string>
+    <string name="menu_initiate_messaging_session">Initiate multimedia messaging session</string>
+    <string name="menu_messaging_sessions_list">Current multimedia messaging sessions</string>
+    <string name="menu_initiate_streaming_session">Initiate multimedia streaming session</string>
+    <string name="menu_streaming_sessions_list">Current multimedia streaming sessions</string>
+    <string name="label_initiate_session">Initiate multimedia session</string>
+    <string name="label_no_session">No multimedia session</string>
     <string name="label_service_id">Service ID:</string>
     <string name="label_session_canceled">Session initiation has been canceled</string>
     <string name="label_session_aborted">Session aborted (%1$s)</string>
@@ -283,8 +283,8 @@
     <string name="label_session_has_expired">Session has expired</string>
     <string name="title_recv_messaging_session">Multimedia messaging invitation</string>
     <string name="title_recv_streaming_session">Multimedia streaming invitation</string>
-    <string name="title_messaging_session">Messaging session</string>
-    <string name="title_streaming_session">Streaming session</string>
+    <string name="title_messaging_session">Multimedia messaging session</string>
+    <string name="title_streaming_session">Multimedia streaming session</string>
     <string name="label_session">Session %s</string>
     <string name="label_send_data">Send data</string>
     <string name="label_recv_data">Receive data:</string>

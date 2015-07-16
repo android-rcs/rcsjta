@@ -24,7 +24,12 @@ package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.network.ImsNetworkInterface;
+import com.gsma.rcs.core.ims.network.sip.FeatureTags;
+import com.gsma.rcs.core.ims.service.extension.ExtensionManager;
+import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsServiceRegistration;
+
+import java.util.List;
 
 /**
  * Server API utils
@@ -32,10 +37,42 @@ import com.gsma.services.rcs.RcsServiceRegistration;
  * @author Jean-Marc AUFFRET
  */
 public class ServerApiUtils {
+
+    private final static Logger logger = Logger.getLogger(ServerApiUtils.class.getSimpleName());
+
+    /**
+     * Singleton of ServerApiUtils singleton
+     */
+    private static volatile ServerApiUtils sInstance;
+
+    private final ExtensionManager mExtensionManager;
+
+    private ServerApiUtils(ExtensionManager extensionManager) {
+        mExtensionManager = extensionManager;
+    }
+
+    /**
+     * Gets the instance of ServerApiUtils.
+     * 
+     * @param extensionManager
+     * @return instance of ServerApiUtils singleton
+     */
+    public static ServerApiUtils getInstance(ExtensionManager extensionManager) {
+        if (sInstance != null) {
+            return sInstance;
+        }
+        synchronized (ServerApiUtils.class) {
+            if (sInstance == null) {
+                sInstance = new ServerApiUtils(extensionManager);
+            }
+        }
+        return sInstance;
+    }
+
     /**
      * Test core
      */
-    public static void testCore() {
+    public void testCore() {
         if (Core.getInstance() == null) {
             throw new ServerApiGenericException("Core is not instanciated");
         }
@@ -44,7 +81,7 @@ public class ServerApiUtils {
     /**
      * Test IMS connection
      */
-    public static void testIms() {
+    public void testIms() {
         if (!isImsConnected()) {
             throw new ServerApiServiceNotRegisteredException("Core is not connected to IMS");
         }
@@ -55,7 +92,7 @@ public class ServerApiUtils {
      * 
      * @return Boolean
      */
-    public static boolean isImsConnected() {
+    public boolean isImsConnected() {
         Core core = Core.getInstance();
         if (core == null) {
             return false;
@@ -72,7 +109,7 @@ public class ServerApiUtils {
      * 
      * @return reason code
      */
-    public static RcsServiceRegistration.ReasonCode getServiceRegistrationReasonCode() {
+    public RcsServiceRegistration.ReasonCode getServiceRegistrationReasonCode() {
         Core core = Core.getInstance();
         if (core == null) {
             return RcsServiceRegistration.ReasonCode.UNSPECIFIED;
@@ -85,13 +122,86 @@ public class ServerApiUtils {
     }
 
     /**
-     * Test API extension permission
+     * Checks if extension is authorized for an application. Application is identified by its uid
      * 
-     * @param ext Extension ID
+     * @param packageUid
+     * @param serviceId
      * @throws ServerApiPermissionDeniedException
      */
-    public static void testApiExtensionPermission(String ext)
+    public void assertExtensionIsAuthorized(Integer packageUid, String serviceId)
             throws ServerApiPermissionDeniedException {
-        // No control done in this release
+        if (mExtensionManager.isNativeApplication(packageUid)) {
+            if (logger.isActivated()) {
+                logger.info("assertExtensionIsAuthorized : no control for native application");
+            }
+            return;
+        }
+        mExtensionManager.testServicePermission(packageUid, serviceId);
+    }
+
+    /**
+     * Checks if API access is authorized for an application. Application is identified by its uid
+     * 
+     * @param packageUid
+     * @throws ServerApiPermissionDeniedException
+     */
+    public void assertApiIsAuthorized(Integer packageUid) throws ServerApiPermissionDeniedException {
+        if (mExtensionManager.isNativeApplication(packageUid)) {
+            if (logger.isActivated()) {
+                logger.info("assertApiIsAuthorized : no control for native application");
+            }
+            return;
+        }
+        mExtensionManager.testApiPermission(packageUid);
+    }
+
+    /**
+     * Add IARI (application Identifier) as features tag in IMS session for third party application
+     * 
+     * @param featureTags
+     * @param callingUid
+     */
+    public void addApplicationIdAsFeaturesTag(List<String> featureTags, Integer callingUid) {
+        boolean isActivated = logger.isActivated();
+        if (isActivated) {
+            logger.debug("addApplicationIdAsFeaturesTag , callingUid : ".concat(String
+                    .valueOf(callingUid)));
+        }
+
+        if (mExtensionManager.isNativeApplication(callingUid)) {
+            if (isActivated) {
+                logger.debug("   --> no control for native application");
+            }
+            return;
+        }
+
+        String iari = mExtensionManager.getApplicationId(callingUid);
+        if (iari == null) {
+            if (isActivated) {
+                logger.debug(" --> no authorization found");
+            }
+            return;
+        }
+        iari = new StringBuilder(FeatureTags.FEATURE_RCSE_EXTENSION).append(".").append(iari)
+                .toString();
+
+        for (int i = 0; i < featureTags.size(); i++) {
+            if (featureTags.get(i).startsWith(FeatureTags.FEATURE_RCSE)) {
+                String featureTag = featureTags.get(i);
+                featureTags.set(
+                        i,
+                        new StringBuilder(featureTag).insert(featureTag.length() - 1,
+                                ",".concat(iari)).toString());
+                return;
+            }
+        }
+
+        String appRef = new StringBuilder(FeatureTags.FEATURE_RCSE).append("=\"").append(iari)
+                .append("\"").toString();
+
+        if (isActivated) {
+            logger.debug(" --> iari : ".concat(appRef));
+        }
+        featureTags.add(appRef);
     }
 }

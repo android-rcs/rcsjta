@@ -363,6 +363,8 @@ public class RcsSettingsProvider extends ContentProvider {
                     RcsSettingsData.DEFAULT_CONTROL_EXTENSIONS);
             addParameter(db, RcsSettingsData.ALLOW_EXTENSIONS,
                     RcsSettingsData.DEFAULT_ALLOW_EXTENSIONS);
+            addParameter(db, RcsSettingsData.EXTENSIONS_POLICY,
+                    RcsSettingsData.DEFAULT_EXTENSIONS_POLICY);
             addParameter(db, RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS,
                     RcsSettingsData.DEFAULT_MAX_MSRP_SIZE_EXTENSIONS);
             addParameter(db, RcsSettingsData.CONFIGURATION_VALID,

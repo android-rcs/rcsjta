@@ -53,6 +53,7 @@ import com.gsma.services.rcs.chat.IOneToOneChat;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 
+import android.os.Binder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
@@ -88,10 +89,9 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      */
     private final Object lock = new Object();
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(OneToOneChatImpl.class.getName());
+
+    private final ServerApiUtils mServerApiUtils;
 
     /**
      * Constructor
@@ -106,12 +106,13 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * @param contactManager ContactManager
      * @param core Core
      * @param undeliveredImManager OneToOneUndeliveredImManager
+     * @param serverApiUtils
      */
     public OneToOneChatImpl(ContactId contact, IOneToOneChatEventBroadcaster broadcaster,
             InstantMessagingService imService, MessagingLog messagingLog, RcsSettings rcsSettings,
             ChatServiceImpl chatService, FileTransferServiceImpl fileTransferService,
             ContactManager contactManager, Core core,
-            OneToOneUndeliveredImManager undeliveredImManager) {
+            OneToOneUndeliveredImManager undeliveredImManager, ServerApiUtils serverApiUtils) {
         mContact = contact;
         mBroadcaster = broadcaster;
         mImService = imService;
@@ -122,11 +123,13 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         mContactManager = contactManager;
         mCore = core;
         mUndeliveredImManager = undeliveredImManager;
+        mServerApiUtils = serverApiUtils;
     }
 
     private void sendChatMessageInNewSession(ChatMessage msg) {
         final OneToOneChatSession newSession = mImService
                 .initiateOneToOneChatSession(mContact, msg);
+        newSession.setCallingUid(Binder.getCallingUid());
         newSession.addListener(this);
         mChatService.addOneToOneChat(mContact, this);
         newSession.startSession();
@@ -428,13 +431,13 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                     MimeType.TEXT_MESSAGE, mContact.toString(), Direction.OUTGOING);
 
             /* If the IMS is connected at this time then send this message. */
-            if (ServerApiUtils.isImsConnected()) {
+            if (mServerApiUtils.isImsConnected()) {
                 sendChatMessage(msg);
             } else {
                 /* If the IMS is NOT connected at this time then queue message. */
                 addOutgoingChatMessage(msg, Status.QUEUED);
             }
-            return new ChatMessageImpl(persistentStorage);
+            return new ChatMessageImpl(persistentStorage, mServerApiUtils);
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -482,13 +485,13 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                     MimeType.GEOLOC_MESSAGE, mContact.toString(), Direction.OUTGOING);
 
             /* If the IMS is connected at this time then send this message. */
-            if (ServerApiUtils.isImsConnected()) {
+            if (mServerApiUtils.isImsConnected()) {
                 sendChatMessage(msg);
             } else {
                 /* If the IMS is NOT connected at this time then queue message. */
                 addOutgoingChatMessage(msg, Status.QUEUED);
             }
-            return new ChatMessageImpl(persistentStorage);
+            return new ChatMessageImpl(persistentStorage, mServerApiUtils);
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -767,7 +770,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                         sLogger.debug("Accept one-to-one chat session with contact "
                                 .concat(mContact.toString()));
                     }
-                    session.acceptSession();
+                    session.acceptSession(Binder.getCallingUid());
                 }
             }
         } catch (ServerApiBaseException e) {
@@ -801,7 +804,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             ChatMessage msg = new ChatMessage(msgId, mContact,
                     mMessagingLog.getChatMessageContent(msgId), mimeType, timestamp, timestamp,
                     null);
-            if (ServerApiUtils.isImsConnected()) {
+            if (mServerApiUtils.isImsConnected()) {
                 resendChatMessage(msg);
             } else {
                 /* If the IMS is NOT connected at this time then re-queue message. */
@@ -1058,5 +1061,18 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId,
                     Status.RECEIVED, ReasonCode.UNSPECIFIED);
         }
+    }
+
+    /**
+     * Override the onTransact Binder method. It is used to check authorization for an application
+     * before calling API method. Control of authorization is made for third party applications (vs.
+     * native application) by comparing the client application fingerprint with the RCS application
+     * fingerprint
+     */
+    @Override
+    public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags)
+            throws android.os.RemoteException {
+        mServerApiUtils.assertApiIsAuthorized(Binder.getCallingUid());
+        return super.onTransact(code, data, reply, flags);
     }
 }

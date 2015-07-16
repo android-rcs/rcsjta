@@ -38,6 +38,7 @@ import com.gsma.services.rcs.extension.MultimediaSession.ReasonCode;
 import com.gsma.services.rcs.extension.MultimediaSession.State;
 
 import android.content.Intent;
+import android.os.Binder;
 import android.os.RemoteException;
 
 /**
@@ -62,6 +63,8 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     private final Logger mLogger = Logger.getLogger(getClass().getName());
 
+    private final ServerApiUtils mServerApiUtils;
+
     /**
      * Constructor
      *
@@ -73,17 +76,19 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
      * @param contact remote contact
      * @param serviceId
      * @param state State of the multimedia session
+     * @param serverApiUtils
      */
     public MultimediaMessagingSessionImpl(String sessionId,
             IMultimediaMessagingSessionEventBroadcaster broadcaster, SipService sipService,
             MultimediaSessionServiceImpl multimediaSessionService, Direction direction,
-            ContactId contact, String serviceId, State state) {
+            ContactId contact, String serviceId, State state, ServerApiUtils serverApiUtils) {
         mSessionId = sessionId;
         mBroadcaster = broadcaster;
         mSipService = sipService;
         mMultimediaSessionService = multimediaSessionService;
         mMultimediaSessionStorageAccessor = new MultimediaSessionStorageAccessor(direction,
                 contact, serviceId, state);
+        mServerApiUtils = serverApiUtils;
     }
 
     private void handleSessionRejected(ReasonCode reasonCode, ContactId contact) {
@@ -275,7 +280,8 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                 throw new ServerApiGenericException(new StringBuilder("Session with session ID '")
                         .append(mSessionId).append("' not available!").toString());
             }
-            ServerApiUtils.testApiExtensionPermission(session.getServiceId());
+            mServerApiUtils.assertExtensionIsAuthorized(Binder.getCallingUid(),
+                    session.getServiceId());
             session.acceptSession();
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -305,7 +311,8 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                 throw new ServerApiGenericException(new StringBuilder("Session with session ID '")
                         .append(mSessionId).append("' not available!").toString());
             }
-            ServerApiUtils.testApiExtensionPermission(session.getServiceId());
+            mServerApiUtils.assertExtensionIsAuthorized(Binder.getCallingUid(),
+                    session.getServiceId());
             session.rejectSession(InvitationStatus.INVITATION_REJECTED_DECLINE);
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -334,7 +341,8 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                 throw new ServerApiGenericException(new StringBuilder("Session with session ID '")
                         .append(mSessionId).append("' not available!").toString());
             }
-            ServerApiUtils.testApiExtensionPermission(session.getServiceId());
+            mServerApiUtils.assertExtensionIsAuthorized(Binder.getCallingUid(),
+                    session.getServiceId());
             new Thread() {
                 public void run() {
                     session.terminateSession(TerminationReason.TERMINATION_BY_USER);
@@ -369,7 +377,8 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                 throw new ServerApiGenericException(new StringBuilder("Session with session ID '")
                         .append(mSessionId).append("' not available!").toString());
             }
-            ServerApiUtils.testApiExtensionPermission(session.getServiceId());
+            mServerApiUtils.assertExtensionIsAuthorized(Binder.getCallingUid(),
+                    session.getServiceId());
 
             /* Do not consider max message size if null */
             if (session.getMaxMessageSize() != 0 && content.length > session.getMaxMessageSize()) {
@@ -527,4 +536,16 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
         }
     }
 
+    /**
+     * Override the onTransact Binder method. It is used to check authorization for an application
+     * before calling API method. Control of authorization is made for third party applications (vs.
+     * native application) by comparing the client application fingerprint with the RCS application
+     * fingerprint
+     */
+    @Override
+    public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags)
+            throws android.os.RemoteException {
+        mServerApiUtils.assertApiIsAuthorized(Binder.getCallingUid());
+        return super.onTransact(code, data, reply, flags);
+    }
 }

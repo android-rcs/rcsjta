@@ -24,12 +24,13 @@ package com.gsma.rcs.provider.settings;
 
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.capability.Capabilities.CapabilitiesBuilder;
-import com.gsma.rcs.core.ims.service.extension.ServiceExtensionManager;
+import com.gsma.rcs.core.ims.service.extension.ExtensionManager;
 import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.settings.RcsSettingsData.AuthenticationProcedure;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ConfigurationMode;
 import com.gsma.rcs.provider.settings.RcsSettingsData.EnableRcseSwitch;
+import com.gsma.rcs.provider.settings.RcsSettingsData.ExtensionPolicy;
 import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.provider.settings.RcsSettingsData.GsmaRelease;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ImMsgTech;
@@ -1440,7 +1441,7 @@ public class RcsSettings {
      * @return the set of extensions
      */
     public Set<String> getSupportedRcsExtensions() {
-        return ServiceExtensionManager
+        return ExtensionManager
                 .getExtensions(readString(RcsSettingsData.CAPABILITY_RCS_EXTENSIONS));
     }
 
@@ -1451,7 +1452,7 @@ public class RcsSettings {
      */
     public void setSupportedRcsExtensions(Set<String> extensions) {
         writeParameter(RcsSettingsData.CAPABILITY_RCS_EXTENSIONS,
-                ServiceExtensionManager.getExtensions(extensions));
+                ExtensionManager.getExtensions(extensions));
     }
 
     /**
@@ -1995,6 +1996,26 @@ public class RcsSettings {
      */
     public boolean isExtensionsAllowed() {
         return readBoolean(RcsSettingsData.ALLOW_EXTENSIONS);
+    }
+
+    /**
+     * Returns the RCS extensions policy. 0 - Only natively integrated Extensions are authorized to
+     * access and use the RCS service via the T-API. 1 - Natively-integrated Extensions and
+     * self-signed Extensions are authorized to access the RCS service via the T-API. For self-
+     * signed Extensions, the app accessing the API shall have an IARI Authorization corresponding
+     * to its unique IARI.
+     * 
+     * @return Integer
+     */
+    public ExtensionPolicy getExtensionspolicy() {
+        return ExtensionPolicy.valueOf(readInteger(RcsSettingsData.EXTENSIONS_POLICY));
+    }
+
+    /**
+     * @param extensionPolicy
+     */
+    public void setExtensionspolicy(ExtensionPolicy extensionPolicy) {
+        writeInteger(RcsSettingsData.EXTENSIONS_POLICY, extensionPolicy.toInt());
     }
 
     /**

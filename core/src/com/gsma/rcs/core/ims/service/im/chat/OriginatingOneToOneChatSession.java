@@ -34,6 +34,7 @@ import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
@@ -66,12 +67,13 @@ public class OriginatingOneToOneChatSession extends OneToOneChatSession {
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param serverApiUtils
      */
     public OriginatingOneToOneChatSession(InstantMessagingService imService, ContactId contact,
             ChatMessage msg, RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
-            ContactManager contactManager) {
+            ContactManager contactManager, ServerApiUtils serverApiUtils) {
         super(imService, contact, PhoneUtils.formatContactIdToUri(contact), msg, rcsSettings,
-                messagingLog, timestamp, contactManager);
+                messagingLog, timestamp, contactManager, serverApiUtils);
         // Create dialog path
         createOriginatingDialogPath();
         // Set contribution ID

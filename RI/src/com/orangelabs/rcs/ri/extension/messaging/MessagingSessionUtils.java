@@ -18,6 +18,17 @@
 
 package com.orangelabs.rcs.ri.extension.messaging;
 
+import com.gsma.services.rcs.RcsServiceException;
+
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
+
+import android.content.Context;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 /**
  * Messaging service utils
  * 
@@ -27,5 +38,31 @@ public class MessagingSessionUtils {
     /**
      * Service ID constant
      */
-    public final static String SERVICE_ID = "ext.messaging";
+    final static String SERVICE_ID = "ext.messaging";
+
+    /**
+     * Get serviceIds from capabilities if available. Otherwise return a default serviceId.
+     * 
+     * @param context
+     * @return String[]
+     */
+    public static String[] getServicesIds(Context context) {
+        List<String> serviceIds = new ArrayList<String>();
+        serviceIds.add(SERVICE_ID);
+        try {
+            ConnectionManager connectionManager = ConnectionManager.getInstance();
+            if (connectionManager != null
+                    && connectionManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
+                Set<String> extensions = connectionManager.getCapabilityApi().getMyCapabilities()
+                        .getSupportedExtensions();
+                if (!extensions.isEmpty()) {
+                    serviceIds.addAll(extensions);
+                }
+            }
+        } catch (RcsServiceException e1) {
+            e1.printStackTrace();
+        }
+        return serviceIds.toArray(new String[serviceIds.size()]);
+    }
+
 }

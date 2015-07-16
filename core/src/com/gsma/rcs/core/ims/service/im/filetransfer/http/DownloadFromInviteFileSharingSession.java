@@ -24,8 +24,6 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
@@ -35,6 +33,7 @@ import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -72,12 +71,13 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
      * @param timestamp
      * @param timestampSent
      * @param contactManager
+     * @param serverApiUtils
      */
     public DownloadFromInviteFileSharingSession(InstantMessagingService imService,
             ChatSession chatSession, FileTransferHttpInfoDocument fileTransferInfo,
             String fileTransferId, ContactId contact, String displayName, RcsSettings rcsSettings,
             MessagingLog messagingLog, long timestamp, long timestampSent,
-            ContactManager contactManager) {
+            ContactManager contactManager, ServerApiUtils serverApiUtils) {
 
         // @formatter:off
         super(imService,
@@ -95,7 +95,8 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
                 messagingLog,
                 timestamp,
                 getRemoteSipId(chatSession),
-                contactManager);
+                contactManager,
+                serverApiUtils);
         // @formatter:on
 
         mTimestampSent = timestampSent;

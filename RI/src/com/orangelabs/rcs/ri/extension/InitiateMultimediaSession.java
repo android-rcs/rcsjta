@@ -21,14 +21,15 @@ package com.orangelabs.rcs.ri.extension;
 import com.gsma.services.rcs.contact.ContactId;
 
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.extension.messaging.MessagingSessionUtils;
 import com.orangelabs.rcs.ri.utils.ContactListAdapter;
 import com.orangelabs.rcs.ri.utils.ContactUtil;
 
 import android.app.Activity;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 
@@ -44,17 +45,25 @@ public abstract class InitiateMultimediaSession extends Activity {
      */
     private Spinner mSpinner;
 
+    /**
+     * Spinner for serviceId (extension) selection
+     */
+    private Spinner mSpinnerServiceId;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Set layout
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.extension_initiate_session);
 
         // Set contact selector
         mSpinner = (Spinner) findViewById(R.id.contact);
         mSpinner.setAdapter(ContactListAdapter.createContactListAdapter(this));
+
+        mSpinnerServiceId = (Spinner) findViewById(R.id.extension);
+        mSpinnerServiceId.setAdapter(new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, MessagingSessionUtils.getServicesIds(this)));
 
         // Set buttons callback
         Button initiateBtn = (Button) findViewById(R.id.initiate_btn);
@@ -81,7 +90,7 @@ public abstract class InitiateMultimediaSession extends Activity {
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
             ContactId contact = ContactUtil.formatContact(phoneNumber);
             // Initiate session
-            initiateSession(contact);
+            initiateSession(contact, mSpinnerServiceId.getSelectedItem().toString());
             // Exit activity
             finish();
         }
@@ -91,6 +100,7 @@ public abstract class InitiateMultimediaSession extends Activity {
      * Initiate session
      * 
      * @param contact Remote contact
+     * @param serviceId
      */
-    public abstract void initiateSession(ContactId contact);
+    public abstract void initiateSession(ContactId contact, String serviceId);
 }

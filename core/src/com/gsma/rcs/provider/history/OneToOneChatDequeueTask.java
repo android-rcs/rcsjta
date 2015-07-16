@@ -33,6 +33,7 @@ import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
 import com.gsma.rcs.service.api.OneToOneChatImpl;
 import com.gsma.rcs.service.api.OneToOneFileTransferImpl;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
@@ -56,9 +57,9 @@ public class OneToOneChatDequeueTask extends DequeueTask {
     public OneToOneChatDequeueTask(Object lock, Context ctx, Core core,
             ChatServiceImpl chatService, FileTransferServiceImpl fileTransferService,
             HistoryLog historyLog, MessagingLog messagingLog, ContactManager contactManager,
-            RcsSettings rcsSettings) {
+            RcsSettings rcsSettings, ServerApiUtils serverApiUtils) {
         super(lock, ctx, core, contactManager, messagingLog, rcsSettings, chatService,
-                fileTransferService);
+                fileTransferService, serverApiUtils);
         mHistoryLog = historyLog;
         final ImdnManager imdnManager = mImService.getImdnManager();
         mDisplayedReportEnabled = imdnManager.isRequestGroupDeliveryDisplayedReportsEnabled();

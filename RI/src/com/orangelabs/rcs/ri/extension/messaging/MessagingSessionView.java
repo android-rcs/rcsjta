@@ -43,7 +43,6 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -92,13 +91,22 @@ public class MessagingSessionView extends Activity {
      */
     public final static String EXTRA_CONTACT = "contact";
 
+    /**
+     * Intent parameter: serviceId
+     */
+
+    public final static String EXTRA_SERVICE_ID = "serviceId";
+
+    /**
+     * UI handler
+     */
     private final Handler mHandler = new Handler();
 
     private String mSessionId;
 
     private ContactId mContact;
 
-    private String mServiceId = MessagingSessionUtils.SERVICE_ID;
+    private String mServiceId;
 
     private MultimediaMessagingSession mSession;
 
@@ -204,7 +212,6 @@ public class MessagingSessionView extends Activity {
         mCnxManager = ConnectionManager.getInstance();
 
         /* Set layout */
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.extension_session_view);
 
         /* Set buttons callback */
@@ -295,7 +302,7 @@ public class MessagingSessionView extends Activity {
 
                 // Get remote contact
                 mContact = intent.getParcelableExtra(MessagingSessionView.EXTRA_CONTACT);
-
+                mServiceId = getIntent().getStringExtra(MessagingSessionView.EXTRA_SERVICE_ID);
                 // Initiate session
                 startSession();
             } else if (mode == MessagingSessionView.MODE_OPEN) {
@@ -315,6 +322,7 @@ public class MessagingSessionView extends Activity {
 
                 // Get remote contact
                 mContact = mSession.getRemoteContact();
+                mServiceId = mSession.getServiceId();
             } else {
                 // Incoming session from its Intent
                 mSessionId = intent
@@ -332,6 +340,7 @@ public class MessagingSessionView extends Activity {
                 // Get remote contact
                 mContact = mSession.getRemoteContact();
                 String from = RcsDisplayName.getInstance(this).getDisplayName(mContact);
+                mServiceId = mSession.getServiceId();
 
                 // Manual accept
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);

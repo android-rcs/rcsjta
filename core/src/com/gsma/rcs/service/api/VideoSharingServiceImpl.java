@@ -52,6 +52,7 @@ import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.sharing.video.VideoSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.video.VideoSharing.State;
 
+import android.os.Binder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
@@ -97,6 +98,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
     private static final Logger sLogger = Logger.getLogger(VideoSharingServiceImpl.class
             .getSimpleName());
 
+    private final ServerApiUtils mServerApiUtils;
+
     /**
      * Constructor
      * 
@@ -108,11 +111,12 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @param localContentResolver LocalContentResolver
      * @param imOperationExecutor IM ExecutorService
      * @param imsLock ims lock object
+     * @param serverApiUtils
      */
     public VideoSharingServiceImpl(RichcallService richcallService, RichCallHistory richCallLog,
             RcsSettings rcsSettings, ContactManager contactManager, Core core,
             LocalContentResolver localContentResolver, ExecutorService imOperationExecutor,
-            Object imsLock) {
+            Object imsLock, ServerApiUtils serverApiUtils) {
         if (sLogger.isActivated()) {
             sLogger.info("Video sharing API is loaded");
         }
@@ -124,6 +128,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
         mLocalContentResolver = localContentResolver;
         mImOperationExecutor = imOperationExecutor;
         mImsLock = imsLock;
+        mServerApiUtils = serverApiUtils;
     }
 
     /**
@@ -172,7 +177,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @return Returns true if registered else returns false
      */
     public boolean isServiceRegistered() {
-        return ServerApiUtils.isImsConnected();
+        return mServerApiUtils.isImsConnected();
     }
 
     /**
@@ -181,7 +186,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @return the reason code for IMS service registration
      */
     public int getServiceRegistrationReasonCode() {
-        return ServerApiUtils.getServiceRegistrationReasonCode().toInt();
+        return mServerApiUtils.getServiceRegistrationReasonCode().toInt();
     }
 
     /**
@@ -267,7 +272,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
         VideoSharingPersistedStorageAccessor storageAccessor = new VideoSharingPersistedStorageAccessor(
                 sharingId, mRichCallLog);
         VideoSharingImpl videoSharing = new VideoSharingImpl(sharingId, mRichcallService,
-                mBroadcaster, storageAccessor, this);
+                mBroadcaster, storageAccessor, this, mServerApiUtils);
         addVideoSharing(videoSharing, sharingId);
         session.addListener(videoSharing);
     }
@@ -316,12 +321,12 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
         if (sLogger.isActivated()) {
             sLogger.info("Initiate a live video session with ".concat(contact.toString()));
         }
-        ServerApiUtils.testIms();
+        mServerApiUtils.testIms();
         try {
             long timestamp = System.currentTimeMillis();
             final VideoStreamingSession session = mRichcallService.initiateLiveVideoSharingSession(
                     contact, player, timestamp);
-
+            session.setCallingUid(Binder.getCallingUid());
             String sharingId = session.getSessionID();
             VideoContent content = (VideoContent) session.getContent();
             mRichCallLog.addVideoSharing(sharingId, contact, Direction.OUTGOING, content,
@@ -333,7 +338,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
                     sharingId, contact, Direction.OUTGOING, mRichCallLog, content.getEncoding(),
                     content.getHeight(), content.getWidth(), timestamp);
             VideoSharingImpl videoSharing = new VideoSharingImpl(sharingId, mRichcallService,
-                    mBroadcaster, storageAccessor, this);
+                    mBroadcaster, storageAccessor, this, mServerApiUtils);
 
             addVideoSharing(videoSharing, sharingId);
             session.addListener(videoSharing);
@@ -374,7 +379,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
             VideoSharingPersistedStorageAccessor storageAccessor = new VideoSharingPersistedStorageAccessor(
                     sharingId, mRichCallLog);
             return new VideoSharingImpl(sharingId, mRichcallService, mBroadcaster, storageAccessor,
-                    this);
+                    this, mServerApiUtils);
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -557,5 +562,18 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 
     public void broadcastDeleted(ContactId contact, Set<String> sharingIds) {
         mBroadcaster.broadcastDeleted(contact, sharingIds);
+    }
+
+    /**
+     * Override the onTransact Binder method. It is used to check authorization for an application
+     * before calling API method. Control of authorization is made for third party applications (vs.
+     * native application) by comparing the client application fingerprint with the RCS application
+     * fingerprint
+     */
+    @Override
+    public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags)
+            throws android.os.RemoteException {
+        mServerApiUtils.assertApiIsAuthorized(Binder.getCallingUid());
+        return super.onTransact(code, data, reply, flags);
     }
 }

@@ -34,6 +34,7 @@ import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.standfw.StoreAndForwardManager;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
+import com.gsma.rcs.core.ims.service.system.SystemRequestService;
 import com.gsma.rcs.core.ims.service.terms.TermsConditionsService;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.FifoBuffer;
@@ -268,7 +269,7 @@ public class ImsServiceDispatcher extends Thread {
             // New incoming session invitation
             if (isTagPresent(sdp, "msrp")
                     && SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_3GPP_VIDEO_SHARE)
-                    && (SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_3GPP_IMAGE_SHARE) || SipUtils
+                    && (SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_RCSE_IMAGE_SHARE) || SipUtils
                             .isFeatureTagPresent(request, FeatureTags.FEATURE_3GPP_IMAGE_SHARE_RCS2))) {
                 // Image sharing
                 if (mRcsSettings.isImageSharingSupported()) {
@@ -474,6 +475,9 @@ public class ImsServiceDispatcher extends Thread {
             } else if (TermsConditionsService.isTermsRequest(request)) {
                 // Terms & conditions service
                 mImsModule.getTermsConditionsService().receiveMessage(request);
+            } else if (SystemRequestService.isSystemRequest(request)) {
+                // System request service
+                mImsModule.getSystemRequestService().receiveMessage(request);
             } else {
                 // Unknown service: reject the message with a 403 Forbidden
                 if (logActivated) {

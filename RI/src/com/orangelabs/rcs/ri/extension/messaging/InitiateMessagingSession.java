@@ -37,12 +37,13 @@ public class InitiateMessagingSession extends InitiateMultimediaSession {
      * 
      * @param contact Remote contact
      */
-    public void initiateSession(ContactId contact) {
+    public void initiateSession(ContactId contact, String serviceId) {
         // Display session view
         Intent intent = new Intent(InitiateMessagingSession.this, MessagingSessionView.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putExtra(MessagingSessionView.EXTRA_MODE, MessagingSessionView.MODE_OUTGOING);
         intent.putExtra(MessagingSessionView.EXTRA_CONTACT, (Parcelable) contact);
+        intent.putExtra(MessagingSessionView.EXTRA_SERVICE_ID, serviceId);
         startActivity(intent);
     }
 }

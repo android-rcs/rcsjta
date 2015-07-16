@@ -18,88 +18,49 @@
 
 package com.gsma.rcs.core.ims.service.capability;
 
-import com.gsma.rcs.core.ims.service.extension.ServiceExtensionManager;
-import com.gsma.rcs.platform.AndroidFactory;
-import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.capability.CapabilityService;
+import com.gsma.rcs.core.Core;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.os.Bundle;
+import android.net.Uri;
 
 /**
  * External capability monitoring
  * 
- * @author jexa7410
+ * @author LEMORDANT Philippe
  */
 public class ExternalCapabilityMonitoring extends BroadcastReceiver {
-    /**
-     * The logger
-     */
-    private final static Logger logger = Logger.getLogger(ExternalCapabilityMonitoring.class
-            .getSimpleName());
+
+    private static final int INVALID_UID = -1;
 
     @Override
-    public void onReceive(Context context, Intent intent) {
-        try {
-            // Instantiate the settings manager
-            LocalContentResolver localContentResolver = new LocalContentResolver(context);
-            RcsSettings rcsSettings = RcsSettings.createInstance(localContentResolver);
+    public void onReceive(Context context, final Intent intent) {
+        String action = intent.getAction();
+        Integer uid = intent.getIntExtra(Intent.EXTRA_UID, INVALID_UID);
+        if (uid == INVALID_UID) {
+            return;
+        }
 
-            // Get Intent parameters
-            String action = intent.getAction();
-            Integer uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
-            if (uid == -1) {
-                return;
-            }
-
-            if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
-                // Get extensions associated to the new application
-                PackageManager pm = context.getPackageManager();
-                String packageName = intent.getData().getSchemeSpecificPart();
-                ApplicationInfo appInfo = pm.getApplicationInfo(packageName,
-                        PackageManager.GET_META_DATA);
-                if (appInfo == null) {
-                    // No app info
-                    return;
-                }
-                Bundle appMeta = appInfo.metaData;
-                if (appMeta == null) {
-                    // No app meta
-                    return;
-                }
-
-                String exts = appMeta.getString(CapabilityService.INTENT_EXTENSIONS);
-                if (exts == null) {
-                    // No RCS extension
-                    return;
-                }
-
-                if (logger.isActivated()) {
-                    logger.debug("Add extensions " + exts + " for application " + uid);
-                }
-
-                // Add the new extension in the supported RCS extensions
-                ServiceExtensionManager.getInstance(rcsSettings).addNewSupportedExtensions(
-                        AndroidFactory.getApplicationContext());
-            } else {
-                if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
-                    if (logger.isActivated()) {
-                        logger.debug("Remove extensions for application " + uid);
-                    }
-
-                    // Remove the extensions in the supported RCS extensions
-                    ServiceExtensionManager.getInstance(rcsSettings).removeSupportedExtensions(
-                            AndroidFactory.getApplicationContext());
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        Uri uri = intent.getData();
+        String packageName = uri != null ? uri.getSchemeSpecificPart() : null;
+        if (packageName == null) {
+            return;
+        }
+        boolean packageRemoved = false;
+        if (Intent.ACTION_PACKAGE_ADDED.equals(action)
+                || Intent.ACTION_PACKAGE_REPLACED.equals(action)
+                || Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
+        } else if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
+            packageRemoved = true;
+        } else {
+            return;
+        }
+        Core core = Core.getInstance();
+        if (core != null) {
+            core.getListener()
+                    .updateSupportedExtensionsForPackage(uid, packageName, packageRemoved);
         }
     }
+
 }

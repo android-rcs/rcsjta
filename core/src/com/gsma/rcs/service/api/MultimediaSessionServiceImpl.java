@@ -51,6 +51,7 @@ import com.gsma.services.rcs.extension.MultimediaSession.State;
 import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
 
 import android.content.Intent;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
@@ -91,21 +92,25 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
     private static final Logger sLogger = Logger.getLogger(MultimediaSessionServiceImpl.class
             .getSimpleName());
 
+    private ServerApiUtils mServerApiUtils;
+
     /**
      * Constructor
      * 
      * @param sipService SipService
      * @param rcsSettings RcsSettings
      * @param contactManager ContactManager
+     * @param serverApiUtils
      */
     public MultimediaSessionServiceImpl(SipService sipService, RcsSettings rcsSettings,
-            ContactManager contactManager) {
+            ContactManager contactManager, ServerApiUtils serverApiUtils) {
         if (sLogger.isActivated()) {
             sLogger.info("Multimedia session API is loaded");
         }
         mSipService = sipService;
         mRcsSettings = rcsSettings;
         mContactManager = contactManager;
+        mServerApiUtils = serverApiUtils;
     }
 
     /**
@@ -182,7 +187,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @return Returns true if registered else returns false
      */
     public boolean isServiceRegistered() {
-        return ServerApiUtils.isImsConnected();
+        return mServerApiUtils.isImsConnected();
     }
 
     /**
@@ -191,7 +196,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @return the reason code for IMS service registration
      */
     public int getServiceRegistrationReasonCode() {
-        return ServerApiUtils.getServiceRegistrationReasonCode().toInt();
+        return mServerApiUtils.getServiceRegistrationReasonCode().toInt();
     }
 
     /**
@@ -256,7 +261,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
         // Add session in the list
         MultimediaMessagingSessionImpl multimediaMessaging = new MultimediaMessagingSessionImpl(
                 session.getSessionID(), mMultimediaMessagingSessionEventBroadcaster, mSipService,
-                this, Direction.INCOMING, remote, session.getServiceId(), State.INVITED);
+                this, Direction.INCOMING, remote, session.getServiceId(), State.INVITED,
+                mServerApiUtils);
         session.addListener(multimediaMessaging);
         addMultimediaMessaging(multimediaMessaging);
 
@@ -274,7 +280,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
         ContactId remote = session.getRemoteContact();
         MultimediaStreamingSessionImpl multimediaStreaming = new MultimediaStreamingSessionImpl(
                 session.getSessionID(), mMultimediaStreamingSessionEventBroadcaster, mSipService,
-                this, Direction.INCOMING, remote, session.getServiceId(), State.INVITED);
+                this, Direction.INCOMING, remote, session.getServiceId(), State.INVITED,
+                mServerApiUtils);
         session.addListener(multimediaStreaming);
         addMultimediaStreaming(multimediaStreaming);
 
@@ -336,8 +343,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
         if (sLogger.isActivated()) {
             sLogger.info("Initiate a multimedia messaging session with " + contact);
         }
-        ServerApiUtils.testIms();
-        ServerApiUtils.testApiExtensionPermission(serviceId);
+        mServerApiUtils.testIms();
+        mServerApiUtils.assertExtensionIsAuthorized(Binder.getCallingUid(), serviceId);
         try {
             String featureTag = FeatureTags.FEATURE_RCSE + "=\""
                     + FeatureTags.FEATURE_RCSE_EXTENSION + "." + serviceId + "\"";
@@ -345,7 +352,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
                     featureTag);
             MultimediaMessagingSessionImpl multiMediaMessaging = new MultimediaMessagingSessionImpl(
                     session.getSessionID(), mMultimediaMessagingSessionEventBroadcaster,
-                    mSipService, this, Direction.OUTGOING, contact, serviceId, State.INITIATING);
+                    mSipService, this, Direction.OUTGOING, contact, serviceId, State.INITIATING,
+                    mServerApiUtils);
 
             session.addListener(multiMediaMessaging);
             addMultimediaMessaging(multiMediaMessaging);
@@ -452,8 +460,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
         if (sLogger.isActivated()) {
             sLogger.info("Initiate a multimedia streaming session with " + contact);
         }
-        ServerApiUtils.testIms();
-        ServerApiUtils.testApiExtensionPermission(serviceId);
+        mServerApiUtils.testIms();
+        mServerApiUtils.assertExtensionIsAuthorized(Binder.getCallingUid(), serviceId);
         try {
             String featureTag = FeatureTags.FEATURE_RCSE + "=\""
                     + FeatureTags.FEATURE_RCSE_EXTENSION + "." + serviceId + "\"";
@@ -462,7 +470,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 
             MultimediaStreamingSessionImpl multimediaStreaming = new MultimediaStreamingSessionImpl(
                     session.getSessionID(), mMultimediaStreamingSessionEventBroadcaster,
-                    mSipService, this, Direction.OUTGOING, contact, serviceId, State.INITIATING);
+                    mSipService, this, Direction.OUTGOING, contact, serviceId, State.INITIATING,
+                    mServerApiUtils);
 
             session.addListener(multimediaStreaming);
             addMultimediaStreaming(multimediaStreaming);
@@ -688,5 +697,18 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      */
     public ICommonServiceConfiguration getCommonConfiguration() {
         return new CommonServiceConfigurationImpl(mRcsSettings);
+    }
+
+    /**
+     * Override the onTransact Binder method. It is used to check authorization for an application
+     * before calling API method. Control of authorization is made for third party applications (vs.
+     * native application) by comparing the client application fingerprint with the RCS application
+     * fingerprint
+     */
+    @Override
+    public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags)
+            throws android.os.RemoteException {
+        mServerApiUtils.assertApiIsAuthorized(Binder.getCallingUid());
+        return super.onTransact(code, data, reply, flags);
     }
 }

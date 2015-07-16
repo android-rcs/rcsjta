@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="iaritool" default="jar" basedir=".">
+
+	<property name="build.dir" value="build" />
+	<property name="classes.dir" value="build/classes" />
+	<property name="res.dir" value="res" />
+	<property name="libs.dir" value="libs" />
+
+	<target name="clean">
+		<delete dir="${classes.dir}" />
+		<delete file="${build.dir}/iaritool.jar" />
+	</target>
+
+	<path id="classpath">
+		<fileset dir="${libs.dir}" includes="**/*.jar" />
+		<fileset file="${ant.home}/lib/ant.jar" />
+			</path>
+
+	<!-- specify bootclasspath explicitly to include provider classes -->
+	<path id="bootclasspath">
+		<fileset file="${java.home}/lib/rt.jar" />
+		<fileset dir="${java.home}/lib" includes="**/*jce*.jar" />
+	</path>
+
+	<target name="compile">
+		<mkdir dir="${classes.dir}" />
+		<javac srcdir="src" destdir="${classes.dir}" classpathref="classpath"
+			bootclasspathref="bootclasspath" includeantruntime="false">
+		</javac>
+	</target>
+
+	<target name="jar" depends="compile">
+		<jar destfile="${build.dir}/iaritool.jar">
+			<manifest>
+				<attribute name="Main-Class"
+					value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader" />
+				<attribute name="Rsrc-Main-Class"
+					value="com.gsma.iariauth.util.IARITool" />
+				<attribute name="Class-Path" value="." />
+				<attribute name="Rsrc-Class-Path"
+					value="./ bcprov-jdk15on-150.jar commons-cli-1.2.jar commons-logging-1.1.jar xmlsec-1.5.6.jar" />
+			</manifest>
+			<zipfileset src="${libs.dir}/jar-in-jar-loader.zip" />
+			<fileset dir="${classes.dir}" />
+			<fileset dir="." includes="res/*.xml" />
+			<zipfileset dir="${libs.dir}" includes="bcprov-jdk15on-150.jar" />
+			<zipfileset dir="${libs.dir}" includes="commons-cli-1.2.jar" />
+			<zipfileset dir="${libs.dir}" includes="commons-logging-1.1.jar" />
+			<zipfileset dir="${libs.dir}" includes="xmlsec-1.5.6.jar" />
+		</jar>
+	</target>
+</project>

@@ -56,10 +56,8 @@ import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 import com.gsma.services.rcs.filetransfer.IFileTransfer;
 
 import android.net.Uri;
+import android.os.Binder;
 import android.os.RemoteException;
-import android.util.MonthDisplayHelper;
-
-import javax2.sip.message.Response;
 
 /**
  * File transfer implementation
@@ -94,6 +92,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
 
     private final ContactManager mContactManager;
 
+    private final ServerApiUtils mServerApiUtils;
+
     /**
      * Constructor
      * 
@@ -107,13 +107,14 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
      * @param messagingLog
      * @param contactManager
      * @param undeliveredManager
+     * @param serverApiUtils
      */
     public OneToOneFileTransferImpl(String transferId,
             IOneToOneFileTransferBroadcaster broadcaster, InstantMessagingService imService,
             FileTransferPersistedStorageAccessor persistentStorage,
             FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings, Core core,
             MessagingLog messagingLog, ContactManager contactManager,
-            OneToOneUndeliveredImManager undeliveredManager) {
+            OneToOneUndeliveredImManager undeliveredManager, ServerApiUtils serverApiUtils) {
         mFileTransferId = transferId;
         mBroadcaster = broadcaster;
         mImService = imService;
@@ -124,6 +125,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         mMessagingLog = messagingLog;
         mContactManager = contactManager;
         mUndeliveredManager = undeliveredManager;
+        mServerApiUtils = serverApiUtils;
     }
 
     private State getRcsState(FileSharingSession session) {
@@ -597,7 +599,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                             .append("': already accepted").toString());
 
                 }
-                ongoingSession.acceptSession();
+                ongoingSession.acceptSession(Binder.getCallingUid());
                 return;
             }
             /* No active session: restore session from provider */
@@ -625,7 +627,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             FileSharingSession session = new DownloadFromAcceptFileSharingSession(mImService,
                     ContentManager.createMmContent(resume.getFile(), resume.getSize(),
                             resume.getFileName()), download, mRcsSettings, mMessagingLog,
-                    mContactManager);
+                    mContactManager, mServerApiUtils);
             session.addListener(this);
             session.startSession();
         } catch (ServerApiBaseException e) {
@@ -878,7 +880,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                 }
                 return false;
             }
-            if (!ServerApiUtils.isImsConnected()) {
+            if (!mServerApiUtils.isImsConnected()) {
                 if (sLogger.isActivated()) {
                     sLogger.debug(new StringBuilder(
                             "Cannot resume transfer with file transfer Id '")
@@ -946,12 +948,12 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                     session = new ResumeUploadFileSharingSession(mImService,
                             ContentManager.createMmContent(resume.getFile(), resume.getSize(),
                                     resume.getFileName()), (FtHttpResumeUpload) resume,
-                            mRcsSettings, mMessagingLog, mContactManager);
+                            mRcsSettings, mMessagingLog, mContactManager, mServerApiUtils);
                 } else {
                     session = new DownloadFromResumeFileSharingSession(mImService,
                             ContentManager.createMmContent(resume.getFile(), resume.getSize(),
                                     resume.getFileName()), (FtHttpResumeDownload) resume,
-                            mRcsSettings, mMessagingLog, mContactManager);
+                            mRcsSettings, mMessagingLog, mContactManager, mServerApiUtils);
                 }
                 session.addListener(this);
                 session.startSession();
@@ -1504,5 +1506,18 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
+    }
+
+    /**
+     * Override the onTransact Binder method. It is used to check authorization for an application
+     * before calling API method. Control of authorization is made for third party applications (vs.
+     * native application) by comparing the client application fingerprint with the RCS application
+     * fingerprint
+     */
+    @Override
+    public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags)
+            throws android.os.RemoteException {
+        mServerApiUtils.assertApiIsAuthorized(Binder.getCallingUid());
+        return super.onTransact(code, data, reply, flags);
     }
 }

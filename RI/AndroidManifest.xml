@@ -27,9 +27,19 @@
         android:allowBackup="false"
         android:icon="@drawable/app_icon"
         android:label="@string/app_name" >
+
+        <!-- Application Identifier -->
         <meta-data
-            android:name="com.gsma.services.rcs.capability.EXTENSION"
-            android:value="ext.messaging;ext.streaming" />
+            android:name="com.gsma.services.rcs.APPLICATION_ID"
+            android:value="OE5UGv9hAbcd85XC-xEjpEpw5OXLWG6RVrNeyA" />
+
+        <!-- Extensions supported by application -->
+        <meta-data
+            android:name="com.gsma.services.rcs.capability.EXTENSION.0"
+            android:value="hszdfBlrn-xg1hXJj4z2kfL93ccp-sGuTwJvjg" />
+        <meta-data
+            android:name="fake.com.gsma.services.rcs.capability.EXTENSION.1"
+            android:value="Go9z8V2KFV7tHcK71EoNGDPEr5sdcRzXT8r3iQ" />
 
         <uses-library android:name="com.google.android.maps" />
 
@@ -442,7 +452,8 @@
             <intent-filter>
                 <action android:name="com.gsma.services.rcs.extension.action.NEW_MESSAGING_SESSION" />
 
-                <data android:mimeType="com.gsma.services.rcs/ext.messaging" />
+                <data android:mimeType="com.gsma.services.rcs/ext.ss.hszdfBlrn-xg1hXJj4z2kfL93ccp-sGuTwJvjg" />
+                <data android:mimeType="com.gsma.services.rcs/ext.ss.Go9z8V2KFV7tHcK71EoNGDPEr5sdcRzXT8r3iQ" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.DEFAULT" />

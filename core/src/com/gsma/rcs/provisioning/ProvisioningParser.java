@@ -28,6 +28,7 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData;
 import com.gsma.rcs.provider.settings.RcsSettingsData.AuthenticationProcedure;
 import com.gsma.rcs.provider.settings.RcsSettingsData.EnableRcseSwitch;
+import com.gsma.rcs.provider.settings.RcsSettingsData.ExtensionPolicy;
 import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.provider.settings.RcsSettingsData.GsmaRelease;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ImMsgTech;
@@ -49,7 +50,6 @@ import java.io.ByteArrayInputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
 import javax2.sip.ListeningPoint;
 
 /**
@@ -1006,10 +1006,10 @@ public class ProvisioningParser {
                          * According to "Rich Communication Suite 5.1 Advanced Communications
                          * Services and Client Specification Version 4.0" 3.5.4.8.3 File transfer
                          * procedure 3.5.4.8.3.1 Sender procedures This specification uses the term
-                         * 'HTTP POST' and 'HTTP GET' as a generic reference to the action
-                         * of using the POST or GET method. However, it is strongly recommended that
-                         * whenever the POST action contains sensitive information such as a user ID
-                         * or password, the action should take place over a secure connection and/or
+                         * 'HTTP POST' and 'HTTP GET' as a generic reference to the action of using
+                         * the POST or GET method. However, it is strongly recommended that whenever
+                         * the POST action contains sensitive information such as a user ID or
+                         * password, the action should take place over a secure connection and/or
                          * via HTTPS explicitly.
                          */
                         if (!ftHttpCsUri.startsWith(PROTOCOL_HTTPS)) {
@@ -1267,6 +1267,65 @@ public class ProvisioningParser {
     }
 
     /**
+     * Parse API ext
+     *
+     * @param node Node
+     */
+    private void parseAPIExt(Node node) {
+        if (node == null) {
+            return;
+        }
+        String extensionsPolicy = null;
+        Node childnode = node.getFirstChild();
+        if (childnode != null) {
+            do {
+
+                if (extensionsPolicy == null) {
+                    if ((extensionsPolicy = getValueByParamName("extensionsPolicy", childnode,
+                            TYPE_TXT)) != null) {
+                        try {
+                            ExtensionPolicy extensionPolicy = ExtensionPolicy.valueOf(Integer
+                                    .parseInt(extensionsPolicy));
+                            mRcsSettings.setExtensionspolicy(extensionPolicy);
+                        } catch (IllegalArgumentException e) {
+                            if (logger.isActivated()) {
+                                logger.warn("Cannot parse extension policy ".concat(e.getMessage()));
+                            }
+                        }
+                        continue;
+                    }
+                }
+            } while ((childnode = childnode.getNextSibling()) != null);
+        }
+    }
+
+    /**
+     * Parse other ext
+     *
+     * @param node Node
+     */
+    private void parseOtherExt(Node node) {
+        if (node == null) {
+            return;
+        }
+        Node childnode = node.getFirstChild();
+        if (childnode != null) {
+            do {
+                if (childnode.getNodeName().equals("characteristic")) {
+                    if (childnode.getAttributes().getLength() > 0) {
+                        Node typenode = childnode.getAttributes().getNamedItem("type");
+                        if (typenode != null) {
+                            if (typenode.getNodeValue().equalsIgnoreCase("APIExt")) {
+                                parseAPIExt(childnode);
+                            }
+                        }
+                    }
+                }
+            } while ((childnode = childnode.getNextSibling()) != null);
+        }
+    }
+
+    /**
      * Parse transport protocol
      * 
      * @param node Node
@@ -1377,6 +1436,8 @@ public class ProvisioningParser {
                         if (typenode != null) {
                             if (typenode.getNodeValue().equalsIgnoreCase("transportProto")) {
                                 parseTransportProtocol(childnode);
+                            } else if (typenode.getNodeValue().equalsIgnoreCase("Ext")) {
+                                parseOtherExt(childnode);
                             }
                         }
                     }

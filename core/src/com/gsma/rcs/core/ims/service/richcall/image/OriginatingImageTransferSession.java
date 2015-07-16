@@ -43,6 +43,7 @@ import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.Base64;
 import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.NetworkRessourceManager;
@@ -92,11 +93,13 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param serverApiUtils
      */
     public OriginatingImageTransferSession(ImsService parent, MmContent content, ContactId contact,
             MmContent thumbnail, RcsSettings rcsSettings, long timestamp,
-            ContactManager contactManager) {
-        super(parent, content, contact, thumbnail, rcsSettings, timestamp, contactManager);
+            ContactManager contactManager, ServerApiUtils serverApiUtils) {
+        super(parent, content, contact, thumbnail, rcsSettings, timestamp, contactManager,
+                serverApiUtils);
 
         // Create dialog path
         createOriginatingDialogPath();

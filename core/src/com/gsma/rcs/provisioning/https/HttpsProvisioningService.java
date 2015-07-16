@@ -23,9 +23,11 @@
 package com.gsma.rcs.provisioning.https;
 
 import com.gsma.rcs.addressbook.RcsAccountException;
+import com.gsma.rcs.core.ims.service.extension.ExtensionManager;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
+import com.gsma.rcs.provider.security.SecurityLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provisioning.ProvisioningInfo;
 import com.gsma.rcs.service.LauncherUtils;
@@ -80,6 +82,8 @@ public class HttpsProvisioningService extends Service {
 
     private ContactManager mContactManager;
 
+    private ExtensionManager mExtensionManager;
+
     /**
      * Retry action for provisioning failure
      */
@@ -101,6 +105,8 @@ public class HttpsProvisioningService extends Service {
         mRetryIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_RETRY), 0);
         mContactManager = ContactManager.createInstance(mContext, contentResolver,
                 mLocalContentResolver, mRcsSettings);
+        SecurityLog securityLog = SecurityLog.getInstance(mLocalContentResolver);
+        mExtensionManager = ExtensionManager.getInstance(mContext, mRcsSettings, securityLog);
     }
 
     @Override
@@ -135,7 +141,8 @@ public class HttpsProvisioningService extends Service {
         registerReceiver(retryReceiver, new IntentFilter(ACTION_RETRY));
 
         mHttpsProvisioningMng = new HttpsProvisioningManager(mContext, mLocalContentResolver,
-                mRetryIntent, first, user, mRcsSettings, mMessagingLog, mContactManager);
+                mRetryIntent, first, user, mRcsSettings, mMessagingLog, mContactManager,
+                mExtensionManager);
         if (logActivated) {
             sLogger.debug(new StringBuilder("Provisioning (boot=").append(first).append(") (user=")
                     .append(user).append(") (version=").append(version).append(")").toString());

@@ -59,6 +59,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpThumbn
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
@@ -107,11 +108,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * Contribution ID
      */
     private String mContributionId;
-
-    /**
-     * Feature tags
-     */
-    private List<String> mFeatureTags = new ArrayList<String>();
 
     /**
      * Feature tags
@@ -185,11 +181,12 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param firstMsg First message in session
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param serverApiUtils
      */
     public ChatSession(InstantMessagingService imService, ContactId contact, String remoteUri,
             RcsSettings rcsSettings, MessagingLog messagingLog, ChatMessage firstMsg,
-            long timestamp, ContactManager contactManager) {
-        super(imService, contact, remoteUri, rcsSettings, timestamp, contactManager);
+            long timestamp, ContactManager contactManager, ServerApiUtils serverApiUtils) {
+        super(imService, contact, remoteUri, rcsSettings, timestamp, contactManager, serverApiUtils);
 
         mImService = imService;
         mImdnManager = imService.getImdnManager();
@@ -208,30 +205,12 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     }
 
     /**
-     * Get feature tags
-     * 
-     * @return Feature tags
-     */
-    public String[] getFeatureTags() {
-        return mFeatureTags.toArray(new String[mFeatureTags.size()]);
-    }
-
-    /**
      * Get Accept-Contact tags
      * 
      * @return Feature tags
      */
     public String[] getAcceptContactTags() {
         return mAcceptContactTags.toArray(new String[mAcceptContactTags.size()]);
-    }
-
-    /**
-     * Set feature tags
-     * 
-     * @param tags Feature tags
-     */
-    public void setFeatureTags(List<String> tags) {
-        this.mFeatureTags = tags;
     }
 
     /**
@@ -891,7 +870,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 
         DownloadFromInviteFileSharingSession fileSession = new DownloadFromInviteFileSharingSession(
                 mImService, this, fileTransferInfo, msgId, contact, displayName, mRcsSettings,
-                mMessagingLog, timestamp, timestampSent, mContactManager);
+                mMessagingLog, timestamp, timestampSent, mContactManager, mServerApiUtils);
         if (fileTransferHttpThumbnail != null) {
             try {
                 fileSession.downloadFileIcon();

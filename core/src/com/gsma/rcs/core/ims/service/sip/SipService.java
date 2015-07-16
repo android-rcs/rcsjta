@@ -34,6 +34,7 @@ import com.gsma.rcs.core.ims.service.sip.streaming.OriginatingSipRtpSession;
 import com.gsma.rcs.core.ims.service.sip.streaming.TerminatingSipRtpSession;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
@@ -52,9 +53,7 @@ import javax2.sip.message.Response;
  * @author Jean-Marc AUFFRET
  */
 public class SipService extends ImsService {
-    /**
-     * The logger
-     */
+
     private final static Logger logger = Logger.getLogger(SipService.class.getSimpleName());
 
     /**
@@ -76,18 +75,23 @@ public class SipService extends ImsService {
 
     private final RcsSettings mRcsSettings;
 
+    private final ServerApiUtils mServerApiUtils;
+
     /**
      * Constructor
      * 
      * @param parent IMS module
      * @param contactManager ContactManager
      * @param rcsSettings
+     * @param serverApiUtils
      */
-    public SipService(ImsModule parent, ContactManager contactManager, RcsSettings rcsSettings) {
+    public SipService(ImsModule parent, ContactManager contactManager, RcsSettings rcsSettings,
+            ServerApiUtils serverApiUtils) {
         super(parent, true);
 
         mContactManager = contactManager;
         mRcsSettings = rcsSettings;
+        mServerApiUtils = serverApiUtils;
     }
 
     /**
@@ -133,7 +137,7 @@ public class SipService extends ImsService {
         // Create a new session
         long timestamp = System.currentTimeMillis();
         OriginatingSipMsrpSession session = new OriginatingSipMsrpSession(this, contact,
-                featureTag, mRcsSettings, timestamp, mContactManager);
+                featureTag, mRcsSettings, timestamp, mContactManager, mServerApiUtils);
 
         return session;
     }
@@ -170,7 +174,7 @@ public class SipService extends ImsService {
 
         // Create a new session
         TerminatingSipMsrpSession session = new TerminatingSipMsrpSession(this, invite, remote,
-                sessionInvite, mRcsSettings, timestamp, mContactManager);
+                sessionInvite, mRcsSettings, timestamp, mContactManager, mServerApiUtils);
 
         getImsModule().getCore().getListener()
                 .handleSipMsrpSessionInvitation(sessionInvite, session);
@@ -193,7 +197,7 @@ public class SipService extends ImsService {
         // Create a new session
         long timestamp = System.currentTimeMillis();
         OriginatingSipRtpSession session = new OriginatingSipRtpSession(this, contact, featureTag,
-                mRcsSettings, timestamp, mContactManager);
+                mRcsSettings, timestamp, mContactManager, mServerApiUtils);
 
         return session;
     }
@@ -230,7 +234,7 @@ public class SipService extends ImsService {
 
         // Create a new session
         TerminatingSipRtpSession session = new TerminatingSipRtpSession(this, invite, remote,
-                sessionInvite, mRcsSettings, timestamp, mContactManager);
+                sessionInvite, mRcsSettings, timestamp, mContactManager, mServerApiUtils);
 
         getImsModule().getCore().getListener()
                 .handleSipRtpSessionInvitation(sessionInvite, session);

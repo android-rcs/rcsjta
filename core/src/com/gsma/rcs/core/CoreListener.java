@@ -519,4 +519,19 @@ public interface CoreListener {
      * @param msgId
      */
     public void handleChatMessageDisplayReportSent(String chatId, ContactId remote, String msgId);
+
+    /**
+     * Checks if supported extensions have changed
+     */
+    public void checkIfSupportedExtensionsHaveChanged();
+
+    /**
+     * Updates supported extensions for package
+     * 
+     * @param uid the package UID
+     * @param packageName the package name
+     * @param packageRemoved the package is removed
+     */
+    public void updateSupportedExtensionsForPackage(Integer uid, String packageName,
+            boolean packageRemoved);
 }

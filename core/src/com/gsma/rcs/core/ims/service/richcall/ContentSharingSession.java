@@ -29,6 +29,7 @@ import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.services.rcs.contact.ContactId;
@@ -55,12 +56,13 @@ public abstract class ContentSharingSession extends ImsServiceSession {
      * @param rcsSettings RCS settings accessor
      * @param timestamp Local timestamp for the session
      * @param contactManager Contact manager accessor
+     * @param serverApiUtils
      */
     public ContentSharingSession(ImsService parent, MmContent content, ContactId contact,
-            RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
+            RcsSettings rcsSettings, long timestamp, ContactManager contactManager,
+            ServerApiUtils serverApiUtils) {
         super(parent, contact, PhoneUtils.formatContactIdToUri(contact), rcsSettings, timestamp,
-                contactManager);
-
+                contactManager, serverApiUtils);
         mContent = content;
     }
 

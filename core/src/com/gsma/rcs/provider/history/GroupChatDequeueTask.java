@@ -33,6 +33,7 @@ import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
 import com.gsma.rcs.service.api.GroupChatImpl;
 import com.gsma.rcs.service.api.GroupFileTransferImpl;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 
 import android.content.Context;
@@ -56,9 +57,9 @@ public class GroupChatDequeueTask extends DequeueTask {
     public GroupChatDequeueTask(Object lock, Context ctx, Core core, String chatId,
             MessagingLog messagingLog, ChatServiceImpl chatService,
             FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings,
-            HistoryLog historyLog, ContactManager contactManager) {
+            HistoryLog historyLog, ContactManager contactManager, ServerApiUtils serverApiUtils) {
         super(lock, ctx, core, contactManager, messagingLog, rcsSettings, chatService,
-                fileTransferService);
+                fileTransferService, serverApiUtils);
         mChatId = chatId;
         mHistoryLog = historyLog;
         final ImdnManager imdnManager = mImService.getImdnManager();

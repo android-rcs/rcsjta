@@ -35,11 +35,14 @@ import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Vector;
 
 import javax2.sip.header.ContactHeader;
@@ -150,7 +153,17 @@ public abstract class ImsServiceSession extends Thread {
 
     protected final RcsSettings mRcsSettings;
 
+    /**
+     * Feature tags
+     */
+    private List<String> mFeatureTags = new ArrayList<String>();
+
     protected final ContactManager mContactManager;
+
+    /**
+     * CallingUid : identify the client application bound to the API
+     */
+    private Integer mCallingUid;
 
     /**
      * Session timestamp
@@ -158,6 +171,8 @@ public abstract class ImsServiceSession extends Thread {
     private long mTimestamp;
 
     private static final Logger sLogger = Logger.getLogger(ImsServiceSession.class.getSimpleName());
+
+    protected final ServerApiUtils mServerApiUtils;
 
     /**
      * Constructor
@@ -168,9 +183,11 @@ public abstract class ImsServiceSession extends Thread {
      * @param rcsSettings RCS settings accessor
      * @param timestamp Local timestamp for the session
      * @param contactManager Contact manager accessor
+     * @param serverApiUtils
      */
     public ImsServiceSession(ImsService imsService, ContactId contact, String remoteUri,
-            RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
+            RcsSettings rcsSettings, long timestamp, ContactManager contactManager,
+            ServerApiUtils serverApiUtils) {
         mImsService = imsService;
         mContact = contact;
         mRemoteUri = remoteUri;
@@ -180,6 +197,7 @@ public abstract class ImsServiceSession extends Thread {
         mRcsSettings = rcsSettings;
         mRingingPeriod = mRcsSettings.getRingingPeriod();
         mTimestamp = timestamp;
+        mServerApiUtils = serverApiUtils;
     }
 
     /**
@@ -445,11 +463,21 @@ public abstract class ImsServiceSession extends Thread {
      * Accept the session invitation
      */
     public void acceptSession() {
+        acceptSession(null);
+    }
+
+    /**
+     * Accept the session invitation
+     * 
+     * @param callingUid : identifier of the application bound to the APÏ
+     */
+    public void acceptSession(Integer callingUid) {
         if (sLogger.isActivated()) {
             sLogger.debug("Session invitation has been accepted");
         }
         mInvitationStatus = InvitationStatus.INVITATION_ACCEPTED;
-
+        setCallingUid(callingUid);
+        // Unblock semaphore
         synchronized (mWaitUserAnswer) {
             mWaitUserAnswer.notifyAll();
         }
@@ -1352,5 +1380,47 @@ public abstract class ImsServiceSession extends Thread {
      * @param response
      */
     public void handle180Ringing(SipResponse response) {
+    }
+
+    /**
+     * Get feature tags
+     * 
+     * @return Feature tags
+     */
+    protected String[] getFeatureTags() {
+        if (mCallingUid == null) {
+            return mFeatureTags.toArray(new String[mFeatureTags.size()]);
+        }
+
+        List<String> newFeaturesTags = new ArrayList<String>(mFeatureTags);
+        mServerApiUtils.addApplicationIdAsFeaturesTag(newFeaturesTags, mCallingUid);
+        return newFeaturesTags.toArray(new String[newFeaturesTags.size()]);
+    }
+
+    /**
+     * Set feature tags
+     * 
+     * @param tags Feature tags
+     */
+    protected void setFeatureTags(List<String> tags) {
+        mFeatureTags = tags;
+    }
+
+    /**
+     * Get the UID of the application bound to the API
+     * 
+     * @return UID or null when if there is no bound application to the API
+     */
+    protected Integer getCallingUid() {
+        return mCallingUid;
+    }
+
+    /**
+     * Set the UID of the application bound to the API
+     * 
+     * @param callingUid
+     */
+    public void setCallingUid(Integer callingUid) {
+        mCallingUid = callingUid;
     }
 }

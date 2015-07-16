@@ -39,9 +39,9 @@ import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
-import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.video.IVideoPlayer;
@@ -59,9 +59,6 @@ import java.util.Vector;
  */
 public class TerminatingVideoStreamingSession extends VideoStreamingSession {
 
-    /**
-     * The logger
-     */
     private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
 
     /**
@@ -73,12 +70,13 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param serverApiUtils
      */
     public TerminatingVideoStreamingSession(ImsService parent, SipRequest invite,
             ContactId contact, RcsSettings rcsSettings, long timestamp,
-            ContactManager contactManager) {
+            ContactManager contactManager, ServerApiUtils serverApiUtils) {
         super(parent, ContentManager.createLiveVideoContentFromSdp(invite.getContentBytes()),
-                contact, rcsSettings, timestamp, contactManager);
+                contact, rcsSettings, timestamp, contactManager, serverApiUtils);
 
         // Create dialog path
         createTerminatingDialogPath(invite);
@@ -247,7 +245,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                 mLogger.info("Send 200 OK");
             }
             SipResponse resp = SipMessageFactory.create200OkInviteResponse(dialogPath,
-                    RichcallService.FEATURE_TAGS_VIDEO_SHARE, sdp);
+                    getFeatureTags(), sdp);
 
             // The signalisation is established
             dialogPath.setSigEstablished();

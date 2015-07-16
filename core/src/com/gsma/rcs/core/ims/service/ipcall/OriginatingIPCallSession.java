@@ -30,6 +30,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.service.ipcalldraft.IIPCallPlayer;
 import com.gsma.rcs.service.ipcalldraft.IIPCallRenderer;
 import com.gsma.rcs.utils.logger.Logger;
@@ -60,12 +61,13 @@ public class OriginatingIPCallSession extends IPCallSession {
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param serverApiUtils
      */
     public OriginatingIPCallSession(ImsService parent, ContactId contact,
             AudioContent audioContent, VideoContent videoContent, IIPCallPlayer player,
             IIPCallRenderer renderer, RcsSettings rcsSettings, long timestamp,
-            ContactManager contactManager) {
-        super(parent, contact, audioContent, videoContent, rcsSettings, timestamp, contactManager);
+            ContactManager contactManager, ServerApiUtils serverApiUtils) {
+        super(parent, contact, audioContent, videoContent, rcsSettings, timestamp, contactManager, serverApiUtils);
 
         // Set the player
         setPlayer(player);

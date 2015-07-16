@@ -34,9 +34,12 @@ import com.gsma.rcs.core.ims.service.richcall.ContentSharingSession;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.video.IVideoPlayer;
+
+import java.util.Arrays;
 
 /**
  * Video sharing streaming session
@@ -65,10 +68,12 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param serverApiUtils
      */
     public VideoStreamingSession(ImsService parent, MmContent content, ContactId contact,
-            RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
-        super(parent, content, contact, rcsSettings, timestamp, contactManager);
+            RcsSettings rcsSettings, long timestamp, ContactManager contactManager, ServerApiUtils serverApiUtils) {
+        super(parent, content, contact, rcsSettings, timestamp, contactManager, serverApiUtils);
+        setFeatureTags(Arrays.asList(RichcallService.FEATURE_TAGS_VIDEO_SHARE));
     }
 
     /**
@@ -132,8 +137,8 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
      * @throws SipException
      */
     public SipRequest createInvite() throws SipException {
-        return SipMessageFactory.createInvite(getDialogPath(),
-                RichcallService.FEATURE_TAGS_VIDEO_SHARE, getDialogPath().getLocalContent());
+        return SipMessageFactory.createInvite(getDialogPath(), getFeatureTags(), getDialogPath()
+                .getLocalContent());
     }
 
     /**

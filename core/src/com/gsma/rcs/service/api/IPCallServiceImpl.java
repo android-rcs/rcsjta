@@ -86,6 +86,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * Lock used for synchronization
      */
     private final Object lock = new Object();
+    
+    private final ServerApiUtils mServerApiUtils;
 
     /**
      * Constructor
@@ -94,9 +96,10 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * @param ipCallLog IPCallHistory
      * @param contactManager ContactManager
      * @param rcsSettings RcsSettings
+     * @param serverApiUtils
      */
     public IPCallServiceImpl(IPCallService ipCallService, IPCallHistory ipCallLog,
-            ContactManager contactManager, RcsSettings rcsSettings) {
+            ContactManager contactManager, RcsSettings rcsSettings, ServerApiUtils serverApiUtils) {
         if (sLogger.isActivated()) {
             sLogger.info("IP call service API is loaded");
         }
@@ -104,6 +107,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
         mIPCallLog = ipCallLog;
         mRcsSettings = rcsSettings;
         mContactManager = contactManager;
+        mServerApiUtils = serverApiUtils;
     }
 
     /**
@@ -152,7 +156,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * @return Returns true if registered else returns false
      */
     public boolean isServiceRegistered() {
-        return ServerApiUtils.isImsConnected();
+        return mServerApiUtils.isImsConnected();
     }
 
     /**
@@ -161,7 +165,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * @return the reason code for IMS service registration
      */
     public int getServiceRegistrationReasonCode() {
-        return ServerApiUtils.getServiceRegistrationReasonCode().toInt();
+        return mServerApiUtils.getServiceRegistrationReasonCode().toInt();
     }
 
     /**
@@ -263,7 +267,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
             sLogger.info("Initiate an IP call audio session with " + contact);
         }
 
-        ServerApiUtils.testIms();
+        mServerApiUtils.testIms();
 
         long timestamp = System.currentTimeMillis();
         try {
@@ -331,7 +335,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
             sLogger.info("Initiate an IP call visio session with " + contact);
         }
 
-        ServerApiUtils.testIms();
+        mServerApiUtils.testIms();
 
         long timestamp = System.currentTimeMillis();
         try {

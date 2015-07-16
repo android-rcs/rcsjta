@@ -28,6 +28,7 @@ import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -51,20 +52,24 @@ public class StoreAndForwardManager {
     private final static Logger logger = Logger.getLogger(StoreAndForwardManager.class
             .getSimpleName());
 
+    private final ServerApiUtils mServerApiUtils;
+
     /**
      * Constructor
      * 
-     * @param imsService IMS service
+     * @param imService IMS service
      * @param rcsSettings
      * @param contactManager
      * @param messagingLog
+     * @param serverApiUtils
      */
     public StoreAndForwardManager(InstantMessagingService imService, RcsSettings rcsSettings,
-            ContactManager contactManager, MessagingLog messagingLog) {
+            ContactManager contactManager, MessagingLog messagingLog, ServerApiUtils serverApiUtils) {
         mRcsSettings = rcsSettings;
         mImService = imService;
         mContactManager = contactManager;
         mMessagingLog = messagingLog;
+        mServerApiUtils = serverApiUtils;
     }
 
     /**
@@ -82,7 +87,7 @@ public class StoreAndForwardManager {
         }
         TerminatingStoreAndForwardOneToOneChatMessageSession session = new TerminatingStoreAndForwardOneToOneChatMessageSession(
                 mImService, invite, contact, mRcsSettings, mMessagingLog, timestamp,
-                mContactManager);
+                mContactManager, mServerApiUtils);
 
         mImService.getImsModule().getCore().getListener()
                 .handleStoreAndForwardMsgSessionInvitation(session);
@@ -103,7 +108,7 @@ public class StoreAndForwardManager {
         }
         TerminatingStoreAndForwardOneToOneChatNotificationSession session = new TerminatingStoreAndForwardOneToOneChatNotificationSession(
                 mImService, invite, contact, mRcsSettings, mMessagingLog, timestamp,
-                mContactManager);
+                mContactManager, mServerApiUtils);
 
         mImService.getImsModule().getCore().getListener()
                 .handleStoreAndForwardNotificationSessionInvitation(session);

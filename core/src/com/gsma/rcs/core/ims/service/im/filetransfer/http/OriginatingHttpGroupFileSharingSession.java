@@ -32,7 +32,6 @@ import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
-import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
@@ -40,12 +39,12 @@ import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
-import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession.State;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
@@ -107,16 +106,17 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
      * @param timestamp Local timestamp for the session
      * @param timestampSent the timestamp sent in payload for the group file sharing
      * @param contactManager
+     * @param serverApiUtils
      */
     public OriginatingHttpGroupFileSharingSession(String fileTransferId,
             InstantMessagingService imService, MmContent content, MmContent fileIcon,
             String conferenceId, String chatSessionId, String chatContributionId, String tId,
             Core core, RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
-            long timestampSent, ContactManager contactManager) {
+            long timestampSent, ContactManager contactManager, ServerApiUtils serverApiUtils) {
         super(imService, content, null, conferenceId, fileIcon, chatSessionId, chatContributionId,
                 fileTransferId, rcsSettings, messagingLog, timestamp,
                 FileTransferData.UNKNOWN_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION,
-                contactManager);
+                contactManager, serverApiUtils);
         mCore = core;
         mTimestampSent = timestampSent;
 

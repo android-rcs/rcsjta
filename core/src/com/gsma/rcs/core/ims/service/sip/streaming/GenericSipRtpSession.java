@@ -41,6 +41,7 @@ import com.gsma.rcs.core.ims.service.sip.SipSessionError;
 import com.gsma.rcs.core.ims.service.sip.SipSessionListener;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
@@ -100,10 +101,11 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param serverApiUtils
      */
     public GenericSipRtpSession(ImsService parent, ContactId contact, String featureTag,
-            RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
-        super(parent, contact, featureTag, rcsSettings, timestamp, contactManager);
+            RcsSettings rcsSettings, long timestamp, ContactManager contactManager, ServerApiUtils serverApiUtils) {
+        super(parent, contact, featureTag, rcsSettings, timestamp, contactManager, serverApiUtils);
 
         // Get local port
         mLocalRtpPort = NetworkRessourceManager.generateLocalRtpPort(rcsSettings);

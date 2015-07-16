@@ -37,6 +37,7 @@ import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.service.ipcalldraft.IIPCallPlayer;
 import com.gsma.rcs.service.ipcalldraft.IIPCallRenderer;
 import com.gsma.rcs.service.ipcalldraft.IPCall.ReasonCode;
@@ -74,9 +75,6 @@ public class IPCallService extends ImsService {
 
     private final RcsSettings mRcsSettings;
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(IPCallService.class.getSimpleName());
 
     /**
@@ -84,10 +82,9 @@ public class IPCallService extends ImsService {
      */
     private Map<String, IPCallSession> mIPCallSessionCache = new HashMap<String, IPCallSession>();
 
-    /**
-     * Contacts manager
-     */
     private final ContactManager mContactManager;
+
+    private final ServerApiUtils mServerApiUtils;
 
     /**
      * Constructor
@@ -95,11 +92,14 @@ public class IPCallService extends ImsService {
      * @param parent IMS module
      * @param rcsSettings RcsSettings
      * @param contactsManager ContactManager
+     * @param serverApiUtils
      */
-    public IPCallService(ImsModule parent, RcsSettings rcsSettings, ContactManager contactsManager) {
+    public IPCallService(ImsModule parent, RcsSettings rcsSettings, ContactManager contactsManager,
+            ServerApiUtils serverApiUtils) {
         super(parent, true);
         mRcsSettings = rcsSettings;
         mContactManager = contactsManager;
+        mServerApiUtils = serverApiUtils;
     }
 
     private void handleIPCallInvitationRejected(SipRequest invite, ContactId contact,
@@ -237,7 +237,7 @@ public class IPCallService extends ImsService {
         // Create a new session
         OriginatingIPCallSession session = new OriginatingIPCallSession(this, contact,
                 audioContent, videoContent, player, renderer, mRcsSettings, timestamp,
-                mContactManager);
+                mContactManager, mServerApiUtils);
 
         return session;
     }
@@ -293,7 +293,7 @@ public class IPCallService extends ImsService {
 
         // Create a new session
         IPCallSession session = new TerminatingIPCallSession(this, invite, contact, mRcsSettings,
-                timestamp, mContactManager);
+                timestamp, mContactManager, mServerApiUtils);
 
         getImsModule().getCore().getListener().handleIPCallInvitation(session);
 

@@ -86,6 +86,48 @@ public class RcsSettingsData {
     };
 
     /**
+     * Security extension policy
+     */
+    public enum ExtensionPolicy {
+        /**
+         * Only native application
+         */
+        ONLY_NATIVE(0),
+        /**
+         * All applications
+         */
+        NATIVE_AND_SELF_SIGNED(1);
+
+        private int mValue;
+
+        private static SparseArray<ExtensionPolicy> mValueToEnum = new SparseArray<ExtensionPolicy>();
+        static {
+            for (ExtensionPolicy entry : ExtensionPolicy.values()) {
+                mValueToEnum.put(entry.toInt(), entry);
+            }
+        }
+
+        private ExtensionPolicy(int value) {
+            mValue = value;
+        }
+
+        public final int toInt() {
+            return mValue;
+        }
+
+        public static ExtensionPolicy valueOf(int value) {
+            ExtensionPolicy entry = mValueToEnum.get(value);
+            if (entry != null) {
+                return entry;
+            }
+            throw new IllegalArgumentException("No enum const class "
+                    + ExtensionPolicy.class.getName() + "." + value);
+
+        }
+
+    };
+
+    /**
      * Option for what ux-operation to react on when handling manual acceptance of one2one and group
      * chat invitations.
      */
@@ -1247,7 +1289,7 @@ public class RcsSettingsData {
      * Control RCS extensions
      */
     public static final String CONTROL_EXTENSIONS = "ControlRcsExtensions";
-    /* package private */static final Boolean DEFAULT_CONTROL_EXTENSIONS = false;
+    /* package private */static final Boolean DEFAULT_CONTROL_EXTENSIONS = true;
 
     /**
      * Allow RCS extensions
@@ -1260,6 +1302,13 @@ public class RcsSettingsData {
      */
     public static final String MAX_MSRP_SIZE_EXTENSIONS = "ExtensionsMaxMsrpSize";
     /* package private */static final Integer DEFAULT_MAX_MSRP_SIZE_EXTENSIONS = 0;
+
+    /**
+     * RCS extensions policy
+     */
+    public static final String EXTENSIONS_POLICY = "ExtensionsPolicy";
+    /* package private */static final Integer DEFAULT_EXTENSIONS_POLICY = ExtensionPolicy.NATIVE_AND_SELF_SIGNED
+            .toInt();
 
     /**
      * Validity of the RCS configuration.

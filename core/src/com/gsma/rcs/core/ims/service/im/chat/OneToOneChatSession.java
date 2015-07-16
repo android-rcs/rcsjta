@@ -40,6 +40,7 @@ import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.api.OneToOneFileTransferImpl;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.contact.ContactId;
@@ -68,12 +69,14 @@ public abstract class OneToOneChatSession extends ChatSession {
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp for the session
      * @param contactManager Contact manager accessor
+     * @param serverApiUtils
      */
     public OneToOneChatSession(InstantMessagingService imService, ContactId contact,
             String remoteUri, ChatMessage firstMsg, RcsSettings rcsSettings,
-            MessagingLog messagingLog, long timestamp, ContactManager contactManager) {
+            MessagingLog messagingLog, long timestamp, ContactManager contactManager,
+            ServerApiUtils serverApiUtils) {
         super(imService, contact, remoteUri, rcsSettings, messagingLog, firstMsg, timestamp,
-                contactManager);
+                contactManager, serverApiUtils);
 
         List<String> featureTags = ChatUtils.getSupportedFeatureTagsForChat(rcsSettings);
         setFeatureTags(featureTags);
@@ -234,8 +237,8 @@ public abstract class OneToOneChatSession extends ChatSession {
      * @throws SipException
      */
     private SipRequest createInviteRequest(String content) throws SipException {
-        SipRequest invite = SipMessageFactory.createInvite(getDialogPath(),
-                InstantMessagingService.CHAT_FEATURE_TAGS, content);
+        SipRequest invite = SipMessageFactory.createInvite(getDialogPath(), getFeatureTags(),
+                content);
 
         // Add a contribution ID header
         invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());

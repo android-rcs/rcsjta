@@ -30,9 +30,9 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.capability.Capabilities.CapabilitiesBuilder;
 import com.gsma.rcs.core.ims.service.capability.SyncContactTask.ISyncContactTaskListener;
-
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.contact.ContactManagerException;
+import com.gsma.rcs.provider.security.SecurityLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
@@ -76,14 +76,15 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      * @param parent IMS module
      * @param rcsSettings RCS settings accessor
      * @param contactsManager Contact manager accessor
+     * @param securityLog
      */
     public CapabilityService(ImsModule parent, RcsSettings rcsSettings,
-            ContactManager contactsManager) {
+            ContactManager contactsManager, SecurityLog securityLog) {
         super(parent, true);
         mRcsSettings = rcsSettings;
         mContactManager = contactsManager;
         mPollingManager = new PollingManager(this, mRcsSettings, mContactManager);
-        mOptionsManager = new OptionsManager(parent, mRcsSettings, mContactManager);
+        mOptionsManager = new OptionsManager(parent, mRcsSettings, mContactManager, securityLog);
         mAnonymousFetchManager = new AnonymousFetchManager(parent, mRcsSettings, mContactManager);
         mAddressBookManager = getImsModule().getCore().getAddressBookManager();
         mISyncContactTaskListener = new ISyncContactTaskListener() {

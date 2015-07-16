@@ -33,6 +33,7 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ConfigurationMode;
 import com.gsma.rcs.provider.settings.RcsSettingsData.EnableRcseSwitch;
+import com.gsma.rcs.provider.settings.RcsSettingsData.ExtensionPolicy;
 import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.provider.settings.RcsSettingsData.NetworkAccessType;
 
@@ -44,6 +45,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -326,6 +328,15 @@ public class StackProvisioning extends Activity {
         saveCheckBoxParam(R.id.ImeiAsDeviceId, RcsSettingsData.USE_IMEI_AS_DEVICE_ID, helper);
         saveCheckBoxParam(R.id.ControlExtensions, RcsSettingsData.CONTROL_EXTENSIONS, helper);
         saveCheckBoxParam(R.id.AllowExtensions, RcsSettingsData.ALLOW_EXTENSIONS, helper);
+        
+        CheckBox box = (CheckBox) helper.getActivity().findViewById(R.id.ExtensionPolicy);
+        ExtensionPolicy extensionPolicy = ExtensionPolicy.valueOf(box.isChecked() ? 1 : 0);
+        if (bundle != null) {
+            bundle.putInt(RcsSettingsData.EXTENSIONS_POLICY, ExtensionPolicy.NATIVE_AND_SELF_SIGNED.equals(extensionPolicy) ? 1 : 0);
+        } else {
+            mRcsSettings.setExtensionspolicy(extensionPolicy);
+        }
+        
         saveEditTextParam(R.id.MaxMsrpLengthExtensions, RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS,
                 helper);
         saveEditTextParam(R.id.MessagingCapabilitiesValidity,
@@ -557,6 +568,17 @@ public class StackProvisioning extends Activity {
         setCheckBoxParam(R.id.ImeiAsDeviceId, RcsSettingsData.USE_IMEI_AS_DEVICE_ID, helper);
         setCheckBoxParam(R.id.ControlExtensions, RcsSettingsData.CONTROL_EXTENSIONS, helper);
         setCheckBoxParam(R.id.AllowExtensions, RcsSettingsData.ALLOW_EXTENSIONS, helper);
+
+        ExtensionPolicy extensionPolicy;
+        if (bundle != null && bundle.containsKey(RcsSettingsData.EXTENSIONS_POLICY)) {
+            extensionPolicy = ExtensionPolicy.valueOf(bundle
+                    .getInt(RcsSettingsData.EXTENSIONS_POLICY));
+        } else {
+            extensionPolicy = mRcsSettings.getExtensionspolicy();
+        }
+        CheckBox box = (CheckBox) helper.getActivity().findViewById(R.id.ExtensionPolicy);
+        box.setChecked(ExtensionPolicy.NATIVE_AND_SELF_SIGNED.equals(extensionPolicy));
+
         setEditTextParam(R.id.MaxMsrpLengthExtensions, RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS,
                 helper);
         setEditTextParam(R.id.MessagingCapabilitiesValidity,

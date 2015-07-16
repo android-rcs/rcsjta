@@ -35,7 +35,6 @@ import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.Activity;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.format.DateUtils;
@@ -77,8 +76,6 @@ public class RequestCapabilities extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        /* Set layout */
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.capabilities_request);
 
         mCnxManager = ConnectionManager.getInstance();
@@ -86,7 +83,6 @@ public class RequestCapabilities extends Activity {
         /* Set the contact selector */
         mSpinner = (Spinner) findViewById(R.id.contact);
         mSpinner.setAdapter(ContactListAdapter.createContactListAdapter(this));
-        mSpinner.setOnItemSelectedListener(listenerContact);
 
         /* Set button callback */
         Button refreshBtn = (Button) findViewById(R.id.refresh_btn);
@@ -134,6 +130,18 @@ public class RequestCapabilities extends Activity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mSpinner.setOnItemSelectedListener(mListenerContact);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mSpinner.setOnItemSelectedListener(null);
+    }
+
     /**
      * Capabilities event listener
      */
@@ -169,13 +177,16 @@ public class RequestCapabilities extends Activity {
     /**
      * Spinner contact listener
      */
-    private OnItemSelectedListener listenerContact = new OnItemSelectedListener() {
+    private OnItemSelectedListener mListenerContact = new OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
             CapabilityService capabilityApi = mCnxManager.getCapabilityApi();
             try {
                 // Get selected contact
                 ContactId contactId = getSelectedContact();
+                if (contactId == null) {
+                    return;
+                }
 
                 // Get current capabilities
                 Capabilities currentCapabilities = capabilityApi.getContactCapabilities(contactId);
@@ -207,7 +218,11 @@ public class RequestCapabilities extends Activity {
     private ContactId getSelectedContact() {
         // get selected phone number
         ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
-        return ContactUtil.formatContact(adapter.getSelectedNumber(mSpinner.getSelectedView()));
+        View view = mSpinner.getSelectedView();
+        if (view == null) {
+            return null;
+        }
+        return ContactUtil.formatContact(adapter.getSelectedNumber(view));
     }
 
     /**

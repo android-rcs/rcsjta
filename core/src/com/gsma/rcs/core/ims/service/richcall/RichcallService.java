@@ -49,6 +49,7 @@ import com.gsma.rcs.core.ims.service.richcall.video.TerminatingVideoStreamingSes
 import com.gsma.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
@@ -118,18 +119,23 @@ public class RichcallService extends ImsService {
 
     private final RcsSettings mRcsSettings;
 
+    private final ServerApiUtils mServerApiUtils;
+
     /**
      * Constructor
      * 
      * @param parent IMS module
+     * @param core
      * @param contactsManager ContactManager
      * @param rcsSettings
+     * @param serverApiUtils
      */
     public RichcallService(ImsModule parent, Core core, ContactManager contactsManager,
-            RcsSettings rcsSettings) {
+            RcsSettings rcsSettings, ServerApiUtils serverApiUtils) {
         super(parent, true);
         mContactManager = contactsManager;
         mRcsSettings = rcsSettings;
+        mServerApiUtils = serverApiUtils;
     }
 
     private void handleImageSharingInvitationRejected(SipRequest invite, ContactId contact,
@@ -470,7 +476,8 @@ public class RichcallService extends ImsService {
 
         // Create a new session
         OriginatingImageTransferSession session = new OriginatingImageTransferSession(this,
-                content, contact, thumbnail, mRcsSettings, timestamp, mContactManager);
+                content, contact, thumbnail, mRcsSettings, timestamp, mContactManager,
+                mServerApiUtils);
 
         return session;
     }
@@ -588,7 +595,7 @@ public class RichcallService extends ImsService {
 
         // Create a new session
         ImageTransferSession session = new TerminatingImageTransferSession(this, invite, contact,
-                mRcsSettings, timestamp, mContactManager);
+                mRcsSettings, timestamp, mContactManager, mServerApiUtils);
 
         getImsModule().getCore().getListener().handleContentSharingTransferInvitation(session);
 
@@ -660,7 +667,7 @@ public class RichcallService extends ImsService {
         // Create a new session
         OriginatingVideoStreamingSession session = new OriginatingVideoStreamingSession(this,
                 player, ContentManager.createGenericLiveVideoContent(), contact, mRcsSettings,
-                timestamp, mContactManager);
+                timestamp, mContactManager, mServerApiUtils);
 
         return session;
     }
@@ -753,7 +760,7 @@ public class RichcallService extends ImsService {
 
         // Create a new session
         VideoStreamingSession session = new TerminatingVideoStreamingSession(this, invite, contact,
-                mRcsSettings, timestamp, mContactManager);
+                mRcsSettings, timestamp, mContactManager, mServerApiUtils);
 
         getImsModule().getCore().getListener().handleContentSharingStreamingInvitation(session);
 
@@ -767,11 +774,12 @@ public class RichcallService extends ImsService {
      * @param content Content to be shared
      * @param geoloc Geolocation
      * @param timestamp Local timesatmp
+     * @param serverApiUtils
      * @return GeolocTransferSession
      * @throws CoreException
      */
     public GeolocTransferSession initiateGeolocSharingSession(ContactId contact, MmContent content,
-            Geoloc geoloc, long timestamp) throws CoreException {
+            Geoloc geoloc, long timestamp, ServerApiUtils serverApiUtils) throws CoreException {
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("Initiate geoloc sharing session with contact ")
                     .append(contact).append(".").toString());
@@ -789,7 +797,7 @@ public class RichcallService extends ImsService {
 
         // Create a new session
         OriginatingGeolocTransferSession session = new OriginatingGeolocTransferSession(this,
-                content, contact, geoloc, mRcsSettings, timestamp, mContactManager);
+                content, contact, geoloc, mRcsSettings, timestamp, mContactManager, serverApiUtils);
 
         return session;
     }
@@ -883,7 +891,7 @@ public class RichcallService extends ImsService {
 
         // Create a new session
         GeolocTransferSession session = new TerminatingGeolocTransferSession(this, invite, contact,
-                mRcsSettings, timestamp, mContactManager);
+                mRcsSettings, timestamp, mContactManager, mServerApiUtils);
 
         getImsModule().getCore().getListener().handleContentSharingTransferInvitation(session);
 

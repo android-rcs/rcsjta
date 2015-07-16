@@ -36,6 +36,7 @@ import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -70,6 +71,8 @@ public class FtHttpResumeManager implements Runnable {
 
     private final ContactManager mContactManager;
 
+    private final ServerApiUtils mServerApiUtils;
+
     /**
      * Constructor
      * 
@@ -77,13 +80,16 @@ public class FtHttpResumeManager implements Runnable {
      * @param rcsSettings
      * @param messagingLog
      * @param contactManager
+     * @param serverApiUtils
      */
     public FtHttpResumeManager(InstantMessagingService instantMessagingService,
-            RcsSettings rcsSettings, MessagingLog messagingLog, ContactManager contactManager) {
+            RcsSettings rcsSettings, MessagingLog messagingLog, ContactManager contactManager,
+            ServerApiUtils serverApiUtils) {
         mRcsSettings = rcsSettings;
         mImsService = instantMessagingService;
         mMessagingLog = messagingLog;
         mContactManager = contactManager;
+        mServerApiUtils = serverApiUtils;
     }
 
     @Override
@@ -132,7 +138,7 @@ public class FtHttpResumeManager implements Runnable {
                 // Creates the Resume Download session object
                 final DownloadFromResumeFileSharingSession resumeDownload = new DownloadFromResumeFileSharingSession(
                         mImsService, downloadContent, downloadInfo, mRcsSettings, mMessagingLog,
-                        mContactManager);
+                        mContactManager, mServerApiUtils);
                 resumeDownload.addListener(getFileSharingSessionListener());
                 resumeDownload.startSession();
                 mImsService
@@ -156,7 +162,7 @@ public class FtHttpResumeManager implements Runnable {
                     // Create Resume Upload session
                     final ResumeUploadFileSharingSession resumeUpload = new ResumeUploadFileSharingSession(
                             mImsService, uploadContent, uploadInfo, mRcsSettings, mMessagingLog,
-                            mContactManager);
+                            mContactManager, mServerApiUtils);
                     resumeUpload.addListener(getFileSharingSessionListener());
                     resumeUpload.startSession();
                     mImsService.getImsModule().getCore().getListener()

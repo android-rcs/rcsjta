@@ -35,6 +35,7 @@ import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
@@ -78,13 +79,15 @@ public class RestartGroupChatSession extends GroupChatSession {
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param serverApiUtils
      */
     public RestartGroupChatSession(InstantMessagingService imService, String conferenceId,
             String subject, String contributionId,
             Map<ContactId, ParticipantStatus> storedParticipants, RcsSettings rcsSettings,
-            MessagingLog messagingLog, long timestamp, ContactManager contactManager) {
+            MessagingLog messagingLog, long timestamp, ContactManager contactManager,
+            ServerApiUtils serverApiUtils) {
         super(imService, null, conferenceId, storedParticipants, rcsSettings, messagingLog,
-                timestamp, contactManager);
+                timestamp, contactManager, serverApiUtils);
 
         if (!TextUtils.isEmpty(subject)) {
             setSubject(subject);

@@ -35,11 +35,14 @@ import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.net.Uri;
+
+import java.util.Arrays;
 
 /**
  * Abstract IMS file transfer session
@@ -74,12 +77,14 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param serverApiUtils
      */
     public ImsFileSharingSession(InstantMessagingService imService, MmContent content,
             ContactId contact, MmContent fileIcon, String filetransferId, RcsSettings rcsSettings,
-            long timestamp, ContactManager contactManager) {
+            long timestamp, ContactManager contactManager, ServerApiUtils serverApiUtils) {
         super(imService, content, contact, PhoneUtils.formatContactIdToUri(contact), fileIcon,
-                filetransferId, rcsSettings, timestamp, contactManager);
+                filetransferId, rcsSettings, timestamp, contactManager, serverApiUtils);
+        setFeatureTags(Arrays.asList(InstantMessagingService.FT_FEATURE_TAGS));
     }
 
     @Override
@@ -129,12 +134,11 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
     public SipRequest createInvite() throws SipException {
         SipRequest invite;
         if (getFileicon() != null) {
-            invite = SipMessageFactory.createMultipartInvite(getDialogPath(),
-                    InstantMessagingService.FT_FEATURE_TAGS, getDialogPath().getLocalContent(),
-                    BOUNDARY_TAG);
+            invite = SipMessageFactory.createMultipartInvite(getDialogPath(), getFeatureTags(),
+                    getDialogPath().getLocalContent(), BOUNDARY_TAG);
         } else {
-            invite = SipMessageFactory.createInvite(getDialogPath(),
-                    InstantMessagingService.FT_FEATURE_TAGS, getDialogPath().getLocalContent());
+            invite = SipMessageFactory.createInvite(getDialogPath(), getFeatureTags(),
+                    getDialogPath().getLocalContent());
         }
 
         // Add a contribution ID header

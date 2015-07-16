@@ -22,7 +22,6 @@ import com.orangelabs.rcs.ri.R;
 
 import android.app.ListActivity;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -38,9 +37,6 @@ public class TestCapabilitiesApi extends ListActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Set layout
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         // Set items
         String[] items = {

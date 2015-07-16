@@ -26,6 +26,7 @@ import com.gsma.rcs.core.content.LiveVideoContent;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.video.IVideoPlayer;
 
@@ -45,10 +46,12 @@ public class OriginatingLiveVideoStreamingSession extends OriginatingVideoStream
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param serverApiUtils
      */
     public OriginatingLiveVideoStreamingSession(ImsService parent, IVideoPlayer player,
             LiveVideoContent content, ContactId contact, RcsSettings rcsSettings, long timestamp,
-            ContactManager contactManager) {
-        super(parent, player, content, contact, rcsSettings, timestamp, contactManager);
+            ContactManager contactManager, ServerApiUtils serverApiUtils) {
+        super(parent, player, content, contact, rcsSettings, timestamp, contactManager,
+                serverApiUtils);
     }
 }

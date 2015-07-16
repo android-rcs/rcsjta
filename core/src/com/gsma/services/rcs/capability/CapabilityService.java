@@ -55,7 +55,9 @@ import java.util.Set;
  */
 public final class CapabilityService extends RcsService {
     /**
-     * Intent broadcasted to discover extensions
+     * Prefix of metadata name used by application to define managed extension in their manifest.
+     * The metadata value is set to the extension identifier which is the specific part of the IARI
+     * tag.
      */
     public final static String INTENT_EXTENSIONS = "com.gsma.services.rcs.capability.EXTENSION";
 
@@ -63,6 +65,12 @@ public final class CapabilityService extends RcsService {
      * Extension MIME type
      */
     public final static String EXTENSION_MIME_TYPE = "com.gsma.services.rcs";
+
+    /**
+     * Metadata name used by application to define application identifier in their manifest. The
+     * application identifier is set to the specific part of the IARI tag.
+     */
+    public final static String METADATA_APPLICATION_ID = "com.gsma.services.rcs.APPLICATION_ID";
 
     private static boolean sApiCompatible = false;
 

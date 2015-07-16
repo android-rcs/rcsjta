@@ -31,6 +31,7 @@ import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
 import android.text.TextUtils;
@@ -58,12 +59,13 @@ public class RejoinGroupChatSession extends GroupChatSession {
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param serverApiUtils
      */
     public RejoinGroupChatSession(InstantMessagingService imService, GroupChatInfo groupChatInfo,
             RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
-            ContactManager contactManager) {
+            ContactManager contactManager, ServerApiUtils serverApiUtils) {
         super(imService, null, groupChatInfo.getRejoinId(), groupChatInfo.getParticipants(),
-                rcsSettings, messagingLog, timestamp, contactManager);
+                rcsSettings, messagingLog, timestamp, contactManager, serverApiUtils);
 
         if (!TextUtils.isEmpty(groupChatInfo.getSubject())) {
             setSubject(groupChatInfo.getSubject());

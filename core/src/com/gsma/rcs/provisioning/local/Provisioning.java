@@ -37,13 +37,14 @@ import android.widget.TabHost;
  */
 @SuppressWarnings("deprecation")
 public class Provisioning extends TabActivity {
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         LocalContentResolver localContentResolver = new LocalContentResolver(
                 getApplicationContext());
-        AndroidFactory.setApplicationContext(this, RcsSettings.createInstance(localContentResolver));
+        AndroidFactory
+                .setApplicationContext(this, RcsSettings.createInstance(localContentResolver));
 
         // Set tabs
         final TabHost tabHost = getTabHost();

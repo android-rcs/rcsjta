@@ -32,6 +32,7 @@ import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.gsma.rcs.core.ims.service.capability.OptionsRequestTask.IOptionsRequestTaskListener;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.security.SecurityLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
@@ -65,6 +66,8 @@ public class OptionsManager implements DiscoveryManager {
 
     private final ContactManager mContactManager;
 
+    private final SecurityLog mSecurityLog;
+
     private final static Logger sLogger = Logger.getLogger(OptionsManager.class.getSimpleName());
 
     /**
@@ -73,11 +76,14 @@ public class OptionsManager implements DiscoveryManager {
      * @param parent IMS module
      * @param rcsSettings RCS settings accessor
      * @param contactManager Contact manager accessor
+     * @param securityLog
      */
-    public OptionsManager(ImsModule parent, RcsSettings rcsSettings, ContactManager contactManager) {
+    public OptionsManager(ImsModule parent, RcsSettings rcsSettings, ContactManager contactManager,
+            SecurityLog securityLog) {
         mImsModule = parent;
         mRcsSettings = rcsSettings;
         mContactManager = contactManager;
+        mSecurityLog = securityLog;
     }
 
     /**
@@ -107,8 +113,8 @@ public class OptionsManager implements DiscoveryManager {
         }
         boolean richcall = mImsModule.getRichcallService().isCallConnectedWith(contact);
         OptionsRequestTask task = new OptionsRequestTask(mImsModule, contact,
-                CapabilityUtils.getSupportedFeatureTags(richcall, mRcsSettings), mRcsSettings,
-                mContactManager, listener);
+                CapabilityUtils.getSupportedFeatureTags(richcall, mRcsSettings, mSecurityLog),
+                mRcsSettings, mContactManager, listener);
         if (mThreadPool.isShutdown()) {
             if (sLogger.isActivated()) {
                 sLogger.warn("Request capabilities in background for " + contact
@@ -205,7 +211,7 @@ public class OptionsManager implements DiscoveryManager {
         boolean richcall = mImsModule.getRichcallService().isCallConnectedWith(contact);
         SipResponse resp = SipMessageFactory.create200OkOptionsResponse(options, mImsModule
                 .getSipManager().getSipStack().getContact(),
-                CapabilityUtils.getSupportedFeatureTags(richcall, mRcsSettings),
+                CapabilityUtils.getSupportedFeatureTags(richcall, mRcsSettings, mSecurityLog),
                 CapabilityUtils.buildSdp(ipAddress, richcall, mRcsSettings));
 
         // Send 200 OK response

@@ -37,7 +37,7 @@ public class InitiateStreamingSession extends InitiateMultimediaSession {
      * 
      * @param contact Remote contact
      */
-    public void initiateSession(ContactId contact) {
+    public void initiateSession(ContactId contact, String extension) {
         // Display session view
         Intent intent = new Intent(InitiateStreamingSession.this, StreamingSessionView.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

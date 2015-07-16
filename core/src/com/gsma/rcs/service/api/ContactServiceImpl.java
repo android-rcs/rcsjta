@@ -53,9 +53,7 @@ import java.util.Set;
  * @author Philippe LEMORDANT
  */
 public class ContactServiceImpl extends IContactService.Stub {
-    /**
-     * The logger
-     */
+
     private static final Logger logger = Logger.getLogger(ContactServiceImpl.class.getSimpleName());
 
     private final RcsServiceRegistrationEventBroadcaster mRcsServiceRegistrationEventBroadcaster = new RcsServiceRegistrationEventBroadcaster();
@@ -67,24 +65,25 @@ public class ContactServiceImpl extends IContactService.Stub {
 
     private final RcsSettings mRcsSettings;
 
-    /**
-     * Contacts manager
-     */
     private final ContactManager mContactManager;
+
+    private final ServerApiUtils mServerApiUtils;
 
     /**
      * Constructor
      * 
      * @param contactManager Contacts manager
      * @param rcsSettings
+     * @param serverApiUtils
      */
-    public ContactServiceImpl(ContactManager contactManager, RcsSettings rcsSettings) {
+    public ContactServiceImpl(ContactManager contactManager, RcsSettings rcsSettings,
+            ServerApiUtils serverApiUtils) {
         if (logger.isActivated()) {
             logger.info("Contacts service API is loaded");
         }
-
         mContactManager = contactManager;
         mRcsSettings = rcsSettings;
+        mServerApiUtils = serverApiUtils;
     }
 
     /**
@@ -102,7 +101,7 @@ public class ContactServiceImpl extends IContactService.Stub {
      * @return Returns true if registered else returns false
      */
     public boolean isServiceRegistered() {
-        return ServerApiUtils.isImsConnected();
+        return mServerApiUtils.isImsConnected();
     }
 
     /**

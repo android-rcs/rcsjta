@@ -41,6 +41,7 @@ import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.State;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharing;
 
+import android.os.Binder;
 import android.os.RemoteException;
 
 /**
@@ -65,10 +66,9 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
      */
     private final Object lock = new Object();
 
-    /**
-     * The logger
-     */
     private final static Logger logger = Logger.getLogger(GeolocSharingImpl.class.getSimpleName());
+
+    private final ServerApiUtils mServerApiUtils;
 
     /**
      * Constructor
@@ -77,15 +77,17 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
      * @param broadcaster IGeolocSharingEventBroadcaster
      * @param richcallService RichcallService
      * @param geolocSharingService GeolocSharingServiceImpl
+     * @param serverApiUtils
      */
     public GeolocSharingImpl(String sharingId, IGeolocSharingEventBroadcaster broadcaster,
             RichcallService richcallService, GeolocSharingServiceImpl geolocSharingService,
-            GeolocSharingPersistedStorageAccessor persistedStorage) {
+            GeolocSharingPersistedStorageAccessor persistedStorage, ServerApiUtils serverApiUtils) {
         mSharingId = sharingId;
         mBroadcaster = broadcaster;
         mRichcallService = richcallService;
         mGeolocSharingService = geolocSharingService;
         mPersistentStorage = persistedStorage;
+        mServerApiUtils = serverApiUtils;
     }
 
     /**
@@ -302,7 +304,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
                 throw new ServerApiGenericException(new StringBuilder("Session with sharing ID '")
                         .append(mSharingId).append("' not available!").toString());
             }
-            session.acceptSession();
+            session.acceptSession(Binder.getCallingUid());
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
                 logger.error(ExceptionUtil.getFullStackTrace(e));
@@ -576,5 +578,18 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
         synchronized (lock) {
             setStateAndReasonCode(contact, State.RINGING, ReasonCode.UNSPECIFIED);
         }
+    }
+
+    /**
+     * Override the onTransact Binder method. It is used to check authorization for an application
+     * before calling API method. Control of authorization is made for third party applications (vs.
+     * native application) by comparing the client application fingerprint with the RCS application
+     * fingerprint
+     */
+    @Override
+    public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags)
+            throws android.os.RemoteException {
+        mServerApiUtils.assertApiIsAuthorized(Binder.getCallingUid());
+        return super.onTransact(code, data, reply, flags);
     }
 }
