@@ -39,6 +39,7 @@ import com.gsma.rcs.provisioning.ProvisioningInfo.Version;
 import com.gsma.rcs.provisioning.ProvisioningParser;
 import com.gsma.rcs.provisioning.TermsAndConditionsRequest;
 import com.gsma.rcs.service.LauncherUtils;
+import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.NetworkUtils;
 import com.gsma.rcs.utils.StringUtils;
@@ -450,12 +451,16 @@ public class HttpsProvisioningManager {
 
     private static String readStream(InputStream in) throws IOException {
         StringBuilder sb = new StringBuilder();
-        BufferedReader r = new BufferedReader(new InputStreamReader(in, UTF8), BUFFER_READER_SIZE);
-        for (String line = r.readLine(); line != null; line = r.readLine()) {
-            sb.append(line);
+        try {
+            BufferedReader r = new BufferedReader(new InputStreamReader(in, UTF8),
+                    BUFFER_READER_SIZE);
+            for (String line = r.readLine(); line != null; line = r.readLine()) {
+                sb.append(line);
+            }
+            return sb.toString();
+        } finally {
+            CloseableUtils.close(in);
         }
-        in.close();
-        return sb.toString();
     }
 
     /**
@@ -678,11 +683,7 @@ public class HttpsProvisioningManager {
         if (header == null) {
             return 0;
         }
-        try {
-            return Integer.valueOf(header) * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
-        } catch (NumberFormatException e) {
-            return 0;
-        }
+        return Integer.valueOf(header) * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
     }
 
     /**
