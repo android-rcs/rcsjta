@@ -26,6 +26,8 @@ import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import android.app.Application;
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Handler;
+import android.os.Looper;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -181,7 +183,18 @@ public class RiApplication extends Application {
 
         mRcsServiceControl = RcsServiceControl.getInstance(mContext);
         List<RcsServiceName> services = Arrays.asList(RcsServiceName.values());
-        ConnectionManager.createInstance(mContext, new HashSet<RcsServiceName>(services)).start();
+
+        /* Do not execute the ConnectionManager on the main thread */
+        Handler mainThreadHandler = new Handler(Looper.getMainLooper());
+        final ConnectionManager cnxManager = ConnectionManager.createInstance(mContext,
+                new HashSet<RcsServiceName>(services));
+        mainThreadHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                cnxManager.start();
+            }
+        });
+
     }
 
     private String[] convertForUI(String[] strings) {
