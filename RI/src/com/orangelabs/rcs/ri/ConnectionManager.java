@@ -39,6 +39,7 @@ import com.gsma.services.rcs.upload.FileUploadService;
 import com.orangelabs.rcs.ri.settings.SettingsDisplay;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.TimerUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.Activity;
@@ -66,7 +67,7 @@ import java.util.Set;
  */
 public class ConnectionManager {
 
-    private final PendingIntent mPoolConnectionIntent;
+    private final PendingIntent mPollCnxIntent;
 
     private static volatile ConnectionManager sInstance;
 
@@ -359,8 +360,8 @@ public class ConnectionManager {
         /* Construct list of APIs */
         mApis = new HashMap<RcsServiceName, RcsService>();
 
-        mPoolConnectionIntent = PendingIntent.getBroadcast(context, 0, new Intent(
-                ACTION_POOL_CONNECTION), 0);
+        mPollCnxIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_POOL_CONNECTION),
+                0);
 
         if (managedServices == null || managedServices.isEmpty()) {
             throw new RuntimeException("Incorrect parameter managedService!");
@@ -426,7 +427,7 @@ public class ConnectionManager {
     }
 
     /**
-     * 
+     * Start connection manager
      */
     public void start() {
         /* Register the broadcast receiver to catch ACTION_SERVICE_UP */
@@ -441,7 +442,9 @@ public class ConnectionManager {
         notifyImsDisconnection(RcsServiceRegistration.ReasonCode.CONNECTION_LOST);
 
         /* Start pooling connection */
-        poolRcsApiConnection(API_CNX_POOLING_PERIOD);
+        AlarmManager am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+        TimerUtils.setExactTimer(am, System.currentTimeMillis() + API_CNX_POOLING_START,
+                mPollCnxIntent);
 
         connectApis();
     }
@@ -723,17 +726,15 @@ public class ConnectionManager {
                          * thread and eventually bring the whole system down, which is not intended.
                          */
                         Log.e(LOGTAG, "Failed to pool conection to RCS service!", e);
+                    } finally {
+                        AlarmManager am = (AlarmManager) mContext
+                                .getSystemService(Context.ALARM_SERVICE);
+                        TimerUtils.setExactTimer(am, System.currentTimeMillis()
+                                + API_CNX_POOLING_PERIOD, mPollCnxIntent);
                     }
                 }
             }.start();
         }
-    }
-
-    private void poolRcsApiConnection(long delay) {
-        AlarmManager am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-        am.setRepeating(AlarmManager.RTC_WAKEUP,
-                System.currentTimeMillis() + API_CNX_POOLING_START, API_CNX_POOLING_PERIOD,
-                mPoolConnectionIntent);
     }
 
 }

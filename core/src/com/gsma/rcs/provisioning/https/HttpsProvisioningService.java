@@ -30,6 +30,7 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provisioning.ProvisioningFailureReasons;
 import com.gsma.rcs.provisioning.ProvisioningInfo.Version;
 import com.gsma.rcs.service.LauncherUtils;
+import com.gsma.rcs.utils.TimerUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
 import android.app.AlarmManager;
@@ -252,7 +253,7 @@ public class HttpsProvisioningService extends Service {
                     .append(" millisecs").toString());
         }
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + delay, intent);
+        TimerUtils.setExactTimer(am, System.currentTimeMillis() + delay, intent);
     }
 
     /**
