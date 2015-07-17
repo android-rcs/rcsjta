@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wap-provisioningdoc version="1.1">
+	<characteristic type="VERS">
+		<parm name="version" value="2"/>
+		<parm name="validity" value="172800"/>
+	</characteristic>
+	<characteristic type="MSG">
+		<parm name="title" value="ORANGE Labs Lannion - Blackbird"/>
+		<parm name="message" value="JOYN ON ORANGE FRENCH test bed (NSN 9.2 + IMAS RCS14 + DM server simulator)"/>
+		<parm name="Accept_btn" value="1"/>
+		<parm name="Reject_btn" value="0"/>
+	</characteristic>
+	<characteristic type="APPLICATION">
+		<parm name="AppID" value="ap2001"/>
+		<parm name="Name" value="IMS Settings"/>
+		<parm name="AppRef" value="IMS-Settings"/>
+		<characteristic type="ConRefs">
+			<parm name="ConRef" value="ftrdwispc.vp"/>
+		</characteristic>
+		<parm name="PDP_ContextOperPref" value="0"/>
+		<parm name="Timer_T1" value="2000"/>
+		<parm name="Timer_T2" value="16000"/>
+		<parm name="Timer_T4" value="17000"/>
+		<parm name="Private_User_Identity" value="+__s__MSISDN__e__@volteofr.com"/>
+		<characteristic type="Public_user_identity_List">
+			<parm name="Public_user_Identity" value="sip:+__s__MSISDN__e__@volteofr.com"/>
+		</characteristic>
+		<parm name="Home_network_domain_name" value="volteofr.com"/>
+		<characteristic type="Ext">
+			<parm name="NatUrlFmt" value="0"/>
+			<parm name="IntUrlFmt" value="0"/>
+			<parm name="MaxSizeImageShare" value="102400000"/>
+			<parm name="MaxTimeVideoShare" value="3600"/>
+		</characteristic>
+		<characteristic type="ICSI_List"/>
+		<characteristic type="LBO_P-CSCF_Address">
+			<parm name="Address" value="ofrnsn92.rcs.lannion.com"/>
+			<parm name="AddressType" value="FQDN"/>
+		</characteristic>
+		<parm name="Voice_Domain_Preference_E_UTRAN" value="1"/>
+		<parm name="SMS_Over_IP_Networks_Indication" value="0"/>
+		<parm name="Keep_Alive_Enabled" value="0"/>
+		<parm name="Voice_Domain_Preference_UTRAN" value="1"/>
+		<parm name="Mobility_Management_IMS_Voice_Termination" value="0"/>
+		<parm name="RegRetryBaseTime" value="30"/>
+		<parm name="RegRetryMaxTime" value="1800"/>
+		<characteristic type="APPAUTH">
+			<parm name="AuthType" value="Digest"/>
+			<parm name="Realm" value="volteofr.com"/>
+			<parm name="UserName" value="+__s__MSISDN__e__@volteofr.com"/>
+			<parm name="UserPwd" value="voltercs2014"/>
+		</characteristic>
+	</characteristic>
+	<characteristic type="APPLICATION">
+		<parm name="AppID" value="ap2002"/>
+		<parm name="Name" value="RCS Settings"/>
+		<parm name="AppRef" value="RCSe-Settings"/>
+		<characteristic type="IMS">
+			<parm name="To-AppRef" value="IMS-Settings"/>
+		</characteristic>
+		<characteristic type="SERVICES">
+			<parm name="presencePrfl" value="0"/>
+			<parm name="ChatAuth" value="1"/>
+			<parm name="GroupChatAuth" value="1"/>
+			<parm name="ftAuth" value="1"/>
+			<parm name="standaloneMsgAuth" value="0"/>
+			<parm name="geolocPullAuth" value="0"/>
+			<parm name="geolocPushAuth" value="0"/>
+			<parm name="vsAuth" value="1"/>
+			<parm name="isAuth" value="1"/>
+			<parm name="rcsIPVoiceCallAuth" value="0"/>
+			<parm name="rcsIPVideoCallAuth" value="0"/>
+			<parm name="allowRCSExtensions" value="1"/>
+		</characteristic>
+		<characteristic type="PRESENCE">
+			<parm name="AvailabilityAuth" value="0"/>
+			<characteristic type="FAVLINK">
+				<parm name="AutMa" value="Auto"/>
+				<characteristic type="LINKS"/>
+				<parm name="LabelMaxLength" value="1"/>
+			</characteristic>
+			<parm name="IconMaxSize" value="1"/>
+			<parm name="NoteMaxSize" value="1"/>
+			<characteristic type="VIPCONTACTS">
+				<parm name="NonVipPollPeriodSetting" value="1"/>
+				<parm name="NonVipMaxPollPerPeriod" value="1"/>
+			</characteristic>
+			<parm name="PublishTimer" value="1"/>
+			<parm name="NickNameLength" value="1"/>
+			<characteristic type="Location">
+				<parm name="TextMaxLength" value="1"/>
+				<parm name="LocInfoMaxValidTime" value="1"/>
+			</characteristic>
+			<parm name="client-obj-datalimit" value="1"/>
+		</characteristic>
+		<characteristic type="XDMS">
+			<parm name="RevokeTimer" value="1"/>
+			<parm name="XCAPRootURI" value="foo.bar"/>
+		</characteristic>
+		<characteristic type="SUPL">
+			<parm name="TextMaxLength" value="1"/>
+			<parm name="LocInfoMaxValidTime" value="1"/>
+			<parm name="Addr" value="foo.bar"/>
+		</characteristic>
+		<characteristic type="IM">
+			<parm name="imMsgTech" value="0"/>
+			<parm name="imCapAlwaysON" value="0"/>
+			<parm name="GroupChatFullStandFwd" value="0"/>
+			<parm name="GroupChatOnlyFStandFwd" value="0"/>
+			<parm name="imWarnSF" value="0"/>
+			<parm name="SmsFallBackAuth" value="0"/>
+			<parm name="imCapNonRCS" value="0"/>
+			<parm name="AutAccept" value="0"/>
+			<parm name="AutAcceptGroupChat" value="1"/>
+			<parm name="imSessionStart" value="0"/>
+			<parm name="firstMessageInvite" value="1"/>
+			<parm name="TimerIdle" value="400"/>
+			<parm name="MaxConcurrentSession" value="15"/>
+			<parm name="multiMediaChat" value="0"/>
+			<parm name="MaxSize1to1" value="1600"/>
+			<parm name="MaxSize1toM" value="1600"/>
+			<parm name="ftWarnSize" value="0"/>
+			<parm name="MaxSizeFileTr" value="102400"/>
+			<parm name="ftThumb" value="0"/>
+			<parm name="ftStAndFwEnabled" value="0"/>
+			<parm name="ftCapAlwaysON" value="0"/>
+			<parm name="ftAutAccept" value="0"/>
+			<parm name="ftHTTPCSURI" value="https://ftohttp.rcs14.hcs.1.2.rcs.mnc001.mcc208.pub.3gppnetwork.org/rcse-hcs/upload"/>
+			<parm name="ftHTTPCSUser" value="+__s__MSISDN__e__@volteofr.com"/>
+			<parm name="ftHTTPCSPwd" value="voltercs2014"/>
+			<parm name="ftDefaultMech" value="HTTP"/>
+			<parm name="pres-srv-cap" value="0"/>
+			<parm name="deferred-msg-func-uri" value="sip:foo@bar"/>
+			<parm name="max_adhoc_group_size" value="50"/>
+			<parm name="conf-fcty-uri" value="sip:Conference-Factory@volteofr.com"/>
+			<parm name="exploder-uri" value="sip:foo@bar"/>
+			<parm name="conv-hist-func-uri" value="sip:foo@bar"/>
+		</characteristic>
+		<characteristic type="CPM"/>
+		<characteristic type="CAPDISCOVERY">
+			<parm name="pollingPeriod" value="0"/>
+			<parm name="pollingRate" value="100"/>
+			<parm name="pollingRatePeriod" value="10"/>
+			<parm name="defaultDisc" value="0"/>
+			<characteristic type="Ext">
+				<characteristic type="joyn">
+					<parm name="msgCapValidity" value="120"/>
+				</characteristic>
+			</characteristic>
+		</characteristic>
+		<characteristic type="APN">
+			<parm name="rcseOnlyAPN" value=""/>
+			<parm name="enableRcseSwitch" value="1"/>
+		</characteristic>
+		<characteristic type="OTHER">
+			<parm name="endUserConfReqId" value=""/>
+			<parm name="allowVSSave" value="0"/>
+			<characteristic type="transportProto">
+				<parm name="psSignalling" value="SIPoUDP"/>
+				<parm name="psMedia" value="MSRP"/>
+				<parm name="psRTMedia" value="RTP"/>
+				<parm name="wifiSignalling" value="SIPoUDP"/>
+				<parm name="wifiMedia" value="MSRP"/>
+				<parm name="wifiRTMedia" value="RTP"/>
+			</characteristic>
+			<characteristic type="Ext">
+				<characteristic type="APIExt">
+					<parm name="extensionsPolicy" value="0" />
+				</characteristic>
+			</characteristic>
+		</characteristic>
+		<characteristic type="SERVICEPROVIDEREXT">
+			<characteristic type="joyn">
+				<characteristic type="UX">
+					<parm name="messagingUX" value="1"/>
+					<parm name="oneButtonVideoCall" value="0"/>
+				</characteristic>
+				<characteristic type="Messaging">
+					<parm name="deliveryTimeout" value="30"/>
+					<parm name="ftHTTPCapAlwaysOn" value="0"/>
+				</characteristic>
+			</characteristic>
+		</characteristic>
+	</characteristic>
+</wap-provisioningdoc>
