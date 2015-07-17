@@ -66,7 +66,8 @@ public abstract class PeriodicRefresher {
         mContext = AndroidFactory.getApplicationContext();
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         /* Create a unique pending intent */
-        mAction = this.toString(); /* Unique action ID */
+        mAction = new StringBuilder(getClass().getName()).append('_')
+                .append(System.currentTimeMillis()).toString(); /* Unique action ID */
         mAlarmIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(mAction), 0);
     }
 
