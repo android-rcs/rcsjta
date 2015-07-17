@@ -19,6 +19,7 @@ package com.gsma.rcs.service.api;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.IntentUtils;
+import com.gsma.rcs.utils.TimerUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.chat.OneToOneChatIntent;
 import com.gsma.services.rcs.contact.ContactId;
@@ -109,9 +110,7 @@ public class OneToOneUndeliveredImManager {
         synchronized (mUndeliveredImAlarms) {
             if (!mUndeliveredImAlarms.containsKey(id)) {
                 mUndeliveredImAlarms.put(id, undeliveredIntent);
-
-                mAlarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, undeliveredIntent);
-
+                TimerUtils.setExactTimer(mAlarmManager, triggerTime, undeliveredIntent);
             }
         }
     }

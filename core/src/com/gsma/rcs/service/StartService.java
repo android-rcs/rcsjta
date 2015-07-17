@@ -37,6 +37,7 @@ import com.gsma.rcs.provider.settings.RcsSettingsData.ConfigurationMode;
 import com.gsma.rcs.provisioning.ProvisioningInfo;
 import com.gsma.rcs.provisioning.https.HttpsProvisioningService;
 import com.gsma.rcs.utils.IntentUtils;
+import com.gsma.rcs.utils.TimerUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService;
 
@@ -582,8 +583,8 @@ public class StartService extends Service {
             sLogger.debug("Retry polling telephony manager (mcc=" + mcc + ",mnc=" + mnc + ")");
         }
         AlarmManager am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-        am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
-                + TELEPHONY_MANAGER_POOLING_PERIOD, mPoolTelephonyManagerIntent);
+        TimerUtils.setExactTimer(am, System.currentTimeMillis() + TELEPHONY_MANAGER_POOLING_PERIOD,
+                mPoolTelephonyManagerIntent);
     }
 
     private BroadcastReceiver getPollingTelephonyManagerReceiver() {

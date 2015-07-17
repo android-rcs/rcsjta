@@ -34,10 +34,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Build;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 /**
  * Periodic refresher
@@ -46,47 +42,32 @@ import java.lang.reflect.Method;
  */
 public abstract class PeriodicRefresher {
 
-    private static final int KITKAT_VERSION_CODE = 19;
-
-    private static final String SET_EXACT_METHOD_NAME = "setExact";
-
-    private static final Class[] SET_EXACT_METHOD_PARAM = new Class[] {
-            int.class, long.class, PendingIntent.class
-    };
-
     /**
      * Keep alive manager
      */
-    private KeepAlive mAlarmReceiver = new KeepAlive();
+    private final KeepAlive mAlarmReceiver = new KeepAlive();
 
-    /**
-     * Alarm intent
-     */
-    private PendingIntent mAlarmIntent;
+    private final PendingIntent mAlarmIntent;
 
-    /**
-     * Action
-     */
-    private String mAction;
+    private final String mAction;
 
-    /**
-     * Timer state
-     */
     private boolean mTimerStarted = false;
 
-    /**
-     * The logger
-     */
+    private final Context mContext;
+
+    private final AlarmManager mAlarmManager;
+
     private static final Logger sLogger = Logger.getLogger(PeriodicRefresher.class.getName());
 
     /**
      * Constructor
      */
     public PeriodicRefresher() {
-        // Create a unique pending intent
-        this.mAction = this.toString(); // Unique action ID
-        this.mAlarmIntent = PendingIntent.getBroadcast(AndroidFactory.getApplicationContext(), 0,
-                new Intent(mAction), 0);
+        mContext = AndroidFactory.getApplicationContext();
+        mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+        /* Create a unique pending intent */
+        mAction = this.toString(); /* Unique action ID */
+        mAlarmIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(mAction), 0);
     }
 
     /**
@@ -115,46 +96,24 @@ public abstract class PeriodicRefresher {
      * @param delta Delta to apply on the expire period in percentage
      */
     public synchronized void startTimer(long currentTime, long expirePeriod, double delta) {
-        // Check expire period
+        /* Check expire period */
         if (expirePeriod <= 0) {
-            // Expire period is null
+            /* Expire period is null */
             if (sLogger.isActivated()) {
                 sLogger.debug("Timer is deactivated");
             }
             return;
         }
 
-        // Calculate the effective refresh period
+        /* Calculate the effective refresh period */
         long pollingPeriod = (long) (expirePeriod * delta);
         if (sLogger.isActivated()) {
             sLogger.debug(new StringBuilder("Start timer at period=").append(pollingPeriod)
                     .append("ms (expiration=").append(expirePeriod).append("ms)").toString());
         }
-
-        final Context ctx = AndroidFactory.getApplicationContext();
-        ctx.registerReceiver(mAlarmReceiver, new IntentFilter(mAction));
-        AlarmManager alarmManager = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
-        if (Build.VERSION.SDK_INT < KITKAT_VERSION_CODE) {
-            alarmManager.set(AlarmManager.RTC_WAKEUP, currentTime + pollingPeriod, mAlarmIntent);
-            mTimerStarted = true;
-        } else {
-            try {
-                Method setExactMethod = alarmManager.getClass().getDeclaredMethod(
-                        SET_EXACT_METHOD_NAME, SET_EXACT_METHOD_PARAM);
-                setExactMethod.invoke(alarmManager, AlarmManager.RTC_WAKEUP, currentTime
-                        + pollingPeriod, mAlarmIntent);
-                mTimerStarted = true;
-            } catch (NoSuchMethodException e) {
-                throw new UnsupportedOperationException("Failed to get setExact method!", e);
-
-            } catch (IllegalAccessException e) {
-                throw new UnsupportedOperationException(
-                        "No access to the definition of setExact method!", e);
-
-            } catch (InvocationTargetException e) {
-                throw new UnsupportedOperationException("Can't invoke setExact method!", e);
-            }
-        }
+        mContext.registerReceiver(mAlarmReceiver, new IntentFilter(mAction));
+        TimerUtils.setExactTimer(mAlarmManager, currentTime + pollingPeriod, mAlarmIntent);
+        mTimerStarted = true;
     }
 
     /**
@@ -162,25 +121,17 @@ public abstract class PeriodicRefresher {
      */
     public synchronized void stopTimer() {
         if (!mTimerStarted) {
-            // Already stopped
             return;
         }
-
         if (sLogger.isActivated()) {
             sLogger.debug("Stop timer");
         }
-
-        // The timer is stopped
+        /* The timer is stopped */
         mTimerStarted = false;
+        mAlarmManager.cancel(mAlarmIntent);
 
-        // Cancel alarm
-        AlarmManager am = (AlarmManager) AndroidFactory.getApplicationContext().getSystemService(
-                Context.ALARM_SERVICE);
-        am.cancel(mAlarmIntent);
-
-        // Unregister the alarm receiver
         try {
-            AndroidFactory.getApplicationContext().unregisterReceiver(mAlarmReceiver);
+            mContext.unregisterReceiver(mAlarmReceiver);
         } catch (IllegalArgumentException e) {
             // Nothing to do
         }
