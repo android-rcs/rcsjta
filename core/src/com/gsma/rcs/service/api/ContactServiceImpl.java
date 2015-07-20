@@ -216,6 +216,9 @@ public class ContactServiceImpl extends IContactService.Stub {
         if (contactInfo == null) {
             return null;
         }
+        if (!contactInfo.isRcsContact()) {
+            return null;
+        }
         Capabilities capaApi = getCapabilities(contactInfo.getCapabilities());
         boolean registered = RegistrationState.ONLINE.equals(contactInfo.getRegistrationState());
         boolean blocked = (contactInfo.getBlockingState() == BlockingState.BLOCKED);
