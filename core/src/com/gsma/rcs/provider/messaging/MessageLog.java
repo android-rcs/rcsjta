@@ -135,8 +135,8 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_CONTACT, contact.toString());
         values.put(MessageData.KEY_DIRECTION, Direction.INCOMING.toInt());
         values.put(MessageData.KEY_READ_STATUS, ReadStatus.UNREAD.toInt());
-        String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
-        values.put(MessageData.KEY_MIME_TYPE, apiMimeType);
+        String mimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
+        values.put(MessageData.KEY_MIME_TYPE, mimeType);
         values.put(MessageData.KEY_CONTENT, ChatUtils.networkContentToPersistedContent(msg));
 
         values.put(MessageData.KEY_TIMESTAMP, msg.getTimestamp());
@@ -175,8 +175,8 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_CONTACT, contact.toString());
         values.put(MessageData.KEY_DIRECTION, Direction.OUTGOING.toInt());
         values.put(MessageData.KEY_READ_STATUS, ReadStatus.UNREAD.toInt());
-        String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
-        values.put(MessageData.KEY_MIME_TYPE, apiMimeType);
+        String mimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
+        values.put(MessageData.KEY_MIME_TYPE, mimeType);
         values.put(MessageData.KEY_CONTENT, ChatUtils.networkContentToPersistedContent(msg));
 
         values.put(MessageData.KEY_TIMESTAMP, msg.getTimestamp());
@@ -270,8 +270,8 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_READ_STATUS, ReadStatus.UNREAD.toInt());
         values.put(MessageData.KEY_STATUS, status.toInt());
         values.put(MessageData.KEY_REASON_CODE, reasonCode.toInt());
-        String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
-        values.put(MessageData.KEY_MIME_TYPE, apiMimeType);
+        String mimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
+        values.put(MessageData.KEY_MIME_TYPE, mimeType);
         values.put(MessageData.KEY_CONTENT, ChatUtils.networkContentToPersistedContent(msg));
         values.put(MessageData.KEY_TIMESTAMP, msg.getTimestamp());
         values.put(MessageData.KEY_TIMESTAMP_SENT, msg.getTimestampSent());

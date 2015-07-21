@@ -53,4 +53,13 @@ public interface OneToOneChatSessionListener extends ChatSessionListener {
      */
     public void handleDeliveryReportSendViaMsrpFailure(String msgId, ContactId contact,
             TypeMsrpChunk chunktype);
+
+    /**
+     * Handle IM error
+     * 
+     * @param error Error
+     * @param msgId
+     * @param mimeType
+     */
+    public void handleImError(ChatError error, String msgId, String mimeType);
 }

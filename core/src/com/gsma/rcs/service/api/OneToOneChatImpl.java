@@ -136,7 +136,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         newSession.addListener(this);
         mChatService.addOneToOneChat(mContact, this);
         newSession.startSession();
-        handleMessageSent(msg.getMessageId(), msg.getMimeType());
+        handleMessageSent(msg.getMessageId(),
+                ChatUtils.networkMimeTypeToApiMimeType(msg));
     }
 
     private void sendChatMessageWithinSession(final OneToOneChatSession session, ChatMessage msg) {
@@ -508,21 +509,21 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         }
     }
 
-    private void dequeueChatMessageAndBroadcastStatusChange(ChatMessage message) {
-        mMessagingLog.dequeueChatMessage(message);
-        String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(message.getMimeType());
-        mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, message.getMessageId(),
+    private void dequeueChatMessageAndBroadcastStatusChange(ChatMessage msg) {
+        mMessagingLog.dequeueChatMessage(msg);
+        String mimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
+        mBroadcaster.broadcastMessageStatusChanged(mContact, mimeType, msg.getMessageId(),
                 Status.SENDING, ReasonCode.UNSPECIFIED);
     }
 
     /**
      * Dequeue one-one chat message
      * 
-     * @param message
+     * @param msg
      * @throws MsrpException
      */
-    public void dequeueOneToOneChatMessage(ChatMessage message) throws MsrpException {
-        String msgId = message.getMessageId();
+    public void dequeueOneToOneChatMessage(ChatMessage msg) throws MsrpException {
+        String msgId = msg.getMessageId();
         if (sLogger.isActivated()) {
             sLogger.debug("Dequeue chat message msgId=".concat(msgId));
         }
@@ -530,16 +531,16 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
         if (session == null) {
             if (mImService.isChatSessionAvailable()) {
-                dequeueChatMessageAndBroadcastStatusChange(message);
-                sendChatMessageInNewSession(message);
+                dequeueChatMessageAndBroadcastStatusChange(msg);
+                sendChatMessageInNewSession(msg);
             } else {
                 throw new MsrpException(new StringBuilder(
                         "There is no available chat session for contact '").append(mContact)
                         .append("'!").toString());
             }
         } else if (session.isMediaEstablished()) {
-            dequeueChatMessageAndBroadcastStatusChange(message);
-            sendChatMessageWithinSession(session, message);
+            dequeueChatMessageAndBroadcastStatusChange(msg);
+            sendChatMessageWithinSession(session, msg);
         } else if (session.isInitiatedByRemote()) {
             if (sLogger.isActivated()) {
                 sLogger.debug("Accept one-to-one chat session with contact ".concat(mContact
@@ -548,8 +549,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             session.acceptSession();
         } else {
             if (mImService.isChatSessionAvailable()) {
-                dequeueChatMessageAndBroadcastStatusChange(message);
-                sendChatMessageInNewSession(message);
+                dequeueChatMessageAndBroadcastStatusChange(msg);
+                sendChatMessageInNewSession(msg);
             } else {
                 throw new MsrpException(new StringBuilder(
                         "There is no available chat session for contact '").append(mContact)
@@ -800,13 +801,15 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                     "OnetoOneChat messageId must not be null or empty!");
         }
         try {
-            String mimeType = mMessagingLog.getMessageMimeType(msgId);
+            ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
+                    mMessagingLog, msgId);
+            String mimeType = ChatUtils.apiMimeTypeToNetworkMimeType(persistentStorage
+                    .getMimeType());
             /* Set new timestamp for resend message */
             long timestamp = System.currentTimeMillis();
             /* For outgoing message, timestampSent = timestamp */
-            ChatMessage msg = new ChatMessage(msgId, mContact,
-                    mMessagingLog.getChatMessageContent(msgId), mimeType, timestamp, timestamp,
-                    null);
+            ChatMessage msg = new ChatMessage(msgId, mContact, persistentStorage.getContent(),
+                    mimeType, timestamp, timestamp, null);
             if (ServerApiUtils.isImsConnected()) {
                 resendChatMessage(msg);
             } else {
@@ -880,7 +883,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             sLogger.info(new StringBuilder("New IM with messageId '").append(msgId)
                     .append("' received from ").append(mContact).append(".").toString());
         }
-        String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
+        String mimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
         synchronized (lock) {
             if (mContactManager.isBlockedForContact(mContact)) {
                 if (sLogger.isActivated()) {
@@ -893,39 +896,35 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                     session.terminateSession(TerminationReason.TERMINATION_BY_USER);
                 }
                 mMessagingLog.addOneToOneSpamMessage(msg);
-                mBroadcaster.broadcastMessageReceived(apiMimeType, msgId);
+                mBroadcaster.broadcastMessageReceived(mimeType, msgId);
                 return;
             }
             mMessagingLog.addIncomingOneToOneChatMessage(msg, imdnDisplayedRequested);
-            mBroadcaster.broadcastMessageReceived(apiMimeType, msgId);
+            mBroadcaster.broadcastMessageReceived(mimeType, msgId);
         }
     }
 
     @Override
-    public void handleImError(ChatError error, ChatMessage message) {
+    public void handleImError(ChatError error, String msgId, String mimeType) {
         int errorCode = error.getErrorCode();
         if (sLogger.isActivated()) {
-            sLogger.info("IM error " + errorCode);
+            sLogger.info(new StringBuilder("IM error ").append(errorCode)
+                    .append(" ; First message '").append(msgId).append("'").toString());
         }
         synchronized (lock) {
             mChatService.removeOneToOneChat(mContact);
             switch (errorCode) {
                 case ChatError.SESSION_INITIATION_FAILED:
                 case ChatError.SESSION_INITIATION_CANCELLED:
-                    if (message != null) {
-                        String msgId = message.getMessageId();
-                        mUndeliveredImManager.cancelDeliveryTimeoutAlarm(msgId);
-                        String mimeType = message.getMimeType();
-                        String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(mimeType);
-                        if (FileTransferUtils.isFileTransferHttpType(apiMimeType)) {
-                            mFileTransferService.setOneToOneFileTransferStateAndReasonCode(msgId,
-                                    mContact, FileTransfer.State.FAILED,
-                                    FileTransfer.ReasonCode.FAILED_DATA_TRANSFER);
-                        } else if (ChatUtils.isTextPlainType(apiMimeType)
-                                || MimeType.GEOLOC_MESSAGE.equals(apiMimeType)) {
-                            mChatService.setOneToOneChatMessageStatusAndReasonCode(msgId,
-                                    apiMimeType, mContact, Status.FAILED, ReasonCode.FAILED_SEND);
-                        }
+                    mUndeliveredImManager.cancelDeliveryTimeoutAlarm(msgId);
+                    if (FileTransferUtils.isFileTransferHttpType(mimeType)) {
+                        mFileTransferService.setOneToOneFileTransferStateAndReasonCode(msgId,
+                                mContact, FileTransfer.State.FAILED,
+                                FileTransfer.ReasonCode.FAILED_DATA_TRANSFER);
+                    } else if (ChatUtils.isTextPlainType(mimeType)
+                            || MimeType.GEOLOC_MESSAGE.equals(mimeType)) {
+                        mChatService.setOneToOneChatMessageStatusAndReasonCode(msgId, mimeType,
+                                mContact, Status.FAILED, ReasonCode.FAILED_SEND);
                     }
                     break;
                 /*
@@ -959,18 +958,16 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             sLogger.info(new StringBuilder("Message sent; msgId=").append(msgId).append(".")
                     .toString());
         }
-        String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(mimeType);
         synchronized (lock) {
             mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.SENT,
                     ReasonCode.UNSPECIFIED);
-            mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId, Status.SENT,
+            mBroadcaster.broadcastMessageStatusChanged(mContact, mimeType, msgId, Status.SENT,
                     ReasonCode.UNSPECIFIED);
         }
     }
 
     @Override
     public void handleMessageFailedSend(String msgId, String mimeType) {
-        String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(mimeType);
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("Message sent; msgId=").append(msgId).append(".")
                     .toString());
@@ -979,7 +976,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.FAILED,
                     ReasonCode.FAILED_SEND);
 
-            mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId, Status.FAILED,
+            mBroadcaster.broadcastMessageStatusChanged(mContact, mimeType, msgId, Status.FAILED,
                     ReasonCode.FAILED_SEND);
         }
     }

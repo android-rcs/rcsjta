@@ -83,4 +83,11 @@ public interface GroupChatSessionListener extends ChatSessionListener {
      */
     public void handleDeliveryReportSendViaMsrpFailure(String msgId, String chatId,
             TypeMsrpChunk chunktype);
+
+    /**
+     * Handle IM error
+     * 
+     * @param error Error
+     */
+    public void handleImError(ChatError error);
 }

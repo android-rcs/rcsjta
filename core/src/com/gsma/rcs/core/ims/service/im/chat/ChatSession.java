@@ -404,34 +404,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     }
 
     /**
-     * Handle error
-     * 
-     * @param error Error
-     */
-    public void handleError(ImsServiceError error) {
-        if (isSessionInterrupted()) {
-            return;
-        }
-
-        // Error
-        if (sLogger.isActivated()) {
-            sLogger.info("Session error: " + error.getErrorCode() + ", reason="
-                    + error.getMessage());
-        }
-
-        // Close media session
-        closeMediaSession();
-
-        // Remove the current session
-        removeSession();
-
-        for (int i = 0; i < getListeners().size(); i++) {
-            ((ChatSessionListener) getListeners().get(i)).handleImError(new ChatError(error),
-                    mFirstMsg);
-        }
-    }
-
-    /**
      * Handle 480 Temporarily Unavailable
      * 
      * @param resp 480 response

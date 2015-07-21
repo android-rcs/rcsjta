@@ -105,10 +105,11 @@ public class OneToOneChatMessageDequeueTask extends DequeueTask {
                     String content = cursor.getString(contentIdx);
                     long timestamp = System.currentTimeMillis();
                     /* For outgoing message, timestampSent = timestamp */
-                    ChatMessage message = ChatUtils.createChatMessage(id, mimeType, content,
-                            mContact, null, timestamp, timestamp);
+                    ChatMessage msg = ChatUtils.createChatMessage(id,
+                            ChatUtils.apiMimeTypeToNetworkMimeType(mimeType), content, mContact,
+                            null, timestamp, timestamp);
                     try {
-                        oneToOneChat.dequeueOneToOneChatMessage(message);
+                        oneToOneChat.dequeueOneToOneChatMessage(msg);
                     } catch (MsrpException e) {
                         if (logActivated) {
                             mLogger.debug(new StringBuilder(

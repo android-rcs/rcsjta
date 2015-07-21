@@ -70,7 +70,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
-
 import javax2.sip.header.ContactHeader;
 import javax2.sip.header.ExtensionHeader;
 
@@ -932,18 +931,42 @@ public class ChatUtils {
     /**
      * Generate persisted MIME-type from network pay-load
      * 
-     * @param networkMimeType Network pay-load MIME-type
+     * @param message ChatMessage
      * @return API MIME-type
      */
-    public static String networkMimeTypeToApiMimeType(String networkMimeType) {
+    public static String networkMimeTypeToApiMimeType(ChatMessage message) {
+        String mimeType = message.getMimeType();
         /*
          * Geolocation chat messages does not have the same mimetype in the payload as in the TAPI.
          * Text chat messages do.
          */
-        if (isGeolocType(networkMimeType)) {
+        if (isGeolocType(mimeType)) {
             return MimeType.GEOLOC_MESSAGE;
+        } else if (isTextPlainType(mimeType)) {
+            return MimeType.TEXT_MESSAGE;
         }
-        return networkMimeType;
+        throw new IllegalArgumentException(
+                "Unsupported input mimetype detected : ".concat(mimeType));
+    }
+
+    /**
+     * Generate persisted MIME-type from network pay-load
+     * 
+     * @param networkMimeType Network pay-load MIME-type
+     * @return API MIME-type
+     */
+    public static String apiMimeTypeToNetworkMimeType(String apiMimeType) {
+        /*
+         * Geolocation chat messages does not have the same mimetype in the payload as in the TAPI.
+         * Text chat messages do.
+         */
+        if (apiMimeType.startsWith(MimeType.GEOLOC_MESSAGE)) {
+            return GeolocInfoDocument.MIME_TYPE;
+        } else if (isTextPlainType(apiMimeType)) {
+            return MimeType.TEXT_MESSAGE;
+        }
+        throw new IllegalArgumentException(
+                "Unsupported input mimetype detected : ".concat(apiMimeType));
     }
 
     /**

@@ -130,8 +130,9 @@ public class GroupChatDequeueTask extends DequeueTask {
                                 String content = cursor.getString(contentIdx);
                                 long timestamp = System.currentTimeMillis();
                                 /* For outgoing message, timestampSent = timestamp */
-                                ChatMessage message = ChatUtils.createChatMessage(id, mimeType,
-                                        content, null, null, timestamp, timestamp);
+                                ChatMessage message = ChatUtils.createChatMessage(id,
+                                        ChatUtils.apiMimeTypeToNetworkMimeType(mimeType), content,
+                                        null, null, timestamp, timestamp);
                                 groupChat.dequeueGroupChatMessage(message);
 
                             } catch (MsrpException e) {

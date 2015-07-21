@@ -35,6 +35,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
+import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionAuthenticationAgent;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -398,9 +399,9 @@ public abstract class GroupChatSession extends ChatSession {
             sendDataChunks(IdGenerator.generateMessageID(), networkContent, CpimMessage.MIME_TYPE,
                     TypeMsrpChunk.TextMessage);
         }
+        String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
         for (ImsSessionListener listener : getListeners()) {
-            ((ChatSessionListener) listener).handleMessageSent(msgId,
-                    ChatUtils.networkMimeTypeToApiMimeType(mimeType));
+            ((ChatSessionListener) listener).handleMessageSent(msgId, apiMimeType);
         }
     }
 
@@ -952,7 +953,31 @@ public abstract class GroupChatSession extends ChatSession {
 
         ChatError chatError = new ChatError(errorCode, error);
         for (ImsSessionListener listener : getListeners()) {
-            ((ChatSessionListener) listener).handleImError(chatError, null);
+            ((GroupChatSessionListener) listener).handleImError(chatError);
+        }
+    }
+
+    /**
+     * Handle error
+     * 
+     * @param error Error
+     */
+    @Override
+    public void handleError(ImsServiceError error) {
+        if (isSessionInterrupted()) {
+            return;
+        }
+        if (sLogger.isActivated()) {
+            sLogger.info(new StringBuilder("Session error: ").append(error.getErrorCode())
+                    .append(", reason=").append(error.getMessage()).toString());
+        }
+        closeMediaSession();
+
+        removeSession();
+
+        ChatError chatError = new ChatError(error);
+        for (ImsSessionListener listener : getListeners()) {
+            ((GroupChatSessionListener) listener).handleImError(chatError);
         }
     }
 }

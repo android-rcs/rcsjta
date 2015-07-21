@@ -41,14 +41,6 @@ public interface ChatSessionListener extends ImsSessionListener {
     public void handleReceiveMessage(ChatMessage msg, boolean imdnDisplayedRequested);
 
     /**
-     * IM error
-     * 
-     * @param error Error
-     * @param message
-     */
-    public void handleImError(ChatError error, ChatMessage message);
-
-    /**
      * Is composing event
      * 
      * @param contact Contact identifier
