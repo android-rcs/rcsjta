@@ -26,6 +26,7 @@ import com.gsma.rcs.core.ims.network.ImsNetworkInterface.DnsResolvedFields;
 import com.gsma.rcs.platform.FactoryException;
 import com.gsma.rcs.provider.settings.RcsSettings;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.SocketException;
 
 /**
@@ -38,24 +39,6 @@ public abstract class NetworkFactory {
      * Current platform factory
      */
     private static NetworkFactory mFactory;
-
-    /**
-     * Load the factory
-     * 
-     * @param classname Factory classname
-     * @throws FactoryException
-     */
-    public static void loadFactory(String classname) throws FactoryException {
-        if (mFactory != null) {
-            return;
-        }
-
-        try {
-            mFactory = (NetworkFactory) Class.forName(classname).newInstance();
-        } catch (Exception e) {
-            throw new FactoryException("Can't load the factory ".concat(classname), e);
-        }
-    }
 
     /**
      * Load the factory
@@ -78,7 +61,19 @@ public abstract class NetworkFactory {
         try {
             mFactory = (NetworkFactory) Class.forName(classname)
                     .getConstructor(rcsSettingsArgsClass).newInstance(rcsSettingsArgs);
-        } catch (Exception e) {
+        } catch (InstantiationException e) {
+            throw new FactoryException("Can't load the factory ".concat(classname), e);
+
+        } catch (IllegalAccessException e) {
+            throw new FactoryException("Can't load the factory ".concat(classname), e);
+
+        } catch (InvocationTargetException e) {
+            throw new FactoryException("Can't load the factory ".concat(classname), e);
+
+        } catch (NoSuchMethodException e) {
+            throw new FactoryException("Can't load the factory ".concat(classname), e);
+
+        } catch (ClassNotFoundException e) {
             throw new FactoryException("Can't load the factory ".concat(classname), e);
         }
     }

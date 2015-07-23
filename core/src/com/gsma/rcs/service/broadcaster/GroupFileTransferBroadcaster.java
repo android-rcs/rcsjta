@@ -28,6 +28,7 @@ import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
 import android.content.Intent;
 import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +65,7 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
             try {
                 mGroupFileTransferListeners.getBroadcastItem(i).onStateChanged(chatId, transferId,
                         rcsState, rcsReasonCode);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);
                 }
@@ -80,7 +81,7 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
             try {
                 mGroupFileTransferListeners.getBroadcastItem(i).onProgressUpdate(chatId,
                         transferId, currentSize, totalSize);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);
                 }
@@ -98,7 +99,7 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
             try {
                 mGroupFileTransferListeners.getBroadcastItem(i).onDeliveryInfoChanged(chatId,
                         contact, transferId, rcsStatus, rcsReasonCode);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener per contact", e);
                 }
@@ -129,7 +130,7 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
         for (int i = 0; i < N; i++) {
             try {
                 mGroupFileTransferListeners.getBroadcastItem(i).onDeleted(chatId, ids);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener per contact", e);
                 }

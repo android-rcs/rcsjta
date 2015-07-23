@@ -27,6 +27,7 @@ import com.gsma.services.rcs.extension.MultimediaSession.State;
 
 import android.content.Intent;
 import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 
 /**
  * MultimediaStreamingSessionEventBroadcaster maintains the registering and unregistering of
@@ -57,7 +58,7 @@ public class MultimediaStreamingSessionEventBroadcaster implements
             try {
                 mMultimediaStreamingListeners.getBroadcastItem(i).onPayloadReceived(contact,
                         sessionId, content);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);
                 }
@@ -75,7 +76,7 @@ public class MultimediaStreamingSessionEventBroadcaster implements
             try {
                 mMultimediaStreamingListeners.getBroadcastItem(i).onStateChanged(contact,
                         sessionId, rcsState, rcsReasonCode);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);
                 }

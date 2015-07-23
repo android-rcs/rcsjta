@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.provisioning.local;
@@ -32,6 +36,7 @@ import com.gsma.rcs.provider.settings.RcsSettingsData.AuthenticationProcedure;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ConfigurationMode;
 import com.gsma.rcs.provider.settings.RcsSettingsData.GsmaRelease;
 import com.gsma.rcs.provisioning.ProvisioningParser;
+import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
@@ -41,6 +46,7 @@ import com.gsma.services.rcs.contact.ContactId;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -54,8 +60,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.xml.sax.SAXException;
+
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -317,50 +326,23 @@ public class ProfileProvisioning extends Activity {
         }
     };
 
-    private void loadProfile(String myPhoneNumber, String provisioningFile) {
-        boolean logActivated = logger.isActivated();
-        if (provisioningFile == null
-                || provisioningFile.equals(getString(R.string.label_no_xml_file))) {
+    private void loadProfile(ContactId contact, Uri provisioningFile) {
+        final boolean logActivated = logger.isActivated();
+        try {
             if (logActivated) {
-                logger.error("Loading of provisioning failed: no XML file");
+                logger.debug("Selection of provisioning file: ".concat(provisioningFile.getPath()));
             }
-            Toast.makeText(ProfileProvisioning.this, getString(R.string.label_load_failed),
-                    Toast.LENGTH_LONG).show();
-            return;
-
-        }
-        String filePath = PROVISIONING_FOLDER_PATH + File.separator + provisioningFile;
-        if (logActivated) {
-            logger.debug("Selection of provisioning file: ".concat(provisioningFile));
-        }
-        String mXMLFileContent = getFileContent(filePath);
-        if (mXMLFileContent == null) {
+            String xMLFileContent = getFileContent(provisioningFile);
+            ProvisionTask mProvisionTask = new ProvisionTask();
+            mProvisionTask.execute(xMLFileContent, contact.toString());
+        } catch (IOException e) {
             if (logActivated) {
                 logger.error("Loading of provisioning failed: invalid XML file '"
                         + provisioningFile + "'");
             }
             Toast.makeText(ProfileProvisioning.this, getString(R.string.label_load_failed),
                     Toast.LENGTH_LONG).show();
-            return;
-
         }
-        if (logActivated) {
-            logger.debug("Selection of provisioning file: " + filePath);
-        }
-        PhoneNumber number = ContactUtil.getValidPhoneNumberFromAndroid(myPhoneNumber);
-        if (number == null) {
-            if (logActivated) {
-                logger.error("Loading of provisioning failed: invalid phone number '"
-                        + myPhoneNumber + "'");
-            }
-            Toast.makeText(ProfileProvisioning.this, getString(R.string.label_load_failed),
-                    Toast.LENGTH_LONG).show();
-            return;
-
-        }
-        ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
-        ProvisionTask mProvisionTask = new ProvisionTask();
-        mProvisionTask.execute(mXMLFileContent, contact.toString());
     }
 
     /**
@@ -385,9 +367,26 @@ public class ProfileProvisioning extends Activity {
                 .setNegativeButton(R.string.label_cancel, null)
                 .setPositiveButton(R.string.label_ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        String inputUserPhoneNumber = textEdit.getText().toString();
+                        PhoneNumber number = ContactUtil.getValidPhoneNumberFromAndroid(textEdit
+                                .getText().toString());
+                        if (number == null) {
+                            Toast.makeText(ProfileProvisioning.this,
+                                    getString(R.string.label_load_failed), Toast.LENGTH_LONG)
+                                    .show();
+                            return;
+                        }
+                        ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
                         String selectedProvisioningFile = (String) spinner.getSelectedItem();
-                        loadProfile(inputUserPhoneNumber, selectedProvisioningFile);
+                        if (selectedProvisioningFile == null
+                                || selectedProvisioningFile
+                                        .equals(getString(R.string.label_no_xml_file))) {
+                            Toast.makeText(ProfileProvisioning.this,
+                                    getString(R.string.label_load_failed), Toast.LENGTH_LONG)
+                                    .show();
+                            return;
+                        }
+                        loadProfile(contact, Uri.fromFile(new File(PROVISIONING_FOLDER_PATH,
+                                selectedProvisioningFile)));
                     }
                 });
         AlertDialog dialog = builder.create();
@@ -398,16 +397,12 @@ public class ProfileProvisioning extends Activity {
     /**
      * Read a text file and convert it into a string
      * 
-     * @param filePath the file path
+     * @param provisioningFile Uri for the file
      * @return the result string
+     * @throws IOException
      */
-    private String getFileContent(String filePath) {
-        if (filePath == null)
-            return null;
-        // Get the text file
-        File file = new File(filePath);
-
-        // Read text from file
+    private String getFileContent(Uri provisioningFile) throws IOException {
+        File file = new File(provisioningFile.getPath());
         StringBuilder text = new StringBuilder();
         BufferedReader br = null;
         try {
@@ -420,20 +415,9 @@ public class ProfileProvisioning extends Activity {
             }
             return text.toString();
 
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error(
-                        "Error reading file content: " + e.getClass().getName() + " "
-                                + e.getMessage(), e);
-            }
         } finally {
-            if (br != null)
-                try {
-                    br.close();
-                } catch (IOException e) {
-                }
+            CloseableUtils.close(br);
         }
-        return null;
     }
 
     /**
@@ -473,8 +457,8 @@ public class ProfileProvisioning extends Activity {
             mRcsSettings.setGsmaRelease(GsmaRelease.ALBATROS);
             // Before parsing the provisioning, the client Messaging mode is set to NONE
             mRcsSettings.setMessagingMode(MessagingMode.NONE);
-
-            if (parser.parse(release, messagingMode, true)) {
+            try {
+                parser.parse(release, messagingMode, true);
                 /* Customize display name with user phone number */
                 mRcsSettings.setUserProfileImsDisplayName(phoneNumber);
                 mRcsSettings
@@ -482,7 +466,7 @@ public class ProfileProvisioning extends Activity {
                                 && mRcsSettings.getFtHttpLogin().length() > 0
                                 && mRcsSettings.getFtHttpPassword().length() > 0);
                 return true;
-            } else {
+            } catch (SAXException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't parse provisioning document");
                 }

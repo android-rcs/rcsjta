@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +15,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.platform.network;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.security.KeyStore;
-import java.security.SecureRandom;
-import java.security.cert.Certificate;
-
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.KeyManager;
 
 import com.gsma.rcs.core.ims.security.cert.KeyStoreManager;
 import com.gsma.rcs.core.ims.security.cert.X509KeyManagerWrapper;
@@ -38,6 +28,29 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provisioning.https.EasyX509TrustManager;
 import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.logger.Logger;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLPeerUnverifiedException;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+
+import javax2.sip.ListeningPoint;
 
 /**
  * Android secure socket connection
@@ -148,11 +161,9 @@ public class AndroidSecureSocketConnection extends AndroidSocketConnection {
                     }
                 }
             }
-        } catch (Exception ex) {
-            if (logger.isActivated()) {
-                logger.error("SSL handshake failed! Error: ", ex);
-            }
+        } catch (IOException e) {
             s = null;
+            throw new IOException("SSL handshake failed!", e);
         }
         setSocket(s);
     }
@@ -163,35 +174,23 @@ public class AndroidSecureSocketConnection extends AndroidSocketConnection {
      * @param algorithm hash algorithm to be used
      * @param socket
      * @return String
+     * @throws SSLPeerUnverifiedException
      */
-    // Changed by Deutsche Telekom
-    public String getFingerprint(String algorithm, SSLSocket socket) {
-        String result = null;
-        // Changed by Deutsche Telekom
-        try {
-            if ((socket != null) && (socket.getSession() != null)) {
-                Certificate[] certs = socket.getSession().getPeerCertificates();
-                if (logger.isActivated()) {
-                    logger.debug("Remote certificate chain length: " + certs.length);
-                }
-                if (certs.length > 0) {
-                    result = KeyStoreManager.getCertFingerprint(certs[0], algorithm);
-                }
-            } else {
-                if (logger.isActivated()) {
-                    if (socket == null) {
-                        logger.error("SSL socket is null!");
-                    } else {
-                        logger.error("SSL session is null!");
-                    }
-                }
-            }
-        } catch (Exception ex) {
-            if (logger.isActivated()) {
-                logger.error("Getting remote certificate fingerprint failed: ", ex);
-            }
+    private String getFingerprint(String algorithm, SSLSocket socket)
+            throws SSLPeerUnverifiedException {
+        final SSLSession session = socket.getSession();
+        if (session == null) {
+            throw new SSLPeerUnverifiedException("SSL session not available!");
         }
-        return result;
+        Certificate[] certs = session.getPeerCertificates();
+        if (logger.isActivated()) {
+            logger.debug("Remote certificate chain length: " + certs.length);
+        }
+        if (certs.length == 0) {
+            throw new SSLPeerUnverifiedException(
+                    "No remote certificates available for SSL session!");
+        }
+        return KeyStoreManager.getCertFingerprint(certs[0], algorithm);
     }
 
     /**
@@ -218,7 +217,7 @@ public class AndroidSecureSocketConnection extends AndroidSocketConnection {
                 String trustStoreFile = KeyStoreManager.getKeystorePath();
                 char[] keyStorePassword = KeyStoreManager.getKeystorePassword().toCharArray();
 
-                SSLContext sslContext = SSLContext.getInstance("TLS");
+                SSLContext sslContext = SSLContext.getInstance(ListeningPoint.TLS);
 
                 // Changed by Deutsche Telekom
                 TrustManager[] tms = null;
@@ -274,8 +273,36 @@ public class AndroidSecureSocketConnection extends AndroidSocketConnection {
                 sslContext.init(kms, tms, secureRandom);
 
                 mSslSocketFactory = sslContext.getSocketFactory();
-            } catch (Exception e) {
-                throw new IOException("Certificate exception: " + e.getMessage());
+            } catch (NoSuchAlgorithmException e) {
+                throw new IOException(
+                        "Unable to create SSL instance for service type :  "
+                                .concat(ListeningPoint.TLS),
+                        e);
+
+            } catch (KeyStoreException e) {
+                throw new IOException(
+                        "Unable to create SSL instance for service type :  "
+                                .concat(ListeningPoint.TLS),
+                        e);
+
+            } catch (CertificateException e) {
+                throw new IOException(
+                        "Unable to create SSL instance for service type :  "
+                                .concat(ListeningPoint.TLS),
+                        e);
+
+            } catch (UnrecoverableKeyException e) {
+                throw new IOException(
+                        "Unable to create SSL instance for service type :  "
+                                .concat(ListeningPoint.TLS),
+                        e);
+
+            } catch (KeyManagementException e) {
+                throw new IOException(
+                        "Unable to create SSL instance for service type :  "
+                                .concat(ListeningPoint.TLS),
+                        e);
+
             } finally {
                 CloseableUtils.close(ksFileInputStream);
                 CloseableUtils.close(tsFileInputStream);

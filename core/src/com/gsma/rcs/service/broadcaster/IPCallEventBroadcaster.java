@@ -27,6 +27,7 @@ import com.gsma.rcs.service.ipcalldraft.IIPCallListener;
 
 import android.content.Intent;
 import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 
 /**
  * IPCallEventBroadcaster maintains the registering and unregistering of IIPCallListener and also
@@ -58,7 +59,7 @@ public class IPCallEventBroadcaster implements IIPCallEventBroadcaster {
             try {
                 mIpCallListeners.getBroadcastItem(i).onIPCallStateChanged(contact, callId,
                         rcsState, rcsReasonCode);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);
                 }

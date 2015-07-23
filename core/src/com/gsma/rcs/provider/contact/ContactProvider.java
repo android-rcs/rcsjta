@@ -43,6 +43,7 @@ import android.text.TextUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -372,11 +373,14 @@ public class ContactProvider extends ContentProvider {
                         initialValues.put(ContactData.KEY_PRESENCE_PHOTO_DATA, path);
                         initialValues.put(ContactData.KEY_PRESENCE_PHOTO_EXIST_FLAG,
                                 ContactData.FALSE_VALUE);
-
-                    } catch (Exception e) {
-                        /* TODO: Proper exception handling will be done in CR037 */
+                    } catch (IOException e) {
+                        /*
+                         * As Social Presence Profile Picture is optional for a RCS user, So if
+                         * there is an issue with creating an empty file for same, We should still
+                         * proceed with updating user capability information.
+                         */
                         if (logger.isActivated()) {
-                            logger.error("Problem while creating photoData", e);
+                            logger.debug(e.getMessage());
                         }
                     }
                 }

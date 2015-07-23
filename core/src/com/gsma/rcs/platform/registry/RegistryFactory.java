@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.platform.registry;
@@ -41,11 +45,16 @@ public abstract class RegistryFactory {
         if (mFactory != null) {
             return;
         }
-
         try {
             mFactory = (RegistryFactory) Class.forName(classname).newInstance();
-        } catch (Exception e) {
-            throw new FactoryException("Can't load the factory " + classname, e);
+        } catch (InstantiationException e) {
+            throw new FactoryException("Can't load the factory ".concat(classname), e);
+
+        } catch (IllegalAccessException e) {
+            throw new FactoryException("Can't load the factory ".concat(classname), e);
+
+        } catch (ClassNotFoundException e) {
+            throw new FactoryException("Can't load the factory ".concat(classname), e);
         }
     }
 

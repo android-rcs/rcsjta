@@ -27,6 +27,7 @@ import com.gsma.services.rcs.sharing.video.VideoSharingIntent;
 
 import android.content.Intent;
 import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +64,7 @@ public class VideoSharingEventBroadcaster implements IVideoSharingEventBroadcast
             try {
                 mVideoSharingListeners.getBroadcastItem(i).onStateChanged(contact, sharingId,
                         rcsState, rcsReasonCode);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);
                 }
@@ -86,7 +87,7 @@ public class VideoSharingEventBroadcaster implements IVideoSharingEventBroadcast
         for (int i = 0; i < N; i++) {
             try {
                 mVideoSharingListeners.getBroadcastItem(i).onDeleted(contact, ids);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);
                 }

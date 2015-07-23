@@ -27,6 +27,7 @@ import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.Intent;
 import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +64,7 @@ public class OneToOneChatEventBroadcaster implements IOneToOneChatEventBroadcast
             try {
                 mOneToOneChatListeners.getBroadcastItem(i).onMessageStatusChanged(contact,
                         mimeType, msgId, rcsStatus, rcsReasonCode);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener.", e);
                 }
@@ -77,7 +78,7 @@ public class OneToOneChatEventBroadcaster implements IOneToOneChatEventBroadcast
         for (int i = 0; i < N; i++) {
             try {
                 mOneToOneChatListeners.getBroadcastItem(i).onComposingEvent(contact, status);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);
                 }
@@ -102,7 +103,7 @@ public class OneToOneChatEventBroadcaster implements IOneToOneChatEventBroadcast
         for (int i = 0; i < N; i++) {
             try {
                 mOneToOneChatListeners.getBroadcastItem(i).onMessagesDeleted(contact, ids);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener.", e);
                 }

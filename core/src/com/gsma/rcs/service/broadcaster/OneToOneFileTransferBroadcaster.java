@@ -27,6 +27,7 @@ import com.gsma.services.rcs.filetransfer.IOneToOneFileTransferListener;
 
 import android.content.Intent;
 import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +64,7 @@ public class OneToOneFileTransferBroadcaster implements IOneToOneFileTransferBro
             try {
                 mOneToOneFileTransferListeners.getBroadcastItem(i).onStateChanged(contact,
                         transferId, rcsState, rcsReasonCode);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);
                 }
@@ -79,7 +80,7 @@ public class OneToOneFileTransferBroadcaster implements IOneToOneFileTransferBro
             try {
                 mOneToOneFileTransferListeners.getBroadcastItem(i).onProgressUpdate(contact,
                         transferId, currentSize, totalSize);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);
                 }
@@ -110,7 +111,7 @@ public class OneToOneFileTransferBroadcaster implements IOneToOneFileTransferBro
         for (int i = 0; i < N; i++) {
             try {
                 mOneToOneFileTransferListeners.getBroadcastItem(i).onDeleted(contact, ids);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);
                 }

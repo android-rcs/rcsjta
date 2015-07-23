@@ -61,11 +61,13 @@ import android.text.TextUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HttpContext;
+import org.xml.sax.SAXException;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -489,9 +491,9 @@ public class HttpsProvisioningManager {
             /*
              * Override primary URI if a file containing URI for HTTPS provisioning exists
              */
-            String primaryUriFromFile = getPrimaryProvisionigServerUriFromFile();
-            if (primaryUriFromFile != null) {
-                primaryUri = primaryUriFromFile;
+            File provFile = new File(mCtx.getFilesDir(), PROVISIONING_URI_FILENAME);
+            if (provFile.exists()) {
+                primaryUri = getPrimaryProvisionigServerUriFromFile(provFile);
                 secondaryUri = null;
             }
             if (logActivated) {
@@ -577,34 +579,19 @@ public class HttpsProvisioningManager {
         }
     }
 
-    private String getPrimaryProvisionigServerUriFromFile() {
-        boolean logActivated = sLogger.isActivated();
+    private String getPrimaryProvisionigServerUriFromFile(File provFile) throws IOException {
         DataInputStream dataInputStream = null;
         try {
-            File primaryUri = new File(mCtx.getFilesDir(), PROVISIONING_URI_FILENAME);
-            if (!primaryUri.exists()) {
-                return null;
-            }
-            if (logActivated) {
+            if (sLogger.isActivated()) {
                 sLogger.debug("Provisioning URI file found !");
             }
-            FileInputStream fis = new FileInputStream(primaryUri);
+            FileInputStream fis = new FileInputStream(provFile);
             dataInputStream = new DataInputStream(fis);
             BufferedReader br = new BufferedReader(new InputStreamReader(dataInputStream));
             return br.readLine();
-        } catch (Exception e) {
-            if (logActivated) {
-                sLogger.error("Failed to locate URI provisioning file", e);
-            }
-            return null;
+
         } finally {
-            if (dataInputStream != null) {
-                try {
-                    dataInputStream.close();
-                } catch (IOException e) {
-                    // Do nothing
-                }
-            }
+            CloseableUtils.close(dataInputStream);
         }
     }
 
@@ -732,7 +719,8 @@ public class HttpsProvisioningManager {
             /* Before parsing the provisioning, the client Messaging mode is set to NONE */
             mRcsSettings.setMessagingMode(MessagingMode.NONE);
 
-            if (parser.parse(gsmaRelease, messagingMode, mFirstProvAfterBoot)) {
+            try {
+                parser.parse(gsmaRelease, messagingMode, mFirstProvAfterBoot);
                 // Successfully provisioned, 1st time reg finalized
                 mFirstProvAfterBoot = false;
                 ProvisioningInfo info = parser.getProvisioningInfo();
@@ -836,7 +824,7 @@ public class HttpsProvisioningManager {
                         RcsService.ACTION_SERVICE_PROVISIONING_DATA_CHANGED);
                 IntentUtils.tryToSetReceiverForegroundFlag(serviceProvisioned);
                 mCtx.sendBroadcast(serviceProvisioned);
-            } else {
+            } catch (SAXException e) {
                 if (logActivated) {
                     sLogger.debug("Can't parse provisioning document");
                 }

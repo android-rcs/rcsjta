@@ -31,6 +31,7 @@ import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
 import android.content.Intent;
 import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +67,7 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
             try {
                 mGroupChatListeners.getBroadcastItem(i).onMessageStatusChanged(chatId, mimeType,
                         msgId, rcsStatus, rcsReasonCode);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener.", e);
                 }
@@ -83,7 +84,7 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
             try {
                 mGroupChatListeners.getBroadcastItem(i).onMessageGroupDeliveryInfoChanged(chatId,
                         contact, apiMimeType, msgId, status.toInt(), reasonCode.toInt());
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener.", e);
                 }
@@ -99,7 +100,7 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
             try {
                 mGroupChatListeners.getBroadcastItem(i).onParticipantStatusChanged(chatId, contact,
                         status.toInt());
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);
                 }
@@ -116,7 +117,7 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
             try {
                 mGroupChatListeners.getBroadcastItem(i).onStateChanged(chatId, rcsState,
                         rcsReasonCode);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);
                 }
@@ -130,7 +131,7 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
         for (int i = 0; i < N; i++) {
             try {
                 mGroupChatListeners.getBroadcastItem(i).onComposingEvent(chatId, contact, status);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);
                 }
@@ -162,7 +163,7 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
         for (int i = 0; i < N; i++) {
             try {
                 mGroupChatListeners.getBroadcastItem(i).onMessagesDeleted(chatId, msgIds2);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener.", e);
                 }
@@ -177,7 +178,7 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
         for (int i = 0; i < N; i++) {
             try {
                 mGroupChatListeners.getBroadcastItem(i).onDeleted(ids);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener.", e);
                 }

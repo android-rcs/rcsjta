@@ -22,6 +22,7 @@ import com.gsma.services.rcs.capability.ICapabilitiesListener;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 
 import java.util.HashMap;
 
@@ -47,7 +48,7 @@ public class CapabilitiesBroadcaster implements ICapabilitiesBroadcaster {
             try {
                 mCapabilitiesListeners.getBroadcastItem(i).onCapabilitiesReceived(contact,
                         contactCapabilities);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);
                 }
@@ -68,7 +69,7 @@ public class CapabilitiesBroadcaster implements ICapabilitiesBroadcaster {
             try {
                 capabilitiesListeners.getBroadcastItem(i).onCapabilitiesReceived(contact,
                         contactCapabilities);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);
                 }

@@ -50,11 +50,16 @@ public abstract class FileFactory {
         if (mFactory != null) {
             return;
         }
-
         try {
             mFactory = (FileFactory) Class.forName(classname).newInstance();
-        } catch (Exception e) {
-            throw new FactoryException("Can't load the factory " + classname, e);
+        } catch (InstantiationException e) {
+            throw new FactoryException("Can't load the factory ".concat(classname), e);
+
+        } catch (IllegalAccessException e) {
+            throw new FactoryException("Can't load the factory ".concat(classname), e);
+
+        } catch (ClassNotFoundException e) {
+            throw new FactoryException("Can't load the factory ".concat(classname), e);
         }
     }
 

@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +15,31 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.provisioning.https;
+
+import org.apache.http.conn.ConnectTimeoutException;
+import org.apache.http.conn.scheme.LayeredSocketFactory;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.TrustManager;
-
-import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.conn.scheme.LayeredSocketFactory;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
+import javax2.sip.ListeningPoint;
 
 /**
  * This socket factory will create ssl socket that accepts self signed certificate
@@ -46,13 +54,26 @@ public class EasySSLSocketFactory implements LayeredSocketFactory {
 
     private static SSLContext createEasySSLContext() throws IOException {
         try {
-            SSLContext context = SSLContext.getInstance("TLS");
+            SSLContext context = SSLContext.getInstance(ListeningPoint.TLS);
             context.init(null, new TrustManager[] {
                 new EasyX509TrustManager(null)
             }, null);
             return context;
-        } catch (Exception e) {
-            throw new IOException(e.getMessage());
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new IOException(
+                    "Unable to create SSL instance for service type :  ".concat(ListeningPoint.TLS),
+                    e);
+
+        } catch (KeyManagementException e) {
+            throw new IOException(
+                    "Unable to create SSL instance for service type :  ".concat(ListeningPoint.TLS),
+                    e);
+
+        } catch (KeyStoreException e) {
+            throw new IOException(
+                    "Unable to create SSL instance for service type :  ".concat(ListeningPoint.TLS),
+                    e);
         }
     }
 

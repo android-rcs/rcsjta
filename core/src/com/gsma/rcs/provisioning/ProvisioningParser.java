@@ -32,6 +32,7 @@ import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.provider.settings.RcsSettingsData.GsmaRelease;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ImMsgTech;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ImSessionStartMode;
+import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.DeviceUtils;
@@ -44,11 +45,15 @@ import com.gsma.services.rcs.contact.ContactId;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import javax2.sip.ListeningPoint;
 
 /**
@@ -74,6 +79,11 @@ public class ProvisioningParser {
     private static final String PROTOCOL_HTTPS = "https";
 
     /**
+     * header for SIP URI
+     */
+    private static final String SIP_URI_HEADER = "sip:";
+
+    /**
      * Provisioning info
      */
     private ProvisioningInfo provisioningInfo = new ProvisioningInfo();
@@ -90,7 +100,7 @@ public class ProvisioningParser {
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(ProvisioningParser.class.getName());
 
     /**
      * Enumerated type for the root node
@@ -138,40 +148,33 @@ public class ProvisioningParser {
      *         GSMA release is set to blackbird if SERVICES node is present, otherwise release is
      *         unchanged
      *         </p>
+     * @throws SAXException
      */
-    public boolean parse(GsmaRelease release, MessagingMode messagingMode, boolean first) {
-        boolean logActivated = logger.isActivated();
+    public void parse(GsmaRelease release, MessagingMode messagingMode, boolean first)
+            throws SAXException {
+        ByteArrayInputStream inputStream = null;
         try {
+            final boolean logActivated = sLogger.isActivated();
             if (logActivated) {
-                logger.debug("Start the parsing of content first=".concat(Boolean.toString(first)));
+                sLogger.debug("Start the parsing of content first=".concat(Boolean.toString(first)));
             }
             mFirst = first;
-            ByteArrayInputStream mInputStream = new ByteArrayInputStream(mContent.getBytes(UTF8));
+            inputStream = new ByteArrayInputStream(mContent.getBytes(UTF8));
             DocumentBuilderFactory dfactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dbuilder = dfactory.newDocumentBuilder();
-            Document doc = dbuilder.parse(mInputStream);
-            mInputStream.close();
-            mInputStream = null;
+            Document doc = dbuilder.parse(inputStream);
             if (doc == null) {
-                if (logActivated) {
-                    logger.debug("The document is null");
-                }
-                return false;
+                throw new SAXException("The provisioning content document is null!");
             }
-
             if (logActivated) {
-                logger.debug("Parsed Doc =" + doc);
+                sLogger.debug("Parsed Doc =" + doc);
             }
-
             Node rootnode = doc.getDocumentElement();
             Node childnode = rootnode.getFirstChild();
             if (childnode == null) {
-                if (logActivated) {
-                    logger.debug("The first chid node is null");
-                }
-                return false;
+                throw new SAXException(
+                        "The first chid node in the provisioning content document is null!");
             }
-
             int nodeNumber = 0;
             do {
                 if (childnode.getNodeName().equals("characteristic")) {
@@ -179,7 +182,7 @@ public class ProvisioningParser {
                         Node typenode = childnode.getAttributes().getNamedItem("type");
                         if (typenode != null && typenode.getNodeValue() != null) {
                             if (logActivated) {
-                                logger.debug("Node " + childnode.getNodeName() + " with type "
+                                sLogger.debug("Node " + childnode.getNodeName() + " with type "
                                         + typenode.getNodeValue());
                             }
                             nodeNumber++;
@@ -230,13 +233,13 @@ public class ProvisioningParser {
                                         parseUx(childnode, ImsServerVersion.NON_JOYN);
                                         break;
                                     default:
-                                        if (logger.isActivated()) {
-                                            logger.warn("unhandled node type: " + nodeType);
+                                        if (sLogger.isActivated()) {
+                                            sLogger.warn("unhandled node type: " + nodeType);
                                         }
                                 }
                             } catch (IllegalArgumentException e) {
-                                if (logger.isActivated()) {
-                                    logger.warn("invalid node type: " + nodeType);
+                                if (sLogger.isActivated()) {
+                                    sLogger.warn("invalid node type: " + nodeType);
                                 }
                             }
                         }
@@ -253,12 +256,14 @@ public class ProvisioningParser {
                 /* We do the same for the messaging mode */
                 mRcsSettings.setMessagingMode(messagingMode);
             }
-            return true;
-        } catch (Exception e) {
-            if (logActivated) {
-                logger.error("Can't parse content", e);
-            }
-            return false;
+        } catch (ParserConfigurationException e) {
+            throw new SAXException("Can't parse provisioning content document!", e);
+
+        } catch (IOException e) {
+            throw new SAXException("Can't parse provisioning content document!", e);
+
+        } finally {
+            CloseableUtils.close(inputStream);
         }
     }
 
@@ -1012,7 +1017,7 @@ public class ProvisioningParser {
                          * via HTTPS explicitly.
                          */
                         if (!ftHttpCsUri.startsWith(PROTOCOL_HTTPS)) {
-                            logger.error(new StringBuilder(ftHttpCsUri)
+                            sLogger.error(new StringBuilder(ftHttpCsUri)
                                     .append(" is not a secure protocol, hence disabling ftHttp capability.")
                                     .toString());
                             continue;
@@ -1153,7 +1158,7 @@ public class ProvisioningParser {
 
                 if (confFctyUri == null) {
                     if ((confFctyUri = getValueByParamName("conf-fcty-uri", childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.setImConferenceUri(formatSipUri(confFctyUri));
+                        mRcsSettings.setImConferenceUri(formatSipUri(confFctyUri.trim()));
                         continue;
                     }
                 }
@@ -1384,8 +1389,8 @@ public class ProvisioningParser {
                 if (endUserConfReqId == null) {
                     if ((endUserConfReqId = getValueByParamName("endUserConfReqId", childnode,
                             TYPE_TXT)) != null) {
-                        mRcsSettings
-                                .setEndUserConfirmationRequestUri(formatSipUri(endUserConfReqId));
+                        mRcsSettings.setEndUserConfirmationRequestUri(formatSipUri(endUserConfReqId
+                                .trim()));
                         continue;
                     }
                 }
@@ -1473,8 +1478,8 @@ public class ProvisioningParser {
                     mRcsSettings.writeParameter(RcsSettingsData.UUID, DeviceUtils.generateUUID()
                             .toString());
                 } catch (RcsServiceException e) {
-                    if (logger.isActivated()) {
-                        logger.error(new StringBuilder(
+                    if (sLogger.isActivated()) {
+                        sLogger.error(new StringBuilder(
                                 "Exception caught in ProvisioningParser.parseOther() while fetching uuid value;"
                                         + " exception-msg=").append(e.getMessage()).append("!")
                                 .toString());
@@ -1525,11 +1530,11 @@ public class ProvisioningParser {
                 if (publicUserIdentity == null) {
                     if ((publicUserIdentity = getValueByParamName("Public_User_Identity",
                             childnode, TYPE_TXT)) != null) {
-                        String username = extractUserNamePart(publicUserIdentity);
+                        String username = extractUserNamePart(publicUserIdentity.trim());
                         PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(username);
                         if (number == null) {
-                            if (logger.isActivated()) {
-                                logger.error("Invalid public user identity '" + username + "'");
+                            if (sLogger.isActivated()) {
+                                sLogger.error("Invalid public user identity '" + username + "'");
                             }
                             mRcsSettings.setUserProfileImsUserName(null);
                         } else {
@@ -1962,8 +1967,8 @@ public class ProvisioningParser {
                     try {
                         Integer.parseInt(value);
                     } catch (NumberFormatException e) {
-                        if (logger.isActivated()) {
-                            logger.warn("Bad value for integer parameter " + paramName);
+                        if (sLogger.isActivated()) {
+                            sLogger.warn("Bad value for integer parameter " + paramName);
                         }
                         return null;
                     }
@@ -1984,22 +1989,14 @@ public class ProvisioningParser {
      * @return Username
      */
     private String extractUserNamePart(String uri) {
-        if ((uri == null) || (uri.trim().length() == 0)) {
-            return "";
-        }
+        int indexOfSipHeader = uri.indexOf(SIP_URI_HEADER);
+        if (indexOfSipHeader != -1) {
+            int startIndexOfUriAddress = uri.indexOf("@", indexOfSipHeader);
+            return uri
+                    .substring(indexOfSipHeader + SIP_URI_HEADER.length(), startIndexOfUriAddress);
 
-        try {
-            uri = uri.trim();
-            int index1 = uri.indexOf("sip:");
-            if (index1 != -1) {
-                int index2 = uri.indexOf("@", index1);
-                String result = uri.substring(index1 + 4, index2);
-                return result;
-            } else {
-                return uri;
-            }
-        } catch (Exception e) {
-            return "";
+        } else {
+            return uri;
         }
     }
 
@@ -2010,18 +2007,7 @@ public class ProvisioningParser {
      * @return SIP-URI
      */
     private String formatSipUri(String uri) {
-        if ((uri == null) || (uri.trim().length() == 0)) {
-            return "";
-        }
-
-        try {
-            uri = uri.trim();
-            if (!uri.startsWith("sip:")) {
-                uri = "sip:" + uri;
-            }
-            return uri;
-        } catch (Exception e) {
-            return "";
-        }
+        return uri.startsWith(SIP_URI_HEADER) ? uri : new StringBuilder(SIP_URI_HEADER).append(uri)
+                .toString();
     }
 }

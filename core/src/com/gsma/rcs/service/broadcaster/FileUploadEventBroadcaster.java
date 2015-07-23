@@ -28,6 +28,7 @@ import com.gsma.services.rcs.upload.FileUploadInfo;
 import com.gsma.services.rcs.upload.IFileUploadListener;
 
 import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 
 /**
  * FileUploadEventBroadcaster maintains the registering and unregistering of IFileUploadListener and
@@ -56,7 +57,7 @@ public class FileUploadEventBroadcaster implements IFileUploadEventBroadcaster {
         for (int i = 0; i < N; i++) {
             try {
                 mFileUploadListeners.getBroadcastItem(i).onStateChanged(uploadId, rcsState);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);
                 }
@@ -71,7 +72,7 @@ public class FileUploadEventBroadcaster implements IFileUploadEventBroadcaster {
             try {
                 mFileUploadListeners.getBroadcastItem(i).onProgressUpdate(uploadId, currentSize,
                         totalSize);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);
                 }
@@ -85,7 +86,7 @@ public class FileUploadEventBroadcaster implements IFileUploadEventBroadcaster {
         for (int i = 0; i < N; i++) {
             try {
                 mFileUploadListeners.getBroadcastItem(i).onUploaded(uploadId, info);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);
                 }

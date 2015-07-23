@@ -18,6 +18,7 @@
 package com.gsma.rcs.service.broadcaster;
 
 import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
@@ -51,7 +52,7 @@ public class RcsServiceRegistrationEventBroadcaster implements
         for (int i = 0; i < N; i++) {
             try {
                 mServiceRegistrationListeners.getBroadcastItem(i).onServiceRegistered();
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);
                 }
@@ -66,7 +67,7 @@ public class RcsServiceRegistrationEventBroadcaster implements
             try {
                 mServiceRegistrationListeners.getBroadcastItem(i).onServiceUnregistered(
                         reason.toInt());
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);
                 }

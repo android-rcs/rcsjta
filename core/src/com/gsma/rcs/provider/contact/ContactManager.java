@@ -82,6 +82,7 @@ import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactData.AggregationData;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.StringUtils;
@@ -909,9 +910,7 @@ public final class ContactManager {
             return infos;
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -952,12 +951,7 @@ public final class ContactManager {
                 sLogger.error("Photo can't be saved", e);
             }
         } finally {
-            if (outstream != null) {
-                try {
-                    outstream.close();
-                } catch (Exception e2) {
-                }
-            }
+            CloseableUtils.close(outstream);
         }
     }
 
@@ -1096,9 +1090,7 @@ public final class ContactManager {
             return rcsNumbers;
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -1126,9 +1118,7 @@ public final class ContactManager {
             return rcsNumbers;
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -1156,9 +1146,7 @@ public final class ContactManager {
             return numbers;
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -1376,9 +1364,7 @@ public final class ContactManager {
             return ops;
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -1697,9 +1683,7 @@ public final class ContactManager {
             }
             return INVALID_ID;
         } finally {
-            if (cur != null) {
-                cur.close();
-            }
+            CursorUtil.close(cur);
         }
     }
 
@@ -2088,13 +2072,7 @@ public final class ContactManager {
             return null;
 
         } finally {
-            try {
-                if (out != null) {
-                    out.close();
-                }
-            } catch (IOException e) {
-                // purposely left blank
-            }
+            CloseableUtils.close(out);
         }
     }
 
@@ -2213,9 +2191,7 @@ public final class ContactManager {
                 } while (cursor.moveToNext());
             }
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
         /*
          * No match found using LOOSE equals, starting STRICT equals. This is done because of that
@@ -2248,9 +2224,7 @@ public final class ContactManager {
             return rawContactsIds;
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -2277,9 +2251,7 @@ public final class ContactManager {
             return INVALID_ID;
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -2298,9 +2270,7 @@ public final class ContactManager {
             return cursor.moveToFirst();
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -2322,9 +2292,7 @@ public final class ContactManager {
             return cursor.moveToFirst();
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -2427,20 +2395,14 @@ public final class ContactManager {
                         ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
                                 .withValues(values).build());
                     }
-                } catch (Exception e) {
-                    if (sLogger.isActivated()) {
-                        sLogger.error("Cannot add/update etag", e);
-                    }
                 } finally {
-                    if (cur2 != null) {
-                        cur2.close();
-                    }
+                    CursorUtil.close(cur2);
                 }
             }
             return ops;
 
         } finally {
-            cursor.close();
+            CursorUtil.close(cursor);
         }
     }
 
@@ -2461,9 +2423,7 @@ public final class ContactManager {
             return cursor.getLong(cursor.getColumnIndexOrThrow(RawContacts._ID));
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -2491,97 +2451,91 @@ public final class ContactManager {
             int idMimeTypeColumnIdx = cursor.getColumnIndexOrThrow(Data.MIMETYPE);
             while (cursor.moveToNext()) {
                 String mimeTypeStr = cursor.getString(idMimeTypeColumnIdx);
-                try {
-                    /* Convert mime type string to enumerated */
-                    MimeType mimeType = MimeType.getMimeType(mimeTypeStr);
-                    switch (mimeType) {
-                        case CAPABILITY_IMAGE_SHARE:
-                            capaBuilder.setImageSharing(true);
-                            break;
-                        case CAPABILITY_VIDEO_SHARE:
-                            capaBuilder.setVideoSharing(true);
-                            break;
-                        case CAPABILITY_IP_VOICE_CALL:
-                            capaBuilder.setIpVoiceCall(true);
-                            break;
-                        case CAPABILITY_IP_VIDEO_CALL:
-                            capaBuilder.setIpVideoCall(true);
-                            break;
-                        case CAPABILITY_IM_SESSION:
-                            capaBuilder.setImSession(true);
-                            break;
-                        case CAPABILITY_FILE_TRANSFER:
-                            capaBuilder.setFileTransfer(true);
-                            break;
-                        case CAPABILITY_GEOLOCATION_PUSH:
-                            capaBuilder.setGeolocationPush(true);
-                            break;
-                        case CAPABILITY_EXTENSIONS: {
-                            /* Set RCS extensions capability */
-                            int columnIndex = cursor.getColumnIndex(Data.DATA2);
-                            if (INVALID_ID != columnIndex) {
-                                capaBuilder.setExtensions(ServiceExtensionManager
-                                        .getExtensions(cursor.getString(columnIndex)));
-                            }
+                /* Convert mime type string to enumerated */
+                MimeType mimeType = MimeType.getMimeType(mimeTypeStr);
+                switch (mimeType) {
+                    case CAPABILITY_IMAGE_SHARE:
+                        capaBuilder.setImageSharing(true);
+                        break;
+                    case CAPABILITY_VIDEO_SHARE:
+                        capaBuilder.setVideoSharing(true);
+                        break;
+                    case CAPABILITY_IP_VOICE_CALL:
+                        capaBuilder.setIpVoiceCall(true);
+                        break;
+                    case CAPABILITY_IP_VIDEO_CALL:
+                        capaBuilder.setIpVideoCall(true);
+                        break;
+                    case CAPABILITY_IM_SESSION:
+                        capaBuilder.setImSession(true);
+                        break;
+                    case CAPABILITY_FILE_TRANSFER:
+                        capaBuilder.setFileTransfer(true);
+                        break;
+                    case CAPABILITY_GEOLOCATION_PUSH:
+                        capaBuilder.setGeolocationPush(true);
+                        break;
+                    case CAPABILITY_EXTENSIONS: {
+                        /* Set RCS extensions capability */
+                        int columnIndex = cursor.getColumnIndex(Data.DATA2);
+                        if (INVALID_ID != columnIndex) {
+                            capaBuilder.setExtensions(ServiceExtensionManager.getExtensions(cursor
+                                    .getString(columnIndex)));
                         }
-                            break;
-                        case REGISTRATION_STATE: {
-                            /* Set registration state */
-                            int columnIndex = cursor.getColumnIndex(Data.DATA2);
-                            if (columnIndex != -1) {
-                                int registrationState = cursor.getInt(columnIndex);
-                                contactInfo.setRegistrationState(RegistrationState
-                                        .valueOf(registrationState));
-                            }
+                    }
+                        break;
+                    case REGISTRATION_STATE: {
+                        /* Set registration state */
+                        int columnIndex = cursor.getColumnIndex(Data.DATA2);
+                        if (columnIndex != -1) {
+                            int registrationState = cursor.getInt(columnIndex);
+                            contactInfo.setRegistrationState(RegistrationState
+                                    .valueOf(registrationState));
                         }
-                            break;
-                        case NUMBER: {
-                            /* Set contact ID */
-                            int columnIndex = cursor.getColumnIndex(Data.DATA1);
-                            if (INVALID_ID != columnIndex) {
-                                String contact = cursor.getString(columnIndex);
-                                /* check validity for contact read from raw contact */
-                                PhoneNumber number = ContactUtil
-                                        .getValidPhoneNumberFromAndroid(contact);
-                                if (number != null) {
-                                    contactInfo.setContact(ContactUtil
-                                            .createContactIdFromValidatedData(number));
-                                } else {
-                                    if (sLogger.isActivated()) {
-                                        sLogger.warn("Cannot parse contact ".concat(contact));
-                                    }
+                    }
+                        break;
+                    case NUMBER: {
+                        /* Set contact ID */
+                        int columnIndex = cursor.getColumnIndex(Data.DATA1);
+                        if (INVALID_ID != columnIndex) {
+                            String contact = cursor.getString(columnIndex);
+                            /* check validity for contact read from raw contact */
+                            PhoneNumber number = ContactUtil
+                                    .getValidPhoneNumberFromAndroid(contact);
+                            if (number != null) {
+                                contactInfo.setContact(ContactUtil
+                                        .createContactIdFromValidatedData(number));
+                            } else {
+                                if (sLogger.isActivated()) {
+                                    sLogger.warn("Cannot parse contact ".concat(contact));
                                 }
                             }
                         }
-                            break;
-                        case BLOCKING_STATE: {
-                            /* Set blocking state */
-                            int columnIndex = cursor.getColumnIndex(Data.DATA2);
-                            if (columnIndex != -1) {
-                                int state = cursor.getInt(columnIndex);
-                                contactInfo.setBlockingState(BlockingState.valueOf(state));
-                            }
-                        }
-                            break;
-                        case BLOCKING_TIMESTAMP: {
-                            /* Set blocking timestamp */
-                            int columnIndex = cursor.getColumnIndex(Data.DATA2);
-                            if (columnIndex != -1) {
-                                long timestamp = cursor.getLong(columnIndex);
-                                contactInfo.setBlockingTimestamp(timestamp);
-                            }
-                        }
-                            break;
-                        default:
-                            if (sLogger.isActivated()) {
-                                sLogger.warn("Unhandled mimetype ".concat(mimeTypeStr));
-                            }
-                            break;
                     }
-                } catch (Exception e) {
-                    if (sLogger.isActivated()) {
-                        sLogger.warn("Invalid mimetype ".concat(e.getMessage()));
+                        break;
+                    case BLOCKING_STATE: {
+                        /* Set blocking state */
+                        int columnIndex = cursor.getColumnIndex(Data.DATA2);
+                        if (columnIndex != -1) {
+                            int state = cursor.getInt(columnIndex);
+                            contactInfo.setBlockingState(BlockingState.valueOf(state));
+                        }
                     }
+                        break;
+                    case BLOCKING_TIMESTAMP: {
+                        /* Set blocking timestamp */
+                        int columnIndex = cursor.getColumnIndex(Data.DATA2);
+                        if (columnIndex != -1) {
+                            long timestamp = cursor.getLong(columnIndex);
+                            contactInfo.setBlockingTimestamp(timestamp);
+                        }
+                    }
+                        break;
+                    default:
+                        if (sLogger.isActivated()) {
+                            sLogger.warn("Unhandled mimetype ".concat(mimeTypeStr));
+                        }
+                        break;
                 }
             }
             contactInfo.setPresenceInfo(presenceInfo);
@@ -2589,7 +2543,7 @@ public final class ContactManager {
             return contactInfo;
 
         } finally {
-            cursor.close();
+            CursorUtil.close(cursor);
         }
     }
 
@@ -2750,14 +2704,8 @@ public final class ContactManager {
                             });
                 }
             } while (cursor.moveToNext());
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Exception occurred", e);
-            }
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
         if (!ops.isEmpty()) {
             /* Do the actual database modifications */
@@ -2806,9 +2754,7 @@ public final class ContactManager {
                 }
             } while (cursor.moveToNext());
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -2968,9 +2914,7 @@ public final class ContactManager {
             return result;
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -3017,9 +2961,7 @@ public final class ContactManager {
             }
             return cursor.getLong(cursor.getColumnIndexOrThrow(Groups._ID));
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
