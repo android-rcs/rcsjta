@@ -34,6 +34,7 @@ import com.gsma.rcs.provider.settings.RcsSettingsData.ImMsgTech;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ImSessionStartMode;
 import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.DeviceUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -41,6 +42,8 @@ import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMethod;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
+
+import android.net.Uri;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -77,11 +80,6 @@ public class ProvisioningParser {
     private static final String UUID_VALUE = "uuid_Value";
 
     private static final String PROTOCOL_HTTPS = "https";
-
-    /**
-     * header for SIP URI
-     */
-    private static final String SIP_URI_HEADER = "sip:";
 
     /**
      * Provisioning info
@@ -1989,11 +1987,11 @@ public class ProvisioningParser {
      * @return Username
      */
     private String extractUserNamePart(String uri) {
-        int indexOfSipHeader = uri.indexOf(SIP_URI_HEADER);
+        int indexOfSipHeader = uri.indexOf(PhoneUtils.SIP_URI_HEADER);
         if (indexOfSipHeader != -1) {
             int startIndexOfUriAddress = uri.indexOf("@", indexOfSipHeader);
-            return uri
-                    .substring(indexOfSipHeader + SIP_URI_HEADER.length(), startIndexOfUriAddress);
+            return uri.substring(indexOfSipHeader + PhoneUtils.SIP_URI_HEADER.length(),
+                    startIndexOfUriAddress);
 
         } else {
             return uri;
@@ -2003,11 +2001,11 @@ public class ProvisioningParser {
     /**
      * Format to SIP-URI
      * 
-     * @param uri URI
+     * @param path Sip Uri path
      * @return SIP-URI
      */
-    private String formatSipUri(String uri) {
-        return uri.startsWith(SIP_URI_HEADER) ? uri : new StringBuilder(SIP_URI_HEADER).append(uri)
-                .toString();
+    private Uri formatSipUri(String path) {
+        return path.startsWith(PhoneUtils.SIP_URI_HEADER) ? Uri.parse(path) : Uri
+                .parse(new StringBuilder(PhoneUtils.SIP_URI_HEADER).append(path).toString());
     }
 }

@@ -29,6 +29,8 @@ import com.gsma.rcs.core.ims.network.sip.Multipart;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.presence.pidf.PidfDocument;
 import com.gsma.rcs.core.ims.service.presence.pidf.PidfParser;
@@ -41,10 +43,16 @@ import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
+import android.text.TextUtils;
+
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Vector;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import javax2.sip.header.AcceptHeader;
 import javax2.sip.header.EventHeader;
@@ -60,7 +68,8 @@ public class PresenceSubscribeManager extends SubscribeManager {
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger
+            .getLogger(PresenceSubscribeManager.class.getName());
 
     /**
      * Constructor
@@ -87,10 +96,11 @@ public class PresenceSubscribeManager extends SubscribeManager {
      * @param dialog SIP dialog path
      * @param expirePeriod Expiration period in milliseconds
      * @return SIP request
-     * @throws SipException
+     * @throws SipPayloadException
      */
     @Override
-    public SipRequest createSubscribe(SipDialogPath dialog, long expirePeriod) throws SipException {
+    public SipRequest createSubscribe(SipDialogPath dialog, long expirePeriod)
+            throws SipPayloadException {
         // Create SUBSCRIBE message
         SipRequest subscribe = SipMessageFactory.createSubscribe(dialog, expirePeriod);
 
@@ -111,115 +121,93 @@ public class PresenceSubscribeManager extends SubscribeManager {
      * Receive a notification
      * 
      * @param notify Received notify
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void receiveNotification(SipRequest notify) {
-        // Check notification
+    public void receiveNotification(SipRequest notify) throws SipPayloadException,
+            SipNetworkException {
         if (!isNotifyForThisSubscriber(notify)) {
             return;
         }
+        if (sLogger.isActivated()) {
+            sLogger.debug("New presence notification received");
+        }
+        String content = notify.getContent();
+        if (TextUtils.isEmpty(content)) {
+            throw new SipPayloadException(
+                    "Presence notification content should not be null or empty!");
+        }
+        try {
+            String boundary = notify.getBoundaryContentType();
+            Multipart multi = new Multipart(content, boundary);
+            if (!multi.isMultipart()) {
+                throw new SipPayloadException("Presence notification content not multipart!");
+            }
+            String rlmiPart = multi.getPart("application/rlmi+xml");
+            if (rlmiPart != null) {
+                InputSource rlmiInput = new InputSource(new ByteArrayInputStream(
+                        rlmiPart.getBytes(UTF8)));
+                RlmiParser rlmiParser = new RlmiParser(rlmiInput);
+                RlmiDocument rlmiInfo = rlmiParser.getResourceInfo();
+                Vector<ResourceInstance> list = rlmiInfo.getResourceList();
+                for (ResourceInstance res : list) {
+                    String uri = res.getUri();
+                    PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(uri);
+                    if (number == null) {
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("Invalid uri '" + uri + "'");
+                        }
+                        continue;
+                    }
+                    ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
+                    String state = res.getState();
+                    String reason = res.getReason();
 
-        if (logger.isActivated()) {
-            logger.debug("New presence notification received");
+                    if ((state != null) && (reason != null)) {
+                        if (state.equalsIgnoreCase("terminated")
+                                && reason.equalsIgnoreCase("rejected")) {
+                            /*
+                             * It's a "terminated" event with status "rejected" the contact should
+                             * be removed from the "rcs" list
+                             */
+                            getImsModule().getPresenceService().getXdmManager()
+                                    .removeContactFromGrantedList(contact);
+                        }
+                        getImsModule().getCore().getListener()
+                                .handlePresenceSharingNotification(contact, state, reason);
+                    }
+                }
+            }
+            String pidfPart = multi.getPart("application/pidf+xml");
+            InputSource pidfInput = new InputSource(new ByteArrayInputStream(
+                    pidfPart.getBytes(UTF8)));
+            PidfParser pidfParser = new PidfParser(pidfInput);
+            PidfDocument presenceInfo = pidfParser.getPresence();
+            String entity = presenceInfo.getEntity();
+            PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(entity);
+            if (number == null) {
+                throw new SipPayloadException("Invalid entity :".concat(entity));
+            }
+            ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
+            getImsModule().getCore().getListener()
+                    .handlePresenceInfoNotification(contact, presenceInfo);
+        } catch (ParserConfigurationException e) {
+            throw new SipPayloadException("Can't parse presence notification!", e);
+
+        } catch (SAXException e) {
+            throw new SipPayloadException("Can't parse presence notification!", e);
+
+        } catch (IOException e) {
+            throw new SipNetworkException("Can't parse presence notification!", e);
         }
 
-        // Parse XML part
-        String content = notify.getContent();
-        if (content != null) {
-            try {
-                String boundary = notify.getBoundaryContentType();
-                Multipart multi = new Multipart(content, boundary);
-                if (multi.isMultipart()) {
-                    // RLMI
-                    String rlmiPart = multi.getPart("application/rlmi+xml");
-                    if (rlmiPart != null) {
-                        try {
-                            // Parse RLMI part
-                            InputSource rlmiInput = new InputSource(new ByteArrayInputStream(
-                                    rlmiPart.getBytes(UTF8)));
-                            RlmiParser rlmiParser = new RlmiParser(rlmiInput);
-                            RlmiDocument rlmiInfo = rlmiParser.getResourceInfo();
-                            Vector<ResourceInstance> list = rlmiInfo.getResourceList();
-                            for (ResourceInstance res : list) {
-                                String uri = res.getUri();
-                                PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(uri);
-                                if (number == null) {
-                                    if (logger.isActivated()) {
-                                        logger.warn("Invalid uri '" + uri + "'");
-                                    }
-                                    continue;
-                                }
-                                ContactId contact = ContactUtil
-                                        .createContactIdFromValidatedData(number);
-                                String state = res.getState();
-                                String reason = res.getReason();
-
-                                if ((state != null) && (reason != null)) {
-                                    if (state.equalsIgnoreCase("terminated")
-                                            && reason.equalsIgnoreCase("rejected")) {
-                                        // It's a "terminated" event with status "rejected" the
-                                        // contact
-                                        // should be removed from the "rcs" list
-                                        getImsModule().getPresenceService().getXdmManager()
-                                                .removeContactFromGrantedList(contact);
-                                    }
-
-                                    // Notify listener
-                                    getImsModule()
-                                            .getCore()
-                                            .getListener()
-                                            .handlePresenceSharingNotification(contact, state,
-                                                    reason);
-                                }
-                            }
-                        } catch (Exception e) {
-                            if (logger.isActivated()) {
-                                logger.error("Can't parse RLMI notification", e);
-                            }
-                        }
-                    }
-
-                    // PIDF
-                    String pidfPart = multi.getPart("application/pidf+xml");
-                    try {
-                        // Parse PIDF part
-                        InputSource pidfInput = new InputSource(new ByteArrayInputStream(
-                                pidfPart.getBytes(UTF8)));
-                        PidfParser pidfParser = new PidfParser(pidfInput);
-                        PidfDocument presenceInfo = pidfParser.getPresence();
-                        String entity = presenceInfo.getEntity();
-                        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(entity);
-                        if (number == null) {
-                            if (logger.isActivated()) {
-                                logger.warn("Invalid entity '" + entity + "'");
-                            }
-                        } else {
-                            ContactId contact = ContactUtil
-                                    .createContactIdFromValidatedData(number);
-                            // Notify listener
-                            getImsModule().getCore().getListener()
-                                    .handlePresenceInfoNotification(contact, presenceInfo);
-                        }
-                    } catch (Exception e) {
-                        if (logger.isActivated()) {
-                            logger.error("Can't parse PIDF notification", e);
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                if (logger.isActivated()) {
-                    logger.error("Can't parse presence notification", e);
-                }
+        SubscriptionStateHeader stateHeader = (SubscriptionStateHeader) notify
+                .getHeader(SubscriptionStateHeader.NAME);
+        if ((stateHeader != null) && stateHeader.getState().equalsIgnoreCase("terminated")) {
+            if (sLogger.isActivated()) {
+                sLogger.info("Presence subscription has been terminated by server");
             }
-
-            // Check subscription state
-            SubscriptionStateHeader stateHeader = (SubscriptionStateHeader) notify
-                    .getHeader(SubscriptionStateHeader.NAME);
-            if ((stateHeader != null) && stateHeader.getState().equalsIgnoreCase("terminated")) {
-                if (logger.isActivated()) {
-                    logger.info("Presence subscription has been terminated by server");
-                }
-                terminatedByServer();
-            }
+            terminatedByServer();
         }
     }
 }

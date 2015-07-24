@@ -41,6 +41,7 @@ import com.gsma.services.rcs.contact.ContactId;
 import android.net.Uri;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Vector;
 
 import javax2.sip.header.ContactHeader;
@@ -164,7 +165,7 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
         if (logActivated) {
             mLogger.info("Initiate a HTTP file transfer session as terminating");
         }
-        Vector<ImsSessionListener> listeners = getListeners();
+        List<ImsSessionListener> listeners = getListeners();
         ContactId contact = getRemoteContact();
         long fileExpiration = getFileExpiration();
         try {

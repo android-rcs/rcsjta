@@ -45,6 +45,7 @@ import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration.Image
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.net.Uri;
 import android.text.TextUtils;
 
 import java.util.HashMap;
@@ -644,8 +645,8 @@ public class RcsSettings {
      * 
      * @param uri SIP-URI
      */
-    public void setImConferenceUri(String uri) {
-        writeParameter(RcsSettingsData.IM_CONF_URI, uri);
+    public void setImConferenceUri(Uri uri) {
+        writeParameter(RcsSettingsData.IM_CONF_URI, uri.getPath());
     }
 
     /**
@@ -653,8 +654,8 @@ public class RcsSettings {
      * 
      * @return SIP-URI
      */
-    public String getEndUserConfirmationRequestUri() {
-        return readString(RcsSettingsData.ENDUSER_CONFIRMATION_URI);
+    public Uri getEndUserConfirmationRequestUri() {
+        return Uri.parse(readString(RcsSettingsData.ENDUSER_CONFIRMATION_URI));
     }
 
     /**
@@ -662,8 +663,8 @@ public class RcsSettings {
      * 
      * @param uri SIP-URI
      */
-    public void setEndUserConfirmationRequestUri(String uri) {
-        writeParameter(RcsSettingsData.ENDUSER_CONFIRMATION_URI, uri);
+    public void setEndUserConfirmationRequestUri(Uri uri) {
+        writeParameter(RcsSettingsData.ENDUSER_CONFIRMATION_URI, uri.getPath());
     }
 
     /**

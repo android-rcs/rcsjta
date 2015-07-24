@@ -71,7 +71,6 @@ public class GeolocInfoParser extends DefaultHandler {
      * @throws SAXException
      * @throws ParserConfigurationException
      * @throws IOException
-     * @throws Exception
      */
     public GeolocInfoParser(InputSource inputSource) throws ParserConfigurationException,
             SAXException, IOException {

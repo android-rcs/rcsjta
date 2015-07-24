@@ -309,57 +309,45 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
      * @param msgId Message ID
      * @param data Received data
      * @param mimeType Data mime-type
-     * @throws MsrpException
+     * @throws SipNetworkException
      * @throws SipPayloadException
      */
-    public void msrpDataReceived(String msgId, byte[] data, String mimeType) throws MsrpException,
-            SipPayloadException {
+    public void msrpDataReceived(String msgId, byte[] data, String mimeType)
+            throws SipPayloadException, SipNetworkException {
         final boolean logActivated = mLogger.isActivated();
         if (logActivated) {
-            mLogger.info("Data received (type " + mimeType + ")");
+            mLogger.debug(new StringBuilder("Data received (type ").append(mimeType).append(")")
+                    .toString());
         }
-
-        // Update the activity manager
         getActivityManager().updateActivity();
-
         if ((data == null) || (data.length == 0)) {
-            // By-pass empty data
             if (logActivated) {
                 mLogger.debug("By-pass received empty data");
             }
             return;
         }
-
         if (ChatUtils.isMessageCpimType(mimeType)) {
-            // Receive a CPIM message
-            try {
-                CpimParser cpimParser = new CpimParser(data);
-                CpimMessage cpimMsg = cpimParser.getCpimMessage();
-                if (cpimMsg == null) {
-                    return;
-                }
-                String contentType = cpimMsg.getContentType();
-                if (!ChatUtils.isMessageImdnType(contentType)) {
-                    return;
-                }
-                String from = cpimMsg.getHeader(CpimMessage.HEADER_FROM);
-                PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(from);
-                if (number != null) {
-                    ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
-                    // Receive an IMDN report
-                    receiveDeliveryStatus(contact, cpimMsg.getMessageContent());
-                } else {
-                    // Receive an IMDN report
-                    receiveDeliveryStatus(getRemoteContact(), cpimMsg.getMessageContent());
-                }
-            } catch (SipNetworkException e) {
-                throw new MsrpException(
-                        "Unable to handle delivery status for msgId : ".concat(msgId), e);
+            CpimParser cpimParser = new CpimParser(data);
+            CpimMessage cpimMsg = cpimParser.getCpimMessage();
+            if (cpimMsg == null) {
+                return;
+            }
+            String contentType = cpimMsg.getContentType();
+            if (!ChatUtils.isMessageImdnType(contentType)) {
+                return;
+            }
+            String from = cpimMsg.getHeader(CpimMessage.HEADER_FROM);
+            PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(from);
+            if (number != null) {
+                ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
+                receiveDeliveryStatus(contact, cpimMsg.getMessageContent());
+            } else {
+                receiveDeliveryStatus(getRemoteContact(), cpimMsg.getMessageContent());
             }
         } else {
-            // Not supported content
             if (logActivated) {
-                mLogger.debug("Not supported content " + mimeType + " in chat session");
+                mLogger.debug(new StringBuilder("Not supported content ").append(mimeType)
+                        .append(" in chat session").toString());
             }
         }
     }

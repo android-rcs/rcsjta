@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +15,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.terms;
 
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
+import com.gsma.rcs.utils.logger.Logger;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import java.io.IOException;
 import java.util.HashMap;
 
-import com.gsma.rcs.utils.logger.Logger;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 /**
  * End user notification request parser. If the message contains the text in different languages
@@ -53,60 +60,64 @@ public class EndUserNotificationParser extends DefaultHandler {
     /**
      * Char buffer for parsing text from one element
      */
-    private StringBuffer accumulator;
+    private StringBuffer mAccumulator;
 
     /**
      * Value off attribute 'id' off element 'EndUserNotification'
      */
-    private String id = null;
+    private String mId;
 
     /**
      * Requested language (given in constructor)
      */
-    private String requestedLanguage = null;
+    private String mRequestedLanguage;
 
     /**
      * Language from the first 'Subject' element
      */
-    private String firstLanguage = null;
+    private String mFirstLanguage;
 
     /**
      * Flag if variable 'firstLanguage' is set
      */
-    private boolean isFirstSubjectParsed = false;
+    private boolean isFirstSubjectParsed;
 
     /**
      * Value of language attribute of current xml element during parsing
      */
-    private String currentLangAttribute = null;
+    private String mCurrentLangAttribute;
 
     /**
      * HashMap<('ElementName' + 'Language'), text>
      */
-    private HashMap<String, String> elementMap = new HashMap<String, String>();
+    private final HashMap<String, String> mElementMap;
 
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(EndUserNotificationParser.class
+            .getName());
 
     /**
      * Constructor
      * 
      * @param inputSource Input source
      * @param requestedLanguage requested language
-     * @throws Exception
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws IOException
      */
     public EndUserNotificationParser(InputSource inputSource, String requestedLanguage)
-            throws Exception {
-        this.requestedLanguage = requestedLanguage;
+            throws ParserConfigurationException, SAXException, IOException {
+        mRequestedLanguage = requestedLanguage;
+        mElementMap = new HashMap<String, String>();
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser parser = factory.newSAXParser();
         parser.parse(inputSource, this);
     }
 
     public String getId() {
-        return id;
+        return mId;
     }
 
     public String getSubject() {
@@ -122,37 +133,37 @@ public class EndUserNotificationParser extends DefaultHandler {
     }
 
     public void startDocument() {
-        if (logger.isActivated()) {
-            logger.debug("Start document 'EndUserNotification'.");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Start document 'EndUserNotification'.");
         }
-        accumulator = new StringBuffer();
+        mAccumulator = new StringBuffer();
     }
 
     public void characters(char buffer[], int start, int length) {
-        accumulator.append(buffer, start, length);
+        mAccumulator.append(buffer, start, length);
     }
 
     public void startElement(String namespaceURL, String localName, String qname, Attributes attr) {
-        accumulator.setLength(0);
+        mAccumulator.setLength(0);
 
         if (qname.equals("EndUserNotification")) {
-            id = attr.getValue("id").trim();
+            mId = attr.getValue("id").trim();
         } else {
-            currentLangAttribute = attr.getValue("xml:lang");
-            if (currentLangAttribute == null) {
+            mCurrentLangAttribute = attr.getValue("xml:lang");
+            if (mCurrentLangAttribute == null) {
                 // for xml failure tolerance
-                currentLangAttribute = attr.getValue("lang");
+                mCurrentLangAttribute = attr.getValue("lang");
             }
 
-            if (currentLangAttribute == null) {
+            if (mCurrentLangAttribute == null) {
                 // to avoid null pointer exception
-                currentLangAttribute = "";
+                mCurrentLangAttribute = "";
             }
             // put to lower case for xml failure tolerance
-            currentLangAttribute = currentLangAttribute.trim().toLowerCase();
+            mCurrentLangAttribute = mCurrentLangAttribute.trim().toLowerCase();
             if (!isFirstSubjectParsed) {
                 isFirstSubjectParsed = true;
-                firstLanguage = currentLangAttribute;
+                mFirstLanguage = mCurrentLangAttribute;
             }
         }
 
@@ -160,13 +171,13 @@ public class EndUserNotificationParser extends DefaultHandler {
 
     public void endElement(String namespaceURL, String localName, String qname) {
         if (qname.equals("EndUserNotification")) {
-            if (logger.isActivated()) {
-                logger.debug("EndUserNotification document is complete");
+            if (sLogger.isActivated()) {
+                sLogger.debug("EndUserNotification document is complete");
             }
-        } else if (currentLangAttribute.equals(requestedLanguage)
-                || currentLangAttribute.equals(DEFAULT_LANGUAGE)
-                || currentLangAttribute.equals(firstLanguage) || currentLangAttribute.equals("")) {
-            elementMap.put(qname + currentLangAttribute, accumulator.toString().trim());
+        } else if (mCurrentLangAttribute.equals(mRequestedLanguage)
+                || mCurrentLangAttribute.equals(DEFAULT_LANGUAGE)
+                || mCurrentLangAttribute.equals(mFirstLanguage) || mCurrentLangAttribute.equals("")) {
+            mElementMap.put(qname + mCurrentLangAttribute, mAccumulator.toString().trim());
         }
     }
 
@@ -177,20 +188,23 @@ public class EndUserNotificationParser extends DefaultHandler {
     // or the text from the element with out any 'xml:lang' attribute
     // or null if element not found
     private String giveTextInBestLanguage(String elementName) {
-        if (elementMap.containsKey(elementName + requestedLanguage)) {
-            return elementMap.get(elementName + requestedLanguage);
-        } else if (elementMap.containsKey(elementName + DEFAULT_LANGUAGE)) {
-            return elementMap.get(elementName + DEFAULT_LANGUAGE);
-        } else if (elementMap.containsKey(elementName + firstLanguage)) {
-            return elementMap.get(elementName + firstLanguage);
+        if (mElementMap.containsKey(elementName + mRequestedLanguage)) {
+            return mElementMap.get(elementName + mRequestedLanguage);
+
+        } else if (mElementMap.containsKey(elementName + DEFAULT_LANGUAGE)) {
+            return mElementMap.get(elementName + DEFAULT_LANGUAGE);
+
+        } else if (mElementMap.containsKey(elementName + mFirstLanguage)) {
+            return mElementMap.get(elementName + mFirstLanguage);
+
         } else {
-            return elementMap.get(elementName);
+            return mElementMap.get(elementName);
         }
     }
 
     public void endDocument() {
-        if (logger.isActivated()) {
-            logger.debug("End document: 'EndUserNotification'");
+        if (sLogger.isActivated()) {
+            sLogger.debug("End document: 'EndUserNotification'");
         }
     }
 }

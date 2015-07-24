@@ -104,7 +104,7 @@ public class ImsModule implements SipEventListener {
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(ImsModule.class.getName());
 
     /**
      * Constructor
@@ -120,8 +120,8 @@ public class ImsModule implements SipEventListener {
             ContactManager contactManager, MessagingLog messagingLog) {
         mCore = core;
 
-        if (logger.isActivated()) {
-            logger.info("IMS module initialization");
+        if (sLogger.isActivated()) {
+            sLogger.info("IMS module initialization");
         }
         ServiceExtensionManager.getInstance(rcsSettings).updateSupportedExtensions(ctx);
         mCnxManager = new ImsConnectionManager(this, rcsSettings);
@@ -151,8 +151,8 @@ public class ImsModule implements SipEventListener {
 
         mInitializationFinished = true;
 
-        if (logger.isActivated()) {
-            logger.info("IMS module has been created");
+        if (sLogger.isActivated()) {
+            sLogger.info("IMS module has been created");
         }
     }
 
@@ -205,8 +205,8 @@ public class ImsModule implements SipEventListener {
      * Start the IMS module
      */
     public void start() {
-        if (logger.isActivated()) {
-            logger.info("Start the IMS module");
+        if (sLogger.isActivated()) {
+            sLogger.info("Start the IMS module");
         }
 
         // Start the service dispatcher
@@ -215,8 +215,8 @@ public class ImsModule implements SipEventListener {
         // Start call monitoring
         mCallManager.startCallMonitoring();
 
-        if (logger.isActivated()) {
-            logger.info("IMS module is started");
+        if (sLogger.isActivated()) {
+            sLogger.info("IMS module is started");
         }
     }
 
@@ -227,8 +227,8 @@ public class ImsModule implements SipEventListener {
      * @throws SipPayloadException
      */
     public void stop() throws SipPayloadException, SipNetworkException {
-        if (logger.isActivated()) {
-            logger.info("Stop the IMS module");
+        if (sLogger.isActivated()) {
+            sLogger.info("Stop the IMS module");
         }
 
         // Stop call monitoring
@@ -240,25 +240,26 @@ public class ImsModule implements SipEventListener {
         // Terminate the service dispatcher
         mServiceDispatcher.terminate();
 
-        if (logger.isActivated()) {
-            logger.info("IMS module has been stopped");
+        if (sLogger.isActivated()) {
+            sLogger.info("IMS module has been stopped");
         }
     }
 
     /**
      * Start IMS services
+     * 
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void startImsServices() {
-        // Start each services
+    public void startImsServices() throws SipPayloadException, SipNetworkException {
         for (ImsService imsService : mServices.values()) {
             if (imsService.isActivated()) {
-                if (logger.isActivated()) {
-                    logger.info("Start IMS service: ".concat(imsService.getClass().getName()));
+                if (sLogger.isActivated()) {
+                    sLogger.info("Start IMS service: ".concat(imsService.getClass().getName()));
                 }
                 imsService.start();
             }
         }
-        // Send call manager event
         getCallManager().connectionEvent(true);
     }
 
@@ -273,11 +274,20 @@ public class ImsModule implements SipEventListener {
 
         // Stop each services
         for (ImsService imsService : mServices.values()) {
-            if (imsService.isActivated()) {
-                if (logger.isActivated()) {
-                    logger.info("Stop IMS service: ".concat(imsService.getClass().getName()));
+            try {
+                if (imsService.isActivated()) {
+                    if (sLogger.isActivated()) {
+                        sLogger.info("Stop IMS service: ".concat(imsService.getClass().getName()));
+                    }
+                    imsService.stop();
                 }
-                imsService.stop();
+            } catch (SipPayloadException e) {
+                sLogger.error(
+                        "Unable to stop IMS service: ".concat(imsService.getClass().getName()), e);
+            } catch (SipNetworkException e) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(e.getMessage());
+                }
             }
         }
         // Send call manager event
@@ -290,8 +300,8 @@ public class ImsModule implements SipEventListener {
     public void checkImsServices() {
         for (ImsService imsService : mServices.values()) {
             if (imsService.isActivated()) {
-                if (logger.isActivated()) {
-                    logger.info("Check IMS service: ".concat(imsService.getClass().getName()));
+                if (sLogger.isActivated()) {
+                    sLogger.info("Check IMS service: ".concat(imsService.getClass().getName()));
                 }
                 imsService.check();
             }
@@ -414,8 +424,8 @@ public class ImsModule implements SipEventListener {
      * @param reasonCode The reason code
      */
     public void terminateAllSessions(TerminationReason reasonCode) {
-        if (logger.isActivated()) {
-            logger.debug("Terminate all sessions");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Terminate all sessions");
         }
         for (ImsService service : getImsServices()) {
             service.terminateAllSessions(reasonCode);

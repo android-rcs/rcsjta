@@ -24,14 +24,18 @@ package com.gsma.rcs.core.ims.service.presence.xdm;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
+import com.gsma.rcs.utils.logger.Logger;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import com.gsma.rcs.utils.logger.Logger;
+import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 /**
  * XCAP photo-icon response parser
@@ -56,9 +60,12 @@ public class XcapPhotoIconResponseParser extends DefaultHandler {
      * Constructor
      * 
      * @param inputSource Input source
-     * @throws Exception
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws IOException
      */
-    public XcapPhotoIconResponseParser(InputSource inputSource) throws Exception {
+    public XcapPhotoIconResponseParser(InputSource inputSource)
+            throws ParserConfigurationException, SAXException, IOException {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser parser = factory.newSAXParser();
         parser.parse(inputSource, this);

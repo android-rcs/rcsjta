@@ -22,6 +22,8 @@
 
 package com.gsma.rcs.addressbook;
 
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.contact.ContactManagerException;
@@ -262,15 +264,19 @@ public class AddressBookManager {
                                     }
                                 }
                             } catch (ContactManagerException e) {
-                                // TODO CR037 exception handling
                                 sLogger.error("Failed to check address book!", e);
+                            } catch (SipPayloadException e) {
+                                sLogger.error("Failed to check address book!", e);
+                            } catch (SipNetworkException e) {
+                                if (sLogger.isActivated()) {
+                                    sLogger.debug(e.getMessage());
+                                }
                             } catch (RuntimeException e) {
                                 /*
                                  * Intentionally catch runtime exceptions as else it will abruptly
                                  * end the thread and eventually bring the whole system down, which
                                  * is not intended.
                                  */
-                                // TODO CR037 exception handling
                                 sLogger.error("Failed to check address book!", e);
                             }
                         }

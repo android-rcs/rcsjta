@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +15,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.capability;
 
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
@@ -95,9 +101,11 @@ public class AnonymousFetchManager implements DiscoveryManager {
      * Receive a notification
      * 
      * @param notify Received notify
-     * @throws IOException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void receiveNotification(SipRequest notify) throws IOException {
+    public void receiveNotification(SipRequest notify) throws SipPayloadException,
+            SipNetworkException {
         boolean logActivated = logger.isActivated();
         if (logActivated) {
             logger.debug("Anonymous fetch notification received");
@@ -114,10 +122,13 @@ public class AnonymousFetchManager implements DiscoveryManager {
             try {
                 pidfParser = new PidfParser(pidfInput);
             } catch (ParserConfigurationException e) {
-                throw new IOException("Can't parse XML notification! CallId=".concat(notify
+                throw new SipPayloadException("Can't parse XML notification! CallId=".concat(notify
                         .getCallId()), e);
             } catch (SAXException e) {
-                throw new IOException("Can't parse XML notification! CallId=".concat(notify
+                throw new SipPayloadException("Can't parse XML notification! CallId=".concat(notify
+                        .getCallId()), e);
+            } catch (IOException e) {
+                throw new SipNetworkException("Can't parse XML notification! CallId=".concat(notify
                         .getCallId()), e);
             }
             PidfDocument presence = pidfParser.getPresence();

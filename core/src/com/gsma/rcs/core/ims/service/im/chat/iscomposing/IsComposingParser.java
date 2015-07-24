@@ -30,6 +30,9 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -62,9 +65,12 @@ public class IsComposingParser extends DefaultHandler {
      * Constructor
      * 
      * @param inputSource Input source
-     * @throws Exception
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws IOException
      */
-    public IsComposingParser(InputSource inputSource) throws Exception {
+    public IsComposingParser(InputSource inputSource) throws ParserConfigurationException,
+            SAXException, IOException {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser parser = factory.newSAXParser();
         parser.parse(inputSource, this);

@@ -28,6 +28,7 @@ import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
@@ -66,7 +67,8 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 
     protected HttpUploadManager mUploadManager;
 
-    private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(OriginatingHttpFileSharingSession.class
+            .getName());
 
     /**
      * The timestamp to be sent in payload when the file sharing was initiated for outgoing file
@@ -101,8 +103,8 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                 contactManager);
         mCore = core;
         mTimestampSent = timestampSent;
-        if (mLogger.isActivated()) {
-            mLogger.debug("OriginatingHttpFileSharingSession contact=".concat(contact.toString()));
+        if (sLogger.isActivated()) {
+            sLogger.debug("OriginatingHttpFileSharingSession contact=".concat(contact.toString()));
         }
 
         mUploadManager = new HttpUploadManager(getContent(), fileIcon, this, tId, rcsSettings);
@@ -113,8 +115,8 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
      */
     public void run() {
         try {
-            if (mLogger.isActivated()) {
-                mLogger.info("Initiate a new HTTP file transfer session as originating");
+            if (sLogger.isActivated()) {
+                sLogger.info("Initiate a new HTTP file transfer session as originating");
             }
             // Upload the file to the HTTP server
             byte[] result = mUploadManager.uploadFile();
@@ -122,17 +124,28 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
         } catch (IOException e) {
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
         } catch (URISyntaxException e) {
-            mLogger.error(
+            sLogger.error(
                     new StringBuilder("Failed to initiate file transfer session for sessionId : ")
                             .append(getSessionID()).append(" with fileTransferId : ")
                             .append(getFileTransferId()).toString(), e);
+            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (SipPayloadException e) {
+            sLogger.error(
+                    new StringBuilder("Failed to initiate file transfer session for sessionId : ")
+                            .append(getSessionID()).append(" with fileTransferId : ")
+                            .append(getFileTransferId()).toString(), e);
+            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (SipNetworkException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
-            mLogger.error(
+            sLogger.error(
                     new StringBuilder("Failed to initiate file transfer session for sessionId : ")
                             .append(getSessionID()).append(" with fileTransferId : ")
                             .append(getFileTransferId()).toString(), e);
@@ -140,97 +153,103 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
         }
     }
 
-    protected void sendResultToContact(byte[] result) throws MsrpException {
-        // Check if upload has been cancelled
-        if (mUploadManager.isCancelled()) {
-            return;
-        }
-        boolean logActivated = mLogger.isActivated();
-        FileTransferHttpInfoDocument infoDocument;
-        if (result == null
-                || (infoDocument = FileTransferUtils.parseFileTransferHttpDocument(result,
-                        mRcsSettings)) == null) {
-            // Don't call handleError in case of Pause or Cancel
-            if (mUploadManager.isCancelled() || mUploadManager.isPaused()) {
+    protected void sendResultToContact(byte[] result) throws SipPayloadException,
+            SipNetworkException {
+        try {
+            // Check if upload has been cancelled
+            if (mUploadManager.isCancelled()) {
                 return;
             }
-
-            if (mLogger.isActivated()) {
-                mLogger.debug("Upload has failed");
-            }
-            // Upload error
-            handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED));
-            return;
-
-        }
-        String fileInfo = new String(result, UTF8);
-        if (logActivated) {
-            mLogger.debug("Upload done with success: ".concat(fileInfo));
-        }
-
-        setFileExpiration(infoDocument.getExpiration());
-        FileTransferHttpThumbnail thumbnail = infoDocument.getFileThumbnail();
-        if (thumbnail != null) {
-            setIconExpiration(thumbnail.getExpiration());
-        } else {
-            setIconExpiration(FileTransferData.UNKNOWN_EXPIRATION);
-        }
-
-        OneToOneChatSession chatSession = mCore.getImService().getOneToOneChatSession(
-                getRemoteContact());
-        // Note: FileTransferId is always generated to equal the associated msgId of a
-        // FileTransfer invitation message.
-        String msgId = getFileTransferId();
-        if (chatSession != null && chatSession.isMediaEstablished()) {
-            if (logActivated) {
-                mLogger.debug("Send file transfer info via an existing chat session");
-            }
-            setChatSessionID(chatSession.getSessionID());
-            setContributionID(chatSession.getContributionID());
-
-            String networkContent;
-
-            if (mImdnManager.isRequestOneToOneDeliveryDisplayedReportsEnabled()) {
-                networkContent = ChatUtils.buildCpimMessageWithImdn(ChatUtils.ANONYMOUS_URI,
-                        ChatUtils.ANONYMOUS_URI, msgId, fileInfo,
-                        FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);
-            } else if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
-                networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(
-                        ChatUtils.ANONYMOUS_URI, ChatUtils.ANONYMOUS_URI, msgId, fileInfo,
-                        FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);
-            } else {
-                networkContent = ChatUtils.buildCpimMessage(ChatUtils.ANONYMOUS_URI,
-                        ChatUtils.ANONYMOUS_URI, fileInfo, FileTransferHttpInfoDocument.MIME_TYPE,
-                        mTimestampSent);
-            }
-            chatSession.sendDataChunks(IdGenerator.generateMessageID(), networkContent,
-                    CpimMessage.MIME_TYPE, MsrpSession.TypeMsrpChunk.HttpFileSharing);
-        } else {
-            if (logActivated) {
-                mLogger.debug("Send file transfer info via a new chat session.");
-            }
-            long timestamp = getTimestamp();
-            ChatMessage firstMsg = ChatUtils.createFileTransferMessage(getRemoteContact(),
-                    fileInfo, msgId, timestamp, mTimestampSent);
-            InstantMessagingService imService = mCore.getImService();
-            if (!imService.isChatSessionAvailable()) {
-                if (logActivated) {
-                    mLogger.debug("Couldn't initiate One to one session as max chat sessions reached.");
+            boolean logActivated = sLogger.isActivated();
+            FileTransferHttpInfoDocument infoDocument;
+            if (result == null
+                    || (infoDocument = FileTransferUtils.parseFileTransferHttpDocument(result,
+                            mRcsSettings)) == null) {
+                // Don't call handleError in case of Pause or Cancel
+                if (mUploadManager.isCancelled() || mUploadManager.isPaused()) {
+                    return;
                 }
-                mMessagingLog.setFileTransferDownloadInfo(getFileTransferId(), infoDocument);
-                removeSession();
+
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Upload has failed");
+                }
+                // Upload error
+                handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED));
                 return;
+
             }
-            chatSession = imService.initiateOneToOneChatSession(getRemoteContact(), firstMsg);
-            setChatSessionID(chatSession.getSessionID());
-            setContributionID(chatSession.getContributionID());
+            String fileInfo = new String(result, UTF8);
+            if (logActivated) {
+                sLogger.debug("Upload done with success: ".concat(fileInfo));
+            }
 
-            chatSession.startSession();
-            mCore.getListener().handleOneOneChatSessionInitiation(chatSession);
+            setFileExpiration(infoDocument.getExpiration());
+            FileTransferHttpThumbnail thumbnail = infoDocument.getFileThumbnail();
+            if (thumbnail != null) {
+                setIconExpiration(thumbnail.getExpiration());
+            } else {
+                setIconExpiration(FileTransferData.UNKNOWN_EXPIRATION);
+            }
+
+            OneToOneChatSession chatSession = mCore.getImService().getOneToOneChatSession(
+                    getRemoteContact());
+            // Note: FileTransferId is always generated to equal the associated msgId of a
+            // FileTransfer invitation message.
+            String msgId = getFileTransferId();
+            if (chatSession != null && chatSession.isMediaEstablished()) {
+                if (logActivated) {
+                    sLogger.debug("Send file transfer info via an existing chat session");
+                }
+                setChatSessionID(chatSession.getSessionID());
+                setContributionID(chatSession.getContributionID());
+
+                String networkContent;
+
+                if (mImdnManager.isRequestOneToOneDeliveryDisplayedReportsEnabled()) {
+                    networkContent = ChatUtils.buildCpimMessageWithImdn(ChatUtils.ANONYMOUS_URI,
+                            ChatUtils.ANONYMOUS_URI, msgId, fileInfo,
+                            FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);
+                } else if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
+                    networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(
+                            ChatUtils.ANONYMOUS_URI, ChatUtils.ANONYMOUS_URI, msgId, fileInfo,
+                            FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);
+                } else {
+                    networkContent = ChatUtils.buildCpimMessage(ChatUtils.ANONYMOUS_URI,
+                            ChatUtils.ANONYMOUS_URI, fileInfo,
+                            FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);
+                }
+                chatSession.sendDataChunks(IdGenerator.generateMessageID(), networkContent,
+                        CpimMessage.MIME_TYPE, MsrpSession.TypeMsrpChunk.HttpFileSharing);
+            } else {
+                if (logActivated) {
+                    sLogger.debug("Send file transfer info via a new chat session.");
+                }
+                long timestamp = getTimestamp();
+                ChatMessage firstMsg = ChatUtils.createFileTransferMessage(getRemoteContact(),
+                        fileInfo, msgId, timestamp, mTimestampSent);
+                InstantMessagingService imService = mCore.getImService();
+                if (!imService.isChatSessionAvailable()) {
+                    if (logActivated) {
+                        sLogger.debug("Couldn't initiate One to one session as max chat sessions reached.");
+                    }
+                    mMessagingLog.setFileTransferDownloadInfo(getFileTransferId(), infoDocument);
+                    removeSession();
+                    return;
+                }
+                chatSession = imService.initiateOneToOneChatSession(getRemoteContact(), firstMsg);
+                setChatSessionID(chatSession.getSessionID());
+                setContributionID(chatSession.getContributionID());
+
+                chatSession.startSession();
+                mCore.getListener().handleOneOneChatSessionInitiation(chatSession);
+            }
+
+            // File transfered
+            handleFileTransfered();
+        } catch (MsrpException e) {
+            throw new SipNetworkException(
+                    "Failed to send result chunks for transferId : ".concat(getFileTransferId()), e);
         }
-
-        // File transfered
-        handleFileTransfered();
     }
 
     @Override
@@ -283,23 +302,28 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                 } catch (IOException e) {
                     handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
                 } catch (URISyntaxException e) {
-                    mLogger.error(
+                    sLogger.error(
                             new StringBuilder("Failed to resume upload for sessionId : ")
                                     .append(getSessionID()).append(" with fileTransferId : ")
                                     .append(getFileTransferId()).toString(), e);
                     handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
                 } catch (SipPayloadException e) {
-                    mLogger.error(
+                    sLogger.error(
                             new StringBuilder("Failed to resume upload for sessionId : ")
                                     .append(getSessionID()).append(" with fileTransferId : ")
                                     .append(getFileTransferId()).toString(), e);
+                    handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
+                } catch (SipNetworkException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(e.getMessage());
+                    }
                     handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
                 } catch (RuntimeException e) {
                     /*
                      * Intentionally catch runtime exceptions as else it will abruptly end the
                      * thread and eventually bring the whole system down, which is not intended.
                      */
-                    mLogger.error(
+                    sLogger.error(
                             new StringBuilder("Failed to resume upload for sessionId : ")
                                     .append(getSessionID()).append(" with fileTransferId : ")
                                     .append(getFileTransferId()).toString(), e);
@@ -348,8 +372,8 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 
     @Override
     public void terminateSession(TerminationReason reason) {
-        if (mLogger.isActivated()) {
-            mLogger.debug("terminateSession reason=".concat(reason.toString()));
+        if (sLogger.isActivated()) {
+            sLogger.debug("terminateSession reason=".concat(reason.toString()));
         }
         closeHttpSession(reason);
         /*
@@ -370,8 +394,8 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                  * only if TId is present.
                  */
                 if (State.ESTABLISHED == state && mUploadManager.getTId() != null) {
-                    if (mLogger.isActivated()) {
-                        mLogger.debug("Pause the session (session terminated, but can be resumed)");
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Pause the session (session terminated, but can be resumed)");
                     }
                     for (ImsSessionListener listener : getListeners()) {
                         ((FileSharingSessionListener) listener)

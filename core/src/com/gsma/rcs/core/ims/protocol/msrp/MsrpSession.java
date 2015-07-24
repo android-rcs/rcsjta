@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.protocol.msrp;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.CloseableUtils;
@@ -875,110 +876,92 @@ public class MsrpSession {
      * @param flag Continuation flag
      * @param data Received data
      * @param totalSize Total size of the content
-     * @throws IOException
-     * @throws MsrpException
+     * @throws SipNetworkException
      * @throws SipPayloadException
      */
     public void receiveMsrpSend(String txId, Hashtable<String, String> headers, int flag,
-            byte[] data, long totalSize) throws IOException, MsrpException, SipPayloadException {
-        // Consider media is established when we received something
-        isEstablished = true;
-
-        // Receive a SEND request
-        if (logger.isActivated()) {
-            logger.debug("SEND request received (flag=" + flag + ", transaction=" + txId
-                    + ", totalSize=" + totalSize + ")");
-        }
-
-        // Read message-ID
-        String msgId = headers.get(MsrpConstants.HEADER_MESSAGE_ID);
-
-        // Test if a failure report is needed
-        boolean failureReportNeeded = true;
-        String failureHeader = headers.get(MsrpConstants.HEADER_FAILURE_REPORT);
-        if ((failureHeader != null) && failureHeader.equalsIgnoreCase("no")) {
-            failureReportNeeded = false;
-        }
-
-        // Send MSRP response if requested
-        if (failureReportNeeded) {
-            sendMsrpResponse(MsrpConstants.RESPONSE_OK + " " + MsrpConstants.COMMENT_OK, txId,
-                    headers);
-        }
-
-        // Test if it's an empty chunk
-        if (data == null) {
+            byte[] data, long totalSize) throws SipPayloadException, SipNetworkException {
+        try {
+            isEstablished = true;
             if (logger.isActivated()) {
-                logger.debug("Empty chunk");
-            }
-            return;
-        }
-
-        // Save received data chunk if there is some
-        receivedChunks.addChunk(data);
-
-        // Check the continuation flag
-        if (flag == MsrpConstants.FLAG_LAST_CHUNK) {
-            // Transfer terminated
-            if (logger.isActivated()) {
-                logger.info("Transfer terminated");
+                logger.debug(new StringBuilder("SEND request received (flag=").append(flag)
+                        .append(", transaction=").append(txId).append(", totalSize=")
+                        .append(totalSize).append(")").toString());
             }
 
-            // Read the received content
-            byte[] dataContent = receivedChunks.getReceivedData();
-            receivedChunks.resetCache();
-
-            // Notify event listener
-            String contentTypeHeader = headers.get(MsrpConstants.HEADER_CONTENT_TYPE);
-            msrpEventListener.msrpDataReceived(msgId, dataContent, contentTypeHeader);
-
-            // Test if a success report is needed
-            boolean successReportNeeded = false;
-            String reportHeader = headers.get(MsrpConstants.HEADER_SUCCESS_REPORT);
-            if ((reportHeader != null) && reportHeader.equalsIgnoreCase("yes")) {
-                successReportNeeded = true;
+            String msgId = headers.get(MsrpConstants.HEADER_MESSAGE_ID);
+            boolean failureReportNeeded = true;
+            String failureHeader = headers.get(MsrpConstants.HEADER_FAILURE_REPORT);
+            if ((failureHeader != null) && failureHeader.equalsIgnoreCase("no")) {
+                failureReportNeeded = false;
             }
+            if (failureReportNeeded) {
+                sendMsrpResponse(
+                        new StringBuilder(MsrpConstants.RESPONSE_OK).append(' ')
+                                .append(MsrpConstants.COMMENT_OK).toString(), txId, headers);
+            }
+            if (data == null) {
+                if (logger.isActivated()) {
+                    logger.debug("Empty chunk");
+                }
+                return;
+            }
+            receivedChunks.addChunk(data);
 
-            // Send MSRP report if requested
-            if (successReportNeeded) {
-                try {
-                    sendMsrpReportRequest(txId, headers, dataContent.length, totalSize);
-                } catch (MsrpException e) {
-                    // Report failed
-                    if (logger.isActivated()) {
-                        logger.error("Can't send report", e);
+            if (flag == MsrpConstants.FLAG_LAST_CHUNK) {
+                if (logger.isActivated()) {
+                    logger.info("Transfer terminated");
+                }
+                byte[] dataContent = receivedChunks.getReceivedData();
+                receivedChunks.resetCache();
+
+                String contentTypeHeader = headers.get(MsrpConstants.HEADER_CONTENT_TYPE);
+                msrpEventListener.msrpDataReceived(msgId, dataContent, contentTypeHeader);
+
+                boolean successReportNeeded = false;
+                String reportHeader = headers.get(MsrpConstants.HEADER_SUCCESS_REPORT);
+                if ((reportHeader != null) && reportHeader.equalsIgnoreCase("yes")) {
+                    successReportNeeded = true;
+                }
+
+                if (successReportNeeded) {
+                    try {
+                        sendMsrpReportRequest(txId, headers, dataContent.length, totalSize);
+                    } catch (MsrpException e) {
+                        if (logger.isActivated()) {
+                            logger.error("Can't send report", e);
+                        }
+                        // Changed by Deutsche Telekom
+                        msrpEventListener.msrpTransferError(msgId, e.getMessage(),
+                                TypeMsrpChunk.StatusReport);
                     }
+                }
+            } else if (flag == MsrpConstants.FLAG_ABORT_CHUNK) {
+                if (logger.isActivated()) {
+                    logger.info("Transfer aborted");
+                }
+                msrpEventListener.msrpTransferAborted();
+            } else if (flag == MsrpConstants.FLAG_MORE_CHUNK) {
+                if (logger.isActivated()) {
+                    logger.debug("Transfer in progress...");
+                }
+                byte[] dataContent = receivedChunks.getReceivedData();
+                boolean resetCache = msrpEventListener.msrpTransferProgress(
+                        receivedChunks.getCurrentSize(), totalSize, dataContent);
 
-                    // Notify event listener
-                    // Changed by Deutsche Telekom
-                    msrpEventListener.msrpTransferError(msgId, e.getMessage(),
-                            TypeMsrpChunk.StatusReport);
+                /*
+                 * Data are only consumed chunk by chunk in file transfer & image share. In a chat
+                 * session only the whole message is consumed after receiving the last chunk.
+                 */
+                if (resetCache) {
+                    receivedChunks.resetCache();
                 }
             }
-        } else if (flag == MsrpConstants.FLAG_ABORT_CHUNK) {
-            // Transfer aborted
-            if (logger.isActivated()) {
-                logger.info("Transfer aborted");
-            }
-
-            // Notify event listener
-            msrpEventListener.msrpTransferAborted();
-        } else if (flag == MsrpConstants.FLAG_MORE_CHUNK) {
-            // Transfer in progress
-            if (logger.isActivated()) {
-                logger.debug("Transfer in progress...");
-            }
-            byte[] dataContent = receivedChunks.getReceivedData();
-
-            // Notify event listener
-            boolean resetCache = msrpEventListener.msrpTransferProgress(
-                    receivedChunks.getCurrentSize(), totalSize, dataContent);
-
-            // Data are only consumed chunk by chunk in file transfer & image share.
-            // In a chat session only the whole message is consumed after receiving the last chunk.
-            if (resetCache) {
-                receivedChunks.resetCache();
-            }
+        } catch (IOException e) {
+            throw new SipNetworkException(new StringBuilder(
+                    "Failed to SEND request for received (flag=").append(flag)
+                    .append(", transaction=").append(txId).append(", totalSize=").append(totalSize)
+                    .append(")").toString(), e);
         }
     }
 

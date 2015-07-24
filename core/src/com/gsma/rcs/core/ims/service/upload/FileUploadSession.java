@@ -24,6 +24,8 @@ package com.gsma.rcs.core.ims.service.upload;
 
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
@@ -57,7 +59,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
 
     private final RcsSettings mRcsSettings;
 
-    private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(FileUploadSession.class.getName());
 
     /**
      * FileUploadSession state
@@ -143,8 +145,8 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
      */
     public void run() {
         try {
-            if (mLogger.isActivated()) {
-                mLogger.info("Initiate a new HTTP upload ".concat(mUploadId));
+            if (sLogger.isActivated()) {
+                sLogger.info("Initiate a new HTTP upload ".concat(mUploadId));
             }
             /* Create fileIcon content is requested */
             MmContent fileIconContent = null;
@@ -157,7 +159,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
             byte[] result = mUploadManager.uploadFile();
             storeResult(result);
         } catch (SecurityException e) {
-            mLogger.error(
+            sLogger.error(
                     "File icon creation has failed as the file is not accessible for HTTP uploadId "
                             .concat(mUploadId), e);
             removeSession();
@@ -166,7 +168,17 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
             removeSession();
             mListener.handleUploadError(FileSharingError.MEDIA_UPLOAD_FAILED);
         } catch (URISyntaxException e) {
-            mLogger.error("Failed to initiate session for HTTP uploadId ".concat(mUploadId), e);
+            sLogger.error("Failed to initiate session for HTTP uploadId ".concat(mUploadId), e);
+            removeSession();
+            mListener.handleUploadError(FileSharingError.MEDIA_UPLOAD_FAILED);
+        } catch (SipPayloadException e) {
+            sLogger.error("Failed to initiate session for HTTP uploadId ".concat(mUploadId), e);
+            removeSession();
+            mListener.handleUploadError(FileSharingError.MEDIA_UPLOAD_FAILED);
+        } catch (SipNetworkException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
             removeSession();
             mListener.handleUploadError(FileSharingError.MEDIA_UPLOAD_FAILED);
         } catch (RuntimeException e) {
@@ -174,7 +186,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
-            mLogger.error("Failed to initiate session for HTTP uploadId ".concat(mUploadId), e);
+            sLogger.error("Failed to initiate session for HTTP uploadId ".concat(mUploadId), e);
             removeSession();
             mListener.handleUploadError(FileSharingError.MEDIA_UPLOAD_FAILED);
         }
@@ -184,8 +196,10 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
      * Analyze the result
      * 
      * @param result Byte array result
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void storeResult(byte[] result) {
+    private void storeResult(byte[] result) throws SipPayloadException, SipNetworkException {
         // Check if upload has been cancelled
         if (mUploadManager.isCancelled()) {
             return;
@@ -214,16 +228,16 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
         }
         if (mFileInfoDoc != null) {
             // File uploaded with success
-            if (mLogger.isActivated()) {
-                mLogger.debug("Upload done with success: ".concat(mFileInfoDoc.getUri().toString()));
+            if (sLogger.isActivated()) {
+                sLogger.debug("Upload done with success: ".concat(mFileInfoDoc.getUri().toString()));
             }
 
             removeSession();
             mListener.handleUploadTerminated(mFileInfoDoc);
         } else {
             // Upload error
-            if (mLogger.isActivated()) {
-                mLogger.debug("Upload has failed");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Upload has failed");
             }
             removeSession();
             // Notify listener

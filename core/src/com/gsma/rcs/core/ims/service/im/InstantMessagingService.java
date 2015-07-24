@@ -1354,9 +1354,10 @@ public class InstantMessagingService extends ImsService {
      * @param invite Received invite
      * @param timestamp Local timestamp when got SipRequest
      * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     public void receiveStoredAndForwardPushMessages(SipRequest invite, long timestamp)
-            throws SipPayloadException {
+            throws SipPayloadException, SipNetworkException {
         boolean logActivated = sLogger.isActivated();
         String referredId = ChatUtils.getReferredIdentityAsContactUri(invite);
         ContactId remote = ChatUtils.getReferredIdentityAsContactId(invite);

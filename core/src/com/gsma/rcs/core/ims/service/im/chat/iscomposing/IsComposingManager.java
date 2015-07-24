@@ -22,16 +22,24 @@
 
 package com.gsma.rcs.core.ims.service.im.chat.iscomposing;
 
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSessionListener;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Is Composing manager which manages "is composing" events as per RFC3994. It handles the status
@@ -56,7 +64,7 @@ public class IsComposingManager {
     /**
      * IM session
      */
-    private ChatSession session;
+    private ChatSession mSession;
 
     /**
      * The logger
@@ -69,7 +77,7 @@ public class IsComposingManager {
      * @param session IM session
      */
     public IsComposingManager(ChatSession session) {
-        this.session = session;
+        mSession = session;
     }
 
     /**
@@ -77,18 +85,19 @@ public class IsComposingManager {
      * 
      * @param contact Contact identifier
      * @param event Event
+     * @throws SipPayloadException
+     * @throws IOException
      */
-    public void receiveIsComposingEvent(ContactId contact, byte[] event) {
+    public void receiveIsComposingEvent(ContactId contact, byte[] event)
+            throws SipPayloadException, IOException {
         try {
-            // Parse received event
             InputSource input = new InputSource(new ByteArrayInputStream(event));
             IsComposingParser parser = new IsComposingParser(input);
             IsComposingInfo isComposingInfo = parser.getIsComposingInfo();
+            List<ImsSessionListener> sessionListeners = mSession.getListeners();
             if ((isComposingInfo != null) && isComposingInfo.isStateActive()) {
-                // Send status message to "active"
-                for (int j = 0; j < session.getListeners().size(); j++) {
-                    ((ChatSessionListener) session.getListeners().get(j)).handleIsComposingEvent(
-                            contact, true);
+                for (ImsSessionListener sessionListener : sessionListeners) {
+                    ((ChatSessionListener) sessionListener).handleIsComposingEvent(contact, true);
                 }
 
                 // Start the expiration timer
@@ -98,19 +107,22 @@ public class IsComposingManager {
                 }
                 startExpirationTimer(timeout, contact);
             } else {
-                // Send status message to "idle"
-                for (int j = 0; j < session.getListeners().size(); j++) {
-                    ((ChatSessionListener) session.getListeners().get(j)).handleIsComposingEvent(
-                            contact, false);
+                for (ImsSessionListener sessionListener : sessionListeners) {
+                    ((ChatSessionListener) sessionListener).handleIsComposingEvent(contact, false);
                 }
 
                 // Stop the expiration timer
                 stopExpirationTimer(contact);
             }
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't parse is-composing event", e);
-            }
+        } catch (ParserConfigurationException e) {
+            throw new SipPayloadException(
+                    "Can't parse is-composing event for session ID : ".concat(mSession
+                            .getSessionID()), e);
+
+        } catch (SAXException e) {
+            throw new SipPayloadException(
+                    "Can't parse is-composing event for session ID : ".concat(mSession
+                            .getSessionID()), e);
         }
     }
 
@@ -123,8 +135,8 @@ public class IsComposingManager {
     public void receiveIsComposingEvent(ContactId contact, boolean state) {
         // We just received an instant message, so if composing info was active, it must
         // be changed to idle. If it was already idle, no need to notify listener again
-        for (int j = 0; j < session.getListeners().size(); j++) {
-            ((ChatSessionListener) session.getListeners().get(j)).handleIsComposingEvent(contact,
+        for (int j = 0; j < mSession.getListeners().size(); j++) {
+            ((ChatSessionListener) mSession.getListeners().get(j)).handleIsComposingEvent(contact,
                     state);
         }
 
@@ -189,11 +201,8 @@ public class IsComposingManager {
                 logger.debug("Is-composing timer has expired: " + contact
                         + " is now considered idle");
             }
-
-            // Send status message to "idle"
-            for (int j = 0; j < session.getListeners().size(); j++) {
-                ((ChatSessionListener) session.getListeners().get(j)).handleIsComposingEvent(
-                        contact, false);
+            for (ImsSessionListener sessionListener : mSession.getListeners()) {
+                ((ChatSessionListener) sessionListener).handleIsComposingEvent(contact, false);
             }
         }
     }

@@ -26,11 +26,12 @@ import com.gsma.rcs.addressbook.AddressBookEventListener;
 import com.gsma.rcs.addressbook.AddressBookManager;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.capability.Capabilities.CapabilitiesBuilder;
 import com.gsma.rcs.core.ims.service.capability.SyncContactTask.ISyncContactTaskListener;
-
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -201,9 +202,11 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      * Receive a capability request (options procedure)
      * 
      * @param options Received options message
-     * @throws SipException thrown if sending the capability response fails
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void receiveCapabilityRequest(SipRequest options) throws SipException {
+    public void receiveCapabilityRequest(SipRequest options) throws SipPayloadException,
+            SipNetworkException {
         mOptionsManager.receiveCapabilityRequest(options);
     }
 
@@ -211,9 +214,11 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      * Receive a notification (anonymous fetch procedure)
      * 
      * @param notify Received notify
-     * @throws IOException thrown if notification parsing fails
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void receiveNotification(SipRequest notify) throws IOException {
+    public void receiveNotification(SipRequest notify) throws SipPayloadException,
+            SipNetworkException {
         mAnonymousFetchManager.receiveNotification(notify);
     }
 

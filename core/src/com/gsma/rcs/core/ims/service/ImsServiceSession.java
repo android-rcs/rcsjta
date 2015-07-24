@@ -39,7 +39,9 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Vector;
 
 import javax2.sip.header.ContactHeader;
@@ -116,7 +118,7 @@ public abstract class ImsServiceSession extends Thread {
     /**
      * Session listeners
      */
-    private Vector<ImsSessionListener> mListeners = new Vector<ImsSessionListener>();
+    private List<ImsSessionListener> mListeners = new ArrayList<ImsSessionListener>();
 
     /**
      * Session timer manager
@@ -274,7 +276,7 @@ public abstract class ImsServiceSession extends Thread {
      * Remove all listeners
      */
     public void removeListeners() {
-        mListeners.removeAllElements();
+        mListeners.clear();
     }
 
     /**
@@ -282,7 +284,7 @@ public abstract class ImsServiceSession extends Thread {
      * 
      * @return Listeners
      */
-    public Vector<ImsSessionListener> getListeners() {
+    public List<ImsSessionListener> getListeners() {
         return mListeners;
     }
 

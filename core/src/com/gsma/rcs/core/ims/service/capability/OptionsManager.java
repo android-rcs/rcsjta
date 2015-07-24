@@ -26,6 +26,8 @@ import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
@@ -183,9 +185,11 @@ public class OptionsManager implements DiscoveryManager {
      * Receive a capability request (options procedure)
      * 
      * @param options Received options message
-     * @throws SipException thrown if capability request fails
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void receiveCapabilityRequest(SipRequest options) throws SipException {
+    public void receiveCapabilityRequest(SipRequest options) throws SipPayloadException,
+            SipNetworkException {
         String sipId = SipUtils.getAssertedIdentity(options);
         PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(sipId);
         if (number == null) {

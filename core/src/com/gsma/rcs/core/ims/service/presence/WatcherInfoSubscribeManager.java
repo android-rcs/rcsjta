@@ -26,6 +26,8 @@ import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.presence.watcherinfo.Watcher;
 import com.gsma.rcs.core.ims.service.presence.watcherinfo.WatcherInfoDocument;
@@ -37,8 +39,12 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import javax2.sip.header.SubscriptionStateHeader;
 
@@ -78,10 +84,11 @@ public class WatcherInfoSubscribeManager extends SubscribeManager {
      * @param dialog SIP dialog path
      * @param expirePeriod Expiration period in milliseconds
      * @return SIP request
-     * @throws SipException
+     * @throws SipPayloadException
      */
     @Override
-    public SipRequest createSubscribe(SipDialogPath dialog, long expirePeriod) throws SipException {
+    public SipRequest createSubscribe(SipDialogPath dialog, long expirePeriod)
+            throws SipPayloadException {
         // Create SUBSCRIBE message
         SipRequest subscribe = SipMessageFactory.createSubscribe(dialog, expirePeriod);
 
@@ -98,8 +105,11 @@ public class WatcherInfoSubscribeManager extends SubscribeManager {
      * Receive a notification
      * 
      * @param notify Received notify
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void receiveNotification(SipRequest notify) {
+    public void receiveNotification(SipRequest notify) throws SipPayloadException,
+            SipNetworkException {
         // Check notification
         if (!isNotifyForThisSubscriber(notify)) {
             return;
@@ -143,10 +153,14 @@ public class WatcherInfoSubscribeManager extends SubscribeManager {
                         }
                     }
                 }
-            } catch (Exception e) {
-                if (logger.isActivated()) {
-                    logger.error("Can't parse watcher-info notification", e);
-                }
+            } catch (ParserConfigurationException e) {
+                throw new SipPayloadException("Can't parse watcher-info notification!", e);
+
+            } catch (SAXException e) {
+                throw new SipPayloadException("Can't parse watcher-info notification!", e);
+
+            } catch (IOException e) {
+                throw new SipNetworkException("Can't parse watcher-info notification!", e);
             }
         }
 

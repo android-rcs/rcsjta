@@ -23,9 +23,13 @@
 package com.gsma.rcs.core.ims.service.terms;
 
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.sip.SipManager;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
+import com.gsma.rcs.core.ims.protocol.sip.SipInterface;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -35,14 +39,22 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.IdGenerator;
-import com.gsma.rcs.utils.StringUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
+import android.net.Uri;
+import android.text.TextUtils;
+
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Locale;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax2.sip.InvalidArgumentException;
+import javax2.sip.message.Response;
 
 /**
  * Terms & conditions service via SIP
@@ -82,7 +94,7 @@ public class TermsConditionsService extends ImsService {
 
     private final RcsSettings mRcsSettings;
 
-    private Logger mLogger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(TermsConditionsService.class.getName());
 
     /**
      * Constructor
@@ -100,7 +112,6 @@ public class TermsConditionsService extends ImsService {
      */
     public synchronized void start() {
         if (isServiceStarted()) {
-            // Already started
             return;
         }
         setServiceStarted(true);
@@ -111,7 +122,6 @@ public class TermsConditionsService extends ImsService {
      */
     public synchronized void stop() {
         if (!isServiceStarted()) {
-            // Already stopped
             return;
         }
         setServiceStarted(false);
@@ -127,49 +137,40 @@ public class TermsConditionsService extends ImsService {
      * Receive a SIP message
      * 
      * @param message Received message
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void receiveMessage(SipRequest message) {
-        boolean logActivated = mLogger.isActivated();
+    public void receiveMessage(SipRequest message) throws SipPayloadException, SipNetworkException {
+        boolean logActivated = sLogger.isActivated();
         if (logActivated) {
-            mLogger.debug("Receive terms message");
+            sLogger.debug("Receive terms message");
         }
-
-        // Send a 200 OK response
         try {
             if (logActivated) {
-                mLogger.info("Send 200 OK");
+                sLogger.info("Send 200 OK");
             }
             SipResponse response = SipMessageFactory.createResponse(message,
-                    IdGenerator.getIdentifier(), 200);
-            getImsModule().getSipManager().sendSipResponse(response);
-        } catch (Exception e) {
-            if (logActivated) {
-                mLogger.error("Can't send 200 OK response", e);
-            }
-            return;
-        }
+                    IdGenerator.getIdentifier(), Response.OK);
+            final ImsModule imsModule = getImsModule();
+            imsModule.getSipManager().sendSipResponse(response);
 
-        // Parse received message
-        try {
             String lang = Locale.getDefault().getLanguage();
 
             String remoteId = getRemoteIdentity(message);
             PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(remoteId);
             if (number == null) {
                 if (logActivated) {
-                    mLogger.error("Can't parse contact" + remoteId);
+                    sLogger.error("Can't parse contact : ".concat(remoteId));
                 }
                 return;
             }
             ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
-            if (REQUEST_MIME_TYPE.equals(message.getContentType())) {
-                // Parse terms request
+            final String contentType = message.getContentType();
+            if (REQUEST_MIME_TYPE.equals(contentType)) {
                 InputSource input = new InputSource(new ByteArrayInputStream(
                         message.getContentBytes()));
                 TermsRequestParser parser = new TermsRequestParser(input, lang, mRcsSettings);
-
-                // Notify listener
-                getImsModule()
+                imsModule
                         .getCore()
                         .getListener()
                         .handleUserConfirmationRequest(contact, parser.getId(), parser.getType(),
@@ -177,193 +178,134 @@ public class TermsConditionsService extends ImsService {
                                 parser.getButtonAccept(), parser.getButtonReject(),
                                 parser.getTimeout());
 
-            } else if (ACK_MIME_TYPE.equals(message.getContentType())) {
-                // Parse terms ack
+            } else if (ACK_MIME_TYPE.equals(contentType)) {
                 InputSource input = new InputSource(new ByteArrayInputStream(
                         message.getContentBytes()));
                 TermsAckParser parser = new TermsAckParser(input);
-
-                // Notify listener
-                getImsModule()
+                imsModule
                         .getCore()
                         .getListener()
                         .handleUserConfirmationAck(contact, parser.getId(), parser.getStatus(),
                                 parser.getSubject(), parser.getText());
 
-            } else if (USER_NOTIFICATION_MIME_TYPE.equals(message.getContentType())) {
-                // Parse terms notification
+            } else if (USER_NOTIFICATION_MIME_TYPE.equals(contentType)) {
                 InputSource input = new InputSource(new ByteArrayInputStream(
                         message.getContentBytes()));
                 EndUserNotificationParser parser = new EndUserNotificationParser(input, lang);
-
-                // Notify listener
-                getImsModule()
+                imsModule
                         .getCore()
                         .getListener()
                         .handleUserNotification(contact, parser.getId(), parser.getSubject(),
                                 parser.getText(), parser.getButtonOk());
             } else {
                 if (logActivated) {
-                    mLogger.warn("Unknown terms request " + message.getContentType());
+                    sLogger.warn("Unknown terms request ".concat(contentType));
                 }
             }
-        } catch (Exception e) {
-            if (logActivated) {
-                mLogger.error("Can't parse terms request", e);
-            }
+        } catch (ParserConfigurationException e) {
+            throw new SipPayloadException("Can't parse terms request!", e);
+
+        } catch (SAXException e) {
+            throw new SipPayloadException("Can't parse terms request!", e);
+
+        } catch (IOException e) {
+            throw new SipNetworkException("Can't parse terms request!", e);
         }
     }
 
     /**
      * Accept terms
      * 
-     * @param id Request ID
+     * @param requestId Request ID
      * @param pin Response value
-     * @return Boolean result
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public boolean acceptTerms(String id, String pin) {
-        if (mLogger.isActivated()) {
-            mLogger.debug("Send response for request " + id);
+    public void acceptTerms(String requestId, String pin) throws SipPayloadException,
+            SipNetworkException {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Send response for request ".concat(requestId));
         }
-
-        // Send SIP MESSAGE
-        return sendSipMessage(mRcsSettings.getEndUserConfirmationRequestUri(), id, ACCEPT_RESPONSE,
+        if (TextUtils.isEmpty(requestId)) {
+            throw new SipPayloadException("requestId should never be null or empty!");
+        }
+        sendSipMessage(mRcsSettings.getEndUserConfirmationRequestUri(), requestId, ACCEPT_RESPONSE,
                 pin);
     }
 
     /**
      * Reject terms
      * 
-     * @param id Request ID
+     * @param requestId Request ID
      * @param pin Response value
-     * @return Boolean result
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public boolean rejectTerms(String id, String pin) {
-        if (mLogger.isActivated()) {
-            mLogger.debug("Send response for request " + id);
+    public void rejectTerms(String requestId, String pin) throws SipPayloadException,
+            SipNetworkException {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Send response for request ".concat(requestId));
         }
-
-        // Send SIP MESSAGE
-        return sendSipMessage(mRcsSettings.getEndUserConfirmationRequestUri(), id,
+        if (TextUtils.isEmpty(requestId)) {
+            throw new SipPayloadException("requestId should never be null or empty!");
+        }
+        sendSipMessage(mRcsSettings.getEndUserConfirmationRequestUri(), requestId,
                 DECLINE_RESPONSE, pin);
     }
 
     /**
      * Send SIP MESSAGE
      * 
-     * @param remote Remote server
-     * @param id Request ID
-     * @param value Response value
-     * @param pin Response value
-     * @return Boolean result
+     * @param eucr
+     * @param requestId
+     * @param responseValue
+     * @param pin
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private boolean sendSipMessage(String remote, String id, String value, String pin) {
-        if (StringUtils.isEmpty(remote)) {
-            if (mLogger.isActivated()) {
-                mLogger.error("Remote URI not set");
-            }
-            return false;
+    private void sendSipMessage(Uri eucr, String requestId, String responseValue, String pin)
+            throws SipPayloadException, SipNetworkException {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Send SIP response");
         }
+        StringBuilder response = new StringBuilder(
+                "<?xml version=\"1.0\" standalone=\"yes\"?><EndUserConfirmationResponse id=\"")
+                .append(requestId).append("\" value=\"").append(responseValue).append("\"");
 
-        if (StringUtils.isEmpty(id)) {
-            if (mLogger.isActivated()) {
-                mLogger.error("Request ID not set");
-            }
-            return false;
+        if (pin != null) {
+            response.append(" pin=\"").append(pin).append("\"");
         }
+        response.append("/>");
 
-        boolean result = false;
-        try {
-            if (mLogger.isActivated()) {
-                mLogger.debug("Send SIP response");
-            }
+        final SipManager sipManager = getImsModule().getSipManager();
+        final SipInterface sipStack = sipManager.getSipStack();
+        final String remoteServer = eucr.getPath();
+        SipDialogPath dialogPath = new SipDialogPath(sipStack, sipStack.generateCallId(), 1,
+                remoteServer, ImsModule.IMS_USER_PROFILE.getPublicUri(), remoteServer,
+                sipStack.getServiceRoutePath(), mRcsSettings);
 
-            // Build response
-            String response = "<?xml version=\"1.0\" standalone=\"yes\"?>"
-                    + "<EndUserConfirmationResponse id=\"" + id + "\" value=\"" + value + "\"";
-            if (pin != null) {
-                response += " pin=\"";
-            }
-            response += "/>";
-
-            // Create authentication agent
-            SessionAuthenticationAgent authenticationAgent = new SessionAuthenticationAgent(
-                    getImsModule());
-
-            // Create a dialog path
-            SipDialogPath dialogPath = new SipDialogPath(getImsModule().getSipManager()
-                    .getSipStack(), getImsModule().getSipManager().getSipStack().generateCallId(),
-                    1, remote, ImsModule.IMS_USER_PROFILE.getPublicUri(), remote, getImsModule()
-                            .getSipManager().getSipStack().getServiceRoutePath(), mRcsSettings);
-
-            // Create MESSAGE request
-            if (mLogger.isActivated()) {
-                mLogger.info("Send first MESSAGE");
-            }
-            SipRequest msg = SipMessageFactory.createMessage(dialogPath, RESPONSE_MIME_TYPE,
-                    response);
-
-            // Send MESSAGE request
-            SipTransactionContext ctx = getImsModule().getSipManager().sendSipMessageAndWait(msg);
-
-            // Analyze received message
-            if (ctx.getStatusCode() == 407) {
-                // 407 response received
-                if (mLogger.isActivated()) {
-                    mLogger.info("407 response received");
-                }
-
-                // Set the Proxy-Authorization header
-                authenticationAgent.readProxyAuthenticateHeader(ctx.getSipResponse());
-
-                // Increment the Cseq number of the dialog path
-                dialogPath.incrementCseq();
-
-                // Create a second MESSAGE request with the right token
-                if (mLogger.isActivated()) {
-                    mLogger.info("Send second MESSAGE");
-                }
-                msg = SipMessageFactory.createMessage(dialogPath, RESPONSE_MIME_TYPE, response);
-
-                // Set the Authorization header
-                authenticationAgent.setProxyAuthorizationHeader(msg);
-
-                // Send MESSAGE request
-                ctx = getImsModule().getSipManager().sendSipMessageAndWait(msg);
-
-                // Analyze received message
-                if ((ctx.getStatusCode() == 200) || (ctx.getStatusCode() == 202)) {
-                    // 200 OK response
-                    if (mLogger.isActivated()) {
-                        mLogger.info("20x OK response received");
-                    }
-                    result = true;
-                } else {
-                    // Error
-                    if (mLogger.isActivated()) {
-                        mLogger.info("Delivery report has failed: " + ctx.getStatusCode()
-                                + " response received");
-                    }
-                }
-            } else if ((ctx.getStatusCode() == 200) || (ctx.getStatusCode() == 202)) {
-                // 200 OK received
-                if (mLogger.isActivated()) {
-                    mLogger.info("20x OK response received");
-                }
-                result = true;
-            } else {
-                // Error responses
-                if (mLogger.isActivated()) {
-                    mLogger.info("Delivery report has failed: " + ctx.getStatusCode()
-                            + " response received");
-                }
-            }
-        } catch (Exception e) {
-            if (mLogger.isActivated()) {
-                mLogger.error("Can't send MESSAGE request", e);
-            }
+        if (sLogger.isActivated()) {
+            sLogger.info("Send first MESSAGE");
         }
-        return result;
+        SipRequest msg = SipMessageFactory.createMessage(dialogPath, RESPONSE_MIME_TYPE,
+                response.toString());
+        SipTransactionContext ctx = sipManager.sendSipMessageAndWait(msg);
+        final int statusCode = ctx.getStatusCode();
+        switch (statusCode) {
+            case Response.PROXY_AUTHENTICATION_REQUIRED:
+                handle407Authentication(dialogPath, ctx.getSipResponse(), response.toString());
+                break;
+            case Response.OK:
+                /* Intentional fall-through */
+            case Response.ACCEPTED:
+                if (sLogger.isActivated()) {
+                    sLogger.info("20x OK response received");
+                }
+                break;
+            default:
+                throw new IllegalArgumentException(new StringBuilder("Invalid response :  ")
+                        .append(statusCode).append(" received!").toString());
+        }
     }
 
     /**
@@ -373,7 +315,6 @@ public class TermsConditionsService extends ImsService {
      * @return ID
      */
     private String getRemoteIdentity(SipRequest request) {
-        // Use the Asserted-Identity header
         return SipUtils.getAssertedIdentity(request);
     }
 
@@ -386,5 +327,50 @@ public class TermsConditionsService extends ImsService {
     public static boolean isTermsRequest(SipRequest request) {
         String contentType = request.getContentType();
         return (contentType != null && contentType.startsWith("application/end-user"));
+    }
+
+    /**
+     * Handle proxy authentication response
+     * 
+     * @param dialogPath
+     * @param sipResponse
+     * @param response
+     * @throws SipPayloadException
+     * @throws SipNetworkException
+     */
+    private void handle407Authentication(SipDialogPath dialogPath, SipResponse sipResponse,
+            String response) throws SipPayloadException, SipNetworkException {
+        try {
+            if (sLogger.isActivated()) {
+                sLogger.info("407 response received");
+            }
+            final ImsModule imsModule = getImsModule();
+            SessionAuthenticationAgent authenticationAgent = new SessionAuthenticationAgent(
+                    imsModule);
+            authenticationAgent.readProxyAuthenticateHeader(sipResponse);
+            dialogPath.incrementCseq();
+            if (sLogger.isActivated()) {
+                sLogger.info("Send second MESSAGE");
+            }
+            SipRequest msg = SipMessageFactory.createMessage(dialogPath, RESPONSE_MIME_TYPE,
+                    response);
+            authenticationAgent.setProxyAuthorizationHeader(msg);
+            SipTransactionContext ctx = imsModule.getSipManager().sendSipMessageAndWait(msg);
+            final int statusCode = ctx.getStatusCode();
+            switch (statusCode) {
+                case Response.OK:
+                    /* Intentional fall-through */
+                case Response.ACCEPTED:
+                    if (sLogger.isActivated()) {
+                        sLogger.info("20x OK response received");
+                    }
+                    break;
+                default:
+                    throw new IllegalArgumentException(new StringBuilder("Invalid response :  ")
+                            .append(statusCode).append(" received!").toString());
+            }
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
+        }
     }
 }

@@ -463,52 +463,52 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param msgId Message ID
      * @param data Received data
      * @param mimeType Data mime-type
-     * @throws MsrpException
+     * @throws SipNetworkException
      * @throws SipPayloadException
      */
-    public void msrpDataReceived(String msgId, byte[] data, String mimeType) throws MsrpException,
-            SipPayloadException {
-        if (sLogger.isActivated()) {
-            sLogger.info("Data received (type " + mimeType + ")");
-        }
-
-        // Update the activity manager
-        mActivityMgr.updateActivity();
-
-        if ((data == null) || (data.length == 0)) {
-            // By-pass empty data
+    public void msrpDataReceived(String msgId, byte[] data, String mimeType)
+            throws SipPayloadException, SipNetworkException {
+        try {
             if (sLogger.isActivated()) {
-                sLogger.debug("By-pass received empty data");
+                sLogger.info("Data received (type " + mimeType + ")");
             }
-            return;
-        }
 
-        if (ChatUtils.isApplicationIsComposingType(mimeType)) {
-            // Is composing event
-            receiveIsComposing(getRemoteContact(), data);
-            return;
-        }
-        if (ChatUtils.isTextPlainType(mimeType)) {
-            // Text message
-            /**
-             * Set message's timestamp to the System.currentTimeMillis, not the session's itself
-             * timestamp
-             */
-            long timestamp = System.currentTimeMillis();
-            /**
-             * Since legacy server can send non CPIM data (like plain text without timestamp) in the
-             * payload, we need to fake timesampSent by using the local timestamp even if this is
-             * not the real proper timestamp from the remote side in this case.
-             */
-            ChatMessage msg = new ChatMessage(msgId, getRemoteContact(), new String(data, UTF8),
-                    MimeType.TEXT_MESSAGE, timestamp, timestamp, null);
-            boolean imdnDisplayedRequested = false;
-            receive(msg, imdnDisplayedRequested);
-            return;
-        }
-        if (ChatUtils.isMessageCpimType(mimeType)) {
-            // Receive a CPIM message
-            try {
+            // Update the activity manager
+            mActivityMgr.updateActivity();
+
+            if ((data == null) || (data.length == 0)) {
+                // By-pass empty data
+                if (sLogger.isActivated()) {
+                    sLogger.debug("By-pass received empty data");
+                }
+                return;
+            }
+
+            if (ChatUtils.isApplicationIsComposingType(mimeType)) {
+                // Is composing event
+                receiveIsComposing(getRemoteContact(), data);
+                return;
+            }
+            if (ChatUtils.isTextPlainType(mimeType)) {
+                // Text message
+                /**
+                 * Set message's timestamp to the System.currentTimeMillis, not the session's itself
+                 * timestamp
+                 */
+                long timestamp = System.currentTimeMillis();
+                /**
+                 * Since legacy server can send non CPIM data (like plain text without timestamp) in
+                 * the payload, we need to fake timesampSent by using the local timestamp even if
+                 * this is not the real proper timestamp from the remote side in this case.
+                 */
+                ChatMessage msg = new ChatMessage(msgId, getRemoteContact(),
+                        new String(data, UTF8), MimeType.TEXT_MESSAGE, timestamp, timestamp, null);
+                boolean imdnDisplayedRequested = false;
+                receive(msg, imdnDisplayedRequested);
+                return;
+            }
+            if (ChatUtils.isMessageCpimType(mimeType)) {
+                // Receive a CPIM message
                 CpimParser cpimParser = new CpimParser(data);
                 CpimMessage cpimMsg = cpimParser.getCpimMessage();
                 if (cpimMsg != null) {
@@ -597,15 +597,15 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                         }
                     }
                 }
-            } catch (SipNetworkException e) {
-                throw new MsrpException(
-                        "Unable to handle delivery status for msgId : ".concat(msgId), e);
+            } else {
+                // Not supported content
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Not supported content " + mimeType + " in chat session");
+                }
             }
-        } else {
-            // Not supported content
-            if (sLogger.isActivated()) {
-                sLogger.debug("Not supported content " + mimeType + " in chat session");
-            }
+        } catch (IOException e) {
+            throw new SipNetworkException(
+                    "Unable to handle delivery status for msgId : ".concat(msgId), e);
         }
     }
 
@@ -644,8 +644,11 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * 
      * @param contact Contact
      * @param event Event
+     * @throws IOException
+     * @throws SipPayloadException
      */
-    protected void receiveIsComposing(ContactId contact, byte[] event) {
+    protected void receiveIsComposing(ContactId contact, byte[] event) throws SipPayloadException,
+            IOException {
         mIsComposingMgr.receiveIsComposingEvent(contact, event);
     }
 

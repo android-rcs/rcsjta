@@ -27,10 +27,13 @@ import com.gsma.rcs.utils.logger.Logger;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import java.io.IOException;
 import java.util.HashMap;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -127,10 +130,12 @@ public class TermsRequestParser extends DefaultHandler {
      * 
      * @param inputSource Input source
      * @param requestedLanguage
-     * @throws Exception
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws IOException
      */
     public TermsRequestParser(InputSource inputSource, String requestedLanguage,
-            RcsSettings rcsSettings) throws Exception {
+            RcsSettings rcsSettings) throws ParserConfigurationException, SAXException, IOException {
         mRequestedLanguage = requestedLanguage;
         mRcsSettings = rcsSettings;
         SAXParserFactory factory = SAXParserFactory.newInstance();

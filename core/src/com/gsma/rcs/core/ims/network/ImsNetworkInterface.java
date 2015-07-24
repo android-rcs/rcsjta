@@ -744,43 +744,6 @@ public abstract class ImsNetworkInterface {
         }
     }
 
-    // Changed by Deutsche Telekom
-    /**
-     * Check if the DNS fields has changed. If it has, return them. Otherwise, return
-     * <code>null</code>.
-     * 
-     * @return The {@link DnsResolvedFields} object containing the new DNS resolved fields,
-     *         otherwise <code>null</code>.
-     * @throws Exception
-     */
-    public DnsResolvedFields checkDnsResolvedFieldsChanged() throws Exception {
-        // Check DNS resolved fields
-        DnsResolvedFields dnsResolvedFields = getDnsResolvedFields();
-
-        if (mSip.getSipStack() == null) {
-            if (sLogger.isActivated()) {
-                sLogger.debug("Registration state has changed: sip stack not initialized yet.");
-            }
-            return dnsResolvedFields;
-        } else if (!mSip.getSipStack().getOutboundProxyAddr().equals(dnsResolvedFields.mIpAddress)) {
-            if (sLogger.isActivated()) {
-                sLogger.debug("Registration state has changed: proxy ip address has changed (old: "
-                        + mSip.getSipStack().getOutboundProxyAddr() + " - new: "
-                        + dnsResolvedFields.mIpAddress + ").");
-            }
-            return dnsResolvedFields;
-        } else if (mSip.getSipStack().getOutboundProxyPort() != dnsResolvedFields.mPort) {
-            if (sLogger.isActivated()) {
-                sLogger.debug("Registration state has changed: proxy port has changed (old: "
-                        + mSip.getSipStack().getOutboundProxyPort() + " - new: "
-                        + dnsResolvedFields.mPort + ").");
-            }
-            return dnsResolvedFields;
-        }
-
-        return null;
-    }
-
     /**
      * Unregister from the IMS
      * 

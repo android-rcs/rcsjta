@@ -35,6 +35,7 @@ import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
@@ -83,11 +84,12 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
      * @param timestamp Local timestamp for the session
      * @param contactManager Contact manager accessor
      * @throws SipPayloadException Thrown if constructor fails to get information from payload
+     * @throws SipNetworkException
      */
     public TerminatingAdhocGroupChatSession(InstantMessagingService imService, SipRequest invite,
             ContactId contact, Map<ContactId, ParticipantStatus> participantsFromInvite,
             String remoteUri, RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
-            ContactManager contactManager) throws SipPayloadException {
+            ContactManager contactManager) throws SipPayloadException, SipNetworkException {
         super(imService, contact, remoteUri, participantsFromInvite, rcsSettings, messagingLog,
                 timestamp, contactManager);
 
@@ -118,8 +120,9 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
      * 
      * @return true if group chat session should be auto accepted
      * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private boolean shouldBeAutoAccepted() throws SipPayloadException {
+    private boolean shouldBeAutoAccepted() throws SipPayloadException, SipNetworkException {
         /*
          * In case the invite contains a http file transfer info the chat session should be
          * auto-accepted so that the file transfer session can be started.
@@ -127,7 +130,6 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
         if (FileTransferUtils.getHttpFTInfo(getDialogPath().getInvite(), mRcsSettings) != null) {
             return true;
         }
-
         return mRcsSettings.isGroupChatAutoAccepted();
     }
 

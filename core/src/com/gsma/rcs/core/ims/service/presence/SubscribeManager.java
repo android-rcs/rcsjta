@@ -26,6 +26,8 @@ import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -35,9 +37,12 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PeriodicRefresher;
 import com.gsma.rcs.utils.logger.Logger;
 
+import java.io.IOException;
 import java.util.Vector;
 
+import javax2.sip.InvalidArgumentException;
 import javax2.sip.header.ExpiresHeader;
+import javax2.sip.message.Response;
 
 /**
  * Generic subscribe manager
@@ -136,8 +141,11 @@ public abstract class SubscribeManager extends PeriodicRefresher {
      * Receive a notification
      * 
      * @param notify Received notify
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public abstract void receiveNotification(SipRequest notify);
+    public abstract void receiveNotification(SipRequest notify) throws SipPayloadException,
+            SipNetworkException;
 
     /**
      * Check if the received notification if for this subscriber
@@ -204,10 +212,10 @@ public abstract class SubscribeManager extends PeriodicRefresher {
      * @param dialog SIP dialog path
      * @param expirePeriod Expiration period in milliseconds
      * @return SIP request
-     * @throws SipException
+     * @throws SipPayloadException
      */
     public abstract SipRequest createSubscribe(SipDialogPath dialog, long expirePeriod)
-            throws SipException;
+            throws SipPayloadException;
 
     /**
      * Subscription refresh processing
@@ -341,52 +349,53 @@ public abstract class SubscribeManager extends PeriodicRefresher {
      * Send SUBSCRIBE message
      * 
      * @param subscribe SIP SUBSCRIBE
-     * @throws Exception
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    private void sendSubscribe(SipRequest subscribe) throws Exception {
-        if (logger.isActivated()) {
-            logger.info(new StringBuilder("Send SUBSCRIBE, expire=").append(subscribe.getExpires())
-                    .append("ms").toString());
-        }
-
-        if (mSubscribed) {
-            // Set the Authorization header
-            mAuthenticationAgent.setProxyAuthorizationHeader(subscribe);
-        }
-
-        // Send SUBSCRIBE request
-        SipTransactionContext ctx = mImsModule.getSipManager().sendSipMessageAndWait(subscribe);
-
-        // Analyze the received response
-        if (ctx.isSipResponse()) {
-            // A response has been received
-            if (ctx.getStatusCode() == 200) {
-                if (subscribe.getExpires() != 0) {
-                    handle200OK(ctx);
-                } else {
-                    handle200OkUnsubscribe(ctx);
-                }
-            } else if (ctx.getStatusCode() == 202) {
-                // 202 Accepted
-                handle200OK(ctx);
-            } else if (ctx.getStatusCode() == 407) {
-                // 407 Proxy Authentication Required
-                handle407Authentication(ctx);
-            } else if (ctx.getStatusCode() == 423) {
-                // 423 Interval Too Brief
-                handle423IntervalTooBrief(ctx);
-            } else {
-                // Other error response
-                handleError(new PresenceError(PresenceError.SUBSCRIBE_FAILED, ctx.getStatusCode()
-                        + " " + ctx.getReasonPhrase()));
-            }
-        } else {
+    private void sendSubscribe(SipRequest subscribe) throws SipPayloadException,
+            SipNetworkException {
+        try {
             if (logger.isActivated()) {
-                logger.debug("No response received for SUBSCRIBE");
+                logger.info(new StringBuilder("Send SUBSCRIBE, expire=")
+                        .append(subscribe.getExpires()).append("ms").toString());
             }
 
-            // No response received: timeout
-            handleError(new PresenceError(PresenceError.SUBSCRIBE_FAILED));
+            if (mSubscribed) {
+                mAuthenticationAgent.setProxyAuthorizationHeader(subscribe);
+            }
+
+            SipTransactionContext ctx = mImsModule.getSipManager().sendSipMessageAndWait(subscribe);
+            if (ctx.isSipResponse()) {
+                switch (ctx.getStatusCode()) {
+                    case Response.OK:
+                        if (subscribe.getExpires() != 0) {
+                            handle200OK(ctx);
+                        } else {
+                            handle200OkUnsubscribe(ctx);
+                        }
+                        return;
+                    case Response.ACCEPTED:
+                        handle200OK(ctx);
+                        return;
+                    case Response.PROXY_AUTHENTICATION_REQUIRED:
+                        handle407Authentication(ctx);
+                        return;
+                    case Response.INTERVAL_TOO_BRIEF:
+                        handle423IntervalTooBrief(ctx);
+                        return;
+                    default:
+                        handleError(new PresenceError(PresenceError.SUBSCRIBE_FAILED,
+                                ctx.getStatusCode() + " " + ctx.getReasonPhrase()));
+                        return;
+                }
+            } else {
+                if (logger.isActivated()) {
+                    logger.debug("No response received for SUBSCRIBE");
+                }
+                handleError(new PresenceError(PresenceError.SUBSCRIBE_FAILED));
+            }
+        } catch (InvalidArgumentException e) {
+            throw new SipNetworkException("Can't send sip subscribe!", e);
         }
     }
 
@@ -436,79 +445,65 @@ public abstract class SubscribeManager extends PeriodicRefresher {
      * Handle 407 response
      * 
      * @param ctx SIP transaction context
-     * @throws Exception
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void handle407Authentication(SipTransactionContext ctx) throws Exception {
-        // 407 response received
-        if (logger.isActivated()) {
-            logger.info("407 response received");
+    private void handle407Authentication(SipTransactionContext ctx) throws SipPayloadException,
+            SipNetworkException {
+        try {
+            if (logger.isActivated()) {
+                logger.info("407 response received");
+            }
+            SipResponse resp = ctx.getSipResponse();
+            mAuthenticationAgent.readProxyAuthenticateHeader(resp);
+            mDialogPath.incrementCseq();
+
+            if (logger.isActivated()) {
+                logger.info("Send second SUBSCRIBE");
+            }
+            SipRequest subscribe = createSubscribe(mDialogPath, ctx.getTransaction().getRequest()
+                    .getExpires().getExpires()
+                    * SECONDS_TO_MILLISECONDS_CONVERSION_RATE);
+            mAuthenticationAgent.setProxyAuthorizationHeader(subscribe);
+            sendSubscribe(subscribe);
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
         }
-
-        SipResponse resp = ctx.getSipResponse();
-
-        // Set the Proxy-Authorization header
-        mAuthenticationAgent.readProxyAuthenticateHeader(resp);
-
-        // Increment the Cseq number of the dialog path
-        mDialogPath.incrementCseq();
-
-        // Create a second SUBSCRIBE request with the right token
-        if (logger.isActivated()) {
-            logger.info("Send second SUBSCRIBE");
-        }
-        SipRequest subscribe = createSubscribe(mDialogPath, ctx.getTransaction().getRequest()
-                .getExpires().getExpires()
-                * SECONDS_TO_MILLISECONDS_CONVERSION_RATE);
-
-        // Set the Authorization header
-        mAuthenticationAgent.setProxyAuthorizationHeader(subscribe);
-
-        // Send SUBSCRIBE request
-        sendSubscribe(subscribe);
     }
 
     /**
      * Handle 423 response
      * 
      * @param ctx SIP transaction context
-     * @throws Exception
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void handle423IntervalTooBrief(SipTransactionContext ctx) throws Exception {
-        // 423 response received
-        if (logger.isActivated()) {
-            logger.info("423 interval too brief response received");
-        }
-
-        SipResponse resp = ctx.getSipResponse();
-
-        // Increment the Cseq number of the dialog path
-        mDialogPath.incrementCseq();
-
-        // Extract the Min-Expire value
-        long minExpire = SipUtils.getMinExpiresPeriod(resp);
-        if (minExpire == -1) {
+    private void handle423IntervalTooBrief(SipTransactionContext ctx) throws SipPayloadException,
+            SipNetworkException {
+        try {
             if (logger.isActivated()) {
-                logger.error("Can't read the Min-Expires value");
+                logger.info("423 interval too brief response received");
             }
-            handleError(new PresenceError(PresenceError.SUBSCRIBE_FAILED,
-                    "No Min-Expires value found"));
-            return;
+            SipResponse resp = ctx.getSipResponse();
+            mDialogPath.incrementCseq();
+
+            long minExpire = SipUtils.getMinExpiresPeriod(resp);
+            if (minExpire == -1) {
+                if (logger.isActivated()) {
+                    logger.error("Can't read the Min-Expires value");
+                }
+                handleError(new PresenceError(PresenceError.SUBSCRIBE_FAILED,
+                        "No Min-Expires value found"));
+                return;
+            }
+            RegistryFactory.getFactory().writeLong(REGISTRY_MIN_EXPIRE_PERIOD, minExpire);
+            mExpirePeriod = minExpire;
+            SipRequest subscribe = createSubscribe(mDialogPath, mExpirePeriod);
+            mAuthenticationAgent.setProxyAuthorizationHeader(subscribe);
+            sendSubscribe(subscribe);
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException("Failed to handle 423 interval too brief response!", e);
         }
-
-        // Save the min expire value in the terminal registry
-        RegistryFactory.getFactory().writeLong(REGISTRY_MIN_EXPIRE_PERIOD, minExpire);
-
-        // Set the default expire value
-        mExpirePeriod = minExpire;
-
-        // Create a new SUBSCRIBE request with the right expire period
-        SipRequest subscribe = createSubscribe(mDialogPath, mExpirePeriod);
-
-        // Set the Authorization header
-        mAuthenticationAgent.setProxyAuthorizationHeader(subscribe);
-
-        // Send SUBSCRIBE request
-        sendSubscribe(subscribe);
     }
 
     /**

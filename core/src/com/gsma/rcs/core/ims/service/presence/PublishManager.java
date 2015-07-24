@@ -26,6 +26,8 @@ import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -37,8 +39,10 @@ import com.gsma.rcs.utils.logger.Logger;
 
 import java.util.Vector;
 
+import javax2.sip.InvalidArgumentException;
 import javax2.sip.header.ExpiresHeader;
 import javax2.sip.header.SIPETagHeader;
+import javax2.sip.message.Response;
 
 /**
  * Publish manager for sending current user presence status
@@ -99,7 +103,7 @@ public class PublishManager extends PeriodicRefresher {
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(PublishManager.class.getName());
 
     private final RcsSettings mRcsSettings;
 
@@ -139,8 +143,8 @@ public class PublishManager extends PeriodicRefresher {
      * Terminate manager
      */
     public void terminate() {
-        if (logger.isActivated()) {
-            logger.info("Terminate the publish manager");
+        if (sLogger.isActivated()) {
+            sLogger.info("Terminate the publish manager");
         }
 
         // Do not unpublish for RCS, just stop timer
@@ -150,36 +154,25 @@ public class PublishManager extends PeriodicRefresher {
             mPublished = false;
         }
 
-        if (logger.isActivated()) {
-            logger.info("Publish manager is terminated");
+        if (sLogger.isActivated()) {
+            sLogger.info("Publish manager is terminated");
         }
     }
 
     /**
      * Publish refresh processing
+     * 
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void periodicProcessing() {
-        // Make a publish
-        if (logger.isActivated()) {
-            logger.info("Execute re-publish");
+    public void periodicProcessing() throws SipPayloadException, SipNetworkException {
+        if (sLogger.isActivated()) {
+            sLogger.info("Execute re-publish");
         }
-
-        try {
-            // Create a new dialog path for each publish
-            mDialogPath = createDialogPath();
-
-            // Create PUBLISH request with no SDP and expire period
-            SipRequest publish = SipMessageFactory.createPublish(createDialogPath(), mExpirePeriod,
-                    mEntityTag, null);
-
-            // Send PUBLISH request
-            sendPublish(publish);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Publish has failed", e);
-            }
-            handleError(new PresenceError(PresenceError.UNEXPECTED_EXCEPTION, e.getMessage()));
-        }
+        mDialogPath = createDialogPath();
+        SipRequest publish = SipMessageFactory.createPublish(createDialogPath(), mExpirePeriod,
+                mEntityTag, null);
+        sendPublish(publish);
     }
 
     /**
@@ -187,113 +180,86 @@ public class PublishManager extends PeriodicRefresher {
      * 
      * @param info Presence info
      * @return Boolean
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public synchronized boolean publish(String info) {
-        try {
-            // Create a new dialog path for each publish
-            mDialogPath = createDialogPath();
-
-            // Set the local SDP part in the dialog path
-            mDialogPath.setLocalContent(info);
-
-            // Create PUBLISH request
-            SipRequest publish = SipMessageFactory.createPublish(mDialogPath, mExpirePeriod,
-                    mEntityTag, info);
-
-            // Send PUBLISH request
-            sendPublish(publish);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Publish has failed", e);
-            }
-            handleError(new PresenceError(PresenceError.UNEXPECTED_EXCEPTION, e.getMessage()));
-        }
+    public synchronized boolean publish(String info) throws SipPayloadException,
+            SipNetworkException {
+        mDialogPath = createDialogPath();
+        mDialogPath.setLocalContent(info);
+        SipRequest publish = SipMessageFactory.createPublish(mDialogPath, mExpirePeriod,
+                mEntityTag, info);
+        sendPublish(publish);
         return mPublished;
     }
 
     /**
      * Unpublish
+     * 
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public synchronized void unPublish() {
+    public synchronized void unPublish() throws SipPayloadException, SipNetworkException {
         if (!mPublished) {
-            // Already unpublished
             return;
         }
-
-        try {
-            // Stop periodic publish
-            stopTimer();
-
-            // Create a new dialog path for each publish
-            mDialogPath = createDialogPath();
-
-            // Create PUBLISH request with no SDP and expire period
-            SipRequest publish = SipMessageFactory.createPublish(mDialogPath, 0, mEntityTag, null);
-
-            // Send PUBLISH request
-            sendPublish(publish);
-
-            // Force publish flag to false
-            mPublished = false;
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Publish has failed", e);
-            }
-            handleError(new PresenceError(PresenceError.UNEXPECTED_EXCEPTION, e.getMessage()));
-        }
+        stopTimer();
+        mDialogPath = createDialogPath();
+        SipRequest publish = SipMessageFactory.createPublish(mDialogPath, 0, mEntityTag, null);
+        sendPublish(publish);
+        mPublished = false;
     }
 
     /**
      * Send PUBLISH message
      * 
      * @param publish SIP PUBLISH
-     * @throws Exception
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    private void sendPublish(SipRequest publish) throws Exception {
-        if (logger.isActivated()) {
-            logger.info(new StringBuilder("Send PUBLISH, expire=").append(publish.getExpires())
-                    .append("ms").toString());
-        }
+    private void sendPublish(SipRequest publish) throws SipPayloadException, SipNetworkException {
+        try {
+            if (sLogger.isActivated()) {
+                sLogger.info(new StringBuilder("Send PUBLISH, expire=")
+                        .append(publish.getExpires()).append("ms").toString());
+            }
+            if (mPublished) {
+                mAuthenticationAgent.setProxyAuthorizationHeader(publish);
+            }
+            SipTransactionContext ctx = mImsModule.getSipManager().sendSipMessageAndWait(publish);
 
-        if (mPublished) {
-            // Set the Authorization header
-            mAuthenticationAgent.setProxyAuthorizationHeader(publish);
-        }
-
-        // Send PUBLISH request
-        SipTransactionContext ctx = mImsModule.getSipManager().sendSipMessageAndWait(publish);
-
-        // Analyze the received response
-        if (ctx.isSipResponse()) {
-            // A response has been received
-            if (ctx.getStatusCode() == 200) {
-                // 200 OK
-                if (publish.getExpires() != 0) {
-                    handle200OK(ctx);
-                } else {
-                    handle200OkUnpublish(ctx);
+            if (ctx.isSipResponse()) {
+                final int statusCode = ctx.getStatusCode();
+                switch (statusCode) {
+                    case Response.OK:
+                        if (publish.getExpires() != 0) {
+                            handle200OK(ctx);
+                        } else {
+                            handle200OkUnpublish(ctx);
+                        }
+                        break;
+                    case Response.PROXY_AUTHENTICATION_REQUIRED:
+                        handle407Authentication(ctx);
+                        break;
+                    case Response.CONDITIONAL_REQUEST_FAILED:
+                        handle412ConditionalRequestFailed(ctx);
+                        break;
+                    case Response.INTERVAL_TOO_BRIEF:
+                        handle423IntervalTooBrief(ctx);
+                        break;
+                    default:
+                        handleError(new PresenceError(PresenceError.PUBLISH_FAILED,
+                                ctx.getStatusCode() + " " + ctx.getReasonPhrase()));
+                        break;
                 }
-            } else if (ctx.getStatusCode() == 407) {
-                // 407 Proxy Authentication Required
-                handle407Authentication(ctx);
-            } else if (ctx.getStatusCode() == 412) {
-                // 412 Error
-                handle412ConditionalRequestFailed(ctx);
-            } else if (ctx.getStatusCode() == 423) {
-                // 423 Interval Too Brief
-                handle423IntervalTooBrief(ctx);
             } else {
-                // Other error response
-                handleError(new PresenceError(PresenceError.PUBLISH_FAILED, ctx.getStatusCode()
-                        + " " + ctx.getReasonPhrase()));
+                if (sLogger.isActivated()) {
+                    sLogger.debug("No response received for PUBLISH");
+                }
+                handleError(new PresenceError(PresenceError.PUBLISH_FAILED));
             }
-        } else {
-            if (logger.isActivated()) {
-                logger.debug("No response received for PUBLISH");
-            }
-
-            // No response received: timeout
-            handleError(new PresenceError(PresenceError.PUBLISH_FAILED));
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException("Publish has failed!", e);
         }
     }
 
@@ -304,8 +270,8 @@ public class PublishManager extends PeriodicRefresher {
      */
     private void handle200OK(SipTransactionContext ctx) {
         // 200 OK response received
-        if (logger.isActivated()) {
-            logger.info("200 OK response received");
+        if (sLogger.isActivated()) {
+            sLogger.info("200 OK response received");
         }
         mPublished = true;
 
@@ -331,8 +297,8 @@ public class PublishManager extends PeriodicRefresher {
      */
     private void handle200OkUnpublish(SipTransactionContext ctx) {
         // 200 OK response received
-        if (logger.isActivated()) {
-            logger.info("200 OK response received");
+        if (sLogger.isActivated()) {
+            sLogger.info("200 OK response received");
         }
 
         SipResponse resp = ctx.getSipResponse();
@@ -345,47 +311,56 @@ public class PublishManager extends PeriodicRefresher {
      * Handle 407 response
      * 
      * @param ctx SIP transaction context
-     * @throws Exception
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void handle407Authentication(SipTransactionContext ctx) throws Exception {
-        // 407 response received
-        if (logger.isActivated()) {
-            logger.info("407 response received");
+    private void handle407Authentication(SipTransactionContext ctx) throws SipPayloadException,
+            SipNetworkException {
+        try {
+            // 407 response received
+            if (sLogger.isActivated()) {
+                sLogger.info("407 response received");
+            }
+
+            SipResponse resp = ctx.getSipResponse();
+
+            // Set the Proxy-Authorization header
+            mAuthenticationAgent.readProxyAuthenticateHeader(resp);
+
+            // Increment the Cseq number of the dialog path
+            mDialogPath.incrementCseq();
+
+            // Create a second PUBLISH request with the right token
+            if (sLogger.isActivated()) {
+                sLogger.info("Send second PUBLISH");
+            }
+            SipRequest publish = SipMessageFactory.createPublish(mDialogPath, ctx.getTransaction()
+                    .getRequest().getExpires().getExpires()
+                    * SECONDS_TO_MILLISECONDS_CONVERSION_RATE, mEntityTag,
+                    mDialogPath.getLocalContent());
+
+            // Set the Authorization header
+            mAuthenticationAgent.setProxyAuthorizationHeader(publish);
+
+            // Send PUBLISH request
+            sendPublish(publish);
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
         }
-
-        SipResponse resp = ctx.getSipResponse();
-
-        // Set the Proxy-Authorization header
-        mAuthenticationAgent.readProxyAuthenticateHeader(resp);
-
-        // Increment the Cseq number of the dialog path
-        mDialogPath.incrementCseq();
-
-        // Create a second PUBLISH request with the right token
-        if (logger.isActivated()) {
-            logger.info("Send second PUBLISH");
-        }
-        SipRequest publish = SipMessageFactory.createPublish(mDialogPath, ctx.getTransaction()
-                .getRequest().getExpires().getExpires()
-                * SECONDS_TO_MILLISECONDS_CONVERSION_RATE, mEntityTag,
-                mDialogPath.getLocalContent());
-
-        // Set the Authorization header
-        mAuthenticationAgent.setProxyAuthorizationHeader(publish);
-
-        // Send PUBLISH request
-        sendPublish(publish);
     }
 
     /**
      * Handle 412 response
      * 
      * @param ctx SIP transaction context
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void handle412ConditionalRequestFailed(SipTransactionContext ctx) throws Exception {
+    private void handle412ConditionalRequestFailed(SipTransactionContext ctx)
+            throws SipPayloadException, SipNetworkException {
         // 412 response received
-        if (logger.isActivated()) {
-            logger.info("412 conditional response received");
+        if (sLogger.isActivated()) {
+            sLogger.info("412 conditional response received");
         }
 
         // Increment the Cseq number of the dialog path
@@ -406,12 +381,14 @@ public class PublishManager extends PeriodicRefresher {
      * Handle 423 response
      * 
      * @param ctx SIP transaction context
-     * @throws Exception
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void handle423IntervalTooBrief(SipTransactionContext ctx) throws Exception {
+    private void handle423IntervalTooBrief(SipTransactionContext ctx) throws SipPayloadException,
+            SipNetworkException {
         // 423 response received
-        if (logger.isActivated()) {
-            logger.info("423 interval too brief response received");
+        if (sLogger.isActivated()) {
+            sLogger.info("423 interval too brief response received");
         }
 
         SipResponse resp = ctx.getSipResponse();
@@ -422,8 +399,8 @@ public class PublishManager extends PeriodicRefresher {
         // Extract the Min-Expire value
         long minExpire = SipUtils.getMinExpiresPeriod(resp);
         if (minExpire == -1) {
-            if (logger.isActivated()) {
-                logger.error("Can't read the Min-Expires value");
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't read the Min-Expires value");
             }
             handleError(new PresenceError(PresenceError.PUBLISH_FAILED,
                     "No Min-Expires value found"));
@@ -451,8 +428,8 @@ public class PublishManager extends PeriodicRefresher {
      */
     private void handleError(PresenceError error) {
         // Error
-        if (logger.isActivated()) {
-            logger.info("Publish has failed: " + error.getErrorCode() + ", reason="
+        if (sLogger.isActivated()) {
+            sLogger.info("Publish has failed: " + error.getErrorCode() + ", reason="
                     + error.getMessage());
         }
         mPublished = false;
@@ -461,8 +438,8 @@ public class PublishManager extends PeriodicRefresher {
         stopTimer();
 
         // Error
-        if (logger.isActivated()) {
-            logger.info("Publish has failed");
+        if (sLogger.isActivated()) {
+            sLogger.info("Publish has failed");
         }
     }
 
@@ -497,14 +474,14 @@ public class PublishManager extends PeriodicRefresher {
             RegistryFactory.getFactory().writeString(REGISTRY_SIP_ETAG, mEntityTag);
             long etagExpiration = System.currentTimeMillis() + mExpirePeriod;
             RegistryFactory.getFactory().writeLong(REGISTRY_SIP_ETAG_EXPIRATION, etagExpiration);
-            if (logger.isActivated()) {
-                logger.debug("New entity tag: " + mEntityTag + ", expire at=" + etagExpiration);
+            if (sLogger.isActivated()) {
+                sLogger.debug("New entity tag: " + mEntityTag + ", expire at=" + etagExpiration);
             }
         } else {
             RegistryFactory.getFactory().removeParameter(REGISTRY_SIP_ETAG);
             RegistryFactory.getFactory().removeParameter(REGISTRY_SIP_ETAG_EXPIRATION);
-            if (logger.isActivated()) {
-                logger.debug("Entity tag has been reset");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Entity tag has been reset");
             }
         }
     }
@@ -516,8 +493,8 @@ public class PublishManager extends PeriodicRefresher {
         mEntityTag = RegistryFactory.getFactory().readString(REGISTRY_SIP_ETAG, null);
         long etagExpiration = RegistryFactory.getFactory().readLong(REGISTRY_SIP_ETAG_EXPIRATION,
                 -1);
-        if (logger.isActivated()) {
-            logger.debug("New entity tag: " + mEntityTag + ", expire at=" + etagExpiration);
+        if (sLogger.isActivated()) {
+            sLogger.debug("New entity tag: " + mEntityTag + ", expire at=" + etagExpiration);
         }
     }
 

@@ -28,12 +28,15 @@ import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.standfw.StoreAndForwardManager;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
+import com.gsma.rcs.core.ims.service.presence.PresenceService;
 import com.gsma.rcs.core.ims.service.terms.TermsConditionsService;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.FifoBuffer;
@@ -48,6 +51,7 @@ import java.text.ParseException;
 import javax2.sip.address.SipURI;
 import javax2.sip.header.ContactHeader;
 import javax2.sip.header.EventHeader;
+import javax2.sip.header.SubscriptionStateHeader;
 import javax2.sip.message.Request;
 import javax2.sip.message.Response;
 
@@ -75,7 +79,7 @@ public class ImsServiceDispatcher extends Thread {
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(ImsServiceDispatcher.class.getName());
 
     private final RcsSettings mRcsSettings;
 
@@ -96,12 +100,12 @@ public class ImsServiceDispatcher extends Thread {
      * Terminate the SIP dispatcher
      */
     public void terminate() {
-        if (logger.isActivated()) {
-            logger.info("Terminate the multi-session manager");
+        if (sLogger.isActivated()) {
+            sLogger.info("Terminate the multi-session manager");
         }
         mBuffer.close();
-        if (logger.isActivated()) {
-            logger.info("Multi-session manager has been terminated");
+        if (sLogger.isActivated()) {
+            sLogger.info("Multi-session manager has been terminated");
         }
     }
 
@@ -118,27 +122,37 @@ public class ImsServiceDispatcher extends Thread {
      * Background processing
      */
     public void run() {
-        if (logger.isActivated()) {
-            logger.info("Start background processing");
+        if (sLogger.isActivated()) {
+            sLogger.info("Start background processing");
         }
         SipRequest request = null;
         while ((request = (SipRequest) mBuffer.getObject()) != null) {
             try {
-                // Dispatch the received SIP request
                 dispatch(request, System.currentTimeMillis());
-            } catch (SipException e) {
-                logger.error("Failed to dispatch received SIP request! CallId=".concat(request
+            } catch (SipPayloadException e) {
+                sLogger.error("Failed to dispatch received SIP request! CallId=".concat(request
                         .getCallId()), e);
-            } catch (IOException e) {
-                logger.error("Failed to dispatch received SIP request! CallId=".concat(request
-                        .getCallId()), e);
+                handleImsDispatchError(request);
+            } catch (SipNetworkException e) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(e.getMessage());
+                }
+                handleImsDispatchError(request);
             } catch (RuntimeException e) {
-                logger.error("Failed to dispatch received SIP request! CallId=".concat(request
+                /*
+                 * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+                 * which should be handled/fixed within the code. However the cases when we are
+                 * executing operations on a thread unhandling such exceptions will eventually lead
+                 * to exit the system and thus can bring the whole system down, which is not
+                 * intended.
+                 */
+                sLogger.error("Failed to dispatch received SIP request! CallId=".concat(request
                         .getCallId()), e);
+                handleImsDispatchError(request);
             }
         }
-        if (logger.isActivated()) {
-            logger.info("End of background processing");
+        if (sLogger.isActivated()) {
+            sLogger.info("End of background processing");
         }
     }
 
@@ -147,13 +161,14 @@ public class ImsServiceDispatcher extends Thread {
      * 
      * @param request SIP request
      * @param timestamp Local timestamp when got SipRequest
-     * @throws SipException
-     * @throws IOException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void dispatch(SipRequest request, long timestamp) throws SipException, IOException {
-        boolean logActivated = logger.isActivated();
+    private void dispatch(SipRequest request, long timestamp) throws SipPayloadException,
+            SipNetworkException {
+        boolean logActivated = sLogger.isActivated();
         if (logActivated) {
-            logger.debug("Receive " + request.getMethod() + " request");
+            sLogger.debug("Receive " + request.getMethod() + " request");
         }
         // Check the IP address of the request-URI
         String localIpAddress = mImsModule.getCurrentNetworkInterface().getNetworkAccess()
@@ -165,7 +180,7 @@ public class ImsServiceDispatcher extends Thread {
             requestURI = SipUtils.ADDR_FACTORY.createSipURI(request.getRequestURI());
         } catch (ParseException e) {
             if (logActivated) {
-                logger.error("Unable to parse request URI " + request.getRequestURI(), e);
+                sLogger.error("Unable to parse request URI " + request.getRequestURI(), e);
             }
             sendFinalResponse(request, Response.BAD_REQUEST);
             return;
@@ -192,7 +207,7 @@ public class ImsServiceDispatcher extends Thread {
         if (!isMatchingRegistered) {
             // Send a 404 error
             if (logActivated) {
-                logger.debug("Request-URI address and port do not match with registered contact: reject the request");
+                sLogger.debug("Request-URI address and port do not match with registered contact: reject the request");
             }
             sendFinalResponse(request, 404);
             return;
@@ -207,7 +222,7 @@ public class ImsServiceDispatcher extends Thread {
                 && !instanceId.contains(mImsModule.getSipManager().getSipStack().getInstanceId())) {
             // Send 486 Busy Here
             if (logActivated) {
-                logger.debug("SIP instance ID doesn't match: reject the request");
+                sLogger.debug("SIP instance ID doesn't match: reject the request");
             }
             sendFinalResponse(request, 486);
             return;
@@ -221,7 +236,7 @@ public class ImsServiceDispatcher extends Thread {
                 && !publicGruu.contains(mImsModule.getSipManager().getSipStack().getPublicGruu())) {
             // Send 486 Busy Here
             if (logActivated) {
-                logger.debug("SIP public-gruu doesn't match: reject the request");
+                sLogger.debug("SIP public-gruu doesn't match: reject the request");
             }
             sendFinalResponse(request, 486);
             return;
@@ -258,7 +273,7 @@ public class ImsServiceDispatcher extends Thread {
             if (sdp == null) {
                 // No SDP found: reject the invitation with a 606 Not Acceptable
                 if (logActivated) {
-                    logger.debug("No SDP found: automatically reject");
+                    sLogger.debug("No SDP found: automatically reject");
                 }
                 sendFinalResponse(request, Response.SESSION_NOT_ACCEPTABLE);
                 return;
@@ -273,14 +288,14 @@ public class ImsServiceDispatcher extends Thread {
                 // Image sharing
                 if (mRcsSettings.isImageSharingSupported()) {
                     if (logActivated) {
-                        logger.debug("Image content sharing transfer invitation");
+                        sLogger.debug("Image content sharing transfer invitation");
                     }
                     mImsModule.getRichcallService().receiveImageSharingInvitation(request,
                             timestamp);
                 } else {
                     // Service not supported: reject the invitation with a 603 Decline
                     if (logActivated) {
-                        logger.debug("Image share service not supported: automatically reject");
+                        sLogger.debug("Image share service not supported: automatically reject");
                     }
                     sendFinalResponse(request, Response.DECLINE);
                 }
@@ -290,14 +305,14 @@ public class ImsServiceDispatcher extends Thread {
                 // File transfer
                 if (mRcsSettings.isFileTransferSupported()) {
                     if (logActivated) {
-                        logger.debug("File transfer invitation");
+                        sLogger.debug("File transfer invitation");
                     }
                     mImsModule.getInstantMessagingService().receiveMsrpFileTransferInvitation(
                             request, timestamp);
                 } else {
                     // Service not supported: reject the invitation with a 603 Decline
                     if (logActivated) {
-                        logger.debug("File transfer service not supported: automatically reject");
+                        sLogger.debug("File transfer service not supported: automatically reject");
                     }
                     sendFinalResponse(request, Response.DECLINE);
                 }
@@ -307,7 +322,7 @@ public class ImsServiceDispatcher extends Thread {
                 if (!mRcsSettings.isImSessionSupported()) {
                     // Service not supported: reject the invitation with a 603 Decline
                     if (logActivated) {
-                        logger.debug("IM service not supported: automatically reject");
+                        sLogger.debug("IM service not supported: automatically reject");
                     }
                     sendFinalResponse(request, Response.DECLINE);
                     return;
@@ -320,14 +335,14 @@ public class ImsServiceDispatcher extends Thread {
                         // HTTP file transfer invitation
                         if (SipUtils.getReferredByHeader(request) != null) {
                             if (logActivated) {
-                                logger.debug("Single S&F file transfer over HTTP invitation");
+                                sLogger.debug("Single S&F file transfer over HTTP invitation");
                             }
                             mImsModule.getInstantMessagingService()
                                     .receiveStoredAndForwardOneToOneHttpFileTranferInvitation(
                                             request, ftHttpInfo, timestamp);
                         } else {
                             if (logActivated) {
-                                logger.debug("Single file transfer over HTTP invitation");
+                                sLogger.debug("Single file transfer over HTTP invitation");
                             }
                             mImsModule.getInstantMessagingService()
                                     .receiveOneToOneHttpFileTranferInvitation(request, ftHttpInfo,
@@ -337,7 +352,7 @@ public class ImsServiceDispatcher extends Thread {
                         // TODO : else return error to Originating side
                         // Malformed XML for FToHTTP: automatically reject with a 606 Not Acceptable
                         if (logActivated) {
-                            logger.debug("Malformed xml for FToHTTP: automatically reject");
+                            sLogger.debug("Malformed xml for FToHTTP: automatically reject");
                         }
                         sendFinalResponse(request, Response.SESSION_NOT_ACCEPTABLE);
                     }
@@ -349,28 +364,28 @@ public class ImsServiceDispatcher extends Thread {
                             && (!contentType.contains("multipart"))) {
                         // Store & Forward push notifs session
                         if (logActivated) {
-                            logger.debug("Store & Forward push notifications");
+                            sLogger.debug("Store & Forward push notifications");
                         }
                         mImsModule.getInstantMessagingService()
                                 .receiveStoredAndForwardPushNotifications(request, timestamp);
                     } else if (ChatUtils.isGroupChatInvitation(request)) {
                         // Ad-hoc group chat session
                         if (logActivated) {
-                            logger.debug("Ad-hoc group chat session invitation");
+                            sLogger.debug("Ad-hoc group chat session invitation");
                         }
                         mImsModule.getInstantMessagingService().receiveAdhocGroupChatSession(
                                 request, timestamp);
                     } else if (SipUtils.getReferredByHeader(request) != null) {
                         // Store & Forward push messages session
                         if (logActivated) {
-                            logger.debug("Store & Forward push messages session");
+                            sLogger.debug("Store & Forward push messages session");
                         }
                         mImsModule.getInstantMessagingService()
                                 .receiveStoredAndForwardPushMessages(request, timestamp);
                     } else {
                         // 1-1 chat session
                         if (logActivated) {
-                            logger.debug("1-1 chat session invitation");
+                            sLogger.debug("1-1 chat session invitation");
                         }
                         mImsModule.getInstantMessagingService().receiveOne2OneChatSession(request,
                                 timestamp);
@@ -381,14 +396,14 @@ public class ImsServiceDispatcher extends Thread {
                 // Video streaming
                 if (mRcsSettings.isVideoSharingSupported()) {
                     if (logActivated) {
-                        logger.debug("Video content sharing streaming invitation");
+                        sLogger.debug("Video content sharing streaming invitation");
                     }
                     mImsModule.getRichcallService().receiveVideoSharingInvitation(request,
                             timestamp);
                 } else {
                     // Service not supported: reject the invitation with a 603 Decline
                     if (logActivated) {
-                        logger.debug("Video share service not supported: automatically reject");
+                        sLogger.debug("Video share service not supported: automatically reject");
                     }
                     sendFinalResponse(request, Response.DECLINE);
                 }
@@ -399,14 +414,14 @@ public class ImsServiceDispatcher extends Thread {
                 // Geoloc sharing
                 if (mRcsSettings.isGeoLocationPushSupported()) {
                     if (logActivated) {
-                        logger.debug("Geoloc content sharing transfer invitation");
+                        sLogger.debug("Geoloc content sharing transfer invitation");
                     }
                     mImsModule.getRichcallService().receiveGeolocSharingInvitation(request,
                             timestamp);
                 } else {
                     // Service not supported: reject the invitation with a 603 Decline
                     if (logActivated) {
-                        logger.debug("Geoloc share service not supported: automatically reject");
+                        sLogger.debug("Geoloc share service not supported: automatically reject");
                     }
                     sendFinalResponse(request, Response.DECLINE);
                 }
@@ -419,7 +434,7 @@ public class ImsServiceDispatcher extends Thread {
                 // TODO: Add Ipcall support here in future releases
                 // Service not supported: reject the invitation with a 603 Decline
                 if (logActivated) {
-                    logger.debug("IP Voice call service not supported: automatically reject");
+                    sLogger.debug("IP Voice call service not supported: automatically reject");
                 }
                 sendFinalResponse(request, Response.DECLINE);
             } else if (SipUtils
@@ -433,7 +448,7 @@ public class ImsServiceDispatcher extends Thread {
                 // TODO: Add Ipcall support here in future releases
                 // Service not supported: reject the invitation with a 603 Decline
                 if (logActivated) {
-                    logger.debug("IP video call service not supported: automatically reject");
+                    sLogger.debug("IP video call service not supported: automatically reject");
                 }
                 sendFinalResponse(request, Response.DECLINE);
             } else {
@@ -442,26 +457,26 @@ public class ImsServiceDispatcher extends Thread {
                     // Generic SIP session
                     if (isTagPresent(sdp, "msrp")) {
                         if (logActivated) {
-                            logger.debug("Generic SIP session invitation with MSRP media");
+                            sLogger.debug("Generic SIP session invitation with MSRP media");
                         }
                         mImsModule.getSipService().receiveMsrpSessionInvitation(intent, request,
                                 timestamp);
                     } else if (isTagPresent(sdp, "rtp")) {
                         if (logActivated) {
-                            logger.debug("Generic SIP session invitation with RTP media");
+                            sLogger.debug("Generic SIP session invitation with RTP media");
                         }
                         mImsModule.getSipService().receiveRtpSessionInvitation(intent, request,
                                 timestamp);
                     } else {
                         if (logActivated) {
-                            logger.debug("Media not supported for a generic SIP session");
+                            sLogger.debug("Media not supported for a generic SIP session");
                         }
                         sendFinalResponse(request, Response.SESSION_NOT_ACCEPTABLE);
                     }
                 } else {
                     // Unknown service: reject the invitation with a 403 forbidden
                     if (logActivated) {
-                        logger.debug("Unknown IMS service: automatically reject");
+                        sLogger.debug("Unknown IMS service: automatically reject");
                     }
                     sendFinalResponse(request, Response.FORBIDDEN, "Unsupported Extension");
                 }
@@ -477,7 +492,7 @@ public class ImsServiceDispatcher extends Thread {
             } else {
                 // Unknown service: reject the message with a 403 Forbidden
                 if (logActivated) {
-                    logger.debug("Unknown IMS service: automatically reject");
+                    sLogger.debug("Unknown IMS service: automatically reject");
                 }
                 sendFinalResponse(request, Response.FORBIDDEN);
             }
@@ -494,7 +509,7 @@ public class ImsServiceDispatcher extends Thread {
 
             // Send a 200 OK response
             if (logActivated) {
-                logger.info("Send 200 OK");
+                sLogger.info("Send 200 OK");
             }
             SipResponse response = SipMessageFactory.createResponse(request, Response.OK);
             mImsModule.getSipManager().sendSipResponse(response);
@@ -509,13 +524,13 @@ public class ImsServiceDispatcher extends Thread {
             // Send a 200 OK
             try {
                 if (logActivated) {
-                    logger.info("Send 200 OK");
+                    sLogger.info("Send 200 OK");
                 }
                 SipResponse cancelResp = SipMessageFactory.createResponse(request, Response.OK);
                 mImsModule.getSipManager().sendSipResponse(cancelResp);
             } catch (Exception e) {
                 if (logActivated) {
-                    logger.error("Can't send 200 OK response", e);
+                    sLogger.error("Can't send 200 OK response", e);
                 }
             }
         } else if (request.getMethod().equals(Request.UPDATE)) {
@@ -526,7 +541,7 @@ public class ImsServiceDispatcher extends Thread {
         } else {
             // Unknown request: : reject the request with a 403 Forbidden
             if (logActivated) {
-                logger.debug("Unknown request " + request.getMethod());
+                sLogger.debug("Unknown request " + request.getMethod());
             }
             sendFinalResponse(request, Response.FORBIDDEN);
         }
@@ -537,10 +552,11 @@ public class ImsServiceDispatcher extends Thread {
      * 
      * @param notify SIP request
      * @param timestamp Local timestamp when got SipRequest
-     * @throws IOException
-     * @throws SipException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void dispatchNotify(SipRequest notify, long timestamp) throws IOException, SipException {
+    private void dispatchNotify(SipRequest notify, long timestamp) throws SipPayloadException,
+            SipNetworkException {
         // Create 200 OK response
         SipResponse resp = SipMessageFactory.createResponse(notify, Response.OK);
 
@@ -550,8 +566,8 @@ public class ImsServiceDispatcher extends Thread {
         // Get the event type
         EventHeader eventHeader = (EventHeader) notify.getHeader(EventHeader.NAME);
         if (eventHeader == null) {
-            if (logger.isActivated()) {
-                logger.debug("Unknown notification event type");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Unknown notification event type");
             }
             return;
         }
@@ -578,8 +594,8 @@ public class ImsServiceDispatcher extends Thread {
                     .receiveConferenceNotification(notify, timestamp);
         } else {
             // Not supported service
-            if (logger.isActivated()) {
-                logger.debug("Not supported notification event type");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Not supported notification event type");
             }
         }
     }
@@ -626,8 +642,8 @@ public class ImsServiceDispatcher extends Thread {
             SipResponse trying = SipMessageFactory.createResponse(request, null, 100);
             mImsModule.getCurrentNetworkInterface().getSipManager().sendSipResponse(trying);
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't send a 100 Trying response");
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't send a 100 Trying response");
             }
         }
     }
@@ -644,8 +660,8 @@ public class ImsServiceDispatcher extends Thread {
                     IdGenerator.getIdentifier(), code);
             mImsModule.getCurrentNetworkInterface().getSipManager().sendSipResponse(resp);
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't send a " + code + " response");
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't send a " + code + " response");
             }
         }
     }
@@ -663,8 +679,28 @@ public class ImsServiceDispatcher extends Thread {
                     IdGenerator.getIdentifier(), code, warning);
             mImsModule.getCurrentNetworkInterface().getSipManager().sendSipResponse(resp);
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't send a " + code + " response");
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't send a " + code + " response");
+            }
+        }
+    }
+
+    /**
+     * Handle ims dispatch error
+     * 
+     * @param request
+     */
+    private void handleImsDispatchError(SipRequest request) {
+        final PresenceService service = mImsModule.getPresenceService();
+        if (request.getMethod().equals(Request.NOTIFY) && mRcsSettings.isSocialPresenceSupported()
+                && service.isServiceStarted()) {
+            SubscriptionStateHeader stateHeader = (SubscriptionStateHeader) request
+                    .getHeader(SubscriptionStateHeader.NAME);
+            if ((stateHeader != null) && stateHeader.getState().equalsIgnoreCase("terminated")) {
+                if (sLogger.isActivated()) {
+                    sLogger.info("Presence subscription has been terminated by server");
+                }
+                service.getPresenceSubscriber().terminatedByServer();
             }
         }
     }

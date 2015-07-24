@@ -29,6 +29,7 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
@@ -143,6 +144,17 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                             .append(getSessionID()).append(" with fileTransferId : ")
                             .append(getFileTransferId()).toString(), e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (SipPayloadException e) {
+            sLogger.error(
+                    new StringBuilder("Failed to initiate file transfer session for sessionId : ")
+                            .append(getSessionID()).append(" with fileTransferId : ")
+                            .append(getFileTransferId()).toString(), e);
+            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (SipNetworkException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
+            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
@@ -202,62 +214,68 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
      * Prepare to send the info to terminating side
      * 
      * @param result byte[] which contains the result of the 200 OK from the content server
-     * @throws MsrpException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void sendResultToContact(byte[] result) throws MsrpException {
-        if (mUploadManager.isCancelled()) {
-            return;
-        }
-        FileTransferHttpInfoDocument infoDocument;
-        boolean logActivated = sLogger.isActivated();
-        if (result == null
-                || (infoDocument = FileTransferUtils.parseFileTransferHttpDocument(result,
-                        mRcsSettings)) == null) {
-            if (logActivated) {
-                sLogger.debug("Upload has failed");
+    private void sendResultToContact(byte[] result) throws SipPayloadException, SipNetworkException {
+        try {
+            if (mUploadManager.isCancelled()) {
+                return;
             }
-            handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED));
-            return;
-
-        }
-        mFileInfo = new String(result, UTF8);
-        if (logActivated) {
-            sLogger.debug("Upload done with success: ".concat(mFileInfo.toString()));
-        }
-        setFileExpiration(infoDocument.getExpiration());
-        FileTransferHttpThumbnail thumbnail = infoDocument.getFileThumbnail();
-        if (thumbnail != null) {
-            setIconExpiration(thumbnail.getExpiration());
-        } else {
-            setIconExpiration(FileTransferData.UNKNOWN_EXPIRATION);
-        }
-
-        String chatId = getContributionID();
-        mChatSession = mCore.getImService().getGroupChatSession(chatId);
-        if (mChatSession != null && mChatSession.isMediaEstablished()) {
-            if (logActivated) {
-                sLogger.debug("Send file transfer info via an existing chat session");
-            }
-            sendFileTransferInfo();
-            handleFileTransfered();
-
-        } else {
-            mMessagingLog.setFileTransferDownloadInfo(getFileTransferId(), infoDocument);
-            removeSession();
-            /*
-             * If group chat session does not exist, try to rejoin group chat and on success dequeue
-             * the file transfer message
-             */
-            if (mChatSession == null) {
-                mCore.getListener().handleRejoinGroupChatAsPartOfSendOperation(chatId);
-            } else if (!mChatSession.isMediaEstablished() && mChatSession.isInitiatedByRemote()) {
+            FileTransferHttpInfoDocument infoDocument;
+            boolean logActivated = sLogger.isActivated();
+            if (result == null
+                    || (infoDocument = FileTransferUtils.parseFileTransferHttpDocument(result,
+                            mRcsSettings)) == null) {
                 if (logActivated) {
-                    sLogger.debug(new StringBuilder("Group chat session with chatId '")
-                            .append(chatId).append("' is pending for acceptance, accept it.")
-                            .toString());
+                    sLogger.debug("Upload has failed");
                 }
-                mChatSession.acceptSession();
+                handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED));
+                return;
+
             }
+            mFileInfo = new String(result, UTF8);
+            if (logActivated) {
+                sLogger.debug("Upload done with success: ".concat(mFileInfo.toString()));
+            }
+            setFileExpiration(infoDocument.getExpiration());
+            FileTransferHttpThumbnail thumbnail = infoDocument.getFileThumbnail();
+            if (thumbnail != null) {
+                setIconExpiration(thumbnail.getExpiration());
+            } else {
+                setIconExpiration(FileTransferData.UNKNOWN_EXPIRATION);
+            }
+
+            String chatId = getContributionID();
+            mChatSession = mCore.getImService().getGroupChatSession(chatId);
+            if (mChatSession != null && mChatSession.isMediaEstablished()) {
+                if (logActivated) {
+                    sLogger.debug("Send file transfer info via an existing chat session");
+                }
+                sendFileTransferInfo();
+                handleFileTransfered();
+
+            } else {
+                mMessagingLog.setFileTransferDownloadInfo(getFileTransferId(), infoDocument);
+                removeSession();
+                /*
+                 * If group chat session does not exist, try to rejoin group chat and on success
+                 * dequeue the file transfer message
+                 */
+                if (mChatSession == null) {
+                    mCore.getListener().handleRejoinGroupChatAsPartOfSendOperation(chatId);
+                } else if (!mChatSession.isMediaEstablished() && mChatSession.isInitiatedByRemote()) {
+                    if (logActivated) {
+                        sLogger.debug(new StringBuilder("Group chat session with chatId '")
+                                .append(chatId).append("' is pending for acceptance, accept it.")
+                                .toString());
+                    }
+                    mChatSession.acceptSession();
+                }
+            }
+        } catch (MsrpException e) {
+            throw new SipNetworkException(
+                    "Failed to send result chunks for transferId : ".concat(getFileTransferId()), e);
         }
     }
 
@@ -299,6 +317,11 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                             new StringBuilder("Failed to resume upload for sessionId : ")
                                     .append(getSessionID()).append(" with fileTransferId : ")
                                     .append(getFileTransferId()).toString(), e);
+                    handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
+                } catch (SipNetworkException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(e.getMessage());
+                    }
                     handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
                 } catch (RuntimeException e) {
                     /*

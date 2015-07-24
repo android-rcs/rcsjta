@@ -64,6 +64,7 @@ import com.gsma.services.rcs.contact.ContactId;
 
 import gov2.nist.javax2.sip.header.Reason;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -440,8 +441,8 @@ public abstract class GroupChatSession extends ChatSession {
         /* Timestamp for IMDN datetime */
         String imdn = ChatUtils.buildImdnDeliveryReport(msgId, status, timestamp);
         /* Timestamp for CPIM DateTime */
-        String content = ChatUtils.buildCpimDeliveryReport(
-                fromUri, toUri, imdn, System.currentTimeMillis());
+        String content = ChatUtils.buildCpimDeliveryReport(fromUri, toUri, imdn,
+                System.currentTimeMillis());
 
         // Send data
         TypeMsrpChunk typeMsrpChunk = TypeMsrpChunk.OtherMessageDeliveredReportStatus;
@@ -683,8 +684,8 @@ public abstract class GroupChatSession extends ChatSession {
      * byte[], java.lang.String)
      */
     @Override
-    public void msrpDataReceived(String msgId, byte[] data, String mimeType) throws MsrpException,
-            SipPayloadException {
+    public void msrpDataReceived(String msgId, byte[] data, String mimeType)
+            throws SipPayloadException, SipNetworkException {
         try {
             boolean logActivated = sLogger.isActivated();
             if (logActivated) {
@@ -841,9 +842,9 @@ public abstract class GroupChatSession extends ChatSession {
                     }
                 }
             }
-        } catch (SipNetworkException e) {
-            throw new MsrpException("Unable to handle delivery status for msgId : ".concat(msgId),
-                    e);
+        } catch (IOException e) {
+            throw new SipNetworkException(
+                    "Unable to handle delivery status for msgId : ".concat(msgId), e);
         }
     }
 

@@ -53,11 +53,14 @@ import android.graphics.Matrix;
 import android.net.Uri;
 
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Utility class to manage File Transfer
@@ -227,16 +230,25 @@ public class FileTransferUtils {
      * @param xml XML document
      * @param rcsSettings RCS settings
      * @return File transfer document
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     public static FileTransferHttpInfoDocument parseFileTransferHttpDocument(byte[] xml,
-            RcsSettings rcsSettings) {
+            RcsSettings rcsSettings) throws SipPayloadException, SipNetworkException {
         try {
             InputSource ftHttpInput = new InputSource(new ByteArrayInputStream(xml));
             FileTransferHttpInfoParser ftHttpParser = new FileTransferHttpInfoParser(ftHttpInput,
                     rcsSettings);
             return ftHttpParser.getFtInfo();
-        } catch (Exception e) {
-            return null;
+
+        } catch (ParserConfigurationException e) {
+            throw new SipPayloadException("Can't parse FT HTTP document!", e);
+
+        } catch (SAXException e) {
+            throw new SipPayloadException("Can't parse FT HTTP document!", e);
+
+        } catch (IOException e) {
+            throw new SipNetworkException("Can't parse FT HTTP document!", e);
         }
     }
 
@@ -247,9 +259,10 @@ public class FileTransferUtils {
      * @param rcsSettings RCS settings
      * @return FT HTTP info
      * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     public static FileTransferHttpInfoDocument getHttpFTInfo(SipRequest request,
-            RcsSettings rcsSettings) throws SipPayloadException {
+            RcsSettings rcsSettings) throws SipPayloadException, SipNetworkException {
         /* Not a valid timestamp here as the message is just for temp use */
         long timestamp = -1;
         ChatMessage message = ChatUtils.getFirstMessage(request, timestamp);

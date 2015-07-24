@@ -24,14 +24,17 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8_STR;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import android.net.Uri;
@@ -96,10 +99,12 @@ public class FileTransferHttpInfoParser extends DefaultHandler {
      * 
      * @param inputSource Input source
      * @param rcsSettings
-     * @throws Exception
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws IOException
      */
     public FileTransferHttpInfoParser(InputSource inputSource, RcsSettings rcsSettings)
-            throws Exception {
+            throws ParserConfigurationException, SAXException, IOException {
         mRcsSettings = rcsSettings;
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser parser = factory.newSAXParser();

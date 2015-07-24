@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +15,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.terms;
 
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
+import com.gsma.rcs.utils.logger.Logger;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import com.gsma.rcs.utils.logger.Logger;
+import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 /**
  * Terms & condition request parser
@@ -39,80 +47,87 @@ public class TermsAckParser extends DefaultHandler {
      * </EndUserConfirmationAck>
      */
 
-    private StringBuffer accumulator;
-    private String id = null;
-    private String status = null;
-    private String subject = null;
-    private String text = null;
+    private StringBuffer mAccumulator;
+
+    private String mId;
+
+    private String mStatus;
+
+    private String mSubject;
+
+    private String mText;
 
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(TermsAckParser.class.getName());
 
     /**
      * Constructor
      * 
      * @param inputSource Input source
-     * @throws Exception
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws IOException
      */
-    public TermsAckParser(InputSource inputSource) throws Exception {
+    public TermsAckParser(InputSource inputSource) throws ParserConfigurationException,
+            SAXException, IOException {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser parser = factory.newSAXParser();
         parser.parse(inputSource, this);
     }
 
     public String getId() {
-        return id;
+        return mId;
     }
 
     public String getStatus() {
-        return status;
+        return mStatus;
     }
 
     public String getSubject() {
-        return subject;
+        return mSubject;
     }
 
     public String getText() {
-        return text;
+        return mText;
     }
 
     public void startDocument() {
-        if (logger.isActivated()) {
-            logger.debug("Start document");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Start document");
         }
-        accumulator = new StringBuffer();
+        mAccumulator = new StringBuffer();
     }
 
     public void characters(char buffer[], int start, int length) {
-        accumulator.append(buffer, start, length);
+        mAccumulator.append(buffer, start, length);
     }
 
     public void startElement(String namespaceURL, String localName, String qname, Attributes attr) {
-        accumulator.setLength(0);
+        mAccumulator.setLength(0);
 
         if (localName.equals("EndUserConfirmationAck")) {
-            id = attr.getValue("id").trim();
-            status = attr.getValue("status").trim();
+            mId = attr.getValue("id").trim();
+            mStatus = attr.getValue("status").trim();
         }
     }
 
     public void endElement(String namespaceURL, String localName, String qname) {
         if (localName.equals("EndUserConfirmationAck")) {
-            if (logger.isActivated()) {
-                logger.debug("Terms request document is complete");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Terms request document is complete");
             }
         } else if (localName.equals("Subject")) {
-            subject = accumulator.toString().trim();
+            mSubject = mAccumulator.toString().trim();
         } else if (localName.equals("Text")) {
-            text = accumulator.toString().trim();
+            mText = mAccumulator.toString().trim();
         }
     }
 
     public void endDocument() {
-        if (logger.isActivated()) {
-            logger.debug("End document");
+        if (sLogger.isActivated()) {
+            sLogger.debug("End document");
         }
     }
 }

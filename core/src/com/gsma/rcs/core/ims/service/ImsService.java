@@ -24,6 +24,8 @@ package com.gsma.rcs.core.ims.service;
 
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
@@ -214,13 +216,19 @@ public abstract class ImsService {
 
     /**
      * Start the IMS service
+     * 
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public abstract void start();
+    public abstract void start() throws SipPayloadException, SipNetworkException;
 
     /**
      * Stop the IMS service
+     * 
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public abstract void stop();
+    public abstract void stop() throws SipPayloadException, SipNetworkException;
 
     /**
      * Check the IMS service
