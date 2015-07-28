@@ -35,6 +35,7 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.SessionActivityManager;
@@ -198,8 +199,9 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
      * Open media session
      * 
      * @throws IOException
+     * @throws SipPayloadException
      */
-    public void openMediaSession() throws IOException {
+    public void openMediaSession() throws IOException, SipPayloadException {
         getMsrpMgr().openMsrpSession();
     }
 

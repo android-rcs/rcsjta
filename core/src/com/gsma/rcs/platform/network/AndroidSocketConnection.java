@@ -22,6 +22,8 @@
 
 package com.gsma.rcs.platform.network;
 
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -59,8 +61,9 @@ public class AndroidSocketConnection implements SocketConnection {
      * @param remoteAddr Remote address
      * @param remotePort Remote port
      * @throws IOException
+     * @throws SipPayloadException
      */
-    public void open(String remoteAddr, int remotePort) throws IOException {
+    public void open(String remoteAddr, int remotePort) throws IOException, SipPayloadException {
         socket = new Socket(remoteAddr, remotePort);
     }
 

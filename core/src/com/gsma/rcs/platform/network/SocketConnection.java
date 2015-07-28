@@ -22,6 +22,8 @@
 
 package com.gsma.rcs.platform.network;
 
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,8 +41,9 @@ public interface SocketConnection extends Closeable {
      * @param remoteAddr Remote address
      * @param remotePort Remote port
      * @throws IOException
+     * @throws SipPayloadException
      */
-    public void open(String remoteAddr, int remotePort) throws IOException;
+    public void open(String remoteAddr, int remotePort) throws IOException, SipPayloadException;
 
     /**
      * Close the socket

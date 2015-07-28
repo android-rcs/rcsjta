@@ -26,8 +26,12 @@ import com.gsma.rcs.utils.logger.Logger;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -88,9 +92,12 @@ public class ConferenceInfoParser extends DefaultHandler {
      * Constructor
      * 
      * @param inputSource Input source
-     * @throws Exception
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws IOException
      */
-    public ConferenceInfoParser(InputSource inputSource) throws Exception {
+    public ConferenceInfoParser(InputSource inputSource) throws ParserConfigurationException,
+            SAXException, IOException {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser parser = factory.newSAXParser();
         parser.parse(inputSource, this);
@@ -127,11 +134,7 @@ public class ConferenceInfoParser extends DefaultHandler {
             mDisconnectionMethod = null;
             mFailureReason = null;
             if (yourown != null) {
-                try {
-                    mMe = Boolean.parseBoolean(yourown);
-                    /* TODO: Implement proper exception handling in CR037 */
-                } catch (Exception e) {
-                }
+                mMe = Boolean.parseBoolean(yourown);
             }
         }
     }

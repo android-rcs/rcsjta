@@ -45,6 +45,7 @@ import android.net.NetworkInfo;
 import android.os.BatteryManager;
 import android.telephony.TelephonyManager;
 
+import java.io.IOException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.security.cert.CertificateException;
@@ -474,10 +475,14 @@ public class ImsConnectionManager implements Runnable {
             }
         } catch (SocketException e) {
             if (sLogger.isActivated()) {
-                sLogger.error("Disconnect from IMS: IP connection lost", e);
+                sLogger.debug(e.getMessage());
             }
             disconnectFromIms();
-
+        } catch (IOException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
+            disconnectFromIms();
         }
     }
 
@@ -486,8 +491,9 @@ public class ImsConnectionManager implements Runnable {
      * 
      * @param ipAddr IP address
      * @throws CertificateException
+     * @throws IOException
      */
-    private void connectToIms(String ipAddr) throws CertificateException {
+    private void connectToIms(String ipAddr) throws CertificateException, IOException {
         // Connected to the network access
         mCurrentNetworkInterface.getNetworkAccess().connect(ipAddr);
 

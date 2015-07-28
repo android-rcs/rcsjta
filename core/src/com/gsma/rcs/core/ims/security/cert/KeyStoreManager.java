@@ -31,6 +31,9 @@ import com.gsma.rcs.utils.logger.Logger;
 
 import com.telekom.bouncycastle.wrapper.SimpleContentSignerBuilder;
 
+import android.net.Uri;
+import android.text.TextUtils;
+
 import local.org.bouncycastle.asn1.ASN1Encodable;
 import local.org.bouncycastle.asn1.x500.X500Name;
 import local.org.bouncycastle.asn1.x509.BasicConstraints;
@@ -50,6 +53,7 @@ import local.org.bouncycastle.operator.OperatorCreationException;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -69,6 +73,7 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -120,6 +125,8 @@ public class KeyStoreManager {
      */
     private static String sLastIpAddress;
 
+    private static KeyStore sKeyStore;
+
     /**
      * Load the keystore manager
      * 
@@ -130,7 +137,6 @@ public class KeyStoreManager {
     // Changed by Deutsche Telekom
     public static void loadKeyStore(RcsSettings rcsSettings) throws KeyStoreException, IOException {
         // Changed by Deutsche Telekom
-        // List all registered providers for debug purpose
         if (sLogger.isActivated()) {
             Provider[] currentProviders = Security.getProviders();
             if (currentProviders.length > 0) {
@@ -141,27 +147,27 @@ public class KeyStoreManager {
             }
         }
 
-        // Create the keystore if not present
         // Changed by Deutsche Telekom
-        if (!KeyStoreManager.isKeystoreExists()) {
+        if (!isKeystoreExists()) {
             // Changed by Deutsche Telekom
             if (sLogger.isActivated()) {
-                sLogger.debug("Create new keystore file " + getKeystorePath());
+                sLogger.debug("Create new keystore file ".concat(getKeystore().getPath()));
             }
-            KeyStoreManager.createKeyStore();
+            createKeyStore();
         }
 
-        // Add certificates if not present
         String certRoot = rcsSettings.getTlsCertificateRoot();
-        if ((certRoot != null) && (certRoot.length() > 0)) {
-            if (!KeyStoreManager.isCertificateEntry(buildCertificateAlias(certRoot))) {
-                KeyStoreManager.addCertificates(certRoot);
+        if (!TextUtils.isEmpty(certRoot)) {
+            Uri certFile = Uri.parse(certRoot);
+            if (!isCertificateEntry(buildCertificateAlias(certFile))) {
+                addCertificates(certFile);
             }
         }
         String certIntermediate = rcsSettings.getTlsCertificateIntermediate();
-        if ((certIntermediate != null) && (certIntermediate.length() > 0)) {
-            if (!KeyStoreManager.isCertificateEntry(buildCertificateAlias(certIntermediate))) {
-                KeyStoreManager.addCertificates(certIntermediate);
+        if (!TextUtils.isEmpty(certIntermediate)) {
+            Uri certIntermediateFile = Uri.parse(certIntermediate);
+            if (!isCertificateEntry(buildCertificateAlias(certIntermediateFile))) {
+                addCertificates(certIntermediateFile);
             }
         }
     }
@@ -185,13 +191,11 @@ public class KeyStoreManager {
     }
 
     /**
-     * Returns the keystore path
-     * 
-     * @return Keystore path
+     * returns the keystore uri
      */
-    public static String getKeystorePath() {
-        return AndroidFactory.getApplicationContext().getFilesDir().getAbsolutePath() + "/"
-                + KEYSTORE_NAME;
+    public static Uri getKeystore() {
+        return Uri.fromFile(new File(AndroidFactory.getApplicationContext().getFilesDir()
+                .getAbsolutePath(), KEYSTORE_NAME));
     }
 
     // Changed by Deutsche Telekom
@@ -209,9 +213,12 @@ public class KeyStoreManager {
      * Sets the fingerprint of the client certificate
      * 
      * @param cert certificate
+     * @throws NoSuchAlgorithmException
+     * @throws CertificateEncodingException
      */
-    public static void setClientCertificateFingerprint(Certificate cert) {
-        sFingerprint = KeyStoreManager.getCertFingerprint(cert, "SHA-1");
+    public static void setClientCertificateFingerprint(Certificate cert)
+            throws CertificateEncodingException, NoSuchAlgorithmException {
+        sFingerprint = getCertFingerprint(cert, "SHA-1");
     }
 
     /**
@@ -219,22 +226,12 @@ public class KeyStoreManager {
      * 
      * @return True if already created
      */
-    // Changed by Deutsche Telekom
     private static boolean isKeystoreExists() {
-        // Test file
-        File file = new File(KeyStoreManager.getKeystorePath());
-        if ((file == null) || (!file.exists()))
-            return false;
-
-        // Changed by Deutsche Telekom
-        // Try to open the keystore
-        KeyStore ks = KeyStoreManager.loadKeyStoreFromFile();
-        if (ks != null) {
-            ks = null;
-            return true;
-        } else {
+        File file = new File(getKeystore().getPath());
+        if (!file.exists()) {
             return false;
         }
+        return sKeyStore != null;
     }
 
     // Changed by Deutsche Telekom
@@ -243,11 +240,13 @@ public class KeyStoreManager {
      * 
      * @param ipAddress IP address to be set in subjectAltName according to RFC 4572
      * @throws CertificateException
+     * @throws IOException
      */
-    public static void updateClientCertificate(String ipAddress) throws CertificateException {
-        if (!KeyStoreManager.isKeystoreExists()) {
+    public static void updateClientCertificate(String ipAddress) throws CertificateException,
+            IOException {
+        if (!isKeystoreExists()) {
             throw new CertificateException(new StringBuilder(
-                    "Client certificate not created as keystore file ").append(getKeystorePath())
+                    "Client certificate not created as keystore file ").append(getKeystore())
                     .append(" is not available").toString());
         }
         if (sLogger.isActivated()) {
@@ -258,30 +257,20 @@ public class KeyStoreManager {
 
     // Changed by Deutsche Telekom
     private static synchronized void createClientCertificate(String ipAddress)
-            throws CertificateException {
+            throws CertificateException, IOException {
         try {
-            // IP address hasn't changed
             if (ipAddress != null && ipAddress.equals(sLastIpAddress)) {
                 if (sLogger.isActivated()) {
                     sLogger.debug("IP address hasn't changed. No update needed.");
                 }
                 return;
             }
-            // remember IP address for next update
             sLastIpAddress = ipAddress;
 
-            // Load the keystore from file
-            KeyStore ks = KeyStoreManager.loadKeyStoreFromFile();
-            if (ks == null) {
-                // loading keystore failed
-                return;
-            }
-
-            // handle private and public key
+            KeyStore ks = loadKeyStoreFromFile();
             PrivateKey privKey = null;
             PublicKey pubKey = null;
             if (ks.isKeyEntry(CLIENT_CERT_ALIAS)) {
-                // recycle key & certificate
                 if (sLogger.isActivated()) {
                     sLogger.debug("old keypair is recycled");
                 }
@@ -292,30 +281,25 @@ public class KeyStoreManager {
                 pubKey = entry.getCertificate().getPublicKey();
                 ks.deleteEntry(CLIENT_CERT_ALIAS);
             } else {
-                // generate key pair to be used by the certificate
                 if (sLogger.isActivated()) {
                     sLogger.debug("new keypair is generated");
                 }
 
                 KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
                 SecureRandom secureRandom = new SecureRandom();
-                // Do *not* seed secureRandom! Automatically seeded
-                // from system entropy.
+                /*
+                 * Do *not* seed secureRandom! Automatically seeded from system entropy.
+                 */
                 keyGen.initialize(1024, secureRandom);
                 KeyPair keypair = keyGen.generateKeyPair();
                 privKey = keypair.getPrivate();
                 pubKey = keypair.getPublic();
             }
-
-            // generate a new X.509 certificate
             X509Certificate[] certChain = new X509Certificate[1];
-            // X500Name subjectName = new X500Name("CN="
-            // + OemCustomization.customizeString("com.gsma.rcs.client"));
             X500Name subjectName = new X500Name("CN=com.gsma.rcs.client");
             long timestamp = System.currentTimeMillis();
             Date startDate = new Date(timestamp - 24 * 60 * 60
                     * SECONDS_TO_MILLISECONDS_CONVERSION_RATE);
-            // validity of 1 year
             Date endDate = new Date(timestamp + 365L * 26 * 60 * 60
                     * SECONDS_TO_MILLISECONDS_CONVERSION_RATE);
             X509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(subjectName,
@@ -329,36 +313,30 @@ public class KeyStoreManager {
                     KeyUsage.digitalSignature | KeyUsage.keyCertSign));
             certGen.addExtension(X509Extension.extendedKeyUsage, false, new ExtendedKeyUsage(
                     KeyPurposeId.id_kp_clientAuth));
-            // set subjectAltName to IP address and SIP URI
             certGen.addExtension(X509Extension.subjectAlternativeName, false, new GeneralNames(
                     new GeneralName[] {
                             new GeneralName(GeneralName.iPAddress, ipAddress),
                             new GeneralName(GeneralName.uniformResourceIdentifier,
                                     ImsModule.IMS_USER_PROFILE.getPublicUri())
                     }));
-            // set basicConstraints to CA
             certGen.addExtension(X509Extension.basicConstraints, false, new BasicConstraints(true));
 
-            // self-sign certificate
             ContentSigner sigGen = new SimpleContentSignerBuilder().build(privKey);
 
             JcaX509CertificateConverter certConv = new JcaX509CertificateConverter();
             certChain[0] = certConv.getCertificate(certGen.build(sigGen));
 
-            // store fingerprint for further use
-            KeyStoreManager.setClientCertificateFingerprint(certChain[0]);
+            setClientCertificateFingerprint(certChain[0]);
 
-            // place new key (incl. certificate) into keystore
             ks.setEntry(CLIENT_CERT_ALIAS, new KeyStore.PrivateKeyEntry(privKey, certChain),
                     new KeyStore.PasswordProtection(KEYSTORE_PASSWORD.toCharArray()));
 
-            // Save the keystore to file
-            KeyStoreManager.saveKeyStoreToFile(ks);
+            saveKeyStoreToFile(ks);
 
             if (sLogger.isActivated()) {
                 sLogger.debug("Client certificate " + CLIENT_CERT_ALIAS + " for IP address "
-                        + ipAddress + " with fingerprint "
-                        + KeyStoreManager.getClientCertificateFingerprint() + " added");
+                        + ipAddress + " with fingerprint " + getClientCertificateFingerprint()
+                        + " added");
             }
         } catch (KeyStoreException e) {
             throw new CertificateException(new StringBuilder(
@@ -394,23 +372,23 @@ public class KeyStoreManager {
      * @@throws IOException
      */
     private static void createKeyStore() throws KeyStoreException, IOException {
-        File file = new File(getKeystorePath());
-        if ((file == null) || (!file.exists())) {
-            try {
-                KeyStore ks = KeyStore.getInstance(getKeystoreType());
-                // Changed by Deutsche Telekom
-                synchronized (KeyStoreManager.class) {
-                    ks.load(null, KEYSTORE_PASSWORD.toCharArray());
-                }
-                // Changed by Deutsche Telekom
-                KeyStoreManager.saveKeyStoreToFile(ks);
-            } catch (NoSuchAlgorithmException e) {
-                throw new KeyStoreException("Unable to create key store!", e);
-
-            } catch (CertificateException e) {
-                throw new KeyStoreException("Unable to create key store!", e);
-
+        if (sKeyStore != null) {
+            return;
+        }
+        try {
+            sKeyStore = KeyStore.getInstance(getKeystoreType());
+            // Changed by Deutsche Telekom
+            synchronized (KeyStoreManager.class) {
+                sKeyStore.load(null, KEYSTORE_PASSWORD.toCharArray());
             }
+            // Changed by Deutsche Telekom
+            saveKeyStoreToFile(sKeyStore);
+        } catch (NoSuchAlgorithmException e) {
+            throw new KeyStoreException("Unable to create key store!", e);
+
+        } catch (CertificateException e) {
+            throw new KeyStoreException("Unable to create key store!", e);
+
         }
     }
 
@@ -419,50 +397,30 @@ public class KeyStoreManager {
      * 
      * @param alias certificate alias
      * @return True if available
+     * @throws KeyStoreException
+     * @throws IOException
      */
     // Changed by Deutsche Telekom
-    private static boolean isCertificateEntry(String alias) {
-        boolean result = false;
-        try {
-            // Open the existing keystore
-            KeyStore ks = KeyStoreManager.loadKeyStoreFromFile();
-            if (ks == null) {
-                // loading the keystore failed
-                return result;
-            }
-
-            // Changed by Deutsche Telekom
-            result = ks.isCertificateEntry(alias);
-            ks = null;
-        } catch (Exception ex) {
-            // Changed by Deutsche Telekom
-            if (sLogger.isActivated()) {
-                sLogger.error("Checking key " + alias + " failed: ", ex);
-            }
-        }
-        return result;
+    private static boolean isCertificateEntry(String alias) throws KeyStoreException, IOException {
+        return sKeyStore.isCertificateEntry(alias);
     }
 
     /**
      * Add a certificate or all certificates in folder in the keystore
      * 
-     * @param path certificates path
+     * @param certificateFile Uri
+     * @throws KeyStoreException
+     * @throws IOException
      */
     // Changed by Deutsche Telekom
-    private static void addCertificates(String path) {
+    private static void addCertificates(Uri certificateFile) throws KeyStoreException, IOException {
+        InputStream inStream = null;
         try {
-            // Open the existing keystore
             // Changed by Deutsche Telekom
-            KeyStore ks = KeyStoreManager.loadKeyStoreFromFile();
-            if (ks == null) {
-                // loading the keystore failed
-                return;
-            }
-
-            // Open certificates path
-            File pathFile = new File(path);
+            KeyStore ks = loadKeyStoreFromFile();
+            final String certPath = certificateFile.getPath();
+            File pathFile = new File(certPath);
             if (pathFile.isDirectory()) {
-                // The path is a folder, add all certificates
                 File[] certificates = pathFile.listFiles(new FilenameFilter() {
                     public boolean accept(File dir, String filename) {
                         return filename.endsWith(RcsSettingsData.CERTIFICATE_FILE_TYPE);
@@ -471,37 +429,35 @@ public class KeyStoreManager {
 
                 if (certificates != null) {
                     for (File file : certificates) {
-                        // Get certificate and add in keystore
                         CertificateFactory cf = CertificateFactory.getInstance("X.509");
-                        InputStream inStream = new FileInputStream(file);
+                        inStream = new FileInputStream(file);
                         X509Certificate cert = (X509Certificate) cf.generateCertificate(inStream);
-                        inStream.close();
-                        ks.setCertificateEntry(buildCertificateAlias(path), cert);
-
-                        // Save the keystore
+                        CloseableUtils.close(inStream);
+                        ks.setCertificateEntry(buildCertificateAlias(certificateFile), cert);
                         // Changed by Deutsche Telekom
-                        KeyStoreManager.saveKeyStoreToFile(ks);
+                        saveKeyStoreToFile(ks);
                     }
                 }
             } else {
-                // The path is a file, add certificate
-                if (path.endsWith(RcsSettingsData.CERTIFICATE_FILE_TYPE)) {
-                    // Get certificate and add in keystore
+                if (certPath.endsWith(RcsSettingsData.CERTIFICATE_FILE_TYPE)) {
                     CertificateFactory cf = CertificateFactory.getInstance("X.509");
-                    InputStream inStream = new FileInputStream(path);
+                    inStream = new FileInputStream(certPath);
                     X509Certificate cert = (X509Certificate) cf.generateCertificate(inStream);
-                    inStream.close();
-                    ks.setCertificateEntry(buildCertificateAlias(path), cert);
-
-                    // Save the keystore
+                    ks.setCertificateEntry(buildCertificateAlias(certificateFile), cert);
                     // Changed by Deutsche Telekom
-                    KeyStoreManager.saveKeyStoreToFile(ks);
+                    saveKeyStoreToFile(ks);
                 }
             }
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("adding certificate " + path + " failed: ", e);
-            }
+        } catch (CertificateException e) {
+            throw new KeyStoreException(new StringBuilder("Adding certificate ")
+                    .append(certificateFile).append(" failed!").toString(), e);
+
+        } catch (FileNotFoundException e) {
+            throw new KeyStoreException(new StringBuilder("Adding certificate ")
+                    .append(certificateFile).append(" failed!").toString(), e);
+
+        } finally {
+            CloseableUtils.close(inStream);
         }
     }
 
@@ -511,17 +467,18 @@ public class KeyStoreManager {
      * @param path File path
      * @return Alias
      */
-    private static String buildCertificateAlias(String path) {
-        String alias = "";
-        File file = new File(path);
+    private static String buildCertificateAlias(Uri certFile) {
+        File file = new File(certFile.getPath());
         String filename = file.getName();
         long lastModified = file.lastModified();
         int lastDotPosition = filename.lastIndexOf('.');
-        if (lastDotPosition > 0)
-            alias = filename.substring(0, lastDotPosition) + lastModified;
-        else
-            alias = filename + lastModified;
-        return alias;
+        StringBuilder alias = new StringBuilder();
+        if (lastDotPosition > 0) {
+            alias.append(filename.substring(0, lastDotPosition));
+        } else {
+            alias.append(filename);
+        }
+        return alias.append(lastModified).toString();
     }
 
     /**
@@ -530,31 +487,18 @@ public class KeyStoreManager {
      * @param cert Certificate
      * @param algorithm hash algorithm to be used
      * @return String as xx:yy:zz
+     * @throws NoSuchAlgorithmException
+     * @throws CertificateEncodingException
      */
-    // Changed by Deutsche Telekom
-    public static String getCertFingerprint(Certificate cert, String algorithm) {
-        try {
-            // Changed by Deutsche Telekom
-            if (cert != null) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Getting " + algorithm + " fingerprint for certificate: "
-                            + cert.toString());
-                }
-                MessageDigest md = MessageDigest.getInstance(algorithm);
-                byte[] der = cert.getEncoded();
-                md.update(der);
-                byte[] digest = md.digest();
-                return hexify(digest);
-            } else {
-                return null;
-            }
-        } catch (Exception e) {
-            // Changed by Deutsche Telekom
-            if (sLogger.isActivated()) {
-                sLogger.error("getCertFingerprint failed: ", e);
-            }
-            return null;
+    public static String getCertFingerprint(Certificate cert, String algorithm)
+            throws NoSuchAlgorithmException, CertificateEncodingException {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Getting " + algorithm + " fingerprint for certificate: "
+                    + cert.toString());
         }
+        MessageDigest md = MessageDigest.getInstance(algorithm);
+        md.update(cert.getEncoded());
+        return hexify(md.digest());
     }
 
     /**
@@ -578,25 +522,21 @@ public class KeyStoreManager {
         return buf.toString();
     }
 
-    // Changed by Deutsche Telekom
     /**
      * Returns whether own certificates are used
      * 
      * @param rcsSettings
      * @return True if own certificates are used
+     * @throws KeyStoreException
+     * @throws IOException
      */
-    public static boolean isOwnCertificateUsed(RcsSettings rcsSettings) {
-        try {
-            String certRoot = rcsSettings.getTlsCertificateRoot();
-            if ((certRoot != null) && (certRoot.length() > 0)) {
-                // Changed by Deutsche Telekom
-                return KeyStoreManager.isCertificateEntry(buildCertificateAlias(certRoot));
-            } else {
-                return false;
-            }
-        } catch (Exception e) {
+    public static boolean isOwnCertificateUsed(RcsSettings rcsSettings) throws KeyStoreException,
+            IOException {
+        String certRoot = rcsSettings.getTlsCertificateRoot();
+        if (TextUtils.isEmpty(certRoot)) {
             return false;
         }
+        return isCertificateEntry(buildCertificateAlias(Uri.parse(certRoot)));
     }
 
     // Changed by Deutsche Telekom
@@ -604,61 +544,62 @@ public class KeyStoreManager {
      * Returns keystore from file
      * 
      * @return KeyStore
+     * @throws KeyStoreException
+     * @throws IOException
      */
-    private static KeyStore loadKeyStoreFromFile() {
-        FileInputStream fis = null;
-        KeyStore ks = null;
-        File file = null;
-        try {
-            // Test file
-            file = new File(KeyStoreManager.getKeystorePath());
-            if ((file != null) && (file.exists())) {
-                fis = new FileInputStream(getKeystorePath());
-
-                // Open the existing keystore
-                ks = KeyStore.getInstance(getKeystoreType());
-                synchronized (KeyStoreManager.class) {
-                    ks.load(fis, KEYSTORE_PASSWORD.toCharArray());
+    private static KeyStore loadKeyStoreFromFile() throws KeyStoreException, IOException {
+        if (sKeyStore == null) {
+            FileInputStream fis = null;
+            try {
+                String keyStorePath = getKeystore().getPath();
+                File file = new File(keyStorePath);
+                if (!file.exists()) {
+                    throw new KeyStoreException(new StringBuilder(
+                            "Loading of key store failed, Reason : ").append(keyStorePath)
+                            .append(" does not exist!").toString());
                 }
+                fis = new FileInputStream(keyStorePath);
+                sKeyStore = KeyStore.getInstance(getKeystoreType());
+                synchronized (KeyStoreManager.class) {
+                    sKeyStore.load(fis, KEYSTORE_PASSWORD.toCharArray());
+                }
+            } catch (NoSuchAlgorithmException e) {
+                throw new KeyStoreException("Loading of key store from file failed!", e);
+
+            } catch (CertificateException e) {
+                throw new KeyStoreException("Loading of key store from file failed!", e);
+
+            } finally {
+                CloseableUtils.close(fis);
             }
-        } catch (Exception ex) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Loading " + getKeystorePath() + " of type " + getKeystoreType()
-                        + " failed: ", ex);
-            }
-            if ((file != null) && (file.exists())) {
-                // delete eronous file
-                file.delete();
-            }
-            return null;
-        } finally {
-            CloseableUtils.close(fis);
         }
-        return ks;
+        return sKeyStore;
     }
 
     // Changed by Deutsche Telekom
     /**
      * Saves keystore in file
+     * 
+     * @throws IOException
+     * @throws
+     * @throws KeyStoreException
      */
-    private static void saveKeyStoreToFile(KeyStore ks) {
-        if (ks == null) {
-            return;
-        }
-
+    private static void saveKeyStoreToFile(KeyStore ks) throws KeyStoreException, IOException {
         FileOutputStream fos = null;
         try {
-            fos = new FileOutputStream(getKeystorePath());
-
-            // Save the existing keystore
+            fos = new FileOutputStream(getKeystore().getPath());
             synchronized (KeyStoreManager.class) {
                 ks.store(fos, KEYSTORE_PASSWORD.toCharArray());
             }
-        } catch (Exception ex) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Saving " + getKeystorePath() + " of type " + getKeystoreType()
-                        + " failed: ", ex);
-            }
+        } catch (FileNotFoundException e) {
+            throw new KeyStoreException("Saving of key store to file failed!", e);
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new KeyStoreException("Saving of key store to file failed!", e);
+
+        } catch (CertificateException e) {
+            throw new KeyStoreException("Saving of key store to file failed!", e);
+
         } finally {
             CloseableUtils.close(fos);
         }

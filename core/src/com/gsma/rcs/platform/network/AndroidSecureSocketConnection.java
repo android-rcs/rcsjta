@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.platform.network;
 
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.security.cert.KeyStoreManager;
 import com.gsma.rcs.core.ims.security.cert.X509KeyManagerWrapper;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -38,6 +39,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 
 import javax.net.ssl.KeyManager;
@@ -126,8 +128,9 @@ public class AndroidSecureSocketConnection extends AndroidSocketConnection {
      * @param remoteAddr Remote address
      * @param remotePort Remote port
      * @throws IOException
+     * @throws SipPayloadException
      */
-    public void open(String remoteAddr, int remotePort) throws IOException {
+    public void open(String remoteAddr, int remotePort) throws IOException, SipPayloadException {
         // Changed by Deutsche Telekom
         SSLSocket s = (SSLSocket) getSslFactory().createSocket(remoteAddr, remotePort);
         // Changed by Deutsche Telekom
@@ -175,22 +178,31 @@ public class AndroidSecureSocketConnection extends AndroidSocketConnection {
      * @param socket
      * @return String
      * @throws SSLPeerUnverifiedException
+     * @throws SipPayloadException
      */
     private String getFingerprint(String algorithm, SSLSocket socket)
-            throws SSLPeerUnverifiedException {
-        final SSLSession session = socket.getSession();
-        if (session == null) {
-            throw new SSLPeerUnverifiedException("SSL session not available!");
+            throws SSLPeerUnverifiedException, SipPayloadException {
+        try {
+            final SSLSession session = socket.getSession();
+            if (session == null) {
+                throw new SSLPeerUnverifiedException("SSL session not available!");
+            }
+            Certificate[] certs = session.getPeerCertificates();
+            if (logger.isActivated()) {
+                logger.debug("Remote certificate chain length: " + certs.length);
+            }
+            if (certs.length == 0) {
+                throw new SSLPeerUnverifiedException(
+                        "No remote certificates available for SSL session!");
+            }
+            return KeyStoreManager.getCertFingerprint(certs[0], algorithm);
+
+        } catch (CertificateEncodingException e) {
+            throw new SipPayloadException("SSL session not available!", e);
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new SipPayloadException("SSL session not available!", e);
         }
-        Certificate[] certs = session.getPeerCertificates();
-        if (logger.isActivated()) {
-            logger.debug("Remote certificate chain length: " + certs.length);
-        }
-        if (certs.length == 0) {
-            throw new SSLPeerUnverifiedException(
-                    "No remote certificates available for SSL session!");
-        }
-        return KeyStoreManager.getCertFingerprint(certs[0], algorithm);
     }
 
     /**
@@ -212,20 +224,16 @@ public class AndroidSecureSocketConnection extends AndroidSocketConnection {
                 if (logger.isActivated()) {
                     logger.debug("Create SSLSocketFactory");
                 }
-                String keyStoreType = KeyStoreManager.getKeystoreType();
-                String keyStoreFile = KeyStoreManager.getKeystorePath();
-                String trustStoreFile = KeyStoreManager.getKeystorePath();
-                char[] keyStorePassword = KeyStoreManager.getKeystorePassword().toCharArray();
-
-                SSLContext sslContext = SSLContext.getInstance(ListeningPoint.TLS);
-
-                // Changed by Deutsche Telekom
                 TrustManager[] tms = null;
                 KeyManager[] kms = null;
 
+                String keyStoreType = KeyStoreManager.getKeystoreType();
                 KeyStore keyStore = KeyStore.getInstance(keyStoreType);
-                // Changed by Deutsche Telekom
+
+                String keyStoreFile = KeyStoreManager.getKeystore().getPath();
                 ksFileInputStream = new FileInputStream(keyStoreFile);
+
+                char[] keyStorePassword = KeyStoreManager.getKeystorePassword().toCharArray();
                 keyStore.load(ksFileInputStream, keyStorePassword);
 
                 String algorithm = KeyManagerFactory.getDefaultAlgorithm();
@@ -237,7 +245,7 @@ public class AndroidSecureSocketConnection extends AndroidSocketConnection {
                     if (KeyStoreManager.isOwnCertificateUsed(mRcsSettings)) {
                         KeyStore trustStore = KeyStore.getInstance(keyStoreType);
                         // Changed by Deutsche Telekom
-                        tsFileInputStream = new FileInputStream(trustStoreFile);
+                        tsFileInputStream = new FileInputStream(keyStoreFile);
                         trustStore.load(tsFileInputStream, keyStorePassword);
                         tmFactory.init(trustStore);
 
@@ -269,9 +277,8 @@ public class AndroidSecureSocketConnection extends AndroidSocketConnection {
                 }
                 SecureRandom secureRandom = new SecureRandom();
                 secureRandom.nextInt();
-
+                SSLContext sslContext = SSLContext.getInstance(ListeningPoint.TLS);
                 sslContext.init(kms, tms, secureRandom);
-
                 mSslSocketFactory = sslContext.getSocketFactory();
             } catch (NoSuchAlgorithmException e) {
                 throw new IOException(

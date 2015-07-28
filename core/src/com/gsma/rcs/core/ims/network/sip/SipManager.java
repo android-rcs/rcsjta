@@ -137,9 +137,11 @@ public class SipManager {
      * @param tcpFallback TCP fallback according to RFC3261 chapter 18.1.1
      * @param networkType type of network
      * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     public synchronized void initStack(String localAddr, String proxyAddr, int proxyPort,
-            String protocol, boolean tcpFallback, int networkType) throws SipPayloadException {
+            String protocol, boolean tcpFallback, int networkType) throws SipPayloadException,
+            SipNetworkException {
 
         closeStack();
 
@@ -181,11 +183,11 @@ public class SipManager {
      * @throws SipPayloadException
      * @throws SipNetworkException
      */
-    public SipTransactionContext sendSipMessage(SipMessage message)
-            throws SipPayloadException, SipNetworkException {
+    public SipTransactionContext sendSipMessage(SipMessage message) throws SipPayloadException,
+            SipNetworkException {
         return sendSipMessage(message, SipManager.TIMEOUT);
     }
-    
+
     /**
      * Send a SIP message and wait a response
      * 
@@ -199,7 +201,7 @@ public class SipManager {
             throws SipPayloadException, SipNetworkException {
         return sendSipMessageAndWait(message, timeout, null);
     }
-    
+
     /**
      * Send a SIP message and create a context to wait a response
      * 
@@ -212,8 +214,8 @@ public class SipManager {
     public SipTransactionContext sendSipMessage(SipMessage message, long timeout)
             throws SipPayloadException, SipNetworkException {
         return sendSipMessage(message, timeout, null);
-    }    
-    
+    }
+
     /**
      * Send a SIP message and wait a response
      * 
@@ -315,7 +317,7 @@ public class SipManager {
     public void waitResponse(SipTransactionContext ctx) {
         ctx.waitResponse(SipManager.TIMEOUT);
     }
-    
+
     /**
      * Wait a response
      * 
@@ -385,7 +387,7 @@ public class SipManager {
         }
         return;
     }
-    
+
     /**
      * Send a SIP response
      * 

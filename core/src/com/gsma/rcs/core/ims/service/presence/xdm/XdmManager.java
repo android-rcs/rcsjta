@@ -34,6 +34,7 @@ import com.gsma.rcs.core.ims.protocol.http.HttpGetRequest;
 import com.gsma.rcs.core.ims.protocol.http.HttpPutRequest;
 import com.gsma.rcs.core.ims.protocol.http.HttpRequest;
 import com.gsma.rcs.core.ims.protocol.http.HttpResponse;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.presence.PhotoIcon;
 import com.gsma.rcs.core.ims.service.presence.directory.Folder;
 import com.gsma.rcs.core.ims.service.presence.directory.XcapDirectoryParser;
@@ -198,12 +199,13 @@ public class XdmManager {
      * @throws IOException
      * @throws CoreException
      * @throws InvalidArgumentException
+     * @throws SipPayloadException
      */
     // @FIXME: This method needs a complete refactor, However at this moment due to other prior
     // tasks the refactoring task has been kept in backlog.
     private HttpResponse sendHttpRequest(HttpRequest request,
             HttpAuthenticationAgent authenticationAgent) throws IOException,
-            InvalidArgumentException {
+            InvalidArgumentException, SipPayloadException {
         SocketConnection conn = null;
         InputStream is = null;
         OutputStream os = null;

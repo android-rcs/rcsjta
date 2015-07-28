@@ -737,8 +737,9 @@ public abstract class ImsServiceSession extends Thread {
      * Open media session
      * 
      * @throws IOException
+     * @throws SipPayloadException
      */
-    public abstract void openMediaSession() throws IOException;
+    public abstract void openMediaSession() throws IOException, SipPayloadException;
 
     /**
      * Start media transfer

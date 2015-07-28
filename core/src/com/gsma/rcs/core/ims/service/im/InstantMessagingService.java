@@ -1223,8 +1223,11 @@ public class InstantMessagingService extends ImsService {
      * 
      * @param notify Received notify
      * @param timestamp Local timestamp when got SipRequest
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void receiveConferenceNotification(SipRequest notify, long timestamp) {
+    public void receiveConferenceNotification(SipRequest notify, long timestamp)
+            throws SipPayloadException, SipNetworkException {
         GroupChatSession session = getGroupChatSessionOfConferenceSubscriber(notify.getCallId());
         if (session != null) {
             session.getConferenceEventSubscriber().receiveNotification(notify, timestamp);

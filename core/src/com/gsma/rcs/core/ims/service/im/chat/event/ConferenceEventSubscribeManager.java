@@ -51,13 +51,17 @@ import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import javax2.sip.InvalidArgumentException;
 import javax2.sip.header.ExpiresHeader;
@@ -172,8 +176,11 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * 
      * @param notify Received notify
      * @param timestamp Local timestamp when got SipRequest
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void receiveNotification(SipRequest notify, long timestamp) {
+    public void receiveNotification(SipRequest notify, long timestamp) throws SipPayloadException,
+            SipNetworkException {
         boolean logActivated = sLogger.isActivated();
         if (logActivated) {
             sLogger.debug("New conference event notification received");
@@ -263,10 +270,14 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
                         updateParticipantStatus(participants, timestamp);
                     }
                 }
-            } catch (Exception e) {
-                if (logActivated) {
-                    sLogger.error("Can't parse XML notification", e);
-                }
+            } catch (ParserConfigurationException e) {
+                throw new SipPayloadException("Can't parse XML notification", e);
+
+            } catch (SAXException e) {
+                throw new SipPayloadException("Can't parse XML notification", e);
+
+            } catch (IOException e) {
+                throw new SipNetworkException("Can't parse XML notification", e);
             }
         }
 

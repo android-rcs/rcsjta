@@ -27,6 +27,7 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.IpAddressUtils;
@@ -186,8 +187,9 @@ public class MsrpManager {
      * Open the MSRP session
      * 
      * @throws IOException
+     * @throws SipPayloadException
      */
-    public void openMsrpSession() throws IOException {
+    public void openMsrpSession() throws IOException, SipPayloadException {
         if ((mMsrpSession == null) || (mMsrpSession.getConnection() == null)) {
             throw new IOException("Session not yet created");
         }
@@ -200,8 +202,9 @@ public class MsrpManager {
      * 
      * @param timeout Timeout value (in milliseconds)
      * @throws IOException
+     * @throws SipPayloadException
      */
-    public void openMsrpSession(long timeout) throws IOException {
+    public void openMsrpSession(long timeout) throws IOException, SipPayloadException {
         if ((mMsrpSession == null) || (mMsrpSession.getConnection() == null)) {
             throw new IOException("Session not yet created");
         }

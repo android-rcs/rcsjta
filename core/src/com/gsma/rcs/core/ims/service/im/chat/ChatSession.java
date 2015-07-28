@@ -979,8 +979,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * Open media session
      * 
      * @throws IOException
+     * @throws SipPayloadException
      */
-    public void openMediaSession() throws IOException {
+    public void openMediaSession() throws IOException, SipPayloadException {
         getMsrpMgr().openMsrpSession();
         sendEmptyDataChunk();
     }

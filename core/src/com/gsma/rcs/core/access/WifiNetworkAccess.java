@@ -30,6 +30,7 @@ import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 
+import java.io.IOException;
 import java.security.cert.CertificateException;
 
 /**
@@ -66,8 +67,9 @@ public class WifiNetworkAccess extends NetworkAccess {
      * 
      * @param ipAddress Local IP address
      * @throws CertificateException
+     * @throws IOException
      */
-    public void connect(String ipAddress) throws CertificateException {
+    public void connect(String ipAddress) throws CertificateException, IOException {
         if (logger.isActivated()) {
             logger.info("Network access connected (" + ipAddress + ")");
         }

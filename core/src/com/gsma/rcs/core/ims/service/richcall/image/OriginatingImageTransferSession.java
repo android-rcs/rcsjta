@@ -34,6 +34,7 @@ import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
@@ -271,8 +272,9 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
      * Open media session
      * 
      * @throws IOException
+     * @throws SipPayloadException
      */
-    public void openMediaSession() throws IOException {
+    public void openMediaSession() throws IOException, SipPayloadException {
         msrpMgr.openMsrpSession();
     }
 

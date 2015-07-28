@@ -37,6 +37,8 @@ import gov2.nist.javax2.sip.address.AddressImpl;
 import gov2.nist.javax2.sip.message.SIPMessage;
 
 import java.io.File;
+import java.io.IOException;
+import java.security.KeyStoreException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.ListIterator;
@@ -55,6 +57,7 @@ import javax2.sip.ProviderDoesNotExistException;
 import javax2.sip.RequestEvent;
 import javax2.sip.ResponseEvent;
 import javax2.sip.ServerTransaction;
+import javax2.sip.SipException;
 import javax2.sip.SipFactory;
 import javax2.sip.SipListener;
 import javax2.sip.SipProvider;
@@ -218,10 +221,11 @@ public class SipInterface implements SipListener {
      * @param networkType Type of network
      * @param rcsSettings
      * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     public SipInterface(String localIpAddress, String proxyAddr, int proxyPort,
             String defaultProtocol, boolean tcpFallback, int networkType, RcsSettings rcsSettings)
-            throws SipPayloadException {
+            throws SipPayloadException, SipNetworkException {
         mLocalIpAddress = localIpAddress;
         mDefaultProtocol = defaultProtocol;
         mTcpFallback = tcpFallback;
@@ -283,12 +287,11 @@ public class SipInterface implements SipListener {
                 if (KeyStoreManager.isOwnCertificateUsed(rcsSettings)) {
                     properties.setProperty("javax2.net.ssl.keyStoreType",
                             KeyStoreManager.getKeystoreType());
-                    properties.setProperty("javax2.net.ssl.keyStore",
-                            KeyStoreManager.getKeystorePath());
+                    String keyStorePath = KeyStoreManager.getKeystore().getPath();
+                    properties.setProperty("javax2.net.ssl.keyStore", keyStorePath);
                     properties.setProperty("javax2.net.ssl.keyStorePassword",
                             KeyStoreManager.getKeystorePassword());
-                    properties.setProperty("javax2.net.ssl.trustStore",
-                            KeyStoreManager.getKeystorePath());
+                    properties.setProperty("javax2.net.ssl.trustStore", keyStorePath);
                 } else {
                     properties.setProperty("gov2.nist.javax2.sip.NETWORK_LAYER",
                             "gov2.nist.core.net.SslNetworkLayer");
@@ -374,10 +377,20 @@ public class SipInterface implements SipListener {
                     "Unable to instantiate SIP stack for localIpAddress : ").append(localIpAddress)
                     .append(" with defaultProtocol : ").append(defaultProtocol).toString(), e);
 
-        } catch (javax2.sip.SipException e) {
+        } catch (SipException e) {
             throw new SipPayloadException(new StringBuilder(
                     "Unable to instantiate SIP stack for localIpAddress : ").append(localIpAddress)
                     .append(" with defaultProtocol : ").append(defaultProtocol).toString(), e);
+        } catch (KeyStoreException e) {
+            throw new SipPayloadException(new StringBuilder(
+                    "Unable to instantiate SIP stack for localIpAddress : ").append(localIpAddress)
+                    .append(" with defaultProtocol : ").append(defaultProtocol).toString(), e);
+
+        } catch (IOException e) {
+            throw new SipNetworkException(new StringBuilder(
+                    "Unable to instantiate SIP stack for localIpAddress : ").append(localIpAddress)
+                    .append(" with defaultProtocol : ").append(defaultProtocol).toString(), e);
+
         }
 
         if (sLogger.isActivated()) {
@@ -434,10 +447,10 @@ public class SipInterface implements SipListener {
      * @param request
      * @return ClientTransaction
      * @throws ParseException
-     * @throws javax2.sip.SipException
+     * @throws SipException
      */
     private ClientTransaction createNewTransaction(SipRequest request) throws ParseException,
-            javax2.sip.SipException {
+            SipException {
         // fall back to TCP if channel is UDP and request size exceeds the limit
         // according to RFC3261, chapter 18.1.1:
         // If a request is within 200 bytes of the path MTU, or if it is larger
@@ -873,7 +886,7 @@ public class SipInterface implements SipListener {
         } catch (ParseException e) {
             throw new SipPayloadException("Unable to instantiate SIP transaction!", e);
 
-        } catch (javax2.sip.SipException e) {
+        } catch (SipException e) {
             throw new SipPayloadException("Can't send SIP message!", e);
         }
     }
@@ -915,7 +928,7 @@ public class SipInterface implements SipListener {
         } catch (InvalidArgumentException e) {
             throw new SipNetworkException("Can't send SIP message!", e);
 
-        } catch (javax2.sip.SipException e) {
+        } catch (SipException e) {
             throw new SipNetworkException("Can't send SIP message!", e);
         }
     }
@@ -941,7 +954,7 @@ public class SipInterface implements SipListener {
 
             /* Re-use INVITE transaction */
             dialog.getStackDialog().sendAck(ack.getStackMessage());
-        } catch (javax2.sip.SipException e) {
+        } catch (SipException e) {
             throw new SipNetworkException("Can't send SIP message!", e);
         }
     }
@@ -980,7 +993,7 @@ public class SipInterface implements SipListener {
         } catch (ParseException e) {
             throw new SipPayloadException("Unable to instantiate SIP transaction!", e);
 
-        } catch (javax2.sip.SipException e) {
+        } catch (SipException e) {
             throw new SipNetworkException("Can't send SIP message!", e);
         }
     }
@@ -1015,7 +1028,7 @@ public class SipInterface implements SipListener {
         } catch (ParseException e) {
             throw new SipPayloadException("Unable to instantiate SIP transaction!", e);
 
-        } catch (javax2.sip.SipException e) {
+        } catch (SipException e) {
             throw new SipNetworkException("Can't send SIP message!", e);
         }
     }
@@ -1061,7 +1074,7 @@ public class SipInterface implements SipListener {
         } catch (ParseException e) {
             throw new SipPayloadException("Unable to instantiate SIP transaction!", e);
 
-        } catch (javax2.sip.SipException e) {
+        } catch (SipException e) {
             throw new SipNetworkException("Can't send SIP message!", e);
         }
     }
@@ -1103,7 +1116,7 @@ public class SipInterface implements SipListener {
         } catch (ParseException e) {
             throw new SipPayloadException("Unable to instantiate SIP transaction!", e);
 
-        } catch (javax2.sip.SipException e) {
+        } catch (SipException e) {
             throw new SipNetworkException("Can't send SIP message!", e);
         }
     }

@@ -30,6 +30,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 
 /**
@@ -41,7 +42,7 @@ public class ExternalCapabilityMonitoring extends BroadcastReceiver {
     /**
      * The logger
      */
-    private final static Logger logger = Logger.getLogger(ExternalCapabilityMonitoring.class
+    private final static Logger sLogger = Logger.getLogger(ExternalCapabilityMonitoring.class
             .getSimpleName());
 
     @Override
@@ -80,8 +81,8 @@ public class ExternalCapabilityMonitoring extends BroadcastReceiver {
                     return;
                 }
 
-                if (logger.isActivated()) {
-                    logger.debug("Add extensions " + exts + " for application " + uid);
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Add extensions " + exts + " for application " + uid);
                 }
 
                 // Add the new extension in the supported RCS extensions
@@ -89,8 +90,8 @@ public class ExternalCapabilityMonitoring extends BroadcastReceiver {
                         AndroidFactory.getApplicationContext());
             } else {
                 if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
-                    if (logger.isActivated()) {
-                        logger.debug("Remove extensions for application " + uid);
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Remove extensions for application " + uid);
                     }
 
                     // Remove the extensions in the supported RCS extensions
@@ -98,8 +99,9 @@ public class ExternalCapabilityMonitoring extends BroadcastReceiver {
                             AndroidFactory.getApplicationContext());
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (NameNotFoundException e) {
+            sLogger.error(
+                    "Unable to find application for intent action : ".concat(intent.getAction()), e);
         }
     }
 }
