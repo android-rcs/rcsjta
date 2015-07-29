@@ -33,8 +33,6 @@ import com.gsma.rcs.utils.IpAddressUtils;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
 
-import android.net.ConnectivityManager;
-
 import gov2.nist.javax2.sip.address.AddressImpl;
 import gov2.nist.javax2.sip.message.SIPMessage;
 
@@ -235,12 +233,10 @@ public class SipInterface implements SipListener {
         mSipTraceEnabled = rcsSettings.isSipTraceActivated();
         mSipTraceFile = rcsSettings.getSipTraceFile();
 
-        /* Set timers value from provisioning for 3G or default for Wifi */
-        if (networkType == ConnectivityManager.TYPE_MOBILE) {
-            mTimerT1 = rcsSettings.getSipTimerT1();
-            mTimerT2 = rcsSettings.getSipTimerT2();
-            mTimerT4 = rcsSettings.getSipTimerT4();
-        }
+        /* Set timers value from provisioning */
+        mTimerT1 = rcsSettings.getSipTimerT1();
+        mTimerT2 = rcsSettings.getSipTimerT2();
+        mTimerT4 = rcsSettings.getSipTimerT4();
 
         /* Set the default route path */
         mDefaultRoutePath = new Vector<String>();
