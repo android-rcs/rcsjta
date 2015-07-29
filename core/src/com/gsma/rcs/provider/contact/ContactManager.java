@@ -500,13 +500,14 @@ public final class ContactManager {
     }
 
     /**
-     * Set the info of a contact
+     * Set the info of a contact. This method is by choice not synchronized here since the methods
+     * invoking this will handle the synchronization and we would like to avoid double locks.
      * 
      * @param newInfo New contact info
      * @param oldInfo Old contact info
      * @throws ContactManagerException
      */
-    private void setContactInfo(ContactInfo newInfo, ContactInfo oldInfo)
+    private void setContactInfoInternal(ContactInfo newInfo, ContactInfo oldInfo)
             throws ContactManagerException {
         ContactId contact = newInfo.getContact();
         String contactNumber = contact.toString();
@@ -527,7 +528,7 @@ public final class ContactManager {
         /* Save capabilities */
         Capabilities newCapa = newInfo.getCapabilities();
         values.put(KEY_CAPABILITY_CS_VIDEO, newCapa.isCsVideoSupported());
-        values.put(KEY_CAPABILITY_FILE_TRANSFER, newCapa.isFileTransferSupported());
+        values.put(KEY_CAPABILITY_FILE_TRANSFER, newCapa.isFileTransferMsrpSupported());
         values.put(KEY_CAPABILITY_IMAGE_SHARE, newCapa.isImageSharingSupported());
         values.put(KEY_CAPABILITY_IM_SESSION, newCapa.isImSessionSupported());
         values.put(KEY_CAPABILITY_VIDEO_SHARE, newCapa.isVideoSharingSupported());
@@ -677,8 +678,8 @@ public final class ContactManager {
                 /* Modify the capabilities */
                 Capabilities oldCapa = oldInfo.getCapabilities();
                 ContentProviderOperation op = modifyMimeTypeForContact(rcsRawContactId, contact,
-                        MIMETYPE_CAPABILITY_FILE_TRANSFER, newCapa.isFileTransferSupported(),
-                        oldCapa.isFileTransferSupported());
+                        MIMETYPE_CAPABILITY_FILE_TRANSFER, newCapa.isFileTransferMsrpSupported(),
+                        oldCapa.isFileTransferMsrpSupported());
                 if (op != null) {
                     ops.add(op);
                 }
@@ -872,7 +873,7 @@ public final class ContactManager {
 
                 // Get the capabilities infos
                 capaBuilder.setCsVideo(isCapabilitySupported(cursor, KEY_CAPABILITY_CS_VIDEO));
-                capaBuilder.setFileTransfer(isCapabilitySupported(cursor,
+                capaBuilder.setFileTransferMsrp(isCapabilitySupported(cursor,
                         KEY_CAPABILITY_FILE_TRANSFER));
                 capaBuilder.setImageSharing(isCapabilitySupported(cursor,
                         KEY_CAPABILITY_IMAGE_SHARE));
@@ -915,12 +916,13 @@ public final class ContactManager {
     }
 
     /**
-     * Get the infos of a contact in the RCS contact provider
+     * Get contact info . This method is by choice not synchronized here since the methods invoking
+     * this will handle the synchronization and we would like to avoid double locks.
      * 
-     * @param contact Contact
-     * @return Contact info
+     * @param contact
+     * @return ContactInfo
      */
-    public ContactInfo getContactInfo(ContactId contact) {
+    private ContactInfo getContactInfoInternal(ContactId contact) {
         ContactInfo contactInfo = mContactInfoCache.get(contact);
         if (contactInfo == null) {
             contactInfo = getContactInfoFromProvider(contact);
@@ -1001,10 +1003,12 @@ public final class ContactManager {
         if (sLogger.isActivated()) {
             sLogger.info("Block contact ".concat(contact.toString()));
         }
-        ContactInfo oldInfo = getContactInfo(contact);
-        ContactInfo newInfo = new ContactInfo(oldInfo);
-        newInfo.setRcsStatus(RcsStatus.BLOCKED);
-        setContactInfo(newInfo, oldInfo);
+        synchronized (mContactInfoCache) {
+            ContactInfo oldInfo = getContactInfoInternal(contact);
+            ContactInfo newInfo = new ContactInfo(oldInfo);
+            newInfo.setRcsStatus(RcsStatus.BLOCKED);
+            setContactInfoInternal(newInfo, oldInfo);
+        }
     }
 
     /**
@@ -1014,8 +1018,10 @@ public final class ContactManager {
         if (sLogger.isActivated()) {
             sLogger.debug("clear ContactInfo cache");
         }
-        mContactInfoCache.clear();
-        mLocalContentResolver.delete(CONTENT_URI, null, null);
+        synchronized (mContactInfoCache) {
+            mContactInfoCache.clear();
+            mLocalContentResolver.delete(CONTENT_URI, null, null);
+        }
     }
 
     /**
@@ -1026,43 +1032,45 @@ public final class ContactManager {
      * @param rcsStatus RCS status
      */
     public void updateRcsStatusOrCreateNewContact(ContactId contact, RcsStatus rcsStatus) {
-        long currentTime = System.currentTimeMillis();
-        ContentValues values = new ContentValues();
-        values.put(KEY_PRESENCE_SHARING_STATUS, rcsStatus.toInt());
-        values.put(KEY_TIMESTAMP_CONTACT_UPDATED, currentTime);
-        if (isContactIdAssociatedWithRcsContactProvider(contact)) {
-            /* Contact already present, update. */
-            Uri uri = Uri.withAppendedPath(CONTENT_URI, contact.toString());
-            mLocalContentResolver.update(uri, values, null, null);
-        } else {
-            /* Contact not present in provider, insert. */
-            values.put(KEY_CONTACT, contact.toString());
-            values.put(KEY_RCS_STATUS, rcsStatus.toInt());
-            values.put(KEY_RCS_STATUS_TIMESTAMP, currentTime);
-            values.put(KEY_REGISTRATION_STATE, RegistrationState.UNKNOWN.toInt());
-            values.put(KEY_PRESENCE_TIMESTAMP, -1);
-            values.put(KEY_CAPABILITY_TIMESTAMP_LAST_REQUEST, Capabilities.INVALID_TIMESTAMP);
-            values.put(KEY_CAPABILITY_CS_VIDEO, 0);
-            values.put(KEY_CAPABILITY_IMAGE_SHARE, 0);
-            values.put(KEY_CAPABILITY_VIDEO_SHARE, 0);
-            values.put(KEY_CAPABILITY_IM_SESSION, 0);
-            values.put(KEY_CAPABILITY_FILE_TRANSFER, 0);
-            values.put(KEY_CAPABILITY_PRESENCE_DISCOVERY, 0);
-            values.put(KEY_CAPABILITY_SOCIAL_PRESENCE, 0);
-            values.put(KEY_CAPABILITY_GEOLOC_PUSH, 0);
-            values.put(KEY_CAPABILITY_FILE_TRANSFER_HTTP, 0);
-            values.put(KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL, 0);
-            values.put(KEY_CAPABILITY_IP_VOICE_CALL, 0);
-            values.put(KEY_CAPABILITY_IP_VIDEO_CALL, 0);
-            values.put(KEY_CAPABILITY_FILE_TRANSFER_SF, 0);
-            values.put(KEY_CAPABILITY_GROUP_CHAT_SF, 0);
-            values.put(KEY_BLOCKED, BLOCKED_VALUE_NOT_SET);
-            values.put(KEY_BLOCKING_TIMESTAMP, INVALID_TIME);
-            values.put(KEY_AUTOMATA, 0);
-            values.put(KEY_CAPABILITY_TIMESTAMP_LAST_RESPONSE, Capabilities.INVALID_TIMESTAMP);
-            mLocalContentResolver.insert(CONTENT_URI, values);
+        synchronized (mContactInfoCache) {
+            long currentTime = System.currentTimeMillis();
+            ContentValues values = new ContentValues();
+            values.put(KEY_PRESENCE_SHARING_STATUS, rcsStatus.toInt());
+            values.put(KEY_TIMESTAMP_CONTACT_UPDATED, currentTime);
+            if (isContactIdAssociatedWithRcsContactProvider(contact)) {
+                /* Contact already present, update. */
+                Uri uri = Uri.withAppendedPath(CONTENT_URI, contact.toString());
+                mLocalContentResolver.update(uri, values, null, null);
+            } else {
+                /* Contact not present in provider, insert. */
+                values.put(KEY_CONTACT, contact.toString());
+                values.put(KEY_RCS_STATUS, rcsStatus.toInt());
+                values.put(KEY_RCS_STATUS_TIMESTAMP, currentTime);
+                values.put(KEY_REGISTRATION_STATE, RegistrationState.UNKNOWN.toInt());
+                values.put(KEY_PRESENCE_TIMESTAMP, -1);
+                values.put(KEY_CAPABILITY_TIMESTAMP_LAST_REQUEST, Capabilities.INVALID_TIMESTAMP);
+                values.put(KEY_CAPABILITY_CS_VIDEO, 0);
+                values.put(KEY_CAPABILITY_IMAGE_SHARE, 0);
+                values.put(KEY_CAPABILITY_VIDEO_SHARE, 0);
+                values.put(KEY_CAPABILITY_IM_SESSION, 0);
+                values.put(KEY_CAPABILITY_FILE_TRANSFER, 0);
+                values.put(KEY_CAPABILITY_PRESENCE_DISCOVERY, 0);
+                values.put(KEY_CAPABILITY_SOCIAL_PRESENCE, 0);
+                values.put(KEY_CAPABILITY_GEOLOC_PUSH, 0);
+                values.put(KEY_CAPABILITY_FILE_TRANSFER_HTTP, 0);
+                values.put(KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL, 0);
+                values.put(KEY_CAPABILITY_IP_VOICE_CALL, 0);
+                values.put(KEY_CAPABILITY_IP_VIDEO_CALL, 0);
+                values.put(KEY_CAPABILITY_FILE_TRANSFER_SF, 0);
+                values.put(KEY_CAPABILITY_GROUP_CHAT_SF, 0);
+                values.put(KEY_BLOCKED, BLOCKED_VALUE_NOT_SET);
+                values.put(KEY_BLOCKING_TIMESTAMP, INVALID_TIME);
+                values.put(KEY_AUTOMATA, 0);
+                values.put(KEY_CAPABILITY_TIMESTAMP_LAST_RESPONSE, Capabilities.INVALID_TIMESTAMP);
+                mLocalContentResolver.insert(CONTENT_URI, values);
+            }
+            getContactInfoInternal(contact).setRcsStatus(rcsStatus);
         }
-        getContactInfo(contact).setRcsStatus(rcsStatus);
     }
 
     /**
@@ -1747,6 +1755,18 @@ public final class ContactManager {
     }
 
     /**
+     * Get the infos of a contact in the RCS contact provider
+     * 
+     * @param contact Contact
+     * @return Contact info
+     */
+    public ContactInfo getContactInfo(ContactId contact) {
+        synchronized (mContactInfoCache) {
+            return getContactInfoInternal(contact);
+        }
+    }
+
+    /**
      * Sets capabilities for contact
      * 
      * @param contact Contact Id
@@ -1767,84 +1787,171 @@ public final class ContactManager {
      */
     public void setContactCapabilities(ContactId contact, Capabilities capabilities,
             RcsStatus contactType, RegistrationState registrationState) {
-        /* Get the current information on this contact */
-        ContactInfo oldInfo = getContactInfo(contact);
-        ContactInfo newInfo = new ContactInfo(oldInfo);
-
-        /* Set the contact type */
-        newInfo.setRcsStatus(contactType);
-
-        /* Set the registration state */
-        newInfo.setRegistrationState(registrationState);
-
-        /* Modify the capabilities regarding the registration state */
-        boolean isRegistered = RegistrationState.ONLINE == registrationState;
-        boolean isRcsContact = newInfo.isRcsContact();
-
-        CapabilitiesBuilder capaBuilder = new CapabilitiesBuilder(capabilities);
-        capaBuilder.setCsVideo(capaBuilder.isCsVideoSupported() && isRegistered);
-
-        /*
-         * File transfer. This capability is enabled: - if the capability is present and the contact
-         * is registered - if the FT S&F is enabled and the contact is RCS capable.
-         */
-        capaBuilder.setFileTransfer(capaBuilder.isFileTransferSupported() && isRegistered
-                || mRcsSettings.isFileTransferStoreForwardSupported() && isRcsContact);
-
-        capaBuilder.setImageSharing(capaBuilder.isImageSharingSupported() && isRegistered);
-
-        /*
-         * IM session capability is enabled: - if the capability is present and the contact is
-         * registered - if the IM store&forward is enabled and the contact is RCS capable.
-         */
-        capaBuilder.setImSession(capaBuilder.isImSessionSupported() && isRegistered
-                || mRcsSettings.isImAlwaysOn() && isRcsContact);
-
-        capaBuilder.setVideoSharing(capaBuilder.isVideoSharingSupported() && isRegistered);
-
-        capaBuilder.setGeolocationPush(capaBuilder.isGeolocationPushSupported() && isRegistered);
-
-        capaBuilder.setFileTransferThumbnail(capaBuilder.isFileTransferThumbnailSupported()
-                && isRegistered);
-
-        capaBuilder.setFileTransferHttp(capaBuilder.isFileTransferHttpSupported() && isRegistered
-                || mRcsSettings.isFtHttpCapAlwaysOn() && isRcsContact);
-
-        capaBuilder.setFileTransferStoreForward(capaBuilder.isFileTransferStoreForwardSupported()
-                && isRegistered || mRcsSettings.isFtAlwaysOn() && isRcsContact);
-
-        capaBuilder.setGroupChatStoreForward(capaBuilder.isGroupChatStoreForwardSupported()
-                && isRegistered);
-
-        capaBuilder.setIpVoiceCall(capaBuilder.isIPVoiceCallSupported() && isRegistered);
-
-        capaBuilder.setIpVideoCall(capaBuilder.isIPVideoCallSupported() && isRegistered);
-
-        capaBuilder.setPresenceDiscovery(capaBuilder.isPresenceDiscovery() && isRegistered);
-
-        capaBuilder.setSocialPresence(capaBuilder.isSocialPresence() && isRegistered);
-
-        if (!isRegistered) {
-            /* If contact is not registered, do not put any extensions */
-            capaBuilder.setExtensions(new HashSet<String>());
+        synchronized (mContactInfoCache) {
+            /* Get the current information on this contact */
+            ContactInfo oldInfo = getContactInfoInternal(contact);
+            ContactInfo newInfo = new ContactInfo(oldInfo);
+            /* Set the contact type */
+            newInfo.setRcsStatus(contactType);
+            /* Set the registration state */
+            newInfo.setRegistrationState(registrationState);
+            /* Modify the capabilities regarding the registration state */
+            boolean isRegistered = RegistrationState.ONLINE == registrationState;
+            boolean isRcsContact = newInfo.isRcsContact();
+            CapabilitiesBuilder capaBuilder = new CapabilitiesBuilder(capabilities);
+            capaBuilder.setCsVideo(capaBuilder.isCsVideoSupported() && isRegistered);
+            /*
+             * File transfer. This capability is enabled: - if the capability is present and the
+             * contact is registered - if the FT S&F is enabled and the contact is RCS capable.
+             */
+            capaBuilder.setFileTransferMsrp(capaBuilder.isFileTransferSupported() && isRegistered
+                    || mRcsSettings.isFileTransferStoreForwardSupported() && isRcsContact);
+            capaBuilder.setImageSharing(capaBuilder.isImageSharingSupported() && isRegistered);
+            /*
+             * IM session capability is enabled: - if the capability is present and the contact is
+             * registered - if the IM store&forward is enabled and the contact is RCS capable.
+             */
+            capaBuilder.setImSession(capaBuilder.isImSessionSupported() && isRegistered
+                    || mRcsSettings.isImAlwaysOn() && isRcsContact);
+            capaBuilder.setVideoSharing(capaBuilder.isVideoSharingSupported() && isRegistered);
+            capaBuilder
+                    .setGeolocationPush(capaBuilder.isGeolocationPushSupported() && isRegistered);
+            capaBuilder.setFileTransferThumbnail(capaBuilder.isFileTransferThumbnailSupported()
+                    && isRegistered);
+            capaBuilder.setFileTransferHttp(capaBuilder.isFileTransferHttpSupported()
+                    && isRegistered || mRcsSettings.isFtHttpCapAlwaysOn() && isRcsContact);
+            capaBuilder.setFileTransferStoreForward(capaBuilder
+                    .isFileTransferStoreForwardSupported()
+                    && isRegistered
+                    || mRcsSettings.isFtAlwaysOn() && isRcsContact);
+            capaBuilder.setGroupChatStoreForward(capaBuilder.isGroupChatStoreForwardSupported()
+                    && isRegistered);
+            capaBuilder.setIpVoiceCall(capaBuilder.isIPVoiceCallSupported() && isRegistered);
+            capaBuilder.setIpVideoCall(capaBuilder.isIPVideoCallSupported() && isRegistered);
+            capaBuilder.setPresenceDiscovery(capaBuilder.isPresenceDiscovery() && isRegistered);
+            capaBuilder.setSocialPresence(capaBuilder.isSocialPresence() && isRegistered);
+            if (!isRegistered) {
+                /* If contact is not registered, do not put any extensions */
+                capaBuilder.setExtensions(new HashSet<String>());
+            }
+            /* Add the capabilities */
+            newInfo.setCapabilities(capaBuilder.build());
+            /* Do not set contact info if they are unchanged */
+            if (newInfo.getCapabilities().equals(oldInfo.getCapabilities())
+                    && newInfo.getRcsStatus() == oldInfo.getRcsStatus()
+                    && newInfo.getRegistrationState() == oldInfo.getRegistrationState()) {
+                return;
+            }
+            /* Save the modifications */
+            try {
+                setContactInfoInternal(newInfo, oldInfo);
+            } catch (ContactManagerException e) {
+                if (sLogger.isActivated()) {
+                    sLogger.error("Could not save the contact modifications", e);
+                }
+            }
         }
+    }
 
-        /* Add the capabilities */
-        newInfo.setCapabilities(capaBuilder.build());
+    /**
+     * Merge capabilities with existing capabilities in the cache
+     * 
+     * @param contact
+     * @param capabilities
+     * @param contactType
+     * @param registrationState
+     */
+    public void mergeContactCapabilities(ContactId contact, Capabilities capabilities,
+            RcsStatus contactType, RegistrationState registrationState) {
+        synchronized (mContactInfoCache) {
+            /* Get the current information on this contact */
+            ContactInfo oldInfo = getContactInfoInternal(contact);
+            /* Merge the capabilities */
+            Capabilities contactCapabilities = oldInfo.getCapabilities();
+            CapabilitiesBuilder capBuilder;
+            if (contactCapabilities != null) {
+                capBuilder = new CapabilitiesBuilder(contactCapabilities);
+            } else {
+                capBuilder = new CapabilitiesBuilder();
+            }
+            if (capabilities.isCsVideoSupported()) {
+                capBuilder.setCsVideo(true);
+            }
+            if (capabilities.isFileTransferMsrpSupported()) {
+                capBuilder.setFileTransferMsrp(true);
+            }
+            if (capabilities.isFileTransferHttpSupported()) {
+                capBuilder.setFileTransferHttp(true);
+            }
+            if (capabilities.isFileTransferStoreForwardSupported()) {
+                capBuilder.setFileTransferStoreForward(true);
+            }
+            if (capabilities.isFileTransferThumbnailSupported()) {
+                capBuilder.setFileTransferThumbnail(true);
+            }
+            if (capabilities.isGeolocationPushSupported()) {
+                capBuilder.setGeolocationPush(true);
+            }
+            if (capabilities.isGroupChatStoreForwardSupported()) {
+                capBuilder.setGroupChatStoreForward(true);
+            }
+            if (capabilities.isImSessionSupported()) {
+                capBuilder.setImSession(true);
+            }
+            if (capabilities.isImageSharingSupported()) {
+                capBuilder.setImageSharing(true);
+            }
+            if (capabilities.isIPVideoCallSupported()) {
+                capBuilder.setIpVideoCall(true);
+            }
+            if (capabilities.isIPVoiceCallSupported()) {
+                capBuilder.setIpVoiceCall(true);
+            }
+            if (capabilities.isPresenceDiscoverySupported()) {
+                capBuilder.setPresenceDiscovery(true);
+            }
+            if (capabilities.isSipAutomata()) {
+                capBuilder.setSipAutomata(true);
+            }
+            if (capabilities.isSocialPresenceSupported()) {
+                capBuilder.setSocialPresence(true);
+            }
+            if (capabilities.isVideoSharingSupported()) {
+                capBuilder.setVideoSharing(true);
+            }
+            long timestampOfLastRequest = capabilities.getTimestampOfLastRequest();
+            if (timestampOfLastRequest != Capabilities.INVALID_TIMESTAMP) {
+                capBuilder.setTimestampOfLastRequest(timestampOfLastRequest);
+            }
+            long timestampOfLastResponse = capabilities.getTimestampOfLastResponse();
+            if (timestampOfLastResponse != Capabilities.INVALID_TIMESTAMP) {
+                capBuilder.setTimestampOfLastRequest(timestampOfLastResponse);
+            }
 
-        /* Do not set contact info if they are unchanged */
-        if (newInfo.getCapabilities().equals(oldInfo.getCapabilities())
-                && newInfo.getRcsStatus() == oldInfo.getRcsStatus()
-                && newInfo.getRegistrationState() == oldInfo.getRegistrationState()) {
-            return;
-        }
+            ContactInfo newInfo = new ContactInfo(oldInfo);
 
-        /* Save the modifications */
-        try {
-            setContactInfo(newInfo, oldInfo);
-        } catch (ContactManagerException e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Could not save the contact modifications", e);
+            /* Set the contact type */
+            newInfo.setRcsStatus(contactType);
+            /* Set the registration state */
+            newInfo.setRegistrationState(registrationState);
+            /* Modify the capabilities regarding the registration state */
+            boolean isRegistered = RegistrationState.ONLINE == registrationState;
+            boolean isRcsContact = newInfo.isRcsContact();
+            /* Add the capabilities */
+            newInfo.setCapabilities(capBuilder.build());
+            /* Do not set contact info if they are unchanged */
+            if (newInfo.getCapabilities().equals(oldInfo.getCapabilities())
+                    && newInfo.getRcsStatus() == oldInfo.getRcsStatus()
+                    && newInfo.getRegistrationState() == oldInfo.getRegistrationState()) {
+                return;
+            }
+            /* Save the modifications */
+            try {
+                setContactInfoInternal(newInfo, oldInfo);
+            } catch (ContactManagerException e) {
+                if (sLogger.isActivated()) {
+                    sLogger.error("Could not save the contact modifications", e);
+                }
             }
         }
     }
@@ -1893,21 +2000,19 @@ public final class ContactManager {
         if (sLogger.isActivated()) {
             sLogger.debug("Update time of last capabilities request for ".concat(contactNumber));
         }
-        ContactInfo contactInfo = getContactInfo(contact);
-        Capabilities capabilities = contactInfo.getCapabilities();
-        if (capabilities == null) {
-            return;
+        synchronized (mContactInfoCache) {
+            ContactInfo contactInfo = getContactInfoInternal(contact);
+            Capabilities capabilities = contactInfo.getCapabilities();
+            long now = System.currentTimeMillis();
+            /* Update the cache */
+            CapabilitiesBuilder capaBuilder = new CapabilitiesBuilder(capabilities);
+            capaBuilder.setTimestampOfLastRequest(now);
+            contactInfo.setCapabilities(capaBuilder.build());
+            ContentValues values = new ContentValues();
+            values.put(KEY_CAPABILITY_TIMESTAMP_LAST_REQUEST, now);
+            Uri uri = Uri.withAppendedPath(CONTENT_URI, contactNumber);
+            mLocalContentResolver.update(uri, values, null, null);
         }
-        long now = System.currentTimeMillis();
-        /* Update the cache */
-        CapabilitiesBuilder capaBuilder = new CapabilitiesBuilder(capabilities);
-        capaBuilder.setTimestampOfLastRequest(now);
-        contactInfo.setCapabilities(capaBuilder.build());
-
-        ContentValues values = new ContentValues();
-        values.put(KEY_CAPABILITY_TIMESTAMP_LAST_REQUEST, now);
-        Uri uri = Uri.withAppendedPath(CONTENT_URI, contactNumber);
-        mLocalContentResolver.update(uri, values, null, null);
     }
 
     /**
@@ -1942,7 +2047,7 @@ public final class ContactManager {
 
         /* Insert capabilities if supported */
         Capabilities capabilities = info.getCapabilities();
-        if (capabilities.isFileTransferSupported()) {
+        if (capabilities.isFileTransferMsrpSupported()) {
             ops.add(createMimeTypeForContact(rawContactRefIms, contact,
                     MIMETYPE_CAPABILITY_FILE_TRANSFER));
         }
@@ -2470,7 +2575,7 @@ public final class ContactManager {
                         capaBuilder.setImSession(true);
                         break;
                     case CAPABILITY_FILE_TRANSFER:
-                        capaBuilder.setFileTransfer(true);
+                        capaBuilder.setFileTransferMsrp(true);
                         break;
                     case CAPABILITY_GEOLOCATION_PUSH:
                         capaBuilder.setGeolocationPush(true);
@@ -2658,8 +2763,10 @@ public final class ContactManager {
      * another contact is created using the same number)
      */
     public void cleanRCSEntries() {
-        cleanRCSRawContactsInAB();
-        cleanEntriesInRcsContactProvider();
+        synchronized (mContactInfoCache) {
+            cleanRCSRawContactsInAB();
+            cleanEntriesInRcsContactProvider();
+        }
     }
 
     /**
@@ -2764,13 +2871,15 @@ public final class ContactManager {
     public void deleteRCSEntries() {
         /* Delete Aggregation data */
         mLocalContentResolver.delete(AggregationData.CONTENT_URI, null, null);
-        /* Empty the cache */
-        if (sLogger.isActivated()) {
-            sLogger.debug("deleteRCSEntries");
+        synchronized (mContactInfoCache) {
+            /* Empty the cache */
+            if (sLogger.isActivated()) {
+                sLogger.debug("deleteRCSEntries");
+            }
+            mContactInfoCache.clear();
+            /* Delete presence data */
+            mLocalContentResolver.delete(CONTENT_URI, null, null);
         }
-        mContactInfoCache.clear();
-        /* Delete presence data */
-        mLocalContentResolver.delete(CONTENT_URI, null, null);
     }
 
     /**
@@ -2791,20 +2900,23 @@ public final class ContactManager {
      * @param displayName the display name
      */
     public void setContactDisplayName(ContactId contact, String displayName) {
-        ContentValues values = new ContentValues();
-        values.put(KEY_DISPLAY_NAME, displayName);
-        /* Check if record exists and if so then update is required */
-        String oldDisplayName = getContactDisplayName(contact);
-        boolean updateRequired = !StringUtils.equals(oldDisplayName, displayName);
-        if (updateRequired) {
-            if (sLogger.isActivated()) {
-                sLogger.debug("Update display name '" + displayName + "' for contact:" + contact);
-            }
-            Uri uri = Uri.withAppendedPath(ContactData.CONTENT_URI, contact.toString());
-            /* Contact already present and display name is new, update */
-            mLocalContentResolver.update(uri, values, null, null);
+        synchronized (mContactInfoCache) {
+            ContentValues values = new ContentValues();
+            values.put(KEY_DISPLAY_NAME, displayName);
+            /* Check if record exists and if so then update is required */
+            String oldDisplayName = getContactDisplayName(contact);
+            boolean updateRequired = !StringUtils.equals(oldDisplayName, displayName);
+            if (updateRequired) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Update display name '" + displayName + "' for contact:"
+                            + contact);
+                }
+                Uri uri = Uri.withAppendedPath(ContactData.CONTENT_URI, contact.toString());
+                /* Contact already present and display name is new, update */
+                mLocalContentResolver.update(uri, values, null, null);
 
-            getContactInfo(contact).setDisplayName(displayName);
+                getContactInfoInternal(contact).setDisplayName(displayName);
+            }
         }
     }
 
@@ -2829,21 +2941,19 @@ public final class ContactManager {
             sLogger.debug("Update the time of last capabilities response for "
                     .concat(contactNumber));
         }
-        ContactInfo contactInfo = getContactInfo(contact);
-        Capabilities capabilities = contactInfo.getCapabilities();
-        if (capabilities == null) {
-            return;
+        synchronized (mContactInfoCache) {
+            ContactInfo contactInfo = getContactInfoInternal(contact);
+            Capabilities capabilities = contactInfo.getCapabilities();
+            long now = System.currentTimeMillis();
+            /* Update the cache */
+            CapabilitiesBuilder capaBuilder = new CapabilitiesBuilder(capabilities);
+            capaBuilder.setTimestampOfLastResponse(now);
+            contactInfo.setCapabilities(capaBuilder.build());
+            ContentValues values = new ContentValues();
+            values.put(KEY_CAPABILITY_TIMESTAMP_LAST_RESPONSE, now);
+            Uri uri = Uri.withAppendedPath(CONTENT_URI, contactNumber);
+            mLocalContentResolver.update(uri, values, null, null);
         }
-        long now = System.currentTimeMillis();
-        /* Update the cache */
-        CapabilitiesBuilder capaBuilder = new CapabilitiesBuilder(capabilities);
-        capaBuilder.setTimestampOfLastResponse(now);
-        contactInfo.setCapabilities(capaBuilder.build());
-
-        ContentValues values = new ContentValues();
-        values.put(KEY_CAPABILITY_TIMESTAMP_LAST_RESPONSE, now);
-        Uri uri = Uri.withAppendedPath(CONTENT_URI, contactNumber);
-        mLocalContentResolver.update(uri, values, null, null);
     }
 
     /**
@@ -2855,14 +2965,16 @@ public final class ContactManager {
      */
     public void setBlockingState(ContactId contact, BlockingState state)
             throws ContactManagerException {
-        /* Get the current information on this contact */
-        ContactInfo oldInfo = getContactInfo(contact);
-        ContactInfo newInfo = new ContactInfo(oldInfo);
-        /* Update the state */
-        newInfo.setBlockingState(state);
-        newInfo.setBlockingTimestamp(System.currentTimeMillis());
-        /* Save the modifications */
-        setContactInfo(newInfo, oldInfo);
+        synchronized (mContactInfoCache) {
+            /* Get the current information on this contact */
+            ContactInfo oldInfo = getContactInfoInternal(contact);
+            ContactInfo newInfo = new ContactInfo(oldInfo);
+            /* Update the state */
+            newInfo.setBlockingState(state);
+            newInfo.setBlockingTimestamp(System.currentTimeMillis());
+            /* Save the modifications */
+            setContactInfoInternal(newInfo, oldInfo);
+        }
     }
 
     /**
@@ -2938,11 +3050,13 @@ public final class ContactManager {
      */
     public void aggregateContactWithRcsRawContact(ContactInfo contactInfo)
             throws ContactManagerException {
-        /*
-         * if RCS contact does not exist, it will be created and RCS raw contact also. if RCS
-         * contact already exists, it will enforce creation and association of RCS raw contact.
-         */
-        setContactInfo(contactInfo, contactInfo);
+        synchronized (mContactInfoCache) {
+            /*
+             * if RCS contact does not exist, it will be created and RCS raw contact also. if RCS
+             * contact already exists, it will enforce creation and association of RCS raw contact.
+             */
+            setContactInfoInternal(contactInfo, contactInfo);
+        }
     }
 
     /**

@@ -184,14 +184,14 @@ public class CapabilityUtils {
                 capaBuilder.setImSession(true);
 
             } else if (tag.contains(FeatureTags.FEATURE_RCSE_FT)) {
-                capaBuilder.setFileTransfer(true);
+                capaBuilder.setFileTransferMsrp(true);
 
             } else if (tag.contains(FeatureTags.FEATURE_RCSE_FT_HTTP)) {
                 capaBuilder.setFileTransferHttp(true);
 
             } else if (tag.contains(FeatureTags.FEATURE_OMA_IM)) {
                 /* Support both IM & FT services */
-                capaBuilder.setImSession(true).setFileTransfer(true);
+                capaBuilder.setImSession(true).setFileTransferMsrp(true);
 
             } else if (tag.contains(FeatureTags.FEATURE_RCSE_PRESENCE_DISCOVERY)) {
                 capaBuilder.setPresenceDiscovery(true);

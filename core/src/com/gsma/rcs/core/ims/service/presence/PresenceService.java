@@ -457,47 +457,67 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * @return Document
      */
     private String buildCapabilities(String timestamp, Capabilities capabilities) {
-        return "<tuple id=\"t1\">" + SipUtils.CRLF + "  <status><basic>"
-                + buildBooleanStatus(capabilities.isFileTransferSupported()) + "</basic></status>"
-                + SipUtils.CRLF + "  <op:service-description>" + SipUtils.CRLF
-                + "    <op:service-id>" + PresenceUtils.FEATURE_RCS2_FT + "</op:service-id>"
-                + SipUtils.CRLF + "    <op:version>1.0</op:version>" + SipUtils.CRLF
-                + "  </op:service-description>" + SipUtils.CRLF + "  <contact>"
-                + ImsModule.IMS_USER_PROFILE.getPublicUri() + "</contact>" + SipUtils.CRLF
-                + "  <timestamp>" + timestamp + "</timestamp>" + SipUtils.CRLF + "</tuple>"
-                + SipUtils.CRLF + "<tuple id=\"t2\">" + SipUtils.CRLF + "  <status><basic>"
-                + buildBooleanStatus(capabilities.isImageSharingSupported()) + "</basic></status>"
-                + SipUtils.CRLF + "  <op:service-description>" + SipUtils.CRLF
-                + "    <op:service-id>" + PresenceUtils.FEATURE_RCS2_IMAGE_SHARE
-                + "</op:service-id>" + SipUtils.CRLF + "    <op:version>1.0</op:version>"
-                + SipUtils.CRLF + "  </op:service-description>" + SipUtils.CRLF + "  <contact>"
-                + ImsModule.IMS_USER_PROFILE.getPublicUri() + "</contact>" + SipUtils.CRLF
-                + "  <timestamp>" + timestamp + "</timestamp>" + SipUtils.CRLF + "</tuple>"
-                + SipUtils.CRLF + "<tuple id=\"t3\">" + SipUtils.CRLF + "  <status><basic>"
-                + buildBooleanStatus(capabilities.isVideoSharingSupported()) + "</basic></status>"
-                + SipUtils.CRLF + "  <op:service-description>" + SipUtils.CRLF
-                + "    <op:service-id>" + PresenceUtils.FEATURE_RCS2_VIDEO_SHARE
-                + "</op:service-id>" + SipUtils.CRLF + "    <op:version>1.0</op:version>"
-                + SipUtils.CRLF + "  </op:service-description>" + SipUtils.CRLF + "  <contact>"
-                + ImsModule.IMS_USER_PROFILE.getPublicUri() + "</contact>" + SipUtils.CRLF
-                + "  <timestamp>" + timestamp + "</timestamp>" + SipUtils.CRLF + "</tuple>"
-                + SipUtils.CRLF + "<tuple id=\"t4\">" + SipUtils.CRLF + "  <status><basic>"
-                + buildBooleanStatus(capabilities.isImSessionSupported()) + "</basic></status>"
-                + SipUtils.CRLF + "  <op:service-description>" + SipUtils.CRLF
-                + "    <op:service-id>" + PresenceUtils.FEATURE_RCS2_CHAT + "</op:service-id>"
-                + SipUtils.CRLF + "    <op:version>1.0</op:version>" + SipUtils.CRLF
-                + "  </op:service-description>" + SipUtils.CRLF + "  <contact>"
-                + ImsModule.IMS_USER_PROFILE.getPublicUri() + "</contact>" + SipUtils.CRLF
-                + "  <timestamp>" + timestamp + "</timestamp>" + SipUtils.CRLF + "</tuple>"
-                + SipUtils.CRLF + "<tuple id=\"t5\">" + SipUtils.CRLF + "  <status><basic>"
-                + buildBooleanStatus(capabilities.isCsVideoSupported()) + "</basic></status>"
-                + SipUtils.CRLF + "  <op:service-description>" + SipUtils.CRLF
-                + "    <op:service-id>" + PresenceUtils.FEATURE_RCS2_CS_VIDEO + "</op:service-id>"
-                + SipUtils.CRLF + "    <op:version>1.0</op:version>" + SipUtils.CRLF
-                + "  </op:service-description>" + SipUtils.CRLF + "  <contact>"
-                + ImsModule.IMS_USER_PROFILE.getPublicUri() + "</contact>" + SipUtils.CRLF
-                + "  <timestamp>" + timestamp + "</timestamp>" + SipUtils.CRLF + "</tuple>"
-                + SipUtils.CRLF;
+        return new StringBuilder("<tuple id=\"t1\">").append(SipUtils.CRLF)
+                .append("  <status><basic>")
+                .append(buildBooleanStatus(capabilities.isFileTransferMsrpSupported()))
+                .append("</basic></status>").append(SipUtils.CRLF)
+                .append("  <op:service-description>").append(SipUtils.CRLF)
+                .append("    <op:service-id>").append(PresenceUtils.FEATURE_RCS2_FT)
+                .append("</op:service-id>").append(SipUtils.CRLF)
+                .append("    <op:version>1.0</op:version>").append(SipUtils.CRLF)
+                .append("  </op:service-description>").append(SipUtils.CRLF).append("  <contact>")
+                .append(ImsModule.IMS_USER_PROFILE.getPublicUri()).append("</contact>")
+                .append(SipUtils.CRLF).append("  <timestamp>").append(timestamp)
+                .append("</timestamp>").append(SipUtils.CRLF).append("</tuple>")
+                .append(SipUtils.CRLF).append("<tuple id=\"t2\">").append(SipUtils.CRLF)
+                .append("  <status><basic>")
+                .append(buildBooleanStatus(capabilities.isImageSharingSupported()))
+                .append("</basic></status>").append(SipUtils.CRLF)
+                .append("  <op:service-description>").append(SipUtils.CRLF)
+                .append("    <op:service-id>").append(PresenceUtils.FEATURE_RCS2_IMAGE_SHARE)
+                .append("</op:service-id>").append(SipUtils.CRLF)
+                .append("    <op:version>1.0</op:version>").append(SipUtils.CRLF)
+                .append("  </op:service-description>").append(SipUtils.CRLF).append("  <contact>")
+                .append(ImsModule.IMS_USER_PROFILE.getPublicUri()).append("</contact>")
+                .append(SipUtils.CRLF).append("  <timestamp>").append(timestamp)
+                .append("</timestamp>").append(SipUtils.CRLF).append("</tuple>")
+                .append(SipUtils.CRLF).append("<tuple id=\"t3\">").append(SipUtils.CRLF)
+                .append("  <status><basic>")
+                .append(buildBooleanStatus(capabilities.isVideoSharingSupported()))
+                .append("</basic></status>").append(SipUtils.CRLF)
+                .append("  <op:service-description>").append(SipUtils.CRLF)
+                .append("    <op:service-id>").append(PresenceUtils.FEATURE_RCS2_VIDEO_SHARE)
+                .append("</op:service-id>").append(SipUtils.CRLF)
+                .append("    <op:version>1.0</op:version>").append(SipUtils.CRLF)
+                .append("  </op:service-description>").append(SipUtils.CRLF).append("  <contact>")
+                .append(ImsModule.IMS_USER_PROFILE.getPublicUri()).append("</contact>")
+                .append(SipUtils.CRLF).append("  <timestamp>").append(timestamp)
+                .append("</timestamp>").append(SipUtils.CRLF).append("</tuple>")
+                .append(SipUtils.CRLF).append("<tuple id=\"t4\">").append(SipUtils.CRLF)
+                .append("  <status><basic>")
+                .append(buildBooleanStatus(capabilities.isImSessionSupported()))
+                .append("</basic></status>").append(SipUtils.CRLF)
+                .append("  <op:service-description>").append(SipUtils.CRLF)
+                .append("    <op:service-id>").append(PresenceUtils.FEATURE_RCS2_CHAT)
+                .append("</op:service-id>").append(SipUtils.CRLF)
+                .append("    <op:version>1.0</op:version>").append(SipUtils.CRLF)
+                .append("  </op:service-description>").append(SipUtils.CRLF).append("  <contact>")
+                .append(ImsModule.IMS_USER_PROFILE.getPublicUri()).append("</contact>")
+                .append(SipUtils.CRLF).append("  <timestamp>").append(timestamp)
+                .append("</timestamp>").append(SipUtils.CRLF).append("</tuple>")
+                .append(SipUtils.CRLF).append("<tuple id=\"t5\">").append(SipUtils.CRLF)
+                .append("  <status><basic>")
+                .append(buildBooleanStatus(capabilities.isCsVideoSupported()))
+                .append("</basic></status>").append(SipUtils.CRLF)
+                .append("  <op:service-description>").append(SipUtils.CRLF)
+                .append("    <op:service-id>").append(PresenceUtils.FEATURE_RCS2_CS_VIDEO)
+                .append("</op:service-id>").append(SipUtils.CRLF)
+                .append("    <op:version>1.0</op:version>").append(SipUtils.CRLF)
+                .append("  </op:service-description>").append(SipUtils.CRLF).append("  <contact>")
+                .append(ImsModule.IMS_USER_PROFILE.getPublicUri()).append("</contact>")
+                .append(SipUtils.CRLF).append("  <timestamp>").append(timestamp)
+                .append("</timestamp>").append(SipUtils.CRLF).append("</tuple>")
+                .append(SipUtils.CRLF).toString();
     }
 
     /**

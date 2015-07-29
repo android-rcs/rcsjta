@@ -39,7 +39,7 @@ public class Capabilities {
     private final boolean mIpVoiceCall;
     private final boolean mIpVideoCall;
     private final boolean mImSession;
-    private final boolean mFileTransfer;
+    private final boolean mFileTransferMsrp;
     private final boolean mCsVideo;
     private final boolean mPresenceDiscovery;
     private final boolean mSocialPresence;
@@ -80,7 +80,7 @@ public class Capabilities {
         mIpVoiceCall = builder.mIpVoiceCall;
         mIpVideoCall = builder.mIpVideoCall;
         mImSession = builder.mImSession;
-        mFileTransfer = builder.mFileTransfer;
+        mFileTransferMsrp = builder.mFileTransferMsrp;
         mCsVideo = builder.mCsVideo;
         mPresenceDiscovery = builder.mPresenceDiscovery;
         mSocialPresence = builder.mSocialPresence;
@@ -141,12 +141,12 @@ public class Capabilities {
     }
 
     /**
-     * Is file transfer supported
+     * Is file transfer MSRP supported
      * 
      * @return Boolean
      */
-    public boolean isFileTransferSupported() {
-        return mFileTransfer;
+    public boolean isFileTransferMsrpSupported() {
+        return mFileTransferMsrp;
     }
 
     /**
@@ -251,7 +251,7 @@ public class Capabilities {
     @Override
     public String toString() {
         return "Caps [ImageShare=" + mImageSharing + ", VideoShare=" + mVideoSharing
-                + ", Im=" + mImSession + ", Ft=" + mFileTransfer + ", FtHttp=" + mFileTransferHttp
+                + ", Im=" + mImSession + ", FtMsrp=" + mFileTransferMsrp + ", FtHttp=" + mFileTransferHttp
                 + ", GeoPush=" + mGeolocationPush + ", FtThumbnail="
                 + mFileTransferThumbnail + ", FtSF="
                 + mFileTransferStoreForward + ", GcSF=" + mGroupChatStoreForward
@@ -276,7 +276,7 @@ public class Capabilities {
                 return false;
         } else if (!mExtensions.equals(other.mExtensions))
             return false;
-        if (mFileTransfer != other.mFileTransfer)
+        if (mFileTransferMsrp != other.mFileTransferMsrp)
             return false;
         if (mFileTransferHttp != other.mFileTransferHttp)
             return false;
@@ -324,7 +324,7 @@ public class Capabilities {
         private boolean mIpVoiceCall = false;
         private boolean mIpVideoCall = false;
         private boolean mImSession = false;
-        private boolean mFileTransfer = false;
+        private boolean mFileTransferMsrp = false;
         private boolean mCsVideo = false;
         private boolean mPresenceDiscovery = false;
         private boolean mSocialPresence = false;
@@ -355,7 +355,7 @@ public class Capabilities {
             mIpVoiceCall = capabilities.isIPVoiceCallSupported();
             mIpVideoCall = capabilities.isIPVideoCallSupported();
             mImSession = capabilities.isImSessionSupported();
-            mFileTransfer = capabilities.isFileTransferSupported();
+            mFileTransferMsrp = capabilities.isFileTransferMsrpSupported();
             mCsVideo = capabilities.isCsVideoSupported();
             mPresenceDiscovery = capabilities.isPresenceDiscoverySupported();
             mSocialPresence = capabilities.isSocialPresenceSupported();
@@ -471,13 +471,13 @@ public class Capabilities {
         }
 
         /**
-         * Sets File Transfer support
+         * Sets MSRP File Transfer support
          * 
          * @param support the File Transfer support
          * @return the current instance
          */
-        public CapabilitiesBuilder setFileTransfer(boolean support) {
-            mFileTransfer = support;
+        public CapabilitiesBuilder setFileTransferMsrp(boolean support) {
+            mFileTransferMsrp = support;
             return this;
         }
 
@@ -487,7 +487,7 @@ public class Capabilities {
          * @return Boolean
          */
         public boolean isFileTransferSupported() {
-            return mFileTransfer;
+            return mFileTransferMsrp;
         }
 
         /**

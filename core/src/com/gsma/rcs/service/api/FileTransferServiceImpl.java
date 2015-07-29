@@ -492,9 +492,9 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         if (remoteCapabilities == null) {
             return null;
         }
-        boolean ftMsrpSupportedforSelf = myCapabilities.isFileTransferSupported();
+        boolean ftMsrpSupportedforSelf = myCapabilities.isFileTransferMsrpSupported();
         boolean ftHttpSupportedforSelf = myCapabilities.isFileTransferHttpSupported();
-        boolean ftMsrpSupportedforRemote = remoteCapabilities.isFileTransferSupported();
+        boolean ftMsrpSupportedforRemote = remoteCapabilities.isFileTransferMsrpSupported();
         boolean ftHttpSupportedforRemote = remoteCapabilities.isFileTransferHttpSupported();
         if (ftMsrpSupportedforSelf && ftMsrpSupportedforRemote) {
             if (ftHttpSupportedforSelf && ftHttpSupportedforRemote) {

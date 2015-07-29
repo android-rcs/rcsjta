@@ -38,8 +38,11 @@ import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
+import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
+import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.InvitationStatus;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
+import com.gsma.rcs.core.ims.service.capability.Capabilities.CapabilitiesBuilder;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
@@ -807,7 +810,16 @@ public class InstantMessagingService extends ImsService {
             sLogger.info("Receive a file transfer session invitation");
         }
         ContactId remote = ContactUtil.createContactIdFromValidatedData(number);
-        // Test if the contact is blocked
+        /*
+         * Update the remote contact's capabilities to include at least MSRP FT capabilities as we
+         * have just received a MSRP file transfer session invitation from this contact so
+         * he/she must at least have this capability. We do not need any capability exchange
+         * response to determine that.
+         */
+        mContactManager.mergeContactCapabilities(remote, new CapabilitiesBuilder()
+                .setFileTransferMsrp(true).setTimestampOfLastResponse(timestamp).build(),
+                RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE);
+
         /**
          * Since in MSRP communication we do not have a timestampSent to be extracted from the
          * payload then we need to fake that by using the local timestamp even if this is not the
@@ -822,12 +834,10 @@ public class InstantMessagingService extends ImsService {
             handleMsrpFileTransferInvitationRejected(invite, remote,
                     FileTransfer.ReasonCode.REJECTED_SPAM, timestamp, timestampSent);
 
-            // Send a 603 Decline response
             sendErrorResponse(invite, Response.DECLINE);
             return;
         }
 
-        // Test number of sessions
         if (!isFileTransferSessionAvailable()) {
             if (logActivated) {
                 sLogger.debug("The max number of file transfer sessions is achieved: reject the invitation");
@@ -835,7 +845,6 @@ public class InstantMessagingService extends ImsService {
             handleMsrpFileTransferInvitationRejected(invite, remote,
                     FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp, timestampSent);
 
-            // Send a 603 Decline response
             sendErrorResponse(invite, Response.DECLINE);
             return;
         }
@@ -964,23 +973,29 @@ public class InstantMessagingService extends ImsService {
         if (logActivated) {
             sLogger.info("Receive a 1-1 chat session invitation");
         }
+        /*
+         * Update the remote contact's capabilities to include at least IM session capabilities as
+         * we have just received a one-one chat session invitation from this contact so he/she must
+         * at least have this capability. We do not need any capability exchange response to
+         * determine that.
+         */
+        mContactManager.mergeContactCapabilities(remote,
+                new CapabilitiesBuilder().setImSession(true).setTimestampOfLastResponse(timestamp)
+                        .build(), RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE);
+
         ChatMessage firstMsg = ChatUtils.getFirstMessage(invite, timestamp);
-        // Test if the contact is blocked
         if (mContactManager.isBlockedForContact(remote)) {
             if (logActivated) {
                 sLogger.debug("Contact " + remote
                         + " is blocked: automatically reject the chat invitation");
             }
 
-            // Save the message in the spam folder
             if (firstMsg != null && !mMessagingLog.isMessagePersisted(firstMsg.getMessageId())) {
                 mMessagingLog.addOneToOneSpamMessage(firstMsg);
             }
 
-            // Send message delivery report if requested
             if (mImdnManager.isDeliveryDeliveredReportsEnabled()
                     && ChatUtils.isImdnDeliveredRequested(invite)) {
-                // Check notification disposition
                 String msgId = ChatUtils.getMessageId(invite);
                 if (msgId != null) {
                     String remoteInstanceId = null;
@@ -990,14 +1005,12 @@ public class InstantMessagingService extends ImsService {
                         remoteInstanceId = inviteContactHeader
                                 .getParameter(SipUtils.SIP_INSTANCE_PARAM);
                     }
-                    // Send message delivery status via a SIP MESSAGE
                     mImdnManager.sendMessageDeliveryStatusImmediately(remote.toString(), remote,
                             msgId, ImdnDocument.DELIVERY_STATUS_DELIVERED, remoteInstanceId,
                             timestamp);
                 }
             }
 
-            // Send a 486 Busy response
             sendErrorResponse(invite, Response.BUSY_HERE);
             return;
         }
@@ -1015,13 +1028,11 @@ public class InstantMessagingService extends ImsService {
             mMessagingLog.addIncomingOneToOneChatMessage(firstMsg, imdnDisplayRequested);
         }
 
-        // Test number of sessions
         if (!isChatSessionAvailable()) {
             if (logActivated) {
                 sLogger.debug("The max number of chat sessions is achieved: reject the invitation");
             }
 
-            // Send a 486 Busy response
             sendErrorResponse(invite, Response.BUSY_HERE);
             return;
         }
@@ -1075,6 +1086,16 @@ public class InstantMessagingService extends ImsService {
             sLogger.info("Receive an ad-hoc group chat session invitation");
         }
         ContactId contact = ChatUtils.getReferredIdentityAsContactId(invite);
+        /*
+         * Update the remote contact's capabilities to include at least IM session capabilities as
+         * we have just received a group chat session invitation from this contact so he/she must at
+         * least have this capability. We do not need any capability exchange response to determine
+         * that.
+         */
+        mContactManager.mergeContactCapabilities(contact,
+                new CapabilitiesBuilder().setImSession(true).setTimestampOfLastResponse(timestamp)
+                        .build(), RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE);
+
         if (contact != null && mContactManager.isBlockedForContact(contact)) {
             if (logActivated) {
                 sLogger.debug("Contact " + contact
@@ -1084,12 +1105,10 @@ public class InstantMessagingService extends ImsService {
             handleGroupChatInvitationRejected(invite, contact, GroupChat.ReasonCode.REJECTED_SPAM,
                     timestamp);
 
-            // Send a 486 Busy response
             sendErrorResponse(invite, Response.BUSY_HERE);
             return;
         }
 
-        // Test number of sessions
         if (!isChatSessionAvailable()) {
             if (logActivated) {
                 sLogger.debug("The max number of chat sessions is achieved: reject the invitation");
@@ -1098,7 +1117,6 @@ public class InstantMessagingService extends ImsService {
             handleGroupChatInvitationRejected(invite, contact,
                     GroupChat.ReasonCode.REJECTED_MAX_CHATS, timestamp);
 
-            // Send a 486 Busy response
             sendErrorResponse(invite, Response.BUSY_HERE);
             return;
         }
@@ -1129,7 +1147,6 @@ public class InstantMessagingService extends ImsService {
                 sLogger.debug("Chat Id " + session.getContributionID()
                         + " is declined since previously terminated by user while disconnected");
             }
-            // Send a 603 Decline response
             sendErrorResponse(invite, Response.DECLINE);
             mMessagingLog.acceptGroupChatNextInvitation(session.getContributionID());
             return;
@@ -1441,6 +1458,17 @@ public class InstantMessagingService extends ImsService {
         if (logActivated) {
             sLogger.info("Receive a single HTTP file transfer invitation");
         }
+        /*
+         * Update the remote contact's capabilities to include at least HTTP FT and IM session
+         * capabilities as we have just received a HTTP file transfer invitation from this contact
+         * so he/she must at least have this capability. We do not need any capability exchange
+         * response to determine that.
+         */
+        mContactManager.mergeContactCapabilities(remote,
+                new CapabilitiesBuilder().setImSession(true).setFileTransferHttp(true)
+                        .setTimestampOfLastResponse(timestamp).build(), RcsStatus.RCS_CAPABLE,
+                RegistrationState.ONLINE);
+
         String fileTransferId = ChatUtils.getMessageId(invite);
         if (isFileTransferAlreadyOngoing(fileTransferId)) {
             if (sLogger.isActivated()) {

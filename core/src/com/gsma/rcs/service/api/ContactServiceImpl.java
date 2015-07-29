@@ -199,7 +199,7 @@ public class ContactServiceImpl extends IContactService.Stub {
         }
         return new Capabilities(capabilities.isImageSharingSupported(),
                 capabilities.isVideoSharingSupported(), capabilities.isImSessionSupported(),
-                capabilities.isFileTransferSupported()
+                capabilities.isFileTransferMsrpSupported()
                         || capabilities.isFileTransferHttpSupported(),
                 capabilities.isGeolocationPushSupported(), capabilities.getSupportedExtensions(),
                 capabilities.isSipAutomata(), capabilities.getTimestampOfLastResponse());

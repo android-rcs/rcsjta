@@ -36,10 +36,12 @@ import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
-import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionActivityManager;
+import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
+import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
+import com.gsma.rcs.core.ims.service.capability.Capabilities.CapabilitiesBuilder;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimParser;
@@ -75,7 +77,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
-import javax2.sip.message.Response;
 
 /**
  * Chat session
@@ -690,6 +691,17 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     protected void receiveHttpFileTransfer(ContactId contact, String displayName,
             FileTransferHttpInfoDocument fileTransferInfo, String msgId, long timestamp,
             long timestampSent) {
+        /*
+         * Update the remote contact's capabilities to include at least HTTP FT and IM session
+         * capabilities as we have just received a HTTP file transfer invitation from this contact
+         * so he/she must at least have this capability. We do not need any capability exchange
+         * response to determine that.
+         */
+        mContactManager.mergeContactCapabilities(contact,
+                new CapabilitiesBuilder().setImSession(true).setFileTransferHttp(true)
+                        .setTimestampOfLastResponse(timestamp).build(), RcsStatus.RCS_CAPABLE,
+                RegistrationState.ONLINE);
+
         FileTransferHttpThumbnail fileTransferHttpThumbnail = fileTransferInfo.getFileThumbnail();
         if (mImService.isFileTransferAlreadyOngoing(msgId)) {
             if (sLogger.isActivated()) {
@@ -716,6 +728,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                     fileIconContent, ReasonCode.REJECTED_SPAM, timestamp, timestampSent);
             return;
         }
+
         /* Auto reject if file too big or size exceeds device storage capacity. */
         FileSharingError error = FileSharingSession.isFileCapacityAcceptable(
                 fileTransferInfo.getSize(), mRcsSettings);

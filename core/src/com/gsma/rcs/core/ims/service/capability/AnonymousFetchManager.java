@@ -153,7 +153,7 @@ public class AnonymousFetchManager implements DiscoveryManager {
                     capaBuilder.setImageSharing(state);
 
                 } else if (PresenceUtils.FEATURE_RCS2_FT.equalsIgnoreCase(id)) {
-                    capaBuilder.setFileTransfer(state);
+                    capaBuilder.setFileTransferMsrp(state);
 
                 } else if (PresenceUtils.FEATURE_RCS2_CS_VIDEO.equalsIgnoreCase(id)) {
                     capaBuilder.setCsVideo(state);

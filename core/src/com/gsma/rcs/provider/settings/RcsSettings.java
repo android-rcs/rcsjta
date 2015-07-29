@@ -676,7 +676,7 @@ public class RcsSettings {
         CapabilitiesBuilder capaBuilder = new CapabilitiesBuilder();
         /* Add my own capabilities */
         capaBuilder.setCsVideo(isCsVideoSupported());
-        capaBuilder.setFileTransfer(isFileTransferSupported());
+        capaBuilder.setFileTransferMsrp(isFileTransferSupported());
         capaBuilder.setFileTransferHttp(isFileTransferHttpSupported());
         capaBuilder.setImageSharing(isImageSharingSupported());
         capaBuilder.setImSession(isImSessionSupported());
