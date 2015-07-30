@@ -226,47 +226,15 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
                             continue;
                         }
 
-                        // Get state
-                        String state = user.getState();
                         if (logActivated) {
                             sLogger.debug("User conference info: " + user);
-                        }
-
-                        /* For the disconnected state, override state with the more detailed
-                         * disconnection-method field (if available).
-                         */
-                        if (User.STATE_DISCONNECTED.equals(state)) {
-                            String disconnectionMethod = user.getDisconnectionMethod();
-                            if (disconnectionMethod != null) {
-                                /* Detect declined by remote from failure-reason field. */
-                                if (User.STATE_FAILED.equals(disconnectionMethod)) {
-                                    String reason = user.getFailureReason();
-                                    if ((reason != null) && reason.contains("603")) {
-                                        state = User.STATE_DECLINED;
-                                    }
-                                } else {
-                                    state = disconnectionMethod;
-                                }
-                            }
-                        }
-
-                        // Manage "pending-out" and "pending-in" status like "pending" status. See
-                        // RFC 4575 dialing-in: Endpoint is
-                        // dialing into the conference, not yet in the roster (probably being
-                        // authenticated). dialing-out: Focus has
-                        // dialed out to connect the endpoint to the conference, but the endpoint is
-                        // not yet in the roster (probably
-                        // being authenticated).
-                        if ((state.equalsIgnoreCase("dialing-out"))
-                                || (state.equalsIgnoreCase("dialing-in"))) {
-                            state = User.STATE_PENDING;
                         }
 
                         /*
                          * Collect contact updates to be able to apply them in a one-shot operation
                          * outside the loop.
                          */
-                        participants.put(contact, getStatus(state));
+                        participants.put(contact, getStatus(user));
 
                     }
 
@@ -770,6 +738,44 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 
         // Reset dialog path attributes
         resetDialogPath();
+    }
+
+    /**
+     * Convert the user status into integer
+     * 
+     * @param user the user
+     * @return the integer status
+     */
+    private static ParticipantStatus getStatus(User user) {
+        String state = user.getState();
+        /* Manage "pending-out" and "pending-in" status like "pending" status. See RFC 4575
+         * dialing-in: Endpoint is dialing into the conference, not yet in the roster (probably
+         * being authenticated). dialing-out: Focus has dialed out to connect the endpoint to the
+         * conference, but the endpoint is not yet in the roster (probably being authenticated).
+         */
+        if ("dialing-out".equalsIgnoreCase(state)) {
+            return ParticipantStatus.INVITED;
+
+        } else if ("dialing-in".equalsIgnoreCase(state)) {
+            return ParticipantStatus.INVITED;
+
+        } else if (User.STATE_DISCONNECTED.equals(state)) {
+            /* For the disconnected state, override state with the more detailed
+             * disconnection-method field (if available).
+             */
+            String disconnectionMethod = user.getDisconnectionMethod();
+            if (disconnectionMethod != null) {
+                /* Detect declined by remote from failure-reason field. */
+                if (User.STATE_FAILED.equals(disconnectionMethod)) {
+                    String reason = user.getFailureReason();
+                    if ((reason != null) && reason.contains("603")) {
+                        return ParticipantStatus.DECLINED;
+                    }
+                }
+                return getStatus(disconnectionMethod);
+            }
+        }
+        return getStatus(state);
     }
 
     /**
