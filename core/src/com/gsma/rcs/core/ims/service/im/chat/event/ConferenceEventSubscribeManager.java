@@ -228,20 +228,24 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 
                         // Get state
                         String state = user.getState();
-                        String method = user.getDisconnectionMethod();
                         if (logActivated) {
                             sLogger.debug("User conference info: " + user);
                         }
-                        if (method != null) {
-                            // If there is a method then use it as a specific state
-                            state = method;
 
-                            // If session failed because declined by remote then use it as a
-                            // specific state
-                            if (method.equals("failed")) {
-                                String reason = user.getFailureReason();
-                                if ((reason != null) && reason.contains("603")) {
-                                    state = User.STATE_DECLINED;
+                        /* For the disconnected state, override state with the more detailed
+                         * disconnection-method field (if available).
+                         */
+                        if (User.STATE_DISCONNECTED.equals(state)) {
+                            String disconnectionMethod = user.getDisconnectionMethod();
+                            if (disconnectionMethod != null) {
+                                /* Detect declined by remote from failure-reason field. */
+                                if (User.STATE_FAILED.equals(disconnectionMethod)) {
+                                    String reason = user.getFailureReason();
+                                    if ((reason != null) && reason.contains("603")) {
+                                        state = User.STATE_DECLINED;
+                                    }
+                                } else {
+                                    state = disconnectionMethod;
                                 }
                             }
                         }
