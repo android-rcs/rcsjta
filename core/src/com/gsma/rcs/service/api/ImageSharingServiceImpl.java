@@ -250,10 +250,6 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
                     + " displayName=" + session.getRemoteDisplayName());
         }
         ContactId contact = session.getRemoteContact();
-
-        // Update displayName of remote contact
-        mContactManager.setContactDisplayName(contact, session.getRemoteDisplayName());
-
         String sharingId = session.getSessionID();
         ImageSharingPersistedStorageAccessor storageAccessor = new ImageSharingPersistedStorageAccessor(
                 sharingId, mRichCallLog);

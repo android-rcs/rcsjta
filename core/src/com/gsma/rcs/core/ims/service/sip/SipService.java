@@ -157,6 +157,9 @@ public class SipService extends ImsService {
         }
         // Test if the contact is blocked
         ContactId remote = ContactUtil.createContactIdFromValidatedData(number);
+        mContactManager.setContactDisplayName(remote,
+                SipUtils.getDisplayNameFromUri(invite.getFrom()));
+
         if (mContactManager.isBlockedForContact(remote)) {
             if (logger.isActivated()) {
                 logger.debug("Contact " + remote
@@ -217,6 +220,9 @@ public class SipService extends ImsService {
         }
         // Test if the contact is blocked
         ContactId remote = ContactUtil.createContactIdFromValidatedData(number);
+        mContactManager.setContactDisplayName(remote,
+                SipUtils.getDisplayNameFromUri(invite.getFrom()));
+
         if (mContactManager.isBlockedForContact(remote)) {
             if (logger.isActivated()) {
                 logger.debug("Contact " + remote

@@ -27,8 +27,11 @@ import com.gsma.rcs.core.CoreListener;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
+import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
+import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
+import com.gsma.rcs.core.ims.service.capability.Capabilities.CapabilitiesBuilder;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatError;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
@@ -1534,7 +1537,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         synchronized (lock) {
             mPersistentStorage.addIncomingGroupChatMessage(msg, imdnDisplayedRequested);
             if (remote != null) {
-                mContactManager.setContactDisplayName(remote, msg.getDisplayName());
+                mContactManager.mergeContactCapabilities(remote, new CapabilitiesBuilder()
+                        .setImSession(true).setTimestampOfLastResponse(msg.getTimestamp()).build(),
+                        RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE, msg.getDisplayName());
             }
             String mimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
             mBroadcaster.broadcastMessageReceived(mimeType, msgId);

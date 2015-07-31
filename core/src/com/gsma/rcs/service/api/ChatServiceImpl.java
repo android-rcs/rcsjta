@@ -317,11 +317,11 @@ public class ChatServiceImpl extends IChatService.Stub {
      */
     public void receiveOneToOneChatInvitation(OneToOneChatSession session) {
         ContactId contact = session.getRemoteContact();
-        String displayName = session.getRemoteDisplayName();
         if (sLogger.isActivated()) {
-            sLogger.info("Chat invitation from " + contact + " (display=" + displayName + ")");
+            sLogger.info(new StringBuilder("Chat invitation from ").append(contact)
+                    .append(" (display=").append(session.getRemoteDisplayName()).append(")")
+                    .toString());
         }
-        mContactManager.setContactDisplayName(contact, displayName);
         // Add session in the list
         OneToOneChatImpl oneToOneChat = getOrCreateOneToOneChat(contact);
         session.addListener(oneToOneChat);
@@ -480,13 +480,11 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param session Chat session
      */
     public void receiveGroupChatInvitation(GroupChatSession session) {
-        String displayName = session.getRemoteDisplayName();
         ContactId remote = session.getRemoteContact();
         if (sLogger.isActivated()) {
-            sLogger.info("Group chat invitation from " + remote + " (display=" + displayName + ")");
-        }
-        if (remote != null) {
-            mContactManager.setContactDisplayName(remote, displayName);
+            sLogger.info(new StringBuilder("Group chat invitation from ").append(remote)
+                    .append(" (display=").append(session.getRemoteDisplayName()).append(")")
+                    .toString());
         }
         String chatId = session.getContributionID();
         GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(

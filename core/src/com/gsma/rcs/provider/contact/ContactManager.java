@@ -525,6 +525,9 @@ public final class ContactManager {
         values.put(KEY_RCS_STATUS, newInfo.getRcsStatus().toInt());
         values.put(KEY_RCS_STATUS_TIMESTAMP, newInfo.getRcsStatusTimestamp());
 
+        /* Save display name */
+        values.put(KEY_DISPLAY_NAME, newInfo.getDisplayName());
+
         /* Save capabilities */
         Capabilities newCapa = newInfo.getCapabilities();
         values.put(KEY_CAPABILITY_CS_VIDEO, newCapa.isCsVideoSupported());
@@ -1860,9 +1863,10 @@ public final class ContactManager {
      * @param capabilities
      * @param contactType
      * @param registrationState
+     * @param displayName
      */
     public void mergeContactCapabilities(ContactId contact, Capabilities capabilities,
-            RcsStatus contactType, RegistrationState registrationState) {
+            RcsStatus contactType, RegistrationState registrationState, String displayName) {
         synchronized (mContactInfoCache) {
             /* Get the current information on this contact */
             ContactInfo oldInfo = getContactInfoInternal(contact);
@@ -1939,10 +1943,12 @@ public final class ContactManager {
             boolean isRcsContact = newInfo.isRcsContact();
             /* Add the capabilities */
             newInfo.setCapabilities(capBuilder.build());
+            newInfo.setDisplayName(displayName);
             /* Do not set contact info if they are unchanged */
             if (newInfo.getCapabilities().equals(oldInfo.getCapabilities())
                     && newInfo.getRcsStatus() == oldInfo.getRcsStatus()
-                    && newInfo.getRegistrationState() == oldInfo.getRegistrationState()) {
+                    && newInfo.getRegistrationState() == oldInfo.getRegistrationState()
+                    && displayName == null && displayName.equals(oldInfo.getDisplayName())) {
                 return;
             }
             /* Save the modifications */

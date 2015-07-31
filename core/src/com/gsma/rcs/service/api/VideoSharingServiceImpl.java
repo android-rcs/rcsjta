@@ -261,8 +261,6 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
                     .append(session.getRemoteDisplayName()).toString());
         }
 
-        // Update displayName of remote contact
-        mContactManager.setContactDisplayName(contact, session.getRemoteDisplayName());
         String sharingId = session.getSessionID();
         VideoSharingPersistedStorageAccessor storageAccessor = new VideoSharingPersistedStorageAccessor(
                 sharingId, mRichCallLog);

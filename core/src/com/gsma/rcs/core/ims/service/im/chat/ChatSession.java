@@ -700,7 +700,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         mContactManager.mergeContactCapabilities(contact,
                 new CapabilitiesBuilder().setImSession(true).setFileTransferHttp(true)
                         .setTimestampOfLastResponse(timestamp).build(), RcsStatus.RCS_CAPABLE,
-                RegistrationState.ONLINE);
+                RegistrationState.ONLINE, displayName);
 
         FileTransferHttpThumbnail fileTransferHttpThumbnail = fileTransferInfo.getFileThumbnail();
         if (mImService.isFileTransferAlreadyOngoing(msgId)) {

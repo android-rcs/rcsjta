@@ -806,10 +806,12 @@ public class InstantMessagingService extends ImsService {
             return;
 
         }
-        if (logActivated) {
-            sLogger.info("Receive a file transfer session invitation");
-        }
         ContactId remote = ContactUtil.createContactIdFromValidatedData(number);
+        if (logActivated) {
+            sLogger.debug("Receive a file transfer session invitation from ".concat(remote
+                    .toString()));
+        }
+        String displayName = SipUtils.getDisplayNameFromUri(invite.getFrom());
         /*
          * Update the remote contact's capabilities to include at least MSRP FT capabilities as we
          * have just received a MSRP file transfer session invitation from this contact so
@@ -818,7 +820,7 @@ public class InstantMessagingService extends ImsService {
          */
         mContactManager.mergeContactCapabilities(remote, new CapabilitiesBuilder()
                 .setFileTransferMsrp(true).setTimestampOfLastResponse(timestamp).build(),
-                RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE);
+                RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE, displayName);
 
         /**
          * Since in MSRP communication we do not have a timestampSent to be extracted from the
@@ -840,7 +842,8 @@ public class InstantMessagingService extends ImsService {
 
         if (!isFileTransferSessionAvailable()) {
             if (logActivated) {
-                sLogger.debug("The max number of file transfer sessions is achieved: reject the invitation");
+                sLogger.debug("The max number of file transfer sessions is achieved: reject the invitation from "
+                        .concat(remote.toString()));
             }
             handleMsrpFileTransferInvitationRejected(invite, remote,
                     FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp, timestampSent);
@@ -877,10 +880,8 @@ public class InstantMessagingService extends ImsService {
                             FileTransfer.ReasonCode.REJECTED_LOW_SPACE, timestamp, timestampSent);
                     break;
                 default:
-                    if (sLogger.isActivated()) {
-                        sLogger.error("Unexpected error while receiving MSRP file transfer invitation"
-                                .concat(Integer.toString(errorCode)));
-                    }
+                    sLogger.error("Unexpected error while receiving MSRP file transfer invitation"
+                            .concat(Integer.toString(errorCode)));
             }
             return;
         }
@@ -962,6 +963,7 @@ public class InstantMessagingService extends ImsService {
 
         String referredId = ChatUtils.getReferredIdentityAsContactUri(invite);
         ContactId remote = ChatUtils.getReferredIdentityAsContactId(invite);
+        String displayName = SipUtils.getDisplayNameFromUri(invite.getFrom());
         if (remote == null) {
             if (logActivated) {
                 sLogger.error("Discard One2OneChatSession: invalid remote ID '" + referredId + "'");
@@ -971,7 +973,7 @@ public class InstantMessagingService extends ImsService {
 
         }
         if (logActivated) {
-            sLogger.info("Receive a 1-1 chat session invitation");
+            sLogger.debug("Receive a 1-1 chat session invitation from ".concat(remote.toString()));
         }
         /*
          * Update the remote contact's capabilities to include at least IM session capabilities as
@@ -981,7 +983,7 @@ public class InstantMessagingService extends ImsService {
          */
         mContactManager.mergeContactCapabilities(remote,
                 new CapabilitiesBuilder().setImSession(true).setTimestampOfLastResponse(timestamp)
-                        .build(), RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE);
+                        .build(), RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE, displayName);
 
         ChatMessage firstMsg = ChatUtils.getFirstMessage(invite, timestamp);
         if (mContactManager.isBlockedForContact(remote)) {
@@ -1030,7 +1032,8 @@ public class InstantMessagingService extends ImsService {
 
         if (!isChatSessionAvailable()) {
             if (logActivated) {
-                sLogger.debug("The max number of chat sessions is achieved: reject the invitation");
+                sLogger.debug("The max number of chat sessions is achieved: reject the invitation from "
+                        .concat(remote.toString()));
             }
 
             sendErrorResponse(invite, Response.BUSY_HERE);
@@ -1082,10 +1085,12 @@ public class InstantMessagingService extends ImsService {
     public void receiveAdhocGroupChatSession(SipRequest invite, long timestamp)
             throws SipPayloadException, SipNetworkException {
         boolean logActivated = sLogger.isActivated();
-        if (logActivated) {
-            sLogger.info("Receive an ad-hoc group chat session invitation");
-        }
         ContactId contact = ChatUtils.getReferredIdentityAsContactId(invite);
+        if (logActivated) {
+            sLogger.debug("Receive an ad-hoc group chat session invitation from ".concat(contact
+                    .toString()));
+        }
+        String displayName = SipUtils.getDisplayNameFromUri(invite.getFrom());
         /*
          * Update the remote contact's capabilities to include at least IM session capabilities as
          * we have just received a group chat session invitation from this contact so he/she must at
@@ -1094,7 +1099,7 @@ public class InstantMessagingService extends ImsService {
          */
         mContactManager.mergeContactCapabilities(contact,
                 new CapabilitiesBuilder().setImSession(true).setTimestampOfLastResponse(timestamp)
-                        .build(), RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE);
+                        .build(), RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE, displayName);
 
         if (contact != null && mContactManager.isBlockedForContact(contact)) {
             if (logActivated) {
@@ -1111,7 +1116,8 @@ public class InstantMessagingService extends ImsService {
 
         if (!isChatSessionAvailable()) {
             if (logActivated) {
-                sLogger.debug("The max number of chat sessions is achieved: reject the invitation");
+                sLogger.debug("The max number of chat sessions is achieved: reject the invitation from "
+                        .concat(contact.toString()));
             }
 
             handleGroupChatInvitationRejected(invite, contact,
@@ -1446,6 +1452,7 @@ public class InstantMessagingService extends ImsService {
         boolean logActivated = sLogger.isActivated();
         String referredId = ChatUtils.getReferredIdentityAsContactUri(invite);
         ContactId remote = ChatUtils.getReferredIdentityAsContactId(invite);
+        String displayName = SipUtils.getDisplayNameFromUri(invite.getFrom());
         if (remote == null) {
             if (logActivated) {
                 sLogger.error("Discard OneToOne HttpFileTranferInvitation: invalid remote ID '"
@@ -1456,7 +1463,8 @@ public class InstantMessagingService extends ImsService {
 
         }
         if (logActivated) {
-            sLogger.info("Receive a single HTTP file transfer invitation");
+            sLogger.debug("Receive a single HTTP file transfer invitation from ".concat(remote
+                    .toString()));
         }
         /*
          * Update the remote contact's capabilities to include at least HTTP FT and IM session
@@ -1467,7 +1475,7 @@ public class InstantMessagingService extends ImsService {
         mContactManager.mergeContactCapabilities(remote,
                 new CapabilitiesBuilder().setImSession(true).setFileTransferHttp(true)
                         .setTimestampOfLastResponse(timestamp).build(), RcsStatus.RCS_CAPABLE,
-                RegistrationState.ONLINE);
+                RegistrationState.ONLINE, displayName);
 
         String fileTransferId = ChatUtils.getMessageId(invite);
         if (isFileTransferAlreadyOngoing(fileTransferId)) {
@@ -1501,7 +1509,8 @@ public class InstantMessagingService extends ImsService {
 
         if (!isChatSessionAvailable()) {
             if (logActivated) {
-                sLogger.debug("The max number of chat sessions is achieved: reject the invitation");
+                sLogger.debug("The max number of chat sessions is achieved: reject the invitation from "
+                        .concat(remote.toString()));
             }
             sendErrorResponse(invite, Response.BUSY_HERE);
             /*
@@ -1527,7 +1536,8 @@ public class InstantMessagingService extends ImsService {
 
         if (!isFileTransferSessionAvailable()) {
             if (logActivated) {
-                sLogger.debug("The max number of FT sessions is achieved, reject the HTTP File transfer");
+                sLogger.debug("The max number of FT sessions is achieved, reject the HTTP File transfer from "
+                        .concat(remote.toString()));
             }
             sendErrorResponse(invite, Response.DECLINE);
             if (fileResent) {
@@ -1571,10 +1581,10 @@ public class InstantMessagingService extends ImsService {
                             FileTransfer.ReasonCode.REJECTED_LOW_SPACE, timestamp, timestampSent);
                     break;
                 default:
-                    if (logActivated) {
-                        sLogger.error("Unexpected error while receiving HTTP file transfer invitation"
-                                .concat(Integer.toString(errorCode)));
-                    }
+                    sLogger.error(new StringBuilder(
+                            "Unexpected error while receiving HTTP file transfer invitation from ")
+                            .append(remote).append(" error : ").append(Integer.toString(errorCode))
+                            .toString());
             }
             return;
         }
@@ -1601,7 +1611,7 @@ public class InstantMessagingService extends ImsService {
         }
         if (fileResent) {
             listener.handleOneToOneResendFileTransferInvitation(fileSharingSession, remote,
-                    oneToOneChatSession.getRemoteDisplayName());
+                    displayName);
         } else {
             listener.handleOneToOneFileTransferInvitation(fileSharingSession, oneToOneChatSession,
                     ftinfo.getExpiration());
@@ -1635,17 +1645,17 @@ public class InstantMessagingService extends ImsService {
         boolean logActivated = sLogger.isActivated();
         String referredId = ChatUtils.getReferredIdentityAsContactUri(invite);
         ContactId remote = ChatUtils.getReferredIdentityAsContactId(invite);
+        String displayName = SipUtils.getDisplayNameFromUri(invite.getFrom());
         if (remote == null) {
-            if (logActivated) {
-                sLogger.error("Discard S&F OneToOne HttpFileTranfer Invitation. Invalid remote ID "
-                        .concat(referredId));
-            }
+            sLogger.error("Discard S&F OneToOne HttpFileTranfer Invitation. Invalid remote ID "
+                    .concat(referredId));
             /* We cannot refuse a S&F File transfer invitation */
             // TODO normally send a deliver to enable transmission of awaiting messages
             return;
         }
         if (logActivated) {
-            sLogger.info("Receive a single S&F HTTP file transfer invitation");
+            sLogger.debug("Receive a single S&F HTTP file transfer invitation from ".concat(remote
+                    .toString()));
         }
         CpimMessage cpimMessage = ChatUtils.extractCpimMessage(invite);
         long timestampSent = cpimMessage.getTimestampSent();
@@ -1653,7 +1663,8 @@ public class InstantMessagingService extends ImsService {
         boolean fileResent = isFileTransferResentAndNotAlreadyOngoing(fileTransferId);
         if (!isChatSessionAvailable()) {
             if (logActivated) {
-                sLogger.debug("The max number of chat sessions is achieved: reject the invitation");
+                sLogger.debug("The max number of chat sessions is achieved: reject the invitation from "
+                        .concat(remote.toString()));
             }
             sendErrorResponse(invite, Response.BUSY_HERE);
             /*
@@ -1680,7 +1691,8 @@ public class InstantMessagingService extends ImsService {
         if (isFileTransferAlreadyOngoing(fileTransferId)) {
             if (sLogger.isActivated()) {
                 sLogger.debug(new StringBuilder("File transfer with fileTransferId '")
-                        .append(fileTransferId).append("' already ongoing, so ignoring this one.")
+                        .append(fileTransferId)
+                        .append("' already ongoing, so ignoring this one from ").append(remote)
                         .toString());
             }
             return;
@@ -1688,7 +1700,8 @@ public class InstantMessagingService extends ImsService {
 
         if (isFileSizeExceeded(ftinfo.getSize())) {
             if (logActivated) {
-                sLogger.debug("File is too big, reject file transfer invitation");
+                sLogger.debug("File is too big, reject file transfer invitation from "
+                        .concat(remote.toString()));
             }
             // TODO add warning header "xxx Size exceeded"
             oneToOneChatSession.sendErrorResponse(invite, oneToOneChatSession.getDialogPath()
@@ -1720,7 +1733,7 @@ public class InstantMessagingService extends ImsService {
         }
         if (fileResent) {
             listener.handleOneToOneResendFileTransferInvitation(filetransferSession, remote,
-                    oneToOneChatSession.getRemoteDisplayName());
+                    displayName);
         } else {
             listener.handleOneToOneFileTransferInvitation(filetransferSession, oneToOneChatSession,
                     ftinfo.getExpiration());

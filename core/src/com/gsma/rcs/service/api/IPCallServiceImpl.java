@@ -224,10 +224,6 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
         if (sLogger.isActivated()) {
             sLogger.info("Receive IP call invitation from " + contact);
         }
-
-        // Update displayName of remote contact
-        mContactManager.setContactDisplayName(contact, session.getRemoteDisplayName());
-
         String callId = session.getSessionID();
         IPCallPersistedStorageAccessor storageAccessor = new IPCallPersistedStorageAccessor(callId,
                 mIPCallLog);

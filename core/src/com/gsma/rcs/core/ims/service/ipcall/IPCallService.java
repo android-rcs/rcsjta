@@ -265,6 +265,9 @@ public class IPCallService extends ImsService {
 
         }
         ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
+        mContactManager.setContactDisplayName(contact,
+                SipUtils.getDisplayNameFromUri(invite.getFrom()));
+
         // Test if the contact is blocked
         if (mContactManager.isBlockedForContact(contact)) {
             if (logActivated) {

@@ -502,6 +502,9 @@ public class RichcallService extends ImsService {
 
         }
         ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
+        mContactManager.setContactDisplayName(contact,
+                SipUtils.getDisplayNameFromUri(invite.getFrom()));
+
         // Test if call is established
         if (!isCallConnectedWith(contact)) {
             if (logActivated) {
@@ -691,6 +694,9 @@ public class RichcallService extends ImsService {
 
         }
         ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
+        mContactManager.setContactDisplayName(contact,
+                SipUtils.getDisplayNameFromUri(invite.getFrom()));
+
         // Test if call is established
         if (!isCallConnectedWith(contact)) {
             if (logActivated) {
@@ -820,6 +826,8 @@ public class RichcallService extends ImsService {
 
         }
         ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
+        mContactManager.setContactDisplayName(contact,
+                SipUtils.getDisplayNameFromUri(invite.getFrom()));
 
         // Test if call is established
         if (!isCallConnectedWith(contact)) {

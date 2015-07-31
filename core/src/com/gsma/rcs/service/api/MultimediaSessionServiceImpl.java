@@ -259,9 +259,6 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
                 this, Direction.INCOMING, remote, session.getServiceId(), State.INVITED);
         session.addListener(multimediaMessaging);
         addMultimediaMessaging(multimediaMessaging);
-
-        // Update displayName of remote contact
-        mContactManager.setContactDisplayName(remote, session.getRemoteDisplayName());
     }
 
     /**
@@ -277,9 +274,6 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
                 this, Direction.INCOMING, remote, session.getServiceId(), State.INVITED);
         session.addListener(multimediaStreaming);
         addMultimediaStreaming(multimediaStreaming);
-
-        // Update displayName of remote contact
-        mContactManager.setContactDisplayName(remote, session.getRemoteDisplayName());
 
         // Broadcast intent related to the received invitation
         IntentUtils.tryToSetExcludeStoppedPackagesFlag(rtpSessionInvite);

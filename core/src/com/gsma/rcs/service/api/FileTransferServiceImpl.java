@@ -372,9 +372,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                     + session.getContent().getName() + " size=" + session.getContent().getSize()
                     + " displayName=" + displayName);
         }
-        if (contact != null) {
-            mContactManager.setContactDisplayName(contact, displayName);
-        }
         // Add session in the list
         String fileTransferId = session.getFileTransferId();
         FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
@@ -407,9 +404,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         if (sLogger.isActivated()) {
             sLogger.info("Receive resend FT invitation from " + remoteContact + " displayName="
                     + displayName);
-        }
-        if (remoteContact != null) {
-            mContactManager.setContactDisplayName(remoteContact, displayName);
         }
         String fileTransferId = session.getFileTransferId();
         FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(

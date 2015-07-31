@@ -249,10 +249,6 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
         // TODO : Add entry into GeolocSharing provider (to be implemented as part of CR025)
 
         ContactId contact = session.getRemoteContact();
-        String remoteDisplayName = session.getRemoteDisplayName();
-        // Update displayName of remote contact
-        mContactManager.setContactDisplayName(contact, remoteDisplayName);
-
         String sharingId = session.getSessionID();
         GeolocSharingPersistedStorageAccessor persistedStorage = new GeolocSharingPersistedStorageAccessor(
                 sharingId, contact, session.getGeoloc(), Direction.INCOMING, mRichcallLog,
