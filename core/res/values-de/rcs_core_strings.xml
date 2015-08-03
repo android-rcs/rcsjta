@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="rcs_core_application_title">RCS-Dienste</string>
+    <string name="rcs_core_permission">RCS</string>
+    <string name="rcs_core_permission_desc">RCS-Dienste nutzen</string>
+
+    <!-- Strings associated to ContactsContract menus -->
+    <string name="rcs_core_my_profile">\u0020Mein RCS-Profil</string>
+    
+    <string name="rcs_core_contact_file_transfer_summary">Datei mittels RCS übertragen</string>
+    <string name="rcs_core_contact_im_session_summary">Chat über RCS starten</string>
+    <string name="rcs_core_contact_ip_voice_call_summary">IP-Telefonat über RCS starten</string>
+    <string name="rcs_core_contact_ip_video_call_summary">IP-Video-Telefonat über RCS starten</string>
+    <string name="rcs_core_contact_image_share_summary">Bild mittels RCS versenden</string>
+    <string name="rcs_core_contact_video_share_summary">Video mittels RCS versenden</string>
+    
+    <string name="rcs_core_contact_file_transfer_details">Datei übertragen</string>
+    <string name="rcs_core_contact_im_session_details">Chat starten</string>
+    <string name="rcs_core_contact_ip_voice_call_details">IP-Telefonat starten</string>
+    <string name="rcs_core_contact_ip_video_call_details">IP-Video-Telefonat starten</string>
+    <string name="rcs_core_contact_image_share_details">Bild versenden</string>
+    <string name="rcs_core_contact_video_share_details">Video versenden</string>
+    <string name="rcs_core_contact_extensions_details">SIP-Session starten</string>
+
+    <!-- Strings linked to RCS account -->
+    <string name="rcs_core_account_id">RCS</string>
+    <string name="rcs_core_account_username">Rich Communication Suite</string>
+    <string name="rcs_core_account_main_title">Allgemeine Einstellungen</string>
+    <string name="rcs_core_account_menu_settings">Einstellungen</string>
+    <string name="rcs_core_account_configure">RCS-Dienst konfigurieren</string>
+    <string name="rcs_core_account_stopping_after_deletion">Der RCS-Dienst wird beended, da das RCS-Nutzerkonto gelöscht wurde</string>
+
+    <!-- Terms and Conditions -->
+    <string name="rcs_core_terms_accept">Akzeptieren</string>
+    <string name="rcs_core_terms_decline">Ablehnen</string>
+    <string name="rcs_core_terms_ok">Ok</string>
+
+    <!-- WIFI provisioning -->
+    <string name="label_ok">OK</string>
+    <string name="label_cancel">Abbrechen</string>
+    <string name="label_save">Speichern</string>  
+    <string name="label_edit_msisdn">Bitte Telefonnummer eingeben:</string>
+    <string name="label_invalid_phone_number">Ungültige Telefonnummer</string>
+    
+</resources>
