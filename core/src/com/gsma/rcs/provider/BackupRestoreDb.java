@@ -29,8 +29,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 
-import javax2.sip.InvalidArgumentException;
-
 /**
  * Backup and restore databases
  * 
@@ -69,13 +67,13 @@ public class BackupRestoreDb {
      * @throws InvalidArgumentException
      */
     public static File[] listOfSavedAccounts(final File databasesDir)
-            throws InvalidArgumentException {
+            throws IllegalArgumentException {
         if (!databasesDir.exists()) {
-            throw new InvalidArgumentException(new StringBuilder("Argument '").append(databasesDir)
+            throw new IllegalArgumentException(new StringBuilder("Argument '").append(databasesDir)
                     .append("' directory does not exist").toString());
         }
         if (!databasesDir.isDirectory()) {
-            throw new InvalidArgumentException(new StringBuilder("Argument '").append(databasesDir)
+            throw new IllegalArgumentException(new StringBuilder("Argument '").append(databasesDir)
                     .append("' is not a directory").toString());
         }
         FileFilter directoryFilter = new FileFilter() {
@@ -209,10 +207,10 @@ public class BackupRestoreDb {
      * 
      * @param databasesDir the database directory
      * @param currentUserAccount the account
-     * @throws InvalidArgumentException
+     * @throws IllegalArgumentException
      */
     private static void cleanBackups(final File databasesDir, final String currentUserAccount)
-            throws InvalidArgumentException {
+            throws IllegalArgumentException {
         File[] files = listOfSavedAccounts(databasesDir);
         if (files == null || files.length <= MAX_SAVED_ACCOUNT) {
             // No need to suppress oldest backup

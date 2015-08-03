@@ -373,7 +373,7 @@ public class Base64 {
     }
 
     /**
-     * Encode the input data in base 64 format to a string
+     * Encode the input data in base-64 format to a string
      * 
      * @return String
      */

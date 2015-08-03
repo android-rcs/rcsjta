@@ -28,8 +28,6 @@ import android.text.TextUtils;
 
 import java.io.File;
 
-import javax2.sip.InvalidArgumentException;
-
 public class DbBackupRestoreTest extends AndroidTestCase {
 
     private static final int MAX_SAVED_ACCOUNT = 3;
@@ -78,7 +76,7 @@ public class DbBackupRestoreTest extends AndroidTestCase {
                 logger.info(new StringBuilder("Account ").append(file.getName())
                         .append(" last modified=").append(file.lastModified()).toString());
             }
-        } catch (InvalidArgumentException e) {
+        } catch (IllegalArgumentException e) {
             fail(e.getMessage());
         }
         assertTrue("listOfSavedAccounts failed", savedAccounts != null && savedAccounts.length == 4);
@@ -110,7 +108,7 @@ public class DbBackupRestoreTest extends AndroidTestCase {
                 logger.info(new StringBuilder("Account ").append(file.getName())
                         .append(" last modified=").append(file.lastModified()).toString());
             }
-        } catch (InvalidArgumentException e) {
+        } catch (IllegalArgumentException e) {
             fail(e.getMessage());
         }
         assertTrue("listOfSavedAccounts MAX_SAVED_ACCOUNT failed", savedAccounts != null

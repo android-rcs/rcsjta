@@ -34,8 +34,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import javax2.sip.InvalidArgumentException;
-
 /**
  * File utilities
  * 
@@ -50,12 +48,12 @@ public class FileUtils {
      * @param destDir the destination directory (may not be null)
      * @param preserveFileDate whether to preserve the file date
      * @throws IOException
-     * @throws InvalidArgumentException
+     * @throws IllegalArgumentException
      */
     public static void copyFileToDirectory(File srcFile, File destDir, boolean preserveFileDate)
-            throws IOException, InvalidArgumentException {
+            throws IOException, IllegalArgumentException {
         if (srcFile == null) {
-            throw new InvalidArgumentException("Source is null");
+            throw new IllegalArgumentException("Source is null");
         }
         if (srcFile.exists() == false) {
             throw new FileNotFoundException("Source '" + srcFile + "' does not exist");
@@ -64,7 +62,7 @@ public class FileUtils {
             throw new IOException("Source '" + srcFile + "' is a directory");
         }
         if (destDir == null) {
-            throw new InvalidArgumentException("Destination is null");
+            throw new IllegalArgumentException("Destination is null");
         }
         if (destDir.exists() == false) {
             // Create directory if it does not exist
@@ -130,11 +128,11 @@ public class FileUtils {
      * Delete a directory recursively
      * 
      * @param dir the directory
-     * @throws InvalidArgumentException
+     * @throws IllegalArgumentException
      */
-    public static void deleteDirectory(File dir) throws InvalidArgumentException {
+    public static void deleteDirectory(File dir) throws IllegalArgumentException {
         if (dir == null) {
-            throw new InvalidArgumentException("Directory is null");
+            throw new IllegalArgumentException("Directory is null");
         }
         if (dir.isDirectory()) {
             String[] children = dir.list();
