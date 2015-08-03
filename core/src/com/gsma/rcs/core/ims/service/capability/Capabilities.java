@@ -250,15 +250,15 @@ public class Capabilities {
 
     @Override
     public String toString() {
-        return "Caps [ImageShare=" + mImageSharing + ", VideoShare=" + mVideoSharing
-                + ", Im=" + mImSession + ", FtMsrp=" + mFileTransferMsrp + ", FtHttp=" + mFileTransferHttp
-                + ", GeoPush=" + mGeolocationPush + ", FtThumbnail="
-                + mFileTransferThumbnail + ", FtSF="
-                + mFileTransferStoreForward + ", GcSF=" + mGroupChatStoreForward
+        return "Caps [ImageShare=" + mImageSharing + ", VideoShare=" + mVideoSharing + ", Im="
+                + mImSession + ", FtMsrp=" + mFileTransferMsrp + ", FtHttp=" + mFileTransferHttp
+                + ", GeoPush=" + mGeolocationPush + ", FtThumbnail=" + mFileTransferThumbnail
+                + ", FtSF=" + mFileTransferStoreForward + ", GcSF=" + mGroupChatStoreForward
                 + ", SipAutomata=" + mSipAutomata + ", Exts=" + mExtensions + "]";
     }
 
-    /* The equals method does not consider the 2 timestamps.
+    /*
+     * The equals method does not consider the 2 timestamps.
      */
     @Override
     public boolean equals(Object obj) {
@@ -306,6 +306,7 @@ public class Capabilities {
             return false;
         return true;
     }
+
     /**
      * Get timestamp of last response
      * 
@@ -482,11 +483,11 @@ public class Capabilities {
         }
 
         /**
-         * Is file transfer supported
+         * Is MSRP file transfer supported
          * 
          * @return Boolean
          */
-        public boolean isFileTransferSupported() {
+        public boolean isFileTransferMsrpSupported() {
             return mFileTransferMsrp;
         }
 
@@ -743,5 +744,4 @@ public class Capabilities {
 
     }
 
-    
 }
