@@ -41,7 +41,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.CheckBox;
+import android.widget.Button;
 import android.widget.TextView;
 
 /**
@@ -61,7 +61,7 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
 
     private TextView mServiceActivated;
 
-    private CheckBox mServiceActivationRefresh;
+    private Button mServiceActivationRefresh;
 
     private TextView mServiceStarted;
 
@@ -80,7 +80,7 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
         mServiceBound = (TextView) findViewById(R.id.service_bound);
         mServiceActivated = (TextView) findViewById(R.id.service_activated);
         mServiceStarted = (TextView) findViewById(R.id.service_started);
-        mServiceActivationRefresh = (CheckBox) findViewById(R.id.service_refresh_all);
+        mServiceActivationRefresh = ( Button) findViewById(R.id.service_refresh_all);
         mServiceActivationRefresh.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -325,7 +325,6 @@
     <string name="label_service_started">Service started:</string>
     <string name="error_service_activated">Failed to read stack activation mode</string>
     <string name="error_service_started">Failed to read stack started status</string>
-    <string name="label_service_refresh_all">Click to refresh Service status</string>
     <string name="label_registration_status">Service registered:</string>
     <string name="menu_service_configuration">Service configuration</string>
     <string name="label_service_configuration_valid">Configuration valid:</string>
