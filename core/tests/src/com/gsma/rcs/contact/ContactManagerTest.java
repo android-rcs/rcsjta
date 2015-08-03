@@ -91,7 +91,10 @@ public class ContactManagerTest extends AndroidTestCase {
         Capabilities getCapa = getInfo.getCapabilities();
         assertNotNull(getCapa);
         assertEquals(expectedCapa.isCsVideoSupported(), getCapa.isCsVideoSupported());
-        assertEquals(expectedCapa.isFileTransferSupported(), getCapa.isFileTransferMsrpSupported()||getCapa.isFileTransferHttpSupported());
+        assertEquals(expectedCapa.isFileTransferMsrpSupported(),
+                getCapa.isFileTransferMsrpSupported());
+        assertEquals(expectedCapa.isFileTransferHttpSupported(),
+                getCapa.isFileTransferHttpSupported());
         assertEquals(expectedCapa.isImageSharingSupported(), getCapa.isImageSharingSupported());
         assertEquals(expectedCapa.isImSessionSupported(), getCapa.isImSessionSupported());
         assertEquals(expectedCapa.isPresenceDiscovery(), getCapa.isPresenceDiscoverySupported());
@@ -113,7 +116,10 @@ public class ContactManagerTest extends AndroidTestCase {
         Capabilities getCapa = mContactManager.getContactCapabilities(mContact);
         assertNotNull(getCapa);
         assertEquals(expectedCapa.isCsVideoSupported(), getCapa.isCsVideoSupported());
-        assertEquals(expectedCapa.isFileTransferSupported(), getCapa.isFileTransferMsrpSupported()||getCapa.isFileTransferHttpSupported());
+        assertEquals(expectedCapa.isFileTransferMsrpSupported(),
+                getCapa.isFileTransferMsrpSupported());
+        assertEquals(expectedCapa.isFileTransferHttpSupported(),
+                getCapa.isFileTransferHttpSupported());
         assertEquals(expectedCapa.isImageSharingSupported(), getCapa.isImageSharingSupported());
         assertEquals(expectedCapa.isImSessionSupported(), getCapa.isImSessionSupported());
         assertEquals(expectedCapa.isPresenceDiscovery(), getCapa.isPresenceDiscoverySupported());

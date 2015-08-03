@@ -1807,8 +1807,9 @@ public final class ContactManager {
              * File transfer. This capability is enabled: - if the capability is present and the
              * contact is registered - if the FT S&F is enabled and the contact is RCS capable.
              */
-            capaBuilder.setFileTransferMsrp(capaBuilder.isFileTransferSupported() && isRegistered
-                    || mRcsSettings.isFileTransferStoreForwardSupported() && isRcsContact);
+            capaBuilder.setFileTransferMsrp(capaBuilder.isFileTransferMsrpSupported()
+                    && isRegistered || mRcsSettings.isFileTransferStoreForwardSupported()
+                    && isRcsContact);
             capaBuilder.setImageSharing(capaBuilder.isImageSharingSupported() && isRegistered);
             /*
              * IM session capability is enabled: - if the capability is present and the contact is
