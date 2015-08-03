@@ -16,7 +16,6 @@
                 android:layout_marginLeft="5dip"
                 android:layout_marginRight="5dip"
                 android:gravity="right"
-                android:paddingTop="10dip"
                 android:text="@string/label_service_bound" />
             <TextView
                 android:id="@+id/service_bound"
