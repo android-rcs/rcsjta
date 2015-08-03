@@ -1939,9 +1939,6 @@ public final class ContactManager {
             newInfo.setRcsStatus(contactType);
             /* Set the registration state */
             newInfo.setRegistrationState(registrationState);
-            /* Modify the capabilities regarding the registration state */
-            boolean isRegistered = RegistrationState.ONLINE == registrationState;
-            boolean isRcsContact = newInfo.isRcsContact();
             /* Add the capabilities */
             newInfo.setCapabilities(capBuilder.build());
             newInfo.setDisplayName(displayName);
@@ -1949,7 +1946,7 @@ public final class ContactManager {
             if (newInfo.getCapabilities().equals(oldInfo.getCapabilities())
                     && newInfo.getRcsStatus() == oldInfo.getRcsStatus()
                     && newInfo.getRegistrationState() == oldInfo.getRegistrationState()
-                    && displayName == null && displayName.equals(oldInfo.getDisplayName())) {
+                    && (displayName == null || displayName.equals(oldInfo.getDisplayName()))) {
                 return;
             }
             /* Save the modifications */
