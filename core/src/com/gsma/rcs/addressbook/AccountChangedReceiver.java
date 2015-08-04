@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +15,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.addressbook;
 
 import com.gsma.rcs.R;
+import com.gsma.rcs.core.Core;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.platform.registry.RegistryFactory;
 import com.gsma.rcs.provider.LocalContentResolver;
@@ -46,57 +51,70 @@ public class AccountChangedReceiver extends BroadcastReceiver {
      */
     private static final String REGISTRY_RCS_ACCOUNT_MANUALY_DELETED = "RcsAccountManualyDeleted";
 
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(AccountChangedReceiver.class.getName());
 
     @Override
-    public void onReceive(final Context context, Intent intent) {
-        ContentResolver contentResolver = context.getContentResolver();
-        LocalContentResolver localContentResolver = new LocalContentResolver(contentResolver);
-        RcsSettings rcsSettings = RcsSettings.createInstance(localContentResolver);
-        AndroidFactory.setApplicationContext(context, rcsSettings);
-        ContactManager contactManager = ContactManager.createInstance(context, contentResolver,
-                localContentResolver, rcsSettings);
-        RcsAccountManager accountUtility = RcsAccountManager
-                .createInstance(context, contactManager);
+    public void onReceive(final Context context, final Intent intent) {
+        Core.getInstance().scheduleForBackgroundExecution(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ContentResolver contentResolver = context.getContentResolver();
+                    LocalContentResolver localContentResolver = new LocalContentResolver(
+                            contentResolver);
+                    RcsSettings rcsSettings = RcsSettings.createInstance(localContentResolver);
+                    AndroidFactory.setApplicationContext(context, rcsSettings);
+                    ContactManager contactManager = ContactManager.createInstance(context,
+                            contentResolver, localContentResolver, rcsSettings);
+                    RcsAccountManager accountUtility = RcsAccountManager.createInstance(context,
+                            contactManager);
 
-        /* Verify that the RCS account is still here */
-        Account mAccount = accountUtility.getAccount(context
-                .getString(R.string.rcs_core_account_username));
-        if (mAccount == null) {
-            boolean logActivated = logger.isActivated();
-            if (logActivated) {
-                logger.debug("RCS account has been deleted");
-            }
-            /* Set the user account manually deleted flag */
-            if (rcsSettings.isUserProfileConfigured()) {
-                setAccountResetByEndUser(true);
-            }
+                    /* Verify that the RCS account is still here */
+                    Account mAccount = accountUtility.getAccount(context
+                            .getString(R.string.rcs_core_account_username));
+                    if (mAccount == null) {
+                        boolean logActivated = sLogger.isActivated();
+                        if (logActivated) {
+                            sLogger.debug("RCS account has been deleted");
+                        }
+                        /* Set the user account manually deleted flag */
+                        if (rcsSettings.isUserProfileConfigured()) {
+                            setAccountResetByEndUser(true);
+                        }
 
-            if (ServiceUtils.isServiceStarted(context)) {
-                if (logActivated) {
-                    logger.debug("RCS service is running, we stop it");
-                }
-                /*
-                 * RCS account was deleted. Warn the user we stop the service. The account will be
-                 * recreated when the service will be restarted.
-                 */
-                Handler handler = new Handler();
-                handler.post(new Runnable() {
-                    public void run() {
-                        Toast.makeText(
-                                context,
-                                context.getString(R.string.rcs_core_account_stopping_after_deletion),
-                                Toast.LENGTH_LONG).show();
+                        if (ServiceUtils.isServiceStarted(context)) {
+                            if (logActivated) {
+                                sLogger.debug("RCS service is running, we stop it");
+                            }
+                            /*
+                             * RCS account was deleted. Warn the user we stop the service. The
+                             * account will be recreated when the service will be restarted.
+                             */
+                            Toast.makeText(
+                                    context,
+                                    context.getString(R.string.rcs_core_account_stopping_after_deletion),
+                                    Toast.LENGTH_LONG).show();
+
+                            /* Stop the service */
+                            LauncherUtils.stopRcsService(context);
+                        }
+                    } else {
+                        /* Set the user account manually deleted flag */
+                        setAccountResetByEndUser(false);
                     }
-                });
-
-                /* Stop the service */
-                LauncherUtils.stopRcsService(context);
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error("Unable to handle connection event for intent action : "
+                            .concat(intent.getAction()), e);
+                }
             }
-        } else {
-            /* Set the user account manually deleted flag */
-            setAccountResetByEndUser(false);
-        }
+        });
     }
 
     /**
