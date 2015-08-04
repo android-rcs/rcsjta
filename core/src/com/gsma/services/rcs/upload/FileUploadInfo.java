@@ -216,7 +216,7 @@ public class FileUploadInfo implements Parcelable {
      * 
      * @return timestamp in milliseconds
      */
-    public long getExpiration() {
+    public long getFileExpiration() {
         return mExpiration;
     }
 
