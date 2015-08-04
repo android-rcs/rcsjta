@@ -19,7 +19,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getMessagingUX"
@@ -32,7 +32,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getMinimumBatteryLevel"
@@ -45,7 +45,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getMyContactId"
@@ -58,7 +58,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getMyDisplayName"
@@ -71,7 +71,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="isConfigValid"
@@ -84,7 +84,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="setDefaultMessagingMethod"
@@ -99,7 +99,7 @@
 >
 <parameter name="method" type="com.gsma.services.rcs.CommonServiceConfiguration.MessagingMethod">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="setMinimumBatteryLevel"
@@ -114,7 +114,7 @@
 >
 <parameter name="level" type="com.gsma.services.rcs.CommonServiceConfiguration.MinimumBatteryLevel">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="setMyDisplayName"
@@ -129,7 +129,9 @@
 >
 <parameter name="name" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 </class>
@@ -553,6 +555,17 @@
  visibility="public"
 >
 </field>
+<field name="ACTION_GET_SERVICE_STARTING_STATE"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;com.gsma.services.rcs.action.GET_SERVICE_STARTING_STATE&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
 <field name="ACTION_SET_ACTIVATION_MODE"
  type="java.lang.String"
  transient="false"
@@ -641,6 +654,17 @@
  visibility="public"
 >
 </field>
+<field name="EXTRA_GET_SERVICE_STARTING_STATE"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;get_service_starting_state&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
 <field name="EXTRA_SET_ACTIVATION_MODE"
  type="java.lang.String"
  transient="false"
@@ -661,6 +685,16 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<constructor name="RcsGenericException"
+ type="com.gsma.services.rcs.RcsGenericException"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="message" type="java.lang.String">
+</parameter>
+</constructor>
 <constructor name="RcsGenericException"
  type="com.gsma.services.rcs.RcsGenericException"
  static="false"
@@ -915,7 +949,9 @@
 >
 <parameter name="listener" type="com.gsma.services.rcs.RcsServiceRegistrationListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="connect"
@@ -952,7 +988,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="getServiceRegistrationReasonCode"
@@ -965,7 +1003,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="getServiceVersion"
@@ -978,7 +1018,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="isServiceConnected"
@@ -1002,7 +1044,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="removeEventListener"
@@ -1017,7 +1061,9 @@
 >
 <parameter name="listener" type="com.gsma.services.rcs.RcsServiceRegistrationListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <field name="ACTION_SERVICE_PROVISIONING_DATA_CHANGED"
@@ -1269,7 +1315,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="isActivationModeChangeable"
@@ -1282,7 +1328,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="isAvailable"
@@ -1296,6 +1342,19 @@
  visibility="public"
 >
 </method>
+<method name="isServiceStarted"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+</method>
 <method name="setActivationMode"
  return="void"
  abstract="false"
@@ -1308,6 +1367,8 @@
 >
 <parameter name="active" type="boolean">
 </parameter>
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
 <exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
 </exception>
 </method>
@@ -1316,6 +1377,17 @@
  transient="false"
  volatile="false"
  value="&quot;com.gsma.rcs&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="TIME_SPENT"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;dur&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -2017,7 +2089,9 @@
 >
 <parameter name="listener" type="com.gsma.services.rcs.capability.CapabilitiesListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="addCapabilitiesListener"
@@ -2034,7 +2108,9 @@
 </parameter>
 <parameter name="listener" type="com.gsma.services.rcs.capability.CapabilitiesListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="connect"
@@ -2073,7 +2149,11 @@
 >
 <parameter name="contact" type="com.gsma.services.rcs.contact.ContactId">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="getMyCapabilities"
@@ -2086,7 +2166,11 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="removeCapabilitiesListener"
@@ -2101,7 +2185,9 @@
 >
 <parameter name="listener" type="com.gsma.services.rcs.capability.CapabilitiesListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="removeCapabilitiesListener"
@@ -2118,7 +2204,9 @@
 </parameter>
 <parameter name="listener" type="com.gsma.services.rcs.capability.CapabilitiesListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="requestAllContactsCapabilities"
@@ -2131,7 +2219,11 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
+</exception>
+<exception name="RcsServiceNotRegisteredException" type="com.gsma.services.rcs.RcsServiceNotRegisteredException">
 </exception>
 </method>
 <method name="requestContactCapabilities"
@@ -2146,7 +2238,11 @@
 >
 <parameter name="contact" type="com.gsma.services.rcs.contact.ContactId">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
+</exception>
+<exception name="RcsServiceNotRegisteredException" type="com.gsma.services.rcs.RcsServiceNotRegisteredException">
 </exception>
 </method>
 <method name="requestContactCapabilities"
@@ -2161,7 +2257,11 @@
 >
 <parameter name="contacts" type="java.util.Set&lt;com.gsma.services.rcs.contact.ContactId&gt;">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
+</exception>
+<exception name="RcsServiceNotRegisteredException" type="com.gsma.services.rcs.RcsServiceNotRegisteredException">
 </exception>
 </method>
 <field name="EXTENSION_MIME_TYPE"
@@ -2237,6 +2337,8 @@
 </parameter>
 <parameter name="participants" type="java.lang.String">
 </parameter>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
 </method>
 <field name="BASECOLUMN_ID"
  type="java.lang.String"
@@ -2835,7 +2937,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getContent"
@@ -2848,7 +2952,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getDirection"
@@ -2861,7 +2967,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getId"
@@ -2874,7 +2982,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getMimeType"
@@ -2887,7 +2995,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getReasonCode"
@@ -2900,7 +3010,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getRemoteContact"
@@ -2913,7 +3025,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getStatus"
@@ -2926,7 +3040,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getTimestamp"
@@ -2939,7 +3055,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getTimestampDelivered"
@@ -2952,7 +3070,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getTimestampDisplayed"
@@ -2965,7 +3085,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getTimestampSent"
@@ -2978,7 +3100,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="isExpiredDelivery"
@@ -2991,7 +3115,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="isRead"
@@ -3004,7 +3130,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 </class>
@@ -3040,7 +3168,9 @@
 >
 <parameter name="listener" type="com.gsma.services.rcs.chat.GroupChatListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="addEventListener"
@@ -3055,7 +3185,9 @@
 >
 <parameter name="listener" type="com.gsma.services.rcs.chat.OneToOneChatListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="clearMessageDeliveryExpiration"
@@ -3070,7 +3202,11 @@
 >
 <parameter name="msgIds" type="java.util.Set&lt;java.lang.String&gt;">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="connect"
@@ -3098,7 +3234,9 @@
 >
 <parameter name="chatId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="deleteGroupChats"
@@ -3111,7 +3249,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="deleteMessage"
@@ -3126,7 +3266,9 @@
 >
 <parameter name="msgId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="deleteOneToOneChat"
@@ -3141,7 +3283,9 @@
 >
 <parameter name="contact" type="com.gsma.services.rcs.contact.ContactId">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="deleteOneToOneChats"
@@ -3154,7 +3298,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="disconnect"
@@ -3180,7 +3326,9 @@
 >
 <parameter name="msgId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="getConfiguration"
@@ -3193,7 +3341,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="getGroupChat"
@@ -3208,7 +3358,9 @@
 >
 <parameter name="chatId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="getOneToOneChat"
@@ -3223,7 +3375,9 @@
 >
 <parameter name="contact" type="com.gsma.services.rcs.contact.ContactId">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="initiateGroupChat"
@@ -3240,7 +3394,17 @@
 </parameter>
 <parameter name="subject" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsMaxAllowedSessionLimitReachedException" type="com.gsma.services.rcs.RcsMaxAllowedSessionLimitReachedException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
+</exception>
+<exception name="RcsServiceNotRegisteredException" type="com.gsma.services.rcs.RcsServiceNotRegisteredException">
 </exception>
 </method>
 <method name="isAllowedToInitiateGroupChat"
@@ -3253,7 +3417,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="isAllowedToInitiateGroupChat"
@@ -3268,7 +3434,11 @@
 >
 <parameter name="contact" type="com.gsma.services.rcs.contact.ContactId">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="markMessageAsRead"
@@ -3283,7 +3453,11 @@
 >
 <parameter name="msgId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="removeEventListener"
@@ -3298,7 +3472,9 @@
 >
 <parameter name="listener" type="com.gsma.services.rcs.chat.GroupChatListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="removeEventListener"
@@ -3313,7 +3489,9 @@
 >
 <parameter name="listener" type="com.gsma.services.rcs.chat.OneToOneChatListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 </class>
@@ -3326,7 +3504,7 @@
  visibility="public"
 >
 <method name="getGeolocExpirationTime"
- return="int"
+ return="long"
  abstract="false"
  native="false"
  synchronized="false"
@@ -3335,7 +3513,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getGeolocLabelMaxLength"
@@ -3348,7 +3526,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getGroupChatMaxParticipants"
@@ -3361,7 +3539,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getGroupChatMessageMaxLength"
@@ -3374,7 +3552,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getGroupChatMinParticipants"
@@ -3387,7 +3565,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getGroupChatSubjectMaxLength"
@@ -3400,7 +3578,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getIsComposingTimeout"
@@ -3413,7 +3591,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getOneToOneChatMessageMaxLength"
@@ -3426,7 +3604,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="isChatWarnSF"
@@ -3439,7 +3617,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="isGroupChatSupported"
@@ -3452,7 +3630,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="isRespondToDisplayReportsEnabled"
@@ -3465,7 +3643,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="isSmsFallback"
@@ -3478,7 +3656,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="setRespondToDisplayReports"
@@ -3493,7 +3671,7 @@
 >
 <parameter name="enable" type="boolean">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 </class>
@@ -3515,7 +3693,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getDirection"
@@ -3528,7 +3706,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getMaxParticipants"
@@ -3541,7 +3721,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getParticipants"
@@ -3554,7 +3734,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getReasonCode"
@@ -3567,7 +3749,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getRemoteContact"
@@ -3580,7 +3764,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getState"
@@ -3593,7 +3779,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getSubject"
@@ -3606,7 +3794,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getTimestamp"
@@ -3619,7 +3809,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="inviteParticipants"
@@ -3634,7 +3826,11 @@
 >
 <parameter name="participants" type="java.util.Set&lt;com.gsma.services.rcs.contact.ContactId&gt;">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="isAllowedToInviteParticipant"
@@ -3649,7 +3845,9 @@
 >
 <parameter name="participant" type="com.gsma.services.rcs.contact.ContactId">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="isAllowedToInviteParticipants"
@@ -3662,7 +3860,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="isAllowedToLeave"
@@ -3675,7 +3875,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="isAllowedToSendMessage"
@@ -3688,7 +3890,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="leave"
@@ -3701,22 +3905,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
-</method>
-<method name="onComposing"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="enabled" type="boolean">
-</parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="openChat"
@@ -3729,7 +3920,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="sendMessage"
@@ -3744,7 +3935,11 @@
 >
 <parameter name="text" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="sendMessage"
@@ -3759,7 +3954,26 @@
 >
 <parameter name="geoloc" type="com.gsma.services.rcs.Geoloc">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+</method>
+<method name="setComposingStatus"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="ongoing" type="boolean">
+</parameter>
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 </class>
@@ -4164,7 +4378,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="isAllowedToSendMessage"
@@ -4177,22 +4391,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
-</method>
-<method name="onComposing"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="enabled" type="boolean">
-</parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="openChat"
@@ -4205,7 +4406,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="resendMessage"
@@ -4220,7 +4421,9 @@
 >
 <parameter name="msgId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="sendMessage"
@@ -4235,7 +4438,9 @@
 >
 <parameter name="message" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="sendMessage"
@@ -4250,7 +4455,24 @@
 >
 <parameter name="geoloc" type="com.gsma.services.rcs.Geoloc">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+</method>
+<method name="setComposingStatus"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="ongoing" type="boolean">
+</parameter>
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 </class>
@@ -4437,6 +4659,17 @@
  visibility="public"
 >
 </field>
+<field name="MIME_TYPE_BLOCKING_TIMESTAMP"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;vnd.android.cursor.item/com.gsma.services.rcs.blocking-timestamp&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
 <field name="MIME_TYPE_EXTENSIONS"
  type="java.lang.String"
  transient="false"
@@ -4470,11 +4703,11 @@
  visibility="public"
 >
 </field>
-<field name="MIME_TYPE_IMAGE_SHARING"
+<field name="MIME_TYPE_IMAGE_SHARE"
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;vnd.android.cursor.item/com.gsma.services.rcs.image-sharing&quot;"
+ value="&quot;vnd.android.cursor.item/com.gsma.services.rcs.image-share&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -4514,11 +4747,11 @@
  visibility="public"
 >
 </field>
-<field name="MIME_TYPE_VIDEO_SHARING"
+<field name="MIME_TYPE_VIDEO_SHARE"
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;vnd.android.cursor.item/com.gsma.services.rcs.video-sharing&quot;"
+ value="&quot;vnd.android.cursor.item/com.gsma.services.rcs.video-share&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -4558,7 +4791,11 @@
 >
 <parameter name="contact" type="com.gsma.services.rcs.contact.ContactId">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="connect"
@@ -4597,7 +4834,11 @@
 >
 <parameter name="contact" type="com.gsma.services.rcs.contact.ContactId">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="getRcsContacts"
@@ -4610,7 +4851,11 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="getRcsContactsOnline"
@@ -4623,7 +4868,11 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="getRcsContactsSupporting"
@@ -4638,7 +4887,11 @@
 >
 <parameter name="serviceId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="unblockContact"
@@ -4653,7 +4906,11 @@
 >
 <parameter name="contact" type="com.gsma.services.rcs.contact.ContactId">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 </class>
@@ -4677,6 +4934,8 @@
 >
 <parameter name="contact" type="java.lang.String">
 </parameter>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
 </method>
 <method name="getInstance"
  return="com.gsma.services.rcs.contact.ContactUtil"
@@ -4701,6 +4960,8 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
 </method>
 <method name="getMyCountryCode"
  return="java.lang.String"
@@ -4712,6 +4973,8 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
 </method>
 <method name="getVCard"
  return="android.net.Uri"
@@ -4725,8 +4988,19 @@
 >
 <parameter name="contactUri" type="android.net.Uri">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
+</method>
+<method name="isMyCountryCodeDefined"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
 </method>
 <method name="isValidContact"
  return="boolean"
@@ -4740,6 +5014,8 @@
 >
 <parameter name="contact" type="java.lang.String">
 </parameter>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
 </method>
 </class>
 <class name="RcsContact"
@@ -4840,7 +5116,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
 </exception>
 </method>
 <method name="acceptInvitation"
@@ -4853,7 +5131,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
 </exception>
 </method>
 <method name="getDirection"
@@ -4866,7 +5146,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getReasonCode"
@@ -4879,7 +5159,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getRemoteContact"
@@ -4892,7 +5172,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getServiceId"
@@ -4905,7 +5185,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getSessionId"
@@ -4918,7 +5198,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getState"
@@ -4931,7 +5211,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="rejectInvitation"
@@ -4944,7 +5224,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
 </exception>
 </method>
 <method name="sendMessage"
@@ -4959,7 +5241,9 @@
 >
 <parameter name="content" type="byte[]">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
 </exception>
 </method>
 </class>
@@ -5073,7 +5357,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
 </exception>
 </method>
 <method name="acceptInvitation"
@@ -5086,7 +5372,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
 </exception>
 </method>
 <method name="getDirection"
@@ -5099,7 +5387,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getReasonCode"
@@ -5112,7 +5400,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getRemoteContact"
@@ -5125,7 +5413,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getServiceId"
@@ -5138,7 +5426,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getSessionId"
@@ -5151,7 +5439,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getState"
@@ -5164,7 +5452,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="rejectInvitation"
@@ -5177,7 +5465,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
 </exception>
 </method>
 </class>
@@ -5327,7 +5617,9 @@
 >
 <parameter name="listener" type="com.gsma.services.rcs.extension.MultimediaMessagingSessionListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="addEventListener"
@@ -5342,7 +5634,9 @@
 >
 <parameter name="listener" type="com.gsma.services.rcs.extension.MultimediaStreamingSessionListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="connect"
@@ -5379,7 +5673,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="getMessagingSession"
@@ -5394,7 +5690,9 @@
 >
 <parameter name="sessionId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="getMessagingSessions"
@@ -5409,7 +5707,9 @@
 >
 <parameter name="serviceId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="getStreamingSession"
@@ -5424,7 +5724,9 @@
 >
 <parameter name="sessionId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="getStreamingSessions"
@@ -5439,7 +5741,9 @@
 >
 <parameter name="serviceId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="initiateMessagingSession"
@@ -5456,7 +5760,13 @@
 </parameter>
 <parameter name="contact" type="com.gsma.services.rcs.contact.ContactId">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
+</exception>
+<exception name="RcsServiceNotRegisteredException" type="com.gsma.services.rcs.RcsServiceNotRegisteredException">
 </exception>
 </method>
 <method name="initiateStreamingSession"
@@ -5473,7 +5783,13 @@
 </parameter>
 <parameter name="contact" type="com.gsma.services.rcs.contact.ContactId">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
+</exception>
+<exception name="RcsServiceNotRegisteredException" type="com.gsma.services.rcs.RcsServiceNotRegisteredException">
 </exception>
 </method>
 <method name="removeEventListener"
@@ -5488,7 +5804,9 @@
 >
 <parameter name="listener" type="com.gsma.services.rcs.extension.MultimediaMessagingSessionListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="removeEventListener"
@@ -5503,7 +5821,9 @@
 >
 <parameter name="listener" type="com.gsma.services.rcs.extension.MultimediaStreamingSessionListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 </class>
@@ -5525,7 +5845,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 </class>
@@ -5547,7 +5867,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
 </exception>
 </method>
 <method name="acceptInvitation"
@@ -5560,7 +5882,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
 </exception>
 </method>
 <method name="getDirection"
@@ -5573,7 +5897,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getReasonCode"
@@ -5586,7 +5910,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getRemoteContact"
@@ -5599,7 +5923,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getServiceId"
@@ -5612,7 +5936,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getSessionId"
@@ -5625,7 +5949,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getState"
@@ -5638,7 +5962,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="rejectInvitation"
@@ -5651,7 +5975,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
 </exception>
 </method>
 <method name="sendPayload"
@@ -5666,7 +5992,9 @@
 >
 <parameter name="content" type="byte[]">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
 </exception>
 </method>
 </class>
@@ -5783,7 +6111,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
 </exception>
 </method>
 <method name="acceptInvitation"
@@ -5796,7 +6126,11 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getChatId"
@@ -5809,7 +6143,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getDirection"
@@ -5822,7 +6158,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getFile"
@@ -5835,7 +6173,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getFileExpiration"
@@ -5848,7 +6188,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getFileIcon"
@@ -5861,7 +6203,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getFileIconExpiration"
@@ -5874,7 +6218,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getFileIconMimeType"
@@ -5887,7 +6233,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getFileName"
@@ -5900,7 +6248,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getFileSize"
@@ -5913,7 +6263,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getMimeType"
@@ -5926,7 +6278,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getReasonCode"
@@ -5939,7 +6293,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getRemoteContact"
@@ -5952,7 +6308,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getState"
@@ -5965,7 +6323,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getTimestamp"
@@ -5978,7 +6338,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getTimestampDelivered"
@@ -5991,7 +6353,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getTimestampDisplayed"
@@ -6004,7 +6368,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getTimestampSent"
@@ -6017,7 +6383,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getTransferId"
@@ -6030,7 +6398,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="isAllowedToPauseTransfer"
@@ -6043,7 +6411,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="isAllowedToResendTransfer"
@@ -6056,7 +6424,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="isAllowedToResumeTransfer"
@@ -6069,7 +6439,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="isExpiredDelivery"
@@ -6082,7 +6454,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="isRead"
@@ -6095,7 +6469,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="pauseTransfer"
@@ -6108,7 +6484,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
 </exception>
 </method>
 <method name="rejectInvitation"
@@ -6121,7 +6499,11 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="resendTransfer"
@@ -6134,7 +6516,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
 </exception>
 </method>
 <method name="resumeTransfer"
@@ -6147,7 +6531,11 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 </class>
@@ -6660,7 +7048,9 @@
 >
 <parameter name="listener" type="com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="addEventListener"
@@ -6675,7 +7065,9 @@
 >
 <parameter name="listener" type="com.gsma.services.rcs.filetransfer.GroupFileTransferListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="clearFileTransferDeliveryExpiration"
@@ -6690,7 +7082,11 @@
 >
 <parameter name="transferIds" type="java.util.Set&lt;java.lang.String&gt;">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="connect"
@@ -6718,7 +7114,11 @@
 >
 <parameter name="transferId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="deleteGroupFileTransfers"
@@ -6731,7 +7131,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="deleteGroupFileTransfers"
@@ -6746,7 +7148,9 @@
 >
 <parameter name="chatId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="deleteOneToOneFileTransfers"
@@ -6759,7 +7163,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="deleteOneToOneFileTransfers"
@@ -6774,7 +7180,9 @@
 >
 <parameter name="contact" type="com.gsma.services.rcs.contact.ContactId">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="disconnect"
@@ -6798,7 +7206,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="getFileTransfer"
@@ -6813,7 +7223,11 @@
 >
 <parameter name="transferId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="isAllowedToTransferFile"
@@ -6828,7 +7242,11 @@
 >
 <parameter name="contact" type="com.gsma.services.rcs.contact.ContactId">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="isAllowedToTransferFileToGroupChat"
@@ -6843,7 +7261,11 @@
 >
 <parameter name="chatId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="markFileTransferAsRead"
@@ -6858,7 +7280,11 @@
 >
 <parameter name="transferId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="removeEventListener"
@@ -6873,7 +7299,9 @@
 >
 <parameter name="listener" type="com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="removeEventListener"
@@ -6888,7 +7316,9 @@
 >
 <parameter name="listener" type="com.gsma.services.rcs.filetransfer.GroupFileTransferListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="transferFile"
@@ -6907,7 +7337,11 @@
 </parameter>
 <parameter name="attachFileIcon" type="boolean">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="transferFileToGroupChat"
@@ -6926,7 +7360,13 @@
 </parameter>
 <parameter name="attachFileIcon" type="boolean">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 </class>
@@ -6948,7 +7388,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getMaxFileTransfers"
@@ -6961,7 +7401,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getMaxSize"
@@ -6974,7 +7414,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getWarnSize"
@@ -6987,7 +7427,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="isAutoAcceptEnabled"
@@ -7000,7 +7440,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="isAutoAcceptInRoamingEnabled"
@@ -7013,7 +7453,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="isAutoAcceptModeChangeable"
@@ -7026,7 +7466,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="isGroupFileTransferSupported"
@@ -7039,7 +7479,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="setAutoAccept"
@@ -7054,7 +7494,9 @@
 >
 <parameter name="enable" type="boolean">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="setAutoAcceptInRoaming"
@@ -7069,7 +7511,11 @@
 >
 <parameter name="enable" type="boolean">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="setImageResizeOption"
@@ -7084,7 +7530,7 @@
 >
 <parameter name="option" type="com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration.ImageResizeOption">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 </class>
@@ -7872,7 +8318,9 @@
 >
 <parameter name="providerId" type="int">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="disconnect"
@@ -7906,7 +8354,9 @@
 </parameter>
 <parameter name="columnMapping" type="java.util.Map&lt;java.lang.String, java.lang.String&gt;">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="unregisterExtraHistoryLogMember"
@@ -7921,7 +8371,9 @@
 >
 <parameter name="providerId" type="int">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 </class>
@@ -7989,7 +8441,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
 </exception>
 </method>
 <method name="acceptInvitation"
@@ -8002,7 +8456,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getDirection"
@@ -8015,7 +8469,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getGeoloc"
@@ -8028,7 +8484,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getReasonCode"
@@ -8041,7 +8499,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getRemoteContact"
@@ -8054,7 +8514,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getSharingId"
@@ -8067,7 +8529,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getState"
@@ -8080,7 +8542,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getTimestamp"
@@ -8093,7 +8557,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="rejectInvitation"
@@ -8106,7 +8572,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 </class>
@@ -8502,7 +8968,9 @@
 >
 <parameter name="listener" type="com.gsma.services.rcs.sharing.geoloc.GeolocSharingListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="connect"
@@ -8530,7 +8998,9 @@
 >
 <parameter name="sharingId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="deleteGeolocSharings"
@@ -8543,7 +9013,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="deleteGeolocSharings"
@@ -8558,7 +9030,9 @@
 >
 <parameter name="contact" type="com.gsma.services.rcs.contact.ContactId">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="disconnect"
@@ -8584,7 +9058,9 @@
 >
 <parameter name="sharingId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="removeEventListener"
@@ -8599,7 +9075,9 @@
 >
 <parameter name="listener" type="com.gsma.services.rcs.sharing.geoloc.GeolocSharingListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="shareGeoloc"
@@ -8616,7 +9094,13 @@
 </parameter>
 <parameter name="geoloc" type="com.gsma.services.rcs.Geoloc">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
+</exception>
+<exception name="RcsServiceNotRegisteredException" type="com.gsma.services.rcs.RcsServiceNotRegisteredException">
 </exception>
 </method>
 </class>
@@ -8641,7 +9125,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
 </exception>
 </method>
 <method name="acceptInvitation"
@@ -8654,7 +9140,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getDirection"
@@ -8667,7 +9153,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getFile"
@@ -8680,7 +9168,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getFileName"
@@ -8693,7 +9183,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getFileSize"
@@ -8706,7 +9198,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getMimeType"
@@ -8719,7 +9213,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getReasonCode"
@@ -8732,7 +9228,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getRemoteContact"
@@ -8745,7 +9243,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getSharingId"
@@ -8758,7 +9258,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getState"
@@ -8771,7 +9271,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getTimestamp"
@@ -8784,7 +9286,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="rejectInvitation"
@@ -8797,7 +9301,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 </class>
@@ -9226,7 +9730,9 @@
 >
 <parameter name="listener" type="com.gsma.services.rcs.sharing.image.ImageSharingListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="connect"
@@ -9254,7 +9760,9 @@
 >
 <parameter name="sharingId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="deleteImageSharings"
@@ -9267,7 +9775,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="deleteImageSharings"
@@ -9282,7 +9792,9 @@
 >
 <parameter name="contact" type="com.gsma.services.rcs.contact.ContactId">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="disconnect"
@@ -9306,7 +9818,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="getImageSharing"
@@ -9321,7 +9835,9 @@
 >
 <parameter name="sharingId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="removeEventListener"
@@ -9336,7 +9852,9 @@
 >
 <parameter name="listener" type="com.gsma.services.rcs.sharing.image.ImageSharingListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="shareImage"
@@ -9353,7 +9871,13 @@
 </parameter>
 <parameter name="file" type="android.net.Uri">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
+</exception>
+<exception name="RcsServiceNotRegisteredException" type="com.gsma.services.rcs.RcsServiceNotRegisteredException">
 </exception>
 </method>
 </class>
@@ -9375,7 +9899,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 </class>
@@ -9601,7 +10125,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="acceptInvitation"
@@ -9616,7 +10140,7 @@
 >
 <parameter name="player" type="com.gsma.services.rcs.sharing.video.VideoPlayer">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getDirection"
@@ -9629,7 +10153,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getDuration"
@@ -9642,7 +10168,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getReasonCode"
@@ -9655,7 +10183,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getRemoteContact"
@@ -9668,7 +10198,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getSharingId"
@@ -9681,7 +10213,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getState"
@@ -9694,7 +10226,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getTimestamp"
@@ -9707,7 +10241,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getVideoDescriptor"
@@ -9720,7 +10256,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="getVideoEncoding"
@@ -9733,7 +10271,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
 </exception>
 </method>
 <method name="rejectInvitation"
@@ -9746,7 +10286,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 </class>
@@ -10173,7 +10713,9 @@
 >
 <parameter name="listener" type="com.gsma.services.rcs.sharing.video.VideoSharingListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="connect"
@@ -10201,7 +10743,9 @@
 >
 <parameter name="sharingId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="deleteVideoSharings"
@@ -10214,7 +10758,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="deleteVideoSharings"
@@ -10229,7 +10775,9 @@
 >
 <parameter name="contact" type="com.gsma.services.rcs.contact.ContactId">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="disconnect"
@@ -10253,7 +10801,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="getVideoSharing"
@@ -10268,7 +10818,9 @@
 >
 <parameter name="sharingId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="removeEventListener"
@@ -10283,7 +10835,9 @@
 >
 <parameter name="listener" type="com.gsma.services.rcs.sharing.video.VideoSharingListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="shareVideo"
@@ -10300,7 +10854,13 @@
 </parameter>
 <parameter name="player" type="com.gsma.services.rcs.sharing.video.VideoPlayer">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
+</exception>
+<exception name="RcsServiceNotRegisteredException" type="com.gsma.services.rcs.RcsServiceNotRegisteredException">
 </exception>
 </method>
 </class>
@@ -10322,7 +10882,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 </class>
@@ -10347,7 +10907,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getFile"
@@ -10360,7 +10920,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getState"
@@ -10373,7 +10933,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getUploadId"
@@ -10386,7 +10946,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 <method name="getUploadInfo"
@@ -10399,7 +10959,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 </class>
@@ -10470,8 +11030,8 @@
 >
 <implements name="android.os.Parcelable">
 </implements>
-<method name="getExpiration"
- return="long"
+<method name="getFile"
+ return="android.net.Uri"
  abstract="false"
  native="false"
  synchronized="false"
@@ -10481,8 +11041,8 @@
  visibility="public"
 >
 </method>
-<method name="getFile"
- return="android.net.Uri"
+<method name="getFileExpiration"
+ return="long"
  abstract="false"
  native="false"
  synchronized="false"
@@ -10666,7 +11226,9 @@
 >
 <parameter name="listener" type="com.gsma.services.rcs.upload.FileUploadListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="canUploadFile"
@@ -10679,7 +11241,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="connect"
@@ -10716,7 +11280,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="getFileUpload"
@@ -10731,7 +11297,9 @@
 >
 <parameter name="uploadId" type="java.lang.String">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="getFileUploads"
@@ -10744,7 +11312,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="removeEventListener"
@@ -10759,7 +11329,9 @@
 >
 <parameter name="listener" type="com.gsma.services.rcs.upload.FileUploadListener">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 <method name="uploadFile"
@@ -10776,7 +11348,11 @@
 </parameter>
 <parameter name="attachFileIcon" type="boolean">
 </parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+<exception name="RcsMaxAllowedSessionLimitReachedException" type="com.gsma.services.rcs.RcsMaxAllowedSessionLimitReachedException">
+</exception>
+<exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
 </class>
@@ -10798,7 +11374,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
 </exception>
 </method>
 </class>
