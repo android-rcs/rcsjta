@@ -126,7 +126,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     private final Object mImsLock;
 
-    private final FileTransferServiceImpl mFileTransferService;
+    private FileTransferServiceImpl mFileTransferService;
 
     /**
      * Constructor
@@ -147,7 +147,6 @@ public class ChatServiceImpl extends IChatService.Stub {
             HistoryLog historyLog, RcsSettings rcsSettings, ContactManager contactManager,
             Core core, LocalContentResolver localContentResolver,
             ExecutorService imOperationExecutor, Object imsLock,
-            FileTransferServiceImpl fileTransferService,
             OneToOneUndeliveredImManager oneToOneUndeliveredImManager) {
         if (sLogger.isActivated()) {
             sLogger.info("Chat service API is loaded");
@@ -161,8 +160,11 @@ public class ChatServiceImpl extends IChatService.Stub {
         mLocalContentResolver = localContentResolver;
         mImOperationExecutor = imOperationExecutor;
         mImsLock = imsLock;
-        mFileTransferService = fileTransferService;
         mOneToOneUndeliveredImManager = oneToOneUndeliveredImManager;
+    }
+
+    public void setFileTransferService(FileTransferServiceImpl fileTransferService) {
+        mFileTransferService = fileTransferService;
     }
 
     private ReasonCode imdnToFailedReasonCode(ImdnDocument imdn) {

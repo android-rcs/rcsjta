@@ -36,6 +36,7 @@ import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.core.ims.service.im.chat.geoloc.GeolocInfoDocument;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
+import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
@@ -353,14 +354,7 @@ public abstract class OneToOneChatSession extends ChatSession {
             errorCode = ChatError.MEDIA_SESSION_FAILED;
         }
 
-        ChatMessage msg = getFirstMessage();
-        ChatError chatError = new ChatError(errorCode, error);
-        String chatMsgId = msg.getMessageId();
-        String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
-        for (ImsSessionListener listener : getListeners()) {
-            ((OneToOneChatSessionListener) listener).handleImError(chatError, chatMsgId,
-                    apiMimeType);
-        }
+        handleError(getFirstMessage(), new ChatError(errorCode, error));
 
         /* Request capabilities to the remote */
         getImsService().getImsModule().getCapabilityService()
@@ -402,15 +396,27 @@ public abstract class OneToOneChatSession extends ChatSession {
                     .append(", reason=").append(error.getMessage()).toString());
         }
         closeMediaSession();
-
         removeSession();
 
-        ChatMessage msg = getFirstMessage();
-        ChatError chatError = new ChatError(error);
+        handleError(getFirstMessage(), new ChatError(error));
+    }
+
+    /**
+     * Handle error
+     *
+     * @param msg ChatMessage that errored
+     * @param error Error
+     */
+    private void handleError(ChatMessage msg, ChatError error) {
         String msgId = msg.getMessageId();
-        String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
+        String apiMimeType;
+        if (FileTransferUtils.isFileTransferHttpType(msg.getMimeType())) {
+            apiMimeType = FileTransferHttpInfoDocument.MIME_TYPE;
+        } else {
+            apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
+        }
         for (ImsSessionListener listener : getListeners()) {
-            ((OneToOneChatSessionListener) listener).handleImError(chatError, msgId, apiMimeType);
+            ((OneToOneChatSessionListener) listener).handleImError(error, msgId, apiMimeType);
         }
     }
 }

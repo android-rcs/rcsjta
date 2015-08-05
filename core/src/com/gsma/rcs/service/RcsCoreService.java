@@ -377,10 +377,11 @@ public class RcsCoreService extends Service implements CoreListener {
 
             mChatApi = new ChatServiceImpl(imService, mMessagingLog, mHistoryLog, mRcsSettings,
                     mContactManager, core, mLocalContentResolver, mImOperationExecutor, mOperationLock,
-                    mFtApi, mOneToOneUndeliveredImManager);
+                    mOneToOneUndeliveredImManager);
             mFtApi = new FileTransferServiceImpl(imService, mChatApi, mMessagingLog, mRcsSettings,
                     mContactManager, core, mLocalContentResolver, mImOperationExecutor,
                     mOperationLock, mOneToOneUndeliveredImManager);
+            mChatApi.setFileTransferService(mFtApi);
             mVshApi = new VideoSharingServiceImpl(richCallService, mRichCallHistory, mRcsSettings,
                     mContactManager, core, mLocalContentResolver, mRcOperationExecutor,
                     mOperationLock);
