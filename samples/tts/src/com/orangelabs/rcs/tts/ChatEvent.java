@@ -46,25 +46,30 @@ public class ChatEvent extends BroadcastReceiver {
         boolean flag = Registry.readBoolean(preferences, Registry.ACTIVATE_TTS, false);
         if (flag) {
             // Get the chat message ID from the Intent
-            String msgId = intent.getParcelableExtra(OneToOneChatIntent.EXTRA_MESSAGE_ID);
+            String msgId = intent.getStringExtra(OneToOneChatIntent.EXTRA_MESSAGE_ID);
 
             // Get the message content associated to the message ID from the database
-            String message = null;
-            Uri uri = ChatLog.Message.CONTENT_URI;
-            String[] PROJECTION = new String[] {
-                    ChatLog.Message.CONTENT
-            };
-            String where = ChatLog.Message.MESSAGE_ID + "='" + msgId + "'";
-            Cursor cursor = context.getContentResolver().query(uri, PROJECTION, where, null, null);
-            if ((cursor != null) && (cursor.getCount() > 0)) {
-                message = cursor.getString(0);
-            }
-
-            if (!TextUtils.isEmpty(message)) {
+            Cursor cursor = null;
+            String content = null;
+            try {
+                cursor = context.getContentResolver().query(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId),
+                        null, null, null, null);
+                if (!cursor.moveToFirst()) {
+                    // Failed to find message from its ID
+                    return;
+                }
+                content = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CONTENT));
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }            
+            
+            if (!TextUtils.isEmpty(content)) {
                 // Play TTS on the chat message
                 ArrayList<String> messages = new ArrayList<String>();
                 messages.add(context.getString(R.string.label_new_msg));
-                messages.add(message);
+                messages.add(content);
                 Intent serviceIntent = new Intent(context, PlayTextToSpeech.class);
                 serviceIntent.putStringArrayListExtra("messages", messages);
                 context.startService(serviceIntent);
