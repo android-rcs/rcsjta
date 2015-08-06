@@ -519,4 +519,57 @@ public interface CoreListener {
      * @param msgId
      */
     public void handleChatMessageDisplayReportSent(String chatId, ContactId remote, String msgId);
+
+    /**
+     * Handle one-one file transferfailure
+     * 
+     * @param fileTransferId
+     * @param contact
+     * @param reasonCode
+     */
+    public void handleOneToOneFileTransferFailure(String fileTransferId, ContactId contact,
+            FileTransfer.ReasonCode reasonCode);
+
+    /**
+     * Deletes all one to one chat from history and abort/reject any associated ongoing session if
+     * such exists.
+     * 
+     * @param imService
+     */
+    public void handleDeleteOneToOneChats(InstantMessagingService imService);
+
+    /**
+     * Deletes all group chat from history and abort/reject any associated ongoing session if such
+     * exists.
+     * 
+     * @param imService
+     */
+    public void handleDeleteGroupChats(InstantMessagingService imService);
+
+    /**
+     * Deletes a one to one chat with a given contact from history and abort/reject any associated
+     * ongoing session if such exists.
+     * 
+     * @param imService
+     * @param contact
+     */
+    public void handleDeleteOneToOneChat(InstantMessagingService imService, ContactId contact);
+
+    /**
+     * Delete a group chat by its chat id from history and abort/reject any associated ongoing
+     * session if such exists.
+     * 
+     * @param imService
+     * @param chatId
+     */
+    public void handleDeleteGroupChat(InstantMessagingService imService, String chatId);
+
+    /**
+     * Delete a message from its message id from history. Will resolve if the message is one to one
+     * or from a group chat.
+     * 
+     * @param imService
+     * @param msgId
+     */
+    public void handleDeleteMessage(InstantMessagingService imService, String msgId);
 }

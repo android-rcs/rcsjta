@@ -23,6 +23,7 @@
 package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.Core;
+import com.gsma.rcs.core.CoreListener;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
@@ -77,8 +78,6 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
 
     private final ChatServiceImpl mChatService;
 
-    private final FileTransferServiceImpl mFileTransferService;
-
     private final RcsSettings mRcsSettings;
 
     private final ContactManager mContactManager;
@@ -107,23 +106,20 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * @param historyLog HistoryLog
      * @param rcsSettings RcsSettings
      * @param chatService ChatServiceImpl
-     * @param fileTransferService FileTransferServiceImpl
      * @param contactManager ContactManager
      * @param core Core
      * @param undeliveredImManager OneToOneUndeliveredImManager
      */
     public OneToOneChatImpl(ContactId contact, IOneToOneChatEventBroadcaster broadcaster,
             InstantMessagingService imService, MessagingLog messagingLog, HistoryLog historyLog,
-            RcsSettings rcsSettings, ChatServiceImpl chatService,
-            FileTransferServiceImpl fileTransferService, ContactManager contactManager, Core core,
-            OneToOneUndeliveredImManager undeliveredImManager) {
+            RcsSettings rcsSettings, ChatServiceImpl chatService, ContactManager contactManager,
+            Core core, OneToOneUndeliveredImManager undeliveredImManager) {
         mContact = contact;
         mBroadcaster = broadcaster;
         mImService = imService;
         mMessagingLog = messagingLog;
         mHistoryLog = historyLog;
         mChatService = chatService;
-        mFileTransferService = fileTransferService;
         mRcsSettings = rcsSettings;
         mContactManager = contactManager;
         mCore = core;
@@ -911,6 +907,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             sLogger.info(new StringBuilder("IM error ").append(errorCode)
                     .append(" ; First message '").append(msgId).append("'").toString());
         }
+        CoreListener listener = mCore.getListener();
         synchronized (lock) {
             mChatService.removeOneToOneChat(mContact);
             switch (errorCode) {
@@ -918,8 +915,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                 case ChatError.SESSION_INITIATION_CANCELLED:
                     mUndeliveredImManager.cancelDeliveryTimeoutAlarm(msgId);
                     if (FileTransferUtils.isFileTransferHttpType(mimeType)) {
-                        mFileTransferService.setOneToOneFileTransferStateAndReasonCode(msgId,
-                                mContact, FileTransfer.State.FAILED,
+                        listener.handleOneToOneFileTransferFailure(msgId, mContact,
                                 FileTransfer.ReasonCode.FAILED_DATA_TRANSFER);
                     } else if (ChatUtils.isTextPlainType(mimeType)
                             || MimeType.GEOLOC_MESSAGE.equals(mimeType)) {
@@ -938,7 +934,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                     break;
             }
         }
-        mCore.getListener().tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(mCore);
+        listener.tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(mCore);
     }
 
     @Override

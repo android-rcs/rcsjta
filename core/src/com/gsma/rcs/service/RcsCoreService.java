@@ -66,8 +66,13 @@ import com.gsma.rcs.provider.history.OneToOneChatDequeueTask;
 import com.gsma.rcs.provider.ipcall.IPCallHistory;
 import com.gsma.rcs.provider.messaging.DelayedDisplayNotificationDispatcher;
 import com.gsma.rcs.provider.messaging.FileTransferDequeueTask;
+import com.gsma.rcs.provider.messaging.GroupChatDeleteTask;
+import com.gsma.rcs.provider.messaging.GroupChatMessageDeleteTask;
+import com.gsma.rcs.provider.messaging.GroupFileTransferDeleteTask;
 import com.gsma.rcs.provider.messaging.MessagingLog;
+import com.gsma.rcs.provider.messaging.OneToOneChatMessageDeleteTask;
 import com.gsma.rcs.provider.messaging.OneToOneChatMessageDequeueTask;
+import com.gsma.rcs.provider.messaging.OneToOneFileTransferDeleteTask;
 import com.gsma.rcs.provider.messaging.RecreateDeliveryExpirationAlarms;
 import com.gsma.rcs.provider.messaging.UpdateFileTransferStateAfterUngracefulTerminationTask;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -102,6 +107,7 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.IContactService;
 import com.gsma.services.rcs.extension.IMultimediaSessionService;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.IFileTransferService;
 import com.gsma.services.rcs.history.IHistoryService;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
@@ -376,12 +382,10 @@ public class RcsCoreService extends Service implements CoreListener {
             SipService sipService = core.getSipService();
 
             mChatApi = new ChatServiceImpl(imService, mMessagingLog, mHistoryLog, mRcsSettings,
-                    mContactManager, core, mLocalContentResolver, mImOperationExecutor, mOperationLock,
-                    mOneToOneUndeliveredImManager);
+                    mContactManager, core, mLocalContentResolver, mOneToOneUndeliveredImManager);
             mFtApi = new FileTransferServiceImpl(imService, mChatApi, mMessagingLog, mRcsSettings,
                     mContactManager, core, mLocalContentResolver, mImOperationExecutor,
                     mOperationLock, mOneToOneUndeliveredImManager);
-            mChatApi.setFileTransferService(mFtApi);
             mVshApi = new VideoSharingServiceImpl(richCallService, mRichCallHistory, mRcsSettings,
                     mContactManager, core, mLocalContentResolver, mRcOperationExecutor,
                     mOperationLock);
@@ -1155,5 +1159,59 @@ public class RcsCoreService extends Service implements CoreListener {
     @Override
     public void handleChatMessageDisplayReportSent(String chatId, ContactId remote, String msgId) {
         mChatApi.handleDisplayReportSent(chatId, remote, msgId);
+    }
+
+    @Override
+    public void handleOneToOneFileTransferFailure(String fileTransferId, ContactId contact,
+            ReasonCode reasonCode) {
+        mFtApi.setOneToOneFileTransferStateAndReasonCode(fileTransferId, contact,
+                FileTransfer.State.FAILED, reasonCode);
+    }
+
+    @Override
+    public void handleDeleteOneToOneChats(InstantMessagingService imService) {
+        mImOperationExecutor.execute(new OneToOneFileTransferDeleteTask(mFtApi, imService,
+                mLocalContentResolver, mOperationLock));
+        mImOperationExecutor.execute(new OneToOneChatMessageDeleteTask(mChatApi, imService,
+                mLocalContentResolver, mOperationLock));
+    }
+
+    @Override
+    public void handleDeleteGroupChats(InstantMessagingService imService) {
+        mImOperationExecutor.execute(new GroupFileTransferDeleteTask(mFtApi, imService,
+                mLocalContentResolver, mOperationLock));
+        mImOperationExecutor.execute(new GroupChatMessageDeleteTask(mChatApi, imService,
+                mLocalContentResolver, mOperationLock));
+        mImOperationExecutor.execute(new GroupChatDeleteTask(mChatApi, imService,
+                mLocalContentResolver, mOperationLock));
+    }
+
+    @Override
+    public void handleDeleteOneToOneChat(InstantMessagingService imService, ContactId contact) {
+        mImOperationExecutor.execute(new OneToOneFileTransferDeleteTask(mFtApi, imService,
+                mLocalContentResolver, mOperationLock, contact));
+        mImOperationExecutor.execute(new OneToOneChatMessageDeleteTask(mChatApi, imService,
+                mLocalContentResolver, mOperationLock, contact));
+    }
+
+    @Override
+    public void handleDeleteGroupChat(InstantMessagingService imService, String chatId) {
+        mImOperationExecutor.execute(new GroupChatMessageDeleteTask(mChatApi, imService,
+                mLocalContentResolver, mOperationLock, chatId));
+        mImOperationExecutor.execute(new GroupFileTransferDeleteTask(mFtApi, imService,
+                mLocalContentResolver, mOperationLock, chatId));
+        mImOperationExecutor.execute(new GroupChatDeleteTask(mChatApi, imService,
+                mLocalContentResolver, mOperationLock, chatId));
+    }
+
+    @Override
+    public void handleDeleteMessage(InstantMessagingService imService, String msgId) {
+        if (mMessagingLog.isOneToOneChatMessage(msgId)) {
+            mImOperationExecutor.execute(new OneToOneChatMessageDeleteTask(mChatApi, imService,
+                    mLocalContentResolver, mOperationLock, msgId));
+        } else {
+            mImOperationExecutor.execute(new GroupChatMessageDeleteTask(mChatApi, imService,
+                    mLocalContentResolver, mOperationLock, null, msgId));
+        }
     }
 }

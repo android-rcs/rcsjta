@@ -77,7 +77,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 
 /**
  * Chat service implementation
@@ -106,8 +105,6 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     private final LocalContentResolver mLocalContentResolver;
 
-    private final ExecutorService mImOperationExecutor;
-
     private final OneToOneUndeliveredImManager mOneToOneUndeliveredImManager;
 
     private final Map<ContactId, OneToOneChatImpl> mOneToOneChatCache = new HashMap<ContactId, OneToOneChatImpl>();
@@ -123,10 +120,6 @@ public class ChatServiceImpl extends IChatService.Stub {
      * Lock used for synchronization
      */
     private final Object mLock = new Object();
-
-    private final Object mImsLock;
-
-    private FileTransferServiceImpl mFileTransferService;
 
     /**
      * Constructor
@@ -146,7 +139,6 @@ public class ChatServiceImpl extends IChatService.Stub {
     public ChatServiceImpl(InstantMessagingService imService, MessagingLog messagingLog,
             HistoryLog historyLog, RcsSettings rcsSettings, ContactManager contactManager,
             Core core, LocalContentResolver localContentResolver,
-            ExecutorService imOperationExecutor, Object imsLock,
             OneToOneUndeliveredImManager oneToOneUndeliveredImManager) {
         if (sLogger.isActivated()) {
             sLogger.info("Chat service API is loaded");
@@ -158,13 +150,7 @@ public class ChatServiceImpl extends IChatService.Stub {
         mContactManager = contactManager;
         mCore = core;
         mLocalContentResolver = localContentResolver;
-        mImOperationExecutor = imOperationExecutor;
-        mImsLock = imsLock;
         mOneToOneUndeliveredImManager = oneToOneUndeliveredImManager;
-    }
-
-    public void setFileTransferService(FileTransferServiceImpl fileTransferService) {
-        mFileTransferService = fileTransferService;
     }
 
     private ReasonCode imdnToFailedReasonCode(ImdnDocument imdn) {
@@ -443,8 +429,8 @@ public class ChatServiceImpl extends IChatService.Stub {
         OneToOneChatImpl oneToOneChat = mOneToOneChatCache.get(contact);
         if (oneToOneChat == null) {
             oneToOneChat = new OneToOneChatImpl(contact, mOneToOneChatEventBroadcaster, mImService,
-                    mMessagingLog, mHistoryLog, mRcsSettings, this, mFileTransferService,
-                    mContactManager, mCore, mOneToOneUndeliveredImManager);
+                    mMessagingLog, mHistoryLog, mRcsSettings, this, mContactManager,
+                    mCore, mOneToOneUndeliveredImManager);
             mOneToOneChatCache.put(contact, oneToOneChat);
         }
         return oneToOneChat;
@@ -728,10 +714,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * such exists.
      */
     public void deleteOneToOneChats() {
-        mImOperationExecutor.execute(new OneToOneFileTransferDeleteTask(mFileTransferService,
-                mImService, mLocalContentResolver, mImsLock));
-        mImOperationExecutor.execute(new OneToOneChatMessageDeleteTask(this, mImService,
-                mLocalContentResolver, mImsLock));
+        mCore.getListener().handleDeleteOneToOneChats(mImService);
     }
 
     /**
@@ -739,12 +722,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * exists.
      */
     public void deleteGroupChats() {
-        mImOperationExecutor.execute(new GroupFileTransferDeleteTask(mFileTransferService,
-                mImService, mLocalContentResolver, mImsLock));
-        mImOperationExecutor.execute(new GroupChatMessageDeleteTask(this, mImService,
-                mLocalContentResolver, mImsLock));
-        mImOperationExecutor.execute(new GroupChatDeleteTask(this, mImService,
-                mLocalContentResolver, mImsLock));
+        mCore.getListener().handleDeleteGroupChats(mImService);
     }
 
     /**
@@ -754,10 +732,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param contact
      */
     public void deleteOneToOneChat(ContactId contact) {
-        mImOperationExecutor.execute(new OneToOneFileTransferDeleteTask(mFileTransferService,
-                mImService, mLocalContentResolver, mImsLock, contact));
-        mImOperationExecutor.execute(new OneToOneChatMessageDeleteTask(this, mImService,
-                mLocalContentResolver, mImsLock, contact));
+        mCore.getListener().handleDeleteOneToOneChat(mImService, contact);
     }
 
     /**
@@ -767,12 +742,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param chatId
      */
     public void deleteGroupChat(String chatId) {
-        mImOperationExecutor.execute(new GroupChatMessageDeleteTask(this, mImService,
-                mLocalContentResolver, mImsLock, chatId));
-        mImOperationExecutor.execute(new GroupFileTransferDeleteTask(mFileTransferService,
-                mImService, mLocalContentResolver, mImsLock, chatId));
-        mImOperationExecutor.execute(new GroupChatDeleteTask(this, mImService,
-                mLocalContentResolver, mImsLock, chatId));
+        mCore.getListener().handleDeleteGroupChat(mImService, chatId);
     }
 
     /**
@@ -782,13 +752,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param msgId
      */
     public void deleteMessage(String msgId) {
-        if (mMessagingLog.isOneToOneChatMessage(msgId)) {
-            mImOperationExecutor.execute(new OneToOneChatMessageDeleteTask(this, mImService,
-                    mLocalContentResolver, mImsLock, msgId));
-        } else {
-            mImOperationExecutor.execute(new GroupChatMessageDeleteTask(this, mImService,
-                    mLocalContentResolver, mImsLock, null, msgId));
-        }
+        mCore.getListener().handleDeleteMessage(mImService, msgId);
     }
 
     /**
@@ -1010,7 +974,7 @@ public class ChatServiceImpl extends IChatService.Stub {
         ContactId contact = session.getRemoteContact();
         OneToOneChatImpl oneToOneChat = new OneToOneChatImpl(contact,
                 mOneToOneChatEventBroadcaster, mImService, mMessagingLog, mHistoryLog, mRcsSettings,
-                this, mFileTransferService, mContactManager, mCore, mOneToOneUndeliveredImManager);
+                this, mContactManager, mCore, mOneToOneUndeliveredImManager);
         session.addListener(oneToOneChat);
         addOneToOneChat(contact, oneToOneChat);
     }
