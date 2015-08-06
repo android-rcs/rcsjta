@@ -896,9 +896,7 @@ public class MsrpSession {
                 failureReportNeeded = false;
             }
             if (failureReportNeeded) {
-                sendMsrpResponse(
-                        new StringBuilder(MsrpConstants.RESPONSE_OK).append(' ')
-                                .append(MsrpConstants.COMMENT_OK).toString(), txId, headers);
+                sendMsrpResponse(MsrpConstants.STATUS_200_OK, txId, headers);
             }
             if (data == null) {
                 if (logger.isActivated()) {
@@ -1095,8 +1093,7 @@ public class MsrpSession {
 
         // Send MSRP response if requested
         if (failureReportNeeded) {
-            sendMsrpResponse(MsrpConstants.RESPONSE_OK + " " + MsrpConstants.COMMENT_OK, txId,
-                    headers);
+            sendMsrpResponse(MsrpConstants.STATUS_200_OK, txId, headers);
         }
 
         // Check status code
