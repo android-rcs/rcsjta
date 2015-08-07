@@ -24,10 +24,6 @@ package com.gsma.rcs.core.ims.security;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import com.gsma.rcs.utils.logger.Logger;
-
-import javax2.sip.InvalidArgumentException;
-
 /**
  * HTTP Digest MD5 authentication (see RFC2617)
  * 
@@ -62,47 +58,42 @@ public class HttpDigestMd5Authentication {
     /**
      * Domain name
      */
-    private String realm = null;
+    private String mRealm;
 
     /**
      * Opaque parameter
      */
-    private String opaque = null;
+    private String mOpaque;
 
     /**
      * Nonce
      */
-    private String nonce = null;
+    private String mNonce;
 
     /**
      * Next nonce
      */
-    private String nextnonce = null;
+    private String mNextNonce;
 
     /**
      * Qop
      */
-    private String qop = null;
+    private String mQop;
 
     /**
      * Cnonce
      */
-    private String cnonce = "" + System.currentTimeMillis();
+    private String mCnonce = Long.toString(System.currentTimeMillis());
 
     /**
      * Cnonce counter
      */
-    private int nc = 0;
+    private int mCnonceCounter = 0;
 
     /**
      * MD5 algorithm
      */
-    private MD5Digest md5Digest = new MD5Digest();
-
-    /**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private MD5Digest mMd5Digest = new MD5Digest();
 
     /**
      * Constructor
@@ -116,7 +107,7 @@ public class HttpDigestMd5Authentication {
      * @return Realm
      */
     public String getRealm() {
-        return realm;
+        return mRealm;
     }
 
     /**
@@ -125,7 +116,7 @@ public class HttpDigestMd5Authentication {
      * @param realm Realm
      */
     public void setRealm(String realm) {
-        this.realm = realm;
+        mRealm = realm;
     }
 
     /**
@@ -134,7 +125,7 @@ public class HttpDigestMd5Authentication {
      * @return Opaque
      */
     public String getOpaque() {
-        return opaque;
+        return mOpaque;
     }
 
     /**
@@ -143,7 +134,7 @@ public class HttpDigestMd5Authentication {
      * @param opaque Opaque
      */
     public void setOpaque(String opaque) {
-        this.opaque = opaque;
+        mOpaque = opaque;
     }
 
     /**
@@ -152,7 +143,7 @@ public class HttpDigestMd5Authentication {
      * @return Client nonce
      */
     public String getCnonce() {
-        return cnonce;
+        return mCnonce;
     }
 
     /**
@@ -161,7 +152,7 @@ public class HttpDigestMd5Authentication {
      * @return Nonce
      */
     public String getNonce() {
-        return nonce;
+        return mNonce;
     }
 
     /**
@@ -170,7 +161,7 @@ public class HttpDigestMd5Authentication {
      * @param nonce Nonce
      */
     public void setNonce(String nonce) {
-        this.nonce = nonce;
+        mNonce = nonce;
     }
 
     /**
@@ -179,7 +170,7 @@ public class HttpDigestMd5Authentication {
      * @return Next nonce
      */
     public String getNextnonce() {
-        return nextnonce;
+        return mNextNonce;
     }
 
     /**
@@ -188,7 +179,7 @@ public class HttpDigestMd5Authentication {
      * @param nextnonce Next nonce
      */
     public void setNextnonce(String nextnonce) {
-        this.nextnonce = nextnonce;
+        mNextNonce = nextnonce;
     }
 
     /**
@@ -197,7 +188,7 @@ public class HttpDigestMd5Authentication {
      * @return Qop
      */
     public String getQop() {
-        return qop;
+        return mQop;
     }
 
     /**
@@ -209,7 +200,7 @@ public class HttpDigestMd5Authentication {
         if (qop != null) {
             qop = qop.split(",")[0];
         }
-        this.qop = qop;
+        mQop = qop;
     }
 
     /**
@@ -217,13 +208,13 @@ public class HttpDigestMd5Authentication {
      */
     public void updateNonceParameters() {
         // Update nonce and nc
-        if (nextnonce.equals(nonce)) {
+        if (mNextNonce.equals(mNonce)) {
             // Next nonce == nonce
-            nc++;
+            mCnonceCounter++;
         } else {
             // Next nonce != nonce
-            nc = 1;
-            nonce = nextnonce;
+            mCnonceCounter = 1;
+            mNonce = mNextNonce;
         }
     }
 
@@ -233,7 +224,7 @@ public class HttpDigestMd5Authentication {
      * @return String (ie. "00000001")
      */
     public String buildNonceCounter() {
-        String result = Integer.toHexString(nc);
+        String result = Integer.toHexString(mCnonceCounter);
         while (result.length() != 8) {
             result = "0" + result;
         }
@@ -265,28 +256,28 @@ public class HttpDigestMd5Authentication {
      * @param uri Request URI
      * @param nc Nonce counter
      * @param body Entity body
-     * @throws InvalidArgumentException
+     * @return the HTTP Digest nonce response
      */
     public String calculateResponse(String user, String password, String method, String uri,
-            String nc, String body) throws InvalidArgumentException {
-        String a1 = new StringBuilder(user).append(COLON).append(realm).append(COLON)
+            String nc, String body) {
+        String a1 = new StringBuilder(user).append(COLON).append(mRealm).append(COLON)
                 .append(password).toString();
         StringBuilder a2 = new StringBuilder(method).append(COLON).append(uri);
 
-        if (qop != null) {
-            if (!qop.startsWith("auth")) {
-                throw new InvalidArgumentException("Invalid qop: ".concat(qop));
+        if (mQop != null) {
+            if (!mQop.startsWith("auth")) {
+                throw new IllegalArgumentException("Invalid qop: ".concat(mQop));
             }
-
-            if (qop.equals("auth-int")) {
+            
+            if (mQop.equals("auth-int")) {
                 a2.append(COLON).append(H(body));
             }
 
-            return H(new StringBuilder(H(a1)).append(COLON).append(nonce).append(COLON).append(nc)
-                    .append(COLON).append(cnonce).append(COLON).append(qop).append(COLON)
+            return H(new StringBuilder(H(a1)).append(COLON).append(mNonce).append(COLON).append(nc)
+                    .append(COLON).append(mCnonce).append(COLON).append(mQop).append(COLON)
                     .append(H(a2.toString())).toString());
         } else {
-            return H(new StringBuilder(H(a1)).append(COLON).append(nonce).append(COLON)
+            return H(new StringBuilder(H(a1)).append(COLON).append(mNonce).append(COLON)
                     .append(H(a2.toString())).toString());
         }
     }
@@ -302,9 +293,9 @@ public class HttpDigestMd5Authentication {
             data = "";
         }
         byte[] bytes = data.getBytes(UTF8);
-        md5Digest.update(bytes, 0, bytes.length);
-        byte returnValue[] = new byte[md5Digest.getDigestSize()];
-        md5Digest.doFinal(returnValue, 0);
+        mMd5Digest.update(bytes, 0, bytes.length);
+        byte returnValue[] = new byte[mMd5Digest.getDigestSize()];
+        mMd5Digest.doFinal(returnValue, 0);
         return toHexString(returnValue);
     }
 }

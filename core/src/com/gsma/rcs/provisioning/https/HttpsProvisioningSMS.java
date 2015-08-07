@@ -40,9 +40,6 @@ import android.os.Bundle;
 import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
 
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.HttpContext;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Random;
@@ -114,8 +111,6 @@ public class HttpsProvisioningSMS {
      * 
      * @param smsPort SMS port
      * @param requestUri Request URI
-     * @param client Instance of {@link DefaultHttpClient}
-     * @param localContext Instance of {@link HttpContext}
      */
     public void registerSmsProvisioningReceiver(final String smsPort, final String requestUri) {
         // Unregister previous one

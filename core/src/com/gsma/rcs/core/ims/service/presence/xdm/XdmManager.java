@@ -64,7 +64,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
-import javax2.sip.InvalidArgumentException;
 import javax2.sip.message.Response;
 
 /**
@@ -358,9 +357,6 @@ public class XdmManager {
                 folder.getEntry().setEtag(etag);
             }
             return response;
-
-        } catch (InvalidArgumentException e) {
-            throw new SipPayloadException("Failed to send http request!", e);
 
         } catch (IOException e) {
             throw new SipNetworkException("Failed to send http request!", e);

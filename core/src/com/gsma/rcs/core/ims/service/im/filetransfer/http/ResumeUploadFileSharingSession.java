@@ -36,7 +36,6 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 /**
  * Resuming session of OriginatingHttpFileSharingSession
@@ -83,8 +82,6 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
             byte[] result = mUploadManager.resumeUpload();
             sendResultToContact(result);
         } catch (IOException e) {
-            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
-        } catch (URISyntaxException e) {
             sLogger.error(
                     new StringBuilder("Failed to resume a file transfer session for sessionId : ")
                             .append(getSessionID()).append(" with fileTransferId : ")

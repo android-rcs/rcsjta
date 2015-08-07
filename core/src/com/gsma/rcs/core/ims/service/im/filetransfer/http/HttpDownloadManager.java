@@ -23,18 +23,12 @@
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import com.gsma.rcs.core.content.MmContent;
-import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
 import android.net.Uri;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -43,11 +37,16 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * HTTP upload manager
  * 
  * @author jexa7410
+ * @author yplo6403
  */
 public class HttpDownloadManager extends HttpTransferManager {
     /**
@@ -58,31 +57,23 @@ public class HttpDownloadManager extends HttpTransferManager {
     /**
      * File content to download
      */
-    private MmContent mContent;
+    private final MmContent mContent;
 
     /**
      * File to be created
      */
-    private File mFile;
+    private final File mFile;
 
     /**
      * URI of file to be created
      */
-    private Uri mDownloadedFile;
+    private final Uri mDownloadedFile;
 
     /**
      * Stream that writes the file
      */
     private BufferedOutputStream mFileDownloadStream;
 
-    /**
-     * number of received bytes calculated
-     */
-    private int mCalcLength = 0;
-
-    /**
-     * Retry counter
-     */
     private int mRetryCount = 0;
 
     private static final Logger sLogger = Logger.getLogger(HttpDownloadManager.class
@@ -143,18 +134,15 @@ public class HttpDownloadManager extends HttpTransferManager {
         }
         if (mFileDownloadStream == null) {
             mFileDownloadStream = openStreamForFile(mFile);
-
         }
         /* Send GET request */
-        HttpGet request = new HttpGet(getHttpServerAddr().toString());
-        request.addHeader("User-Agent", SipUtils.userAgentString());
         if (HTTP_TRACE_ENABLED) {
-            System.out.println(new StringBuilder(">>> Send HTTP request:").append("\n"
-                    + request.getMethod() + " " + request.getRequestLine().getUri()));
+            System.out.println(">>> Send HTTP request:\nGET " + getHttpServerAddr());
         }
 
         try {
-            writeHttpContentToFile(request);
+            writeHttpContentToFile(new URL(getHttpServerAddr().toString()),
+                    new HashMap<String, String>());
         } catch (IOException e) {
             /*
              * Either the stream is currently not open or there has been a connection time out, In
@@ -181,29 +169,34 @@ public class HttpDownloadManager extends HttpTransferManager {
     }
 
     /**
-     * Write the content fetched from http request onto file
+     * Write the content fetched from HTTP request onto file
      * 
-     * @param request HTTP request
+     * @param url the URL of the file to download on the content server
+     * @param properties the HTTP properties
      * @throws IOException
      * @throws FileNotDownloadedException
      */
-    private void writeHttpContentToFile(HttpGet request) throws IOException,
-            FileNotDownloadedException {
+    private void writeHttpContentToFile(URL url, Map<String, String> properties)
+            throws IOException, FileNotDownloadedException {
+        HttpURLConnection urlConnection = null;
         try {
-            /* Execute Http Request */
-            HttpResponse response = getHttpClient().execute(request);
-            int statusCode = response.getStatusLine().getStatusCode();
-            if (HTTP_TRACE_ENABLED) {
-                System.out.println(new StringBuilder("<<< Receive HTTP response:").append("\n"
-                        + statusCode + " " + response.getStatusLine().getReasonPhrase()));
+            /* Execute HTTP Request */
+            urlConnection = openHttpConnection(url, properties);
+            int statusCode = urlConnection.getResponseCode();
+            String message = urlConnection.getResponseMessage();
+            if (sLogger.isActivated()) {
+                sLogger.debug("HTTP get file response: " + statusCode + " (" + message + ")");
             }
+            if (HTTP_TRACE_ENABLED) {
+                System.out.println("<<< Receive HTTP response: \n" + statusCode + " " + statusCode);
+            }
+            int receivedBytes = 0;
             /* Analyze HTTP response */
             switch (statusCode) {
-                case HttpStatus.SC_OK:
-                    mCalcLength = 0;
+                case HttpURLConnection.HTTP_OK:
                     break;
-                case HttpStatus.SC_PARTIAL_CONTENT:
-                    mCalcLength = Long.valueOf(mFile.length()).intValue();
+                case HttpURLConnection.HTTP_PARTIAL:
+                    receivedBytes = Long.valueOf(mFile.length()).intValue();
                     break;
                 default:
                     throw new FileNotDownloadedException(new StringBuilder(
@@ -212,12 +205,11 @@ public class HttpDownloadManager extends HttpTransferManager {
             }
             /* Read content */
             byte[] buffer = new byte[CHUNK_MAX_SIZE];
-            HttpEntity entity = response.getEntity();
-            InputStream input = entity.getContent();
+            InputStream input = urlConnection.getInputStream();
             int num;
             while ((num = input.read(buffer)) != -1 && !isCancelled() && !isPaused()) {
-                mCalcLength += num;
-                getListener().httpTransferProgress(mCalcLength, mContent.getSize());
+                receivedBytes += num;
+                getListener().httpTransferProgress(receivedBytes, mContent.getSize());
                 mFileDownloadStream.write(buffer, 0, num);
             }
 
@@ -234,7 +226,7 @@ public class HttpDownloadManager extends HttpTransferManager {
              * Check if we are able to download the file properly by comparing the file content
              * size, also make sure that the download is not cancelled
              */
-            if (!isCancelled() && mCalcLength != mContent.getSize()) {
+            if (!isCancelled() && receivedBytes != mContent.getSize()) {
                 /* Delete file as download is not successful */
                 mFile.delete();
                 throw new FileNotDownloadedException(
@@ -251,13 +243,16 @@ public class HttpDownloadManager extends HttpTransferManager {
                 }
                 mFileDownloadStream = null;
             }
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
         }
     }
 
     /**
      * Download the thumbnail and save it
      * 
-     * @param iconUri the remote URI
+     * @param iconUri the remote URI of the file icon
      * @param fileIcon the local descriptor
      * @throws IOException
      */
@@ -265,21 +260,21 @@ public class HttpDownloadManager extends HttpTransferManager {
         if (sLogger.isActivated()) {
             sLogger.debug("Download file icon from ".concat(getHttpServerAddr().toString()));
         }
-        HttpGet request = new HttpGet(iconUri.toString());
         if (HTTP_TRACE_ENABLED) {
-            System.out.println(new StringBuilder(">>> Send HTTP request:").append("\n"
-                    + request.getMethod() + " " + request.getRequestLine().getUri()));
+            System.out.println(">>> Send HTTP request:\nGET " + iconUri);
         }
-        ByteArrayOutputStream baos = getThumbnail(request);
+        ByteArrayOutputStream baos;
+        baos = getThumbnail(new URL(iconUri.toString()));
         try {
+            /* Save data to file on disk */
             fileIcon.writeData2File(baos.toByteArray());
         } finally {
             CloseableUtils.close(baos);
             if (fileIcon != null) {
                 try {
                     fileIcon.closeFile();
-                } catch (IOException e) {
-                    /* Nothing to be handled here */
+                } catch (Exception ignore) {
+                    /* Nothing to do, ignore the exception */
                 }
             }
         }
@@ -288,38 +283,52 @@ public class HttpDownloadManager extends HttpTransferManager {
     /**
      * Get the thumbnail
      * 
-     * @param request HTTP request
-     * @return Thumbnail picture data
+     * @param url the URL of the file icon on the content server
      * @throws IOException
      */
-    private ByteArrayOutputStream getThumbnail(HttpGet request) throws IOException {
-        // Execute HTTP request
-        HttpResponse response = getHttpClient().execute(request);
-        int statusCode = response.getStatusLine().getStatusCode();
-        if (HTTP_TRACE_ENABLED) {
-            System.out.println(new StringBuilder("<<< Receive HTTP response:").append("\n"
-                    + statusCode + " " + response.getStatusLine().getReasonPhrase()));
-        }
+    private ByteArrayOutputStream getThumbnail(URL url) throws IOException {
+        HttpURLConnection urlConnection = null;
+        ByteArrayOutputStream bOutputStream = null;
+        try {
+            urlConnection = openHttpConnection(url, new HashMap<String, String>());
+            int statusCode = urlConnection.getResponseCode();
+            String message = urlConnection.getResponseMessage();
+            if (sLogger.isActivated()) {
+                sLogger.debug("HTTP get thumbnail response: " + statusCode + " (" + message + ")");
+            }
+            if (HTTP_TRACE_ENABLED) {
+                System.out.println("<<< Receive HTTP response:\n" + statusCode + " " + statusCode);
+            }
+            if (HttpURLConnection.HTTP_OK == statusCode) {
+                byte[] buffer = new byte[CHUNK_MAX_SIZE];
+                bOutputStream = new ByteArrayOutputStream();
+                InputStream input = urlConnection.getInputStream();
+                int num;
+                while ((num = input.read(buffer)) != -1) {
+                    bOutputStream.write(buffer, 0, num);
+                    if (isCancelled()) {
+                        break;
+                    }
+                }
+                return bOutputStream;
+            }
+            throw new IOException(new StringBuilder("Received '").append(statusCode)
+                    .append("' from server").toString());
 
-        // Analyze HTTP response
-        if (HttpStatus.SC_OK == statusCode) {
-            byte[] buffer = new byte[CHUNK_MAX_SIZE];
-            ByteArrayOutputStream bOutputStream = new ByteArrayOutputStream();
-            HttpEntity entity = response.getEntity();
-            InputStream input = entity.getContent();
-            int num;
-            while ((num = input.read(buffer)) != -1) {
-                bOutputStream.write(buffer, 0, num);
-                if (isCancelled()) {
-                    break;
+        } finally {
+            /* Close streams */
+            if (bOutputStream != null) {
+                try {
+                    bOutputStream.flush();
+                    bOutputStream.close();
+                } catch (IOException ignore) {
+                    /* Nothing to do, ignore the exception */
                 }
             }
-            bOutputStream.flush();
-            bOutputStream.close();
-            return bOutputStream;
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
         }
-        throw new IOException(new StringBuilder("Received '").append(statusCode)
-                .append("' from server").toString());
     }
 
     /**
@@ -341,28 +350,26 @@ public class HttpDownloadManager extends HttpTransferManager {
         }
 
         // Send GET request
-        HttpGet request = new HttpGet(serverAddress.toString());
         long downloadedLength = mFile.length();
         long completeSize = mContent.getSize();
-        request.addHeader("User-Agent", SipUtils.userAgentString());
-        request.addHeader("Range", "bytes=" + downloadedLength + "-" + completeSize);
+        Map<String, String> properties = new HashMap<String, String>();
+        properties.put("Range", "bytes=" + downloadedLength + "-" + completeSize);
         if (HTTP_TRACE_ENABLED) {
-            System.out.println(new StringBuilder(">>> Send HTTP request:").append("\n"
-                    + request.getMethod() + " " + request.getRequestLine().getUri()));
+            System.out.println(">>> Send HTTP request:\n GET " + serverAddress);
         }
 
         try {
-            writeHttpContentToFile(request);
+            writeHttpContentToFile(new URL(serverAddress.toString()), properties);
         } catch (IOException e) {
             /*
-             * Either the stream is curently not open or there has been a connection time out, In
+             * Either the stream is currently not open or there has been a connection time out, In
              * either cases we should pause downloading the file.
              */
             if (!isPaused() && !isCancelled()) {
                 pauseTransferBySystem();
             }
             throw e;
-        } catch (IllegalStateException e) {
+        } catch (FileNotDownloadedException e) {
             /* Execute request with retry procedure */
             /*
              * Something went wrong during file download, either the HTTP response was not as

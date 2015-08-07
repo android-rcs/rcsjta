@@ -58,16 +58,12 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.text.TextUtils;
 
-import org.apache.http.HttpStatus;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.HttpContext;
 import org.xml.sax.SAXException;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -365,7 +361,7 @@ public class HttpsProvisioningManager {
             String request = new StringBuilder(primaryUri).append(args).toString();
             urlConnection = executeHttpRequest(true, request);
             result.code = urlConnection.getResponseCode();
-            if (HttpStatus.SC_OK != result.code && !StringUtils.isEmpty(secondaryUri)) {
+            if (HttpURLConnection.HTTP_OK != result.code && !StringUtils.isEmpty(secondaryUri)) {
                 /* First server not available, try the secondaryUri */
                 request = new StringBuilder(secondaryUri).append(args).toString();
                 urlConnection.disconnect();
@@ -374,7 +370,7 @@ public class HttpsProvisioningManager {
                 result.code = urlConnection.getResponseCode();
             }
             switch (result.code) {
-                case HttpStatus.SC_OK:
+                case HttpURLConnection.HTTP_OK:
                     if (logActivated) {
                         sLogger.debug("HTTPS request returns with 200 OK");
                     }
@@ -391,13 +387,13 @@ public class HttpsProvisioningManager {
                     }
                     return result;
 
-                case HttpStatus.SC_FORBIDDEN:
+                case HttpURLConnection.HTTP_FORBIDDEN:
                     if (logActivated) {
                         sLogger.debug("Request to get OTP failed: Forbidden. MSISDN=" + msisdn);
                     }
                     return sendFirstRequestsToRequireOTP(null, primaryUri, secondaryUri);
 
-                case HttpStatus.SC_SERVICE_UNAVAILABLE:
+                case HttpURLConnection.HTTP_UNAVAILABLE:
                     result.retryAfter = getRetryAfter(urlConnection);
                     /* Intentional fall through */
                 default:
@@ -411,7 +407,7 @@ public class HttpsProvisioningManager {
                 urlConnection.disconnect();
             }
             /* If not waiting for the SMS with OTP */
-            if (!result.waitingForSMSOTP && HttpStatus.SC_FORBIDDEN != result.code) {
+            if (!result.waitingForSMSOTP && HttpURLConnection.HTTP_FORBIDDEN != result.code) {
                 mSmsManager.unregisterSmsProvisioningReceiver();
             }
         }
@@ -422,8 +418,6 @@ public class HttpsProvisioningManager {
      * 
      * @param otp One time password
      * @param requestUri Request URI
-     * @param client Instance of {@link DefaultHttpClient}
-     * @param localContext Instance of {@link HttpContext}
      * @throws RcsAccountException thrown if RCS account failed to be created
      * @throws IOException
      */
@@ -517,7 +511,7 @@ public class HttpsProvisioningManager {
             String requestUri = primaryUri;
             urlConnection = executeHttpRequest(false, primaryUri);
             result.code = urlConnection.getResponseCode();
-            if (HttpStatus.SC_OK != result.code && !StringUtils.isEmpty(secondaryUri)) {
+            if (HttpURLConnection.HTTP_OK != result.code && !StringUtils.isEmpty(secondaryUri)) {
                 urlConnection.disconnect();
                 urlConnection = null;
                 /* First server not available, try the secondaryUri */
@@ -526,7 +520,7 @@ public class HttpsProvisioningManager {
                 result.code = urlConnection.getResponseCode();
             }
             switch (result.code) {
-                case HttpStatus.SC_OK:
+                case HttpURLConnection.HTTP_OK:
                     break;
 
                 case HTTP_STATUS_ERROR_NETWORK_AUTHENTICATION_REQUIRED:
@@ -537,7 +531,7 @@ public class HttpsProvisioningManager {
                      */
                     return sendFirstRequestsToRequireOTP(null, primaryUri, secondaryUri);
 
-                case HttpStatus.SC_SERVICE_UNAVAILABLE:
+                case HttpURLConnection.HTTP_UNAVAILABLE:
                     result.retryAfter = getRetryAfter(urlConnection);
                     /* Intentional fall through */
                 default:
@@ -559,11 +553,11 @@ public class HttpsProvisioningManager {
             urlConnection = executeHttpRequest(true, request);
             result.code = urlConnection.getResponseCode();
             switch (result.code) {
-                case HttpStatus.SC_OK:
+                case HttpURLConnection.HTTP_OK:
                     result.content = readStream(urlConnection.getInputStream());
                     return result;
 
-                case HttpStatus.SC_SERVICE_UNAVAILABLE:
+                case HttpURLConnection.HTTP_UNAVAILABLE:
                     result.retryAfter = getRetryAfter(urlConnection);
                     /* Intentional fall through */
                 default:
@@ -617,8 +611,6 @@ public class HttpsProvisioningManager {
      * 
      * @param otp One time password
      * @param requestUri Request URI
-     * @param client Instance of {@link DefaultHttpClient}
-     * @param localContext Instance of {@link HttpContext}
      * @return Instance of {@link HttpsProvisioningResult} or null in case of internal exception
      * @throws IOException
      */
@@ -640,11 +632,11 @@ public class HttpsProvisioningManager {
             urlConnection = executeHttpRequest(true, request);
             result.code = urlConnection.getResponseCode();
             switch (result.code) {
-                case HttpStatus.SC_OK:
+                case HttpURLConnection.HTTP_OK:
                     result.content = readStream(urlConnection.getInputStream());
                     return result;
 
-                case HttpStatus.SC_SERVICE_UNAVAILABLE:
+                case HttpURLConnection.HTTP_UNAVAILABLE:
                     result.retryAfter = getRetryAfter(urlConnection);
                     /* Intentional fall through */
                 default:
@@ -682,7 +674,7 @@ public class HttpsProvisioningManager {
     private void processProvisioningResult(HttpsProvisioningResult result)
             throws RcsAccountException {
         boolean logActivated = sLogger.isActivated();
-        if (HttpStatus.SC_OK == result.code) {
+        if (HttpURLConnection.HTTP_OK == result.code) {
             // Reset after 511 counter
             mRetryAfter511ErrorCount = 0;
 
@@ -848,7 +840,7 @@ public class HttpsProvisioningManager {
                     tryLaunchRcsCoreService(mCtx, -1);
                 }
             }
-        } else if (HttpStatus.SC_SERVICE_UNAVAILABLE == result.code) {
+        } else if (HttpURLConnection.HTTP_UNAVAILABLE == result.code) {
             // Server Unavailable
             if (logActivated) {
                 sLogger.debug(new StringBuilder("Server Unavailable. Retry after: ")
@@ -863,7 +855,7 @@ public class HttpsProvisioningManager {
             } else {
                 tryLaunchRcsCoreService(mCtx, result.retryAfter);
             }
-        } else if (HttpStatus.SC_FORBIDDEN == result.code) {
+        } else if (HttpURLConnection.HTTP_FORBIDDEN == result.code) {
             // Forbidden: reset account + version = 0
             if (logActivated) {
                 sLogger.debug("Provisioning forbidden: reset account");

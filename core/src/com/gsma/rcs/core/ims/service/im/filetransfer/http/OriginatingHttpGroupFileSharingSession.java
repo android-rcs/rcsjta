@@ -33,7 +33,6 @@ import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
-import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
@@ -41,7 +40,6 @@ import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
-import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession.State;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.provider.messaging.FileTransferData;
@@ -52,7 +50,6 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 /**
  * Originating file transfer HTTP session
@@ -137,8 +134,6 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
             byte[] result = mUploadManager.uploadFile();
             sendResultToContact(result);
         } catch (IOException e) {
-            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
-        } catch (URISyntaxException e) {
             sLogger.error(
                     new StringBuilder("Failed to initiate file transfer session for sessionId : ")
                             .append(getSessionID()).append(" with fileTransferId : ")
@@ -305,8 +300,6 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                         sendResultToContact(null);
                     }
                 } catch (IOException e) {
-                    handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
-                } catch (URISyntaxException e) {
                     sLogger.error(
                             new StringBuilder("Failed to resume upload for sessionId : ")
                                     .append(getSessionID()).append(" with fileTransferId : ")

@@ -26,9 +26,6 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.ims.security.HttpDigestMd5Authentication;
 import com.gsma.rcs.utils.Base64;
-import com.gsma.rcs.utils.logger.Logger;
-
-import javax2.sip.InvalidArgumentException;
 
 /**
  * HTTP Digest MD5 authentication agent
@@ -37,30 +34,20 @@ import javax2.sip.InvalidArgumentException;
  * @author Deutsche Telekom
  */
 public class HttpAuthenticationAgent {
-    /**
-     * Login
-     */
-    private String serverLogin;
 
-    /**
-     * Password
-     */
-    private String serverPwd;
+    private final String mServerLogin;
 
-    /**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private final String mServerPwd;
 
     /**
      * HTTP Digest MD5 agent
      */
-    private HttpDigestMd5Authentication digest = new HttpDigestMd5Authentication();
+    private HttpDigestMd5Authentication mDigest = new HttpDigestMd5Authentication();
 
     /**
      * Controls if its a HTTP Digest authentication or Basic
      */
-    private boolean isDigestAuthentication;
+    private boolean mIsDigestAuthentication;
 
     /**
      * Constructor
@@ -69,8 +56,8 @@ public class HttpAuthenticationAgent {
      * @param pwd Server pwd
      */
     public HttpAuthenticationAgent(String login, String pwd) {
-        this.serverLogin = login;
-        this.serverPwd = pwd;
+        mServerLogin = login;
+        mServerPwd = pwd;
     }
 
     /**
@@ -80,10 +67,8 @@ public class HttpAuthenticationAgent {
      * @param requestUri Request Uri
      * @param body Entity body
      * @return authorizationHeader Authorization header
-     * @throws InvalidArgumentException
      */
-    public String generateAuthorizationHeader(String method, String requestUri, String body)
-            throws InvalidArgumentException {
+    public String generateAuthorizationHeader(String method, String requestUri, String body) {
         return "Authorization: ".concat(generateAuthorizationHeaderValue(method, requestUri, body));
     }
 
@@ -94,51 +79,49 @@ public class HttpAuthenticationAgent {
      * @param requestUri Request Uri
      * @param body Entity body
      * @return authorizationHeader Authorization header value
-     * @throws InvalidArgumentException
      */
-    public String generateAuthorizationHeaderValue(String method, String requestUri, String body)
-            throws InvalidArgumentException {
+    public String generateAuthorizationHeaderValue(String method, String requestUri, String body) {
         /*
          * According to
          * "Rich Communication Suite 5.1 Advanced Communications - Services and Client Specification - Version 2.0 - 03 May 2013"
          * , the authentication should be performed using basic authentication or HTTP digest as
          * per[RFC2617]
          */
-        if (!isDigestAuthentication) {
+        if (!mIsDigestAuthentication) {
             /* Build the Basic Authorization header */
-            return "Basic ".concat(Base64.encodeBase64ToString((new StringBuilder(serverLogin)
-                    .append(':').append(serverPwd).toString()).getBytes(UTF8)));
+            return "Basic ".concat(Base64.encodeBase64ToString((new StringBuilder(mServerLogin)
+                    .append(':').append(mServerPwd).toString()).getBytes(UTF8)));
         }
 
-        digest.updateNonceParameters();
+        mDigest.updateNonceParameters();
 
         /* Build the Authorization header */
-        StringBuilder authValue = new StringBuilder("Digest username=\"").append(serverLogin)
-                .append("\"").append(",realm=\"").append(digest.getRealm()).append("\"")
-                .append(",nonce=\"").append(digest.getNonce()).append("\"").append(",uri=\"")
-                .append(requestUri).append("\"").append(",nc=").append(digest.buildNonceCounter())
-                .append(",cnonce=\"").append(digest.getCnonce()).append("\"");
+        StringBuilder authValue = new StringBuilder("Digest username=\"").append(mServerLogin)
+                .append("\"").append(",realm=\"").append(mDigest.getRealm()).append("\"")
+                .append(",nonce=\"").append(mDigest.getNonce()).append("\"").append(",uri=\"")
+                .append(requestUri).append("\"").append(",nc=").append(mDigest.buildNonceCounter())
+                .append(",cnonce=\"").append(mDigest.getCnonce()).append("\"");
 
-        String opaque = digest.getOpaque();
+        String opaque = mDigest.getOpaque();
         if (opaque != null) {
             authValue.append(",opaque=\"").append(opaque).append("\"");
         }
 
-        String qop = digest.getQop();
+        String qop = mDigest.getQop();
         if (qop != null && qop.startsWith("auth")) {
             authValue
                     .append(",qop=\"")
                     .append(qop)
                     .append("\"")
                     .append(",response=\"")
-                    .append(digest.calculateResponse(serverLogin, serverPwd, method, requestUri,
-                            digest.buildNonceCounter(), body)).append("\"");
+                    .append(mDigest.calculateResponse(mServerLogin, mServerPwd, method, requestUri,
+                            mDigest.buildNonceCounter(), body)).append("\"");
 
         } else {
             authValue
                     .append(",response=\"")
-                    .append(digest.calculateResponse(serverLogin, serverPwd, method, requestUri,
-                            digest.buildNonceCounter(), "")).append("\"");
+                    .append(mDigest.calculateResponse(mServerLogin, mServerPwd, method, requestUri,
+                            mDigest.buildNonceCounter(), "")).append("\"");
         }
 
         return authValue.toString();
@@ -156,27 +139,27 @@ public class HttpAuthenticationAgent {
             // "Rich Communication Suite 5.1 Advanced Communications - Services and Client Specification - Version 2.0 - 03 May 2013",
             // the authentication should be performed using basic authentication or HTTP digest as
             // per [RFC2617]
-            isDigestAuthentication = header
+            mIsDigestAuthentication = header
                     .startsWith(HttpDigestMd5Authentication.HTTP_DIGEST_SCHEMA);
-            if (!isDigestAuthentication) {
+            if (!mIsDigestAuthentication) {
                 return;
             }
 
             // Get domain name
             String value = getValue(header, "realm");
-            digest.setRealm(value);
+            mDigest.setRealm(value);
 
             // Get opaque parameter
             value = getValue(header, "opaque");
-            digest.setOpaque(value);
+            mDigest.setOpaque(value);
 
             // Get qop
             value = getValue(header, "qop");
-            digest.setQop(value);
+            mDigest.setQop(value);
 
             // Get nonce to be used
             value = getValue(header, "nonce");
-            digest.setNextnonce(value);
+            mDigest.setNextnonce(value);
         }
     }
 

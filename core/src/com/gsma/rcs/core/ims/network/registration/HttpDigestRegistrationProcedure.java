@@ -29,7 +29,6 @@ import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.security.HttpDigestMd5Authentication;
 import com.gsma.rcs.utils.PhoneUtils;
 
-import javax2.sip.InvalidArgumentException;
 import javax2.sip.header.AuthenticationInfoHeader;
 import javax2.sip.header.AuthorizationHeader;
 import javax2.sip.header.WWWAuthenticateHeader;
@@ -82,48 +81,43 @@ public class HttpDigestRegistrationProcedure extends RegistrationProcedure {
      * Write security header to REGISTER request
      * 
      * @param request Request
-     * @throws SipPayloadException
      */
-    public void writeSecurityHeader(SipRequest request) throws SipPayloadException {
-        try {
-            String realm;
-            if (mDigest.getRealm() != null) {
-                realm = mDigest.getRealm();
-            } else {
-                realm = ImsModule.IMS_USER_PROFILE.getRealm();
-            }
-
-            String nonce = "";
-            if (mDigest.getNextnonce() != null) {
-                mDigest.updateNonceParameters();
-                nonce = mDigest.getNonce();
-            }
-
-            String response = "";
-            if (nonce.length() > 0) {
-                String user = ImsModule.IMS_USER_PROFILE.getPrivateID();
-                String password = ImsModule.IMS_USER_PROFILE.getPassword();
-                response = mDigest.calculateResponse(user, password, request.getMethod(),
-                        request.getRequestURI(), mDigest.buildNonceCounter(), request.getContent());
-            }
-
-            /* Build the Authorization header */
-            String auth = "Digest username=\"" + ImsModule.IMS_USER_PROFILE.getPrivateID() + "\""
-                    + ",uri=\"" + request.getRequestURI() + "\"" + ",algorithm=MD5" + ",realm=\""
-                    + realm + "\"" + ",nonce=\"" + nonce + "\"" + ",response=\"" + response + "\"";
-            String opaque = mDigest.getOpaque();
-            if (opaque != null) {
-                auth += ",opaque=\"" + opaque + "\"";
-            }
-            String qop = mDigest.getQop();
-            if ((qop != null) && qop.startsWith("auth")) {
-                auth += ",nc=" + mDigest.buildNonceCounter() + ",qop=" + qop + ",cnonce=\""
-                        + mDigest.getCnonce() + "\"";
-            }
-            request.addHeader(AuthorizationHeader.NAME, auth);
-        } catch (InvalidArgumentException e) {
-            throw new SipPayloadException("Unable to write security header!", e);
+    public void writeSecurityHeader(SipRequest request) {
+        String realm;
+        if (mDigest.getRealm() != null) {
+            realm = mDigest.getRealm();
+        } else {
+            realm = ImsModule.IMS_USER_PROFILE.getRealm();
         }
+
+        String nonce = "";
+        if (mDigest.getNextnonce() != null) {
+            mDigest.updateNonceParameters();
+            nonce = mDigest.getNonce();
+        }
+
+        String response = "";
+        if (nonce.length() > 0) {
+            String user = ImsModule.IMS_USER_PROFILE.getPrivateID();
+            String password = ImsModule.IMS_USER_PROFILE.getPassword();
+            response = mDigest.calculateResponse(user, password, request.getMethod(),
+                    request.getRequestURI(), mDigest.buildNonceCounter(), request.getContent());
+        }
+
+        /* Build the Authorization header */
+        String auth = "Digest username=\"" + ImsModule.IMS_USER_PROFILE.getPrivateID() + "\""
+                + ",uri=\"" + request.getRequestURI() + "\"" + ",algorithm=MD5" + ",realm=\""
+                + realm + "\"" + ",nonce=\"" + nonce + "\"" + ",response=\"" + response + "\"";
+        String opaque = mDigest.getOpaque();
+        if (opaque != null) {
+            auth += ",opaque=\"" + opaque + "\"";
+        }
+        String qop = mDigest.getQop();
+        if ((qop != null) && qop.startsWith("auth")) {
+            auth += ",nc=" + mDigest.buildNonceCounter() + ",qop=" + qop + ",cnonce=\""
+                    + mDigest.getCnonce() + "\"";
+        }
+        request.addHeader(AuthorizationHeader.NAME, auth);
     }
 
     /**

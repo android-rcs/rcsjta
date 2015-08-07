@@ -35,7 +35,6 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.UUID;
 
 /**
@@ -165,10 +164,6 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
             removeSession();
             mListener.handleUploadNotAllowedToSend();
         } catch (IOException e) {
-            removeSession();
-            mListener.handleUploadError(FileSharingError.MEDIA_UPLOAD_FAILED);
-        } catch (URISyntaxException e) {
-            sLogger.error("Failed to initiate session for HTTP uploadId ".concat(mUploadId), e);
             removeSession();
             mListener.handleUploadError(FileSharingError.MEDIA_UPLOAD_FAILED);
         } catch (SipPayloadException e) {

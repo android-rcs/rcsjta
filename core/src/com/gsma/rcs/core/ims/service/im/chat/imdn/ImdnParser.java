@@ -25,7 +25,6 @@ package com.gsma.rcs.core.ims.service.im.chat.imdn;
 import com.gsma.rcs.utils.DateUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
-import org.apache.http.ParseException;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;

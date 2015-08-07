@@ -25,50 +25,36 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 import static com.gsma.rcs.utils.StringUtils.UTF8_STR;
 
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.content.MmContent;
-import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.http.HttpAuthenticationAgent;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.CloseableUtils;
+import com.gsma.rcs.utils.StringUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
 import android.net.Uri;
 
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.util.EntityUtils;
 import org.xml.sax.SAXException;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.text.ParseException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSession;
 import javax.xml.parsers.ParserConfigurationException;
-
-import javax2.sip.InvalidArgumentException;
 
 /**
  * HTTP upload manager
@@ -113,49 +99,28 @@ public class HttpUploadManager extends HttpTransferManager {
      */
     private static final String UPLOAD_INFO_REQUEST = "&get_upload_info";
 
+    private static final int HTTP_READ_TIMEOUT = 5000;
+
     /**
      * File content to upload
      */
-    private MmContent mContent;
+    private final MmContent mContent;
 
     /**
-     * Fileicon to upload
+     * File icon content to upload
      */
-    private MmContent mFileIcon;
+    private final MmContent mFileIcon;
 
     /**
-     * TID of the upload
+     * TID of the upload transfer
      */
-    private String mTId;
+    private final String mTId;
 
-    /**
-     * TID flag
-     */
-    private boolean mTIdFlag = true;
-
-    /**
-     * Authentication flag
-     */
-    private boolean mAuthenticationFlag = true;
-
-    /**
-     * The targeted URL
-     */
-    private URL mUrl;
-
-    /**
-     * Retry counter
-     */
     private int mRetryCount = 0;
 
-    /**
-     * Http Authentication Agent
-     */
     private HttpAuthenticationAgent mAuth;
-    /**
-     * The logger
-     */
-    private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
+
+    private static final Logger sLogger = Logger.getLogger(HttpUploadManager.class.getSimpleName());
 
     /**
      * Constructor
@@ -174,195 +139,153 @@ public class HttpUploadManager extends HttpTransferManager {
         mTId = tId;
     }
 
-    /**
-     * Upload a file
-     * 
-     * @return XML result or null if fails
-     * @throws URISyntaxException
-     * @throws IOException
-     */
-    public byte[] uploadFile() throws IOException, URISyntaxException {
-        if (mLogger.isActivated()) {
-            mLogger.debug("Upload file ".concat(mContent.getUri().toString()));
+    private long getRetryTimeout(URLConnection connection) {
+        try {
+            return Long.parseLong(connection.getHeaderField("Retry-After"))
+                    * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
+        } catch (NumberFormatException e) {
+            return 0L;
         }
-        /* Send a first POST request */
-        HttpPost post = generatePost();
-        HttpResponse resp = executeRequest(post);
-
-        /* Check response status code */
-        int statusCode = resp.getStatusLine().getStatusCode();
-        if (mLogger.isActivated()) {
-            mLogger.debug("First POST response: " + resp.getStatusLine());
-        }
-        switch (statusCode) {
-            case HttpStatus.SC_UNAUTHORIZED:
-                /* AUTHENTICATION REQUIRED: 401 */
-                mAuthenticationFlag = true;
-                break;
-            case HttpStatus.SC_NO_CONTENT:
-                /* NO CONTENT : 204 */
-                mAuthenticationFlag = false;
-                break;
-            case HttpStatus.SC_SERVICE_UNAVAILABLE:
-                /* SERVICE_UNAVAILABLE : 503 - check retry-after header */
-                Header[] headers = resp.getHeaders("Retry-After");
-                long retryAfter = 0;
-                if (headers.length > 0) {
-                    try {
-                        retryAfter = Integer.parseInt(headers[0].getValue())
-                                * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
-                    } catch (NumberFormatException e) {
-                        /* Nothing to do */
-                    }
-                }
-                if (retryAfter > 0) {
-                    try {
-                        Thread.sleep(retryAfter);
-                    } catch (InterruptedException e) {
-                        /* Nothing to do */
-                    }
-                }
-                /* No break to do the retry */
-            default:
-                /* Retry procedure */
-                if (mRetryCount < RETRY_MAX) {
-                    mRetryCount++;
-                    return uploadFile();
-                } else {
-                    throw new IOException("Unable to upload file for URI ".concat(mContent.getUri()
-                            .toString()));
-                }
-        }
-
-        if (isCancelled()) {
-            if (mLogger.isActivated()) {
-                mLogger.debug("File transfer cancelled by user");
-            }
-            return null;
-        }
-        // Notify listener
-        getListener().httpTransferStarted();
-
-        // Send a second POST request
-        return sendMultipartPost(resp);
     }
 
     /**
-     * Generate First POST
+     * Upload a file
      * 
-     * @return POST request
-     * @throws MalformedURLException
-     * @throws URISyntaxException
-     * @throws UnsupportedEncodingException
+     * @return XML result or null if upload failed
+     * @throws IOException
      */
-    private HttpPost generatePost() throws MalformedURLException, URISyntaxException,
-            UnsupportedEncodingException {
-        // Check server address
-        mUrl = new URL(getHttpServerAddr().toString());
-        String protocol = mUrl.getProtocol(); // TODO : exit if not HTTPS
-        String host = mUrl.getHost();
-        String serviceRoot = mUrl.getPath();
-
-        // Build POST request
-        HttpPost post = new HttpPost(new URI(protocol + "://" + host + serviceRoot));
-        post.addHeader("User-Agent", SipUtils.userAgentString());
-        if (HTTP_TRACE_ENABLED) {
-            String trace = ">>> Send HTTP request:";
-            trace += "\n " + post.getMethod() + " " + post.getRequestLine().getUri();
-            System.out.println(trace);
+    public byte[] uploadFile() throws IOException {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Upload file " + mContent.getUri() + " TID=" + mTId);
         }
+        /* Send a first POST request */
+        URL url = new URL(getHttpServerAddr().toString());
+        HttpURLConnection urlConnection = null;
+        try {
+            urlConnection = openHttpConnection(url, new HashMap<String, String>());
+            urlConnection.setDoInput(true);
+            urlConnection.setDoOutput(true);
+            urlConnection.setRequestMethod("POST");
+            urlConnection.setReadTimeout(HTTP_READ_TIMEOUT);
+            urlConnection.setChunkedStreamingMode(CHUNK_MAX_SIZE);
+            if (HTTP_TRACE_ENABLED) {
+                System.out.println(">>> Send HTTP request:\nPOST " + url);
+            }
+            int statusCode = urlConnection.getResponseCode();
+            String message = urlConnection.getResponseMessage();
+            /* Check response status code */
+            if (sLogger.isActivated()) {
+                sLogger.debug("First POST response: " + statusCode + " (" + message + ")");
+            }
+            switch (statusCode) {
+                case HttpURLConnection.HTTP_UNAUTHORIZED:
+                    /* AUTHENTICATION REQUIRED: 401 */
+                    String authHeader = urlConnection.getHeaderField("www-authenticate");
+                    if (StringUtils.isEmpty(authHeader)) {
+                        throw new IOException("headers malformed in 401 response");
+                    }
+                    mAuth = new HttpAuthenticationAgent(getHttpServerLogin(), getHttpServerPwd());
+                    mAuth.readWwwAuthenticateHeader(authHeader);
+                    break;
 
-        return post;
+                case HttpURLConnection.HTTP_NO_CONTENT:
+                    /* NO CONTENT : 204 response if authentication is not required */
+                    break;
+
+                case HttpURLConnection.HTTP_UNAVAILABLE:
+                    /* SERVICE_UNAVAILABLE : 503 - check retry-after header */
+                    long retryAfter = getRetryTimeout(urlConnection);
+                    if (retryAfter > 0) {
+                        try {
+                            Thread.sleep(retryAfter);
+                        } catch (InterruptedException e) {
+                            /* Nothing to do */
+                        }
+                    }
+                    /* No break to do the retry */
+                default:
+                    /* Retry procedure */
+                    if (mRetryCount < RETRY_MAX) {
+                        mRetryCount++;
+                        return uploadFile();
+                    } else {
+                        throw new IOException("Unable to upload file URI " + mContent.getUri()
+                                + "!");
+                    }
+            }
+
+            if (isCancelled()) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("File transfer cancelled by user");
+                }
+                return null;
+            }
+            // Notify listener
+            getListener().httpTransferStarted();
+
+            // Send a second POST request
+            return sendMultipartPost(url);
+        } finally {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
+        }
     }
 
     /**
      * Create and Send the second POST
      * 
-     * @param resp response of the first request
-     * @return Content of the response
-     * @throws CoreException
+     * @return byte[] the response containing the download file
      * @throws IOException
      */
-    private byte[] sendMultipartPost(HttpResponse resp) throws IOException {
+    private byte[] sendMultipartPost(URL url) throws IOException {
         DataOutputStream outputStream = null;
-        Uri file = mContent.getUri();
-
-        // Get the connection
-        HttpsURLConnection connection = null;
-        HttpsURLConnection.setDefaultHostnameVerifier(new NullHostNameVerifier());
-        connection = (HttpsURLConnection) mUrl.openConnection();
-
-        connection.setSSLSocketFactory(FileTransSSLFactory.getFileTransferSSLContext()
-                .getSocketFactory());
-
-        connection.setDoInput(true);
-        connection.setDoOutput(true);
-        connection.setReadTimeout(5000);
-        connection.setChunkedStreamingMode(CHUNK_MAX_SIZE);
-
-        // POST construction
-        connection.setRequestMethod("POST");
-        connection.setRequestProperty("Connection", "Keep-Alive");
-        connection.setRequestProperty("User-Agent", SipUtils.userAgentString());
-        connection.setRequestProperty("Content-Type", "multipart/form-data; boundary="
-                + BOUNDARY_TAG);
-
-        // Construct the Body
-        String body = "";
-
-        // Add tid
-        if (mTIdFlag) {
-            body += generateTidMultipart();
-        }
-
-        // Update authentication agent from response
-        if (mAuthenticationFlag) {
-            Header[] authHeaders = resp.getHeaders("www-authenticate");
-            if (authHeaders.length == 0) {
-                throw new IOException("headers malformed in 401 response");
-            }
-            mAuth = new HttpAuthenticationAgent(getHttpServerLogin(), getHttpServerPwd());
-            mAuth.readWwwAuthenticateHeader(authHeaders[0].getValue());
-
-            String authValue;
-            try {
-                authValue = mAuth.generateAuthorizationHeaderValue(connection.getRequestMethod(),
-                        mUrl.getPath(), body);
-                if (authValue != null) {
-                    connection.setRequestProperty("Authorization", authValue);
-                }
-            } catch (InvalidArgumentException e) {
-                throw new IOException("Error when generating authorization header value", e);
-            }
-        }
-
-        // Trace
-        if (HTTP_TRACE_ENABLED) {
-            String trace = ">>> Send HTTP request:";
-            trace += "\n " + connection.getRequestMethod() + " " + mUrl.toString();
-            Map<String, List<String>> properties = connection.getRequestProperties();
-            for (String property : properties.keySet()) {
-                trace += "\n " + property + ": " + connection.getRequestProperty((String) property);
-            }
-            trace += "\n" + body;
-            System.out.println(trace);
-        }
-
-        // Create the DataOutputStream and start writing its body
-        outputStream = new DataOutputStream(connection.getOutputStream());
-        outputStream.writeBytes(body);
-
-        // Add file icon
-        if (mFileIcon != null) {
-            writeThumbnailMultipart(outputStream);
-        }
-        /* From this point, resuming is possible */
-        ((HttpUploadTransferEventListener) getListener()).uploadStarted();
+        HttpURLConnection connection = null;
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("Connection", "Keep-Alive");
+        headers.put("Content-Type", "multipart/form-data; boundary=" + BOUNDARY_TAG);
         try {
-            /* Add File */
-            writeFileMultipart(outputStream, file);
-            if (!isCancelled()) {
-                try {
+            connection = openHttpConnection(url, headers);
+            connection.setDoInput(true);
+            connection.setReadTimeout(HTTP_READ_TIMEOUT);
+            connection.setChunkedStreamingMode(CHUNK_MAX_SIZE);
+            connection.setRequestMethod("POST");
+
+            /* Construct the Body */
+            String body = generateTidMultipart();
+
+            /* Update authentication agent */
+            if (mAuth != null) {
+                String authValue = mAuth.generateAuthorizationHeaderValue("POST", url.getPath(),
+                        body);
+                connection.setRequestProperty("Authorization", authValue);
+            }
+            if (HTTP_TRACE_ENABLED) {
+                StringBuilder trace = new StringBuilder(">>> Send HTTP request:\nPOST ")
+                        .append(url);
+                Map<String, List<String>> properties = connection.getRequestProperties();
+                for (Entry<String, List<String>> property : properties.entrySet()) {
+                    trace.append("\n").append(property.getKey()).append(": ")
+                            .append(property.getValue());
+                }
+                trace.append("\n").append(body);
+                System.out.println(trace);
+            }
+
+            /* Create the DataOutputStream and start writing its body */
+            outputStream = new DataOutputStream(connection.getOutputStream());
+            outputStream.writeBytes(body);
+
+            /* Add file icon */
+            if (mFileIcon != null && mFileIcon.getSize() > 0) {
+                writeThumbnailMultipart(outputStream);
+            }
+            /* From this point, resuming is possible */
+            ((HttpUploadTransferEventListener) getListener()).uploadStarted();
+            try {
+                /* Add File */
+                writeFileMultipart(outputStream, mContent.getUri());
+                if (!isCancelled()) {
                     /*
                      * if the upload is cancelled, we don't send the last boundary to get bad
                      * request
@@ -371,130 +294,110 @@ public class HttpUploadManager extends HttpTransferManager {
 
                     /* Check response status code */
                     int responseCode = connection.getResponseCode();
-                    if (mLogger.isActivated()) {
-                        mLogger.debug("Second POST response " + responseCode + " "
-                                + connection.getResponseMessage());
+                    String message = connection.getResponseMessage();
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Second POST response " + responseCode + " (" + message + ")");
                     }
                     byte[] result = null;
                     boolean success = false;
                     boolean retry = false;
                     if (HTTP_TRACE_ENABLED) {
-                        String trace = "<<< Receive HTTP response:";
-                        trace += "\n " + responseCode + " " + connection.getResponseMessage();
+                        String trace = "<<< Receive HTTP response:" + responseCode + " " + message;
                         System.out.println(trace);
                     }
                     switch (responseCode) {
-                        case HttpStatus.SC_OK:
+                        case HttpURLConnection.HTTP_OK:
                             success = true;
                             InputStream inputStream = connection.getInputStream();
                             result = convertStreamToString(inputStream);
-                            inputStream.close();
                             if (HTTP_TRACE_ENABLED) {
-                                System.out.println("\n " + new String(result));
+                                System.out.println("\n" + new String(result));
                             }
                             break;
-                        case HttpStatus.SC_SERVICE_UNAVAILABLE:
-                            String header = connection.getHeaderField("Retry-After");
-                            long retryAfter = 0;
-                            if (header != null) {
+                        case HttpURLConnection.HTTP_UNAVAILABLE:
+                            long retryAfter = getRetryTimeout(connection);
+                            if (retryAfter > 0) {
                                 try {
-                                    retryAfter = Integer.parseInt(header)
-                                            * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
-                                } catch (NumberFormatException ignore) {
-                                    /* Nothing to do, ignore the exception */
-                                }
-                                if (retryAfter > 0) {
-                                    try {
-                                        Thread.sleep(retryAfter);
-                                        /* Retry procedure */
-                                        if (mRetryCount < RETRY_MAX) {
-                                            mRetryCount++;
-                                            retry = true;
-                                        }
-                                    } catch (InterruptedException ignore) {
-                                        /* Nothing to do, ignore the exception */
+                                    Thread.sleep(retryAfter);
+                                    /* Retry procedure */
+                                    if (mRetryCount < RETRY_MAX) {
+                                        mRetryCount++;
+                                        retry = true;
                                     }
+                                } catch (InterruptedException ignore) {
+                                    /* Nothing to do, ignore the exception */
                                 }
                             }
                             break;
                         default:
                             break; /* no success, no retry */
                     }
-
                     if (success) {
                         return result;
                     } else if (retry) {
-                        return sendMultipartPost(resp);
+                        return sendMultipartPost(url);
                     } else {
-                        if (mLogger.isActivated()) {
-                            mLogger.warn("File Upload aborted, Received " + responseCode
+                        if (sLogger.isActivated()) {
+                            sLogger.warn("File Upload aborted, Received " + responseCode
                                     + " from server");
                         }
                         return null;
                     }
-                } catch (IOException e) {
-                    if (mLogger.isActivated()) {
-                        mLogger.warn("File Upload paused due to " + e.getLocalizedMessage()
-                                + " and is now in state paused.");
-                    }
-                    /*
-                     * When there is a connection problem causing transfer terminated, state should
-                     * be set to paused.
-                     */
-                    if (!isPaused() && !isCancelled()) {
-                        pauseTransferBySystem();
+
+                } else {
+                    /* Check if user has paused transfer */
+                    if (isPaused()) {
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("File transfer paused by user (TID=" + mTId + ")");
+                        }
+                        try {
+                            /*
+                             * Sent data are bufferized. Must wait for response to enable sending to
+                             * server.
+                             */
+                            int responseCode = connection.getResponseCode();
+                            String message = connection.getResponseMessage();
+                            if (sLogger.isActivated()) {
+                                sLogger.debug("Second POST response " + responseCode + " " + "("
+                                        + message + ")");
+                            }
+                        } catch (IOException e) {
+                            if (sLogger.isActivated()) {
+                                sLogger.warn("File Upload aborted due to "
+                                        + e.getLocalizedMessage()
+                                        + " now in state pause, waiting for resume...");
+                            }
+                        }
+                    } else {
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("File transfer cancelled by user");
+                        }
                     }
                     return null;
                 }
-            } else {
-                /* Check if user has paused transfer */
-                if (isPaused()) {
-                    if (mLogger.isActivated()) {
-                        mLogger.debug("File transfer paused by user");
-                    }
-                    try {
-                        /*
-                         * Sent data are bufferized. Must wait for response to enable sending to
-                         * server.
-                         */
-                        int responseCode = connection.getResponseCode();
-                        if (mLogger.isActivated()) {
-                            mLogger.debug("Second POST response " + responseCode + " "
-                                    + connection.getResponseMessage());
-                        }
-                    } catch (IOException e) {
-                        if (mLogger.isActivated()) {
-                            mLogger.warn("File Upload aborted due to " + e.getLocalizedMessage()
-                                    + " now in state pause, waiting for resume...");
-                        }
-                        return null;
-                    }
-                } else {
-                    if (mLogger.isActivated()) {
-                        mLogger.debug("File transfer cancelled by user");
-                    }
+            } catch (IOException e) {
+                if (sLogger.isActivated()) {
+                    sLogger.warn("File Upload paused due to " + e.getLocalizedMessage()
+                            + " and is now in state paused.");
+                }
+                /*
+                 * When there is a connection problem causing transfer terminated, state should be
+                 * set to paused.
+                 */
+                if (!isPaused() && !isCancelled()) {
+                    pauseTransferBySystem();
                 }
                 return null;
+            } catch (SecurityException e) {
+                /*
+                 * Note! This is needed since this can be called during dequeuing.
+                 */
+                if (sLogger.isActivated()) {
+                    sLogger.error("Upload has failed due to that the file is not accessible!", e);
+                }
+                getListener().httpTransferNotAllowedToSend();
+                return null;
             }
-        } catch (IOException e) {
-            if (mLogger.isActivated()) {
-                mLogger.warn("File Upload paused due to " + e.getLocalizedMessage()
-                        + " and is now in state paused.");
-            }
-            /*
-             * When there is a connection problem causing transfer terminated, state should be set
-             * to paused.
-             */
-            if (!isPaused() && !isCancelled()) {
-                pauseTransferBySystem();
-            }
-            return null;
-        } catch (SecurityException e) {
-            if (mLogger.isActivated()) {
-                mLogger.error("Upload has failed due to that the file is not accessible!", e);
-            }
-            getListener().httpTransferNotAllowedToSend();
-            return null;
         } finally {
             /* Close streams */
             if (outputStream != null) {
@@ -515,40 +418,36 @@ public class HttpUploadManager extends HttpTransferManager {
      * Write the thumbnail multipart
      * 
      * @param outputStream DataOutputStream to write to
+     * @throws IOException
      */
     private void writeThumbnailMultipart(DataOutputStream outputStream) throws IOException {
         long size = mFileIcon.getSize();
         Uri fileIcon = mFileIcon.getUri();
-        if (mLogger.isActivated()) {
-            mLogger.debug(new StringBuilder("write file icon ").append(fileIcon).append(" (size=")
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("Write file icon ").append(fileIcon).append(" (size=")
                     .append(size).append(")").toString());
         }
-        if (size > 0) {
-            FileInputStream fileInputStream = null;
-            try {
-                fileInputStream = (FileInputStream) AndroidFactory.getApplicationContext()
-                        .getContentResolver().openInputStream(fileIcon);
-                int bufferSize = (int) size;
-                byte[] fileIconData = new byte[bufferSize];
-                if (size != fileInputStream.read(fileIconData, 0, bufferSize)) {
-                    throw new IOException("Unable to read fileIcon from ".concat(fileIcon
-                            .toString()));
-                }
-                outputStream.writeBytes(new StringBuilder(TWO_HYPENS).append(BOUNDARY_TAG)
-                        .append(LINE_END).toString());
-                outputStream.writeBytes(new StringBuilder(
-                        "Content-Disposition: form-data; name=\"Thumbnail\"; filename=\"thumb_")
-                        .append(mContent.getName()).append("\"").append(LINE_END).toString());
-                outputStream.writeBytes("Content-Type: image/jpeg".concat(LINE_END));
-                outputStream.writeBytes("Content-Length: " + size);
-                outputStream.writeBytes(LINE_END.concat(LINE_END));
-                outputStream.write(fileIconData);
-                outputStream.writeBytes(LINE_END);
-            } finally {
-                if (fileInputStream != null) {
-                    fileInputStream.close();
-                }
+        FileInputStream fileInputStream = null;
+        try {
+            fileInputStream = (FileInputStream) AndroidFactory.getApplicationContext()
+                    .getContentResolver().openInputStream(fileIcon);
+            int bufferSize = (int) size;
+            byte[] fileIconData = new byte[bufferSize];
+            if (size != fileInputStream.read(fileIconData, 0, bufferSize)) {
+                throw new IOException("Unable to read fileIcon from '" + fileIcon + "'!");
             }
+            outputStream.writeBytes(new StringBuilder(TWO_HYPENS).append(BOUNDARY_TAG)
+                    .append(LINE_END).toString());
+            outputStream.writeBytes(new StringBuilder(
+                    "Content-Disposition: form-data; name=\"Thumbnail\"; filename=\"thumb_")
+                    .append(mContent.getName()).append("\"").append(LINE_END).toString());
+            outputStream.writeBytes("Content-Type: image/jpeg".concat(LINE_END));
+            outputStream.writeBytes("Content-Length: ".concat(Long.toString(size)));
+            outputStream.writeBytes(LINE_END.concat(LINE_END));
+            outputStream.write(fileIconData);
+            outputStream.writeBytes(LINE_END);
+        } finally {
+            CloseableUtils.close(fileInputStream);
         }
     }
 
@@ -607,12 +506,11 @@ public class HttpUploadManager extends HttpTransferManager {
                 bytesRead = fileInputStream.read(buffer, 0, bufferSize);
             }
         } finally {
-            if (fileInputStream != null) {
-                fileInputStream.close();
-            }
+            CloseableUtils.close(fileInputStream);
         }
-        if (!isCancelled())
+        if (!isCancelled()) {
             outputStream.writeBytes(LINE_END);
+        }
     }
 
     /**
@@ -639,67 +537,49 @@ public class HttpUploadManager extends HttpTransferManager {
     }
 
     /**
-     * Blank host verifier
-     */
-    private class NullHostNameVerifier implements HostnameVerifier {
-        /**
-         * Verifies that the specified hostname is allowed within the specified SSL session.
-         * 
-         * @param hostname Hostname to check
-         * @param session Current SSL session
-         * @return Always returns true
-         */
-        public boolean verify(String hostname, SSLSession session) {
-            return true;
-        }
-    }
-
-    /**
      * Resume the upload
      * 
      * @return byte[] contains the info to send to terminating side
      * @throws IOException
-     * @throws URISyntaxException
      * @throws SipPayloadException
      */
-    public byte[] resumeUpload() throws IOException, URISyntaxException, SipPayloadException {
-        // Try to get upload info
-        HttpResponse resp = null;
-        resp = sendGetUploadInfo();
+    public byte[] resumeUpload() throws IOException, SipPayloadException {
+        if (sLogger.isActivated()) {
+            sLogger.debug("User resumes transfer (TID=" + mTId + ")");
+        }
+        /* Try to get upload info */
+        byte[] resp = sendGetInfo(UPLOAD_INFO_REQUEST, false);
         resetParamForResume();
 
         if (resp == null) {
-            if (mLogger.isActivated()) {
-                mLogger.debug("Unexpected Server response, will restart upload from begining");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Unexpected Server response, will restart upload from begining");
             }
             return uploadFile();
         }
 
         try {
-            String content = EntityUtils.toString(resp.getEntity());
-            byte[] bytes = content.getBytes(UTF8);
             if (HTTP_TRACE_ENABLED) {
-                String trace = "Get Upload Info response:";
-                trace += "\n " + content;
+                String trace = "Get Upload Info response:\n".concat(resp.toString());
                 System.out.println(trace);
             }
             FileTransferHttpResumeInfo ftResumeInfo = ChatUtils
-                    .parseFileTransferHttpResumeInfo(bytes);
+                    .parseFileTransferHttpResumeInfo(resp);
 
             if (ftResumeInfo == null) {
-                if (mLogger.isActivated()) {
-                    mLogger.error("Cannot parse resume info! restart upload");
+                if (sLogger.isActivated()) {
+                    sLogger.error("Cannot parse resume info! restart upload");
                 }
                 return uploadFile();
             }
-            if ((ftResumeInfo.getEnd() - ftResumeInfo.getStart()) >= (this.mContent.getSize() - 1)) {
-                if (mLogger.isActivated()) {
-                    mLogger.info("Nothing to resume: uploaded complete");
+            if ((ftResumeInfo.getEnd() - ftResumeInfo.getStart()) >= (mContent.getSize() - 1)) {
+                if (sLogger.isActivated()) {
+                    sLogger.info("Nothing to resume: uploaded complete");
                 }
-                return getDownloadInfo(); // The file has already been uploaded completely
+                return sendGetDownloadInfo(); /* The file has already been uploaded completely */
             }
             if (sendPutForResumingUpload(ftResumeInfo) != null) {
-                return getDownloadInfo();
+                return sendGetDownloadInfo();
             }
             return null;
 
@@ -717,64 +597,50 @@ public class HttpUploadManager extends HttpTransferManager {
      * @param resumeInfo info on already uploaded content
      * @return byte[] containing the server's response
      * @throws IOException
-     * @throws MalformedURLException
-     * @throws CoreException
      */
     private byte[] sendPutForResumingUpload(FileTransferHttpResumeInfo resumeInfo)
             throws IOException {
-        if (mLogger.isActivated()) {
-            mLogger.debug("sendPutForResumingUpload. Already sent from " + resumeInfo.getStart()
-                    + " to " + resumeInfo.getEnd());
+        int endByte = resumeInfo.getEnd();
+        long totalSize = mContent.getSize();
+        if (sLogger.isActivated()) {
+            sLogger.debug("sendPutForResumingUpload. Already sent from " + resumeInfo.getStart()
+                    + " to " + endByte);
+        }
+        URL url = new URL(resumeInfo.getUri().toString());
+        Map<String, String> properties = new HashMap<String, String>();
+        properties.put("Connection", "Keep-Alive");
+        properties.put("Content-Type", mContent.getEncoding());
+        properties.put("Content-Length", String.valueOf(totalSize - (endByte + 1)));
+        /*
+         * According to RFC 2616, section 14.16 the Content-Range header must contain an element
+         * bytes-unit.
+         */
+        properties.put("Content-Range", "bytes " + (endByte + 1) + "-" + (totalSize - 1) + "/"
+                + totalSize);
+        if (mAuth != null) {
+            String authValue = mAuth.generateAuthorizationHeaderValue("PUT", url.getPath(), "");
+            properties.put("Authorization", authValue);
         }
         DataOutputStream outputStream = null;
-        Uri file = mContent.getUri();
-
-        // Get the connection
-        HttpsURLConnection connection = null;
-        HttpsURLConnection.setDefaultHostnameVerifier(new NullHostNameVerifier());
-        connection = (HttpsURLConnection) new URL(resumeInfo.getUri().toString()).openConnection();
-
-        connection.setSSLSocketFactory(FileTransSSLFactory.getFileTransferSSLContext()
-                .getSocketFactory());
-
-        connection.setDoInput(true);
-        connection.setDoOutput(true);
-        connection.setReadTimeout(2000);
-
-        // POST construction
-        connection.setRequestMethod("PUT");
-        connection.setRequestProperty("Connection", "Keep-Alive");
-        connection.setRequestProperty("User-Agent", SipUtils.userAgentString());
-        connection.setRequestProperty("Content-Type", this.mContent.getEncoding());
-        connection.setRequestProperty("Content-Length",
-                String.valueOf(mContent.getSize() - (resumeInfo.getEnd() + 1)));
-        // according to RFC 2616, section 14.16 the Content-Range header must contain an element
-        // bytes-unit
-        connection.setRequestProperty("Content-Range", "bytes " + (resumeInfo.getEnd() + 1) + "-"
-                + (mContent.getSize() - 1) + "/" + mContent.getSize());
-
-        // Construct the Body
-        String body = "";
+        HttpURLConnection connection = null;
         try {
-            // Update authentication agent from response
-            if (mAuthenticationFlag && mAuth != null) {
-                String authValue = mAuth.generateAuthorizationHeaderValue(
-                        connection.getRequestMethod(), mUrl.getPath(), body);
-                if (authValue != null) {
-                    connection.setRequestProperty("Authorization", authValue);
-                }
-            }
+            connection = openHttpConnection(url, properties);
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+            connection.setReadTimeout(HTTP_READ_TIMEOUT);
+            connection.setRequestMethod("PUT");
 
-            // Trace
+            String body = "";
+            // Update authentication agent from response
+
             if (HTTP_TRACE_ENABLED) {
-                String trace = ">>> Send HTTP request:";
-                trace += "\n " + connection.getRequestMethod() + " " + mUrl.toString();
-                Map<String, List<String>> properties = connection.getRequestProperties();
-                for (String property : properties.keySet()) {
-                    trace += "\n " + property + ": "
-                            + connection.getRequestProperty((String) property);
+                StringBuilder trace = new StringBuilder(">>> Send HTTP request:\nPUT ").append(url);
+                Map<String, List<String>> headers = connection.getRequestProperties();
+                for (Entry<String, List<String>> property : headers.entrySet()) {
+                    trace.append("\n").append(property.getKey()).append(": ")
+                            .append(property.getValue());
                 }
-                trace += "\n" + body;
+                trace.append("\n").append(body);
                 System.out.println(trace);
             }
 
@@ -783,24 +649,22 @@ public class HttpUploadManager extends HttpTransferManager {
             outputStream.writeBytes(body);
 
             // Add File
-            writeRemainingFileData(outputStream, file, resumeInfo.getEnd());
+            writeRemainingFileData(outputStream, mContent.getUri(), endByte);
             if (!isCancelled()) {
                 // Check response status code
                 int responseCode = connection.getResponseCode();
-                if (mLogger.isActivated()) {
-                    mLogger.debug("PUT response " + responseCode + " "
-                            + connection.getResponseMessage());
+                String message = connection.getResponseMessage();
+                if (sLogger.isActivated()) {
+                    sLogger.debug("PUT response " + responseCode + " (" + message + ")");
                 }
                 byte[] result = null;
                 boolean success = false;
                 boolean retry = false;
                 switch (responseCode) {
-                    case 200:
-                        // 200 OK
+                    case HttpURLConnection.HTTP_OK:
                         success = true;
                         InputStream inputStream = connection.getInputStream();
                         result = convertStreamToString(inputStream);
-                        inputStream.close();
                         if (HTTP_TRACE_ENABLED) {
                             System.out.println("\n" + new String(result));
                         }
@@ -808,12 +672,6 @@ public class HttpUploadManager extends HttpTransferManager {
                     default:
                         break; // no success, no retry
                 }
-
-                // Close streams
-                outputStream.flush();
-                outputStream.close();
-                connection.disconnect();
-
                 if (success) {
                     return result;
                 } else if (retry) {
@@ -823,32 +681,43 @@ public class HttpUploadManager extends HttpTransferManager {
                 }
             } else {
                 if (isPaused()) {
-                    if (mLogger.isActivated()) {
-                        mLogger.warn("File transfer paused by user");
+                    if (sLogger.isActivated()) {
+                        sLogger.warn("File transfer paused by user");
                     }
-                    // Sent data are bufferized. Must wait for response to enable sending to server.
+                    // Sent data are bufferized. Must wait for response to enable sending to
+                    // server.
                     int responseCode = connection.getResponseCode();
-                    if (mLogger.isActivated()) {
-                        mLogger.debug("PUT response " + responseCode + " "
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("PUT response " + responseCode + " "
                                 + connection.getResponseMessage());
                     }
                 } else {
-                    if (mLogger.isActivated()) {
-                        mLogger.warn("File transfer cancelled by user");
+                    if (sLogger.isActivated()) {
+                        sLogger.warn("File transfer cancelled by user");
                     }
                 }
-                // Close streams
-                outputStream.flush();
-                outputStream.close();
-                connection.disconnect();
                 return null;
             }
         } catch (SecurityException e) {
-            mLogger.error("Upload reasume has failed due to that the file is not accessible!", e);
+            /*
+             * Note! This is needed since this can be called during dequeuing.
+             */
+            sLogger.error("Upload reasume has failed due to that the file is not accessible!", e);
             getListener().httpTransferNotAllowedToSend();
             return null;
-        } catch (InvalidArgumentException e) {
-            throw new IOException("Error when authentication agent from response!", e);
+        } finally {
+            /* Close streams */
+            if (outputStream != null) {
+                try {
+                    outputStream.flush();
+                    outputStream.close();
+                } catch (IOException ignore) {
+                    /* Nothing to do, ignore the exception */
+                }
+            }
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
     }
 
@@ -863,30 +732,35 @@ public class HttpUploadManager extends HttpTransferManager {
     private void writeRemainingFileData(DataOutputStream outputStream, Uri file, int offset)
             throws IOException {
         // Write file content
-        FileInputStream fileInputStream = (FileInputStream) AndroidFactory.getApplicationContext()
-                .getContentResolver().openInputStream(file);
-        // Skip bytes already received
-        int bytesRead = (int) fileInputStream.skip(offset + 1);
-        int bytesAvailable = fileInputStream.available();
-        int bufferSize = Math.min(bytesAvailable, CHUNK_MAX_SIZE);
-        byte[] buffer = new byte[bufferSize];
-        int progress = bytesRead;
-        bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-        if (mLogger.isActivated()) {
-            mLogger.debug("Send " + bytesAvailable + " remaining bytes starting from " + progress);
-        }
-        // Send remaining bytes
-        while (bytesRead > 0 && !isCancelled()) {
-            progress += bytesRead;
-            outputStream.write(buffer, 0, bytesRead);
-            bytesAvailable = fileInputStream.available();
-            getListener().httpTransferProgress(progress, mContent.getSize());
-            bufferSize = Math.min(bytesAvailable, CHUNK_MAX_SIZE);
-            buffer = new byte[bufferSize];
+        FileInputStream fileInputStream = null;
+        try {
+            fileInputStream = (FileInputStream) AndroidFactory.getApplicationContext()
+                    .getContentResolver().openInputStream(file);
+            // Skip bytes already received
+            int bytesRead = (int) fileInputStream.skip(offset + 1);
+            int bytesAvailable = fileInputStream.available();
+            int bufferSize = Math.min(bytesAvailable, CHUNK_MAX_SIZE);
+            byte[] buffer = new byte[bufferSize];
+            int progress = bytesRead;
             bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+            if (sLogger.isActivated()) {
+                sLogger.debug("Send " + bytesAvailable + " remaining bytes starting from "
+                        + progress);
+            }
+            // Send remaining bytes
+            while (bytesRead > 0 && !isCancelled()) {
+                progress += bytesRead;
+                outputStream.write(buffer, 0, bytesRead);
+                bytesAvailable = fileInputStream.available();
+                getListener().httpTransferProgress(progress, mContent.getSize());
+                bufferSize = Math.min(bytesAvailable, CHUNK_MAX_SIZE);
+                buffer = new byte[bufferSize];
+                bytesRead = fileInputStream.read(buffer, 0, bufferSize);
 
+            }
+        } finally {
+            CloseableUtils.close(fileInputStream);
         }
-        fileInputStream.close();
     }
 
     /**
@@ -895,130 +769,112 @@ public class HttpUploadManager extends HttpTransferManager {
      * @param suffix String that specifies if it is for upload or download info
      * @param authRequired Boolean that indicates whether or not the request has to be authenticated
      *            with a authorization header
-     * @return HttpResponse The last response of the server (401 are hidden)
+     * @return byte[] contains the response of the server or null (401 UNAUTHORIZED is hidden)
      * @throws IOException
      */
-    private HttpResponse sendGetInfo(String suffix, boolean authRequired) throws IOException,
-            URISyntaxException {
-        // Check server address
-        mUrl = new URL(getHttpServerAddr().toString());
-        String protocol = mUrl.getProtocol(); // TODO : exit if not HTTPS
-        String host = mUrl.getHost();
-        String serviceRoot = mUrl.getPath();
-        HttpGet get;
-        try {
-            // Build POST request
-            get = new HttpGet(new URI(protocol + "://" + host + serviceRoot + "?tid=" + mTId
-                    + suffix));
-            get.addHeader("User-Agent", SipUtils.userAgentString());
-            if (authRequired && mAuth != null) {
-                get.addHeader("Authorization", mAuth.generateAuthorizationHeaderValue(
-                        get.getMethod(), get.getURI().toString(), ""));
-            }
+    private byte[] sendGetInfo(String suffix, boolean authRequired) throws IOException {
+        URL url = new URL(getHttpServerAddr().toString());
+        String protocol = url.getProtocol();
+        String host = url.getHost();
+        String path = url.getPath();
+        String query = "tid=" + mTId + suffix;
+        Uri uri = new Uri.Builder().scheme(protocol).encodedAuthority(host).encodedPath(path)
+                .encodedQuery(query).build();
+        url = new URL(uri.toString());
 
-            // Trace
+        Map<String, String> properties = new HashMap<String, String>();
+        if (authRequired && mAuth != null) {
+            String authValue = mAuth.generateAuthorizationHeaderValue("GET", url.getPath(), "");
+            properties.put("Authorization", authValue);
+        }
+        HttpURLConnection connection = null;
+        try {
+            connection = openHttpConnection(url, properties);
+            connection.setReadTimeout(HTTP_READ_TIMEOUT);
             if (HTTP_TRACE_ENABLED) {
-                String trace = ">>> Send HTTP request:";
-                trace += "\n " + get.getMethod() + " " + get.getRequestLine().getUri();
-                Header headers[] = get.getAllHeaders();
-                for (Header header : headers) {
-                    trace += "\n " + header.getName() + ": " + header.getValue();
+                StringBuilder trace = new StringBuilder(">>> Send HTTP request:\nGET ").append(url);
+                Map<String, List<String>> headers = connection.getHeaderFields();
+                for (Entry<String, List<String>> header : headers.entrySet()) {
+                    trace.append("\n").append(header.getKey()).append(" ")
+                            .append(header.getValue());
                 }
                 System.out.println(trace);
             }
-        } catch (InvalidArgumentException e) {
-            throw new IOException("Error when generating authorization header value!", e);
-        }
-        HttpResponse resp = executeRequest(get);
-
-        // Check response status code
-        int statusCode = resp.getStatusLine().getStatusCode();
-        if (mLogger.isActivated()) {
-            mLogger.debug("Get Info (" + suffix + ") Response " + resp.getStatusLine());
-        }
-        if (HTTP_TRACE_ENABLED) {
-            String trace = "<<< Receive HTTP response:";
-            trace += "\n " + resp.getStatusLine().toString();
-            Header[] headers = resp.getAllHeaders();
-            for (Header header : headers) {
-                trace += "\n" + header.getName() + " " + header.getValue();
+            int statusCode = connection.getResponseCode();
+            String message = connection.getResponseMessage();
+            if (sLogger.isActivated()) {
+                sLogger.debug("Get info (" + suffix + ") Response: " + statusCode + "(" + message
+                        + ")");
             }
-            System.out.println(trace);
-        }
-        switch (statusCode) {
-            case HttpStatus.SC_UNAUTHORIZED:
-                if (authRequired) {
-                    throw new IOException("Unexpected response from server, got " + statusCode
-                            + " for the second time. Authentication rejected.");
+            if (HTTP_TRACE_ENABLED) {
+                StringBuilder trace = new StringBuilder("<<< Receive HTTP response: ")
+                        .append(statusCode).append(" ").append(message);
+                Map<String, List<String>> headers = connection.getHeaderFields();
+                for (Entry<String, List<String>> header : headers.entrySet()) {
+                    trace.append("\n").append(header.getKey()).append(" ")
+                            .append(header.getValue());
                 }
-                Header[] authHeaders = resp.getHeaders("www-authenticate");
-                if (authHeaders.length == 0) {
-                    throw new IOException("headers malformed in 401 response");
-                }
-                if (mAuth == null) {
-                    mAuth = new HttpAuthenticationAgent(getHttpServerLogin(), getHttpServerPwd());
-                    mAuth.readWwwAuthenticateHeader(authHeaders[0].getValue());
-                }
-                mAuth.readWwwAuthenticateHeader(authHeaders[0].getValue());
-                return sendGetInfo(suffix, true);
-            case HttpStatus.SC_OK:
-                return resp;
-            default:
-                return null;
+                System.out.println(trace);
+            }
+            switch (statusCode) {
+                case HttpURLConnection.HTTP_UNAUTHORIZED:
+                    if (authRequired) {
+                        throw new IOException("Unexpected response from server, got " + statusCode
+                                + " for the second time. Authentication rejected.");
+                    }
+                    String authHeader = connection.getHeaderField("www-authenticate");
+                    if (StringUtils.isEmpty(authHeader)) {
+                        throw new IOException("headers malformed in 401 response");
+                    }
+                    if (mAuth == null) {
+                        mAuth = new HttpAuthenticationAgent(getHttpServerLogin(),
+                                getHttpServerPwd());
+                    }
+                    mAuth.readWwwAuthenticateHeader(authHeader);
+                    return sendGetInfo(suffix, true);
+
+                case HttpURLConnection.HTTP_OK:
+                    String resp = readStream(connection.getInputStream());
+                    return resp.getBytes(UTF8);
+
+                default:
+                    return null;
+            }
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
     }
 
-    /**
-     * Send a request to get the download info and bring the response
-     * 
-     * @return byte[] contains the response of the server to the upload
-     * @throws URISyntaxException
-     */
-    private byte[] getDownloadInfo() throws URISyntaxException {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+    private static String readStream(InputStream in) throws IOException {
+        StringBuilder sb = new StringBuilder();
         try {
-            HttpResponse resp = sendGetDownloadInfo();
-
-            InputStream is = resp.getEntity().getContent();
-
-            int nRead;
-            byte[] data = new byte[16384];
-
-            while ((nRead = is.read(data, 0, data.length)) != -1) {
-                buffer.write(data, 0, nRead);
+            BufferedReader r = new BufferedReader(new InputStreamReader(in, UTF8), CHUNK_MAX_SIZE);
+            for (String line = r.readLine(); line != null; line = r.readLine()) {
+                sb.append(line);
             }
-
-            buffer.flush();
-        } catch (IOException e) {
-            if (mLogger.isActivated()) {
-                mLogger.warn("Could not get upload info due to " + e.getLocalizedMessage());
-            }
-            getListener().httpTransferPausedBySystem();
-            return null;
+            return sb.toString();
+        } finally {
+            CloseableUtils.close(in);
         }
-        return buffer.toByteArray();
     }
 
     /**
      * Send a request to get info on the upload for download purpose on terminating
      * 
-     * @return HttpResponse The last response of the server (401 are hidden)
-     * @throws IOException
-     * @throws URISyntaxException
+     * @return byte[] contains the response of the server to the upload
      */
-    private HttpResponse sendGetDownloadInfo() throws IOException, URISyntaxException {
-        return sendGetInfo(DOWNLOAD_INFO_REQUEST, false);
-    }
-
-    /**
-     * Send a get for info on the upload
-     * 
-     * @return HttpResponse The last response of the server (401 are hidden)
-     * @throws IOException
-     * @throws URISyntaxException
-     */
-    private HttpResponse sendGetUploadInfo() throws IOException, URISyntaxException {
-        return sendGetInfo(UPLOAD_INFO_REQUEST, false);
+    private byte[] sendGetDownloadInfo() {
+        try {
+            return sendGetInfo(DOWNLOAD_INFO_REQUEST, false);
+        } catch (IOException e) {
+            if (sLogger.isActivated()) {
+                sLogger.warn("Could not get upload info due to " + e.getLocalizedMessage());
+            }
+            getListener().httpTransferPausedBySystem();
+            return null;
+        }
     }
 
     /**
@@ -1029,4 +885,5 @@ public class HttpUploadManager extends HttpTransferManager {
     public String getTId() {
         return mTId;
     }
+
 }
