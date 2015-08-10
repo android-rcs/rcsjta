@@ -504,8 +504,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                         "There are are no available capabilities : FTMsrp(Self)")
                         .append(ftMsrpSupportedforSelf).append(" FTHttp(Self)")
                         .append(ftHttpSupportedforSelf).append(" FTMsrp(Remote)")
-                        .append(ftMsrpSupportedforSelf).append(" FTHttp(Remote)")
-                        .append(ftMsrpSupportedforRemote).toString());
+                        .append(ftMsrpSupportedforRemote).append(" FTHttp(Remote)")
+                        .append(ftHttpSupportedforRemote).toString());
             }
             return null;
         }
