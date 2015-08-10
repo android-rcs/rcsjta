@@ -37,7 +37,10 @@ java -jar ../build/iaritool.jar -sign -template $EXTENSION.xml -dest $EXTENSION.
 
 # validate auth document
 echo "validate signed iari authorization"
-java -jar ../../tag-auth-validator/build/iarivalidator.jar -d $EXTENSION.xml -pkgname $PKG_NAME -keystore keys/$EXTENSION.jks -storepass $SECRET -pkgkeystore keys/package-signer.jks -pkgalias package-signer -pkgstorepass $SECRET -v
+echo $EXTENSION
+echo $PKG_NAME
+echo $SECRET
+java -jar ../../tag-auth-validator/build/iarivalidator.jar -d $EXTENSION.xml -pkgname $PKG_NAME  -pkgkeystore keys/package-signer.jks -pkgalias package-signer -pkgstorepass $SECRET -v
 
 # extract generated extension from IARI document
 GENERATED_EXTENSION=`sed -nr 's/^.*urn:urn-7:3gpp-application.ims.iari.rcs.(.*)<\/iari>$/\1/p' $EXTENSION.xml`
