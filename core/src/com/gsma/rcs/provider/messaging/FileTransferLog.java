@@ -55,7 +55,6 @@ import java.util.Set;
  * Class to interface the 'filetransfer' table
  */
 public class FileTransferLog implements IFileTransferLog {
-
     private static final String SELECTION_FILE_BY_T_ID = new StringBuilder(
             FileTransferData.KEY_UPLOAD_TID).append("=?").toString();
 
@@ -958,5 +957,21 @@ public class FileTransferLog implements IFileTransferLog {
         mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
                 null);
+    }
+
+    @Override
+    public boolean setFileInfoDequeued(String fileTransferId, long deliveryExpiration) {
+        if (logger.isActivated()) {
+            logger.debug(new StringBuilder("setFileInfoDequeued (Id=").append(fileTransferId)
+                    .append(") (deliveryExpiration=").append(deliveryExpiration).append(")")
+                    .toString());
+        }
+        ContentValues values = new ContentValues();
+        values.put(FileTransferData.KEY_STATE, State.TRANSFERRED.toInt());
+        values.put(FileTransferData.KEY_REASON_CODE, ReasonCode.UNSPECIFIED.toInt());
+        values.put(FileTransferData.KEY_DELIVERY_EXPIRATION, deliveryExpiration);
+        return mLocalContentResolver.update(
+                Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
+                null) > 0;
     }
 }

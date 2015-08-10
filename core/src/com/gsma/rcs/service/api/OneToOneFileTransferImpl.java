@@ -1179,8 +1179,20 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                     .append(mFileTransferId).append(" dequeued successfully.").toString());
         }
         synchronized (mLock) {
-            mFileTransferService.removeGroupFileTransfer(mFileTransferId);
-            setStateAndReasonCode(contact, State.TRANSFERRED, ReasonCode.UNSPECIFIED);
+            mFileTransferService.removeOneToOneFileTransfer(mFileTransferId);
+            long deliveryExpiration = 0;
+            if (!mRcsSettings.isFtHttpCapAlwaysOn()) {
+                long timeout = mRcsSettings.getMsgDeliveryTimeoutPeriod();
+                if (timeout > 0) {
+                    deliveryExpiration = System.currentTimeMillis() + timeout;
+                    mUndeliveredManager.scheduleOneToOneFileTransferDeliveryTimeoutAlarm(contact,
+                            mFileTransferId, deliveryExpiration);
+                }
+            }
+            if (mPersistentStorage.setFileInfoDequeued(deliveryExpiration)) {
+                mBroadcaster.broadcastStateChanged(contact, mFileTransferId, State.TRANSFERRED,
+                        ReasonCode.UNSPECIFIED);
+            }
         }
         mCore.getListener().tryToDequeueFileTransfers(mCore);
     }

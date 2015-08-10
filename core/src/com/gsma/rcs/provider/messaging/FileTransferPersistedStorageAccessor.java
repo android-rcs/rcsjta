@@ -420,4 +420,8 @@ public class FileTransferPersistedStorageAccessor {
         return mMessagingLog.setFileTransferStateAndTimestamps(mFileTransferId, state, reasonCode,
                 timestamp, timestampSent);
     }
+
+    public boolean setFileInfoDequeued(long deliveryExpiration) {
+        return mMessagingLog.setFileInfoDequeued(mFileTransferId, deliveryExpiration);
+    }
 }

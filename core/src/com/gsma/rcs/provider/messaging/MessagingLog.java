@@ -622,4 +622,9 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     public void setFileTransferTimestamps(String fileTransferId, long timestamp, long timestampSent) {
         mFileTransferLog.setFileTransferTimestamps(fileTransferId, timestamp, timestampSent);
     }
+
+    @Override
+    public boolean setFileInfoDequeued(String fileTransferId, long deliveryExpiration) {
+        return setFileInfoDequeued(fileTransferId, deliveryExpiration);
+    }
 }

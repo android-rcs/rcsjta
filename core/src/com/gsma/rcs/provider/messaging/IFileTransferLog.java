@@ -384,4 +384,13 @@ public interface IFileTransferLog {
      * @param timestampSent New timestamp sent in payload for the file transfer
      */
     public void setFileTransferTimestamps(String fileTransferId, long timestamp, long timestampSent);
+
+    /**
+     * Set file info dequeued successfully.
+     * 
+     * @param fileTransferId
+     * @param deliveryExpiration
+     * @return True if an entry was updated, otherwise false
+     */
+    public boolean setFileInfoDequeued(String fileTransferId, long deliveryExpiration);
 }
