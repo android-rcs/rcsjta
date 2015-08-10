@@ -5,8 +5,8 @@
 		<parm name="validity" value="172800"/>
 	</characteristic>
 	<characteristic type="MSG">
-		<parm name="title" value="ORANGE Labs Lannion - Blackbird"/>
-		<parm name="message" value="JOYN ON ORANGE FRENCH test bed (NSN 9.2 + IMAS RCS8 + DM server simulator)"/>
+		<parm name="title" value="RCS"/>
+		<parm name="message" value="Welcome to RCS Blackbird platform"/>
 		<parm name="Accept_btn" value="1"/>
 		<parm name="Reject_btn" value="0"/>
 	</characteristic>
@@ -15,17 +15,17 @@
 		<parm name="Name" value="IMS Settings"/>
 		<parm name="AppRef" value="IMS-Settings"/>
 		<characteristic type="ConRefs">
-			<parm name="ConRef" value="ftrdwispc.vp"/>
+			<parm name="ConRef" value="XXXXX"/>
 		</characteristic>
 		<parm name="PDP_ContextOperPref" value="0"/>
 		<parm name="Timer_T1" value="2000"/>
 		<parm name="Timer_T2" value="16000"/>
 		<parm name="Timer_T4" value="17000"/>
-		<parm name="Private_User_Identity" value="+__s__MSISDN__e__@volteofr.com"/>
+		<parm name="Private_User_Identity" value="+__s__MSISDN__e__@yourdomain.com"/>
 		<characteristic type="Public_user_identity_List">
-			<parm name="Public_user_Identity" value="sip:+__s__MSISDN__e__@volteofr.com"/>
+			<parm name="Public_user_Identity" value="sip:+__s__MSISDN__e__@yourdomain.com"/>
 		</characteristic>
-		<parm name="Home_network_domain_name" value="volteofr.com"/>
+		<parm name="Home_network_domain_name" value="yourdomain.com"/>
 		<characteristic type="Ext">
 			<parm name="NatUrlFmt" value="0"/>
 			<parm name="IntUrlFmt" value="0"/>
@@ -34,7 +34,7 @@
 		</characteristic>
 		<characteristic type="ICSI_List"/>
 		<characteristic type="LBO_P-CSCF_Address">
-			<parm name="Address" value="ofrnsn92.rcs.lannion.com"/>
+			<parm name="Address" value="yourdomain.com"/>
 			<parm name="AddressType" value="FQDN"/>
 		</characteristic>
 		<parm name="Voice_Domain_Preference_E_UTRAN" value="1"/>
@@ -46,9 +46,9 @@
 		<parm name="RegRetryMaxTime" value="1800"/>
 		<characteristic type="APPAUTH">
 			<parm name="AuthType" value="Digest"/>
-			<parm name="Realm" value="volteofr.com"/>
-			<parm name="UserName" value="+__s__MSISDN__e__@volteofr.com"/>
-			<parm name="UserPwd" value="voltercs2014"/>
+			<parm name="Realm" value="yourdomain.com"/>
+			<parm name="UserName" value="+__s__MSISDN__e__@yourdomain.com"/>
+			<parm name="UserPwd" value="XXXXX"/>
 		</characteristic>
 	</characteristic>
 	<characteristic type="APPLICATION">
@@ -70,6 +70,7 @@
 			<parm name="isAuth" value="1"/>
 			<parm name="rcsIPVoiceCallAuth" value="0"/>
 			<parm name="rcsIPVideoCallAuth" value="0"/>
+			<parm name="allowRCSExtensions" value="1"/>
 		</characteristic>
 		<characteristic type="PRESENCE">
 			<parm name="AvailabilityAuth" value="0"/>
@@ -124,14 +125,14 @@
 			<parm name="ftStAndFwEnabled" value="0"/>
 			<parm name="ftCapAlwaysON" value="0"/>
 			<parm name="ftAutAccept" value="0"/>
-			<parm name="ftHTTPCSURI" value="https://ftohttp.g2r0.nsn92.rcs.mnc001.mcc208.pub.3gppnetwork.org/rcse-hcs/upload"/>
-			<parm name="ftHTTPCSUser" value="+__s__MSISDN__e__@volteofr.com"/>
-			<parm name="ftHTTPCSPwd" value="voltercs2014"/>
+			<parm name="ftHTTPCSURI" value="https://yourdomain.mncXXX.mccXXX.pub.3gppnetwork.org/rcse-hcs/upload"/>
+			<parm name="ftHTTPCSUser" value="+__s__MSISDN__e__@yourdomain.com"/>
+			<parm name="ftHTTPCSPwd" value="XXXXX"/>
 			<parm name="ftDefaultMech" value="HTTP"/>
 			<parm name="pres-srv-cap" value="0"/>
 			<parm name="deferred-msg-func-uri" value="sip:foo@bar"/>
 			<parm name="max_adhoc_group_size" value="50"/>
-			<parm name="conf-fcty-uri" value="sip:Conference-Factory@volteofr.com"/>
+			<parm name="conf-fcty-uri" value="sip:Conference-Factory@yourdomain.com"/>
 			<parm name="exploder-uri" value="sip:foo@bar"/>
 			<parm name="conv-hist-func-uri" value="sip:foo@bar"/>
 		</characteristic>
@@ -161,6 +162,11 @@
 				<parm name="wifiSignalling" value="SIPoUDP"/>
 				<parm name="wifiMedia" value="MSRP"/>
 				<parm name="wifiRTMedia" value="RTP"/>
+			</characteristic>
+			<characteristic type="Ext">
+				<characteristic type="APIExt">
+					<parm name="extensionsPolicy" value="0" />
+				</characteristic>
 			</characteristic>
 		</characteristic>
 		<characteristic type="SERVICEPROVIDEREXT">

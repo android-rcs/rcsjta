@@ -5,8 +5,8 @@
     <parm name="validity" value="172800"/>
   </characteristic>
   <characteristic type="MSG">
-    <parm name="title" value="ORANGE Labs Lannion - Albatros"/>
-    <parm name="message" value="JOYN ON ORANGE FRENCH test bed (NSN9.2 + IMAS G2R0 + DM server simulator)"/>
+    <parm name="title" value="RCS"/>
+    <parm name="message" value="Welcome to RCS Blackbird platform"/>
     <parm name="Accept_btn" value="1"/>
     <parm name="Reject_btn" value="0"/>
   </characteristic>
@@ -15,17 +15,17 @@
     <parm name="Name" value="IMS Settings"/>
     <parm name="AppRef" value="IMS-Settings"/>
     <characteristic type="ConRefs">
-      <parm name="ConRef" value="ftrdwispc.vp"/>
+      <parm name="ConRef" value="XXXXX"/>
     </characteristic>
     <parm name="PDP_ContextOperPref" value="0"/>
     <parm name="Timer_T1" value="2000"/>
     <parm name="Timer_T2" value="16000"/>
     <parm name="Timer_T4" value="17000"/>
-    <parm name="Private_User_Identity" value="+__s__MSISDN__e__@volteofr.com"/>
+    <parm name="Private_User_Identity" value="+__s__MSISDN__e__@yourdomain.com"/>
     <characteristic type="Public_user_identity_List">
-      <parm name="Public_user_Identity" value="sip:+__s__MSISDN__e__@volteofr.com"/>
+      <parm name="Public_user_Identity" value="sip:+__s__MSISDN__e__@yourdomain.com"/>
     </characteristic>
-    <parm name="Home_network_domain_name" value="volteofr.com"/>
+    <parm name="Home_network_domain_name" value="yourdomain.com"/>
     <characteristic type="Ext">
       <parm name="NatUrlFmt" value="0"/>
       <parm name="IntUrlFmt" value="0"/>
@@ -38,7 +38,7 @@
       <parm name="ICSI_Resource_Allocation_Mode" value="1"/>
     </characteristic>
     <characteristic type="LBO_P-CSCF_Address">
-      <parm name="Address" value="ofrnsn92.rcs.lannion.com"/>
+      <parm name="Address" value="yourdomain.com"/>
       <parm name="AddressType" value="FQDN"/>
     </characteristic>
 	<parm name="Voice_Domain_Preference_E_UTRAN" value="1"/>
@@ -50,13 +50,13 @@
     <parm name="RegRetryMaxTime" value="1800"/>
     <characteristic type="PhoneContext_List">
       <parm name="PhoneContext" value=""/>
-      <parm name="Public_user_identity" value="sip:+__s__MSISDN__e__@volteofr.com"/>
+      <parm name="Public_user_identity" value="sip:+__s__MSISDN__e__@yourdomain.com"/>
     </characteristic>
     <characteristic type="APPAUTH">
       <parm name="AuthType" value="Digest"/>
-      <parm name="Realm" value="volteofr.com"/>
-      <parm name="UserName" value="+__s__MSISDN__e__@volteofr.com"/>
-      <parm name="UserPwd" value="voltercs2014"/>
+      <parm name="Realm" value="yourdomain.com"/>
+      <parm name="UserName" value="+__s__MSISDN__e__@yourdomain.com"/>
+      <parm name="UserPwd" value="XXXXX"/>
     </characteristic>
   </characteristic>
   <characteristic type="APPLICATION">
@@ -86,8 +86,8 @@
       <parm name="pres-srv-cap" value="0"/>
       <!-- <parm name="deferred-msg-func-uri" value=""/> -->
       <parm name="max_adhoc_group_size" value="15"/>
-      <parm name="conf-fcty-uri" value="sip:Conference-Factory@volteofr.com"/>
-      <parm name="exploder-uri" value="sip:rcse-standfw@volteofr.com"/>
+      <parm name="conf-fcty-uri" value="sip:Conference-Factory@yourdomain.com"/>
+      <parm name="exploder-uri" value="sip:rcse-standfw@yourdomain.com"/>
     </characteristic>
     <characteristic type="CAPDISCOVERY">
       <parm name="pollingPeriod" value="0"/>
