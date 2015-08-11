@@ -17,7 +17,7 @@ The provisioning parameters contains the IMS user profile (eg. IMPU, IMPI, IMS d
 
 To change the default provisioning mode, start the local provisioning application and from the second folder selects the auto config mode:
 
-![https://rcsjta.googlecode.com/git/docs/website/provisioning.png](https://rcsjta.googlecode.com/git/docs/website/provisioning.png)
+<img src='https://github.com/android-rcs/rcsjta/blob/master/docs/website/provisioning.pn'>
 
 Then save the configuration and restart the stack.
 
@@ -38,8 +38,13 @@ For any update of a setting, don't forget to save the configuration and then to 
 
 For the IMS settings of the folder "Profile": to facilitate the edition  it's possible to load predefined profile from a local XML file stored in the directory `/sdcard` of the device. So you can create as many XML file per IMS platform and then load the right one for your test without manual and tedious edition:
 
-![https://rcsjta.googlecode.com/git/docs/website/provisioning2.png](https://rcsjta.googlecode.com/git/docs/website/provisioning2.png)
+<img src='https://github.com/android-rcs/rcsjta/blob/master/docs/website/provisioning2.png'>
 
 See template for [Albatros configuration](https://github.com/android-rcs/rcsjta/blob/master/data/provisioning_templates/albatros/template-ota_config-Albatros.xml).
 
 See template for [Blackbird configuration](https://github.com/android-rcs/rcsjta/blob/master/data/provisioning_templates/blackbird/template_config-Blackbird.xml).
+
+If you already have a valid SIM card, it is possible to generate automatically a provisioning template using the tool "RCSJTA provisioning template". This tool gets the configuration via HTTPs from the DM server and saves the file "provisioning_template.xml" under the SD card of your device. The new created template can be used later to provision the stack manually with any other MSISDN (provided it is a valid one for the current platform).
+
+<img src='https://github.com/android-rcs/rcsjta/blob/master/docs/website/provisioning_template.png'>
+
