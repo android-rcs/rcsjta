@@ -16,11 +16,11 @@ Source code is available from `./tests/cts` directory of your current branch:<br
 
 See the following screenshot of a test which has failed because the API signature is not compliant (missing method and parameter):<br>
 <br>
-<img src='https://rcsjta.googlecode.com/git/docs/website/test_harness_ko.png' />
+<img src='https://github.com/android-rcs/rcsjta/blob/master/docs/website/test_harness_ko.png'>
 
 See another test which is successful:<br>
 <br>
-<img src='https://rcsjta.googlecode.com/git/docs/website/test_harness_ok.png' />
+<img src='https://github.com/android-rcs/rcsjta/blob/master/docs/website/test_harness_ok.png'>
 
 <h1>Implementation</h1>
 
