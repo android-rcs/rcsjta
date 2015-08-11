@@ -42,6 +42,4 @@ For the IMS settings of the folder "Profile": to facilitate the edition  it's po
 
 See template for [Albatros configuration](https://github.com/android-rcs/rcsjta/blob/master/data/provisioning_templates/albatros/template-ota_config-Albatros.xml).
 
-See template for [Blackbird configuration basic services](https://github.com/android-rcs/rcsjta/blob/master/data/provisioning_templates/blackbird/template_config_nsn9_2_rcs8.xml).
-
-See template for [Blackbird configuration advanced services](https://github.com/android-rcs/rcsjta/blob/master/data/provisioning_templates/blackbird/template_config_nsn9_2_rcs14.xml).
+See template for [Blackbird configuration](https://github.com/android-rcs/rcsjta/blob/master/data/provisioning_templates/blackbird/template_config-Blackbird.xml).
