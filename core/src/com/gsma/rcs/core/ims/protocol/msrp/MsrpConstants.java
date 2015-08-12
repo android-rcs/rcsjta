@@ -54,9 +54,7 @@ public interface MsrpConstants {
 
     public static final String METHOD_SEND = "SEND";
     public static final String METHOD_REPORT = "REPORT";
-
-    public static final int RESPONSE_OK = 200;
+    public static final String STATUS_200_OK = "200 OK";
 
     public static final int CHUNK_MAX_SIZE = 10 * 1024;
-    public static final String COMMENT_OK = "OK";
 }

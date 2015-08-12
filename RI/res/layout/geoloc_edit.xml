@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dip"
             android:layout_marginRight="5dip"
-            android:inputType="numberDecimal"
+            android:inputType="numberDecimal|numberSigned"
             android:lines="1"
             android:maxLength="8"
             android:text="@string/label_gsh_default_latitude" />
@@ -65,7 +65,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dip"
             android:layout_marginRight="5dip"
-            android:inputType="numberDecimal"
+            android:inputType="numberDecimal|numberSigned"
             android:lines="1"
             android:maxLength="8"
             android:text="@string/label_gsh_default_longitude" />
