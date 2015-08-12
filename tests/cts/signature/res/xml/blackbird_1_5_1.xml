@@ -1383,17 +1383,6 @@
  visibility="public"
 >
 </field>
-<field name="TIME_SPENT"
- type="java.lang.String"
- transient="false"
- volatile="false"
- value="&quot;dur&quot;"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
 </class>
 <class name="RcsServiceException"
  extends="java.lang.Exception"

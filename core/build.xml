@@ -97,6 +97,8 @@
 		<copy file="${terminal.api}" todir="${terminal.root}/../samples/tts/libs"/>
 		<copy file="${terminal.api}" todir="${terminal.root}/../samples/extension/libs"/>
 		<copy file="${terminal.api}" todir="${terminal.root}/../samples/session/libs"/>
+		<copy file="${terminal.api}" todir="${terminal.root}/../tests/cts/signature/libs"/>
+		<copy file="${terminal.api}" todir="${terminal.root}/../tests/cts/provider/libs"/>
 	</target>
 
 	<!-- TAPI javadoc -->
