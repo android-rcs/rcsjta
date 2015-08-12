@@ -76,8 +76,6 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 
     private final RcsSettings mRcsSettings;
 
-    private final ContactManager mContactManager;
-
     private final Map<String, IIPCall> mIPCallCache = new HashMap<String, IIPCall>();
 
     private static final Logger sLogger = Logger.getLogger(IPCallServiceImpl.class.getSimpleName());
@@ -103,7 +101,6 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
         mIPCallService = ipCallService;
         mIPCallLog = ipCallLog;
         mRcsSettings = rcsSettings;
-        mContactManager = contactManager;
     }
 
     /**

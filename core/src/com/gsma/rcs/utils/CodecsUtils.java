@@ -18,14 +18,6 @@
 
 package com.gsma.rcs.utils;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import android.hardware.Camera;
-import android.hardware.Camera.Parameters;
-import android.os.Build;
-
 import com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264.JavaPacketizer;
 import com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264.profiles.H264Profile1_2;
@@ -33,6 +25,13 @@ import com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264.profiles.H264Profile1
 import com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264.profiles.H264Profile1b;
 import com.gsma.rcs.core.ims.protocol.rtp.format.video.H264VideoFormat;
 import com.gsma.services.rcs.sharing.video.VideoCodec;
+
+import android.hardware.Camera;
+import android.hardware.Camera.Parameters;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Codecs utility functions
@@ -66,21 +65,8 @@ public class CodecsUtils {
         // Get supported sizes of camera
         boolean cif_available = true;
         boolean qvga_available = true;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-            for (int i = 0; i < Camera.getNumberOfCameras(); i++) {
-                Camera camera = Camera.open(i);
-                Parameters param = camera.getParameters();
-                List<Camera.Size> sizes = param.getSupportedPreviewSizes();
-                if (!sizeContains(sizes, H264Config.CIF_WIDTH, H264Config.CIF_HEIGHT)) {
-                    cif_available = false;
-                }
-                if (!sizeContains(sizes, H264Config.QVGA_WIDTH, H264Config.QVGA_HEIGHT)) {
-                    qvga_available = false;
-                }
-                camera.release();
-            }
-        } else {
-            Camera camera = Camera.open();
+        for (int i = 0; i < Camera.getNumberOfCameras(); i++) {
+            Camera camera = Camera.open(i);
             Parameters param = camera.getParameters();
             List<Camera.Size> sizes = param.getSupportedPreviewSizes();
             if (!sizeContains(sizes, H264Config.CIF_WIDTH, H264Config.CIF_HEIGHT)) {
@@ -91,7 +77,6 @@ public class CodecsUtils {
             }
             camera.release();
         }
-
         return getSupportedCodecList(cif_available, qvga_available);
     }
 

@@ -22,24 +22,23 @@
 
 package com.gsma.rcs.core.ims.protocol.rtp.stream;
 
-import java.io.IOException;
-import java.util.Comparator;
-import java.util.PriorityQueue;
-import java.util.concurrent.TimeoutException;
-
-import com.gsma.rcs.core.ims.protocol.rtp.RtpException;
 import com.gsma.rcs.core.ims.protocol.rtp.RtpUtils;
 import com.gsma.rcs.core.ims.protocol.rtp.core.RtcpPacketReceiver;
 import com.gsma.rcs.core.ims.protocol.rtp.core.RtcpPacketTransmitter;
 import com.gsma.rcs.core.ims.protocol.rtp.core.RtcpSession;
+import com.gsma.rcs.core.ims.protocol.rtp.core.RtpExtensionHeader.ExtensionElement;
 import com.gsma.rcs.core.ims.protocol.rtp.core.RtpPacket;
 import com.gsma.rcs.core.ims.protocol.rtp.core.RtpPacketReceiver;
-import com.gsma.rcs.core.ims.protocol.rtp.core.RtpExtensionHeader.ExtensionElement;
 import com.gsma.rcs.core.ims.protocol.rtp.format.Format;
 import com.gsma.rcs.core.ims.protocol.rtp.format.video.VideoOrientation;
 import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.rtp.util.Buffer;
 import com.gsma.rcs.utils.logger.Logger;
+
+import java.io.IOException;
+import java.util.Comparator;
+import java.util.PriorityQueue;
+import java.util.concurrent.TimeoutException;
 
 /**
  * RTP input stream

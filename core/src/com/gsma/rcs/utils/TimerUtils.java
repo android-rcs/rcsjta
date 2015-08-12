@@ -26,21 +26,10 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.os.Build;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 /**
  * Utilities for timer management
  */
 public class TimerUtils {
-
-    private static final int KITKAT_VERSION_CODE = 19;
-
-    private static final String SET_EXACT_METHOD_NAME = "setExact";
-
-    private static final Class<?>[] SET_EXACT_METHOD_PARAM = new Class[] {
-            int.class, long.class, PendingIntent.class
-    };
 
     /**
      * Schedule an alarm with exact timer
@@ -48,6 +37,7 @@ public class TimerUtils {
      * @param alarmManager
      * @param triggerAtMillis time in milliseconds that the alarm should go off. @param operation
      *            Action to perform when the alarm goes off
+     * @param operation Action to perform when the alarm goes off
      */
     public static void setExactTimer(AlarmManager alarmManager, long triggerAtMillis,
             PendingIntent operation) {
@@ -58,24 +48,10 @@ public class TimerUtils {
          * Applications whose targetSdkVersion is earlier than API 19 will continue to see the
          * previous behavior in which all alarms are delivered exactly when requested.
          */
-        if (Build.VERSION.SDK_INT < KITKAT_VERSION_CODE) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
             alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, operation);
         } else {
-            try {
-                Method setExactMethod = alarmManager.getClass().getDeclaredMethod(
-                        SET_EXACT_METHOD_NAME, SET_EXACT_METHOD_PARAM);
-                setExactMethod.invoke(alarmManager, AlarmManager.RTC_WAKEUP, triggerAtMillis,
-                        operation);
-            } catch (NoSuchMethodException e) {
-                throw new UnsupportedOperationException("Failed to get setExact method!", e);
-
-            } catch (IllegalAccessException e) {
-                throw new UnsupportedOperationException(
-                        "No access to the definition of setExact method!", e);
-
-            } catch (InvocationTargetException e) {
-                throw new UnsupportedOperationException("Can't invoke setExact method!", e);
-            }
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, operation);
         }
     }
 }

@@ -50,8 +50,6 @@ import com.gsma.services.rcs.filetransfer.IFileTransfer;
 import android.net.Uri;
 import android.os.RemoteException;
 
-import javax2.sip.message.Response;
-
 /**
  * File transfer implementation
  */

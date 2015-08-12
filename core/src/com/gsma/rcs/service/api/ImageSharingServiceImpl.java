@@ -79,8 +79,6 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 
     private final RcsSettings mRcsSettings;
 
-    private final ContactManager mContactManager;
-
     private final LocalContentResolver mLocalContentResolver;
 
     private final ExecutorService mImOperationExecutor;
@@ -118,7 +116,6 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
         mRichcallService = richcallService;
         mRichCallLog = richCallLog;
         mRcsSettings = rcsSettings;
-        mContactManager = contactManager;
         mLocalContentResolver = localContentResolver;
         mImOperationExecutor = imOperationExecutor;
         mImsLock = imsLock;

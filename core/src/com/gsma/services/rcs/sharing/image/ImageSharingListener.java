@@ -26,7 +26,6 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.image.ImageSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.image.ImageSharing.State;
 
-import java.util.List;
 import java.util.Set;
 
 /**

@@ -77,8 +77,6 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 
     private final RcsSettings mRcsSettings;
 
-    private final ContactManager mContactManager;
-
     private final Map<String, IMultimediaMessagingSession> mMultimediaMessagingCache = new HashMap<String, IMultimediaMessagingSession>();
 
     private final Map<String, IMultimediaStreamingSession> mMultimediaStreamingCache = new HashMap<String, IMultimediaStreamingSession>();
@@ -105,7 +103,6 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
         }
         mSipService = sipService;
         mRcsSettings = rcsSettings;
-        mContactManager = contactManager;
     }
 
     /**

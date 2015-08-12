@@ -34,13 +34,12 @@ import com.gsma.rcs.provider.settings.RcsSettingsData.ImMsgTech;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ImSessionStartMode;
 import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.ContactUtil;
-import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.DeviceUtils;
+import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMethod;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
-import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.net.Uri;
@@ -56,7 +55,6 @@ import java.io.IOException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import javax2.sip.ListeningPoint;
 
 /**
@@ -140,12 +138,6 @@ public class ProvisioningParser {
      * @param release The GSMA release (Albatros, Blackbird, Crane...) before parsing
      * @param messagingMode the messaging mode
      * @param first True if it is a first provisioning
-     * @return Boolean result
-     *         <p>
-     *         <b>Be Careful:</b><br />
-     *         GSMA release is set to blackbird if SERVICES node is present, otherwise release is
-     *         unchanged
-     *         </p>
      * @throws SAXException
      */
     public void parse(GsmaRelease release, MessagingMode messagingMode, boolean first)
@@ -1472,17 +1464,8 @@ public class ProvisioningParser {
              * RFC4122, section 4.2.
              */
             if (uuidValue == null) {
-                try {
-                    mRcsSettings.writeParameter(RcsSettingsData.UUID, DeviceUtils.generateUUID()
-                            .toString());
-                } catch (RcsServiceException e) {
-                    if (sLogger.isActivated()) {
-                        sLogger.error(new StringBuilder(
-                                "Exception caught in ProvisioningParser.parseOther() while fetching uuid value;"
-                                        + " exception-msg=").append(e.getMessage()).append("!")
-                                .toString());
-                    }
-                }
+                mRcsSettings.writeParameter(RcsSettingsData.UUID, DeviceUtils.generateUUID()
+                        .toString());
             }
         }
     }

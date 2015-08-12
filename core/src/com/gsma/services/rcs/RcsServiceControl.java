@@ -34,9 +34,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
 /**
  * A utility class to control the activation of the RCS service.
  */
@@ -96,45 +93,13 @@ public class RcsServiceControl {
      */
     private static class IntentUtils {
 
-        private static final int HONEYCOMB_MR1_VERSION_CODE = 12;
-
-        private static final int JELLY_BEAN_VERSION_CODE = 16;
-
-        private static final String ADD_FLAGS_METHOD_NAME = "addFlags";
-
-        private static final Class<?>[] ADD_FLAGS_PARAM = new Class[] {
-            int.class
-        };
-
-        private static final String FLAG_EXCLUDE_STOPPED_PACKAGES = "FLAG_EXCLUDE_STOPPED_PACKAGES";
-
-        private static final String FLAG_RECEIVER_FOREGROUND = "FLAG_RECEIVER_FOREGROUND";
-
         /**
          * Using reflection to add FLAG_EXCLUDE_STOPPED_PACKAGES support backward compatibility.
          *
          * @param intent Intent to set flags
          */
         private static void tryToSetExcludeStoppedPackagesFlag(Intent intent) {
-
-            if (Build.VERSION.SDK_INT < HONEYCOMB_MR1_VERSION_CODE) {
-                /*
-                 * Since FLAG_EXCLUDE_STOPPED_PACKAGES is introduced only from API level
-                 * HONEYCOMB_MR1_VERSION_CODE we need to do nothing if we are running on a version
-                 * prior that so we just return then.
-                 */
-                return;
-            }
-
-            try {
-                Method addflagsMethod = intent.getClass().getDeclaredMethod(ADD_FLAGS_METHOD_NAME,
-                        ADD_FLAGS_PARAM);
-                Field flagExcludeStoppedPackages = intent.getClass().getDeclaredField(
-                        FLAG_EXCLUDE_STOPPED_PACKAGES);
-                addflagsMethod.invoke(intent, flagExcludeStoppedPackages.getInt(Intent.class));
-            } catch (Exception e) {
-                Log.e(LOG_TAG, "Could not add FLAG_EXCLUDE_STOPPED_PACKAGES to intent!");
-            }
+            intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
         }
 
         /**
@@ -143,7 +108,7 @@ public class RcsServiceControl {
          * @param intent Intent to set flags
          */
         private static void tryToSetReceiverForegroundFlag(Intent intent) {
-            if (Build.VERSION.SDK_INT < JELLY_BEAN_VERSION_CODE) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
                 /*
                  * Since FLAG_RECEIVER_FOREGROUND is introduced only from API level
                  * JELLY_BEAN_VERSION_CODE we need to do nothing if we are running on a version
@@ -151,16 +116,7 @@ public class RcsServiceControl {
                  */
                 return;
             }
-
-            try {
-                Method addflagsMethod = intent.getClass().getDeclaredMethod(ADD_FLAGS_METHOD_NAME,
-                        ADD_FLAGS_PARAM);
-                Field flagReceiverForeground = intent.getClass().getDeclaredField(
-                        FLAG_RECEIVER_FOREGROUND);
-                addflagsMethod.invoke(intent, flagReceiverForeground.getInt(Intent.class));
-            } catch (Exception e) {
-                Log.e(LOG_TAG, "Could not add FLAG_RECEIVER_FOREGROUND to intent!");
-            }
+            intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         }
     }
 

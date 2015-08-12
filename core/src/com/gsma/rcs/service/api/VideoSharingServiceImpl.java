@@ -77,10 +77,6 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 
     private final RcsSettings mRcsSettings;
 
-    private final ContactManager mContactManager;
-
-    private final Core mCore;
-
     private final LocalContentResolver mLocalContentResolver;
 
     private final ExecutorService mImOperationExecutor;
@@ -119,8 +115,6 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
         mRichcallService = richcallService;
         mRichCallLog = richCallLog;
         mRcsSettings = rcsSettings;
-        mContactManager = contactManager;
-        mCore = core;
         mLocalContentResolver = localContentResolver;
         mImOperationExecutor = imOperationExecutor;
         mImsLock = imsLock;

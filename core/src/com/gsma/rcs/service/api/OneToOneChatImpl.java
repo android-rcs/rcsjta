@@ -74,8 +74,6 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
 
     private final MessagingLog mMessagingLog;
 
-    private final HistoryLog mHistoryLog;
-
     private final ChatServiceImpl mChatService;
 
     private final RcsSettings mRcsSettings;
@@ -118,7 +116,6 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         mBroadcaster = broadcaster;
         mImService = imService;
         mMessagingLog = messagingLog;
-        mHistoryLog = historyLog;
         mChatService = chatService;
         mRcsSettings = rcsSettings;
         mContactManager = contactManager;
@@ -132,8 +129,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         newSession.addListener(this);
         mChatService.addOneToOneChat(mContact, this);
         newSession.startSession();
-        handleMessageSent(msg.getMessageId(),
-                ChatUtils.networkMimeTypeToApiMimeType(msg));
+        handleMessageSent(msg.getMessageId(), ChatUtils.networkMimeTypeToApiMimeType(msg));
     }
 
     private void sendChatMessageWithinSession(final OneToOneChatSession session, ChatMessage msg) {

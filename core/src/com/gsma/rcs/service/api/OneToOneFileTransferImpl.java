@@ -57,9 +57,6 @@ import com.gsma.services.rcs.filetransfer.IFileTransfer;
 
 import android.net.Uri;
 import android.os.RemoteException;
-import android.util.MonthDisplayHelper;
-
-import javax2.sip.message.Response;
 
 /**
  * File transfer implementation
@@ -992,8 +989,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             ReasonCode rcsReasonCode = mPersistentStorage.getReasonCode();
             /*
              * According to Blackbird PDD v3.0, "When a File Transfer is interrupted by sender
-             * interaction (or fails), then ‘resend button’ shall be offered to allow the user to
-             * re-send the file without selecting a new receiver or selecting the file again."
+             * interaction (or fails), then ‘resend button’ shall be offered to allow the user
+             * to re-send the file without selecting a new receiver or selecting the file again."
              */
             switch (rcsState) {
                 case FAILED:

@@ -46,8 +46,6 @@ import com.gsma.services.rcs.sharing.video.VideoSharing.State;
 
 import android.os.RemoteException;
 
-import javax2.sip.message.Response;
-
 /**
  * Video sharing session
  * 

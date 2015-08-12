@@ -36,13 +36,8 @@ import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.history.HistoryLog;
 import com.gsma.rcs.provider.messaging.ChatMessagePersistedStorageAccessor;
-import com.gsma.rcs.provider.messaging.GroupChatDeleteTask;
-import com.gsma.rcs.provider.messaging.GroupChatMessageDeleteTask;
 import com.gsma.rcs.provider.messaging.GroupChatPersistedStorageAccessor;
-import com.gsma.rcs.provider.messaging.GroupFileTransferDeleteTask;
 import com.gsma.rcs.provider.messaging.MessagingLog;
-import com.gsma.rcs.provider.messaging.OneToOneChatMessageDeleteTask;
-import com.gsma.rcs.provider.messaging.OneToOneFileTransferDeleteTask;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.broadcaster.GroupChatEventBroadcaster;
 import com.gsma.rcs.service.broadcaster.OneToOneChatEventBroadcaster;
@@ -103,8 +98,6 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     private final Core mCore;
 
-    private final LocalContentResolver mLocalContentResolver;
-
     private final OneToOneUndeliveredImManager mOneToOneUndeliveredImManager;
 
     private final Map<ContactId, OneToOneChatImpl> mOneToOneChatCache = new HashMap<ContactId, OneToOneChatImpl>();
@@ -149,7 +142,6 @@ public class ChatServiceImpl extends IChatService.Stub {
         mRcsSettings = rcsSettings;
         mContactManager = contactManager;
         mCore = core;
-        mLocalContentResolver = localContentResolver;
         mOneToOneUndeliveredImManager = oneToOneUndeliveredImManager;
     }
 
@@ -429,8 +421,8 @@ public class ChatServiceImpl extends IChatService.Stub {
         OneToOneChatImpl oneToOneChat = mOneToOneChatCache.get(contact);
         if (oneToOneChat == null) {
             oneToOneChat = new OneToOneChatImpl(contact, mOneToOneChatEventBroadcaster, mImService,
-                    mMessagingLog, mHistoryLog, mRcsSettings, this, mContactManager,
-                    mCore, mOneToOneUndeliveredImManager);
+                    mMessagingLog, mHistoryLog, mRcsSettings, this, mContactManager, mCore,
+                    mOneToOneUndeliveredImManager);
             mOneToOneChatCache.put(contact, oneToOneChat);
         }
         return oneToOneChat;
@@ -478,7 +470,8 @@ public class ChatServiceImpl extends IChatService.Stub {
         GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
                 chatId, mMessagingLog, mRcsSettings);
         GroupChatImpl groupChat = new GroupChatImpl(chatId, mGroupChatEventBroadcaster, mImService,
-                storageAccessor, mRcsSettings, mContactManager, this, mMessagingLog, mHistoryLog, mCore);
+                storageAccessor, mRcsSettings, mContactManager, this, mMessagingLog, mHistoryLog,
+                mCore);
         session.addListener(groupChat);
         addGroupChat(groupChat);
     }
@@ -579,7 +572,8 @@ public class ChatServiceImpl extends IChatService.Stub {
             GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
                     chatId, mMessagingLog, mRcsSettings);
             groupChat = new GroupChatImpl(chatId, mGroupChatEventBroadcaster, mImService,
-                    storageAccessor, mRcsSettings, mContactManager, this, mMessagingLog, mHistoryLog, mCore);
+                    storageAccessor, mRcsSettings, mContactManager, this, mMessagingLog,
+                    mHistoryLog, mCore);
             mGroupChatCache.put(chatId, groupChat);
         }
         return groupChat;
@@ -973,8 +967,8 @@ public class ChatServiceImpl extends IChatService.Stub {
     public void handleOneToOneChatSessionInitiation(OneToOneChatSession session) {
         ContactId contact = session.getRemoteContact();
         OneToOneChatImpl oneToOneChat = new OneToOneChatImpl(contact,
-                mOneToOneChatEventBroadcaster, mImService, mMessagingLog, mHistoryLog, mRcsSettings,
-                this, mContactManager, mCore, mOneToOneUndeliveredImManager);
+                mOneToOneChatEventBroadcaster, mImService, mMessagingLog, mHistoryLog,
+                mRcsSettings, this, mContactManager, mCore, mOneToOneUndeliveredImManager);
         session.addListener(oneToOneChat);
         addOneToOneChat(contact, oneToOneChat);
     }

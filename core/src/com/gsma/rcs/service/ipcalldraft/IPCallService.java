@@ -30,13 +30,10 @@ import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsServiceControl;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceListener;
-import com.gsma.services.rcs.RcsServiceNotRegisteredException;
 import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import com.gsma.services.rcs.RcsServiceNotRegisteredException;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.rcs.service.ipcalldraft.IIPCall;
-import com.gsma.rcs.service.ipcalldraft.IIPCallListener;
-import com.gsma.rcs.service.ipcalldraft.IIPCallService;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -47,7 +44,6 @@ import android.os.IInterface;
 
 import java.lang.ref.WeakReference;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;

@@ -16,8 +16,6 @@
 
 package com.gsma.services.rcs;
 
-import android.text.TextUtils;
-
 /**
  * Rcs Persistent Storage Exception
  * <p>

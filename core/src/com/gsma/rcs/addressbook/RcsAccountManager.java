@@ -45,8 +45,6 @@ public class RcsAccountManager {
 
     private final ContactManager mContactManager;
 
-    private static final int VERSION_CODE_LOLLIPOP = 21;
-
     /**
      * Account manager type
      */
@@ -132,7 +130,7 @@ public class RcsAccountManager {
             contentValues.put(Groups.ACCOUNT_TYPE, ACCOUNT_MANAGER_TYPE);
             contentValues.put(Groups.GROUP_VISIBLE, false);
             contentValues.put(Groups.TITLE, mContext.getString(R.string.rcs_core_account_id));
-            if (Build.VERSION.SDK_INT >= VERSION_CODE_LOLLIPOP) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 contentValues.put(CONTACTSCONTRACT_GROUPS_COLUMN_TITLE_RES,
                         R.string.rcs_core_account_id);
                 contentValues.put(CONTACTSCONTRACT_GROUPS_COLUMN_RES_PACKAGE,

@@ -77,8 +77,6 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 
     private final RichcallService mRichcallService;
 
-    private final ContactManager mContactManager;
-
     private final RichCallHistory mRichcallLog;
 
     private final LocalContentResolver mLocalContentResolver;
@@ -118,7 +116,6 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
             sLogger.info("Geoloc sharing service API is loaded.");
         }
         mRichcallService = richcallService;
-        mContactManager = contactManager;
         mRichcallLog = richCallHistory;
         mRcsSettings = rcsSettings;
         mLocalContentResolver = localContentResolver;

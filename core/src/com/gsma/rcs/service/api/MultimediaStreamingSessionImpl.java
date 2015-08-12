@@ -40,8 +40,6 @@ import com.gsma.services.rcs.extension.MultimediaSession.State;
 import android.content.Intent;
 import android.os.RemoteException;
 
-import javax2.sip.message.Response;
-
 /**
  * Multimedia streaming session
  * 

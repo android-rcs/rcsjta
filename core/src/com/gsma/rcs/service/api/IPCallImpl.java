@@ -50,8 +50,6 @@ import com.gsma.services.rcs.contact.ContactId;
 
 import android.os.RemoteException;
 
-import javax2.sip.message.Response;
-
 /**
  * IP call implementation
  * 

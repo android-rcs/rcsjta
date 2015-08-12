@@ -30,9 +30,7 @@ import com.gsma.services.rcs.RcsServiceException;
 import android.content.Context;
 import android.os.Build;
 import android.telephony.TelephonyManager;
-import android.text.TextUtils;
 
-import java.lang.reflect.Field;
 import java.util.UUID;
 
 /***
@@ -56,17 +54,7 @@ public class DeviceUtils {
 
     private static final int LAST_SEVENTH_INDEX = 7;
 
-    private static final int GINGERBREAD_VERSION_CODE = 9;
-
-    private static final String FIELD_SERIAL = "SERIAL";
-
-    private static final String ERROR_SERIAL_NOT_FOUND = "Failed to get declared serial field";
-
-    private static final String ERROR_SERIAL_NO_ACCESS = "No access to the definition of serial field";
-    /**
-     * UUID
-     */
-    private static UUID uuid = null;
+    private static UUID sUuid;
 
     private static String sImei;
 
@@ -78,49 +66,26 @@ public class DeviceUtils {
      * @throws RcsServiceException
      */
     public static UUID getDeviceUUID(Context ctx) throws RcsServiceException {
-        if (uuid == null) {
+        if (sUuid == null) {
             String imei = getImei(ctx);
             if (imei == null) {
                 // For compatibility with device without telephony
-                uuid = generateUUID();
+                sUuid = generateUUID();
             } else {
-                uuid = UUID.nameUUIDFromBytes(imei.getBytes(UTF8));
+                sUuid = UUID.nameUUIDFromBytes(imei.getBytes(UTF8));
             }
         }
 
-        return uuid;
+        return sUuid;
     }
 
     /**
      * Generate the UUID from system using serial
      * 
-     * @return generated uuid
-     * @throws RcsServiceException
+     * @return generated UUID
      */
-    public static UUID generateUUID() throws RcsServiceException {
-        if (Build.VERSION.SDK_INT < GINGERBREAD_VERSION_CODE) {
-            /**
-             * Since SERIAL is introduced only from API level GINGERBREAD_VERSION_CODE, we need to
-             * do nothing if we are running on a version prior to that, So we throw
-             * RcsServiceException with error message = ERROR_SERIAL_NOT_FOUND.
-             */
-            throw new RcsServiceException(ERROR_SERIAL_NOT_FOUND);
-        }
-        try {
-            Build build = new Build();
-            Field serialField = build.getClass().getDeclaredField(FIELD_SERIAL);
-            final String serial = (String) serialField.get(build);
-            if (TextUtils.isEmpty(serial)) {
-                throw new RcsServiceException(ERROR_SERIAL_NOT_FOUND);
-            }
-            return UUID.nameUUIDFromBytes(serial.getBytes(UTF8));
-        } catch (NoSuchFieldException e) {
-            throw new RcsServiceException(new StringBuilder(ERROR_SERIAL_NOT_FOUND).append(
-                    e.getMessage()).toString());
-        } catch (IllegalAccessException e) {
-            throw new RcsServiceException(new StringBuilder(ERROR_SERIAL_NO_ACCESS).append(
-                    e.getMessage()).toString());
-        }
+    public static UUID generateUUID() {
+        return UUID.nameUUIDFromBytes(Build.SERIAL.getBytes(UTF8));
     }
 
     /**

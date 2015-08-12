@@ -44,8 +44,6 @@ import com.gsma.services.rcs.sharing.image.ImageSharing.State;
 import android.net.Uri;
 import android.os.RemoteException;
 
-import javax2.sip.message.Response;
-
 /**
  * Image sharing implementation
  * 

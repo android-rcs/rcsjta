@@ -16,8 +16,6 @@
 
 package com.gsma.services.rcs;
 
-import android.text.TextUtils;
-
 /**
  * Rcs Max Allowed Session Limit Reached Exception.
  * <p>
