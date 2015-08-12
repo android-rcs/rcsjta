@@ -47,7 +47,7 @@ public class RcsServiceControl {
      */
     public final static String RCS_STACK_PACKAGENAME = "com.gsma.rcs";
 
-    public static final String TIME_SPENT = "dur";
+    private static final String TIME_SPENT = "dur";
 
     /**
      * Singleton of RcsServiceControl
