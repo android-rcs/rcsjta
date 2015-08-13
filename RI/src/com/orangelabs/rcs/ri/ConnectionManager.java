@@ -654,34 +654,24 @@ public class ConnectionManager {
     }
 
     private void notifyImsConnection() {
-        addImsConnectionNotification(true, null);
+        addImsConnectionNotification(R.drawable.ri_notif_on_icon, mContext.getString(R.string.ims_connected));
     }
 
     private void notifyImsDisconnection(RcsServiceRegistration.ReasonCode reason) {
-        addImsConnectionNotification(false, reason);
+        String label;
+        if (RcsServiceRegistration.ReasonCode.BATTERY_LOW == reason) {
+            label = mContext.getString(R.string.ims_battery_disconnected);
+        } else {
+            label = mContext.getString(R.string.ims_disconnected);
+        }
+        addImsConnectionNotification(R.drawable.ri_notif_off_icon, label);
     }
 
-    private void addImsConnectionNotification(boolean connected,
-            RcsServiceRegistration.ReasonCode reason) {
-        /* Create notification */
+    private void addImsConnectionNotification(int iconId, String label) {
         Intent intent = new Intent(mContext, SettingsDisplay.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent contentIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
-        int iconId;
-        String label;
-        if (connected) {
-            iconId = R.drawable.ri_notif_on_icon;
-            label = mContext.getString(R.string.ims_connected);
-        } else {
-            iconId = R.drawable.ri_notif_off_icon;
-            if (RcsServiceRegistration.ReasonCode.BATTERY_LOW == reason) {
-                label = mContext.getString(R.string.ims_battery_disconnected);
-            } else {
-                label = mContext.getString(R.string.ims_disconnected);
-            }
-        }
         String title = mContext.getString(R.string.notification_title_rcs_service);
-        /* Create notification */
         Notification notif = buildImsConnectionNotification(contentIntent, title, label, iconId);
         notif.flags = Notification.FLAG_NO_CLEAR | Notification.FLAG_FOREGROUND_SERVICE;
         /* Send notification */
