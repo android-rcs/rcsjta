@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="GSMA Terminal API" basedir=".">
+	<tstamp>
+		<format property="TODAY_MY" pattern="yyyyMMdd-HHmmss" locale="en,UK" />
+	</tstamp>
 
 	<property environment="env" />
 	<property name="android.root" value="${env.ANDROID_HOME}" />
@@ -19,7 +22,7 @@
 	<property name="javadoc.root" value="${terminal.root}/doclava" />
 	<property name="sdk.version" value="3.2.3" />
 	<property name="generate.root" value="${terminal.root}/gen" />
-	<property name="sdk.zip" value="${generate.root}/sdk.zip" />
+	<property name="sdk.zip" value="${generate.root}/rcsjta_sdk_${TODAY_MY}.zip" />
 
 	<path id="j2se.lib">
 		<fileset dir="${env.JAVA_HOME}/lib/">
@@ -35,11 +38,15 @@
 
 	<!-- Generate RCS API SDK -->
 	<!-- ********************* -->
-	<!-- Generate sdk.zip -->
-	<!-- ********************* -->
-	<target name="sdk" depends="ri-apk,docs,prov-template-apk,extension-apk,tts-apk">
+	<target name="sdk"
+		depends="ri-apk,docs,prov-template-apk,extension-apk,tts-apk">
 		<echo>Generate RCS SDK for Android target ${android.target}</echo>
-		<delete dir="${sdk.zip}" failonerror="false" />
+		<mkdir dir="${generate.root}" />
+		<delete>
+			<fileset dir="${generate.root}">
+				<include name="*" />
+			</fileset>
+		</delete>
 		<zip destfile="${sdk.zip}">
 			<fileset dir="${stack.root}" includes="LICENSE*.txt" />
 			<fileset dir="${stack.root}" includes="NOTICE.txt" />
@@ -107,8 +114,12 @@
 
 	<!-- Generate RCS API DOCS -->
 	<target name="docs" depends="core-apk">
-		<delete dir="${javadoc.root}" failonerror="false"/>
 		<mkdir dir="${javadoc.root}" />
+		<delete>
+			<fileset dir="${javadoc.root}">
+				<include name="*" />
+			</fileset>
+		</delete>
 
 		<echo>Generate Javadoc to ${terminal.root}/doclava</echo>
 
