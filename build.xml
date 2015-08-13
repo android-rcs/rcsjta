@@ -45,7 +45,7 @@
 			<fileset dir="${stack.root}" includes="NOTICE.txt" />
 			<zipfileset dir="${stack.root}" includes="rcs_api.jar"
 				prefix="api" />
-			<zipfileset dir="${stack.root}/../ri/libs/armeabi"
+			<zipfileset dir="${stack.root}/../RI/libs/armeabi"
 				includes="lib*.so" prefix="api/codecs" />
 			<zipfileset dir="${javadoc.root}" prefix="api/javadoc" />
 			<zipfileset dir="${prov_template.root}/bin" includes="*debug.apk"
