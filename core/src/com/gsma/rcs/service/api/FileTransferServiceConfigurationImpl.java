@@ -28,12 +28,12 @@ import android.os.RemoteException;
  * 
  * @author yplo6403
  */
-public class IFileTransferServiceConfigurationImpl extends IFileTransferServiceConfiguration.Stub {
+public class FileTransferServiceConfigurationImpl extends IFileTransferServiceConfiguration.Stub {
 
     /**
      * The sLogger
      */
-    private final Logger mLogger = Logger.getLogger(IFileTransferServiceConfigurationImpl.class
+    private final Logger mLogger = Logger.getLogger(FileTransferServiceConfigurationImpl.class
             .getSimpleName());
 
     private final RcsSettings mRcsSettings;
@@ -41,7 +41,7 @@ public class IFileTransferServiceConfigurationImpl extends IFileTransferServiceC
     /**
      * @param rcsSettings
      */
-    public IFileTransferServiceConfigurationImpl(RcsSettings rcsSettings) {
+    public FileTransferServiceConfigurationImpl(RcsSettings rcsSettings) {
         mRcsSettings = rcsSettings;
     }
 

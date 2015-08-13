@@ -22,36 +22,36 @@
 
 package com.gsma.rcs.service.api;
 
-import android.os.RemoteException;
-
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.sharing.video.IVideoSharingServiceConfiguration;
+import com.gsma.services.rcs.upload.IFileUploadServiceConfiguration;
+
+import android.os.RemoteException;
 
 /**
- * A class that implements interface to allow access to video sharing service configuration from API
+ * A class that implements interface to allow access to file upload service configuration from API
  * 
  * @author yplo6403
  */
-public class IVideoSharingServiceConfigurationImpl extends IVideoSharingServiceConfiguration.Stub {
+public class FileUploadServiceConfigurationImpl extends IFileUploadServiceConfiguration.Stub {
 
-    private RcsSettings mRcsSettings;
+    private final RcsSettings mRcsSettings;
 
-    private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
+    private final Logger mLogger = Logger.getLogger(getClass().getName());
 
     /**
      * Constructor
      * 
      * @param rcsSettings
      */
-    public IVideoSharingServiceConfigurationImpl(RcsSettings rcsSettings) {
+    public FileUploadServiceConfigurationImpl(RcsSettings rcsSettings) {
         mRcsSettings = rcsSettings;
     }
 
     @Override
-    public long getMaxTime() throws RemoteException {
+    public long getMaxSize() throws RemoteException {
         try {
-            return mRcsSettings.getMaxVideoShareDuration();
+            return mRcsSettings.getMaxImageSharingSize();
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -64,4 +64,5 @@ public class IVideoSharingServiceConfigurationImpl extends IVideoSharingServiceC
             throw new ServerApiGenericException(e);
         }
     }
+
 }

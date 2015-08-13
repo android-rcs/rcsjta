@@ -267,7 +267,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      */
     public IImageSharingServiceConfiguration getConfiguration() throws RemoteException {
         try {
-            return new IImageSharingServiceConfigurationImpl(mRcsSettings);
+            return new ImageSharingServiceConfigurationImpl(mRcsSettings);
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {

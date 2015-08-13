@@ -136,7 +136,7 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      */
     public IFileUploadServiceConfiguration getConfiguration() throws RemoteException {
         try {
-            return new IFileUploadServiceConfigurationImpl(mRcsSettings);
+            return new FileUploadServiceConfigurationImpl(mRcsSettings);
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {

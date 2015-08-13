@@ -293,7 +293,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      */
     public IMultimediaSessionServiceConfiguration getConfiguration() throws RemoteException {
         try {
-            return new IMultimediaSessionServiceConfigurationImpl(mRcsSettings);
+            return new MultimediaSessionServiceConfigurationImpl(mRcsSettings);
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {

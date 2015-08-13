@@ -24,43 +24,47 @@ package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.upload.IFileUploadServiceConfiguration;
+import com.gsma.services.rcs.extension.IMultimediaSessionServiceConfiguration;
 
 import android.os.RemoteException;
 
 /**
- * A class that implements interface to allow access to file upload service configuration from API
+ * A class that implements interface to allow access to multimedia session service configuration
+ * from API
  * 
  * @author yplo6403
  */
-public class IFileUploadServiceConfigurationImpl extends IFileUploadServiceConfiguration.Stub {
+public class MultimediaSessionServiceConfigurationImpl extends
+        IMultimediaSessionServiceConfiguration.Stub {
+
+    /**
+     * The sLogger
+     */
+    private static final Logger sLogger = Logger
+            .getLogger(MultimediaSessionServiceConfigurationImpl.class.getSimpleName());
 
     private final RcsSettings mRcsSettings;
 
-    private final Logger mLogger = Logger.getLogger(getClass().getName());
-
     /**
-     * Constructor
-     * 
      * @param rcsSettings
      */
-    public IFileUploadServiceConfigurationImpl(RcsSettings rcsSettings) {
+    public MultimediaSessionServiceConfigurationImpl(RcsSettings rcsSettings) {
         mRcsSettings = rcsSettings;
     }
 
     @Override
-    public long getMaxSize() throws RemoteException {
+    public int getMessageMaxLength() throws RemoteException {
         try {
-            return mRcsSettings.getMaxImageSharingSize();
+            return mRcsSettings.getMaxMsrpLengthForExtensions();
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }

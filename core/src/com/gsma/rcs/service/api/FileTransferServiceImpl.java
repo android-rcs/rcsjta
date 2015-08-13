@@ -424,7 +424,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      */
     public IFileTransferServiceConfiguration getConfiguration() throws RemoteException {
         try {
-            return new IFileTransferServiceConfigurationImpl(mRcsSettings);
+            return new FileTransferServiceConfigurationImpl(mRcsSettings);
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {

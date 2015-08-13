@@ -26,16 +26,16 @@ import android.os.RemoteException;
 
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.sharing.image.IImageSharingServiceConfiguration;
+import com.gsma.services.rcs.sharing.video.IVideoSharingServiceConfiguration;
 
 /**
- * A class that implements interface to allow access to image sharing service configuration from API
+ * A class that implements interface to allow access to video sharing service configuration from API
  * 
  * @author yplo6403
  */
-public class IImageSharingServiceConfigurationImpl extends IImageSharingServiceConfiguration.Stub {
+public class VideoSharingServiceConfigurationImpl extends IVideoSharingServiceConfiguration.Stub {
 
-    private final RcsSettings mRcsSettings;
+    private RcsSettings mRcsSettings;
 
     private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
 
@@ -44,14 +44,14 @@ public class IImageSharingServiceConfigurationImpl extends IImageSharingServiceC
      * 
      * @param rcsSettings
      */
-    public IImageSharingServiceConfigurationImpl(RcsSettings rcsSettings) {
+    public VideoSharingServiceConfigurationImpl(RcsSettings rcsSettings) {
         mRcsSettings = rcsSettings;
     }
 
     @Override
-    public long getMaxSize() throws RemoteException {
+    public long getMaxTime() throws RemoteException {
         try {
-            return mRcsSettings.getMaxImageSharingSize();
+            return mRcsSettings.getMaxVideoShareDuration();
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -64,5 +64,4 @@ public class IImageSharingServiceConfigurationImpl extends IImageSharingServiceC
             throw new ServerApiGenericException(e);
         }
     }
-
 }

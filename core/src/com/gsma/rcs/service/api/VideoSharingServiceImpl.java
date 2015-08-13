@@ -278,7 +278,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      */
     public IVideoSharingServiceConfiguration getConfiguration() throws RemoteException {
         try {
-            return new IVideoSharingServiceConfigurationImpl(mRcsSettings);
+            return new VideoSharingServiceConfigurationImpl(mRcsSettings);
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
