@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="mediaplayer" default="help">
+
+	<property name="terminal.root" value="." />
+	<property name="terminal.media" value="${terminal.root}/rcs_media.jar" />
+
+	<!-- Generate media JAR used in the RI -->
+	<target name="mediaplayer">
+		<echo>Generate ${terminal.media} file</echo>
+		<delete file="${terminal.media}" />
+		<jar destfile="${terminal.media}" basedir="${terminal.root}/bin/classes" />
+		<copy file="${terminal.media}" todir="${terminal.root}/../RI/libs" />
+		<copy todir="${terminal.root}/../RI/libs/armeabi" >  
+		        <fileset dir="${terminal.root}/libs/armeabi" includes="**" />
+		</copy>
+	</target>
+
+</project>

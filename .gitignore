@@ -3,7 +3,7 @@ gen
 bin
 .settings
 rcs_api.jar
-project.properties
+rcs_media.jar
 *.classpath
 *.project
 build

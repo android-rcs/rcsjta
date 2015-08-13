@@ -1,0 +1,13 @@
+NOTICE - RCS Java Terminal API - Android client
+Release 1.5
+
+The RCS stack is under Apache 2 license (see LICENSE-2.0.txt) and uses the following open source libraries:
+ - NIST SIP: see LICENSE-NIST.txt.
+ - DNS Java: see LICENSE-DNS.txt.
+ - The Legion Of The Bouncy Castle: see LICENSE-BOUNCYCASTLE.txt.
+
+
+   News:
+
+   Bugs fixed:
+   -----------

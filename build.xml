@@ -1,134 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project name="GSMA Terminal API" basedir=".">
 
-	<property environment="env"/>
-	<property name="android.root" 		value="${env.ANDROID_HOME}"/>
-	<property name="android.target" 	value="${env.ANDROID_TARGET}"/>
-	<property name="android.platform"	value="${android.root}/platforms/${android.target}"/>
-	<property name="terminal.root" 		value="."/>
-	<property name="terminal.api" 		value="${terminal.root}/core/rcs_api.jar"/>
-	<property name="terminal.ri" 		value="${terminal.root}/RI/bin/GSMA_RI.apk"/>
-	<property name="terminal.core" 		value="${terminal.root}/core/bin/RCSJTA_core.apk"/>
-	<property name="terminal.build"		value="${terminal.root}/core/bin"/>
-	<property name="src.path" 			value="${terminal.root}/core/src"/>
-	<property name="sdk.version" 		value="3.2.3"/>
+	<property environment="env" />
+	<property name="android.root" value="${env.ANDROID_HOME}" />
+	<property name="android.target" value="${env.ANDROID_TARGET}" />
+	<property name="android.platform" value="${android.root}/platforms/${android.target}" />
+	<property name="terminal.root" value="." />
+	<property name="ri.root" value="${terminal.root}/RI" />
+	<property name="stack.root" value="${terminal.root}/core" />
+	<property name="stack.bin" value="${stack.root}/bin" />
+	<property name="stack.src" value="${stack.root}/src" />
+	<property name="tools" value="${terminal.root}/tools" />
+	<property name="samples" value="${terminal.root}/samples" />
+	<property name="prov_template.root"
+		value="${tools}/provisioning/RCSJTA_provisioning_template" />
+	<property name="extension.root" value="${samples}/extension" />
+	<property name="tts.root" value="${samples}/tts" />
+	<property name="javadoc.root" value="${terminal.root}/doclava" />
+	<property name="sdk.version" value="3.2.3" />
+	<property name="generate.root" value="${terminal.root}/gen" />
+	<property name="sdk.zip" value="${generate.root}/sdk.zip" />
 
 	<path id="j2se.lib">
 		<fileset dir="${env.JAVA_HOME}/lib/">
 			<include name="**/*.jar" />
 		</fileset>
 	</path>
-	<property name="j2se.classpath" refid="j2se.lib"/>
+	<property name="j2se.classpath" refid="j2se.lib" />
 
 	<path id="terminal.classpath">
-		<pathelement path="${j2se.classpath};${android.platform}/android.jar;${terminal.build}/classes"/>
+		<pathelement
+			path="${j2se.classpath};${android.platform}/android.jar;${stack.bin}/classes" />
 	</path>
 
 	<!-- Generate RCS API SDK -->
-
-	<target name="sdk" description="Generate RCS SDK" depends="">
-
-		<echo>Generate SDK</echo>
-		<delete dir="${terminal.root}/sdk-joyn"/>
-		<mkdir dir="${terminal.root}/sdk-joyn"/>
-
-		<echo>copy ${terminal.api} file</echo>
-		<copy file="${terminal.api}" tofile="${terminal.root}/sdk-joyn/libs/joyn-API.jar"/>
-
-		<echo>copy ${terminal.core} file</echo>
-		<copy file="${terminal.core}" tofile="${terminal.root}/sdk-joyn/tools/joyn-core.apk"/>
-
-		<echo>copy ${terminal.ri} application</echo>
-		<copy file="${terminal.ri}" tofile="${terminal.root}/sdk-joyn/tools/RI.apk"/>
-
-		<echo> copy ${terminal.root}/samples</echo>
-		<copy todir="${terminal.root}/sdk-joyn/sample_projects">
-			<fileset dir="${terminal.root}/samples">
-				<exclude name="**/gen/"/>
-				<exclude name="**/bin/"/>
-				<exclude name="**/.svn/"/>
-				<exclude name="**/Zone.sav/"/>
-				<exclude name="**/.svn/"/>
-				<exclude name="**/.project"/>
-				<exclude name="**/.classpath"/>
-			</fileset>  
-		</copy>
-
-		<echo>Generate Javadoc</echo>
-
-		<javadoc
-				verbose="on"
-				access="public" 
-				classpath=":${terminal.classpath}" 
-				sourcepath="${src.path}"
-				packagenames="com.gsma.services.rcs.*"
-				bootclasspath="${android.platform}/android.jar;${terminal.build}/classes">	
-
-			<doclet name="com.google.doclava.Doclava" path="${terminal.root}/doclava-1.0.6/doclava-1.0.6.jar">
-				<param name="-d" value="${terminal.root}/sdk-joyn"/>			    
-				<param name="-templatedir"/><param name="${terminal.root}/templates-sdk" />
-				<param name="-hdf"/> <param name="project.name"/> <param name="RCS SDK"/>
-				<param name="-hdf"/> <param name="sdk.version"/> <param name="${sdk.version}"/>
-
-				<param name="-htmldir"/> <param name="${terminal.root}/sdk" />
-				<param name="-overview"/> <param name="${terminal.root}/sdk-joyn/overview.html" />
-				<param name="-generatesources"/>
-				<param name="-assetsdir"/> <param name="assets" />
-
-				<param name="-since"/><param name="${terminal.root}/SDK/releases/albatros.xml"/><param name="Albatros"/>
-				<param name="-since"/><param name="${terminal.root}/SDK/releases/blackbird.xml"/><param name="Blackbird"/>
-				<param name="-since"/><param name="${terminal.root}/SDK/releases/current.xml"/><param name="Crane"/>
-
-				<param name="-federate" /><param name="android"/><param name="http://developer.android.com/reference/"/>
-				<param name="-federationxml" /><param name="android"/><param name="${terminal.root}/doclava-1.0.6/android-10.xml"/>
-
-			</doclet>
-		</javadoc>
-		<copy todir="${terminal.root}/sdk-joyn/javadoc">
-			<fileset dir="${terminal.root}/sdk-joyn/reference"/>
-		</copy>
-		<delete dir="${terminal.root}/sdk-joyn/reference"/>
-
-		<move file="${terminal.root}/sdk-joyn/releases/joyn-sdk.txt" tofile="${terminal.root}/sdk-joyn/releases/joyn-sdk-${sdk.version}.txt"/>
-		<echo>zip sdk</echo>
-		<zip basedir="${terminal.root}/sdk-joyn/" destfile="${terminal.root}/joyn-sdk-${sdk.version}.zip"/>		
-		<echo>cleanup</echo>
-		<delete dir="${terminal.root}/sdk-joyn"/>
+	<!-- ********************* -->
+	<!-- Generate sdk.zip -->
+	<!-- ********************* -->
+	<target name="sdk" depends="ri-apk,docs,prov-template-apk,extension-apk,tts-apk">
+		<echo>Generate RCS SDK for Android target ${android.target}</echo>
+		<delete dir="${sdk.zip}" />
+		<zip destfile="${sdk.zip}">
+			<fileset dir="${stack.root}" includes="LICENSE*.txt" />
+			<fileset dir="${stack.root}" includes="NOTICE.txt" />
+			<zipfileset dir="${stack.root}" includes="rcs_api.jar"
+				prefix="api" />
+			<zipfileset dir="${stack.root}/../ri/libs/armeabi"
+				includes="lib*.so" prefix="api/codecs" />
+			<zipfileset dir="${javadoc.root}" prefix="api/javadoc" />
+			<zipfileset dir="${prov_template.root}/bin" includes="*debug.apk"
+				fullpath="tools/RCS_provisioning_template.apk" />
+			<zipfileset dir="${stack.root}/bin" includes="*debug.apk"
+				fullpath="stack/RCS_core.apk" />
+			<zipfileset dir="${ri.root}/bin" includes="*debug.apk"
+				fullpath="tools/RCS_RI.apk" />
+			<zipfileset dir="${extension.root}/bin" includes="*debug.apk"
+				fullpath="samples/RCS_extension.apk" />
+			<zipfileset dir="${tts.root}/bin" includes="*debug.apk"
+				fullpath="samples/RCS_tts.apk" />
+		</zip>
 	</target>
 
-	<target name="generate-api">
-		<ant dir="${terminal.root}/core" antfile="build.xml" target="api" inheritAll="false" />        
+	<target name="api" depends="core-apk">
+		<echo>Generate RCS api</echo>
+		<ant dir="${stack.root}" antfile="build.xml" target="api"
+			inheritAll="false" />
 	</target>
-	<target name="generate-ri-apk" depends="generate-api">
-		<ant dir="${terminal.root}/ri" target="debug" inheritAll="false" />        
-	</target>	
+
+	<target name="mediaplayer" depends="core-apk">
+		<echo>Generate mediaplayer lib</echo>
+		<ant dir="${terminal.root}/mediaplayer" target="clean" inheritAll="false" />
+		<ant dir="${terminal.root}/mediaplayer" target="debug" inheritAll="false" />
+		<ant dir="${terminal.root}/mediaplayer" antfile="build-local.xml"
+			target="mediaplayer" inheritAll="false" />
+	</target>
+
+	<target name="core-apk">
+		<echo>Generate Core apk</echo>
+		<ant dir="${stack.root}" target="clean" inheritAll="false" />
+		<ant dir="${stack.root}" target="debug" inheritAll="false" />
+	</target>
+
+	<target name="ri-apk" depends="api,mediaplayer">
+		<echo>Generate RI apk</echo>
+		<ant dir="${ri.root}" target="clean" inheritAll="false" />
+		<ant dir="${ri.root}" target="debug" inheritAll="false" />
+	</target>
+
+	<target name="prov-template-apk">
+		<echo>Generate RCS provisioning template apk</echo>
+		<ant dir="${prov_template.root}" target="clean" inheritAll="false" />
+		<ant dir="${prov_template.root}" target="debug" inheritAll="false" />
+	</target>
+
+	<target name="extension-apk" depends="api">
+		<echo>Generate samples extension apk</echo>
+		<ant dir="${extension.root}" target="clean" inheritAll="false" />
+		<ant dir="${extension.root}" target="debug" inheritAll="false" />
+	</target>
+
+	<target name="tts-apk" depends="api">
+		<echo>Generate samples tts apk</echo>
+		<ant dir="${tts.root}" target="clean" inheritAll="false" />
+		<ant dir="${tts.root}" target="debug" inheritAll="false" />
+	</target>
 
 	<!-- Generate RCS API DOCS -->
-	<target name="docs">
-		<delete dir="${terminal.root}/doclava"/>
-		<mkdir dir="${terminal.root}/doclava"/>
+	<target name="docs" depends="core-apk">
+		<delete dir="${javadoc.root}" failonerror="false"/>
+		<mkdir dir="${javadoc.root}" />
 
 		<echo>Generate Javadoc to ${terminal.root}/doclava</echo>
 
-		<fail unless="env.ANDROID_TARGET" message="variable $ANDROID_TARGET not set! Please define variable like 'export ANDROID_TARGET=android-19'"/>
+		<fail unless="env.ANDROID_TARGET"
+			message="variable $ANDROID_TARGET not set! Please define variable like 'export ANDROID_TARGET=android-19'" />
 
-		<javadoc 
-				verbose="on"
-				access="public"
-				sourcepath="${src.path}"
-				classpath="${terminal.classpath}"
-				packagenames="com.gsma.services.rcs.*"
-				bootclasspath="${android.platform}/android.jar;${terminal.build}/classes"
-				>
-			<doclet name="com.google.doclava.Doclava" path="${terminal.root}/doclava-1.0.6/doclava-1.0.6.jar">
-				<param name="-d" value="${terminal.root}/doclava"/>
-				<param name="-hdf"/> <param name="project.name"/> <param name="RCS API"/>
-				<param name="-hdf"/> <param name="sdk.version"/> <param name="${sdk.version}"/>
-				<param name="-title" value="TAPI 1.5.1"/>
+		<javadoc verbose="on" access="public" sourcepath="${stack.src}"
+			classpath="${terminal.classpath}" packagenames="com.gsma.services.rcs.*"
+			bootclasspath="${android.platform}/android.jar;${stack.bin}/classes">
+			<doclet name="com.google.doclava.Doclava"
+				path="${terminal.root}/doclava-1.0.6/doclava-1.0.6.jar">
+				<param name="-d" value="${javadoc.root}" />
+				<param name="-hdf" />
+				<param name="project.name" />
+				<param name="RCS API" />
+				<param name="-hdf" />
+				<param name="sdk.version" />
+				<param name="${sdk.version}" />
+				<param name="-title" value="TAPI 1.5.1" />
 				<!-- versioning -->
-				<param name="-apiversion" value="v1.5"/>
+				<param name="-apiversion" value="v1.5" />
 				<!-- federation -->
-				<param name="-federate" /><param name="android"/><param name="http://developer.android.com/reference/"/>
-				<param name="-federationxml" /><param name="android"/><param name="${terminal.root}/doclava-1.0.6/android-10.xml"/>
+				<param name="-federate" />
+				<param name="android" />
+				<param name="http://developer.android.com/reference/" />
+				<param name="-federationxml" />
+				<param name="android" />
+				<param name="${terminal.root}/doclava-1.0.6/android-10.xml" />
 			</doclet>
 		</javadoc>
 	</target>

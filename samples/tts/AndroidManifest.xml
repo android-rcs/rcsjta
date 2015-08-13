@@ -4,8 +4,8 @@
       android:versionCode="1"
       android:versionName="1.0">
 
-	<uses-sdk android:minSdkVersion="5"
-		android:targetSdkVersion="15"/>
+	<uses-sdk android:minSdkVersion="12"
+		android:targetSdkVersion="22"/>
 
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="com.gsma.services.permission.RCS" />
