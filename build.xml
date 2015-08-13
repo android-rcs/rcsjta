@@ -39,7 +39,7 @@
 	<!-- ********************* -->
 	<target name="sdk" depends="ri-apk,docs,prov-template-apk,extension-apk,tts-apk">
 		<echo>Generate RCS SDK for Android target ${android.target}</echo>
-		<delete dir="${sdk.zip}" />
+		<delete dir="${sdk.zip}" failonerror="false" />
 		<zip destfile="${sdk.zip}">
 			<fileset dir="${stack.root}" includes="LICENSE*.txt" />
 			<fileset dir="${stack.root}" includes="NOTICE.txt" />
