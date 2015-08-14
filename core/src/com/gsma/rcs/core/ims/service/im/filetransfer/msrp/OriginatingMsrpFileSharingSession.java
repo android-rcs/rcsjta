@@ -34,6 +34,7 @@ import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
@@ -238,8 +239,13 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
 
             /* Send INVITE request */
             sendInvite(invite);
-        } catch (SipException e) {
+        } catch (SipPayloadException e) {
             mLogger.error("Unable to set and send initial invite!", e);
+            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (SipNetworkException e) {
+            if (mLogger.isActivated()) {
+                mLogger.debug(e.getMessage());
+            }
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
         } catch (InvalidArgumentException e) {
             mLogger.error("Unable to set authorization header!", e);
@@ -418,9 +424,10 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * Handle 200 0K response
      * 
      * @param resp 200 OK response
-     * @throws SipException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void handle200OK(SipResponse resp) throws SipException {
+    public void handle200OK(SipResponse resp) throws SipPayloadException, SipNetworkException {
         long timestamp = System.currentTimeMillis();
         ((InstantMessagingService) getImsService()).receiveOneToOneFileDeliveryStatus(
                 getRemoteContact(), new ImdnDocument(getFileTransferId(),

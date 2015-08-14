@@ -33,7 +33,6 @@ import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
@@ -376,9 +375,9 @@ public abstract class IPCallSession extends ImsServiceSession {
      * Create an INVITE request
      * 
      * @return the INVITE request
-     * @throws SipException
+     * @throws SipPayloadException
      */
-    public SipRequest createInvite() throws SipException {
+    public SipRequest createInvite() throws SipPayloadException {
         return SipMessageFactory.createInvite(getDialogPath(), new String[] {}, getDialogPath()
                 .getLocalContent());
     }
@@ -995,9 +994,10 @@ public abstract class IPCallSession extends ImsServiceSession {
      * @param serviceContext context of service (Add Video, Remove Video ...)
      * @return sdp built by builder
      * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     public String buildReInviteSdpResponse(SipRequest reInvite, int serviceContext)
-            throws SipPayloadException {
+            throws SipPayloadException, SipNetworkException {
         String localSdp = "";
         switch (serviceContext) {
             case (IPCallSession.ADD_VIDEO): {
@@ -1018,8 +1018,10 @@ public abstract class IPCallSession extends ImsServiceSession {
      * 
      * @param reInvite reInvite Request received
      * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private String buildAddVideoSdpResponse(SipRequest reInvite) throws SipPayloadException {
+    private String buildAddVideoSdpResponse(SipRequest reInvite) throws SipPayloadException,
+            SipNetworkException {
         if (logger.isActivated()) {
             logger.info("buildAddVideoSdpResponse()");
         }
@@ -1361,7 +1363,7 @@ public abstract class IPCallSession extends ImsServiceSession {
     }
 
     @Override
-    public void receiveCancel(SipRequest cancel) {
+    public void receiveCancel(SipRequest cancel) throws SipNetworkException, SipPayloadException {
         super.receiveCancel(cancel);
 
         // Request capabilities to the remote

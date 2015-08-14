@@ -23,6 +23,8 @@
 package com.gsma.rcs.core.ims.service.im.filetransfer;
 
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -257,10 +259,8 @@ public abstract class FileSharingSession extends ImsServiceSession {
     }
 
     @Override
-    public void receiveCancel(SipRequest cancel) {
+    public void receiveCancel(SipRequest cancel) throws SipNetworkException, SipPayloadException {
         super.receiveCancel(cancel);
-
-        // Request capabilities to the remote
         getImsService().getImsModule().getCapabilityService()
                 .requestContactCapabilities(getRemoteContact());
     }

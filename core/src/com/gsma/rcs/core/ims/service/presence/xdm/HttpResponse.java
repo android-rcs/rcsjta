@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.presence.xdm;
@@ -90,14 +94,10 @@ public class HttpResponse {
      * 
      * @return Response code or -1 in case of error
      */
-    public int getResponseCode() {
-        try {
-            int index1 = status.indexOf(" ") + 1;
-            int index2 = status.indexOf(" ", index1);
-            return Integer.parseInt(status.substring(index1, index2));
-        } catch (Exception e) {
-            return -1;
-        }
+    private int getResponseCode() {
+        int index1 = status.indexOf(" ") + 1;
+        int index2 = status.indexOf(" ", index1);
+        return Integer.parseInt(status.substring(index1, index2));
     }
 
     /**
@@ -105,7 +105,7 @@ public class HttpResponse {
      * 
      * @return Boolean
      */
-    public boolean isSuccessfullResponse() {
+    private boolean isSuccessfullResponse() {
         int code = getResponseCode();
         if ((code >= 200) && (code < 300)) {
             return true;
@@ -119,7 +119,7 @@ public class HttpResponse {
      * 
      * @return Boolean
      */
-    public boolean isNotFoundResponse() {
+    private boolean isNotFoundResponse() {
         int code = getResponseCode();
         if (code == 404) {
             return true;

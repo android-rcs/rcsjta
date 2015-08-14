@@ -1020,9 +1020,10 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * Handle 200 0K response
      * 
      * @param resp 200 OK response
-     * @throws SipException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void handle200OK(SipResponse resp) throws SipException {
+    public void handle200OK(SipResponse resp) throws SipPayloadException, SipNetworkException {
         super.handle200OK(resp);
 
         // Check if geolocation push supported by remote

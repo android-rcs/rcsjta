@@ -26,6 +26,7 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsServiceSession;
@@ -60,8 +61,7 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
     /**
      * The logger
      */
-    private static final Logger logger = Logger.getLogger(ImsFileSharingSession.class
-            .getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(ImsFileSharingSession.class.getName());
 
     /**
      * Constructor
@@ -124,9 +124,9 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
      * Create an INVITE request
      * 
      * @return the INVITE request
-     * @throws SipException
+     * @throws SipPayloadException
      */
-    public SipRequest createInvite() throws SipException {
+    public SipRequest createInvite() throws SipPayloadException {
         SipRequest invite;
         if (getFileicon() != null) {
             invite = SipMessageFactory.createMultipartInvite(getDialogPath(),
@@ -136,10 +136,7 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
             invite = SipMessageFactory.createInvite(getDialogPath(),
                     InstantMessagingService.FT_FEATURE_TAGS, getDialogPath().getLocalContent());
         }
-
-        // Add a contribution ID header
         invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());
-
         return invite;
     }
 
@@ -152,16 +149,11 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
         if (isSessionInterrupted()) {
             return;
         }
-
-        // Error
-        if (logger.isActivated()) {
-            logger.info("Session error: " + error.getErrorCode() + ", reason=" + error.getMessage());
+        if (sLogger.isActivated()) {
+            sLogger.info(new StringBuilder("Session error: ").append(error.getErrorCode())
+                    .append(", reason=").append(error.getMessage()).toString());
         }
-
-        // Close media session
         closeMediaSession();
-
-        // Remove the current session
         removeSession();
 
         ContactId contact = getRemoteContact();
@@ -183,28 +175,15 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
         if (isSessionInterrupted() || getDialogPath().isSessionTerminated()) {
             return;
         }
-        boolean logActivated = logger.isActivated();
-
-        if (logActivated) {
-            logger.info("Data transfer error " + error);
+        if (sLogger.isActivated()) {
+            sLogger.info("Data transfer error: ".concat(error));
         }
+        closeSession(ImsServiceSession.TerminationReason.TERMINATION_BY_SYSTEM);
+        closeMediaSession();
 
-        try {
-            closeSession(ImsServiceSession.TerminationReason.TERMINATION_BY_SYSTEM);
-
-            // Close the media session
-            closeMediaSession();
-        } catch (Exception e) {
-            if (logActivated) {
-                logger.error("Can't close correctly the file transfer session", e);
-            }
-        }
-
-        // Request capabilities
         getImsService().getImsModule().getCapabilityService()
                 .requestContactCapabilities(getRemoteContact());
 
-        // Remove the current session
         removeSession();
 
         if (isFileTransfered()) {

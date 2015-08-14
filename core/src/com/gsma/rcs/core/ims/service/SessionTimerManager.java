@@ -307,37 +307,23 @@ public class SessionTimerManager extends PeriodicRefresher {
      * remote then the session should be terminated.
      */
     private void sessionRefreshForUAS() {
-        try {
+        if (mLogger.isActivated()) {
+            mLogger.debug("Session timer refresh (UAS role)");
+        }
+        if ((System.currentTimeMillis() - mLastSessionRefresh) >= mExpirePeriod) {
             if (mLogger.isActivated()) {
-                mLogger.debug("Session timer refresh (UAS role)");
+                mLogger.debug("Session timer refresh has failed: close the session");
             }
+            mSession.terminateSession(TerminationReason.TERMINATION_BY_TIMEOUT);
 
-            if ((System.currentTimeMillis() - mLastSessionRefresh) >= mExpirePeriod) {
-                // Session has expired
-                if (mLogger.isActivated()) {
-                    mLogger.debug("Session timer refresh has failed: close the session");
-                }
-
-                mSession.terminateSession(TerminationReason.TERMINATION_BY_TIMEOUT);
-
-                ContactId contact = mSession.getRemoteContact();
-                mSession.getImsService().getImsModule().getCapabilityService()
-                        .requestContactCapabilities(contact);
-            } else {
-                // Success
-                if (mLogger.isActivated()) {
-                    mLogger.debug("Session timer refresh with success");
-                }
-
-                // Start processing the session timer
-                startProcessing();
-            }
-        } catch (Exception e) {
+            ContactId contact = mSession.getRemoteContact();
+            mSession.getImsService().getImsModule().getCapabilityService()
+                    .requestContactCapabilities(contact);
+        } else {
             if (mLogger.isActivated()) {
-                mLogger.error("Session timer refresh has failed", e);
+                mLogger.debug("Session timer refresh with success");
             }
-
-            mSession.terminateSession(TerminationReason.TERMINATION_BY_SYSTEM);
+            startProcessing();
         }
     }
 
@@ -345,48 +331,32 @@ public class SessionTimerManager extends PeriodicRefresher {
      * Receive RE-INVITE request
      * 
      * @param reInvite RE-INVITE request
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void receiveReInvite(SipRequest reInvite) {
-        try {
+    public void receiveReInvite(SipRequest reInvite) throws SipPayloadException,
+            SipNetworkException {
+        if (mLogger.isActivated()) {
+            mLogger.debug("Session refresh request received");
+        }
+        mLastSessionRefresh = System.currentTimeMillis();
+        if (mLogger.isActivated()) {
+            mLogger.debug("Send 200 OK");
+        }
+        SipResponse resp = SipMessageFactory.create200OkReInviteResponse(mSession.getDialogPath(),
+                reInvite);
+        mSession.getDialogPath().setSigEstablished();
+        SipTransactionContext ctx = mSession.getImsService().getImsModule().getSipManager()
+                .sendSipMessageAndWait(resp);
+        if (ctx.isSipAck()) {
             if (mLogger.isActivated()) {
-                mLogger.debug("Session refresh request received");
+                mLogger.info("ACK request received");
             }
-
-            // Update last session refresh time
-            mLastSessionRefresh = System.currentTimeMillis();
-
-            // Send 200 OK response
-            if (mLogger.isActivated()) {
-                mLogger.debug("Send 200 OK");
-            }
-            SipResponse resp = SipMessageFactory.create200OkReInviteResponse(
-                    mSession.getDialogPath(), reInvite);
-
-            // The signalisation is established
-            mSession.getDialogPath().setSigEstablished();
-
-            // Send response
-            SipTransactionContext ctx = mSession.getImsService().getImsModule().getSipManager()
-                    .sendSipMessageAndWait(resp);
-
-            // Analyze the received response
-            if (ctx.isSipAck()) {
-                // ACK received
-                if (mLogger.isActivated()) {
-                    mLogger.info("ACK request received");
-                }
-                // The session is established
-                mSession.getDialogPath().setSessionEstablished();
-            } else {
-                if (mLogger.isActivated()) {
-                    mLogger.debug("No ACK received for INVITE");
-                }
-                // TODO ?
-            }
-        } catch (Exception e) {
-            if (mLogger.isActivated()) {
-                mLogger.error("Session timer refresh has failed", e);
-            }
+            mSession.getDialogPath().setSessionEstablished();
+        } else {
+            throw new SipPayloadException(
+                    "No ACK received for INVITE with sessionId: ".concat(String.valueOf(mSession
+                            .getId())));
         }
     }
 
@@ -394,27 +364,22 @@ public class SessionTimerManager extends PeriodicRefresher {
      * Receive UPDATE request
      * 
      * @param update UPDATE request
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void receiveUpdate(SipRequest update) {
-        try {
-            if (mLogger.isActivated()) {
-                mLogger.debug("Session refresh request received");
-            }
-
-            // Update last session refresh time
-            mLastSessionRefresh = System.currentTimeMillis();
-
-            // Send 200 OK response
-            if (mLogger.isActivated()) {
-                mLogger.debug("Send 200 OK");
-            }
-            SipResponse resp = SipMessageFactory.create200OkUpdateResponse(
-                    mSession.getDialogPath(), update);
-            mSession.getImsService().getImsModule().getSipManager().sendSipResponse(resp);
-        } catch (Exception e) {
-            if (mLogger.isActivated()) {
-                mLogger.error("Session timer refresh has failed", e);
-            }
+    public void receiveUpdate(SipRequest update) throws SipNetworkException, SipPayloadException {
+        if (mLogger.isActivated()) {
+            mLogger.debug("Session refresh request received");
         }
+        mLastSessionRefresh = System.currentTimeMillis();
+        if (mLogger.isActivated()) {
+            mLogger.debug("Send 200 OK");
+        }
+        mSession.getImsService()
+                .getImsModule()
+                .getSipManager()
+                .sendSipResponse(
+                        SipMessageFactory.create200OkUpdateResponse(mSession.getDialogPath(),
+                                update));
     }
 }

@@ -70,8 +70,8 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
     /**
      * The logger
      */
-    private final Logger mLogger = Logger
-            .getLogger(TerminatingStoreAndForwardOneToOneChatMessageSession.class.getSimpleName());
+    private static final Logger sLogger = Logger
+            .getLogger(TerminatingStoreAndForwardOneToOneChatMessageSession.class.getName());
 
     /**
      * Constructor
@@ -131,10 +131,10 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
      * Background processing
      */
     public void run() {
-        final boolean logActivated = mLogger.isActivated();
+        final boolean logActivated = sLogger.isActivated();
         try {
             if (logActivated) {
-                mLogger.info("Initiate a store & forward session for messages");
+                sLogger.info("Initiate a store & forward session for messages");
             }
             SipDialogPath dialogPath = getDialogPath();
 
@@ -157,7 +157,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
             /* Check if session should be auto-accepted once */
             if (isSessionAccepted()) {
                 if (logActivated) {
-                    mLogger.debug("Auto accept store and forward chat invitation");
+                    sLogger.debug("Auto accept store and forward chat invitation");
                 }
 
                 for (ImsSessionListener listener : listeners) {
@@ -165,7 +165,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
                 }
             } else {
                 if (logActivated) {
-                    mLogger.debug("Accept manually store and forward chat invitation");
+                    sLogger.debug("Accept manually store and forward chat invitation");
                 }
 
                 for (ImsSessionListener listener : listeners) {
@@ -180,7 +180,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
                         /* Intentional fall through */
                     case INVITATION_REJECTED_BUSY_HERE:
                         if (logActivated) {
-                            mLogger.debug("Session has been rejected by user");
+                            sLogger.debug("Session has been rejected by user");
                         }
                         sendErrorResponse(dialogPath.getInvite(), dialogPath.getLocalTag(), answer);
                         removeSession();
@@ -193,7 +193,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
 
                     case INVITATION_TIMEOUT:
                         if (logActivated) {
-                            mLogger.debug("Session has been rejected on timeout");
+                            sLogger.debug("Session has been rejected on timeout");
                         }
 
                         /* Ringing period timeout */
@@ -209,14 +209,14 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
 
                     case INVITATION_REJECTED_BY_SYSTEM:
                         if (logActivated) {
-                            mLogger.debug("Session has been aborted by system");
+                            sLogger.debug("Session has been aborted by system");
                         }
                         removeSession();
                         return;
 
                     case INVITATION_CANCELED:
                         if (logActivated) {
-                            mLogger.debug("Session has been rejected by remote");
+                            sLogger.debug("Session has been rejected by remote");
                         }
 
                         removeSession();
@@ -264,13 +264,13 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
                 remoteSetup = attr2.getValue();
             }
             if (logActivated) {
-                mLogger.debug("Remote setup attribute is ".concat(remoteSetup));
+                sLogger.debug("Remote setup attribute is ".concat(remoteSetup));
             }
 
             /* Set setup mode */
             String localSetup = createSetupAnswer(remoteSetup);
             if (logActivated) {
-                mLogger.debug("Local setup attribute is ".concat(localSetup));
+                sLogger.debug("Local setup attribute is ".concat(localSetup));
             }
 
             /* Set local port */
@@ -293,14 +293,14 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
             /* Test if the session should be interrupted */
             if (isInterrupted()) {
                 if (logActivated) {
-                    mLogger.debug("Session has been interrupted: end of processing");
+                    sLogger.debug("Session has been interrupted: end of processing");
                 }
                 return;
             }
 
             /* Create a 200 OK response */
             if (logActivated) {
-                mLogger.info("Send 200 OK");
+                sLogger.info("Send 200 OK");
             }
             SipResponse resp = SipMessageFactory.create200OkInviteResponse(dialogPath,
                     getFeatureTags(), sdp);
@@ -329,8 +329,8 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
 
             // Test if the session should be interrupted
             if (isInterrupted()) {
-                if (mLogger.isActivated()) {
-                    mLogger.debug("Session has been interrupted: end of processing");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Session has been interrupted: end of processing");
                 }
                 return;
             }
@@ -338,7 +338,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
             /* Analyze the received response */
             if (ctx.isSipAck()) {
                 if (logActivated) {
-                    mLogger.info("ACK request received");
+                    sLogger.info("ACK request received");
                 }
                 dialogPath.setSessionEstablished();
 
@@ -365,7 +365,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
 
             } else {
                 if (logActivated) {
-                    mLogger.debug("No ACK received for INVITE");
+                    sLogger.debug("No ACK received for INVITE");
                 }
 
                 /* No response received: timeout */
@@ -373,8 +373,13 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
             }
         } catch (MsrpException e) {
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
-        } catch (SipException e) {
-            mLogger.error("Unable to send 200OK response!", e);
+        } catch (SipPayloadException e) {
+            sLogger.error("Unable to send 200OK response!", e);
+            handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
+        } catch (SipNetworkException e) {
+            if (logActivated) {
+                sLogger.debug(e.getMessage());
+            }
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
         } catch (IOException e) {
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
@@ -383,7 +388,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
-            mLogger.error("Failed initiating a store & forward session for messages!", e);
+            sLogger.error("Failed initiating a store & forward session for messages!", e);
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
         }
     }

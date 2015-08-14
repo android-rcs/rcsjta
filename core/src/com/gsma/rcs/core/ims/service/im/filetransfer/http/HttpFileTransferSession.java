@@ -23,7 +23,7 @@
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import com.gsma.rcs.core.content.MmContent;
-import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
@@ -153,9 +153,9 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * Create an INVITE request
      * 
      * @return the INVITE request
-     * @throws SipException
+     * @throws SipPayloadException
      */
-    public SipRequest createInvite() throws SipException {
+    public SipRequest createInvite() throws SipPayloadException {
         // Not used here
         return null;
     }

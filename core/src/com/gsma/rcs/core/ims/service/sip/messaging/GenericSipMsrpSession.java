@@ -34,7 +34,7 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
@@ -236,9 +236,10 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
      * Handle 200 0K response
      * 
      * @param resp 200 OK response
-     * @throws SipException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void handle200OK(SipResponse resp) throws SipException {
+    public void handle200OK(SipResponse resp) throws SipPayloadException, SipNetworkException {
         super.handle200OK(resp);
 
         getActivityManager().start();

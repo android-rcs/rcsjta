@@ -24,7 +24,7 @@ package com.gsma.rcs.core.ims.service.richcall.video;
 
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
-import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
@@ -129,9 +129,9 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
      * Create an INVITE request
      * 
      * @return the INVITE request
-     * @throws SipException
+     * @throws SipPayloadException
      */
-    public SipRequest createInvite() throws SipException {
+    public SipRequest createInvite() throws SipPayloadException {
         return SipMessageFactory.createInvite(getDialogPath(),
                 RichcallService.FEATURE_TAGS_VIDEO_SHARE, getDialogPath().getLocalContent());
     }

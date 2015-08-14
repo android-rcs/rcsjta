@@ -29,10 +29,13 @@ import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -60,8 +63,8 @@ public class TerminatingIPCallSession extends IPCallSession {
     /**
      * The logger
      */
-    private final static Logger logger = Logger.getLogger(TerminatingIPCallSession.class
-            .getSimpleName());
+    private final static Logger sLogger = Logger
+            .getLogger(TerminatingIPCallSession.class.getName());
 
     /**
      * Constructor
@@ -88,8 +91,8 @@ public class TerminatingIPCallSession extends IPCallSession {
      */
     public void run() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Initiate a new IP call session as terminating");
+            if (sLogger.isActivated()) {
+                sLogger.info("Initiate a new IP call session as terminating");
             }
 
             SipDialogPath dialogPath = getDialogPath();
@@ -110,8 +113,8 @@ public class TerminatingIPCallSession extends IPCallSession {
                 case INVITATION_REJECTED_DECLINE:
                     /* Intentional fall through */
                 case INVITATION_REJECTED_BUSY_HERE:
-                    if (logger.isActivated()) {
-                        logger.debug("Session has been rejected by user");
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Session has been rejected by user");
                     }
                     sendErrorResponse(dialogPath.getInvite(), dialogPath.getLocalTag(), answer);
                     removeSession();
@@ -123,8 +126,8 @@ public class TerminatingIPCallSession extends IPCallSession {
                     return;
 
                 case INVITATION_NOT_ANSWERED:
-                    if (logger.isActivated()) {
-                        logger.debug("Session has been rejected on timeout");
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Session has been rejected on timeout");
                     }
 
                     /* Ringing period timeout */
@@ -139,8 +142,8 @@ public class TerminatingIPCallSession extends IPCallSession {
                     return;
 
                 case INVITATION_CANCELED:
-                    if (logger.isActivated()) {
-                        logger.debug("Session has been rejected by remote");
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Session has been rejected by remote");
                     }
 
                     removeSession();
@@ -166,24 +169,24 @@ public class TerminatingIPCallSession extends IPCallSession {
             }
 
             if (getRenderer() == null) {
-                if (logger.isActivated()) {
-                    logger.debug("Renderer not initialized");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Renderer not initialized");
                 }
                 handleError(new IPCallError(IPCallError.RENDERER_NOT_INITIALIZED));
                 return;
             }
 
             if (getPlayer() == null) {
-                if (logger.isActivated()) {
-                    logger.debug("Player not initialized");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Player not initialized");
                 }
                 handleError(new IPCallError(IPCallError.PLAYER_NOT_INITIALIZED));
                 return;
             }
 
             if (isInterrupted()) {
-                if (logger.isActivated()) {
-                    logger.debug("Session has been interrupted: end of processing");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Session has been interrupted: end of processing");
                 }
                 return;
             }
@@ -194,8 +197,8 @@ public class TerminatingIPCallSession extends IPCallSession {
 
             prepareMediaSession();
 
-            if (logger.isActivated()) {
-                logger.info("Send 200 OK");
+            if (sLogger.isActivated()) {
+                sLogger.info("Send 200 OK");
             }
             SipResponse resp = null;
             if ((getPlayer().getVideoCodec() != null) && (getRenderer().getVideoCodec() != null)) {
@@ -216,8 +219,8 @@ public class TerminatingIPCallSession extends IPCallSession {
 
             /* Analyze the received response */
             if (ctx.isSipAck()) {
-                if (logger.isActivated()) {
-                    logger.info("ACK request received");
+                if (sLogger.isActivated()) {
+                    sLogger.info("ACK request received");
                 }
 
                 dialogPath.setSessionEstablished();
@@ -235,17 +238,35 @@ public class TerminatingIPCallSession extends IPCallSession {
                     getListeners().get(i).handleSessionStarted(contact);
                 }
             } else {
-                if (logger.isActivated()) {
-                    logger.debug("No ACK received for INVITE");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("No ACK received for INVITE");
                 }
 
                 /* No response received: timeout */
                 handleError(new IPCallError(IPCallError.SESSION_INITIATION_FAILED));
             }
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Session initiation has failed", e);
+        } catch (SipPayloadException e) {
+            sLogger.error("Session initiation has failed!", e);
+            handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        } catch (SipNetworkException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
             }
+            handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        } catch (MediaException e) {
+            sLogger.error("Session initiation has failed!", e);
+            handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        } catch (RemoteException e) {
+            sLogger.error("Session initiation has failed!", e);
+            handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        } catch (RuntimeException e) {
+            /*
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
+             */
+            sLogger.error("Session initiation has failed!", e);
             handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
         }
     }
@@ -259,18 +280,12 @@ public class TerminatingIPCallSession extends IPCallSession {
         if (isSessionInterrupted()) {
             return;
         }
-
-        // Error
-        if (logger.isActivated()) {
-            logger.info("Session error: " + error.getErrorCode() + ", reason=" + error.getMessage());
+        if (sLogger.isActivated()) {
+            sLogger.info(new StringBuilder("Session error: ").append(error.getErrorCode())
+                    .append(", reason=").append(error.getMessage()).toString());
         }
-
-        // Close media (audio, video) session
         closeMediaSession();
-
-        // Remove the current session
         removeSession();
-
         ContactId contact = getRemoteContact();
         for (int i = 0; i < getListeners().size(); i++) {
             ((IPCallStreamingSessionListener) getListeners().get(i))
@@ -282,8 +297,10 @@ public class TerminatingIPCallSession extends IPCallSession {
      * Build sdp response for addVideo
      * 
      * @param reInvite reInvite Request received
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private String buildSdpAnswer() {
+    private String buildSdpAnswer() throws SipPayloadException, SipNetworkException {
         // Parse the remote SDP part
         SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(UTF8));
 
@@ -301,8 +318,8 @@ public class TerminatingIPCallSession extends IPCallSession {
             selectedAudioCodec = AudioCodecManager.negociateAudioCodec(getRenderer()
                     .getSupportedAudioCodecs(), proposedAudioCodecs);
             if (selectedAudioCodec == null) {
-                if (logger.isActivated()) {
-                    logger.debug("Proposed audio codecs are not supported");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Proposed audio codecs are not supported");
                 }
 
                 // Send a 415 Unsupported media type response
@@ -319,13 +336,13 @@ public class TerminatingIPCallSession extends IPCallSession {
                 selectedVideoCodec = VideoCodecManager.negociateVideoCodec(getPlayer()
                         .getSupportedVideoCodecs(), proposedVideoCodecs);
                 if (selectedVideoCodec == null) {
-                    if (logger.isActivated()) {
-                        logger.debug("Proposed video codecs are not supported");
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Proposed video codecs are not supported");
                     }
                 }
             } else {
-                if (logger.isActivated()) {
-                    logger.debug("No video requested");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("No video requested");
                 }
             }
 
@@ -350,8 +367,8 @@ public class TerminatingIPCallSession extends IPCallSession {
             return sdp;
 
         } catch (RemoteException e) {
-            if (logger.isActivated()) {
-                logger.error("Session initiation has failed", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Session initiation has failed", e);
             }
 
             // Unexpected error

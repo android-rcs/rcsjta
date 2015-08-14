@@ -141,30 +141,28 @@ public class ImdnManager extends Thread {
      * Background processing
      */
     public void run() {
-        if (sLogger.isActivated()) {
-            sLogger.info("Start background processing");
-        }
         DeliveryStatus delivery = null;
         while ((delivery = (DeliveryStatus) mBuffer.getObject()) != null) {
             try {
-                // Send SIP MESSAGE
                 sendSipMessageDeliveryStatus(delivery, null); // TODO: add sip.instance
 
-                // Update rich messaging history when sending DISPLAYED report
-                // Since the requested display report was now successfully send we mark this message
-                // as fully received
+                /*
+                 * Update rich messaging history when sending DISPLAYED report Since the requested
+                 * display report was now successfully send we mark this message as fully received
+                 */
                 if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(delivery.getStatus())) {
                     mCore.getListener().handleChatMessageDisplayReportSent(delivery.getChatId(),
                             delivery.getRemote(), delivery.getMsgId());
                 }
-            } catch (Exception e) {
+            } catch (SipPayloadException e) {
+                sLogger.error(
+                        "Failed to send delivery status for chatId : ".concat(delivery.getChatId()),
+                        e);
+            } catch (SipNetworkException e) {
                 if (sLogger.isActivated()) {
-                    sLogger.error("Unexpected exception", e);
+                    sLogger.debug(e.getMessage());
                 }
             }
-        }
-        if (sLogger.isActivated()) {
-            sLogger.info("End of background processing");
         }
     }
 

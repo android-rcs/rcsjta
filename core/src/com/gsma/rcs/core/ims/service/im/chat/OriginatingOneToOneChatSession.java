@@ -28,6 +28,8 @@ import com.gsma.rcs.core.ims.network.sip.Multipart;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
@@ -164,8 +166,13 @@ public class OriginatingOneToOneChatSession extends OneToOneChatSession {
         } catch (InvalidArgumentException e) {
             mLogger.error("Unable to set authorization header for chat invite!", e);
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
-        } catch (SipException e) {
+        } catch (SipPayloadException e) {
             mLogger.error("Unable to send 200OK response!", e);
+            handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
+        } catch (SipNetworkException e) {
+            if (mLogger.isActivated()) {
+                mLogger.debug(e.getMessage());
+            }
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
         } catch (RuntimeException e) {
             /*

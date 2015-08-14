@@ -361,8 +361,10 @@ public abstract class GroupChatSession extends ChatSession {
      * Receive CANCEL request
      * 
      * @param cancel CANCEL request
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void receiveCancel(SipRequest cancel) {
+    public void receiveCancel(SipRequest cancel) throws SipNetworkException, SipPayloadException {
         mConferenceSubscriber.terminate();
 
         super.receiveCancel(cancel);
@@ -653,9 +655,9 @@ public abstract class GroupChatSession extends ChatSession {
      * Create an INVITE request
      * 
      * @return the INVITE request
-     * @throws SipException
+     * @throws SipPayloadException
      */
-    public SipRequest createInvite() throws SipException {
+    public SipRequest createInvite() throws SipPayloadException {
         // Nothing to do in terminating side
         return null;
     }
@@ -664,9 +666,10 @@ public abstract class GroupChatSession extends ChatSession {
      * Handle 200 0K response
      * 
      * @param resp 200 OK response
-     * @throws SipException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void handle200OK(SipResponse resp) throws SipException {
+    public void handle200OK(SipResponse resp) throws SipPayloadException, SipNetworkException {
         super.handle200OK(resp);
 
         mConferenceSubscriber.subscribe();

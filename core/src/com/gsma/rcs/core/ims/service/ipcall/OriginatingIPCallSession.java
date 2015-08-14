@@ -25,7 +25,8 @@ package com.gsma.rcs.core.ims.service.ipcall;
 import com.gsma.rcs.core.content.AudioContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
-import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.provider.contact.ContactManager;
@@ -34,6 +35,8 @@ import com.gsma.rcs.service.ipcalldraft.IIPCallPlayer;
 import com.gsma.rcs.service.ipcalldraft.IIPCallRenderer;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
+
+import javax2.sip.InvalidArgumentException;
 
 /**
  * Originating IP call session
@@ -85,56 +88,52 @@ public class OriginatingIPCallSession extends IPCallSession {
             if (sLogger.isActivated()) {
                 sLogger.info("Initiate a new IP call session as originating");
             }
-
-            // Check audio parameters
             if (getAudioContent() == null) {
                 handleError(new IPCallError(IPCallError.UNSUPPORTED_AUDIO_TYPE,
                         "Audio codec not supported"));
                 return;
             }
-
-            // Build SDP proposal
             String sdp = buildAudioVideoSdpProposal();
-
-            // Set the local SDP part in the dialog path
             getDialogPath().setLocalContent(sdp);
-
-            // Create an INVITE request
             if (sLogger.isActivated()) {
                 sLogger.info("Send INVITE");
             }
             SipRequest invite;
             if (getVideoContent() == null) {
-                // Voice call
                 invite = SipMessageFactory.createInvite(getDialogPath(),
                         IPCallService.FEATURE_TAGS_IP_VOICE_CALL, sdp);
             } else {
-                // Visio call
                 invite = SipMessageFactory.createInvite(getDialogPath(),
                         IPCallService.FEATURE_TAGS_IP_VIDEO_CALL, sdp);
             }
-
-            // Set the Authorization header
             getAuthenticationAgent().setAuthorizationHeader(invite);
-
-            // Set initial request in the dialog path
             getDialogPath().setInvite(invite);
-
-            // Send INVITE request
             sendInvite(invite);
-
-        } catch (Exception e) {
+        } catch (SipPayloadException e) {
+            sLogger.error("Session initiation has failed!", e);
+            handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        } catch (SipNetworkException e) {
             if (sLogger.isActivated()) {
-                sLogger.error("Session initiation has failed", e);
+                sLogger.debug(e.getMessage());
             }
-
-            // Unexpected error
+            handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        } catch (InvalidArgumentException e) {
+            sLogger.error("Session initiation has failed!", e);
+            handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        } catch (RuntimeException e) {
+            /*
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
+             */
+            sLogger.error("Session initiation has failed!", e);
             handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
         }
     }
 
     @Override
-    public SipRequest createInvite() throws SipException {
+    public SipRequest createInvite() throws SipPayloadException {
         if (getVideoContent() == null) {
             // Voice call
             return SipMessageFactory.createInvite(getDialogPath(),

@@ -32,7 +32,8 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -293,11 +294,16 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
                 // No response received: timeout
                 handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED));
             }
-        } catch (SipException e) {
+        } catch (SipPayloadException e) {
             sLogger.error(
                     new StringBuilder("Session initiation has failed for CallId=")
                             .append(getDialogPath().getCallId()).append(" ContactId=")
                             .append(getRemoteContact()).toString(), e);
+            handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
+        } catch (SipNetworkException e) {
+            if (logActivated) {
+                sLogger.debug(e.getMessage());
+            }
             handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
         } catch (MsrpException e) {
             handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));

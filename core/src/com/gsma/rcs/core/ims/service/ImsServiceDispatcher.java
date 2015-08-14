@@ -520,19 +520,11 @@ public class ImsServiceDispatcher extends Thread {
             if (session != null) {
                 session.receiveCancel(request);
             }
-
-            // Send a 200 OK
-            try {
-                if (logActivated) {
-                    sLogger.info("Send 200 OK");
-                }
-                SipResponse cancelResp = SipMessageFactory.createResponse(request, Response.OK);
-                mImsModule.getSipManager().sendSipResponse(cancelResp);
-            } catch (Exception e) {
-                if (logActivated) {
-                    sLogger.error("Can't send 200 OK response", e);
-                }
+            if (logActivated) {
+                sLogger.info("Send 200 OK");
             }
+            mImsModule.getSipManager().sendSipResponse(
+                    SipMessageFactory.createResponse(request, Response.OK));
         } else if (request.getMethod().equals(Request.UPDATE)) {
             // UPDATE received
             if (session != null) {
@@ -635,17 +627,12 @@ public class ImsServiceDispatcher extends Thread {
      * Send a 100 Trying response to the remote party
      * 
      * @param request SIP request
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void send100Trying(SipRequest request) {
-        try {
-            // Send a 100 Trying response
-            SipResponse trying = SipMessageFactory.createResponse(request, null, 100);
-            mImsModule.getCurrentNetworkInterface().getSipManager().sendSipResponse(trying);
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Can't send a 100 Trying response");
-            }
-        }
+    private void send100Trying(SipRequest request) throws SipNetworkException, SipPayloadException {
+        mImsModule.getCurrentNetworkInterface().getSipManager()
+                .sendSipResponse(SipMessageFactory.createResponse(request, null, Response.TRYING));
     }
 
     /**
@@ -653,17 +640,16 @@ public class ImsServiceDispatcher extends Thread {
      * 
      * @param request SIP request
      * @param code Response code
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void sendFinalResponse(SipRequest request, int code) {
-        try {
-            SipResponse resp = SipMessageFactory.createResponse(request,
-                    IdGenerator.getIdentifier(), code);
-            mImsModule.getCurrentNetworkInterface().getSipManager().sendSipResponse(resp);
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Can't send a " + code + " response");
-            }
-        }
+    private void sendFinalResponse(SipRequest request, int code) throws SipNetworkException,
+            SipPayloadException {
+        mImsModule
+                .getCurrentNetworkInterface()
+                .getSipManager()
+                .sendSipResponse(
+                        SipMessageFactory.createResponse(request, IdGenerator.getIdentifier(), code));
     }
 
     /**
@@ -672,17 +658,17 @@ public class ImsServiceDispatcher extends Thread {
      * @param request SIP request
      * @param code Response code
      * @param warning Warning message
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void sendFinalResponse(SipRequest request, int code, String warning) {
-        try {
-            SipResponse resp = SipMessageFactory.createResponse(request,
-                    IdGenerator.getIdentifier(), code, warning);
-            mImsModule.getCurrentNetworkInterface().getSipManager().sendSipResponse(resp);
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Can't send a " + code + " response");
-            }
-        }
+    private void sendFinalResponse(SipRequest request, int code, String warning)
+            throws SipNetworkException, SipPayloadException {
+        mImsModule
+                .getCurrentNetworkInterface()
+                .getSipManager()
+                .sendSipResponse(
+                        SipMessageFactory.createResponse(request, IdGenerator.getIdentifier(),
+                                code, warning));
     }
 
     /**

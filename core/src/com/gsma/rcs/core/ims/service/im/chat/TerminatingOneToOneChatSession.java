@@ -34,7 +34,6 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
@@ -66,8 +65,8 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
     /**
      * The logger
      */
-    private final Logger mLogger = Logger.getLogger(TerminatingOneToOneChatSession.class
-            .getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(TerminatingOneToOneChatSession.class
+            .getName());
 
     /**
      * Constructor
@@ -123,10 +122,10 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
      * Background processing
      */
     public void run() {
-        final boolean logActivated = mLogger.isActivated();
+        final boolean logActivated = sLogger.isActivated();
         try {
             if (logActivated) {
-                mLogger.info("Initiate a new 1-1 chat session as terminating");
+                sLogger.info("Initiate a new 1-1 chat session as terminating");
             }
             ContactId remote = getRemoteContact();
             SipDialogPath dialogPath = getDialogPath();
@@ -149,7 +148,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
             /* Check if session should be auto-accepted once */
             if (isSessionAccepted()) {
                 if (logActivated) {
-                    mLogger.debug("Received one-to-one chat invitation marked for auto-accept");
+                    sLogger.debug("Received one-to-one chat invitation marked for auto-accept");
                 }
 
                 for (ImsSessionListener listener : listeners) {
@@ -157,7 +156,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
                 }
             } else {
                 if (logActivated) {
-                    mLogger.debug("Received one-to-one chat invitation marked for manual accept");
+                    sLogger.debug("Received one-to-one chat invitation marked for manual accept");
                 }
 
                 for (ImsSessionListener listener : listeners) {
@@ -172,7 +171,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
                         /* Intentional fall through */
                     case INVITATION_REJECTED_BUSY_HERE:
                         if (logActivated) {
-                            mLogger.debug("Session has been rejected by user");
+                            sLogger.debug("Session has been rejected by user");
                         }
                         sendErrorResponse(dialogPath.getInvite(), dialogPath.getLocalTag(), answer);
                         removeSession();
@@ -185,7 +184,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 
                     case INVITATION_TIMEOUT:
                         if (logActivated) {
-                            mLogger.debug("Session has been rejected on timeout");
+                            sLogger.debug("Session has been rejected on timeout");
                         }
 
                         /* Ringing period timeout */
@@ -201,14 +200,14 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 
                     case INVITATION_REJECTED_BY_SYSTEM:
                         if (logActivated) {
-                            mLogger.debug("Session has been aborted by system");
+                            sLogger.debug("Session has been aborted by system");
                         }
                         removeSession();
                         return;
 
                     case INVITATION_CANCELED:
                         if (logActivated) {
-                            mLogger.debug("Session has been rejected by remote");
+                            sLogger.debug("Session has been rejected by remote");
                         }
 
                         removeSession();
@@ -228,15 +227,15 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
                         break;
 
                     case INVITATION_DELETED:
-                        if (mLogger.isActivated()) {
-                            mLogger.debug("Session has been deleted");
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("Session has been deleted");
                         }
                         removeSession();
                         return;
 
                     default:
                         if (logActivated) {
-                            mLogger.debug("Unknown invitation answer in run; answer=".concat(String
+                            sLogger.debug("Unknown invitation answer in run; answer=".concat(String
                                     .valueOf(answer)));
                         }
                         break;
@@ -265,13 +264,13 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
                 remoteSetup = attr2.getValue();
             }
             if (logActivated) {
-                mLogger.debug("Remote setup attribute is ".concat(remoteSetup));
+                sLogger.debug("Remote setup attribute is ".concat(remoteSetup));
             }
 
             /* Set setup mode */
             String localSetup = createSetupAnswer(remoteSetup);
             if (logActivated) {
-                mLogger.debug("Local setup attribute is ".concat(localSetup));
+                sLogger.debug("Local setup attribute is ".concat(localSetup));
             }
 
             /* Set local port */
@@ -294,14 +293,14 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
             /* Test if the session should be interrupted */
             if (isInterrupted()) {
                 if (logActivated) {
-                    mLogger.debug("Session has been interrupted: end of processing");
+                    sLogger.debug("Session has been interrupted: end of processing");
                 }
                 return;
             }
 
             /* Create a 200 OK response */
             if (logActivated) {
-                mLogger.info("Send 200 OK");
+                sLogger.info("Send 200 OK");
             }
             SipResponse resp = SipMessageFactory.create200OkInviteResponse(dialogPath,
                     getFeatureTags(), sdp);
@@ -332,7 +331,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
             /* Test if the session should be interrupted */
             if (isInterrupted()) {
                 if (logActivated) {
-                    mLogger.debug("Session has been interrupted: end of processing");
+                    sLogger.debug("Session has been interrupted: end of processing");
                 }
                 return;
             }
@@ -340,7 +339,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
             /* Analyze the received response */
             if (ctx.isSipAck()) {
                 if (logActivated) {
-                    mLogger.info("ACK request received");
+                    sLogger.info("ACK request received");
                 }
                 dialogPath.setSessionEstablished();
 
@@ -366,7 +365,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 
             } else {
                 if (logActivated) {
-                    mLogger.debug("No ACK received for INVITE");
+                    sLogger.debug("No ACK received for INVITE");
                 }
 
                 /* No response received: timeout */
@@ -374,8 +373,13 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
             }
         } catch (MsrpException e) {
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
-        } catch (SipException e) {
-            mLogger.error("Unable to send 200OK response!", e);
+        } catch (SipPayloadException e) {
+            sLogger.error("Unable to send 200OK response!", e);
+            handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
+        } catch (SipNetworkException e) {
+            if (logActivated) {
+                sLogger.debug(e.getMessage());
+            }
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
         } catch (IOException e) {
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
@@ -384,7 +388,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
-            mLogger.error("Failed to initiate chat session as terminating!", e);
+            sLogger.error("Failed to initiate chat session as terminating!", e);
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
         }
     }
@@ -402,10 +406,11 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 
     @Override
     public void startSession() {
-        final boolean logActivated = mLogger.isActivated();
+        final boolean logActivated = sLogger.isActivated();
         ContactId remote = getRemoteContact();
         if (logActivated) {
-            mLogger.debug("Start OneToOneChatSession with '" + remote + "'");
+            sLogger.debug(new StringBuilder("Start OneToOneChatSession with '").append(remote)
+                    .append("'").toString());
         }
         InstantMessagingService imService = getImsService().getImsModule()
                 .getInstantMessagingService();
@@ -420,8 +425,9 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
                  * that was locally originated with the same contact.
                  */
                 if (logActivated) {
-                    mLogger.warn("Rejecting OneToOneChatSession (session id '" + getSessionID()
-                            + "') with '" + remote + "'");
+                    sLogger.warn(new StringBuilder("Rejecting OneToOneChatSession (session id '")
+                            .append(getSessionID()).append("') with '").append(remote).append("'")
+                            .toString());
                 }
                 rejectSession();
                 return;
@@ -432,8 +438,10 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
              * CURRENT rcs chat session if there is one and replace it with the new one.
              */
             if (logActivated) {
-                mLogger.warn("Rejecting/Aborting existing OneToOneChatSession (session id '"
-                        + getSessionID() + "') with '" + remote + "'");
+                sLogger.warn(new StringBuilder(
+                        "Rejecting/Aborting existing OneToOneChatSession (session id '")
+                        .append(getSessionID()).append("') with '").append(remote).append("'")
+                        .toString());
             }
             if (currentSessionInitiatedByRemote) {
                 if (currentSessionEstablished) {

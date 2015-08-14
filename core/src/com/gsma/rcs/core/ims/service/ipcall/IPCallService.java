@@ -31,6 +31,7 @@ import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
@@ -249,9 +250,10 @@ public class IPCallService extends ImsService {
      * @param audio
      * @param video
      * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     public void receiveIPCallInvitation(SipRequest invite, boolean audio, boolean video)
-            throws SipPayloadException {
+            throws SipPayloadException, SipNetworkException {
         boolean logActivated = sLogger.isActivated();
         // Parse contact
         PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(SipUtils

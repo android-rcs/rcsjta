@@ -24,6 +24,8 @@ package com.gsma.rcs.core.ims.service.sip;
 
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
@@ -144,8 +146,11 @@ public class SipService extends ImsService {
      * @param sessionInvite Resolved intent
      * @param invite Initial invite
      * @param timestamp Local timestamp when got SipRequest
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void receiveMsrpSessionInvitation(Intent sessionInvite, SipRequest invite, long timestamp) {
+    public void receiveMsrpSessionInvitation(Intent sessionInvite, SipRequest invite, long timestamp)
+            throws SipPayloadException, SipNetworkException {
         PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(SipUtils
                 .getAssertedIdentity(invite));
         if (number == null) {
@@ -207,8 +212,11 @@ public class SipService extends ImsService {
      * @param sessionInvite Resolved intent
      * @param invite Initial invite
      * @param timestamp Local timestamp when got SipRequest
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void receiveRtpSessionInvitation(Intent sessionInvite, SipRequest invite, long timestamp) {
+    public void receiveRtpSessionInvitation(Intent sessionInvite, SipRequest invite, long timestamp)
+            throws SipPayloadException, SipNetworkException {
         PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(SipUtils
                 .getAssertedIdentity(invite));
         if (number == null) {

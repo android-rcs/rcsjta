@@ -26,6 +26,7 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
 import android.net.Uri;
@@ -264,24 +265,21 @@ public class HttpDownloadManager extends HttpTransferManager {
         if (sLogger.isActivated()) {
             sLogger.debug("Download file icon from ".concat(getHttpServerAddr().toString()));
         }
-        // Send GET request
         HttpGet request = new HttpGet(iconUri.toString());
         if (HTTP_TRACE_ENABLED) {
             System.out.println(new StringBuilder(">>> Send HTTP request:").append("\n"
                     + request.getMethod() + " " + request.getRequestLine().getUri()));
         }
-
-        // Execute request
-        ByteArrayOutputStream baos;
-        baos = getThumbnail(request);
+        ByteArrayOutputStream baos = getThumbnail(request);
         try {
-            // Save data to file
             fileIcon.writeData2File(baos.toByteArray());
         } finally {
+            CloseableUtils.close(baos);
             if (fileIcon != null) {
                 try {
                     fileIcon.closeFile();
-                } catch (Exception e2) {
+                } catch (IOException e) {
+                    /* Nothing to be handled here */
                 }
             }
         }

@@ -44,6 +44,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Vector;
 
+import javax2.sip.InvalidArgumentException;
 import javax2.sip.header.ContactHeader;
 import javax2.sip.message.Response;
 
@@ -654,46 +655,32 @@ public abstract class ImsServiceSession extends Thread {
      * Receive CANCEL request
      * 
      * @param cancel CANCEL request
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void receiveCancel(SipRequest cancel) {
+    public void receiveCancel(SipRequest cancel) throws SipNetworkException, SipPayloadException {
         if (sLogger.isActivated()) {
             sLogger.info("Receive a CANCEL message from the remote");
         }
-
         if (getDialogPath().isSigEstablished()) {
             if (sLogger.isActivated()) {
                 sLogger.info("Ignore the received CANCEL message from the remote (session already established)");
             }
             return;
         }
-
-        // Close media session
         closeMediaSession();
-
-        // Update dialog path
         getDialogPath().setSessionCancelled();
-
-        // Send a 487 Request terminated
-        try {
-            if (sLogger.isActivated()) {
-                sLogger.info("Send 487 Request terminated");
-            }
-            SipResponse terminatedResp = SipMessageFactory.createResponse(getDialogPath()
-                    .getInvite(), getDialogPath().getLocalTag(), 487);
-            getImsService().getImsModule().getSipManager().sendSipResponse(terminatedResp);
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Can't send 487 error response", e);
-            }
+        if (sLogger.isActivated()) {
+            sLogger.info("Send 487 Request terminated");
         }
-
-        // Remove the current session
+        getImsService()
+                .getImsModule()
+                .getSipManager()
+                .sendSipResponse(
+                        SipMessageFactory.createResponse(getDialogPath().getInvite(),
+                                getDialogPath().getLocalTag(), Response.REQUEST_TERMINATED));
         removeSession();
-
-        // Set invitation status
         mInvitationStatus = InvitationStatus.INVITATION_CANCELED;
-
-        // Unblock semaphore
         synchronized (mWaitUserAnswer) {
             mWaitUserAnswer.notifyAll();
         }
@@ -716,8 +703,10 @@ public abstract class ImsServiceSession extends Thread {
      * Receive UPDATE request
      * 
      * @param update UPDATE request
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void receiveUpdate(SipRequest update) {
+    public void receiveUpdate(SipRequest update) throws SipNetworkException, SipPayloadException {
         mSessionTimer.receiveUpdate(update);
     }
 
@@ -760,16 +749,16 @@ public abstract class ImsServiceSession extends Thread {
      * 
      * @param request SIP request
      * @param localTag Local tag
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void send180Ringing(SipRequest request, String localTag) {
-        try {
-            SipResponse progress = SipMessageFactory.createResponse(request, localTag, 180);
-            getImsService().getImsModule().getSipManager().sendSipResponse(progress);
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Can't send a 180 Ringing response");
-            }
-        }
+    public void send180Ringing(SipRequest request, String localTag) throws SipNetworkException,
+            SipPayloadException {
+        getImsService()
+                .getImsModule()
+                .getSipManager()
+                .sendSipResponse(
+                        SipMessageFactory.createResponse(request, localTag, Response.RINGING));
     }
 
     /**
@@ -810,20 +799,19 @@ public abstract class ImsServiceSession extends Thread {
      * 
      * @param request SIP request
      * @param localTag Local tag
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void send603Decline(SipRequest request, String localTag) {
-        try {
-            // Send a 603 Decline error
-            if (sLogger.isActivated()) {
-                sLogger.info("Send 603 Decline");
-            }
-            SipResponse resp = SipMessageFactory.createResponse(request, localTag, 603);
-            getImsService().getImsModule().getSipManager().sendSipResponse(resp);
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Can't send 603 Decline response", e);
-            }
+    public void send603Decline(SipRequest request, String localTag) throws SipNetworkException,
+            SipPayloadException {
+        if (sLogger.isActivated()) {
+            sLogger.info("Send 603 Decline");
         }
+        getImsService()
+                .getImsModule()
+                .getSipManager()
+                .sendSipResponse(
+                        SipMessageFactory.createResponse(request, localTag, Response.DECLINE));
     }
 
     /**
@@ -832,20 +820,20 @@ public abstract class ImsServiceSession extends Thread {
      * @param request SIP request
      * @param localTag Local tag
      * @param warning the warning message
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void send403Forbidden(SipRequest request, String localTag, String warning) {
-        try {
-            // Send a 403 Forbidden
-            if (sLogger.isActivated()) {
-                sLogger.info("Send 403 Forbidden (warning=" + warning + ")");
-            }
-            SipResponse resp = SipMessageFactory.createResponse(request, localTag, 403, warning);
-            getImsService().getImsModule().getSipManager().sendSipResponse(resp);
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Can't send 403 Forbidden response", e);
-            }
+    private void send403Forbidden(SipRequest request, String localTag, String warning)
+            throws SipNetworkException, SipPayloadException {
+        if (sLogger.isActivated()) {
+            sLogger.info("Send 403 Forbidden (warning=" + warning + ")");
         }
+        getImsService()
+                .getImsModule()
+                .getSipManager()
+                .sendSipResponse(
+                        SipMessageFactory.createResponse(request, localTag, Response.FORBIDDEN,
+                                warning));
     }
 
     /**
@@ -853,40 +841,38 @@ public abstract class ImsServiceSession extends Thread {
      * 
      * @param request SIP request
      * @param localTag Local tag
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void send486Busy(SipRequest request, String localTag) {
-        try {
-            // Send a 486 Busy error
-            if (sLogger.isActivated()) {
-                sLogger.info("Send 486 Busy");
-            }
-            SipResponse resp = SipMessageFactory.createResponse(request, localTag, 486);
-            getImsService().getImsModule().getSipManager().sendSipResponse(resp);
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Can't send 486 Busy response", e);
-            }
+    public void send486Busy(SipRequest request, String localTag) throws SipNetworkException,
+            SipPayloadException {
+        if (sLogger.isActivated()) {
+            sLogger.info("Send 486 Busy");
         }
+        getImsService()
+                .getImsModule()
+                .getSipManager()
+                .sendSipResponse(
+                        SipMessageFactory.createResponse(request, localTag, Response.BUSY_HERE));
     }
 
     /**
      * Send a 415 "Unsupported Media Type" to the remote party
      * 
      * @param request SIP request
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void send415Error(SipRequest request) {
-        try {
-            if (sLogger.isActivated()) {
-                sLogger.info("Send 415 Unsupported Media Type");
-            }
-            SipResponse resp = SipMessageFactory.createResponse(request, 415);
-            // TODO: set Accept-Encoding header
-            getImsService().getImsModule().getSipManager().sendSipResponse(resp);
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Can't send 415 error response", e);
-            }
+    public void send415Error(SipRequest request) throws SipNetworkException, SipPayloadException {
+        if (sLogger.isActivated()) {
+            sLogger.info("Send 415 Unsupported Media Type");
         }
+        // TODO: set Accept-Encoding header
+        getImsService()
+                .getImsModule()
+                .getSipManager()
+                .sendSipResponse(
+                        SipMessageFactory.createResponse(request, Response.UNSUPPORTED_MEDIA_TYPE));
     }
 
     /**
@@ -978,17 +964,18 @@ public abstract class ImsServiceSession extends Thread {
      * Create an INVITE request
      * 
      * @return the INVITE request
-     * @throws SipException
+     * @throws SipPayloadException
      */
-    public abstract SipRequest createInvite() throws SipException;
+    public abstract SipRequest createInvite() throws SipPayloadException;
 
     /**
      * Send INVITE message
      * 
      * @param invite SIP INVITE
-     * @throws SipException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void sendInvite(SipRequest invite) throws SipException {
+    public void sendInvite(SipRequest invite) throws SipPayloadException, SipNetworkException {
         // Send INVITE request
         SipTransactionContext ctx = getImsService()
                 .getImsModule()
@@ -1057,9 +1044,10 @@ public abstract class ImsServiceSession extends Thread {
      * Handle 200 0K response
      * 
      * @param resp 200 OK response
-     * @throws SipException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void handle200OK(SipResponse resp) throws SipException {
+    public void handle200OK(SipResponse resp) throws SipPayloadException, SipNetworkException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info("200 OK response received");
@@ -1148,8 +1136,11 @@ public abstract class ImsServiceSession extends Thread {
      * Handle 407 Proxy Authentication Required
      * 
      * @param resp 407 response
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void handle407Authentication(SipResponse resp) {
+    public void handle407Authentication(SipResponse resp) throws SipPayloadException,
+            SipNetworkException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info("407 response received");
@@ -1175,23 +1166,21 @@ public abstract class ImsServiceSession extends Thread {
 
             // Send INVITE request
             sendInvite(invite);
-
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Session initiation has failed", e);
-            }
-
-            // Unexpected error
-            handleError(new ImsServiceError(ImsServiceError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException("Unable to fetch Authorization header!", e);
         }
+
     }
 
     /**
      * Handle 422 response
      * 
      * @param resp 422 response
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void handle422SessionTooSmall(SipResponse resp) {
+    public void handle422SessionTooSmall(SipResponse resp) throws SipPayloadException,
+            SipNetworkException {
         try {
             // 422 response received
             if (sLogger.isActivated()) {
@@ -1233,14 +1222,8 @@ public abstract class ImsServiceSession extends Thread {
 
             // Send INVITE request
             sendInvite(invite);
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Session initiation has failed", e);
-            }
-
-            // Unexpected error
-            handleError(new ImsSessionBasedServiceError(
-                    ImsSessionBasedServiceError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        } catch (InvalidArgumentException e) {
+            throw new SipPayloadException("Unable to fetch Authorization header!", e);
         }
     }
 
@@ -1336,9 +1319,10 @@ public abstract class ImsServiceSession extends Thread {
      * @param serviceContext
      * @return SDP built
      * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     public String buildReInviteSdpResponse(SipRequest ReInvite, int serviceContext)
-            throws SipPayloadException {
+            throws SipPayloadException, SipNetworkException {
         return null;
     }
 

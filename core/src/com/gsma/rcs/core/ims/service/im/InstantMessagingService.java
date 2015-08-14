@@ -1407,8 +1407,11 @@ public class InstantMessagingService extends ImsService {
      * 
      * @param invite Received invite
      * @param timestamp Local timestamp when got SipRequest
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void receiveStoredAndForwardPushNotifications(SipRequest invite, long timestamp) {
+    public void receiveStoredAndForwardPushNotifications(SipRequest invite, long timestamp)
+            throws SipPayloadException, SipNetworkException {
         String referredId = ChatUtils.getReferredIdentityAsContactUri(invite);
         ContactId remote = ChatUtils.getReferredIdentityAsContactId(invite);
         if (remote == null) {

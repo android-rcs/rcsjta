@@ -29,6 +29,7 @@ import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.provider.contact.ContactManager;
@@ -165,24 +166,16 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
      * 
      * @param content Content part
      * @return Request
-     * @throws SipException
+     * @throws SipPayloadException
      */
-    private SipRequest createInviteRequest(String content) throws SipException {
+    private SipRequest createInviteRequest(String content) throws SipPayloadException {
         SipRequest invite = SipMessageFactory.createMultipartInvite(getDialogPath(),
                 getFeatureTags(), getAcceptContactTags(), content, BOUNDARY_TAG);
-
-        // Test if there is a subject
         if (getSubject() != null) {
-            // Add a subject header
             invite.addHeader(SubjectHeader.NAME, getSubject());
         }
-
-        // Add a require header
         invite.addHeader(RequireHeader.NAME, "recipient-list-invite");
-
-        // Add a contribution ID header
         invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());
-
         return invite;
     }
 
@@ -190,9 +183,9 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
      * Create an INVITE request
      * 
      * @return the INVITE request
-     * @throws SipException
+     * @throws SipPayloadException
      */
-    public SipRequest createInvite() throws SipException {
+    public SipRequest createInvite() throws SipPayloadException {
         return createInviteRequest(getDialogPath().getLocalContent());
     }
 

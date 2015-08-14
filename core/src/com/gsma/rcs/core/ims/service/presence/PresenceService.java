@@ -47,6 +47,8 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.Context;
+import android.content.OperationApplicationException;
+import android.os.RemoteException;
 
 import java.util.Set;
 
@@ -220,85 +222,63 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * 
      * @param list of granted contacts
      * @param list of blocked contacts
+     * @throws SipPayloadException
      */
     private void firstLaunchOrAccountChangedCheck(Set<ContactId> grantedContacts,
-            Set<ContactId> blockedContacts) {
-        boolean logActivated = logger.isActivated();
-        if (logActivated) {
-            logger.debug("First launch or account change check procedure");
-        }
-
-        // Flush the address book provider
-        mContactManager.flushRcsContactProvider();
-
-        ContactId me = null;
-        String publicUri = ImsModule.IMS_USER_PROFILE.getPublicUri();
-        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(publicUri);
-        if (number == null) {
+            Set<ContactId> blockedContacts) throws SipPayloadException {
+        final String publicUri = ImsModule.IMS_USER_PROFILE.getPublicUri();
+        try {
+            boolean logActivated = logger.isActivated();
             if (logActivated) {
-                logger.error("Cannot parse user contact " + publicUri);
+                logger.debug("First launch or account change check procedure");
             }
-        } else {
-            me = ContactUtil.createContactIdFromValidatedData(number);
-        }
-        // Treat the buddy list
-        for (ContactId contact : grantedContacts) {
-            if (me != null && !contact.equals(me)) {
-                // For each RCS granted contact, except me
-                if (!PresenceUtils.isNumberInAddressBook(contact)) {
-                    // If it is not present in the address book
-                    if (logActivated) {
-                        logger.debug("The RCS number " + contact
-                                + " was not found in the address book: add it");
-                    }
+            mContactManager.flushRcsContactProvider();
+            ContactId me = null;
+            PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(publicUri);
+            if (number == null) {
+                if (logActivated) {
+                    logger.error("Cannot parse user contact ".concat(publicUri));
+                }
+            } else {
+                me = ContactUtil.createContactIdFromValidatedData(number);
+            }
 
-                    // => We create the entry in the regular address book
-                    try {
+            for (ContactId contact : grantedContacts) {
+                if (me != null && !contact.equals(me)) {
+                    if (!PresenceUtils.isNumberInAddressBook(contact)) {
+                        if (logActivated) {
+                            logger.debug(new StringBuilder("The RCS number ").append(contact)
+                                    .append(" was not found in the address book: add it")
+                                    .toString());
+                        }
                         PresenceUtils.createRcsContactIfNeeded(
                                 AndroidFactory.getApplicationContext(), contact);
-                    } catch (Exception e) {
-                        if (logActivated) {
-                            logger.error("Something went wrong when creating contact " + contact, e);
-                        }
                     }
+                    mContactManager.updateRcsStatusOrCreateNewContact(contact,
+                            RcsStatus.PENDING_OUT);
                 }
-
-                // Add the contact to the rich address book provider
-                mContactManager.updateRcsStatusOrCreateNewContact(contact, RcsStatus.PENDING_OUT);
             }
-        }
 
-        // Treat the blocked contact list
-        for (ContactId contact : blockedContacts) {
-            // For each RCS blocked contact
-            if (!PresenceUtils.isNumberInAddressBook(contact)) {
-                // If it is not present in the address book
-                if (logActivated) {
-                    logger.debug("The RCS number " + contact
-                            + " was not found in the address book: add it");
-                }
-
-                // => We create the entry in the regular address book
-                try {
+            for (ContactId contact : blockedContacts) {
+                if (!PresenceUtils.isNumberInAddressBook(contact)) {
+                    if (logActivated) {
+                        logger.debug(new StringBuilder("The RCS number ").append(contact)
+                                .append(" was not found in the address book: add it").toString());
+                    }
                     PresenceUtils.createRcsContactIfNeeded(AndroidFactory.getApplicationContext(),
                             contact);
-                } catch (Exception e) {
-                    if (logActivated) {
-                        logger.error("Something went wrong when creating contact " + contact, e);
-                    }
-                }
-                // Set the presence sharing status to blocked
-                try {
                     mContactManager.blockContact(contact);
-                } catch (ContactManagerException e) {
-                    if (logActivated) {
-                        logger.error("Something went wrong when blocking contact " + contact, e);
-                    }
+                    mContactManager.updateRcsStatusOrCreateNewContact(contact, RcsStatus.BLOCKED);
                 }
-
-                // Add the contact to the rich address book provider
-                mContactManager.updateRcsStatusOrCreateNewContact(contact, RcsStatus.BLOCKED);
             }
+        } catch (OperationApplicationException e) {
+            throw new SipPayloadException("Failed creating contact for URI : ".concat(publicUri), e);
+
+        } catch (ContactManagerException e) {
+            throw new SipPayloadException("Failed creating contact : ".concat(publicUri), e);
+
+        } catch (RemoteException e) {
+            throw new SipPayloadException("Failed creating contact : ".concat(publicUri), e);
         }
     }
 

@@ -25,7 +25,7 @@ package com.gsma.rcs.core.ims.service.sip;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
@@ -135,9 +135,9 @@ public abstract class GenericSipSession extends ImsServiceSession {
      * Create 200 OK response
      * 
      * @return Response
-     * @throws SipException
+     * @throws SipPayloadException
      */
-    public SipResponse create200OKResponse() throws SipException {
+    public SipResponse create200OKResponse() throws SipPayloadException {
         String ext = FeatureTags.FEATURE_3GPP + "=\"" + FeatureTags.FEATURE_3GPP_EXTENSION + "\"";
         SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
                 new String[] {
@@ -203,7 +203,7 @@ public abstract class GenericSipSession extends ImsServiceSession {
     }
 
     @Override
-    public void receiveCancel(SipRequest cancel) {
+    public void receiveCancel(SipRequest cancel) throws SipNetworkException, SipPayloadException {
         super.receiveCancel(cancel);
 
         // Request capabilities to the remote

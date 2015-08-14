@@ -26,7 +26,8 @@ import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
-import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
@@ -222,15 +223,12 @@ public abstract class OneToOneChatSession extends ChatSession {
      * 
      * @param content Content part
      * @return Request
-     * @throws SipException
+     * @throws SipPayloadException
      */
-    private SipRequest createMultipartInviteRequest(String content) throws SipException {
+    private SipRequest createMultipartInviteRequest(String content) throws SipPayloadException {
         SipRequest invite = SipMessageFactory.createMultipartInvite(getDialogPath(),
                 getFeatureTags(), content, BOUNDARY_TAG);
-
-        // Add a contribution ID header
         invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());
-
         return invite;
     }
 
@@ -239,15 +237,12 @@ public abstract class OneToOneChatSession extends ChatSession {
      * 
      * @param content Content part
      * @return Request
-     * @throws SipException
+     * @throws SipPayloadException
      */
-    private SipRequest createInviteRequest(String content) throws SipException {
+    private SipRequest createInviteRequest(String content) throws SipPayloadException {
         SipRequest invite = SipMessageFactory.createInvite(getDialogPath(),
                 InstantMessagingService.CHAT_FEATURE_TAGS, content);
-
-        // Add a contribution ID header
         invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());
-
         return invite;
     }
 
@@ -255,11 +250,9 @@ public abstract class OneToOneChatSession extends ChatSession {
      * Create an INVITE request
      * 
      * @return the INVITE request
-     * @throws SipException
+     * @throws SipPayloadException
      */
-    public SipRequest createInvite() throws SipException {
-        // If there is a first message then builds a multipart content else
-        // builds a SDP content
+    public SipRequest createInvite() throws SipPayloadException {
         String content = getDialogPath().getLocalContent();
         if (getFirstMessage() != null) {
             return createMultipartInviteRequest(content);
@@ -271,12 +264,11 @@ public abstract class OneToOneChatSession extends ChatSession {
      * Handle 200 0K response
      * 
      * @param resp 200 OK response
-     * @throws SipException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void handle200OK(SipResponse resp) throws SipException {
+    public void handle200OK(SipResponse resp) throws SipPayloadException, SipNetworkException {
         super.handle200OK(resp);
-
-        // Start the activity manager
         getActivityManager().start();
     }
 
@@ -373,10 +365,8 @@ public abstract class OneToOneChatSession extends ChatSession {
     }
 
     @Override
-    public void receiveCancel(SipRequest cancel) {
+    public void receiveCancel(SipRequest cancel) throws SipNetworkException, SipPayloadException {
         super.receiveCancel(cancel);
-
-        // Request capabilities to the remote
         getImsService().getImsModule().getCapabilityService()
                 .requestContactCapabilities(getRemoteContact());
     }
@@ -403,7 +393,7 @@ public abstract class OneToOneChatSession extends ChatSession {
 
     /**
      * Handle error
-     *
+     * 
      * @param msg ChatMessage that errored
      * @param error Error
      */

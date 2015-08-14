@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.presence.xdm;
@@ -27,27 +31,27 @@ public abstract class HttpRequest {
     /**
      * URL
      */
-    private String url;
+    private String mURl;
 
     /**
      * Content
      */
-    private String content;
+    private String mContent;
 
     /**
      * Content type
      */
-    private String contentType;
+    private String mContentType;
 
     /**
      * Cookie
      */
-    private String cookie = null;
+    private String mCookie;
 
     /**
      * HTTP authentication agent MD5
      */
-    private HttpAuthenticationAgent authenticationAgent = new HttpAuthenticationAgent();
+    private HttpAuthenticationAgent mAuthenticationAgent = new HttpAuthenticationAgent();
 
     /**
      * Constructor
@@ -57,9 +61,9 @@ public abstract class HttpRequest {
      * @param contentType Content type
      */
     public HttpRequest(String url, String content, String contentType) {
-        this.url = url;
-        this.content = content;
-        this.contentType = contentType;
+        mURl = url;
+        mContent = content;
+        mContentType = contentType;
     }
 
     /**
@@ -68,7 +72,7 @@ public abstract class HttpRequest {
      * @return Authentication agent
      */
     public HttpAuthenticationAgent getAuthenticationAgent() {
-        return authenticationAgent;
+        return mAuthenticationAgent;
     }
 
     /**
@@ -84,7 +88,7 @@ public abstract class HttpRequest {
      * @return URL
      */
     public String getUrl() {
-        return url;
+        return mURl;
     }
 
     /**
@@ -93,7 +97,7 @@ public abstract class HttpRequest {
      * @return Conetnt
      */
     public String getContent() {
-        return content;
+        return mContent;
     }
 
     /**
@@ -103,8 +107,8 @@ public abstract class HttpRequest {
      */
     public int getContentLength() {
         int length = 0;
-        if (content != null) {
-            length = content.length();
+        if (mContent != null) {
+            length = mContent.length();
         }
         return length;
     }
@@ -115,7 +119,7 @@ public abstract class HttpRequest {
      * @return Mime content type
      */
     public String getContentType() {
-        return contentType;
+        return mContentType;
     }
 
     /**
@@ -124,7 +128,7 @@ public abstract class HttpRequest {
      * @return Cookie
      */
     public String getCookie() {
-        return cookie;
+        return mCookie;
     }
 
     /**
@@ -133,7 +137,7 @@ public abstract class HttpRequest {
      * @param cookie Cookie
      */
     public void setCookie(String cookie) {
-        this.cookie = cookie;
+        mCookie = cookie;
     }
 
     /**
@@ -142,11 +146,6 @@ public abstract class HttpRequest {
      * @return AUID
      */
     public String getAUID() {
-        try {
-            String[] parts = url.split("/");
-            return parts[1];
-        } catch (Exception e) {
-            return null;
-        }
+        return mURl.split("/")[1];
     }
 }

@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +15,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.presence.xdm;
 
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.security.HttpDigestMd5Authentication;
 import com.gsma.rcs.utils.logger.Logger;
+
+import javax2.sip.InvalidArgumentException;
 
 /**
  * HTTP Digest MD5 authentication agent
@@ -53,41 +58,29 @@ public class HttpAuthenticationAgent {
      * @param requestUri Request Uri
      * @param body Entity body
      * @return authorizationHeader Authorization header
-     * @throws CoreException
+     * @throws InvalidArgumentException
      */
-    public String generateAuthorizationHeader(String method, String requestUri, String body)
-            throws CoreException {
-        try {
-            // Update nonce parameters
-            digest.updateNonceParameters();
-
-            // Calculate response
-            String user = ImsModule.IMS_USER_PROFILE.getXdmServerLogin();
-            String password = ImsModule.IMS_USER_PROFILE.getXdmServerPassword();
-            String response = digest.calculateResponse(user, password, method, requestUri,
-                    digest.buildNonceCounter(), body);
-
-            // Build the Authorization header
-            String auth = "Authorization: Digest username=\""
-                    + ImsModule.IMS_USER_PROFILE.getXdmServerLogin() + "\"" + ",realm=\""
-                    + digest.getRealm() + "\"" + ",nonce=\"" + digest.getNonce() + "\"" + ",uri=\""
-                    + requestUri + "\"";
-            String opaque = digest.getOpaque();
-            if (opaque != null) {
-                auth += ",opaque=\"" + opaque + "\"";
-            }
-            String qop = digest.getQop();
-            if ((qop != null) && qop.startsWith("auth")) {
-                auth += ",qop=\"" + qop + "\"" + ",nc=" + digest.buildNonceCounter() + ",cnonce=\""
-                        + digest.getCnonce() + "\"" + ",response=\"" + response + "\"";
-            }
-            return auth;
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create the authorization header", e);
-            }
-            throw new CoreException("Can't create the authorization header");
+    private String generateAuthorizationHeader(String method, String requestUri, String body)
+            throws InvalidArgumentException {
+        digest.updateNonceParameters();
+        String user = ImsModule.IMS_USER_PROFILE.getXdmServerLogin();
+        String password = ImsModule.IMS_USER_PROFILE.getXdmServerPassword();
+        String response = digest.calculateResponse(user, password, method, requestUri,
+                digest.buildNonceCounter(), body);
+        StringBuilder auth = new StringBuilder("Authorization: Digest username=\"").append(user)
+                .append("\",realm=\"").append(digest.getRealm()).append("\",nonce=\"")
+                .append(digest.getNonce()).append("\",uri=\"").append(requestUri).append("\"");
+        String opaque = digest.getOpaque();
+        if (opaque != null) {
+            auth.append(",opaque=\"").append(opaque).append("\"");
         }
+        String qop = digest.getQop();
+        if ((qop != null) && qop.startsWith("auth")) {
+            auth.append(",qop=\"").append(qop).append("\",nc=").append(digest.buildNonceCounter())
+                    .append(",cnonce=\"").append(digest.getCnonce()).append("\",response=\"")
+                    .append(response).append("\"");
+        }
+        return auth.toString();
     }
 
     /**

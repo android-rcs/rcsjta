@@ -452,8 +452,8 @@ public class XdmManager {
      * @throws SipNetworkException
      */
     private HttpResponse getXcapDocuments() throws SipPayloadException, SipNetworkException {
-        return sendRequestToXDMS(new HttpGetRequest(Uri.fromParts(XCAP_SCHEME,
-                ImsModule.IMS_USER_PROFILE.getPublicUri(), XCAP_FRAGMENT).getEncodedPath()));
+        return sendRequestToXDMS(new HttpGetRequest(new StringBuilder(XCAP_SCHEME)
+                .append(ImsModule.IMS_USER_PROFILE.getPublicUri()).append(XCAP_FRAGMENT).toString()));
     }
 
     /**

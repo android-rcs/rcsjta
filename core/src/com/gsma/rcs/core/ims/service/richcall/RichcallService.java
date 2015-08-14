@@ -674,9 +674,10 @@ public class RichcallService extends ImsService {
      * @param invite Initial invite
      * @param timestamp Local timestamp when got SipRequest
      * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     public void receiveVideoSharingInvitation(SipRequest invite, long timestamp)
-            throws SipPayloadException {
+            throws SipPayloadException, SipNetworkException {
         boolean logActivated = sLogger.isActivated();
         if (logActivated) {
             sLogger.info("Receive a video sharing invitation");
@@ -806,9 +807,10 @@ public class RichcallService extends ImsService {
      * @param invite Initial invite
      * @param timestamp Local timestamp when got SipRequest
      * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     public void receiveGeolocSharingInvitation(SipRequest invite, long timestamp)
-            throws SipPayloadException {
+            throws SipPayloadException, SipNetworkException {
         boolean logActivated = sLogger.isActivated();
         if (logActivated) {
             sLogger.info("Receive a geoloc sharing session invitation");

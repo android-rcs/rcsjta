@@ -25,6 +25,8 @@ package com.gsma.rcs.core.ims.service.terms;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 
+import android.text.TextUtils;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -57,6 +59,14 @@ public class TermsRequestParser extends DefaultHandler {
      * <ButtonReject xml:lang="de">xxxxxxxxxx</ButtonReject> <ButtonReject
      * xml:lang="es">xxxxxxxxxx</ButtonReject> </EndUserConfirmationRequest>
      */
+
+    private static final String END_USER_CONFRIMATION_REQUEST_ELEMENT = "EndUserConfirmationRequest";
+
+    private static final String END_USER_NOTIFICATION_TYPE_VOLATILE = "Volatile";
+
+    private static final long DEFAULT_T1_TIMER_MULTIPLIER = 64;
+
+    private static final long TIMEOUT_INFINITE = -1;
 
     /**
      * Rate to convert from seconds to milliseconds
@@ -91,7 +101,7 @@ public class TermsRequestParser extends DefaultHandler {
     /**
      * Value off attribute 'pin' off element 'EndUserConfirmationRequest'
      */
-    private boolean mPin = false;
+    private boolean mPin;
 
     /**
      * Requested language (given in constructor)
@@ -191,48 +201,35 @@ public class TermsRequestParser extends DefaultHandler {
     public void startElement(String namespaceURL, String localName, String qname, Attributes attr) {
         mAccumulator.setLength(0);
 
-        if (localName.equals("EndUserConfirmationRequest")) {
+        if (END_USER_CONFRIMATION_REQUEST_ELEMENT.equals(localName)) {
             mId = attr.getValue("id").trim();
             mType = attr.getValue("type").trim();
-            if (mType.equalsIgnoreCase("Volatile")) {
+            if (END_USER_NOTIFICATION_TYPE_VOLATILE.equalsIgnoreCase(mType)) {
                 try {
                     mTimeout = SECONDS_TO_MILLISECONDS_CONVERSION_RATE
                             * Integer.parseInt(attr.getValue("timeout").trim());
-                } catch (Exception e) {
-                    // If the attribute timeout is not present a default value of 64*T1 seconds
-                    // (with T1 as defined in
-                    // [RFC3261]) shall be used
-                    if (mRcsSettings != null) {
-                        mTimeout = mRcsSettings.getSipTimerT1() * 64;
-                    } else {
-                        // T1 is an estimate of the round-trip time (RTT), and it defaults to 500
-                        // ms.
-                        mTimeout = 500 * 64;
-                    }
+                } catch (NumberFormatException e) {
+                    /*
+                     * If the attribute timeout is not present a default value of 64*T1 seconds
+                     * (with T1 as defined in [RFC3261]) shall be used
+                     */
+                    mTimeout = mRcsSettings.getSipTimerT1() * DEFAULT_T1_TIMER_MULTIPLIER;
                 }
-            } else { // type.equalsIgnoreCase('Persistent')
-                mTimeout = -1; // means infinite ( no timeout)
+            } else { /* type.equalsIgnoreCase('Persistent') */
+                mTimeout = TIMEOUT_INFINITE;
             }
-
-            // Get optional attribute pin
-            mPin = false; // Default value according to RCSe spec 1.2.2
             String pinAttr = attr.getValue("pin");
             if (pinAttr != null) {
-                mPin = Boolean.parseBoolean(attr.getValue("pin").trim());
+                mPin = Boolean.parseBoolean(pinAttr.trim());
             }
-
-        } else { // check lang attribute for all sub elements
+        } else {
             mCurrentLangAttribute = attr.getValue("xml:lang");
             if (mCurrentLangAttribute == null) {
-                // for xml failure tolerance
                 mCurrentLangAttribute = attr.getValue("lang");
             }
-
             if (mCurrentLangAttribute == null) {
-                // to avoid null pointer exception
                 mCurrentLangAttribute = "";
             }
-            // put to lower case for xml failure tolerance
             mCurrentLangAttribute = mCurrentLangAttribute.trim().toLowerCase();
             if (!mIsFirstSubjectParsed) {
                 mIsFirstSubjectParsed = true;
@@ -243,7 +240,7 @@ public class TermsRequestParser extends DefaultHandler {
 
     @Override
     public void endElement(String namespaceURL, String localName, String qname) {
-        if (localName.equals("EndUserConfirmationRequest")) {
+        if (END_USER_CONFRIMATION_REQUEST_ELEMENT.equals(localName)) {
             if (logger.isActivated()) {
                 logger.debug("Terms request document is complete");
             }

@@ -24,7 +24,8 @@
 package com.gsma.rcs.core.ims.service.sip.streaming;
 
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -234,11 +235,16 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
             }
         } catch (IOException e) {
             handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
-        } catch (SipException e) {
+        } catch (SipPayloadException e) {
             sLogger.error(
                     new StringBuilder("Session initiation has failed for CallId=")
                             .append(getDialogPath().getCallId()).append(" ContactId=")
                             .append(getRemoteContact()).toString(), e);
+            handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
+        } catch (SipNetworkException e) {
+            if (logActivated) {
+                sLogger.debug(e.getMessage());
+            }
             handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
         } catch (RuntimeException e) {
             /**

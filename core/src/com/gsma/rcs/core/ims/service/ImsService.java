@@ -257,21 +257,16 @@ public abstract class ImsService {
      * 
      * @param invite Invite request
      * @param error Error code
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void sendErrorResponse(SipRequest invite, int error) {
-        try {
-            if (sLogger.isActivated()) {
-                sLogger.info("Send error " + error);
-            }
-            SipResponse resp = SipMessageFactory.createResponse(invite,
-                    IdGenerator.getIdentifier(), error);
-
-            // Send response
-            getImsModule().getSipManager().sendSipResponse(resp);
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Can't send error " + error, e);
-            }
+    public void sendErrorResponse(SipRequest invite, int error) throws SipPayloadException,
+            SipNetworkException {
+        if (sLogger.isActivated()) {
+            sLogger.info("Send error ".concat(String.valueOf(error)));
         }
+        SipResponse resp = SipMessageFactory.createResponse(invite, IdGenerator.getIdentifier(),
+                error);
+        getImsModule().getSipManager().sendSipResponse(resp);
     }
 }
