@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="RCSJTA Security model" default="help">
+
+	<property name="terminal.root" value="." />
+	<property name="terminal.src_libs" value="${terminal.root}/../../../libs" />
+	<property name="terminal.dst_libs" value="${terminal.root}/libs" />
+
+	<target name="jar">
+		<echo>Build libraries</echo>
+		<ant antfile="build.xml" target="android-jar"
+			dir="${terminal.src_libs}/tag-auth-validator" />
+		<copy
+			file="${terminal.src_libs}/tag-auth-validator/build/iarivalidator-android.jar"
+			todir="${terminal.dst_libs}" />
+		<ant antfile="build.xml" target="jar"
+			dir="${terminal.src_libs}/bouncycastle" />
+		<copy file="${terminal.src_libs}/bouncycastle/build/bouncycastle.jar"
+			todir="${terminal.dst_libs}" />
+	</target>
+
+	<target name="clean">
+		<echo>Clean libraries</echo>
+		<delete>
+			<fileset dir="${terminal.dst_libs}">
+				<include name="*" />
+			</fileset>
+		</delete>
+	</target>
+
+	<target name="all" depends="jar" />
+
+	<target name="help">
+		<echo>Library Ant Build. Available targets:</echo>
+		<echo> help: Displays this help.</echo>
+		<echo> clean: Removes output files created by other targets.</echo>
+		<echo> jar: Generates jar library.</echo>
+		<echo />
+	</target>
+</project>

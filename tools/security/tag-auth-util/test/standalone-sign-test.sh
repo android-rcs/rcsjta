@@ -7,6 +7,11 @@ export SECRET="secret"
 export EXTENSION="messaging-standalone-ext0"
 export PKG_NAME="com.gsma.iariauth.sample"
 
+if [ -z ${IARIVALIDATOR_PATH} ]; then 
+	echo "IARIVALIDATOR_PATH is unset"; 
+	exit;
+fi
+
 # echo remove old keys etc
 rm -f keys/$EXTENSION*
 
@@ -40,7 +45,9 @@ echo "validate signed iari authorization"
 echo $EXTENSION
 echo $PKG_NAME
 echo $SECRET
-java -jar ../../tag-auth-validator/build/iarivalidator.jar -d $EXTENSION.xml -pkgname $PKG_NAME  -pkgkeystore keys/package-signer.jks -pkgalias package-signer -pkgstorepass $SECRET -v
+echo $IARIVALIDATOR_PATH
+
+java -jar $IARIVALIDATOR_PATH/build/iarivalidator.jar -d $EXTENSION.xml -pkgname $PKG_NAME  -pkgkeystore keys/package-signer.jks -pkgalias package-signer -pkgstorepass $SECRET -v
 
 # extract generated extension from IARI document
 GENERATED_EXTENSION=`sed -nr 's/^.*urn:urn-7:3gpp-application.ims.iari.rcs.(.*)<\/iari>$/\1/p' $EXTENSION.xml`

@@ -128,6 +128,8 @@
 		<copy file="${terminal.root}/../libs/nist_sip/build/nist_sip.jar" todir="${terminal.root}/libs"/>
 		<ant antfile="build.xml" target="jar" dir="${terminal.root}/../libs/bouncycastle"/>
 		<copy file="${terminal.root}/../libs/bouncycastle/build/bouncycastle.jar" todir="${terminal.root}/libs"/>
+		<ant antfile="build.xml" target="android-jar" dir="${terminal.root}/../libs/tag-auth-validator"/>
+		<copy file="${terminal.root}/../libs/tag-auth-validator/build/iarivalidator-android.jar" todir="${terminal.root}/libs"/>
 	</target>
 	
 	<target name="libs">
@@ -138,6 +140,8 @@
 		<copy file="${terminal.root}/../libs/nist_sip/build/nist_sip.jar" todir="${terminal.root}/libs"/>
 		<ant antfile="build.xml" target="debug" dir="${terminal.root}/../libs/bouncycastle"/>
 		<copy file="${terminal.root}/../libs/bouncycastle/build/bouncycastle.jar" todir="${terminal.root}/libs"/>
+		<ant antfile="build.xml" target="android-jar" dir="${terminal.root}/../libs/tag-auth-validator"/>
+		<copy file="${terminal.root}/../libs/tag-auth-validator/build/iarivalidator-android.jar" todir="${terminal.root}/libs"/>
 	</target>
 
 	<!-- ******************************************************* -->

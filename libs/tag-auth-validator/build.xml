@@ -26,25 +26,15 @@
 
 	<target name="jre-compile">
 		<mkdir dir="${classes.dir}" />
-		<javac
-				srcdir="src"
-				destdir="${classes.dir}"
-				excludes="**/android/*"
-				classpathref="jre-classpath"
-				debug="true"  
-				includeantruntime="false" />		    
+		<javac srcdir="src" destdir="${classes.dir}" excludes="**/android/*"
+			classpathref="jre-classpath" debug="true" includeantruntime="false" />
 
 	</target>
 
 	<target name="android-compile">
 		<mkdir dir="${classes.dir}" />
-		<javac
-				srcdir="src"
-				destdir="${classes.dir}"
-				excludes="**/jre/*"
-				classpathref="android-classpath"
-				debug="true"		    
-				includeantruntime="false" />		    
+		<javac srcdir="src" destdir="${classes.dir}" excludes="**/jre/*"
+			classpathref="android-classpath" debug="true" includeantruntime="false" />
 
 	</target>
 
@@ -52,15 +42,15 @@
 		<jar destfile="${build.dir}/iarivalidator.jar" filesonly="true">
 			<manifest>
 				<attribute name="Main-Class"
-						value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader" />
+					value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader" />
 				<attribute name="Rsrc-Main-Class"
-						value="com.gsma.iariauth.validator.util.IARIValidatorMain" />
+					value="com.gsma.iariauth.validator.util.IARIValidatorMain" />
 				<attribute name="Class-Path" value="." />
 				<attribute name="Rsrc-Class-Path"
-						value="./ bcprov-jdk15on-150.jar commons-cli-1.2.jar commons-logging-1.1.jar xmlsec-contrib-1.5.6.jar" />
+					value="./ bcprov-jdk15on-150.jar commons-cli-1.2.jar commons-logging-1.1.jar xmlsec-contrib-1.5.6.jar" />
 			</manifest>
 			<zipfileset src="${libs-jre.dir}/jar-in-jar-loader.zip" />
-			<fileset dir="${classes.dir}" excludes="**/android/*"/>
+			<fileset dir="${classes.dir}" excludes="**/android/*" />
 			<fileset dir="." includes="res/*.xml" />
 			<zipfileset dir="${libs-jre.dir}" includes="bcprov-jdk15on-150.jar" />
 			<zipfileset dir="${libs-jre.dir}" includes="commons-cli-1.2.jar" />
@@ -71,14 +61,26 @@
 
 	<target name="android-jar" depends="android-compile">
 		<jar destfile="${build.dir}/iarivalidator-android.jar" filesonly="true">
-			<fileset dir="${classes.dir}"> 
-				<exclude name="**/util/IARIValidatorMain.class"/> 
-				<exclude name="**/dsig/jre/BCCertificateInfo.class"/>
+			<fileset dir="${classes.dir}">
+				<exclude name="**/util/IARIValidatorMain.class" />
+				<exclude name="**/dsig/jre/BCCertificateInfo.class" />
 			</fileset>
-			<zipfileset excludes="META-INF/**" src="${libs.dir}/xmlsec-contrib-1.5.6.jar" />
+			<zipfileset excludes="META-INF/**"
+				src="${libs.dir}/xmlsec-contrib-1.5.6.jar" />
 		</jar>
 	</target>
 
 	<target name="all" depends="jre-jar, android-jar" />
+
+	<target name="help">
+		<echo>Library Ant Build. Available targets:</echo>
+		<echo> help: Displays this help.</echo>
+		<echo> clean: Removes output files created by other targets.</echo>
+		<echo> android-compile: Compiles Android source files.</echo>
+		<echo> jre-compile: Compiles JRE source files.</echo>
+		<echo> jre-jar: Generates JRE jar library.</echo>
+		<echo> android-jar: Generates Android jar library.</echo>
+		<echo> all: Compiles sources then creates jar library.</echo>
+	</target>
 </project>
 
