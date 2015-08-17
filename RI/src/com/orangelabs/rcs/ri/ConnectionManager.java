@@ -35,12 +35,9 @@ import com.gsma.services.rcs.upload.FileUploadService;
 
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.TimerUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.Activity;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -59,12 +56,7 @@ import java.util.Set;
  */
 public class ConnectionManager {
 
-    private final PendingIntent mPollCnxIntent;
-
     private static volatile ConnectionManager sInstance;
-
-    private static final long API_CNX_POOLING_PERIOD = 30000;
-    private static final long API_CNX_POOLING_START = 5000;
 
     /**
      * Enumerated type for RCS service name
@@ -89,14 +81,16 @@ public class ConnectionManager {
      */
     final private Map<RcsServiceName, RcsService> mApis;
 
-
     private final Context mContext;
 
     private RcsServiceControl mRcsServiceControl;
+    
+    /**
+     * The set of managed services
+     */
+    private final Set<RcsServiceName> mManagedServices;    
 
     private static final String LOGTAG = LogUtils.getTag(ConnectionManager.class.getSimpleName());
-
-    private static final String ACTION_POOL_CONNECTION = "com.orangelabs.rcs.ri.ACTION_POOL_CONNECTION";
 
     /**
      * Client connection listener
@@ -216,9 +210,11 @@ public class ConnectionManager {
      * Get an instance of ConnectionManager.
      * 
      * @param context the context
+     * @param managedServices Set of managed services 
      * @return the singleton instance.
      */
-    public static ConnectionManager createInstance(Context context) {
+    public static ConnectionManager createInstance(Context context,
+            Set<RcsServiceName> managedServices) {
         if (sInstance != null) {
             return sInstance;
         }
@@ -227,7 +223,7 @@ public class ConnectionManager {
                 if (context == null) {
                     throw new IllegalArgumentException("Context is null");
                 }
-                sInstance = new ConnectionManager(context);
+                sInstance = new ConnectionManager(context, managedServices);
             }
         }
         return sInstance;
@@ -268,10 +264,12 @@ public class ConnectionManager {
     /**
      * Constructor
      * 
-     * @param context
+     * @param context Context
+     * @param managedServices Set of managed services 
      */
-    private ConnectionManager(Context context) {
+    private ConnectionManager(Context context, Set<RcsServiceName> managedServices) {
         mContext = context;
+        mManagedServices = managedServices;
         mRcsServiceControl = RiApplication.getRcsServiceControl();
         /* Construct list of connected services */
         mConnectedServices = new HashSet<RcsServiceName>();
@@ -280,30 +278,54 @@ public class ConnectionManager {
         /* Construct list of APIs */
         mApis = new HashMap<RcsServiceName, RcsService>();
 
-        mPollCnxIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_POOL_CONNECTION),
-                0);
-        
+        if (managedServices == null || managedServices.isEmpty()) {
+            throw new RuntimeException("Incorrect parameter managedService!");
+        }
         /* Instantiate APIs */
-        mApis.put(RcsServiceName.CAPABILITY, new CapabilityService(context,
-                newRcsServiceListener(RcsServiceName.CAPABILITY)));
-        mApis.put(RcsServiceName.CHAT, new ChatService(context,
-                newRcsServiceListener(RcsServiceName.CHAT)));
-        mApis.put(RcsServiceName.CONTACT, new ContactService(context,
-                newRcsServiceListener(RcsServiceName.CONTACT)));
-        mApis.put(RcsServiceName.FILE_TRANSFER, new FileTransferService(context,
-                newRcsServiceListener(RcsServiceName.FILE_TRANSFER)));
-        mApis.put(RcsServiceName.FILE_UPLOAD, new FileUploadService(context,
-                newRcsServiceListener(RcsServiceName.FILE_UPLOAD)));
-        mApis.put(RcsServiceName.GEOLOC_SHARING, new GeolocSharingService(context,
-                newRcsServiceListener(RcsServiceName.GEOLOC_SHARING)));
-        mApis.put(RcsServiceName.HISTORY, new HistoryService(context,
-                newRcsServiceListener(RcsServiceName.HISTORY)));
-        mApis.put(RcsServiceName.IMAGE_SHARING, new ImageSharingService(context,
-                newRcsServiceListener(RcsServiceName.IMAGE_SHARING)));
-        mApis.put(RcsServiceName.MULTIMEDIA, new MultimediaSessionService(context,
-                newRcsServiceListener(RcsServiceName.MULTIMEDIA)));
-        mApis.put(RcsServiceName.VIDEO_SHARING, new VideoSharingService(context,
-                newRcsServiceListener(RcsServiceName.VIDEO_SHARING)));
+        for (RcsServiceName service : mManagedServices) {
+            switch (service) {
+                case CAPABILITY:
+                    mApis.put(RcsServiceName.CAPABILITY, new CapabilityService(context,
+                            newRcsServiceListener(RcsServiceName.CAPABILITY)));
+                    break;
+                case CHAT:
+                    mApis.put(RcsServiceName.CHAT, new ChatService(context,
+                            newRcsServiceListener(RcsServiceName.CHAT)));
+                    break;
+                case CONTACT:
+                    mApis.put(RcsServiceName.CONTACT, new ContactService(context,
+                            newRcsServiceListener(RcsServiceName.CONTACT)));
+                    break;
+                case FILE_TRANSFER:
+                    mApis.put(RcsServiceName.FILE_TRANSFER, new FileTransferService(context,
+                            newRcsServiceListener(RcsServiceName.FILE_TRANSFER)));
+                    break;
+                case FILE_UPLOAD:
+                    mApis.put(RcsServiceName.FILE_UPLOAD, new FileUploadService(context,
+                            newRcsServiceListener(RcsServiceName.FILE_UPLOAD)));
+                    break;
+                case GEOLOC_SHARING:
+                    mApis.put(RcsServiceName.GEOLOC_SHARING, new GeolocSharingService(context,
+                            newRcsServiceListener(RcsServiceName.GEOLOC_SHARING)));
+                    break;
+                case HISTORY:
+                    mApis.put(RcsServiceName.HISTORY, new HistoryService(context,
+                            newRcsServiceListener(RcsServiceName.HISTORY)));
+                    break;
+                case IMAGE_SHARING:
+                    mApis.put(RcsServiceName.IMAGE_SHARING, new ImageSharingService(context,
+                            newRcsServiceListener(RcsServiceName.IMAGE_SHARING)));
+                    break;
+                case MULTIMEDIA:
+                    mApis.put(RcsServiceName.MULTIMEDIA, new MultimediaSessionService(context,
+                            newRcsServiceListener(RcsServiceName.MULTIMEDIA)));
+                    break;
+                case VIDEO_SHARING:
+                    mApis.put(RcsServiceName.VIDEO_SHARING, new VideoSharingService(context,
+                            newRcsServiceListener(RcsServiceName.VIDEO_SHARING)));
+                    break;
+            }
+        }
     }
 
     private boolean isRcsServiceStarted() {
@@ -325,15 +347,7 @@ public class ConnectionManager {
         mContext.registerReceiver(new RcsServiceReceiver(), new IntentFilter(
                 RcsService.ACTION_SERVICE_UP));
 
-        /* Register the broadcast receiver to pool periodically the API connections */
-        mContext.registerReceiver(new TimerPoolRcsServiceStartingState(), new IntentFilter(
-                ACTION_POOL_CONNECTION));
-
-        /* Start pooling connection */
-        AlarmManager am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-        TimerUtils.setExactTimer(am, System.currentTimeMillis() + API_CNX_POOLING_START,
-                mPollCnxIntent);
-
+        /* Connect to APIs */
         connectApis();
     }
 
@@ -536,29 +550,4 @@ public class ConnectionManager {
     public MultimediaSessionService getMultimediaSessionApi() {
         return (MultimediaSessionService) mApis.get(RcsServiceName.MULTIMEDIA);
     }
-
-    private class TimerPoolRcsServiceStartingState extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            new Thread() {
-                public void run() {
-                    try {
-                        connectApis();
-                    } catch (RuntimeException e) {
-                        /*
-                         * Intentionally catch runtime exceptions as else it will abruptly end the
-                         * thread and eventually bring the whole system down, which is not intended.
-                         */
-                        Log.e(LOGTAG, "Failed to pool conection to RCS service!", e);
-                    } finally {
-                        AlarmManager am = (AlarmManager) mContext
-                                .getSystemService(Context.ALARM_SERVICE);
-                        TimerUtils.setExactTimer(am, System.currentTimeMillis()
-                                + API_CNX_POOLING_PERIOD, mPollCnxIntent);
-                    }
-                }
-            }.start();
-        }
-    }
-
 }

@@ -72,7 +72,6 @@ public class RcsServiceNotifManager extends Service {
         try {
             if (!RcsServiceControl.getInstance(ctx).isServiceStarted()) {
                 Log.d(LOGTAG, "RCS service not yet started");
-                // Retry later when service will become UP
                 return;
             }
             mServiceApi = new CapabilityService(ctx, newRcsServiceListener());

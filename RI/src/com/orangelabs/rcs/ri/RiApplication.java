@@ -21,6 +21,8 @@ package com.orangelabs.rcs.ri;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceControl;
 
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
+
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
@@ -29,6 +31,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -186,7 +189,8 @@ public class RiApplication extends Application {
         
         /* Do not execute the ConnectionManager on the main thread */
         Handler mainThreadHandler = new Handler(Looper.getMainLooper());
-        final ConnectionManager cnxManager = ConnectionManager.createInstance(mContext);
+        final ConnectionManager cnxManager = ConnectionManager.createInstance(mContext,
+                EnumSet.allOf(RcsServiceName.class));
         mainThreadHandler.post(new Runnable() {
             @Override
             public void run() {
