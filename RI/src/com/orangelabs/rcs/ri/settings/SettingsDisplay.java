@@ -136,7 +136,7 @@ public class SettingsDisplay extends PreferenceActivity implements
             boolean isServiceActivated = mRcsServiceControl.isActivated();
             boolean isChangeable = mRcsServiceControl.isActivationModeChangeable();
             boolean isServiceConnected = mCnxManager
-                    .isServiceConnected(RcsServiceName.FILE_TRANSFER);
+                    .isServiceConnected(RcsServiceName.CAPABILITY);
             initCheckbox(mRcsActivationCheckbox, (isServiceActivated), isChangeable);
             enablePreferences(isServiceActivated && isServiceConnected);
             if (isServiceConnected) {

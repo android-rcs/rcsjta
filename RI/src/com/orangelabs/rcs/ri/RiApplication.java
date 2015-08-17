@@ -21,17 +21,15 @@ package com.orangelabs.rcs.ri;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceControl;
 
-import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Looper;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -182,19 +180,19 @@ public class RiApplication extends Application {
                 resources.getString(R.string.label_direction_unknown));
 
         mRcsServiceControl = RcsServiceControl.getInstance(mContext);
-        List<RcsServiceName> services = Arrays.asList(RcsServiceName.values());
 
+        /* Starts the RCS service notification manager */
+        startService(new Intent(this, RcsServiceNotifManager.class));
+        
         /* Do not execute the ConnectionManager on the main thread */
         Handler mainThreadHandler = new Handler(Looper.getMainLooper());
-        final ConnectionManager cnxManager = ConnectionManager.createInstance(mContext,
-                new HashSet<RcsServiceName>(services));
+        final ConnectionManager cnxManager = ConnectionManager.createInstance(mContext);
         mainThreadHandler.post(new Runnable() {
             @Override
             public void run() {
                 cnxManager.start();
             }
         });
-
     }
 
     private String[] convertForUI(String[] strings) {

@@ -20,11 +20,8 @@ package com.orangelabs.rcs.ri;
 
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsServiceControl;
-import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceListener;
 import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
-import com.gsma.services.rcs.RcsServiceRegistration;
-import com.gsma.services.rcs.RcsServiceRegistrationListener;
 import com.gsma.services.rcs.capability.CapabilityService;
 import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.contact.ContactService;
@@ -36,7 +33,6 @@ import com.gsma.services.rcs.sharing.image.ImageSharingService;
 import com.gsma.services.rcs.sharing.video.VideoSharingService;
 import com.gsma.services.rcs.upload.FileUploadService;
 
-import com.orangelabs.rcs.ri.settings.SettingsDisplay;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.TimerUtils;
@@ -44,15 +40,11 @@ import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.Activity;
 import android.app.AlarmManager;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Handler;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -70,11 +62,6 @@ public class ConnectionManager {
     private final PendingIntent mPollCnxIntent;
 
     private static volatile ConnectionManager sInstance;
-
-    /**
-     * Notification ID
-     */
-    private final static int SERVICE_NOTIFICATION = 1000;
 
     private static final long API_CNX_POOLING_PERIOD = 30000;
     private static final long API_CNX_POOLING_START = 5000;
@@ -102,40 +89,10 @@ public class ConnectionManager {
      */
     final private Map<RcsServiceName, RcsService> mApis;
 
-    final private RcsServiceRegistrationListener mRcsServiceRegistrationListener = new RcsServiceRegistrationListener() {
-
-        @Override
-        public void onServiceUnregistered(RcsServiceRegistration.ReasonCode reason) {
-            if (LogUtils.isActive) {
-                Log.w(LOGTAG, "IMS Service Registration connection lost");
-            }
-            notifyImsDisconnection(reason);
-        }
-
-        @Override
-        public void onServiceRegistered() {
-            if (LogUtils.isActive) {
-                Log.d(LOGTAG, "IMS Service Registered");
-            }
-            notifyImsConnection();
-        }
-    };
 
     private final Context mContext;
 
-    private final Handler mHandler = new Handler();
-
     private RcsServiceControl mRcsServiceControl;
-
-    /**
-     * The set of managed services
-     */
-    private final Set<RcsServiceName> mManagedServices;
-
-    /**
-     * A service is elected to monitor the IMS registration events.
-     */
-    private final RcsServiceName mElectedService;
 
     private static final String LOGTAG = LogUtils.getTag(ConnectionManager.class.getSimpleName());
 
@@ -189,10 +146,6 @@ public class ConnectionManager {
             mListener = listener;
             mMonitoredServices = new HashSet<RcsServiceName>();
             for (RcsServiceName service : services) {
-                if (!mManagedServices.contains(service)) {
-                    throw new IllegalArgumentException("Service " + service
-                            + " does not belong to set of managed services!");
-                }
                 mMonitoredServices.add(service);
             }
         }
@@ -263,11 +216,9 @@ public class ConnectionManager {
      * Get an instance of ConnectionManager.
      * 
      * @param context the context
-     * @param managedServices Set of managed services
      * @return the singleton instance.
      */
-    public static ConnectionManager createInstance(Context context,
-            Set<RcsServiceName> managedServices) {
+    public static ConnectionManager createInstance(Context context) {
         if (sInstance != null) {
             return sInstance;
         }
@@ -276,7 +227,7 @@ public class ConnectionManager {
                 if (context == null) {
                     throw new IllegalArgumentException("Context is null");
                 }
-                sInstance = new ConnectionManager(context, managedServices);
+                sInstance = new ConnectionManager(context);
             }
         }
         return sInstance;
@@ -303,42 +254,12 @@ public class ConnectionManager {
             public void onServiceDisconnected(ReasonCode error) {
                 mConnectedServices.remove(service);
                 notifyDisconnection(service, error);
-                if (mElectedService == service) {
-                    if (LogUtils.isActive) {
-                        Log.w(LOGTAG, "API ".concat(error.name()));
-                    }
-                    notifyImsDisconnection(RcsServiceRegistration.ReasonCode.CONNECTION_LOST);
-                }
             }
 
             @Override
             public void onServiceConnected() {
                 mConnectedServices.add(service);
                 notifyConnection(service);
-                if (mElectedService != service) {
-                    return;
-                }
-                /* Add a listener to be notified of IMS registration events */
-                final RcsService service = mApis.get(mElectedService);
-                mHandler.post(new Runnable() {
-                    public void run() {
-                        try {
-                            service.addEventListener(mRcsServiceRegistrationListener);
-                            if (service.isServiceRegistered()) {
-                                notifyImsConnection();
-                            } else {
-                                RcsServiceRegistration.ReasonCode reason = service
-                                        .getServiceRegistrationReasonCode();
-                                notifyImsDisconnection(reason);
-                            }
-                        } catch (RcsServiceException e) {
-                            if (LogUtils.isActive) {
-                                Log.w(LOGTAG, "Cannot add RCS Service Registration Listener", e);
-                            }
-                        }
-                    }
-                });
-
             }
         };
 
@@ -349,9 +270,8 @@ public class ConnectionManager {
      * 
      * @param context
      */
-    private ConnectionManager(Context context, Set<RcsServiceName> managedServices) {
+    private ConnectionManager(Context context) {
         mContext = context;
-        mManagedServices = managedServices;
         mRcsServiceControl = RiApplication.getRcsServiceControl();
         /* Construct list of connected services */
         mConnectedServices = new HashSet<RcsServiceName>();
@@ -362,57 +282,28 @@ public class ConnectionManager {
 
         mPollCnxIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_POOL_CONNECTION),
                 0);
-
-        if (managedServices == null || managedServices.isEmpty()) {
-            throw new RuntimeException("Incorrect parameter managedService!");
-        }
-        mElectedService = managedServices.iterator().next();
+        
         /* Instantiate APIs */
-        for (RcsServiceName service : mManagedServices) {
-            switch (service) {
-                case CAPABILITY:
-                    mApis.put(RcsServiceName.CAPABILITY, new CapabilityService(context,
-                            newRcsServiceListener(RcsServiceName.CAPABILITY)));
-                    break;
-                case CHAT:
-                    mApis.put(RcsServiceName.CHAT, new ChatService(context,
-                            newRcsServiceListener(RcsServiceName.CHAT)));
-                    break;
-                case CONTACT:
-                    mApis.put(RcsServiceName.CONTACT, new ContactService(context,
-                            newRcsServiceListener(RcsServiceName.CONTACT)));
-                    break;
-                case FILE_TRANSFER:
-                    mApis.put(RcsServiceName.FILE_TRANSFER, new FileTransferService(context,
-                            newRcsServiceListener(RcsServiceName.FILE_TRANSFER)));
-                    break;
-                case FILE_UPLOAD:
-                    mApis.put(RcsServiceName.FILE_UPLOAD, new FileUploadService(context,
-                            newRcsServiceListener(RcsServiceName.FILE_UPLOAD)));
-                    break;
-                case GEOLOC_SHARING:
-                    mApis.put(RcsServiceName.GEOLOC_SHARING, new GeolocSharingService(context,
-                            newRcsServiceListener(RcsServiceName.GEOLOC_SHARING)));
-                    break;
-                case HISTORY:
-                    mApis.put(RcsServiceName.HISTORY, new HistoryService(context,
-                            newRcsServiceListener(RcsServiceName.HISTORY)));
-                    break;
-                case IMAGE_SHARING:
-                    mApis.put(RcsServiceName.IMAGE_SHARING, new ImageSharingService(context,
-                            newRcsServiceListener(RcsServiceName.IMAGE_SHARING)));
-                    break;
-                case MULTIMEDIA:
-                    mApis.put(RcsServiceName.MULTIMEDIA, new MultimediaSessionService(context,
-                            newRcsServiceListener(RcsServiceName.MULTIMEDIA)));
-                    break;
-                case VIDEO_SHARING:
-                    mApis.put(RcsServiceName.VIDEO_SHARING, new VideoSharingService(context,
-                            newRcsServiceListener(RcsServiceName.VIDEO_SHARING)));
-                    break;
-            }
-        }
-
+        mApis.put(RcsServiceName.CAPABILITY, new CapabilityService(context,
+                newRcsServiceListener(RcsServiceName.CAPABILITY)));
+        mApis.put(RcsServiceName.CHAT, new ChatService(context,
+                newRcsServiceListener(RcsServiceName.CHAT)));
+        mApis.put(RcsServiceName.CONTACT, new ContactService(context,
+                newRcsServiceListener(RcsServiceName.CONTACT)));
+        mApis.put(RcsServiceName.FILE_TRANSFER, new FileTransferService(context,
+                newRcsServiceListener(RcsServiceName.FILE_TRANSFER)));
+        mApis.put(RcsServiceName.FILE_UPLOAD, new FileUploadService(context,
+                newRcsServiceListener(RcsServiceName.FILE_UPLOAD)));
+        mApis.put(RcsServiceName.GEOLOC_SHARING, new GeolocSharingService(context,
+                newRcsServiceListener(RcsServiceName.GEOLOC_SHARING)));
+        mApis.put(RcsServiceName.HISTORY, new HistoryService(context,
+                newRcsServiceListener(RcsServiceName.HISTORY)));
+        mApis.put(RcsServiceName.IMAGE_SHARING, new ImageSharingService(context,
+                newRcsServiceListener(RcsServiceName.IMAGE_SHARING)));
+        mApis.put(RcsServiceName.MULTIMEDIA, new MultimediaSessionService(context,
+                newRcsServiceListener(RcsServiceName.MULTIMEDIA)));
+        mApis.put(RcsServiceName.VIDEO_SHARING, new VideoSharingService(context,
+                newRcsServiceListener(RcsServiceName.VIDEO_SHARING)));
     }
 
     private boolean isRcsServiceStarted() {
@@ -437,9 +328,6 @@ public class ConnectionManager {
         /* Register the broadcast receiver to pool periodically the API connections */
         mContext.registerReceiver(new TimerPoolRcsServiceStartingState(), new IntentFilter(
                 ACTION_POOL_CONNECTION));
-
-        /* By default we consider that IMS connection is lost */
-        notifyImsDisconnection(RcsServiceRegistration.ReasonCode.CONNECTION_LOST);
 
         /* Start pooling connection */
         AlarmManager am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
@@ -510,10 +398,6 @@ public class ConnectionManager {
      */
     public boolean isServiceConnected(RcsServiceName... services) {
         for (RcsServiceName service : services) {
-            if (!mManagedServices.contains(service)) {
-                throw new IllegalArgumentException("Service " + service
-                        + " does not belong to set of managed services!");
-            }
             if (!mConnectedServices.contains(service)) {
                 return false;
             }
@@ -651,56 +535,6 @@ public class ConnectionManager {
      */
     public MultimediaSessionService getMultimediaSessionApi() {
         return (MultimediaSessionService) mApis.get(RcsServiceName.MULTIMEDIA);
-    }
-
-    private void notifyImsConnection() {
-        addImsConnectionNotification(R.drawable.ri_notif_on_icon, mContext.getString(R.string.ims_connected));
-    }
-
-    private void notifyImsDisconnection(RcsServiceRegistration.ReasonCode reason) {
-        String label;
-        if (RcsServiceRegistration.ReasonCode.BATTERY_LOW == reason) {
-            label = mContext.getString(R.string.ims_battery_disconnected);
-        } else {
-            label = mContext.getString(R.string.ims_disconnected);
-        }
-        addImsConnectionNotification(R.drawable.ri_notif_off_icon, label);
-    }
-
-    private void addImsConnectionNotification(int iconId, String label) {
-        Intent intent = new Intent(mContext, SettingsDisplay.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent contentIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
-        String title = mContext.getString(R.string.notification_title_rcs_service);
-        Notification notif = buildImsConnectionNotification(contentIntent, title, label, iconId);
-        notif.flags = Notification.FLAG_NO_CLEAR | Notification.FLAG_FOREGROUND_SERVICE;
-        /* Send notification */
-        NotificationManager notificationManager = (NotificationManager) mContext
-                .getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(SERVICE_NOTIFICATION, notif);
-    }
-
-    /**
-     * Generate a notification
-     * 
-     * @param intent
-     * @param title
-     * @param message
-     * @param iconId
-     * @return the notification
-     */
-    private Notification buildImsConnectionNotification(PendingIntent intent, String title,
-            String message, int iconId) {
-        /* Create notification */
-        NotificationCompat.Builder notif = new NotificationCompat.Builder(mContext);
-        notif.setContentIntent(intent);
-        notif.setSmallIcon(iconId);
-        notif.setWhen(System.currentTimeMillis());
-        notif.setAutoCancel(false);
-        notif.setOnlyAlertOnce(true);
-        notif.setContentTitle(title);
-        notif.setContentText(message);
-        return notif.build();
     }
 
     private class TimerPoolRcsServiceStartingState extends BroadcastReceiver {
