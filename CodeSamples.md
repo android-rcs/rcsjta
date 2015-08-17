@@ -1,5 +1,33 @@
 See [all source code](https://github.com/android-rcs/rcsjta/tree/integration/tests/samples)
 
+# Service API commons #
+
+## Example 1 - Connect to service API when RCS service is ready: ##
+
+When the RCS service is ready (eg. at device boot) an Intent SERVICE_UP is broadcasted to indicate that RCS apps can now bind to the RCS service in background (by calling the method `connect` on the service API).
+
+```
+RcsServiceStartupListener receiver = new RcsServiceStartupListener();
+registerReceiver(receiver, new IntentFilter(RcsService.ACTION_SERVICE_UP));
+
+private class RcsServiceStartupListener extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!RcsService.ACTION_SERVICE_UP.equals(intent.getAction())) {
+                return;
+            }
+
+            try {
+                // Since the RCS service is ready on the device then connects to a given service API
+                api = new CapabilityService(ctx, listener);
+                api.connect();
+            } catch(RcsServiceException e) {
+            ...
+            }
+        }
+    }
+```
+
 # Contact service API #
 
 See [source code](https://github.com/android-rcs/rcsjta/tree/integration/tests/samples/src/com/gsma/rcs/api/ContactSampleTest.java)
