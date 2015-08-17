@@ -27,7 +27,6 @@ import com.gsma.rcs.core.ims.network.ImsNetworkInterface;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
@@ -45,7 +44,6 @@ import com.gsma.rcs.utils.logger.Logger;
 
 import android.content.Intent;
 
-import java.io.IOException;
 import java.text.ParseException;
 
 import javax2.sip.address.SipURI;

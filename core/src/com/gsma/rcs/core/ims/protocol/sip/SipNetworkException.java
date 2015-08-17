@@ -24,7 +24,7 @@ package com.gsma.rcs.core.ims.protocol.sip;
  * exceptions other then re-trying the transactions once network is restored.
  * </p>
  */
-public class SipNetworkException extends SipException {
+public class SipNetworkException extends Exception {
 
     static final long serialVersionUID = 1L;
 

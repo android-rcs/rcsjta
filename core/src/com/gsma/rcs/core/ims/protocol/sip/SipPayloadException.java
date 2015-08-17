@@ -23,7 +23,7 @@ package com.gsma.rcs.core.ims.protocol.sip;
  * These exceptions should be logged and need to be communicated properly to upper service layers.
  * </p>
  */
-public class SipPayloadException extends SipException {
+public class SipPayloadException extends Exception {
 
     static final long serialVersionUID = 1L;
 

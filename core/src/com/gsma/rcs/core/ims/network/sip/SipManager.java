@@ -25,7 +25,6 @@ package com.gsma.rcs.core.ims.network.sip;
 import com.gsma.rcs.core.ims.network.ImsNetworkInterface;
 import com.gsma.rcs.core.ims.protocol.sip.KeepAliveManager;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipInterface;
 import com.gsma.rcs.core.ims.protocol.sip.SipMessage;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
@@ -438,7 +437,8 @@ public class SipManager {
      * @param dialog Dialog path
      * @param request Request
      * @return SipTransactionContext
-     * @throws SipException
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
     public SipTransactionContext sendSubsequentRequest(SipDialogPath dialog, SipRequest request)
             throws SipNetworkException, SipPayloadException {

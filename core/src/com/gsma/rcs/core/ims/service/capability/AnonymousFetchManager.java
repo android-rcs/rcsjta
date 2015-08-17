@@ -87,8 +87,11 @@ public class AnonymousFetchManager implements DiscoveryManager {
      * Request contact capabilities
      * 
      * @param contact Remote contact identifier
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void requestCapabilities(ContactId contact) {
+    public void requestCapabilities(ContactId contact) throws SipPayloadException,
+            SipNetworkException {
         if (logger.isActivated()) {
             logger.debug("Request capabilities in background for " + contact);
         }

@@ -28,7 +28,7 @@ import com.gsma.rcs.core.ims.network.sip.Multipart;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -61,7 +61,8 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
     /**
      * The logger
      */
-    private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(OriginatingAdhocGroupChatSession.class
+            .getName());
 
     /**
      * Constructor
@@ -97,13 +98,13 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
      */
     public void run() {
         try {
-            if (mLogger.isActivated()) {
-                mLogger.info("Initiate a new ad-hoc group chat session as originating");
+            if (sLogger.isActivated()) {
+                sLogger.info("Initiate a new ad-hoc group chat session as originating");
             }
 
             String localSetup = createSetupOffer();
-            if (mLogger.isActivated()) {
-                mLogger.debug("Local setup attribute is ".concat(localSetup));
+            if (sLogger.isActivated()) {
+                sLogger.debug("Local setup attribute is ".concat(localSetup));
             }
 
             int localMsrpPort;
@@ -135,8 +136,8 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
 
             getDialogPath().setLocalContent(multipart);
 
-            if (mLogger.isActivated()) {
-                mLogger.info("Send INVITE");
+            if (sLogger.isActivated()) {
+                sLogger.info("Send INVITE");
             }
             SipRequest invite = createInviteRequest(multipart);
 
@@ -146,17 +147,22 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
 
             sendInvite(invite);
         } catch (InvalidArgumentException e) {
-            mLogger.error("Unable to set authorization header for chat invite!", e);
+            sLogger.error("Unable to set authorization header for chat invite!", e);
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
-        } catch (SipException e) {
-            mLogger.error("Unable to send 200OK response!", e);
+        } catch (SipPayloadException e) {
+            sLogger.error("Unable to send 200OK response!", e);
+            handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
+        } catch (SipNetworkException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
-            mLogger.error("Failed initiating chat session!", e);
+            sLogger.error("Failed initiating chat session!", e);
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
         }
     }

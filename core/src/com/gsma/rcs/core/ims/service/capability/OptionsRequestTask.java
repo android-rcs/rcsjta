@@ -25,7 +25,6 @@ package com.gsma.rcs.core.ims.service.capability;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
@@ -94,8 +93,13 @@ public class OptionsRequestTask implements Runnable {
     public void run() {
         try {
             sendOptions();
-        } catch (SipException e) {
+        } catch (SipPayloadException e) {
             sLogger.error("Options request failed for contact " + mContact + " !", e);
+            handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, e));
+        } catch (SipNetworkException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
             handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, e));
         } catch (ContactManagerException e) {
             sLogger.error("Options request failed for contact " + mContact + " !", e);

@@ -32,14 +32,13 @@ import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
+import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.InvitationStatus;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.capability.Capabilities.CapabilitiesBuilder;
@@ -243,19 +242,14 @@ public class InstantMessagingService extends ImsService {
                 participants, reasonCode, timestamp);
     }
 
-    private void send403Forbidden(SipRequest request, String warning) {
-        try {
-            /* Send a 403 Forbidden */
-            if (sLogger.isActivated()) {
-                sLogger.info("Send 403 Forbidden (warning=" + warning + ")");
-            }
-            SipResponse resp = SipMessageFactory.createResponse(request, null, Response.FORBIDDEN,
-                    warning);
-            getImsModule().getSipManager().sendSipResponse(resp);
-        } catch (SipException e) {
-            /* Better exception handling after CR037 */
-            sLogger.error("Can't send 403 Forbidden response", e);
+    private void send403Forbidden(SipRequest request, String warning) throws SipPayloadException,
+            SipNetworkException {
+        if (sLogger.isActivated()) {
+            sLogger.info("Send 403 Forbidden (warning=" + warning + ")");
         }
+        SipResponse resp = SipMessageFactory.createResponse(request, null, Response.FORBIDDEN,
+                warning);
+        getImsModule().getSipManager().sendSipResponse(resp);
     }
 
     /**
@@ -814,9 +808,9 @@ public class InstantMessagingService extends ImsService {
         String displayName = SipUtils.getDisplayNameFromUri(invite.getFrom());
         /*
          * Update the remote contact's capabilities to include at least MSRP FT capabilities as we
-         * have just received a MSRP file transfer session invitation from this contact so
-         * he/she must at least have this capability. We do not need any capability exchange
-         * response to determine that.
+         * have just received a MSRP file transfer session invitation from this contact so he/she
+         * must at least have this capability. We do not need any capability exchange response to
+         * determine that.
          */
         mContactManager.mergeContactCapabilities(remote, new CapabilitiesBuilder()
                 .setFileTransferMsrp(true).setTimestampOfLastResponse(timestamp).build(),

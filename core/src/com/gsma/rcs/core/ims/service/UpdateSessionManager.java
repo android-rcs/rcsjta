@@ -23,14 +23,12 @@
 package com.gsma.rcs.core.ims.service;
 
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
-import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.InvitationStatus;
-import com.gsma.rcs.core.ims.service.ipcall.IPCallError;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -84,51 +82,42 @@ public class UpdateSessionManager {
      * @param featureTags featureTags to set in reInvite
      * @param content reInvite content
      * @return reInvite request
+     * @throws SipPayloadException
      */
-    public SipRequest createReInvite(String[] featureTags, String content) {
+    public SipRequest createReInvite(String[] featureTags, String content)
+            throws SipPayloadException {
         if (sLogger.isActivated()) {
             sLogger.debug("createReInvite()");
         }
-
-        SipRequest reInvite = null;
-
         try {
-            // Increment the Cseq number of the dialog path
             mSession.getDialogPath().incrementCseq();
             if (sLogger.isActivated()) {
-                sLogger.info("Increment DialogPath CSeq - DialogPath CSeq ="
-                        + mSession.getDialogPath().getCseq());
+                sLogger.info("Increment DialogPath CSeq - DialogPath CSeq =".concat(String
+                        .valueOf(mSession.getDialogPath().getCseq())));
             }
-
-            // Increment internal stack CSeq (NIST stack issue?)
+            /* Increment internal stack CSeq (NIST stack issue?) */
             Dialog dlg = mSession.getDialogPath().getStackDialog();
             while ((dlg != null) && (dlg.getLocalSeqNumber() < mSession.getDialogPath().getCseq())) {
                 dlg.incrementLocalSequenceNumber();
                 if (sLogger.isActivated()) {
                     sLogger.info("Increment LocalSequenceNumber -  Dialog local Seq Number ="
-                            + dlg.getLocalSeqNumber());
+                            .concat(String.valueOf(dlg.getLocalSeqNumber())));
                 }
             }
-
-            // create ReInvite
-            reInvite = SipMessageFactory.createReInvite(mSession.getDialogPath(), featureTags,
-                    content);
+            SipRequest reInvite = SipMessageFactory.createReInvite(mSession.getDialogPath(),
+                    featureTags, content);
             if (sLogger.isActivated()) {
-                sLogger.info("reInvite created -  reInvite CSeq =" + reInvite.getCSeq());
+                sLogger.info("reInvite created -  reInvite CSeq =".concat(String.valueOf(reInvite
+                        .getCSeq())));
             }
-
-            // Set the Authorization header
             mSession.getAuthenticationAgent().setAuthorizationHeader(reInvite);
-
-            // Set the Proxy-Authorization header
             mSession.getAuthenticationAgent().setProxyAuthorizationHeader(reInvite);
+            return reInvite;
 
         } catch (InvalidArgumentException e) {
-            mSession.handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
-        } catch (SipException e) {
-            mSession.handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
+            throw new SipPayloadException("Unable to create authorization header!", e);
         }
-        return reInvite;
+
     }
 
     /**

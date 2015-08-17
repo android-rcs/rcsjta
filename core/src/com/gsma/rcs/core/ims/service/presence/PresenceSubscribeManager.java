@@ -28,7 +28,6 @@ import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
@@ -53,7 +52,6 @@ import java.io.IOException;
 import java.util.Vector;
 
 import javax.xml.parsers.ParserConfigurationException;
-
 import javax2.sip.header.AcceptHeader;
 import javax2.sip.header.EventHeader;
 import javax2.sip.header.SubscriptionStateHeader;

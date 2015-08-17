@@ -26,7 +26,6 @@ import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
@@ -105,49 +104,46 @@ public class AnonymousFetchRequestTask {
 
     /**
      * Start task
+     * 
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void start() {
+    public void start() throws SipPayloadException, SipNetworkException {
         sendSubscribe();
     }
 
     /**
      * Send a SUBSCRIBE request
+     * 
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    private void sendSubscribe() {
+    private void sendSubscribe() throws SipPayloadException, SipNetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Send SUBSCRIBE request to " + mContact);
         }
+        /* Create a dialog path */
+        String contactUri = PhoneUtils.formatContactIdToUri(mContact);
 
-        try {
-            /* Create a dialog path */
-            String contactUri = PhoneUtils.formatContactIdToUri(mContact);
+        /* Set Call-Id */
+        String callId = mImsModule.getSipManager().getSipStack().generateCallId();
 
-            /* Set Call-Id */
-            String callId = mImsModule.getSipManager().getSipStack().generateCallId();
+        /* Set target */
+        String target = contactUri;
 
-            /* Set target */
-            String target = contactUri;
+        /* Set local party */
+        String localParty = "sip:anonymous@" + ImsModule.IMS_USER_PROFILE.getHomeDomain();
 
-            /* Set local party */
-            String localParty = "sip:anonymous@" + ImsModule.IMS_USER_PROFILE.getHomeDomain();
+        /* Set remote party */
+        String remoteParty = contactUri;
 
-            /* Set remote party */
-            String remoteParty = contactUri;
+        /* Set the route path */
+        Vector<String> route = mImsModule.getSipManager().getSipStack().getServiceRoutePath();
 
-            /* Set the route path */
-            Vector<String> route = mImsModule.getSipManager().getSipStack().getServiceRoutePath();
-
-            /* Create a dialog path */
-            mDialogPath = new SipDialogPath(mImsModule.getSipManager().getSipStack(), callId, 1,
-                    target, localParty, remoteParty, route, mRcsSettings);
-
-            SipRequest subscribe = createSubscribe();
-
-            sendSubscribe(subscribe);
-        } catch (SipException e) {
-            sLogger.error("Failed to send SUBSCRIBE request to".concat(mContact.toString()), e);
-            handleError(new PresenceError(PresenceError.SUBSCRIBE_FAILED, e));
-        }
+        /* Create a dialog path */
+        mDialogPath = new SipDialogPath(mImsModule.getSipManager().getSipStack(), callId, 1,
+                target, localParty, remoteParty, route, mRcsSettings);
+        sendSubscribe(createSubscribe());
     }
 
     /**

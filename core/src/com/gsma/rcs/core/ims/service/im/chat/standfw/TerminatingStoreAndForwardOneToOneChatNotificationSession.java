@@ -33,7 +33,6 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
@@ -74,9 +73,8 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
     /**
      * The logger
      */
-    private final Logger mLogger = Logger
-            .getLogger(TerminatingStoreAndForwardOneToOneChatNotificationSession.class
-                    .getSimpleName());
+    private static final Logger sLogger = Logger
+            .getLogger(TerminatingStoreAndForwardOneToOneChatNotificationSession.class.getName());
 
     /**
      * Constructor
@@ -113,10 +111,10 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
      * Background processing
      */
     public void run() {
-        final boolean logActivated = mLogger.isActivated();
+        final boolean logActivated = sLogger.isActivated();
         try {
             if (logActivated) {
-                mLogger.info("Initiate a new store & forward session for notifications");
+                sLogger.info("Initiate a new store & forward session for notifications");
             }
 
             /* Parse the remote SDP part */
@@ -138,13 +136,13 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
                 remoteSetup = attr2.getValue();
             }
             if (logActivated) {
-                mLogger.debug("Remote setup attribute is ".concat(remoteSetup));
+                sLogger.debug("Remote setup attribute is ".concat(remoteSetup));
             }
 
             /* Set setup mode */
             String localSetup = createSetupAnswer(remoteSetup);
             if (logActivated) {
-                mLogger.debug("Local setup attribute is ".concat(localSetup));
+                sLogger.debug("Local setup attribute is ".concat(localSetup));
             }
 
             /* Set local port */
@@ -167,14 +165,14 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
             /* Test if the session should be interrupted */
             if (isInterrupted()) {
                 if (logActivated) {
-                    mLogger.debug("Session has been interrupted: end of processing");
+                    sLogger.debug("Session has been interrupted: end of processing");
                 }
                 return;
             }
 
             /* Create a 200 OK response */
             if (logActivated) {
-                mLogger.info("Send 200 OK");
+                sLogger.info("Send 200 OK");
             }
             SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
                     InstantMessagingService.CHAT_FEATURE_TAGS, sdp);
@@ -204,8 +202,8 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
 
             // Test if the session should be interrupted
             if (isInterrupted()) {
-                if (mLogger.isActivated()) {
-                    mLogger.debug("Session has been interrupted: end of processing");
+                if (logActivated) {
+                    sLogger.debug("Session has been interrupted: end of processing");
                 }
                 return;
             }
@@ -213,7 +211,7 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
             /* Analyze the received response */
             if (ctx.isSipAck()) {
                 if (logActivated) {
-                    mLogger.info("ACK request received");
+                    sLogger.info("ACK request received");
                 }
                 getDialogPath().setSessionEstablished();
 
@@ -231,7 +229,7 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
 
             } else {
                 if (logActivated) {
-                    mLogger.debug("No ACK received for INVITE");
+                    sLogger.debug("No ACK received for INVITE");
                 }
 
                 /* No response received: timeout */
@@ -239,8 +237,13 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
             }
         } catch (MsrpException e) {
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
-        } catch (SipException e) {
-            mLogger.error("Unable to send 200OK response!", e);
+        } catch (SipPayloadException e) {
+            sLogger.error("Unable to send 200OK response!", e);
+            handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
+        } catch (SipNetworkException e) {
+            if (logActivated) {
+                sLogger.debug(e.getMessage());
+            }
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
         } catch (IOException e) {
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
@@ -249,7 +252,7 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
-            mLogger.error("Failed initiating a store & forward session for notifications!", e);
+            sLogger.error("Failed initiating a store & forward session for notifications!", e);
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
         }
     }
@@ -269,8 +272,8 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
     public void closeMsrpSession() {
         if (getMsrpMgr() != null) {
             getMsrpMgr().closeSession();
-            if (mLogger.isActivated()) {
-                mLogger.debug("MSRP session has been closed");
+            if (sLogger.isActivated()) {
+                sLogger.debug("MSRP session has been closed");
             }
         }
     }
@@ -282,9 +285,9 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
      */
     public void handleError(ImsServiceError error) {
         // Error
-        if (mLogger.isActivated()) {
-            mLogger.info("Session error: " + error.getErrorCode() + ", reason="
-                    + error.getMessage());
+        if (sLogger.isActivated()) {
+            sLogger.info(new StringBuilder("Session error: ").append(error.getErrorCode())
+                    .append(", reason=").append(error.getMessage()).toString());
         }
 
         // Close media session
@@ -314,15 +317,15 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
      */
     public void msrpDataReceived(String msgId, byte[] data, String mimeType)
             throws SipPayloadException, SipNetworkException {
-        final boolean logActivated = mLogger.isActivated();
+        final boolean logActivated = sLogger.isActivated();
         if (logActivated) {
-            mLogger.debug(new StringBuilder("Data received (type ").append(mimeType).append(")")
+            sLogger.debug(new StringBuilder("Data received (type ").append(mimeType).append(")")
                     .toString());
         }
         getActivityManager().updateActivity();
         if ((data == null) || (data.length == 0)) {
             if (logActivated) {
-                mLogger.debug("By-pass received empty data");
+                sLogger.debug("By-pass received empty data");
             }
             return;
         }
@@ -346,7 +349,7 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
             }
         } else {
             if (logActivated) {
-                mLogger.debug(new StringBuilder("Not supported content ").append(mimeType)
+                sLogger.debug(new StringBuilder("Not supported content ").append(mimeType)
                         .append(" in chat session").toString());
             }
         }
@@ -376,8 +379,8 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
      * @param error Error code
      */
     public void msrpTransferError(String msgId, String error) {
-        if (mLogger.isActivated()) {
-            mLogger.info("Data transfer error " + error);
+        if (sLogger.isActivated()) {
+            sLogger.info("Data transfer error ".concat(error));
         }
     }
 
