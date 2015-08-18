@@ -16,14 +16,14 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.orangelabs.rcs.ri.settings;
+package com.orangelabs.rcs.core.control.settings;
 
 import com.gsma.services.rcs.RcsServiceException;
 
+import com.orangelabs.rcs.core.control.R;
+import com.orangelabs.rcs.core.control.utils.MessageUtils;
 import com.orangelabs.rcs.ri.ConnectionManager;
 import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.os.Bundle;
 import android.preference.EditTextPreference;
@@ -54,7 +54,7 @@ public class UserprofileSettingsDisplay extends PreferenceActivity implements
 
         mCnxManager = ConnectionManager.getInstance();
         if (!mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
-            Utils.showMessage(this, getString(R.string.label_service_not_available));
+            MessageUtils.showMessage(this, getString(R.string.label_service_not_available));
             return;
         }
 
@@ -63,7 +63,7 @@ public class UserprofileSettingsDisplay extends PreferenceActivity implements
             displaynameEdit.setText(name);
             displaynameEdit.setTitle(name);
         } catch (RcsServiceException e) {
-            Utils.showMessage(this, getString(R.string.label_api_failed));
+            MessageUtils.showMessage(this, getString(R.string.label_api_failed));
             return;
         }
     }
@@ -75,7 +75,7 @@ public class UserprofileSettingsDisplay extends PreferenceActivity implements
                 mCnxManager.getContactApi().getCommonConfiguration().setMyDisplayName(name);
                 displaynameEdit.setTitle(name);
             } catch (RcsServiceException e) {
-                Utils.showMessage(this, getString(R.string.label_api_failed));
+                MessageUtils.showMessage(this, getString(R.string.label_api_failed));
             }
         }
         return true;

@@ -80,7 +80,7 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
         mServiceBound = (TextView) findViewById(R.id.service_bound);
         mServiceActivated = (TextView) findViewById(R.id.service_activated);
         mServiceStarted = (TextView) findViewById(R.id.service_started);
-        mServiceActivationRefresh = ( Button) findViewById(R.id.service_refresh_all);
+        mServiceActivationRefresh = (Button) findViewById(R.id.service_refresh_all);
         mServiceActivationRefresh.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {

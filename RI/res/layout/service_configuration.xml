@@ -56,7 +56,6 @@
         <TableRow android:paddingTop="5dip" >
 
             <TextView
-                android:id="@+id/label_default_messaging_method"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dip"
@@ -117,7 +116,6 @@
         <TableRow android:paddingTop="5dip" >
 
             <TextView
-                android:id="@+id/label_min_battery_level"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dip"

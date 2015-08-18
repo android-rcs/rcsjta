@@ -281,7 +281,8 @@ public class ReceiveFileTransfer extends Activity {
 
                 // Manual accept
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                View titleView = getLayoutInflater().inflate(R.layout.filetransfer_custom_title, null);
+                View titleView = getLayoutInflater().inflate(R.layout.filetransfer_custom_title,
+                        null);
                 builder.setCustomTitle(titleView);
                 builder.setMessage(getString(R.string.label_ft_from_size, from,
                         mFtDao.getSize() / 1024));
@@ -289,7 +290,8 @@ public class ReceiveFileTransfer extends Activity {
                 // Make sure progress bar is at the beginning
                 ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
                 progressBar.setProgress(0);
-                ImageView iconView = (ImageView)titleView.findViewById(R.id.filetransfer_alert_title_icon);
+                ImageView iconView = (ImageView) titleView
+                        .findViewById(R.id.filetransfer_alert_title_icon);
                 if (mFtDao.getThumbnail() != null) {
                     try {
                         Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),
@@ -592,7 +594,7 @@ public class ReceiveFileTransfer extends Activity {
                         } catch (RcsGenericException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
-                        }                        
+                        }
                         break;
 
                     case ABORTED:

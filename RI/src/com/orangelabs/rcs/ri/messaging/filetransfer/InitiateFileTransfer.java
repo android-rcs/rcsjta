@@ -305,8 +305,7 @@ public class InitiateFileTransfer extends Activity {
         CheckBox ftThumb = (CheckBox) findViewById(R.id.ft_thumb);
         boolean tryToSendFileicon = ftThumb.isChecked();
         String mimeType = getContentResolver().getType(mFile);
-        if (tryToSendFileicon && mimeType != null
-                && !mimeType.startsWith("image")) {
+        if (tryToSendFileicon && mimeType != null && !mimeType.startsWith("image")) {
             tryToSendFileicon = false;
         }
         try {

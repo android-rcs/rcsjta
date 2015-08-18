@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="core_control" default="help">
+
+	<property name="terminal.root" value="." />
+	<property name="terminal.lib_dst" value="${terminal.root}/libs" />
+	<property name="terminal.lib_src1" value="${${terminal.root}/../../RI/libs" />
+	<property name="terminal.lib_src2" value="${${terminal.root}/../../Core/libs" />
+	<property name="terminal.target1" value="${terminal.lib_dst}/rcs_cnx.jar" />
+	<property name="terminal.target2" value="${terminal.lib_dst}/rcs_api.jar" />
+	<property name="terminal.classes1.dir" value="${terminal.root}/../../RI/bin/classes" />
+	<property name="terminal.classes2.dir" value="${terminal.root}/../../Core/bin/classes" />
+
+	<target name="jar">
+		<echo>Generate ${terminal.target1} file</echo>
+		<jar destfile="${terminal.target1}" filesonly="true">
+			<fileset dir="${terminal.classes1.dir}" includes="com/orangelabs/rcs/ri/ConnectionManager*" />
+			<fileset dir="${terminal.classes1.dir}" includes="com/orangelabs/rcs/ri/utils/LockAccess*" />
+			<fileset dir="${terminal.classes1.dir}" includes="com/orangelabs/rcs/ri/utils/LogUtils*" />
+		</jar>
+		<echo>Generate ${terminal.target2} file</echo>
+		<jar destfile="${terminal.target2}" filesonly="true">
+			<fileset dir="${terminal.classes2.dir}" includes="com/gsma/services/rcs/**" />
+		</jar>
+	</target>
+
+	<target name="clean">
+		<echo>Delete ${terminal.target1} file</echo>
+		<delete file="${terminal.target1}" />
+		<delete file="${terminal.target2}" />
+	</target>
+
+	<target name="all" depends="clean,jar" />
+
+
+	<target name="help">
+		<echo>Library Ant Build. Available targets:</echo>
+		<echo> help: Displays this help.</echo>
+		<echo> clean: Removes output files created by other targets.</echo>
+		<echo> jar: Generates jar library.</echo>
+		<echo> all: Deletes then creates jar library.</echo>
+	</target>
+
+</project>

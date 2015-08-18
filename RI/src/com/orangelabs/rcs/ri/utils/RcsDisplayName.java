@@ -37,18 +37,10 @@ public class RcsDisplayName {
 
     private static final String LOGTAG = LogUtils.getTag(RcsDisplayName.class.getSimpleName());
 
-    /**
-     * Singleton of RcsDisplayName
-     */
     private static volatile RcsDisplayName sInstance;
-
-    private Context mContext;
 
     private ContactService mService;
 
-    /**
-     * The default display name
-     */
     private static String sDefaultDisplayName;
 
     /**
@@ -57,7 +49,6 @@ public class RcsDisplayName {
      * @param context
      */
     private RcsDisplayName(Context context) {
-        mContext = context;
         mService = ConnectionManager.getInstance().getContactApi();
         sDefaultDisplayName = context.getString(R.string.label_no_contact);
     }

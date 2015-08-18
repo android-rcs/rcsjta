@@ -16,7 +16,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.orangelabs.rcs.ri.settings;
+package com.orangelabs.rcs.core.control.settings;
 
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMethod;
 import com.gsma.services.rcs.RcsServiceException;
@@ -24,10 +24,11 @@ import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration;
 import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration.ImageResizeOption;
 
+import com.orangelabs.rcs.core.control.R;
+import com.orangelabs.rcs.core.control.utils.MessageUtils;
 import com.orangelabs.rcs.ri.ConnectionManager;
 import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.Utils;
+import com.orangelabs.rcs.ri.utils.LockAccess;
 
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
@@ -50,6 +51,7 @@ public class MessagingSettingsDisplay extends PreferenceActivity implements
     private CheckBoxPreference ftAutoAcceptInRoaming;
 
     private ConnectionManager mCnxManager;
+    private LockAccess mExitOnce = new LockAccess();;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +61,7 @@ public class MessagingSettingsDisplay extends PreferenceActivity implements
 
         mCnxManager = ConnectionManager.getInstance();
         if (!mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER, RcsServiceName.CHAT)) {
-            Utils.showMessage(this, getString(R.string.label_service_not_available));
+            MessageUtils.showMessage(this, getString(R.string.label_service_not_available));
             return;
         }
 
@@ -98,9 +100,10 @@ public class MessagingSettingsDisplay extends PreferenceActivity implements
             messagingMethod.setValue(String.valueOf(fileTransferService.getCommonConfiguration()
                     .getDefaultMessagingMethod().toInt()));
         } catch (RcsServiceException e) {
-            Utils.showMessage(this, getString(R.string.label_api_failed));
+            MessageUtils.showMessage(this, getString(R.string.label_api_failed));
             return;
         }
+        mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.FILE_TRANSFER);
     }
 
     public boolean onPreferenceChange(Preference preference, Object objValue) {
@@ -130,7 +133,7 @@ public class MessagingSettingsDisplay extends PreferenceActivity implements
                                 MessagingMethod.valueOf(Integer.parseInt((String) objValue)));
             }
         } catch (RcsServiceException e) {
-            Utils.showMessage(this, getString(R.string.label_api_failed));
+            MessageUtils.showMessage(this, getString(R.string.label_api_failed));
         }
         return true;
     }

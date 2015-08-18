@@ -445,7 +445,7 @@
         <activity
             android:name="com.orangelabs.rcs.ri.extension.streaming.StreamingSessionList"
             android:label="@string/menu_streaming_sessions_list" />
-"
+
         <receiver
             android:name="com.orangelabs.rcs.ri.extension.SessionInvitationReceiver"
             android:exported="true" >
@@ -506,35 +506,6 @@
             android:name="com.orangelabs.rcs.ri.history.sharing.SharingDetailView"
             android:label="@string/title_history_log_item" />
 
-        <!-- RCS settings application -->
-
-        <activity
-            android:name="com.orangelabs.rcs.ri.settings.SettingsDisplay"
-            android:icon="@drawable/rcs_icon"
-            android:label="@string/rcs_settings_title_settings"
-            android:launchMode="singleTask" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <intent-filter>
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <action android:name="com.gsma.services.rcs.action.VIEW_SETTINGS" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name="com.orangelabs.rcs.ri.settings.UserprofileSettingsDisplay"
-            android:label="@string/rcs_settings_title_userprofile_settings" />
-        <activity
-            android:name="com.orangelabs.rcs.ri.settings.MessagingSettingsDisplay"
-            android:label="@string/rcs_settings_title_messaging_settings" />
-        <activity
-            android:name="com.orangelabs.rcs.ri.settings.AboutSettings"
-            android:label="@string/rcs_settings_title_about" />
     </application>
 
 </manifest>

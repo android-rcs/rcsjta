@@ -35,11 +35,12 @@ import com.gsma.services.rcs.upload.FileUploadService;
 
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
@@ -50,7 +51,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A class which manages connection to APIs and IMS platform
+ * A class to manage RCS API connections
  * 
  * @author YPLO6403
  */
@@ -69,26 +70,26 @@ public class ConnectionManager {
     /**
      * Set of connected services
      */
-    final private Set<RcsServiceName> mConnectedServices;
+    private final Set<RcsServiceName> mConnectedServices;
 
     /**
      * Map of Activity / Client Connection notifier
      */
-    final private Map<Activity, ClientConnectionNotifier> mClientsToNotify;
+    private final Map<Activity, ClientConnectionNotifier> mClientsToNotify;
 
     /**
      * Map of RCS services and listeners
      */
-    final private Map<RcsServiceName, RcsService> mApis;
+    private final Map<RcsServiceName, RcsService> mApis;
 
     private final Context mContext;
 
-    private RcsServiceControl mRcsServiceControl;
-    
+    private final RcsServiceControl mRcsServiceControl;
+
     /**
      * The set of managed services
      */
-    private final Set<RcsServiceName> mManagedServices;    
+    private final Set<RcsServiceName> mManagedServices;
 
     private static final String LOGTAG = LogUtils.getTag(ConnectionManager.class.getSimpleName());
 
@@ -140,6 +141,10 @@ public class ConnectionManager {
             mListener = listener;
             mMonitoredServices = new HashSet<RcsServiceName>();
             for (RcsServiceName service : services) {
+                if (!mManagedServices.contains(service)) {
+                    throw new IllegalArgumentException("Service " + service
+                            + " does not belong to set of managed services!");
+                }
                 mMonitoredServices.add(service);
             }
         }
@@ -158,11 +163,11 @@ public class ConnectionManager {
             if (mActivity != null) {
                 String msg = null;
                 if (ReasonCode.SERVICE_DISABLED == error) {
-                    msg = mActivity.getString(R.string.label_api_disabled);
+                    msg = "RCS service disabled";
                 } else {
-                    msg = mActivity.getString(R.string.label_api_disconnected);
+                    msg = "RCS service disconnected";
                 }
-                Utils.showMessageAndExit(mActivity, msg, mTriggerOnlyOnce);
+                showMessageAndExit(mActivity, msg, mTriggerOnlyOnce);
                 return;
             }
             if (mListener != null) {
@@ -210,11 +215,29 @@ public class ConnectionManager {
      * Get an instance of ConnectionManager.
      * 
      * @param context the context
-     * @param managedServices Set of managed services 
+     * @param rcsServiceControl instance of RcsServiceControl
+     * @param services list of managed services
      * @return the singleton instance.
      */
     public static ConnectionManager createInstance(Context context,
-            Set<RcsServiceName> managedServices) {
+            RcsServiceControl rcsServiceControl, RcsServiceName... services) {
+        Set<RcsServiceName> managedServices = new HashSet<RcsServiceName>();
+        for (RcsServiceName service : services) {
+            managedServices.add(service);
+        }
+        return createInstance(context, rcsServiceControl, managedServices);
+    }
+
+    /**
+     * Get an instance of ConnectionManager.
+     * 
+     * @param context the context
+     * @param rcsServiceControl instance of RcsServiceControl
+     * @param managedServices Set of managed services
+     * @return the singleton instance.
+     */
+    public static ConnectionManager createInstance(Context context,
+            RcsServiceControl rcsServiceControl, Set<RcsServiceName> managedServices) {
         if (sInstance != null) {
             return sInstance;
         }
@@ -223,7 +246,7 @@ public class ConnectionManager {
                 if (context == null) {
                     throw new IllegalArgumentException("Context is null");
                 }
-                sInstance = new ConnectionManager(context, managedServices);
+                sInstance = new ConnectionManager(context, managedServices, rcsServiceControl);
             }
         }
         return sInstance;
@@ -264,13 +287,15 @@ public class ConnectionManager {
     /**
      * Constructor
      * 
-     * @param context Context
-     * @param managedServices Set of managed services 
+     * @param context
+     * @param managedServices Set of managed services
+     * @param rcsServiceControl instance of RcsServiceControl
      */
-    private ConnectionManager(Context context, Set<RcsServiceName> managedServices) {
+    private ConnectionManager(Context context, Set<RcsServiceName> managedServices,
+            RcsServiceControl rcsServiceControl) {
         mContext = context;
         mManagedServices = managedServices;
-        mRcsServiceControl = RiApplication.getRcsServiceControl();
+        mRcsServiceControl = rcsServiceControl;
         /* Construct list of connected services */
         mConnectedServices = new HashSet<RcsServiceName>();
         /* Construct list of clients to notify */
@@ -333,7 +358,7 @@ public class ConnectionManager {
             return mRcsServiceControl.isServiceStarted();
         } catch (Exception e) {
             if (LogUtils.isActive) {
-                Log.d(LOGTAG, "Failed to get RCS service starting state!", e);
+                Log.w(LOGTAG, "Failed to get RCS service starting state!", e);
             }
             return false;
         }
@@ -346,8 +371,6 @@ public class ConnectionManager {
         /* Register the broadcast receiver to catch ACTION_SERVICE_UP */
         mContext.registerReceiver(new RcsServiceReceiver(), new IntentFilter(
                 RcsService.ACTION_SERVICE_UP));
-
-        /* Connect to APIs */
         connectApis();
     }
 
@@ -412,6 +435,10 @@ public class ConnectionManager {
      */
     public boolean isServiceConnected(RcsServiceName... services) {
         for (RcsServiceName service : services) {
+            if (!mManagedServices.contains(service)) {
+                throw new IllegalArgumentException("Service " + service
+                        + " does not belong to set of managed services!");
+            }
             if (!mConnectedServices.contains(service)) {
                 return false;
             }
@@ -550,4 +577,39 @@ public class ConnectionManager {
     public MultimediaSessionService getMultimediaSessionApi() {
         return (MultimediaSessionService) mApis.get(RcsServiceName.MULTIMEDIA);
     }
+
+    /**
+     * Show a message and exit activity
+     * 
+     * @param activity Activity
+     * @param msg Message to be displayed
+     * @param locker a locker to only execute once
+     */
+    private void showMessageAndExit(final Activity activity, String msg, LockAccess locker) {
+        // Do not execute if activity is Fishing
+        if (activity.isFinishing()) {
+            return;
+        }
+        // Do not execute if already executed once
+        if (locker != null && !locker.tryLock()) {
+            return;
+        }
+        if (LogUtils.isActive) {
+            Log.w(LOGTAG, new StringBuilder("Exit activity ").append(activity.getLocalClassName())
+                    .append(" <").append(msg).append(">").toString());
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setMessage(msg);
+        builder.setTitle("Information");
+        builder.setCancelable(false);
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                activity.finish();
+            }
+        });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
 }

@@ -17,8 +17,6 @@
     <string name="label_api_failed">Call API method has failed</string>
     <string name="label_api_not_compatible">API is not compatible</string>
     <string name="label_api_unavailable">RCS service not available</string>
-    <string name="label_api_disconnected">RCS service disconnected</string>
-    <string name="label_api_disabled">RCS service disabled</string>
     <string name="label_ok">OK</string>
     <string name="label_cancel">Cancel</string>
     <string name="title_msg">Information</string>
@@ -56,7 +54,6 @@
     <string name="label_receive_image">Received image %s</string>
     <string name="label_remote">Remote contact:</string>
     <string name="label_select_file">Select file</string>
-    <string name="label_invalid_contact">Invalid contact %s</string>
     <string name="label_invalid_contacts">Invalid list of participants</string>
     <string name="label_uninitialized_contact">+33XXXXXXX</string>
     <string name="label_uninitialized_text">blah, blah, blah</string>
@@ -113,7 +110,6 @@
     <string name="label_capabilities_ip_video_call">IP video call</string>
     <string name="label_automata">Automata:</string>
     <string name="label_capabilities_timestamp">Last refresh:</string>
-    <string name="label_capabilities_valid">Valid:</string>
     <string name="label_no_capabilities">No capabilities for %s</string>
 
     <!-- Messaging menu -->
@@ -185,7 +181,6 @@
     <string name="label_select_quicktext">Quick text</string>
     <string name="menu_quicktext">Quick text</string>
     <string name="label_add_participant_failed">Request to add participant(s) has failed</string>
-    <string name="label_group_chat">Group chat</string>
     <string name="label_continue_chat_failed">Can\'t continue the conversation: RCS service is not available</string>
     <string name="label_delete_chat_failed">Delete chat conversation failed</string>
     <string name="label_delete_chat_success">Chat with contact %1$s is deleted</string>
@@ -206,7 +201,6 @@
     <string name="label_chat_send">Send</string>
     <string name="label_groupchat_event">Contact has %1$s</string>
     <string name="menu_chat_service_config">Chat service configuration</string>
-    <string name="label_ImAlwaysOn">IM always on:</string>
     <string name="label_WarnSF">Warning SF:</string>
     <string name="label_IsComposingTimeout">Composing timeout:</string>
     <string name="label_MinGroupChatParticipants">Min GC participants:</string>
@@ -336,7 +330,6 @@
     <string name="label_service_activatation">RCS stack activation:</string>
     <string name="label_service_activate_unchangeable">Unchangeable</string>
     <string name="label_service_activate_changeable">Changeable</string>
-    <string name="text_service_activate_unchangeable">RCS activation cannot be changed</string>
     <string name="ims_connected">Connected to RCS platform</string>
     <string name="ims_disconnected">Disconnected from RCS platform</string>
     <string name="ims_battery_disconnected">Disconnected from RCS platform (Battery low)</string>

@@ -16,7 +16,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.orangelabs.rcs.ri.settings;
+package com.orangelabs.rcs.core.control.settings;
 
 import com.gsma.services.rcs.CommonServiceConfiguration;
 import com.gsma.services.rcs.CommonServiceConfiguration.MinimumBatteryLevel;
@@ -26,12 +26,11 @@ import com.gsma.services.rcs.RcsServiceControl;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceListener;
 
+import com.orangelabs.rcs.core.control.CoreControlApplication;
+import com.orangelabs.rcs.core.control.R;
+import com.orangelabs.rcs.core.control.utils.MessageUtils;
 import com.orangelabs.rcs.ri.ConnectionManager;
 import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -54,10 +53,8 @@ public class SettingsDisplay extends PreferenceActivity implements
         Preference.OnPreferenceChangeListener {
     private final static int SERVICE_DEACTIVATION_CONFIRMATION_DIALOG = 1;
 
-    /**
-     * The log tag for this class
-     */
-    private static final String LOGTAG = LogUtils.getTag(SettingsDisplay.class.getSimpleName());
+    private static final String LOGTAG = "[Core-ctrl][" + SettingsDisplay.class.getSimpleName()
+            + "]";
 
     /**
      * API connection manager
@@ -86,9 +83,7 @@ public class SettingsDisplay extends PreferenceActivity implements
                         mRcsServiceControl.isActivationModeChangeable());
                 initBatteryLevel(mCnxManager.getFileTransferApi().getCommonConfiguration());
             } catch (RcsServiceException e) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "Failed to read configuration", e);
-                }
+                Log.e(LOGTAG, "Failed to read configuration", e);
             }
         }
 
@@ -114,21 +109,21 @@ public class SettingsDisplay extends PreferenceActivity implements
                 "rcs_activation");
         mBatteryLevel = (ListPreference) findPreference("min_battery_level");
 
-        mRcsServiceControl = RiApplication.getRcsServiceControl();
+        mRcsServiceControl = CoreControlApplication.getRcsServiceControl();
         mCnxManager = ConnectionManager.getInstance();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
+        Log.i(LOGTAG, "onResume " + mCnxManager);
         mCnxManager.startMonitorApiCnx(this, mRcsServiceListener, RcsServiceName.FILE_TRANSFER,
                 RcsServiceName.CHAT);
 
         if (!mRcsServiceControl.isAvailable()) {
             initCheckbox(mRcsActivationCheckbox, false, false);
             enablePreferences(false);
-            Utils.showMessage(this, getString(R.string.label_service_not_available));
+            MessageUtils.showMessage(this, getString(R.string.label_service_not_available));
             return;
         }
 
@@ -136,18 +131,16 @@ public class SettingsDisplay extends PreferenceActivity implements
             boolean isServiceActivated = mRcsServiceControl.isActivated();
             boolean isChangeable = mRcsServiceControl.isActivationModeChangeable();
             boolean isServiceConnected = mCnxManager
-                    .isServiceConnected(RcsServiceName.CAPABILITY);
+                    .isServiceConnected(RcsServiceName.FILE_TRANSFER);
             initCheckbox(mRcsActivationCheckbox, (isServiceActivated), isChangeable);
             enablePreferences(isServiceActivated && isServiceConnected);
             if (isServiceConnected) {
                 initBatteryLevel(mCnxManager.getFileTransferApi().getCommonConfiguration());
             }
         } catch (Exception e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "Failed to read activation state", e);
-            }
+            Log.e(LOGTAG, "Failed to read activation state", e);
             enablePreferences(false);
-            Utils.showMessage(this, getString(R.string.label_api_failed));
+            MessageUtils.showMessage(this, getString(R.string.label_api_failed));
             return;
         }
     }
@@ -165,7 +158,7 @@ public class SettingsDisplay extends PreferenceActivity implements
                     try {
                         mRcsServiceControl.setActivationMode(true);
                     } catch (RcsPermissionDeniedException e) {
-                        Utils.showMessage(SettingsDisplay.this,
+                        MessageUtils.showMessage(SettingsDisplay.this,
                                 getString(R.string.text_service_activate_unchangeable));
                     }
                 } else {
@@ -178,8 +171,8 @@ public class SettingsDisplay extends PreferenceActivity implements
                 return super.onPreferenceTreeClick(preferenceScreen, preference);
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            Utils.showMessage(this, getString(R.string.label_api_failed));
+            Log.e(LOGTAG, "Failed onPreferenceTreeClick", e);
+            MessageUtils.showMessage(this, getString(R.string.label_api_failed));
             return true;
         }
     }
@@ -213,9 +206,10 @@ public class SettingsDisplay extends PreferenceActivity implements
                                         try {
                                             mRcsServiceControl.setActivationMode(false);
                                         } catch (RcsPermissionDeniedException e) {
-                                            Utils.showMessage(
-                                                    SettingsDisplay.this,
-                                                    getString(R.string.text_service_activate_unchangeable));
+                                            MessageUtils
+                                                    .showMessage(
+                                                            SettingsDisplay.this,
+                                                            getString(R.string.text_service_activate_unchangeable));
                                         } catch (RcsGenericException e) {
                                             e.printStackTrace();
                                         }
@@ -234,10 +228,8 @@ public class SettingsDisplay extends PreferenceActivity implements
                         .getCommonConfiguration();
                 configuration.setMinimumBatteryLevel(MinimumBatteryLevel.valueOf(level));
             } catch (Exception e) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "Failed to read battery level", e);
-                }
-                Utils.showMessage(this, getString(R.string.label_api_failed));
+                Log.e(LOGTAG, "Failed to read battery level", e);
+                MessageUtils.showMessage(this, getString(R.string.label_api_failed));
             }
         }
         return true;

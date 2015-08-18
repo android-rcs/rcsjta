@@ -6,7 +6,6 @@
     android:padding="2dip" >
 
     <TableLayout
-        android:id="@+id/tableLayout1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"

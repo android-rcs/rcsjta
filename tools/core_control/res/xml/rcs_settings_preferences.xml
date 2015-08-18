@@ -1,0 +1,45 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <CheckBoxPreference
+        android:key="rcs_activation"
+        android:summaryOff="@string/rcs_settings_summary_rcs_service_off"
+        android:summaryOn="@string/rcs_settings_summary_rcs_service_on"
+        android:title="@string/rcs_settings_label_rcs_service" />
+
+    <ListPreference
+        android:dialogTitle="@string/rcs_settings_label_min_battery_level"
+        android:entries="@array/rcs_settings_list_battery_level_label"
+        android:entryValues="@array/rcs_settings_list_battery_level_value"
+        android:key="min_battery_level"
+        android:summary="@string/rcs_settings_summary_min_battery_level"
+        android:title="@string/rcs_settings_label_min_battery_level" />
+
+    <PreferenceScreen
+        android:key="userprofile_settings"
+        android:summary="@string/rcs_settings_summary_userprofile_settings"
+        android:title="@string/rcs_settings_title_userprofile_settings" >
+        <intent
+            android:action="android.intent.action.MAIN"
+            android:targetClass="com.orangelabs.rcs.core.control.settings.UserprofileSettingsDisplay"
+            android:targetPackage="com.orangelabs.rcs.core.control" />
+    </PreferenceScreen>
+    <PreferenceScreen
+        android:key="messaging_settings"
+        android:summary="@string/rcs_settings_summary_messaging_settings"
+        android:title="@string/rcs_settings_title_messaging_settings" >
+        <intent
+            android:action="android.intent.action.MAIN"
+            android:targetClass="com.orangelabs.rcs.core.control.settings.MessagingSettingsDisplay"
+            android:targetPackage="com.orangelabs.rcs.core.control" />
+    </PreferenceScreen>
+    <PreferenceScreen
+        android:key="about_settings"
+        android:summary="@string/rcs_settings_summary_about"
+        android:title="@string/menu_about" >
+        <intent
+            android:action="android.intent.action.MAIN"
+            android:targetClass="com.orangelabs.rcs.core.control.settings.AboutSettings"
+            android:targetPackage="com.orangelabs.rcs.core.control" />
+    </PreferenceScreen>
+
+</PreferenceScreen>

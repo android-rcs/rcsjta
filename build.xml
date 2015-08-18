@@ -17,6 +17,7 @@
 	<property name="samples" value="${terminal.root}/samples" />
 	<property name="prov_template.root"
 		value="${tools}/provisioning/RCSJTA_provisioning_template" />
+    <property name="core_control.root" value="${tools}/core_control" />
 	<property name="extension.root" value="${samples}/extension" />
 	<property name="tts.root" value="${samples}/tts" />
 	<property name="javadoc.root" value="${terminal.root}/doclava" />
@@ -39,7 +40,7 @@
 	<!-- Generate RCS API SDK -->
 	<!-- ********************* -->
 	<target name="sdk"
-		depends="ri-apk,docs,prov-template-apk,extension-apk,tts-apk">
+		depends="ri-apk,docs,prov-template-apk,core-control-apk,extension-apk,tts-apk">
 		<echo>Generate RCS SDK for Android target ${android.target}</echo>
 		<mkdir dir="${generate.root}" />
 		<delete>
@@ -57,6 +58,8 @@
 			<zipfileset dir="${javadoc.root}" prefix="api/javadoc" />
 			<zipfileset dir="${prov_template.root}/bin" includes="*debug.apk"
 				fullpath="tools/RCS_provisioning_template.apk" />
+			<zipfileset dir="${core_control.root}/bin" includes="*debug.apk"
+				fullpath="tools/RCS_core_control.apk" />
 			<zipfileset dir="${stack.root}/bin" includes="*debug.apk"
 				fullpath="stack/RCS_core.apk" />
 			<zipfileset dir="${ri.root}/bin" includes="*debug.apk"
@@ -98,6 +101,14 @@
 		<echo>Generate RCS provisioning template apk</echo>
 		<ant dir="${prov_template.root}" target="clean" inheritAll="false" />
 		<ant dir="${prov_template.root}" target="debug" inheritAll="false" />
+	</target>
+	
+	<target name="core-control-apk">
+		<echo>Generate RCS core control apk</echo>
+		<ant dir="${core_control.root}" antfile="build-local.xml"
+			target="all" inheritAll="false" />
+		<ant dir="${core_control.root}" target="clean" inheritAll="false" />
+		<ant dir="${core_control.root}" target="debug" inheritAll="false" />
 	</target>
 
 	<target name="extension-apk" depends="api">

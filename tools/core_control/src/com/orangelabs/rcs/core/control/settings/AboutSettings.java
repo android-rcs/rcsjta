@@ -16,12 +16,12 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.orangelabs.rcs.ri.settings;
+package com.orangelabs.rcs.core.control.settings;
 
 import com.gsma.services.rcs.RcsService.Build;
 import com.gsma.services.rcs.RcsServiceControl;
 
-import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.core.control.R;
 
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
