@@ -16,6 +16,7 @@
 
 package com.gsma.rcs.service.api;
 
+import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.IntentUtils;
@@ -52,11 +53,15 @@ public class OneToOneUndeliveredImManager {
 
     private final MessagingLog mMessagingLog;
 
+    private final InstantMessagingService mImService;
+
     private final Logger mLogger = Logger.getLogger(getClass().getName());
 
-    public OneToOneUndeliveredImManager(Context ctx, MessagingLog messagingLog) {
+    public OneToOneUndeliveredImManager(Context ctx, MessagingLog messagingLog,
+            InstantMessagingService imService) {
         mCtx = ctx;
         mMessagingLog = messagingLog;
+        mImService = imService;
         mAlarmManager = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
     }
 
@@ -150,6 +155,7 @@ public class OneToOneUndeliveredImManager {
     public void handleChatMessageDeliveryExpiration(ContactId contact, String msgId) {
         cancelDeliveryTimeoutAlarm(msgId);
         mMessagingLog.setChatMessageDeliveryExpired(msgId);
+        mImService.getImsModule().getCapabilityService().requestContactCapabilities(contact);
 
         Intent undeliveredMessage = new Intent(OneToOneChatIntent.ACTION_MESSAGE_DELIVERY_EXPIRED);
         IntentUtils.tryToSetExcludeStoppedPackagesFlag(undeliveredMessage);
@@ -162,6 +168,7 @@ public class OneToOneUndeliveredImManager {
     public void handleFileTransferDeliveryExpiration(ContactId contact, String fileTransferId) {
         cancelDeliveryTimeoutAlarm(fileTransferId);
         mMessagingLog.setFileTransferDeliveryExpired(fileTransferId);
+        mImService.getImsModule().getCapabilityService().requestContactCapabilities(contact);
 
         Intent undeliveredFile = new Intent(
                 FileTransferIntent.ACTION_FILE_TRANSFER_DELIVERY_EXPIRED);
