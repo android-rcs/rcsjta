@@ -1946,7 +1946,8 @@ public final class ContactManager {
             if (newInfo.getCapabilities().equals(oldInfo.getCapabilities())
                     && newInfo.getRcsStatus() == oldInfo.getRcsStatus()
                     && newInfo.getRegistrationState() == oldInfo.getRegistrationState()
-                    && (displayName == null || displayName.equals(oldInfo.getDisplayName()))) {
+                    && (displayName == null ? oldInfo.getDisplayName() == null : displayName
+                            .equals(oldInfo.getDisplayName()))) {
                 return;
             }
             /* Save the modifications */
