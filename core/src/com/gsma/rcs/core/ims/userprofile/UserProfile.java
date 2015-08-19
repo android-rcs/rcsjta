@@ -32,6 +32,7 @@ import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.services.rcs.contact.ContactId;
 
+import android.net.Uri;
 import android.text.TextUtils;
 
 import javax2.sip.header.ExtensionHeader;
@@ -86,7 +87,7 @@ public class UserProfile {
     /**
      * IM conference URI
      */
-    private String mImConferenceUri;
+    private Uri mImConference;
 
     /**
      * Associated URIs
@@ -96,7 +97,7 @@ public class UserProfile {
     /**
      * Preferred URI
      */
-    private String mPreferredUri;
+    private Uri mPreferred;
 
     private final RcsSettings mRcsSettings;
 
@@ -116,7 +117,7 @@ public class UserProfile {
      */
     public UserProfile(ContactId contact, String homeDomain, String privateID, String password,
             String realm, String xdmServerAddr, String xdmServerLogin, String xdmServerPassword,
-            String imConferenceUri, RcsSettings rcsSettings) {
+            Uri imConference, RcsSettings rcsSettings) {
         mContact = contact;
         mHomeDomain = homeDomain;
         mPrivateID = privateID;
@@ -125,9 +126,9 @@ public class UserProfile {
         mXdmServerAddr = xdmServerAddr;
         mXdmServerLogin = xdmServerLogin;
         mXdmServerPassword = xdmServerPassword;
-        mImConferenceUri = imConferenceUri;
+        mImConference = imConference;
         mRcsSettings = rcsSettings;
-        mPreferredUri = PhoneUtils.formatContactIdToUri(mContact);
+        mPreferred = PhoneUtils.formatContactIdToUri(mContact);
     }
 
     /**
@@ -153,8 +154,8 @@ public class UserProfile {
      * 
      * @return Preferred URI
      */
-    public String getPreferredUri() {
-        return mPreferredUri;
+    public Uri getPreferredUri() {
+        return mPreferred;
     }
 
     /**
@@ -162,11 +163,12 @@ public class UserProfile {
      * 
      * @return Public URI
      */
+    // @FIXME: This method should return URI instead of String
     public String getPublicUri() {
-        if (mPreferredUri == null) {
-            return PhoneUtils.formatContactIdToUri(mContact);
+        if (mPreferred == null) {
+            return PhoneUtils.formatContactIdToUri(mContact).toString();
         } else {
-            return mPreferredUri;
+            return mPreferred.toString();
         }
     }
 
@@ -229,11 +231,11 @@ public class UserProfile {
         }
 
         if ((sipUri != null) && (telUri != null)) {
-            mPreferredUri = telUri;
+            mPreferred = Uri.parse(telUri);
         } else if (telUri != null) {
-            mPreferredUri = telUri;
+            mPreferred = Uri.parse(telUri);
         } else if (sipUri != null) {
-            mPreferredUri = sipUri;
+            mPreferred = Uri.parse(sipUri);
         }
     }
 
@@ -337,21 +339,12 @@ public class UserProfile {
     }
 
     /**
-     * Set the IM conference URI
-     * 
-     * @param uri URI
-     */
-    public void setImConferenceUri(String uri) {
-        mImConferenceUri = uri;
-    }
-
-    /**
      * Returns the IM conference URI
      * 
      * @return URI
      */
-    public String getImConferenceUri() {
-        return mImConferenceUri;
+    public Uri getImConferenceUri() {
+        return mImConference;
     }
 
     /**
@@ -364,7 +357,7 @@ public class UserProfile {
                 + "IMS password=" + mPassword + ", " + "IMS home domain=" + mHomeDomain + ", "
                 + "XDM server=" + mXdmServerAddr + ", " + "XDM login=" + mXdmServerLogin + ", "
                 + "XDM password=" + mXdmServerPassword + ", " + "IM Conference URI="
-                + mImConferenceUri;
+                + mImConference;
         return result;
     }
 }

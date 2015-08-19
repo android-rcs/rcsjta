@@ -49,6 +49,8 @@ import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
+import android.net.Uri;
+
 import java.io.IOException;
 
 /**
@@ -108,7 +110,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
      */
     public OriginatingHttpGroupFileSharingSession(String fileTransferId,
             InstantMessagingService imService, MmContent content, MmContent fileIcon,
-            String conferenceId, String chatSessionId, String chatContributionId, String tId,
+            Uri conferenceId, String chatSessionId, String chatContributionId, String tId,
             Core core, RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
             long timestampSent, ContactManager contactManager) {
         super(imService, content, null, conferenceId, fileIcon, chatSessionId, chatContributionId,

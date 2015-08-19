@@ -34,6 +34,8 @@ import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.services.rcs.contact.ContactId;
 
+import android.net.Uri;
+
 import gov2.nist.core.NameValue;
 import gov2.nist.javax2.sip.Utils;
 import gov2.nist.javax2.sip.header.Subject;
@@ -315,8 +317,8 @@ public class SipMessageFactory {
             // Set the P-Preferred-Identity header
             if (ImsModule.IMS_USER_PROFILE.getPreferredUri() != null) {
                 Header prefHeader = SipUtils.HEADER_FACTORY.createHeader(
-                        SipUtils.HEADER_P_PREFERRED_IDENTITY,
-                        ImsModule.IMS_USER_PROFILE.getPreferredUri());
+                        SipUtils.HEADER_P_PREFERRED_IDENTITY, ImsModule.IMS_USER_PROFILE
+                                .getPreferredUri().toString());
                 message.addHeader(prefHeader);
             }
 
@@ -609,8 +611,8 @@ public class SipMessageFactory {
             // Set the P-Preferred-Identity header
             if (ImsModule.IMS_USER_PROFILE.getPreferredUri() != null) {
                 Header prefHeader = SipUtils.HEADER_FACTORY.createHeader(
-                        SipUtils.HEADER_P_PREFERRED_IDENTITY,
-                        ImsModule.IMS_USER_PROFILE.getPreferredUri());
+                        SipUtils.HEADER_P_PREFERRED_IDENTITY, ImsModule.IMS_USER_PROFILE
+                                .getPreferredUri().toString());
                 invite.addHeader(prefHeader);
             }
 
@@ -1022,8 +1024,8 @@ public class SipMessageFactory {
             // Set the P-Preferred-Identity header
             if (ImsModule.IMS_USER_PROFILE.getPreferredUri() != null) {
                 Header prefHeader = SipUtils.HEADER_FACTORY.createHeader(
-                        SipUtils.HEADER_P_PREFERRED_IDENTITY,
-                        ImsModule.IMS_USER_PROFILE.getPreferredUri());
+                        SipUtils.HEADER_P_PREFERRED_IDENTITY, ImsModule.IMS_USER_PROFILE
+                                .getPreferredUri().toString());
                 options.addHeader(prefHeader);
             }
 
@@ -1112,7 +1114,7 @@ public class SipMessageFactory {
      * @return SIP request
      * @throws SipPayloadException
      */
-    public static SipRequest createRefer(SipDialogPath dialog, String toContact, String subject,
+    public static SipRequest createRefer(SipDialogPath dialog, Uri toContact, String subject,
             String contributionId) throws SipPayloadException {
         try {
             // Create the request
@@ -1125,7 +1127,8 @@ public class SipMessageFactory {
             SipUtils.setFeatureTags(refer, tags);
 
             // Set Refer-To header
-            Header referTo = SipUtils.HEADER_FACTORY.createHeader(ReferToHeader.NAME, toContact);
+            Header referTo = SipUtils.HEADER_FACTORY.createHeader(ReferToHeader.NAME,
+                    toContact.toString());
             refer.addHeader(referTo);
 
             // Set Refer-Sub header
@@ -1136,8 +1139,8 @@ public class SipMessageFactory {
             // Set the P-Preferred-Identity header
             if (ImsModule.IMS_USER_PROFILE.getPreferredUri() != null) {
                 Header prefHeader = SipUtils.HEADER_FACTORY.createHeader(
-                        SipUtils.HEADER_P_PREFERRED_IDENTITY,
-                        ImsModule.IMS_USER_PROFILE.getPreferredUri());
+                        SipUtils.HEADER_P_PREFERRED_IDENTITY, ImsModule.IMS_USER_PROFILE
+                                .getPreferredUri().toString());
                 refer.addHeader(prefHeader);
             }
 
@@ -1224,8 +1227,8 @@ public class SipMessageFactory {
             // Set the P-Preferred-Identity header
             if (ImsModule.IMS_USER_PROFILE.getPreferredUri() != null) {
                 Header prefHeader = SipUtils.HEADER_FACTORY.createHeader(
-                        SipUtils.HEADER_P_PREFERRED_IDENTITY,
-                        ImsModule.IMS_USER_PROFILE.getPreferredUri());
+                        SipUtils.HEADER_P_PREFERRED_IDENTITY, ImsModule.IMS_USER_PROFILE
+                                .getPreferredUri().toString());
                 refer.addHeader(prefHeader);
             }
 
@@ -1401,8 +1404,8 @@ public class SipMessageFactory {
                 reInvite.addHeader(firstInvite.getHeader(SipUtils.HEADER_P_PREFERRED_IDENTITY));
             } else if (ImsModule.IMS_USER_PROFILE.getPreferredUri() != null) {
                 Header prefHeader = SipUtils.HEADER_FACTORY.createHeader(
-                        SipUtils.HEADER_P_PREFERRED_IDENTITY,
-                        ImsModule.IMS_USER_PROFILE.getPreferredUri());
+                        SipUtils.HEADER_P_PREFERRED_IDENTITY, ImsModule.IMS_USER_PROFILE
+                                .getPreferredUri().toString());
                 reInvite.addHeader(prefHeader);
             }
 

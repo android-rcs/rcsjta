@@ -493,8 +493,8 @@ public class ProvisioningParser {
 
                 if (noteMaxSize == null) {
                     if ((noteMaxSize = getValueByParamName("NoteMaxSize", childnode, TYPE_INT)) != null) {
-                        mRcsSettings
-                                .writeParameter(RcsSettingsData.MAX_FREETXT_LENGTH, noteMaxSize);
+                        mRcsSettings.writeInteger(RcsSettingsData.MAX_FREETXT_LENGTH,
+                                Integer.parseInt(noteMaxSize));
                         continue;
                     }
                 }
@@ -704,8 +704,8 @@ public class ProvisioningParser {
             do {
                 if (textMaxLength == null) {
                     if ((textMaxLength = getValueByParamName("TextMaxLength", childnode, TYPE_INT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.MAX_GEOLOC_LABEL_LENGTH,
-                                textMaxLength);
+                        mRcsSettings.writeInteger(RcsSettingsData.MAX_GEOLOC_LABEL_LENGTH,
+                                Integer.parseInt(textMaxLength));
                         continue;
                     }
                 }
@@ -929,8 +929,8 @@ public class ProvisioningParser {
                 if (maxConcurrentSession == null) {
                     if ((maxConcurrentSession = getValueByParamName("MaxConcurrentSession",
                             childnode, TYPE_INT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.MAX_CHAT_SESSIONS,
-                                maxConcurrentSession);
+                        mRcsSettings.writeInteger(RcsSettingsData.MAX_CHAT_SESSIONS,
+                                Integer.parseInt(maxConcurrentSession));
                         continue;
                     }
                 }
@@ -1095,16 +1095,16 @@ public class ProvisioningParser {
 
                 if (maxSize1to1 == null) {
                     if ((maxSize1to1 = getValueByParamName("MaxSize1to1", childnode, TYPE_INT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.MAX_CHAT_MSG_LENGTH,
-                                maxSize1to1);
+                        mRcsSettings.writeInteger(RcsSettingsData.MAX_CHAT_MSG_LENGTH,
+                                Integer.parseInt(maxSize1to1));
                         continue;
                     }
                 }
 
                 if (maxSize1toM == null) {
                     if ((maxSize1toM = getValueByParamName("MaxSize1toM", childnode, TYPE_INT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.MAX_GROUPCHAT_MSG_LENGTH,
-                                maxSize1toM);
+                        mRcsSettings.writeInteger(RcsSettingsData.MAX_GROUPCHAT_MSG_LENGTH,
+                                Integer.parseInt(maxSize1toM));
                         continue;
                     }
                 }
@@ -1140,8 +1140,8 @@ public class ProvisioningParser {
                 if (maxAdhocGroupSize == null) {
                     if ((maxAdhocGroupSize = getValueByParamName("max_adhoc_group_size", childnode,
                             TYPE_INT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.MAX_CHAT_PARTICIPANTS,
-                                maxAdhocGroupSize);
+                        mRcsSettings.writeInteger(RcsSettingsData.MAX_CHAT_PARTICIPANTS,
+                                Integer.parseInt(maxAdhocGroupSize));
                         continue;
                     }
                 }
@@ -1280,15 +1280,15 @@ public class ProvisioningParser {
                 if (psSignalling == null) {
                     if ((psSignalling = getValueByParamName("psSignalling", childnode, TYPE_TXT)) != null) {
                         if (psSignalling.equals("SIPoUDP")) {
-                            mRcsSettings.writeParameter(
+                            mRcsSettings.writeString(
                                     RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_MOBILE,
                                     ListeningPoint.UDP);
                         } else if (psSignalling.equals("SIPoTCP")) {
-                            mRcsSettings.writeParameter(
+                            mRcsSettings.writeString(
                                     RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_MOBILE,
                                     ListeningPoint.TCP);
                         } else if (psSignalling.equals("SIPoTLS")) {
-                            mRcsSettings.writeParameter(
+                            mRcsSettings.writeString(
                                     RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_MOBILE,
                                     ListeningPoint.TLS);
                         }
@@ -1299,16 +1299,13 @@ public class ProvisioningParser {
                 if (wifiSignalling == null) {
                     if ((wifiSignalling = getValueByParamName("wifiSignalling", childnode, TYPE_TXT)) != null) {
                         if (wifiSignalling.equals("SIPoUDP")) {
-                            mRcsSettings.writeParameter(
-                                    RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI,
+                            mRcsSettings.writeString(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI,
                                     ListeningPoint.UDP);
                         } else if (wifiSignalling.equals("SIPoTCP")) {
-                            mRcsSettings.writeParameter(
-                                    RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI,
+                            mRcsSettings.writeString(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI,
                                     ListeningPoint.TCP);
                         } else if (wifiSignalling.equals("SIPoTLS")) {
-                            mRcsSettings.writeParameter(
-                                    RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI,
+                            mRcsSettings.writeString(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI,
                                     ListeningPoint.TLS);
                         }
                         continue;
@@ -1395,7 +1392,7 @@ public class ProvisioningParser {
 
                 if (uuidValue == null) {
                     if ((uuidValue = getValueByParamName(UUID_VALUE, childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.UUID, uuidValue);
+                        mRcsSettings.writeString(RcsSettingsData.UUID, uuidValue);
                         continue;
                     }
                 }
@@ -1449,8 +1446,8 @@ public class ProvisioningParser {
                 if (maxMsrpLengthExtensions == null) {
                     if ((maxMsrpLengthExtensions = getValueByParamName("extensionsMaxMSRPSize",
                             childnode, TYPE_INT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS,
-                                maxMsrpLengthExtensions);
+                        mRcsSettings.writeInteger(RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS,
+                                Integer.parseInt(maxMsrpLengthExtensions));
                         continue;
                     }
                 }
@@ -1464,7 +1461,7 @@ public class ProvisioningParser {
              * RFC4122, section 4.2.
              */
             if (uuidValue == null) {
-                mRcsSettings.writeParameter(RcsSettingsData.UUID, DeviceUtils.generateUUID()
+                mRcsSettings.writeString(RcsSettingsData.UUID, DeviceUtils.generateUUID()
                         .toString());
             }
         }
@@ -1486,7 +1483,7 @@ public class ProvisioningParser {
             do {
                 if (conRef == null) {
                     if ((conRef = getValueByParamName("ConRef", childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.RCS_APN, conRef);
+                        mRcsSettings.writeString(RcsSettingsData.RCS_APN, conRef);
                         continue;
                     }
                 }

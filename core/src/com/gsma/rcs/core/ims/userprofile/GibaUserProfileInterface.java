@@ -45,18 +45,12 @@ public class GibaUserProfileInterface extends UserProfileInterface {
      * @return User profile
      */
     public UserProfile read() {
-        // Read profile info from the database settings
-        String xdmServer = mRcsSettings.getXdmServer();
-        String xdmPassword = mRcsSettings.getUserProfileImsPassword();
-        String confUri = mRcsSettings.getImConferenceUri();
-
-        // The user profile will be complete during the registration procedure
-        return new UserProfile(null, // User name derived from GIBA procedure
-                null, // Domain derived from GIBA procedure
-                null, // No private ID with GIBA procedure
-                null, // No password with GIBA procedure
-                null, // No realm with GIBA procedure
-                xdmServer, null, // Login derived from GIBA procedure
-                xdmPassword, confUri, mRcsSettings);
+        return new UserProfile(null, /* User name derived from GIBA procedure */
+        null, /* Domain derived from GIBA procedure */
+        null, /* No private ID with GIBA procedure */
+        null, /* No password with GIBA procedure */
+        null, /* No realm with GIBA procedure */
+        mRcsSettings.getXdmServer(), null, /* Login derived from GIBA procedure */
+        mRcsSettings.getUserProfileImsPassword(), mRcsSettings.getImConferenceUri(), mRcsSettings);
     }
 }

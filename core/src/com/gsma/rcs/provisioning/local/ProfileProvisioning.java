@@ -23,10 +23,14 @@
 package com.gsma.rcs.provisioning.local;
 
 import static com.gsma.rcs.provisioning.local.Provisioning.saveCheckBoxParam;
-import static com.gsma.rcs.provisioning.local.Provisioning.saveEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.saveIntegerEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.saveStringEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.saveUriEditTextParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.setCheckBoxParam;
-import static com.gsma.rcs.provisioning.local.Provisioning.setEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.setIntegerEditTextParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.setSpinnerParameter;
+import static com.gsma.rcs.provisioning.local.Provisioning.setStringEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.setUriEditTextParam;
 
 import com.gsma.rcs.R;
 import com.gsma.rcs.provider.LocalContentResolver;
@@ -168,29 +172,33 @@ public class ProfileProvisioning extends Activity {
         spinner.setAdapter(adapter);
         spinner.setSelection(0);
 
-        setEditTextParam(R.id.ImsUsername, RcsSettingsData.USERPROFILE_IMS_USERNAME, helper);
-        setEditTextParam(R.id.ImsDisplayName, RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME, helper);
-        setEditTextParam(R.id.ImsHomeDomain, RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN, helper);
-        setEditTextParam(R.id.ImsPrivateId, RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID, helper);
-        setEditTextParam(R.id.ImsPassword, RcsSettingsData.USERPROFILE_IMS_PASSWORD, helper);
-        setEditTextParam(R.id.ImsRealm, RcsSettingsData.USERPROFILE_IMS_REALM, helper);
-        setEditTextParam(R.id.ImsOutboundProxyAddrForMobile, RcsSettingsData.IMS_PROXY_ADDR_MOBILE,
+        setStringEditTextParam(R.id.ImsUsername, RcsSettingsData.USERPROFILE_IMS_USERNAME, helper);
+        setStringEditTextParam(R.id.ImsDisplayName, RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME,
                 helper);
-        setEditTextParam(R.id.ImsOutboundProxyPortForMobile, RcsSettingsData.IMS_PROXY_PORT_MOBILE,
+        setStringEditTextParam(R.id.ImsHomeDomain, RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN,
                 helper);
-        setEditTextParam(R.id.ImsOutboundProxyAddrForWifi, RcsSettingsData.IMS_PROXY_ADDR_WIFI,
+        setStringEditTextParam(R.id.ImsPrivateId, RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID,
                 helper);
-        setEditTextParam(R.id.ImsOutboundProxyPortForWifi, RcsSettingsData.IMS_PROXY_PORT_WIFI,
+        setStringEditTextParam(R.id.ImsPassword, RcsSettingsData.USERPROFILE_IMS_PASSWORD, helper);
+        setStringEditTextParam(R.id.ImsRealm, RcsSettingsData.USERPROFILE_IMS_REALM, helper);
+        setStringEditTextParam(R.id.ImsOutboundProxyAddrForMobile,
+                RcsSettingsData.IMS_PROXY_ADDR_MOBILE, helper);
+        setIntegerEditTextParam(R.id.ImsOutboundProxyPortForMobile,
+                RcsSettingsData.IMS_PROXY_PORT_MOBILE, helper);
+        setStringEditTextParam(R.id.ImsOutboundProxyAddrForWifi,
+                RcsSettingsData.IMS_PROXY_ADDR_WIFI, helper);
+        setIntegerEditTextParam(R.id.ImsOutboundProxyPortForWifi,
+                RcsSettingsData.IMS_PROXY_PORT_WIFI, helper);
+        setStringEditTextParam(R.id.XdmServerAddr, RcsSettingsData.XDM_SERVER, helper);
+        setStringEditTextParam(R.id.XdmServerLogin, RcsSettingsData.XDM_LOGIN, helper);
+        setStringEditTextParam(R.id.XdmServerPassword, RcsSettingsData.XDM_PASSWORD, helper);
+        setStringEditTextParam(R.id.FtHttpServerAddr, RcsSettingsData.FT_HTTP_SERVER, helper);
+        setStringEditTextParam(R.id.FtHttpServerLogin, RcsSettingsData.FT_HTTP_LOGIN, helper);
+        setStringEditTextParam(R.id.FtHttpServerPassword, RcsSettingsData.FT_HTTP_PASSWORD, helper);
+        setUriEditTextParam(R.id.ImConferenceUri, RcsSettingsData.IM_CONF_URI, helper);
+        setUriEditTextParam(R.id.EndUserConfReqUri, RcsSettingsData.ENDUSER_CONFIRMATION_URI,
                 helper);
-        setEditTextParam(R.id.XdmServerAddr, RcsSettingsData.XDM_SERVER, helper);
-        setEditTextParam(R.id.XdmServerLogin, RcsSettingsData.XDM_LOGIN, helper);
-        setEditTextParam(R.id.XdmServerPassword, RcsSettingsData.XDM_PASSWORD, helper);
-        setEditTextParam(R.id.FtHttpServerAddr, RcsSettingsData.FT_HTTP_SERVER, helper);
-        setEditTextParam(R.id.FtHttpServerLogin, RcsSettingsData.FT_HTTP_LOGIN, helper);
-        setEditTextParam(R.id.FtHttpServerPassword, RcsSettingsData.FT_HTTP_PASSWORD, helper);
-        setEditTextParam(R.id.ImConferenceUri, RcsSettingsData.IM_CONF_URI, helper);
-        setEditTextParam(R.id.EndUserConfReqUri, RcsSettingsData.ENDUSER_CONFIRMATION_URI, helper);
-        setEditTextParam(R.id.RcsApn, RcsSettingsData.RCS_APN, helper);
+        setStringEditTextParam(R.id.RcsApn, RcsSettingsData.RCS_APN, helper);
 
         setCheckBoxParam(R.id.image_sharing, RcsSettingsData.CAPABILITY_IMAGE_SHARING, helper);
         setCheckBoxParam(R.id.video_sharing, RcsSettingsData.CAPABILITY_VIDEO_SHARING, helper);
@@ -262,26 +270,29 @@ public class ProfileProvisioning extends Activity {
             mRcsSettings.setImsAuhtenticationProcedureForWifi(procedure);
         }
 
-        saveEditTextParam(R.id.ImsUsername, RcsSettingsData.USERPROFILE_IMS_USERNAME, helper);
-        saveEditTextParam(R.id.ImsDisplayName, RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME, helper);
-        saveEditTextParam(R.id.ImsHomeDomain, RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN, helper);
-        saveEditTextParam(R.id.ImsPrivateId, RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID, helper);
-        saveEditTextParam(R.id.ImsPassword, RcsSettingsData.USERPROFILE_IMS_PASSWORD, helper);
-        saveEditTextParam(R.id.ImsRealm, RcsSettingsData.USERPROFILE_IMS_REALM, helper);
-        saveEditTextParam(R.id.ImsOutboundProxyAddrForMobile,
+        saveStringEditTextParam(R.id.ImsUsername, RcsSettingsData.USERPROFILE_IMS_USERNAME, helper);
+        saveStringEditTextParam(R.id.ImsDisplayName, RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME,
+                helper);
+        saveStringEditTextParam(R.id.ImsHomeDomain, RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN,
+                helper);
+        saveStringEditTextParam(R.id.ImsPrivateId, RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID,
+                helper);
+        saveStringEditTextParam(R.id.ImsPassword, RcsSettingsData.USERPROFILE_IMS_PASSWORD, helper);
+        saveStringEditTextParam(R.id.ImsRealm, RcsSettingsData.USERPROFILE_IMS_REALM, helper);
+        saveStringEditTextParam(R.id.ImsOutboundProxyAddrForMobile,
                 RcsSettingsData.IMS_PROXY_ADDR_MOBILE, helper);
-        saveEditTextParam(R.id.ImsOutboundProxyPortForMobile,
+        saveIntegerEditTextParam(R.id.ImsOutboundProxyPortForMobile,
                 RcsSettingsData.IMS_PROXY_PORT_MOBILE, helper);
-        saveEditTextParam(R.id.ImsOutboundProxyAddrForWifi, RcsSettingsData.IMS_PROXY_ADDR_WIFI,
-                helper);
-        saveEditTextParam(R.id.ImsOutboundProxyPortForWifi, RcsSettingsData.IMS_PROXY_PORT_WIFI,
-                helper);
-        saveEditTextParam(R.id.XdmServerAddr, RcsSettingsData.XDM_SERVER, helper);
-        saveEditTextParam(R.id.XdmServerLogin, RcsSettingsData.XDM_LOGIN, helper);
-        saveEditTextParam(R.id.XdmServerPassword, RcsSettingsData.XDM_PASSWORD, helper);
-        saveEditTextParam(R.id.FtHttpServerAddr, RcsSettingsData.FT_HTTP_SERVER, helper);
-        saveEditTextParam(R.id.FtHttpServerLogin, RcsSettingsData.FT_HTTP_LOGIN, helper);
-        saveEditTextParam(R.id.FtHttpServerPassword, RcsSettingsData.FT_HTTP_PASSWORD, helper);
+        saveStringEditTextParam(R.id.ImsOutboundProxyAddrForWifi,
+                RcsSettingsData.IMS_PROXY_ADDR_WIFI, helper);
+        saveIntegerEditTextParam(R.id.ImsOutboundProxyPortForWifi,
+                RcsSettingsData.IMS_PROXY_PORT_WIFI, helper);
+        saveStringEditTextParam(R.id.XdmServerAddr, RcsSettingsData.XDM_SERVER, helper);
+        saveStringEditTextParam(R.id.XdmServerLogin, RcsSettingsData.XDM_LOGIN, helper);
+        saveStringEditTextParam(R.id.XdmServerPassword, RcsSettingsData.XDM_PASSWORD, helper);
+        saveStringEditTextParam(R.id.FtHttpServerAddr, RcsSettingsData.FT_HTTP_SERVER, helper);
+        saveStringEditTextParam(R.id.FtHttpServerLogin, RcsSettingsData.FT_HTTP_LOGIN, helper);
+        saveStringEditTextParam(R.id.FtHttpServerPassword, RcsSettingsData.FT_HTTP_PASSWORD, helper);
 
         if (bundle == null) {
             mRcsSettings.setFileTransferHttpSupported(mRcsSettings.getFtHttpServer().length() > 0
@@ -289,9 +300,10 @@ public class ProfileProvisioning extends Activity {
                     && mRcsSettings.getFtHttpPassword().length() > 0);
         }
 
-        saveEditTextParam(R.id.ImConferenceUri, RcsSettingsData.IM_CONF_URI, helper);
-        saveEditTextParam(R.id.EndUserConfReqUri, RcsSettingsData.ENDUSER_CONFIRMATION_URI, helper);
-        saveEditTextParam(R.id.RcsApn, RcsSettingsData.RCS_APN, helper);
+        saveUriEditTextParam(R.id.ImConferenceUri, RcsSettingsData.IM_CONF_URI, helper);
+        saveUriEditTextParam(R.id.EndUserConfReqUri, RcsSettingsData.ENDUSER_CONFIRMATION_URI,
+                helper);
+        saveStringEditTextParam(R.id.RcsApn, RcsSettingsData.RCS_APN, helper);
 
         // Save capabilities
         saveCheckBoxParam(R.id.image_sharing, RcsSettingsData.CAPABILITY_IMAGE_SHARING, helper);

@@ -23,6 +23,7 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.Context;
+import android.net.Uri;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -84,19 +85,21 @@ public class PhoneUtils {
      * @param contactId the contact identifier
      * @return the Uri
      */
-    public static String formatContactIdToUri(ContactId contactId) {
+    public static Uri formatContactIdToUri(ContactId contactId) {
         if (contactId == null) {
             throw new IllegalArgumentException("ContactId is null");
         }
+        // @FIXME: Should make use of android.net.sip.SipProfile.Builder for creating SIP URI
+        // instead of doing it with Strings.
         if (TEL_URI_SUPPORTED) {
             /* Tel-URI format */
-            return TEL_URI_HEADER.concat(contactId.toString());
+            return Uri.parse(TEL_URI_HEADER.concat(contactId.toString()));
 
         }
         /* SIP-URI format */
-        return new StringBuilder(SIP_URI_HEADER).append(contactId).append("@")
+        return Uri.parse(new StringBuilder(SIP_URI_HEADER).append(contactId).append("@")
                 .append(ImsModule.IMS_USER_PROFILE.getHomeDomain()).append(";user=phone")
-                .toString();
+                .toString());
     }
 
     /**

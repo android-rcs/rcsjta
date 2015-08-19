@@ -23,9 +23,13 @@
 package com.gsma.rcs.provisioning.local;
 
 import static com.gsma.rcs.provisioning.local.Provisioning.saveCheckBoxParam;
-import static com.gsma.rcs.provisioning.local.Provisioning.saveEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.saveIntegerEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.saveLongEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.saveStringEditTextParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.setCheckBoxParam;
-import static com.gsma.rcs.provisioning.local.Provisioning.setEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.setIntegerEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.setLongEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.setStringEditTextParam;
 
 import com.gsma.rcs.R;
 import com.gsma.rcs.provider.LocalContentResolver;
@@ -96,33 +100,45 @@ public class ServiceProvisioning extends Activity {
         ProvisioningHelper helper = new ProvisioningHelper(this, mRcsSettings, bundle);
 
         // Display UI parameters
-        setEditTextParam(R.id.MaxPhotoIconSize, RcsSettingsData.MAX_PHOTO_ICON_SIZE, helper);
-        setEditTextParam(R.id.MaxFreetextLength, RcsSettingsData.MAX_FREETXT_LENGTH, helper);
-        setEditTextParam(R.id.MaxChatParticipants, RcsSettingsData.MAX_CHAT_PARTICIPANTS, helper);
-        setEditTextParam(R.id.MaxChatMessageLength, RcsSettingsData.MAX_CHAT_MSG_LENGTH, helper);
-        setEditTextParam(R.id.MaxGroupChatMessageLength, RcsSettingsData.MAX_GROUPCHAT_MSG_LENGTH,
+        setLongEditTextParam(R.id.MaxPhotoIconSize, RcsSettingsData.MAX_PHOTO_ICON_SIZE, helper);
+        setIntegerEditTextParam(R.id.MaxFreetextLength, RcsSettingsData.MAX_FREETXT_LENGTH, helper);
+        setIntegerEditTextParam(R.id.MaxChatParticipants, RcsSettingsData.MAX_CHAT_PARTICIPANTS,
                 helper);
-        setEditTextParam(R.id.ChatIdleDuration, RcsSettingsData.CHAT_IDLE_DURATION, helper);
-        setEditTextParam(R.id.MaxFileTransferSize, RcsSettingsData.MAX_FILE_TRANSFER_SIZE, helper);
-        setEditTextParam(R.id.WarnFileTransferSize, RcsSettingsData.WARN_FILE_TRANSFER_SIZE, helper);
-        setEditTextParam(R.id.MaxImageShareSize, RcsSettingsData.MAX_IMAGE_SHARE_SIZE, helper);
-        setEditTextParam(R.id.MaxVideoShareDuration, RcsSettingsData.MAX_VIDEO_SHARE_DURATION,
+        setIntegerEditTextParam(R.id.MaxChatMessageLength, RcsSettingsData.MAX_CHAT_MSG_LENGTH,
                 helper);
-        setEditTextParam(R.id.MaxChatSessions, RcsSettingsData.MAX_CHAT_SESSIONS, helper);
-        setEditTextParam(R.id.MaxFileTransferSessions, RcsSettingsData.MAX_FILE_TRANSFER_SESSIONS,
+        setIntegerEditTextParam(R.id.MaxGroupChatMessageLength,
+                RcsSettingsData.MAX_GROUPCHAT_MSG_LENGTH, helper);
+        setLongEditTextParam(R.id.ChatIdleDuration, RcsSettingsData.CHAT_IDLE_DURATION, helper);
+        setLongEditTextParam(R.id.MaxFileTransferSize, RcsSettingsData.MAX_FILE_TRANSFER_SIZE,
                 helper);
-        setEditTextParam(R.id.MaxConcurrentOutgoingFileTransferSessions,
+        setLongEditTextParam(R.id.WarnFileTransferSize, RcsSettingsData.WARN_FILE_TRANSFER_SIZE,
+                helper);
+        setLongEditTextParam(R.id.MaxImageShareSize, RcsSettingsData.MAX_IMAGE_SHARE_SIZE, helper);
+        setLongEditTextParam(R.id.MaxVideoShareDuration, RcsSettingsData.MAX_VIDEO_SHARE_DURATION,
+                helper);
+        setIntegerEditTextParam(R.id.MaxChatSessions, RcsSettingsData.MAX_CHAT_SESSIONS, helper);
+        setIntegerEditTextParam(R.id.MaxFileTransferSessions,
+                RcsSettingsData.MAX_FILE_TRANSFER_SESSIONS, helper);
+        setIntegerEditTextParam(R.id.MaxConcurrentOutgoingFileTransferSessions,
                 RcsSettingsData.MAX_CONCURRENT_OUTGOING_FILE_TRANSFERS, helper);
-        setEditTextParam(R.id.MaxIpCallSessions, RcsSettingsData.MAX_IP_CALL_SESSIONS, helper);
-        setEditTextParam(R.id.MaxChatLogEntries, RcsSettingsData.MAX_CHAT_LOG_ENTRIES, helper);
-        setEditTextParam(R.id.MaxRichcallLogEntries, RcsSettingsData.MAX_RICHCALL_LOG_ENTRIES,
+        setIntegerEditTextParam(R.id.MaxIpCallSessions, RcsSettingsData.MAX_IP_CALL_SESSIONS,
                 helper);
-        setEditTextParam(R.id.MaxIpcallLogEntries, RcsSettingsData.MAX_IPCALL_LOG_ENTRIES, helper);
-        setEditTextParam(R.id.DirectoryPathPhotos, RcsSettingsData.DIRECTORY_PATH_PHOTOS, helper);
-        setEditTextParam(R.id.DirectoryPathVideos, RcsSettingsData.DIRECTORY_PATH_VIDEOS, helper);
-        setEditTextParam(R.id.DirectoryPathFiles, RcsSettingsData.DIRECTORY_PATH_FILES, helper);
-        setEditTextParam(R.id.MaxGeolocLabelLength, RcsSettingsData.MAX_GEOLOC_LABEL_LENGTH, helper);
-        setEditTextParam(R.id.GeolocExpirationTime, RcsSettingsData.GEOLOC_EXPIRATION_TIME, helper);
+        setIntegerEditTextParam(R.id.MaxChatLogEntries, RcsSettingsData.MAX_CHAT_LOG_ENTRIES,
+                helper);
+        setIntegerEditTextParam(R.id.MaxRichcallLogEntries,
+                RcsSettingsData.MAX_RICHCALL_LOG_ENTRIES, helper);
+        setIntegerEditTextParam(R.id.MaxIpcallLogEntries, RcsSettingsData.MAX_IPCALL_LOG_ENTRIES,
+                helper);
+        setStringEditTextParam(R.id.DirectoryPathPhotos, RcsSettingsData.DIRECTORY_PATH_PHOTOS,
+                helper);
+        setStringEditTextParam(R.id.DirectoryPathVideos, RcsSettingsData.DIRECTORY_PATH_VIDEOS,
+                helper);
+        setStringEditTextParam(R.id.DirectoryPathFiles, RcsSettingsData.DIRECTORY_PATH_FILES,
+                helper);
+        setIntegerEditTextParam(R.id.MaxGeolocLabelLength, RcsSettingsData.MAX_GEOLOC_LABEL_LENGTH,
+                helper);
+        setLongEditTextParam(R.id.GeolocExpirationTime, RcsSettingsData.GEOLOC_EXPIRATION_TIME,
+                helper);
 
         Spinner spinner = (Spinner) findViewById(R.id.ImSessionStart);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
@@ -152,35 +168,45 @@ public class ServiceProvisioning extends Activity {
     private void saveInstanceState(Bundle bundle) {
         ProvisioningHelper helper = new ProvisioningHelper(this, mRcsSettings, bundle);
 
-        saveEditTextParam(R.id.MaxPhotoIconSize, RcsSettingsData.MAX_PHOTO_ICON_SIZE, helper);
-        saveEditTextParam(R.id.MaxFreetextLength, RcsSettingsData.MAX_FREETXT_LENGTH, helper);
-        saveEditTextParam(R.id.MaxChatParticipants, RcsSettingsData.MAX_CHAT_PARTICIPANTS, helper);
-        saveEditTextParam(R.id.MaxChatMessageLength, RcsSettingsData.MAX_CHAT_MSG_LENGTH, helper);
-        saveEditTextParam(R.id.MaxGroupChatMessageLength, RcsSettingsData.MAX_GROUPCHAT_MSG_LENGTH,
+        saveLongEditTextParam(R.id.MaxPhotoIconSize, RcsSettingsData.MAX_PHOTO_ICON_SIZE, helper);
+        saveIntegerEditTextParam(R.id.MaxFreetextLength, RcsSettingsData.MAX_FREETXT_LENGTH, helper);
+        saveIntegerEditTextParam(R.id.MaxChatParticipants, RcsSettingsData.MAX_CHAT_PARTICIPANTS,
                 helper);
-        saveEditTextParam(R.id.ChatIdleDuration, RcsSettingsData.CHAT_IDLE_DURATION, helper);
-        saveEditTextParam(R.id.MaxFileTransferSize, RcsSettingsData.MAX_FILE_TRANSFER_SIZE, helper);
-        saveEditTextParam(R.id.WarnFileTransferSize, RcsSettingsData.WARN_FILE_TRANSFER_SIZE,
+        saveIntegerEditTextParam(R.id.MaxChatMessageLength, RcsSettingsData.MAX_CHAT_MSG_LENGTH,
                 helper);
-        saveEditTextParam(R.id.MaxImageShareSize, RcsSettingsData.MAX_IMAGE_SHARE_SIZE, helper);
-        saveEditTextParam(R.id.MaxVideoShareDuration, RcsSettingsData.MAX_VIDEO_SHARE_DURATION,
+        saveIntegerEditTextParam(R.id.MaxGroupChatMessageLength,
+                RcsSettingsData.MAX_GROUPCHAT_MSG_LENGTH, helper);
+        saveLongEditTextParam(R.id.ChatIdleDuration, RcsSettingsData.CHAT_IDLE_DURATION, helper);
+        saveLongEditTextParam(R.id.MaxFileTransferSize, RcsSettingsData.MAX_FILE_TRANSFER_SIZE,
                 helper);
-        saveEditTextParam(R.id.MaxChatSessions, RcsSettingsData.MAX_CHAT_SESSIONS, helper);
-        saveEditTextParam(R.id.MaxFileTransferSessions, RcsSettingsData.MAX_FILE_TRANSFER_SESSIONS,
+        saveLongEditTextParam(R.id.WarnFileTransferSize, RcsSettingsData.WARN_FILE_TRANSFER_SIZE,
                 helper);
-        saveEditTextParam(R.id.MaxConcurrentOutgoingFileTransferSessions,
+        saveLongEditTextParam(R.id.MaxImageShareSize, RcsSettingsData.MAX_IMAGE_SHARE_SIZE, helper);
+        saveLongEditTextParam(R.id.MaxVideoShareDuration, RcsSettingsData.MAX_VIDEO_SHARE_DURATION,
+                helper);
+        saveIntegerEditTextParam(R.id.MaxChatSessions, RcsSettingsData.MAX_CHAT_SESSIONS, helper);
+        saveIntegerEditTextParam(R.id.MaxFileTransferSessions,
+                RcsSettingsData.MAX_FILE_TRANSFER_SESSIONS, helper);
+        saveIntegerEditTextParam(R.id.MaxConcurrentOutgoingFileTransferSessions,
                 RcsSettingsData.MAX_CONCURRENT_OUTGOING_FILE_TRANSFERS, helper);
-        saveEditTextParam(R.id.MaxIpCallSessions, RcsSettingsData.MAX_IP_CALL_SESSIONS, helper);
-        saveEditTextParam(R.id.MaxChatLogEntries, RcsSettingsData.MAX_CHAT_LOG_ENTRIES, helper);
-        saveEditTextParam(R.id.MaxRichcallLogEntries, RcsSettingsData.MAX_RICHCALL_LOG_ENTRIES,
+        saveIntegerEditTextParam(R.id.MaxIpCallSessions, RcsSettingsData.MAX_IP_CALL_SESSIONS,
                 helper);
-        saveEditTextParam(R.id.MaxIpcallLogEntries, RcsSettingsData.MAX_IPCALL_LOG_ENTRIES, helper);
-        saveEditTextParam(R.id.MaxGeolocLabelLength, RcsSettingsData.MAX_GEOLOC_LABEL_LENGTH,
+        saveIntegerEditTextParam(R.id.MaxChatLogEntries, RcsSettingsData.MAX_CHAT_LOG_ENTRIES,
                 helper);
-        saveEditTextParam(R.id.GeolocExpirationTime, RcsSettingsData.GEOLOC_EXPIRATION_TIME, helper);
-        saveEditTextParam(R.id.DirectoryPathPhotos, RcsSettingsData.DIRECTORY_PATH_PHOTOS, helper);
-        saveEditTextParam(R.id.DirectoryPathVideos, RcsSettingsData.DIRECTORY_PATH_VIDEOS, helper);
-        saveEditTextParam(R.id.DirectoryPathFiles, RcsSettingsData.DIRECTORY_PATH_FILES, helper);
+        saveIntegerEditTextParam(R.id.MaxRichcallLogEntries,
+                RcsSettingsData.MAX_RICHCALL_LOG_ENTRIES, helper);
+        saveIntegerEditTextParam(R.id.MaxIpcallLogEntries, RcsSettingsData.MAX_IPCALL_LOG_ENTRIES,
+                helper);
+        saveIntegerEditTextParam(R.id.MaxGeolocLabelLength,
+                RcsSettingsData.MAX_GEOLOC_LABEL_LENGTH, helper);
+        saveLongEditTextParam(R.id.GeolocExpirationTime, RcsSettingsData.GEOLOC_EXPIRATION_TIME,
+                helper);
+        saveStringEditTextParam(R.id.DirectoryPathPhotos, RcsSettingsData.DIRECTORY_PATH_PHOTOS,
+                helper);
+        saveStringEditTextParam(R.id.DirectoryPathVideos, RcsSettingsData.DIRECTORY_PATH_VIDEOS,
+                helper);
+        saveStringEditTextParam(R.id.DirectoryPathFiles, RcsSettingsData.DIRECTORY_PATH_FILES,
+                helper);
 
         Spinner spinner = (Spinner) findViewById(R.id.ImSessionStart);
         if (bundle != null) {

@@ -60,7 +60,7 @@ public class RcsSettingsData {
     /**
      * Default group chat conference URI
      */
-    public static final String DEFAULT_GROUP_CHAT_URI = "sip:foo@bar";
+    public static final Uri DEFAULT_GROUP_CHAT_URI = Uri.parse("sip:foo@bar");
 
     /**
      * File type for certificate
@@ -703,7 +703,7 @@ public class RcsSettingsData {
      * IM conference URI for group chat session
      */
     public static final String IM_CONF_URI = "ImConferenceUri";
-    /* package private */static final String DEFAULT_IM_CONF_URI = RcsSettingsData.DEFAULT_GROUP_CHAT_URI;
+    /* package private */static final Uri DEFAULT_IM_CONF_URI = RcsSettingsData.DEFAULT_GROUP_CHAT_URI;
 
     /**
      * End user confirmation request URI for terms and conditions

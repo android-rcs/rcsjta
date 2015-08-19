@@ -266,9 +266,10 @@ public class GroupChatLog implements IGroupChatLog {
                     .getColumnIndexOrThrow(GroupChatData.KEY_SUBJECT));
             String rejoinId = cursor.getString(cursor
                     .getColumnIndexOrThrow(GroupChatData.KEY_REJOIN_ID));
+            Uri rejoinUri = rejoinId != null ? Uri.parse(rejoinId) : null;
             Map<ContactId, ParticipantStatus> participants = parseEncodedParticipantInfos(cursor
                     .getString(cursor.getColumnIndexOrThrow(GroupChatData.KEY_PARTICIPANTS)));
-            return new GroupChatInfo(rejoinId, chatId, participants, subject, timestamp);
+            return new GroupChatInfo(rejoinUri, chatId, participants, subject, timestamp);
 
         } finally {
             CursorUtil.close(cursor);

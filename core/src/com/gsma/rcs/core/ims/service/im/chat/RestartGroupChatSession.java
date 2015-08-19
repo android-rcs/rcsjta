@@ -40,6 +40,7 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 
+import android.net.Uri;
 import android.text.TextUtils;
 
 import java.util.HashSet;
@@ -80,7 +81,7 @@ public class RestartGroupChatSession extends GroupChatSession {
      * @param timestamp Local timestamp for the session
      * @param contactManager
      */
-    public RestartGroupChatSession(InstantMessagingService imService, String conferenceId,
+    public RestartGroupChatSession(InstantMessagingService imService, Uri conferenceId,
             String subject, String contributionId,
             Map<ContactId, ParticipantStatus> storedParticipants, RcsSettings rcsSettings,
             MessagingLog messagingLog, long timestamp, ContactManager contactManager) {

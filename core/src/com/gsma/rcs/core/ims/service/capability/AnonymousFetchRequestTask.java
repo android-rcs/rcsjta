@@ -123,7 +123,8 @@ public class AnonymousFetchRequestTask {
             sLogger.info("Send SUBSCRIBE request to " + mContact);
         }
         /* Create a dialog path */
-        String contactUri = PhoneUtils.formatContactIdToUri(mContact);
+        // @FIXME: This should be an URI instead of String
+        String contactUri = PhoneUtils.formatContactIdToUri(mContact).toString();
 
         /* Set Call-Id */
         String callId = mImsModule.getSipManager().getSipStack().generateCallId();

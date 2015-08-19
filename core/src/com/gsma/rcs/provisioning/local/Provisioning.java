@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.provisioning.local;
@@ -24,6 +28,7 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 
 import android.app.TabActivity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -37,13 +42,14 @@ import android.widget.TabHost;
  */
 @SuppressWarnings("deprecation")
 public class Provisioning extends TabActivity {
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         LocalContentResolver localContentResolver = new LocalContentResolver(
                 getApplicationContext());
-        AndroidFactory.setApplicationContext(this, RcsSettings.createInstance(localContentResolver));
+        AndroidFactory
+                .setApplicationContext(this, RcsSettings.createInstance(localContentResolver));
 
         // Set tabs
         final TabHost tabHost = getTabHost();
@@ -64,14 +70,74 @@ public class Provisioning extends TabActivity {
      * @param settingsKey the key of the RCS parameter
      * @param helper
      */
-    /* package private */static void setEditTextParam(int viewID, String settingsKey,
+    /* package private */static void setStringEditTextParam(int viewID, String settingsKey,
             ProvisioningHelper helper) {
         String parameter = null;
         Bundle bundle = helper.getBundle();
         if (bundle != null && bundle.containsKey(settingsKey)) {
             parameter = bundle.getString(settingsKey);
         } else {
-            parameter = helper.getRcsSettings().readParameter(settingsKey);
+            parameter = helper.getRcsSettings().readString((settingsKey));
+        }
+        EditText editText = (EditText) helper.getActivity().findViewById(viewID);
+        editText.setText(parameter);
+    }
+
+    /**
+     * Set edit text either from bundle or from RCS settings if bundle is null
+     * 
+     * @param viewID the view ID for the text edit
+     * @param settingsKey the key of the RCS parameter
+     * @param helper
+     */
+    /* package private */static void setIntegerEditTextParam(int viewID, String settingsKey,
+            ProvisioningHelper helper) {
+        String parameter = null;
+        Bundle bundle = helper.getBundle();
+        if (bundle != null && bundle.containsKey(settingsKey)) {
+            parameter = bundle.getString(settingsKey);
+        } else {
+            parameter = Integer.toString(helper.getRcsSettings().readInteger((settingsKey)));
+        }
+        EditText editText = (EditText) helper.getActivity().findViewById(viewID);
+        editText.setText(parameter);
+    }
+
+    /**
+     * Set edit text either from bundle or from RCS settings if bundle is null
+     * 
+     * @param viewID the view ID for the text edit
+     * @param settingsKey the key of the RCS parameter
+     * @param helper
+     */
+    /* package private */static void setLongEditTextParam(int viewID, String settingsKey,
+            ProvisioningHelper helper) {
+        String parameter = null;
+        Bundle bundle = helper.getBundle();
+        if (bundle != null && bundle.containsKey(settingsKey)) {
+            parameter = bundle.getString(settingsKey);
+        } else {
+            parameter = Long.toString(helper.getRcsSettings().readLong((settingsKey)));
+        }
+        EditText editText = (EditText) helper.getActivity().findViewById(viewID);
+        editText.setText(parameter);
+    }
+
+    /**
+     * Set edit text either from bundle or from RCS settings if bundle is null
+     * 
+     * @param viewID the view ID for the text edit
+     * @param settingsKey the key of the RCS parameter
+     * @param helper
+     */
+    /* package private */static void setUriEditTextParam(int viewID, String settingsKey,
+            ProvisioningHelper helper) {
+        String parameter = null;
+        Bundle bundle = helper.getBundle();
+        if (bundle != null && bundle.containsKey(settingsKey)) {
+            parameter = bundle.getString(settingsKey);
+        } else {
+            parameter = helper.getRcsSettings().readUri((settingsKey)).toString();
         }
         EditText editText = (EditText) helper.getActivity().findViewById(viewID);
         editText.setText(parameter);
@@ -91,7 +157,7 @@ public class Provisioning extends TabActivity {
         if (bundle != null && bundle.containsKey(settingsKey)) {
             parameter = bundle.getBoolean(settingsKey);
         } else {
-            parameter = Boolean.parseBoolean(helper.getRcsSettings().readParameter(settingsKey));
+            parameter = helper.getRcsSettings().readBoolean((settingsKey));
         }
         CheckBox box = (CheckBox) helper.getActivity().findViewById(viewID);
         box.setChecked(parameter);
@@ -113,7 +179,7 @@ public class Provisioning extends TabActivity {
         if (bundle != null && bundle.containsKey(settingsKey)) {
             parameter = bundle.getInt(settingsKey);
         } else {
-            String selected = helper.getRcsSettings().readParameter(settingsKey);
+            String selected = helper.getRcsSettings().readString(settingsKey);
             parameter = java.util.Arrays.asList(selection).indexOf(selected);
         }
         spinner.setSelection(parameter % selection.length);
@@ -127,14 +193,70 @@ public class Provisioning extends TabActivity {
      * @param settingsKey the key of the RCS parameter
      * @param helper
      */
-    /* package private */static void saveEditTextParam(int viewID, String settingsKey,
+    /* package private */static void saveStringEditTextParam(int viewID, String settingsKey,
             ProvisioningHelper helper) {
         EditText txt = (EditText) helper.getActivity().findViewById(viewID);
         Bundle bundle = helper.getBundle();
         if (bundle != null) {
             bundle.putString(settingsKey, txt.getText().toString());
         } else {
-            helper.getRcsSettings().writeParameter(settingsKey, txt.getText().toString());
+            helper.getRcsSettings().writeString(settingsKey, txt.getText().toString());
+        }
+    }
+
+    /**
+     * Save integer either in bundle or in RCS settings if bundle is null
+     * 
+     * @param viewID the view ID
+     * @param settingsKey the key of the RCS parameter
+     * @param helper
+     */
+    /* package private */static void saveIntegerEditTextParam(int viewID, String settingsKey,
+            ProvisioningHelper helper) {
+        EditText txt = (EditText) helper.getActivity().findViewById(viewID);
+        Bundle bundle = helper.getBundle();
+        if (bundle != null) {
+            bundle.putString(settingsKey, txt.getText().toString());
+        } else {
+            helper.getRcsSettings().writeInteger(settingsKey,
+                    Integer.parseInt(txt.getText().toString()));
+        }
+    }
+
+    /**
+     * Save long either in bundle or in RCS settings if bundle is null
+     * 
+     * @param viewID the view ID
+     * @param settingsKey the key of the RCS parameter
+     * @param helper
+     */
+    /* package private */static void saveLongEditTextParam(int viewID, String settingsKey,
+            ProvisioningHelper helper) {
+        EditText txt = (EditText) helper.getActivity().findViewById(viewID);
+        Bundle bundle = helper.getBundle();
+        if (bundle != null) {
+            bundle.putString(settingsKey, txt.getText().toString());
+        } else {
+            helper.getRcsSettings()
+                    .writeLong(settingsKey, Long.parseLong(txt.getText().toString()));
+        }
+    }
+
+    /**
+     * Save uri either in bundle or in RCS settings if bundle is null
+     * 
+     * @param viewID the view ID
+     * @param settingsKey the key of the RCS parameter
+     * @param helper
+     */
+    /* package private */static void saveUriEditTextParam(int viewID, String settingsKey,
+            ProvisioningHelper helper) {
+        EditText txt = (EditText) helper.getActivity().findViewById(viewID);
+        Bundle bundle = helper.getBundle();
+        if (bundle != null) {
+            bundle.putString(settingsKey, txt.getText().toString());
+        } else {
+            helper.getRcsSettings().writeUri(settingsKey, Uri.parse(txt.getText().toString()));
         }
     }
 

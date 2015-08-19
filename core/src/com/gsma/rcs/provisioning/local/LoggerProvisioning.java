@@ -19,9 +19,9 @@
 package com.gsma.rcs.provisioning.local;
 
 import static com.gsma.rcs.provisioning.local.Provisioning.saveCheckBoxParam;
-import static com.gsma.rcs.provisioning.local.Provisioning.saveEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.saveStringEditTextParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.setCheckBoxParam;
-import static com.gsma.rcs.provisioning.local.Provisioning.setEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.setStringEditTextParam;
 
 import com.gsma.rcs.R;
 import com.gsma.rcs.provider.LocalContentResolver;
@@ -94,7 +94,7 @@ public class LoggerProvisioning extends Activity {
         setCheckBoxParam(R.id.TraceActivated, RcsSettingsData.TRACE_ACTIVATED, helper);
         setCheckBoxParam(R.id.SipTraceActivated, RcsSettingsData.SIP_TRACE_ACTIVATED, helper);
         setCheckBoxParam(R.id.MediaTraceActivated, RcsSettingsData.MEDIA_TRACE_ACTIVATED, helper);
-        setEditTextParam(R.id.SipTraceFile, RcsSettingsData.SIP_TRACE_FILE, helper);
+        setStringEditTextParam(R.id.SipTraceFile, RcsSettingsData.SIP_TRACE_FILE, helper);
 
         Spinner spinner = (Spinner) findViewById(R.id.TraceLevel);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
@@ -134,7 +134,7 @@ public class LoggerProvisioning extends Activity {
         saveCheckBoxParam(R.id.TraceActivated, RcsSettingsData.TRACE_ACTIVATED, helper);
         saveCheckBoxParam(R.id.SipTraceActivated, RcsSettingsData.SIP_TRACE_ACTIVATED, helper);
         saveCheckBoxParam(R.id.MediaTraceActivated, RcsSettingsData.MEDIA_TRACE_ACTIVATED, helper);
-        saveEditTextParam(R.id.SipTraceFile, RcsSettingsData.SIP_TRACE_FILE, helper);
+        saveStringEditTextParam(R.id.SipTraceFile, RcsSettingsData.SIP_TRACE_FILE, helper);
         Spinner spinner = (Spinner) findViewById(R.id.TraceLevel);
         if (bundle != null) {
             bundle.putInt(RcsSettingsData.TRACE_LEVEL, spinner.getSelectedItemPosition());

@@ -321,7 +321,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             }
             return false;
         }
-        if (TextUtils.isEmpty(groupChat.getRejoinId())) {
+        if (groupChat.getRejoinId() == null) {
             if (sLogger.isActivated()) {
                 sLogger.debug(new StringBuilder("Group chat with group chat Id '")
                         .append(mChatId)

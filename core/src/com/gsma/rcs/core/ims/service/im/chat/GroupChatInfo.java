@@ -24,6 +24,8 @@ package com.gsma.rcs.core.ims.service.im.chat;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 
+import android.net.Uri;
+
 import java.util.Map;
 
 /**
@@ -36,7 +38,7 @@ public class GroupChatInfo {
     /**
      * Rejoin ID
      */
-    private String mRejoinId;
+    private Uri mRejoinId;
 
     /**
      * Contribution Id
@@ -67,7 +69,7 @@ public class GroupChatInfo {
      * @param subject Subject
      * @param timestamp Local timestamp
      */
-    public GroupChatInfo(String rejoinId, String contributionId,
+    public GroupChatInfo(Uri rejoinId, String contributionId,
             Map<ContactId, ParticipantStatus> participants, String subject, long timestamp) {
         mRejoinId = rejoinId;
         mContributionId = contributionId;
@@ -81,7 +83,7 @@ public class GroupChatInfo {
      * 
      * @return ID
      */
-    public String getRejoinId() {
+    public Uri getRejoinId() {
         return mRejoinId;
     }
 

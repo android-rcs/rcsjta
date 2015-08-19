@@ -61,6 +61,8 @@ import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 
+import android.net.Uri;
+
 import gov2.nist.javax2.sip.header.Reason;
 
 import java.io.IOException;
@@ -117,10 +119,9 @@ public abstract class GroupChatSession extends ChatSession {
      * @param timestamp Local timestamp for the session
      * @param contactManager
      */
-    public GroupChatSession(InstantMessagingService imService, ContactId contact,
-            String conferenceId, Map<ContactId, ParticipantStatus> participants,
-            RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
-            ContactManager contactManager) {
+    public GroupChatSession(InstantMessagingService imService, ContactId contact, Uri conferenceId,
+            Map<ContactId, ParticipantStatus> participants, RcsSettings rcsSettings,
+            MessagingLog messagingLog, long timestamp, ContactManager contactManager) {
         super(imService, contact, conferenceId, rcsSettings, messagingLog, null, timestamp,
                 contactManager);
 
@@ -564,10 +565,9 @@ public abstract class GroupChatSession extends ChatSession {
             SipRequest refer;
 
             if (nbrOfContacts == 1) {
-                String singleContactUri = PhoneUtils.formatContactIdToUri(contacts.iterator()
-                        .next());
-                refer = SipMessageFactory.createRefer(getDialogPath(), singleContactUri,
-                        getSubject(), getContributionID());
+                Uri singleContact = PhoneUtils.formatContactIdToUri(contacts.iterator().next());
+                refer = SipMessageFactory.createRefer(getDialogPath(), singleContact, getSubject(),
+                        getContributionID());
             } else {
                 refer = SipMessageFactory.createRefer(getDialogPath(), contacts, getSubject(),
                         getContributionID());
@@ -591,9 +591,8 @@ public abstract class GroupChatSession extends ChatSession {
                 }
 
                 if (nbrOfContacts == 1) {
-                    String singleContactUri = PhoneUtils.formatContactIdToUri(contacts.iterator()
-                            .next());
-                    refer = SipMessageFactory.createRefer(getDialogPath(), singleContactUri,
+                    Uri singleContact = PhoneUtils.formatContactIdToUri(contacts.iterator().next());
+                    refer = SipMessageFactory.createRefer(getDialogPath(), singleContact,
                             getSubject(), getContributionID());
                 } else {
                     refer = SipMessageFactory.createRefer(getDialogPath(), contacts, getSubject(),

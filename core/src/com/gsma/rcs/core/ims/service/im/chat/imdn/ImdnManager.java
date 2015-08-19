@@ -231,8 +231,8 @@ public class ImdnManager extends Thread {
             // Create authentication agent
             SessionAuthenticationAgent authenticationAgent = new SessionAuthenticationAgent(
                     mImsService.getImsModule());
-
-            String toUri = PhoneUtils.formatContactIdToUri(deliveryStatus.getRemote());
+            // @FIXME: This should be an URI instead of String
+            String toUri = PhoneUtils.formatContactIdToUri(deliveryStatus.getRemote()).toString();
             // Create a dialog path
             SipDialogPath dialogPath = new SipDialogPath(mImsService.getImsModule().getSipManager()
                     .getSipStack(), mImsService.getImsModule().getSipManager().getSipStack()

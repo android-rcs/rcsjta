@@ -68,6 +68,8 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 
+import android.net.Uri;
+
 import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
@@ -179,17 +181,17 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * 
      * @param imService InstantMessagingService
      * @param contact Remote contactId
-     * @param remoteUri Remote URI
+     * @param remoteContact Remote Contact URI
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
      * @param firstMsg First message in session
      * @param timestamp Local timestamp for the session
      * @param contactManager
      */
-    public ChatSession(InstantMessagingService imService, ContactId contact, String remoteUri,
+    public ChatSession(InstantMessagingService imService, ContactId contact, Uri remoteContact,
             RcsSettings rcsSettings, MessagingLog messagingLog, ChatMessage firstMsg,
             long timestamp, ContactManager contactManager) {
-        super(imService, contact, remoteUri, rcsSettings, timestamp, contactManager);
+        super(imService, contact, remoteContact, rcsSettings, timestamp, contactManager);
 
         mImService = imService;
         mImdnManager = imService.getImdnManager();
@@ -891,7 +893,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      */
     public void sendMsrpMessageDeliveryStatus(ContactId remote, String msgId, String status,
             long timestamp) throws MsrpException {
-        // Send status in CPIM + IMDN headers
         String from = ChatUtils.ANONYMOUS_URI;
         String to = ChatUtils.ANONYMOUS_URI;
         sendMsrpMessageDeliveryStatus(from, to, msgId, status, timestamp);

@@ -625,7 +625,7 @@ public class XdmManager {
         String url = "/resource-lists/users/"
                 + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
                 + "/index/~~/resource-lists/list%5B@name=%22rcs%22%5D/entry%5B@uri=%22"
-                + Uri.encode(PhoneUtils.formatContactIdToUri(contact)) + "%22%5D";
+                + Uri.encode(PhoneUtils.formatContactIdToUri(contact).toString()) + "%22%5D";
 
         // Content
         String content = "<entry uri='" + contact + "'></entry>";
@@ -666,7 +666,7 @@ public class XdmManager {
         String url = "/resource-lists/users/"
                 + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
                 + "/index/~~/resource-lists/list%5B@name=%22rcs%22%5D/entry%5B@uri=%22"
-                + Uri.encode(PhoneUtils.formatContactIdToUri(contact)) + "%22%5D";
+                + Uri.encode(PhoneUtils.formatContactIdToUri(contact).toString()) + "%22%5D";
 
         // Create the request
         HttpDeleteRequest request = new HttpDeleteRequest(url);
@@ -758,7 +758,7 @@ public class XdmManager {
         String url = "/resource-lists/users/"
                 + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
                 + "/index/~~/resource-lists/list%5B@name=%22rcs_blockedcontacts%22%5D/entry%5B@uri=%22"
-                + Uri.encode(PhoneUtils.formatContactIdToUri(contact)) + "%22%5D";
+                + Uri.encode(PhoneUtils.formatContactIdToUri(contact).toString()) + "%22%5D";
         return sendRequestToXDMS(new HttpDeleteRequest(url));
     }
 
@@ -817,7 +817,7 @@ public class XdmManager {
         String url = "/resource-lists/users/"
                 + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
                 + "/index/~~/resource-lists/list%5B@name=%22rcs_revokedcontacts%22%5D/entry%5B@uri=%22"
-                + Uri.encode(PhoneUtils.formatContactIdToUri(contact)) + "%22%5D";
+                + Uri.encode(PhoneUtils.formatContactIdToUri(contact).toString()) + "%22%5D";
         String content = "<entry uri='" + contact + "'></entry>";
         return sendRequestToXDMS(new HttpPutRequest(url, content, "application/xcap-el+xml"));
     }
@@ -838,7 +838,7 @@ public class XdmManager {
         String url = "/resource-lists/users/"
                 + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
                 + "/index/~~/resource-lists/list%5B@name=%22rcs_revokedcontacts%22%5D/entry%5B@uri=%22"
-                + Uri.encode(PhoneUtils.formatContactIdToUri(contact)) + "%22%5D";
+                + Uri.encode(PhoneUtils.formatContactIdToUri(contact).toString()) + "%22%5D";
         return sendRequestToXDMS(new HttpDeleteRequest(url));
     }
 

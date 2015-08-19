@@ -56,6 +56,7 @@ import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 
+import android.net.Uri;
 import android.text.TextUtils;
 
 import org.xml.sax.InputSource;
@@ -70,6 +71,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
+
 import javax2.sip.header.ContactHeader;
 import javax2.sip.header.ExtensionHeader;
 
@@ -398,6 +400,7 @@ public class ChatUtils {
         return part.substring(0, part.indexOf(CRLF)).trim();
     }
 
+    // @FIXME: This method should have URI as parameter instead of String
     private static String addUriDelimiters(String uri) {
         return new StringBuilder(PhoneUtils.URI_START_DELIMITER).append(uri)
                 .append(PhoneUtils.URI_END_DELIMITER).toString();
@@ -436,7 +439,8 @@ public class ChatUtils {
 
         /* It's a valid phone number, format it to URI and add delimiters */
         ContactId contact = ContactUtil.createContactIdFromValidatedData(validatedNumber);
-        return addUriDelimiters(PhoneUtils.formatContactIdToUri(contact));
+        // @FIXME: This method should have URI as parameter instead of String
+        return addUriDelimiters(PhoneUtils.formatContactIdToUri(contact).toString());
     }
 
     /**

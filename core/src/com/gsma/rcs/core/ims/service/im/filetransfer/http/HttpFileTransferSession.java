@@ -38,6 +38,8 @@ import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
+import android.net.Uri;
+
 /**
  * Abstract file transfer HTTP session
  * 
@@ -80,7 +82,7 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * @param imService InstantMessagingService
      * @param content Content to share
      * @param contact Remote contact identifier
-     * @param remoteUri the remote URI
+     * @param remoteContact the remote contact URI
      * @param fileIcon Content of file icon
      * @param chatSessionId Chat session ID
      * @param chatContributionId Chat contribution Id
@@ -93,11 +95,11 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * @param contactManager
      */
     public HttpFileTransferSession(InstantMessagingService imService, MmContent content,
-            ContactId contact, String remoteUri, MmContent fileIcon, String chatSessionId,
+            ContactId contact, Uri remoteContact, MmContent fileIcon, String chatSessionId,
             String chatContributionId, String fileTransferId, RcsSettings rcsSettings,
             MessagingLog messagingLog, long timestamp, long fileExpiration, long iconExpiration,
             ContactManager contactManager) {
-        super(imService, content, contact, remoteUri, fileIcon, fileTransferId, rcsSettings,
+        super(imService, content, contact, remoteContact, fileIcon, fileTransferId, rcsSettings,
                 timestamp, contactManager);
 
         mChatSessionId = chatSessionId;

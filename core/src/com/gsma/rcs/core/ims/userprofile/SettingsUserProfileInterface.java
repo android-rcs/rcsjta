@@ -50,7 +50,6 @@ public class SettingsUserProfileInterface extends UserProfileInterface {
      * @return User profile
      */
     public UserProfile read() {
-        // Read profile info from the database settings
         ContactId contact = mRcsSettings.getUserProfileImsUserName();
         if (contact == null) {
             if (sLogger.isActivated()) {
@@ -59,16 +58,10 @@ public class SettingsUserProfileInterface extends UserProfileInterface {
             return null;
 
         }
-        String homeDomain = mRcsSettings.getUserProfileImsDomain();
-        String privateID = mRcsSettings.getUserProfileImsPrivateId();
-        String password = mRcsSettings.getUserProfileImsPassword();
-        String realm = mRcsSettings.getUserProfileImsRealm();
-        String xdmServer = mRcsSettings.getXdmServer();
-        String xdmLogin = mRcsSettings.getXdmLogin();
-        String xdmPassword = mRcsSettings.getXdmPassword();
-        String imConfUri = mRcsSettings.getImConferenceUri();
-
-        return new UserProfile(contact, homeDomain, privateID, password, realm, xdmServer,
-                xdmLogin, xdmPassword, imConfUri, mRcsSettings);
+        return new UserProfile(contact, mRcsSettings.getUserProfileImsDomain(),
+                mRcsSettings.getUserProfileImsPrivateId(),
+                mRcsSettings.getUserProfileImsPassword(), mRcsSettings.getUserProfileImsRealm(),
+                mRcsSettings.getXdmServer(), mRcsSettings.getXdmLogin(),
+                mRcsSettings.getXdmPassword(), mRcsSettings.getImConferenceUri(), mRcsSettings);
     }
 }

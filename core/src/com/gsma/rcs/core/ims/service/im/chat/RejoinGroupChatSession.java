@@ -34,6 +34,7 @@ import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 
+import android.net.Uri;
 import android.text.TextUtils;
 
 import javax2.sip.InvalidArgumentException;
@@ -63,7 +64,8 @@ public class RejoinGroupChatSession extends GroupChatSession {
     public RejoinGroupChatSession(InstantMessagingService imService, GroupChatInfo groupChatInfo,
             RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
             ContactManager contactManager) {
-        super(imService, null, groupChatInfo.getRejoinId(), groupChatInfo.getParticipants(),
+        super(imService, null, groupChatInfo.getRejoinId(), groupChatInfo
+                .getParticipants(),
                 rcsSettings, messagingLog, timestamp, contactManager);
 
         if (!TextUtils.isEmpty(groupChatInfo.getSubject())) {

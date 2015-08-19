@@ -849,7 +849,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                     }
                     return false;
                 }
-                if (TextUtils.isEmpty(groupChat.getRejoinId())) {
+                if (groupChat.getRejoinId() == null) {
                     if (sLogger.isActivated()) {
                         sLogger.debug(new StringBuilder(
                                 "Cannot transfer file to group chat with group chat Id '")

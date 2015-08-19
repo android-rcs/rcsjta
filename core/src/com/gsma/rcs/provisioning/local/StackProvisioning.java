@@ -23,9 +23,13 @@
 package com.gsma.rcs.provisioning.local;
 
 import static com.gsma.rcs.provisioning.local.Provisioning.saveCheckBoxParam;
-import static com.gsma.rcs.provisioning.local.Provisioning.saveEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.saveStringEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.saveIntegerEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.saveLongEditTextParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.setCheckBoxParam;
-import static com.gsma.rcs.provisioning.local.Provisioning.setEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.setStringEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.setIntegerEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.setLongEditTextParam;
 
 import com.gsma.rcs.R;
 import com.gsma.rcs.provider.LocalContentResolver;
@@ -165,7 +169,7 @@ public class StackProvisioning extends Activity {
             bundle.putString(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_MOBILE,
                     (String) spinner.getSelectedItem());
         } else {
-            mRcsSettings.writeParameter(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_MOBILE,
+            mRcsSettings.writeString(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_MOBILE,
                     (String) spinner.getSelectedItem());
         }
 
@@ -201,7 +205,7 @@ public class StackProvisioning extends Activity {
             bundle.putString(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI,
                     (String) spinner.getSelectedItem());
         } else {
-            mRcsSettings.writeParameter(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI,
+            mRcsSettings.writeString(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI,
                     (String) spinner.getSelectedItem());
         }
 
@@ -212,7 +216,7 @@ public class StackProvisioning extends Activity {
             if (bundle != null) {
                 bundle.putString(RcsSettingsData.TLS_CERTIFICATE_ROOT, "");
             } else {
-                mRcsSettings.writeParameter(RcsSettingsData.TLS_CERTIFICATE_ROOT, "");
+                mRcsSettings.writeString(RcsSettingsData.TLS_CERTIFICATE_ROOT, "");
             }
         } else {
             String path = CERTIFICATE_FOLDER_PATH + File.separator
@@ -220,7 +224,7 @@ public class StackProvisioning extends Activity {
             if (bundle != null) {
                 bundle.putString(RcsSettingsData.TLS_CERTIFICATE_ROOT, path);
             } else {
-                mRcsSettings.writeParameter(RcsSettingsData.TLS_CERTIFICATE_ROOT, path);
+                mRcsSettings.writeString(RcsSettingsData.TLS_CERTIFICATE_ROOT, path);
             }
         }
 
@@ -229,7 +233,7 @@ public class StackProvisioning extends Activity {
             if (bundle != null) {
                 bundle.putString(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE, "");
             } else {
-                mRcsSettings.writeParameter(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE, "");
+                mRcsSettings.writeString(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE, "");
             }
         } else {
             String path = CERTIFICATE_FOLDER_PATH + File.separator
@@ -237,7 +241,7 @@ public class StackProvisioning extends Activity {
             if (bundle != null) {
                 bundle.putString(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE, path);
             } else {
-                mRcsSettings.writeParameter(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE, path);
+                mRcsSettings.writeString(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE, path);
             }
         }
 
@@ -274,42 +278,45 @@ public class StackProvisioning extends Activity {
             mRcsSettings.setFtProtocol(protocol);
         }
 
-        saveEditTextParam(R.id.SecondaryProvisioningAddress,
+        saveStringEditTextParam(R.id.SecondaryProvisioningAddress,
                 RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS, helper);
         saveCheckBoxParam(R.id.SecondaryProvisioningAddressOnly,
                 RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS_ONLY, helper);
-        saveEditTextParam(R.id.ImsServicePollingPeriod, RcsSettingsData.IMS_SERVICE_POLLING_PERIOD,
+        saveLongEditTextParam(R.id.ImsServicePollingPeriod,
+                RcsSettingsData.IMS_SERVICE_POLLING_PERIOD, helper);
+        saveIntegerEditTextParam(R.id.SipListeningPort, RcsSettingsData.SIP_DEFAULT_PORT, helper);
+        saveLongEditTextParam(R.id.SipTimerT1, RcsSettingsData.SIP_TIMER_T1, helper);
+        saveLongEditTextParam(R.id.SipTimerT2, RcsSettingsData.SIP_TIMER_T2, helper);
+        saveLongEditTextParam(R.id.SipTimerT4, RcsSettingsData.SIP_TIMER_T4, helper);
+        saveLongEditTextParam(R.id.SipTransactionTimeout, RcsSettingsData.SIP_TRANSACTION_TIMEOUT,
                 helper);
-        saveEditTextParam(R.id.SipListeningPort, RcsSettingsData.SIP_DEFAULT_PORT, helper);
-        saveEditTextParam(R.id.SipTimerT1, RcsSettingsData.SIP_TIMER_T1, helper);
-        saveEditTextParam(R.id.SipTimerT2, RcsSettingsData.SIP_TIMER_T2, helper);
-        saveEditTextParam(R.id.SipTimerT4, RcsSettingsData.SIP_TIMER_T4, helper);
-        saveEditTextParam(R.id.SipTransactionTimeout, RcsSettingsData.SIP_TRANSACTION_TIMEOUT,
+        saveLongEditTextParam(R.id.SipKeepAlivePeriod, RcsSettingsData.SIP_KEEP_ALIVE_PERIOD,
                 helper);
-        saveEditTextParam(R.id.SipKeepAlivePeriod, RcsSettingsData.SIP_KEEP_ALIVE_PERIOD, helper);
-        saveEditTextParam(R.id.DefaultMsrpPort, RcsSettingsData.MSRP_DEFAULT_PORT, helper);
-        saveEditTextParam(R.id.DefaultRtpPort, RcsSettingsData.RTP_DEFAULT_PORT, helper);
-        saveEditTextParam(R.id.MsrpTransactionTimeout, RcsSettingsData.MSRP_TRANSACTION_TIMEOUT,
+        saveIntegerEditTextParam(R.id.DefaultMsrpPort, RcsSettingsData.MSRP_DEFAULT_PORT, helper);
+        saveIntegerEditTextParam(R.id.DefaultRtpPort, RcsSettingsData.RTP_DEFAULT_PORT, helper);
+        saveLongEditTextParam(R.id.MsrpTransactionTimeout,
+                RcsSettingsData.MSRP_TRANSACTION_TIMEOUT, helper);
+        saveLongEditTextParam(R.id.RegisterExpirePeriod, RcsSettingsData.REGISTER_EXPIRE_PERIOD,
                 helper);
-        saveEditTextParam(R.id.RegisterExpirePeriod, RcsSettingsData.REGISTER_EXPIRE_PERIOD, helper);
-        saveEditTextParam(R.id.RegisterRetryBaseTime, RcsSettingsData.REGISTER_RETRY_BASE_TIME,
+        saveLongEditTextParam(R.id.RegisterRetryBaseTime, RcsSettingsData.REGISTER_RETRY_BASE_TIME,
                 helper);
-        saveEditTextParam(R.id.RegisterRetryMaxTime, RcsSettingsData.REGISTER_RETRY_MAX_TIME,
+        saveLongEditTextParam(R.id.RegisterRetryMaxTime, RcsSettingsData.REGISTER_RETRY_MAX_TIME,
                 helper);
-        saveEditTextParam(R.id.PublishExpirePeriod, RcsSettingsData.PUBLISH_EXPIRE_PERIOD, helper);
-        saveEditTextParam(R.id.RevokeTimeout, RcsSettingsData.REVOKE_TIMEOUT, helper);
-        saveEditTextParam(R.id.RingingPeriod, RcsSettingsData.RINGING_SESSION_PERIOD, helper);
-        saveEditTextParam(R.id.SubscribeExpirePeriod, RcsSettingsData.SUBSCRIBE_EXPIRE_PERIOD,
+        saveLongEditTextParam(R.id.PublishExpirePeriod, RcsSettingsData.PUBLISH_EXPIRE_PERIOD,
                 helper);
-        saveEditTextParam(R.id.IsComposingTimeout, RcsSettingsData.IS_COMPOSING_TIMEOUT, helper);
-        saveEditTextParam(R.id.SessionRefreshExpirePeriod,
+        saveLongEditTextParam(R.id.RevokeTimeout, RcsSettingsData.REVOKE_TIMEOUT, helper);
+        saveLongEditTextParam(R.id.RingingPeriod, RcsSettingsData.RINGING_SESSION_PERIOD, helper);
+        saveLongEditTextParam(R.id.SubscribeExpirePeriod, RcsSettingsData.SUBSCRIBE_EXPIRE_PERIOD,
+                helper);
+        saveLongEditTextParam(R.id.IsComposingTimeout, RcsSettingsData.IS_COMPOSING_TIMEOUT, helper);
+        saveLongEditTextParam(R.id.SessionRefreshExpirePeriod,
                 RcsSettingsData.SESSION_REFRESH_EXPIRE_PERIOD, helper);
-        saveEditTextParam(R.id.CapabilityRefreshTimeout,
+        saveLongEditTextParam(R.id.CapabilityRefreshTimeout,
                 RcsSettingsData.CAPABILITY_REFRESH_TIMEOUT, helper);
-        saveEditTextParam(R.id.CapabilityExpiryTimeout, RcsSettingsData.CAPABILITY_EXPIRY_TIMEOUT,
-                helper);
-        saveEditTextParam(R.id.CapabilityPollingPeriod, RcsSettingsData.CAPABILITY_POLLING_PERIOD,
-                helper);
+        saveLongEditTextParam(R.id.CapabilityExpiryTimeout,
+                RcsSettingsData.CAPABILITY_EXPIRY_TIMEOUT, helper);
+        saveLongEditTextParam(R.id.CapabilityPollingPeriod,
+                RcsSettingsData.CAPABILITY_POLLING_PERIOD, helper);
         saveCheckBoxParam(R.id.SipKeepAlive, RcsSettingsData.SIP_KEEP_ALIVE, helper);
         saveCheckBoxParam(R.id.PermanentState, RcsSettingsData.PERMANENT_STATE_MODE, helper);
         saveCheckBoxParam(R.id.TelUriFormat, RcsSettingsData.TEL_URI_FORMAT, helper);
@@ -326,9 +333,9 @@ public class StackProvisioning extends Activity {
         saveCheckBoxParam(R.id.ImeiAsDeviceId, RcsSettingsData.USE_IMEI_AS_DEVICE_ID, helper);
         saveCheckBoxParam(R.id.ControlExtensions, RcsSettingsData.CONTROL_EXTENSIONS, helper);
         saveCheckBoxParam(R.id.AllowExtensions, RcsSettingsData.ALLOW_EXTENSIONS, helper);
-        saveEditTextParam(R.id.MaxMsrpLengthExtensions, RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS,
-                helper);
-        saveEditTextParam(R.id.MessagingCapabilitiesValidity,
+        saveIntegerEditTextParam(R.id.MaxMsrpLengthExtensions,
+                RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS, helper);
+        saveLongEditTextParam(R.id.MessagingCapabilitiesValidity,
                 RcsSettingsData.MSG_CAP_VALIDITY_PERIOD, helper);
     }
 
@@ -383,7 +390,7 @@ public class StackProvisioning extends Activity {
                 spinner.setSelection(2);
         }
 
-        setEditTextParam(R.id.SecondaryProvisioningAddress,
+        setStringEditTextParam(R.id.SecondaryProvisioningAddress,
                 RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS, helper);
         setCheckBoxParam(R.id.SecondaryProvisioningAddressOnly,
                 RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS_ONLY, helper);
@@ -466,7 +473,7 @@ public class StackProvisioning extends Activity {
         }
         if (!found) {
             spinner.setSelection(0);
-            mRcsSettings.writeParameter(RcsSettingsData.TLS_CERTIFICATE_ROOT, "");
+            mRcsSettings.writeString(RcsSettingsData.TLS_CERTIFICATE_ROOT, "");
         }
 
         spinner = (Spinner) findViewById(R.id.TlsCertificateIntermediate);
@@ -489,7 +496,7 @@ public class StackProvisioning extends Activity {
         }
         if (!found) {
             spinner.setSelection(0);
-            mRcsSettings.writeParameter(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE, "");
+            mRcsSettings.writeString(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE, "");
         }
 
         spinner = (Spinner) findViewById(R.id.FtProtocol);
@@ -509,37 +516,40 @@ public class StackProvisioning extends Activity {
             spinner.setSelection(1);
         }
 
-        setEditTextParam(R.id.ImsServicePollingPeriod, RcsSettingsData.IMS_SERVICE_POLLING_PERIOD,
+        setLongEditTextParam(R.id.ImsServicePollingPeriod,
+                RcsSettingsData.IMS_SERVICE_POLLING_PERIOD, helper);
+        setIntegerEditTextParam(R.id.SipListeningPort, RcsSettingsData.SIP_DEFAULT_PORT, helper);
+        setLongEditTextParam(R.id.SipTimerT1, RcsSettingsData.SIP_TIMER_T1, helper);
+        setLongEditTextParam(R.id.SipTimerT2, RcsSettingsData.SIP_TIMER_T2, helper);
+        setLongEditTextParam(R.id.SipTimerT4, RcsSettingsData.SIP_TIMER_T4, helper);
+        setLongEditTextParam(R.id.SipTransactionTimeout, RcsSettingsData.SIP_TRANSACTION_TIMEOUT,
                 helper);
-        setEditTextParam(R.id.SipListeningPort, RcsSettingsData.SIP_DEFAULT_PORT, helper);
-        setEditTextParam(R.id.SipTimerT1, RcsSettingsData.SIP_TIMER_T1, helper);
-        setEditTextParam(R.id.SipTimerT2, RcsSettingsData.SIP_TIMER_T2, helper);
-        setEditTextParam(R.id.SipTimerT4, RcsSettingsData.SIP_TIMER_T4, helper);
-        setEditTextParam(R.id.SipTransactionTimeout, RcsSettingsData.SIP_TRANSACTION_TIMEOUT,
+        setLongEditTextParam(R.id.SipKeepAlivePeriod, RcsSettingsData.SIP_KEEP_ALIVE_PERIOD, helper);
+        setIntegerEditTextParam(R.id.DefaultMsrpPort, RcsSettingsData.MSRP_DEFAULT_PORT, helper);
+        setIntegerEditTextParam(R.id.DefaultRtpPort, RcsSettingsData.RTP_DEFAULT_PORT, helper);
+        setLongEditTextParam(R.id.MsrpTransactionTimeout, RcsSettingsData.MSRP_TRANSACTION_TIMEOUT,
                 helper);
-        setEditTextParam(R.id.SipKeepAlivePeriod, RcsSettingsData.SIP_KEEP_ALIVE_PERIOD, helper);
-        setEditTextParam(R.id.DefaultMsrpPort, RcsSettingsData.MSRP_DEFAULT_PORT, helper);
-        setEditTextParam(R.id.DefaultRtpPort, RcsSettingsData.RTP_DEFAULT_PORT, helper);
-        setEditTextParam(R.id.MsrpTransactionTimeout, RcsSettingsData.MSRP_TRANSACTION_TIMEOUT,
+        setLongEditTextParam(R.id.RegisterExpirePeriod, RcsSettingsData.REGISTER_EXPIRE_PERIOD,
                 helper);
-        setEditTextParam(R.id.RegisterExpirePeriod, RcsSettingsData.REGISTER_EXPIRE_PERIOD, helper);
-        setEditTextParam(R.id.RegisterRetryBaseTime, RcsSettingsData.REGISTER_RETRY_BASE_TIME,
+        setLongEditTextParam(R.id.RegisterRetryBaseTime, RcsSettingsData.REGISTER_RETRY_BASE_TIME,
                 helper);
-        setEditTextParam(R.id.RegisterRetryMaxTime, RcsSettingsData.REGISTER_RETRY_MAX_TIME, helper);
-        setEditTextParam(R.id.PublishExpirePeriod, RcsSettingsData.PUBLISH_EXPIRE_PERIOD, helper);
-        setEditTextParam(R.id.RevokeTimeout, RcsSettingsData.REVOKE_TIMEOUT, helper);
-        setEditTextParam(R.id.RingingPeriod, RcsSettingsData.RINGING_SESSION_PERIOD, helper);
-        setEditTextParam(R.id.SubscribeExpirePeriod, RcsSettingsData.SUBSCRIBE_EXPIRE_PERIOD,
+        setLongEditTextParam(R.id.RegisterRetryMaxTime, RcsSettingsData.REGISTER_RETRY_MAX_TIME,
                 helper);
-        setEditTextParam(R.id.IsComposingTimeout, RcsSettingsData.IS_COMPOSING_TIMEOUT, helper);
-        setEditTextParam(R.id.SessionRefreshExpirePeriod,
+        setLongEditTextParam(R.id.PublishExpirePeriod, RcsSettingsData.PUBLISH_EXPIRE_PERIOD,
+                helper);
+        setLongEditTextParam(R.id.RevokeTimeout, RcsSettingsData.REVOKE_TIMEOUT, helper);
+        setLongEditTextParam(R.id.RingingPeriod, RcsSettingsData.RINGING_SESSION_PERIOD, helper);
+        setLongEditTextParam(R.id.SubscribeExpirePeriod, RcsSettingsData.SUBSCRIBE_EXPIRE_PERIOD,
+                helper);
+        setLongEditTextParam(R.id.IsComposingTimeout, RcsSettingsData.IS_COMPOSING_TIMEOUT, helper);
+        setLongEditTextParam(R.id.SessionRefreshExpirePeriod,
                 RcsSettingsData.SESSION_REFRESH_EXPIRE_PERIOD, helper);
-        setEditTextParam(R.id.CapabilityRefreshTimeout, RcsSettingsData.CAPABILITY_REFRESH_TIMEOUT,
-                helper);
-        setEditTextParam(R.id.CapabilityExpiryTimeout, RcsSettingsData.CAPABILITY_EXPIRY_TIMEOUT,
-                helper);
-        setEditTextParam(R.id.CapabilityPollingPeriod, RcsSettingsData.CAPABILITY_POLLING_PERIOD,
-                helper);
+        setLongEditTextParam(R.id.CapabilityRefreshTimeout,
+                RcsSettingsData.CAPABILITY_REFRESH_TIMEOUT, helper);
+        setLongEditTextParam(R.id.CapabilityExpiryTimeout,
+                RcsSettingsData.CAPABILITY_EXPIRY_TIMEOUT, helper);
+        setLongEditTextParam(R.id.CapabilityPollingPeriod,
+                RcsSettingsData.CAPABILITY_POLLING_PERIOD, helper);
         setCheckBoxParam(R.id.TcpFallback, RcsSettingsData.TCP_FALLBACK, helper);
         setCheckBoxParam(R.id.SipKeepAlive, RcsSettingsData.SIP_KEEP_ALIVE, helper);
         setCheckBoxParam(R.id.PermanentState, RcsSettingsData.PERMANENT_STATE_MODE, helper);
@@ -557,9 +567,9 @@ public class StackProvisioning extends Activity {
         setCheckBoxParam(R.id.ImeiAsDeviceId, RcsSettingsData.USE_IMEI_AS_DEVICE_ID, helper);
         setCheckBoxParam(R.id.ControlExtensions, RcsSettingsData.CONTROL_EXTENSIONS, helper);
         setCheckBoxParam(R.id.AllowExtensions, RcsSettingsData.ALLOW_EXTENSIONS, helper);
-        setEditTextParam(R.id.MaxMsrpLengthExtensions, RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS,
-                helper);
-        setEditTextParam(R.id.MessagingCapabilitiesValidity,
+        setIntegerEditTextParam(R.id.MaxMsrpLengthExtensions,
+                RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS, helper);
+        setLongEditTextParam(R.id.MessagingCapabilitiesValidity,
                 RcsSettingsData.MSG_CAP_VALIDITY_PERIOD, helper);
     }
 

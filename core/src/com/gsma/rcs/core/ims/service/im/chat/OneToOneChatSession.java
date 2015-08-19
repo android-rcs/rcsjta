@@ -48,6 +48,8 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.contact.ContactId;
 
+import android.net.Uri;
+
 import java.util.List;
 
 import javax2.sip.message.Response;
@@ -71,7 +73,7 @@ public abstract class OneToOneChatSession extends ChatSession {
      * 
      * @param imService InstantMessagingService
      * @param contact Remote contact identifier
-     * @param remoteUri Remote URI
+     * @param remoteContact Remote Contact URI
      * @param firstMsg First chat message
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
@@ -79,9 +81,9 @@ public abstract class OneToOneChatSession extends ChatSession {
      * @param contactManager Contact manager accessor
      */
     public OneToOneChatSession(InstantMessagingService imService, ContactId contact,
-            String remoteUri, ChatMessage firstMsg, RcsSettings rcsSettings,
+            Uri remoteContact, ChatMessage firstMsg, RcsSettings rcsSettings,
             MessagingLog messagingLog, long timestamp, ContactManager contactManager) {
-        super(imService, contact, remoteUri, rcsSettings, messagingLog, firstMsg, timestamp,
+        super(imService, contact, remoteContact, rcsSettings, messagingLog, firstMsg, timestamp,
                 contactManager);
 
         List<String> featureTags = ChatUtils.getSupportedFeatureTagsForChat(rcsSettings);

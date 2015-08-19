@@ -202,7 +202,7 @@ public abstract class DequeueTask implements Runnable {
                 }
                 return false;
             }
-            if (TextUtils.isEmpty(groupChat.getRejoinId())) {
+            if (groupChat.getRejoinId() == null) {
                 if (mLogger.isActivated()) {
                     mLogger.debug(new StringBuilder(
                             "Cannot dequeue group chat messages and group file transfers as thr group chat with group chat Id '")

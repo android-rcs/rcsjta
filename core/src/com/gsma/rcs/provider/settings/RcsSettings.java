@@ -86,7 +86,7 @@ public class RcsSettings {
     /**
      * A cache for storing settings in order to increase performance
      */
-    final private Map<String, String> mCache;
+    final private Map<String, Object> mCache;
 
     /**
      * Create singleton instance
@@ -111,7 +111,7 @@ public class RcsSettings {
     private RcsSettings(LocalContentResolver localContentResolver) {
         super();
         mLocalContentResolver = localContentResolver;
-        mCache = new HashMap<String, String>();
+        mCache = new HashMap<String, Object>();
     }
 
     /**
@@ -122,8 +122,13 @@ public class RcsSettings {
      * @param key the key field
      * @return the value field
      */
-    private boolean readBoolean(String key) {
-        return Boolean.parseBoolean(readParameter(key));
+    public boolean readBoolean(String key) {
+        Boolean value = (Boolean) mCache.get(key);
+        if (value == null) {
+            value = Boolean.parseBoolean(readParameter(key));
+            mCache.put(key, value);
+        }
+        return value;
     }
 
     /**
@@ -133,7 +138,9 @@ public class RcsSettings {
      * @param value the boolean value
      */
     public void writeBoolean(String key, Boolean value) {
-        writeParameter(key, value.toString());
+        if (writeParameter(key, value.toString()) != 0) {
+            mCache.put(key, value);
+        }
     }
 
     /**
@@ -144,8 +151,13 @@ public class RcsSettings {
      * @param key the key field
      * @return the value field
      */
-    private int readInteger(String key) {
-        return Integer.parseInt(readParameter(key));
+    public int readInteger(String key) {
+        Integer value = (Integer) mCache.get(key);
+        if (value == null) {
+            value = Integer.parseInt(readParameter(key));
+            mCache.put(key, value);
+        }
+        return value;
     }
 
     /**
@@ -156,8 +168,13 @@ public class RcsSettings {
      * @param key the key field
      * @return the value field
      */
-    private long readLong(String key) {
-        return Long.parseLong(readParameter(key));
+    public long readLong(String key) {
+        Long value = (Long) mCache.get(key);
+        if (value == null) {
+            value = Long.parseLong(readParameter(key));
+            mCache.put(key, value);
+        }
+        return value;
     }
 
     /**
@@ -166,8 +183,13 @@ public class RcsSettings {
      * @param key the key field
      * @return the value field or defaultValue (if read fails)
      */
-    private String readString(String key) {
-        return readParameter(key);
+    public String readString(String key) {
+        String value = (String) mCache.get(key);
+        if (value == null) {
+            value = readParameter(key);
+            mCache.put(key, value);
+        }
+        return value;
     }
 
     /**
@@ -177,7 +199,9 @@ public class RcsSettings {
      * @param value the integer value
      */
     public void writeInteger(String key, Integer value) {
-        writeParameter(key, value.toString());
+        if (writeParameter(key, value.toString()) != 0) {
+            mCache.put(key, value);
+        }
     }
 
     /**
@@ -187,26 +211,57 @@ public class RcsSettings {
      * @param value the long value
      */
     public void writeLong(String key, Long value) {
-        writeParameter(key, value.toString());
+        if (writeParameter(key, value.toString()) != 0) {
+            mCache.put(key, value);
+        }
     }
 
     /**
-     * Read a parameter
+     * Write String parameter
+     * 
+     * @param key the key field
+     * @param value the long value
+     */
+    public void writeString(String key, String value) {
+        if (writeParameter(key, value) != 0) {
+            mCache.put(key, value);
+        }
+    }
+
+    /**
+     * Read Uri parameter
+     * 
+     * @param key the key field
+     * @return the value field or defaultValue (if read fails)
+     */
+    public Uri readUri(String key) {
+        Uri value = (Uri) mCache.get(key);
+        if (value == null) {
+            value = Uri.parse((readParameter(key)));
+            mCache.put(key, value);
+        }
+        return value;
+    }
+
+    /**
+     * Write uri parameter
+     * 
+     * @param key the key field
+     * @param value the long value
+     */
+    public void writeUri(String key, Uri value) {
+        if (writeParameter(key, value.toString()) != 0) {
+            mCache.put(key, value);
+        }
+    }
+
+    /**
+     * Read a parameter from database
      * 
      * @param key Key
      * @return Value
      */
-    public String readParameter(String key) {
-        if (sInstance == null) {
-            throw new IllegalStateException("RcsInstance not created");
-        }
-        String value = null;
-        // First read value from cache
-        value = mCache.get(key);
-        if (value != null) {
-            return value;
-        }
-        // If value is null then query database
+    private String readParameter(String key) {
         Cursor c = null;
         try {
             String[] whereArg = new String[] {
@@ -218,10 +273,8 @@ public class RcsSettings {
             if (!c.moveToFirst()) {
                 throw new IllegalArgumentException("Illegal setting key:".concat(key));
             }
-            value = c.getString(c.getColumnIndexOrThrow(RcsSettingsData.KEY_VALUE));
-            // Update cache
-            mCache.put(key, value);
-            return value;
+            return c.getString(c.getColumnIndexOrThrow(RcsSettingsData.KEY_VALUE));
+
         } finally {
             if (c != null) {
                 c.close();
@@ -230,14 +283,14 @@ public class RcsSettings {
     }
 
     /**
-     * Write a string setting parameter
+     * Write a string setting parameter to Database
      * 
      * @param key
      * @param value
      * @return the number of rows updated
      */
-    public int writeParameter(String key, String value) {
-        if (sInstance == null || value == null) {
+    private int writeParameter(String key, String value) {
+        if (value == null) {
             return 0;
         }
         ContentValues values = new ContentValues();
@@ -245,13 +298,8 @@ public class RcsSettings {
         String[] whereArgs = new String[] {
             key
         };
-        int count = mLocalContentResolver.update(RcsSettingsData.CONTENT_URI, values, WHERE_CLAUSE,
+        return mLocalContentResolver.update(RcsSettingsData.CONTENT_URI, values, WHERE_CLAUSE,
                 whereArgs);
-        if (count != 0) {
-            // Put in cache
-            mCache.put(key, value);
-        }
-        return count;
     }
 
     /**
@@ -327,7 +375,7 @@ public class RcsSettings {
      * @param contact
      */
     public void setUserProfileImsUserName(ContactId contact) {
-        writeParameter(
+        writeString(
                 RcsSettingsData.USERPROFILE_IMS_USERNAME,
                 (contact == null) ? RcsSettingsData.DEFAULT_USERPROFILE_IMS_USERNAME : contact
                         .toString());
@@ -357,7 +405,7 @@ public class RcsSettings {
      * @param value Value
      */
     public void setUserProfileImsDisplayName(String value) {
-        writeParameter(RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME, value);
+        writeString(RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME, value);
     }
 
     /**
@@ -375,7 +423,7 @@ public class RcsSettings {
      * @param uri SIP-URI
      */
     public void setUserProfileImsPrivateId(String uri) {
-        writeParameter(RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID, uri);
+        writeString(RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID, uri);
     }
 
     /**
@@ -393,7 +441,7 @@ public class RcsSettings {
      * @param pwd Password
      */
     public void setUserProfileImsPassword(String pwd) {
-        writeParameter(RcsSettingsData.USERPROFILE_IMS_PASSWORD, pwd);
+        writeString(RcsSettingsData.USERPROFILE_IMS_PASSWORD, pwd);
     }
 
     /**
@@ -411,7 +459,7 @@ public class RcsSettings {
      * @param realm Realm
      */
     public void setUserProfileImsRealm(String realm) {
-        writeParameter(RcsSettingsData.USERPROFILE_IMS_REALM, realm);
+        writeString(RcsSettingsData.USERPROFILE_IMS_REALM, realm);
     }
 
     /**
@@ -429,7 +477,7 @@ public class RcsSettings {
      * @param domain Domain
      */
     public void setUserProfileImsDomain(String domain) {
-        writeParameter(RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN, domain);
+        writeString(RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN, domain);
     }
 
     /**
@@ -447,7 +495,7 @@ public class RcsSettings {
      * @param addr Address
      */
     public void setImsProxyAddrForMobile(String addr) {
-        writeParameter(RcsSettingsData.IMS_PROXY_ADDR_MOBILE, addr);
+        writeString(RcsSettingsData.IMS_PROXY_ADDR_MOBILE, addr);
     }
 
     /**
@@ -483,7 +531,7 @@ public class RcsSettings {
      * @param addr Address
      */
     public void setImsProxyAddrForWifi(String addr) {
-        writeParameter(RcsSettingsData.IMS_PROXY_ADDR_WIFI, addr);
+        writeString(RcsSettingsData.IMS_PROXY_ADDR_WIFI, addr);
     }
 
     /**
@@ -519,7 +567,7 @@ public class RcsSettings {
      * @param addr Address as <host>:<port>/<root>
      */
     public void setXdmServer(String addr) {
-        writeParameter(RcsSettingsData.XDM_SERVER, addr);
+        writeString(RcsSettingsData.XDM_SERVER, addr);
     }
 
     /**
@@ -537,7 +585,7 @@ public class RcsSettings {
      * @param value Value
      */
     public void setXdmLogin(String value) {
-        writeParameter(RcsSettingsData.XDM_LOGIN, value);
+        writeString(RcsSettingsData.XDM_LOGIN, value);
     }
 
     /**
@@ -555,7 +603,7 @@ public class RcsSettings {
      * @param value Value
      */
     public void setXdmPassword(String value) {
-        writeParameter(RcsSettingsData.XDM_PASSWORD, value);
+        writeString(RcsSettingsData.XDM_PASSWORD, value);
     }
 
     /**
@@ -573,7 +621,7 @@ public class RcsSettings {
      * @param addr Address
      */
     public void setFtHttpServer(String addr) {
-        writeParameter(RcsSettingsData.FT_HTTP_SERVER, addr);
+        writeString(RcsSettingsData.FT_HTTP_SERVER, addr);
     }
 
     /**
@@ -591,7 +639,7 @@ public class RcsSettings {
      * @param value Value
      */
     public void setFtHttpLogin(String value) {
-        writeParameter(RcsSettingsData.FT_HTTP_LOGIN, value);
+        writeString(RcsSettingsData.FT_HTTP_LOGIN, value);
     }
 
     /**
@@ -609,7 +657,7 @@ public class RcsSettings {
      * @param value Value
      */
     public void setFtHttpPassword(String value) {
-        writeParameter(RcsSettingsData.FT_HTTP_PASSWORD, value);
+        writeString(RcsSettingsData.FT_HTTP_PASSWORD, value);
     }
 
     /**
@@ -628,7 +676,7 @@ public class RcsSettings {
      * @param protocol
      */
     public void setFtProtocol(FileTransferProtocol protocol) {
-        writeParameter(RcsSettingsData.FT_PROTOCOL, protocol.name());
+        writeString(RcsSettingsData.FT_PROTOCOL, protocol.name());
     }
 
     /**
@@ -636,8 +684,8 @@ public class RcsSettings {
      * 
      * @return SIP-URI
      */
-    public String getImConferenceUri() {
-        return readString(RcsSettingsData.IM_CONF_URI);
+    public Uri getImConferenceUri() {
+        return readUri(RcsSettingsData.IM_CONF_URI);
     }
 
     /**
@@ -646,7 +694,7 @@ public class RcsSettings {
      * @param uri SIP-URI
      */
     public void setImConferenceUri(Uri uri) {
-        writeParameter(RcsSettingsData.IM_CONF_URI, uri.getPath());
+        writeUri(RcsSettingsData.IM_CONF_URI, uri);
     }
 
     /**
@@ -655,7 +703,7 @@ public class RcsSettings {
      * @return SIP-URI
      */
     public Uri getEndUserConfirmationRequestUri() {
-        return Uri.parse(readString(RcsSettingsData.ENDUSER_CONFIRMATION_URI));
+        return readUri(RcsSettingsData.ENDUSER_CONFIRMATION_URI);
     }
 
     /**
@@ -664,7 +712,7 @@ public class RcsSettings {
      * @param uri SIP-URI
      */
     public void setEndUserConfirmationRequestUri(Uri uri) {
-        writeParameter(RcsSettingsData.ENDUSER_CONFIRMATION_URI, uri.getPath());
+        writeUri(RcsSettingsData.ENDUSER_CONFIRMATION_URI, uri);
     }
 
     /**
@@ -1122,7 +1170,7 @@ public class RcsSettings {
      * @param procedure
      */
     public void setImsAuthenticationProcedureForMobile(AuthenticationProcedure procedure) {
-        writeParameter(RcsSettingsData.IMS_AUTHENT_PROCEDURE_MOBILE, procedure.name());
+        writeString(RcsSettingsData.IMS_AUTHENT_PROCEDURE_MOBILE, procedure.name());
     }
 
     /**
@@ -1141,7 +1189,7 @@ public class RcsSettings {
      * @param procedure
      */
     public void setImsAuhtenticationProcedureForWifi(AuthenticationProcedure procedure) {
-        writeParameter(RcsSettingsData.IMS_AUTHENT_PROCEDURE_WIFI, procedure.name());
+        writeString(RcsSettingsData.IMS_AUTHENT_PROCEDURE_WIFI, procedure.name());
     }
 
     /**
@@ -1452,7 +1500,7 @@ public class RcsSettings {
      * @param extensions Set of extensions
      */
     public void setSupportedRcsExtensions(Set<String> extensions) {
-        writeParameter(RcsSettingsData.CAPABILITY_RCS_EXTENSIONS,
+        writeString(RcsSettingsData.CAPABILITY_RCS_EXTENSIONS,
                 ServiceExtensionManager.getExtensions(extensions));
     }
 
@@ -1669,7 +1717,7 @@ public class RcsSettings {
      * @param address
      */
     public void setSecondaryProvisioningAddress(String address) {
-        writeParameter(RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS, address);
+        writeString(RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS, address);
     }
 
     /**
@@ -1766,7 +1814,7 @@ public class RcsSettings {
      * @param path Directory path
      */
     public void setPhotoRootDirectory(String path) {
-        writeParameter(RcsSettingsData.DIRECTORY_PATH_PHOTOS, path);
+        writeString(RcsSettingsData.DIRECTORY_PATH_PHOTOS, path);
     }
 
     /**
@@ -1784,7 +1832,7 @@ public class RcsSettings {
      * @param path Directory path
      */
     public void setVideoRootDirectory(String path) {
-        writeParameter(RcsSettingsData.DIRECTORY_PATH_VIDEOS, path);
+        writeString(RcsSettingsData.DIRECTORY_PATH_VIDEOS, path);
     }
 
     /**
@@ -1802,7 +1850,7 @@ public class RcsSettings {
      * @param path Directory path
      */
     public void setFileRootDirectory(String path) {
-        writeParameter(RcsSettingsData.DIRECTORY_PATH_FILES, path);
+        writeString(RcsSettingsData.DIRECTORY_PATH_FILES, path);
     }
 
     /**
@@ -1863,7 +1911,7 @@ public class RcsSettings {
      * @param token
      */
     public void setProvisioningToken(String token) {
-        writeParameter(RcsSettingsData.PROVISIONING_TOKEN, token);
+        writeString(RcsSettingsData.PROVISIONING_TOKEN, token);
     }
 
     /**
@@ -2197,7 +2245,7 @@ public class RcsSettings {
         if (message == null) {
             message = RcsSettingsData.DEFAULT_PROV_USER_MSG_CONTENT;
         }
-        writeParameter(RcsSettingsData.PROV_USER_MSG_CONTENT, message);
+        writeString(RcsSettingsData.PROV_USER_MSG_CONTENT, message);
     }
 
     /**
@@ -2218,7 +2266,7 @@ public class RcsSettings {
         if (title == null) {
             title = RcsSettingsData.DEFAULT_PROV_USER_MSG_TITLE;
         }
-        writeParameter(RcsSettingsData.PROV_USER_MSG_TITLE, title);
+        writeString(RcsSettingsData.PROV_USER_MSG_TITLE, title);
     }
 
     /**

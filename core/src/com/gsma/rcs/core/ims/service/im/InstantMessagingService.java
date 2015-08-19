@@ -91,6 +91,8 @@ import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 
+import android.net.Uri;
+
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
@@ -100,6 +102,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.xml.parsers.ParserConfigurationException;
+
 import javax2.sip.header.ContactHeader;
 import javax2.sip.message.Response;
 
@@ -1063,12 +1066,12 @@ public class InstantMessagingService extends ImsService {
          */
         Map<ContactId, ParticipantStatus> inviteParticipants = ChatUtils.getParticipants(invite,
                 ParticipantStatus.INVITED);
-
+        // @FIXME: This method should return an URI
         String remoteUri = ChatUtils.getReferredIdentityAsContactUri(invite);
 
         TerminatingAdhocGroupChatSession session = new TerminatingAdhocGroupChatSession(this,
-                invite, contact, inviteParticipants, remoteUri, mRcsSettings, mMessagingLog,
-                timestamp, mContactManager);
+                invite, contact, inviteParticipants, Uri.parse(remoteUri), mRcsSettings,
+                mMessagingLog, timestamp, mContactManager);
 
         /*--
          * 6.3.3.1 Leaving a Group Chat that is idle

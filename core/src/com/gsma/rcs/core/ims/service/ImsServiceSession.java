@@ -37,6 +37,8 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
+import android.net.Uri;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -88,7 +90,7 @@ public abstract class ImsServiceSession extends Thread {
     /**
      * Remote contactUri
      */
-    private String mRemoteUri;
+    private Uri mRemoteId;
 
     /**
      * Remote display name
@@ -166,16 +168,16 @@ public abstract class ImsServiceSession extends Thread {
      * 
      * @param imsService IMS service
      * @param contact Remote contact Identifier
-     * @param remoteUri Remote URI
+     * @param remoteContact Remote contact URI
      * @param rcsSettings RCS settings accessor
      * @param timestamp Local timestamp for the session
      * @param contactManager Contact manager accessor
      */
-    public ImsServiceSession(ImsService imsService, ContactId contact, String remoteUri,
+    public ImsServiceSession(ImsService imsService, ContactId contact, Uri remoteId,
             RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
         mImsService = imsService;
         mContact = contact;
-        mRemoteUri = remoteUri;
+        mRemoteId = remoteId;
         mAuthenticationAgent = new SessionAuthenticationAgent(imsService.getImsModule());
         mUpdateMgr = new UpdateSessionManager(this, rcsSettings);
         mContactManager = contactManager;
@@ -196,10 +198,12 @@ public abstract class ImsServiceSession extends Thread {
         Vector<String> route = getImsService().getImsModule().getSipManager().getSipStack()
                 .getServiceRoutePath();
 
+        // @FIXME: This method should take mRemoteId param as an URI instead of String
         // Create a dialog path
         mDialogPath = new SipDialogPath(getImsService().getImsModule().getSipManager()
-                .getSipStack(), callId, 1, mRemoteUri,
-                ImsModule.IMS_USER_PROFILE.getPublicAddress(), mRemoteUri, route, mRcsSettings);
+                .getSipStack(), callId, 1, mRemoteId.toString(),
+                ImsModule.IMS_USER_PROFILE.getPublicAddress(), mRemoteId.toString(), route,
+                mRcsSettings);
 
         // Set the authentication agent in the dialog path
         mDialogPath.setAuthenticationAgent(getAuthenticationAgent());
@@ -371,15 +375,6 @@ public abstract class ImsServiceSession extends Thread {
      */
     public ContactId getRemoteContact() {
         return mContact;
-    }
-
-    /**
-     * Returns the remote Uri
-     * 
-     * @return remoteUri
-     */
-    public String getRemoteUri() {
-        return mRemoteUri;
     }
 
     /**

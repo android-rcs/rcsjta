@@ -36,6 +36,8 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 
+import android.net.Uri;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -95,7 +97,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
      * @param imService InstantMessagingService
      * @param content Content to be shared
      * @param contact Remote contactId
-     * @param remoteUri the remote URI
+     * @param remoteContact the remote contact URI
      * @param fileIcon File icon
      * @param filetransferId File transfer identifier
      * @param rcsSettings RCS settings accessor
@@ -103,9 +105,9 @@ public abstract class FileSharingSession extends ImsServiceSession {
      * @param contactManager Contact manager accessor
      */
     public FileSharingSession(InstantMessagingService imService, MmContent content,
-            ContactId contact, String remoteUri, MmContent fileIcon, String filetransferId,
+            ContactId contact, Uri remoteContact, MmContent fileIcon, String filetransferId,
             RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
-        super(imService, contact, remoteUri, rcsSettings, timestamp, contactManager);
+        super(imService, contact, remoteContact, rcsSettings, timestamp, contactManager);
 
         mContent = content;
         mFileIcon = fileIcon;

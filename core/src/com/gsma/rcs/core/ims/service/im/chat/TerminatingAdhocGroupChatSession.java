@@ -52,6 +52,8 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 
+import android.net.Uri;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
@@ -78,7 +80,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
      * @param invite Initial INVITE request
      * @param contact remote contact
      * @param participantsFromInvite Map of participants
-     * @param remoteUri the remote Uri
+     * @param remoteContact the remote contact Uri
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp for the session
@@ -88,9 +90,9 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
      */
     public TerminatingAdhocGroupChatSession(InstantMessagingService imService, SipRequest invite,
             ContactId contact, Map<ContactId, ParticipantStatus> participantsFromInvite,
-            String remoteUri, RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
+            Uri remoteContact, RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
             ContactManager contactManager) throws SipPayloadException, SipNetworkException {
-        super(imService, contact, remoteUri, participantsFromInvite, rcsSettings, messagingLog,
+        super(imService, contact, remoteContact, participantsFromInvite, rcsSettings, messagingLog,
                 timestamp, contactManager);
 
         mMessagingLog = messagingLog;
