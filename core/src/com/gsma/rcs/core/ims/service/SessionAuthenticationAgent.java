@@ -28,7 +28,6 @@ import com.gsma.rcs.core.ims.network.registration.RegistrationProcedure;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.security.HttpDigestMd5Authentication;
-import com.gsma.rcs.utils.logger.Logger;
 
 import javax2.sip.InvalidArgumentException;
 import javax2.sip.header.ProxyAuthenticateHeader;
@@ -40,20 +39,16 @@ import javax2.sip.header.ProxyAuthorizationHeader;
  * @author JM. Auffret
  */
 public class SessionAuthenticationAgent {
-    /**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
 
     /**
      * HTTP Digest MD5 agent for session
      */
-    private HttpDigestMd5Authentication digest = new HttpDigestMd5Authentication();
+    private HttpDigestMd5Authentication mDigest = new HttpDigestMd5Authentication();
 
     /**
      * HTTP Digest MD5 agent for register (nonce caching procedure)
      */
-    private HttpDigestMd5Authentication registerDigest = null;
+    private HttpDigestMd5Authentication mRegisterDigest;
 
     /**
      * Constructor
@@ -61,11 +56,11 @@ public class SessionAuthenticationAgent {
      * @param imsModule IMS module
      */
     public SessionAuthenticationAgent(ImsModule imsModule) {
-        // Re-use the registration authentication (nonce caching)
+        /* Re-use the registration authentication (nonce caching) */
         RegistrationProcedure procedure = imsModule.getCurrentNetworkInterface()
                 .getRegistrationManager().getRegistrationProcedure();
         if (procedure instanceof HttpDigestRegistrationProcedure) {
-            registerDigest = ((HttpDigestRegistrationProcedure) procedure).getHttpDigest();
+            mRegisterDigest = ((HttpDigestRegistrationProcedure) procedure).getHttpDigest();
         }
     }
 
@@ -76,25 +71,26 @@ public class SessionAuthenticationAgent {
      * @throws InvalidArgumentException
      */
     public void setProxyAuthorizationHeader(SipRequest request) throws InvalidArgumentException {
-        if ((digest.getRealm() == null) || (digest.getNextnonce() == null)) {
+        String realm = mDigest.getRealm();
+        if (realm == null || mDigest.getNextnonce() == null) {
             return;
         }
-        digest.updateNonceParameters();
+        mDigest.updateNonceParameters();
         String user = ImsModule.IMS_USER_PROFILE.getPrivateID();
         String password = ImsModule.IMS_USER_PROFILE.getPassword();
-        String response = digest.calculateResponse(user, password, request.getMethod(),
-                request.getRequestURI(), digest.buildNonceCounter(), request.getContent());
+        String requestUri = request.getRequestURI();
+        String nonceCounter = mDigest.buildNonceCounter();
+        String response = mDigest.calculateResponse(user, password, request.getMethod(),
+                requestUri, nonceCounter, request.getContent());
 
         /* Build the Proxy-Authorization header */
-        StringBuilder auth = new StringBuilder("Digest username=\"")
-                .append(ImsModule.IMS_USER_PROFILE.getPrivateID()).append("\"").append(",uri=\"")
-                .append(request.getRequestURI()).append("\"").append(",algorithm=MD5")
-                .append(",realm=\"").append(digest.getRealm()).append("\"").append(",nc=")
-                .append(digest.buildNonceCounter()).append(",nonce=\"").append(digest.getNonce())
-                .append("\"").append(",response=\"").append(response).append("\"")
-                .append(",cnonce=\"").append(digest.getCnonce()).append("\"");
+        StringBuilder auth = new StringBuilder("Digest username=\"").append(user)
+                .append("\",uri=\"").append(requestUri).append("\",algorithm=MD5,realm=\"")
+                .append(realm).append("\",nc=").append(nonceCounter).append(",nonce=\"")
+                .append(mDigest.getNonce()).append("\",response=\"").append(response)
+                .append("\",cnonce=\"").append(mDigest.getCnonce()).append("\"");
 
-        String qop = digest.getQop();
+        String qop = mDigest.getQop();
         if (qop != null) {
             auth.append(",qop=").append(qop);
         }
@@ -110,14 +106,9 @@ public class SessionAuthenticationAgent {
         ProxyAuthenticateHeader header = (ProxyAuthenticateHeader) response
                 .getHeader(ProxyAuthenticateHeader.NAME);
         if (header != null) {
-            // Get domain name
-            digest.setRealm(header.getRealm());
-
-            // Get qop
-            digest.setQop(header.getQop());
-
-            // New nonce to be used
-            digest.setNextnonce(header.getNonce());
+            mDigest.setRealm(header.getRealm());
+            mDigest.setQop(header.getQop());
+            mDigest.setNextnonce(header.getNonce());
         }
     }
 
@@ -128,32 +119,33 @@ public class SessionAuthenticationAgent {
      * @throws InvalidArgumentException
      */
     public void setAuthorizationHeader(SipRequest request) throws InvalidArgumentException {
-        // Re-use the registration authentication (nonce caching)
-        if ((registerDigest == null) || (registerDigest.getNextnonce() == null)) {
+        String nextNonce = mRegisterDigest.getNextnonce();
+        /* Re-use the registration authentication (nonce caching) */
+        if (mRegisterDigest == null || nextNonce == null) {
             return;
         }
+        mRegisterDigest.updateNonceParameters();
 
-        // Update nonce parameters
-        registerDigest.updateNonceParameters();
-
-        // Calculate response
+        /* Calculate response */
         String user = ImsModule.IMS_USER_PROFILE.getPrivateID();
         String password = ImsModule.IMS_USER_PROFILE.getPassword();
-        String response = registerDigest.calculateResponse(user, password, request.getMethod(),
-                request.getRequestURI(), registerDigest.buildNonceCounter(), request.getContent());
+        String requestUri = request.getRequestURI();
+        String nonCounter = mRegisterDigest.buildNonceCounter();
+        String response = mRegisterDigest.calculateResponse(user, password, request.getMethod(),
+                requestUri, nonCounter, request.getContent());
 
-        // Build the Authorization header
-        String auth = "Digest username=\"" + ImsModule.IMS_USER_PROFILE.getPrivateID() + "\""
-                + ",uri=\"" + request.getRequestURI() + "\"" + ",algorithm=MD5" + ",realm=\""
-                + registerDigest.getRealm() + "\"" + ",nc=" + registerDigest.buildNonceCounter()
-                + ",nonce=\"" + registerDigest.getNextnonce() + "\"" + ",response=\"" + response
-                + "\"" + ",cnonce=\"" + registerDigest.getCnonce() + "\"";
-        String qop = registerDigest.getQop();
+        /* Build the Authorization header */
+        StringBuilder auth = new StringBuilder("Digest username=\"").append(user)
+                .append("\",uri=\"").append(requestUri).append("\",algorithm=MD5,realm=\"")
+                .append(mRegisterDigest.getRealm()).append("\",nc=").append(nonCounter)
+                .append(",nonce=\"").append(nextNonce).append("\",response=\"").append(response)
+                .append("\",cnonce=\"").append(mRegisterDigest.getCnonce()).append("\"");
+        String qop = mRegisterDigest.getQop();
         if (qop != null) {
-            auth += ",qop=" + qop;
+            auth.append(",qop=").append(qop);
         }
 
-        // Set header in the SIP message
-        request.addHeader(ProxyAuthorizationHeader.NAME, auth);
+        /* Set header in the SIP message */
+        request.addHeader(ProxyAuthorizationHeader.NAME, auth.toString());
     }
 }

@@ -73,8 +73,9 @@ public class HttpDigestRegistrationProcedure extends RegistrationProcedure {
      * @return Public URI
      */
     public String getPublicUri() {
-        return PhoneUtils.SIP_URI_HEADER + ImsModule.IMS_USER_PROFILE.getUsername() + "@"
-                + ImsModule.IMS_USER_PROFILE.getHomeDomain();
+        return new StringBuilder(PhoneUtils.SIP_URI_HEADER)
+                .append(ImsModule.IMS_USER_PROFILE.getUsername()).append("@")
+                .append(ImsModule.IMS_USER_PROFILE.getHomeDomain()).toString();
     }
 
     /**
@@ -83,10 +84,8 @@ public class HttpDigestRegistrationProcedure extends RegistrationProcedure {
      * @param request Request
      */
     public void writeSecurityHeader(SipRequest request) {
-        String realm;
-        if (mDigest.getRealm() != null) {
-            realm = mDigest.getRealm();
-        } else {
+        String realm = mDigest.getRealm();
+        if (realm == null) {
             realm = ImsModule.IMS_USER_PROFILE.getRealm();
         }
 
@@ -95,29 +94,30 @@ public class HttpDigestRegistrationProcedure extends RegistrationProcedure {
             mDigest.updateNonceParameters();
             nonce = mDigest.getNonce();
         }
-
+        String requestUri = request.getRequestURI();
+        String user = ImsModule.IMS_USER_PROFILE.getPrivateID();
         String response = "";
         if (nonce.length() > 0) {
-            String user = ImsModule.IMS_USER_PROFILE.getPrivateID();
             String password = ImsModule.IMS_USER_PROFILE.getPassword();
-            response = mDigest.calculateResponse(user, password, request.getMethod(),
-                    request.getRequestURI(), mDigest.buildNonceCounter(), request.getContent());
+            response = mDigest.calculateResponse(user, password, request.getMethod(), requestUri,
+                    mDigest.buildNonceCounter(), request.getContent());
         }
 
         /* Build the Authorization header */
-        String auth = "Digest username=\"" + ImsModule.IMS_USER_PROFILE.getPrivateID() + "\""
-                + ",uri=\"" + request.getRequestURI() + "\"" + ",algorithm=MD5" + ",realm=\""
-                + realm + "\"" + ",nonce=\"" + nonce + "\"" + ",response=\"" + response + "\"";
+        StringBuilder auth = new StringBuilder("Digest username=\"").append(user)
+                .append("\",uri=\"").append(requestUri).append("\",algorithm=MD5,realm=\"")
+                .append(realm).append("\",nonce=\"").append(nonce).append("\",response=\"")
+                .append(response).append("\"");
         String opaque = mDigest.getOpaque();
         if (opaque != null) {
-            auth += ",opaque=\"" + opaque + "\"";
+            auth.append(",opaque=\"").append(opaque).append("\"");
         }
         String qop = mDigest.getQop();
-        if ((qop != null) && qop.startsWith("auth")) {
-            auth += ",nc=" + mDigest.buildNonceCounter() + ",qop=" + qop + ",cnonce=\""
-                    + mDigest.getCnonce() + "\"";
+        if (qop != null && qop.startsWith("auth")) {
+            auth.append(",nc=").append(mDigest.buildNonceCounter()).append(",qop=").append(qop)
+                    .append(",cnonce=\"").append(mDigest.getCnonce()).append("\"");
         }
-        request.addHeader(AuthorizationHeader.NAME, auth);
+        request.addHeader(AuthorizationHeader.NAME, auth.toString());
     }
 
     /**
@@ -134,18 +134,10 @@ public class HttpDigestRegistrationProcedure extends RegistrationProcedure {
                 .getHeader(AuthenticationInfoHeader.NAME);
 
         if (wwwHeader != null) {
-            // Retrieve data from the header WWW-Authenticate (401 response)
-
-            // Get domain name
+            /* Retrieve data from the header WWW-Authenticate (401 response) */
             mDigest.setRealm(wwwHeader.getRealm());
-
-            // Get opaque parameter
             mDigest.setOpaque(wwwHeader.getOpaque());
-
-            // Get qop
             mDigest.setQop(wwwHeader.getQop());
-
-            // Get nonce to be used
             mDigest.setNextnonce(wwwHeader.getNonce());
 
         } else if (infoHeader != null) {
