@@ -71,18 +71,10 @@
 		</zip>
 	</target>
 
-	<target name="api" depends="core-apk">
-		<echo>Generate RCS api</echo>
-		<ant dir="${stack.root}" antfile="build.xml" target="api"
-			inheritAll="false" />
-	</target>
-
 	<target name="mediaplayer" depends="core-apk">
 		<echo>Generate mediaplayer lib</echo>
 		<ant dir="${terminal.root}/mediaplayer" target="clean" inheritAll="false" />
 		<ant dir="${terminal.root}/mediaplayer" target="debug" inheritAll="false" />
-		<ant dir="${terminal.root}/mediaplayer" antfile="build-local.xml"
-			target="mediaplayer" inheritAll="false" />
 	</target>
 
 	<target name="core-apk">
@@ -91,9 +83,11 @@
 		<ant dir="${stack.root}" target="debug" inheritAll="false" />
 	</target>
 
-	<target name="ri-apk" depends="api,mediaplayer">
+	<target name="ri-apk" depends="mediaplayer">
 		<echo>Generate RI apk</echo>
 		<ant dir="${ri.root}" target="clean" inheritAll="false" />
+		<ant dir="${ri.root}" antfile="build-local.xml"
+			target="all" inheritAll="false" />
 		<ant dir="${ri.root}" target="debug" inheritAll="false" />
 	</target>
 
@@ -103,23 +97,27 @@
 		<ant dir="${prov_template.root}" target="debug" inheritAll="false" />
 	</target>
 	
-	<target name="core-control-apk">
+	<target name="core-control-apk" depends="ri-apk">
 		<echo>Generate RCS core control apk</echo>
+		<ant dir="${core_control.root}" target="clean" inheritAll="false" />
 		<ant dir="${core_control.root}" antfile="build-local.xml"
 			target="all" inheritAll="false" />
-		<ant dir="${core_control.root}" target="clean" inheritAll="false" />
 		<ant dir="${core_control.root}" target="debug" inheritAll="false" />
 	</target>
 
-	<target name="extension-apk" depends="api">
+	<target name="extension-apk" depends="core-apk">
 		<echo>Generate samples extension apk</echo>
 		<ant dir="${extension.root}" target="clean" inheritAll="false" />
+		<ant dir="${extension.root}" antfile="build-local.xml"
+			target="all" inheritAll="false" />
 		<ant dir="${extension.root}" target="debug" inheritAll="false" />
 	</target>
 
-	<target name="tts-apk" depends="api">
+	<target name="tts-apk" depends="core-apk">
 		<echo>Generate samples tts apk</echo>
 		<ant dir="${tts.root}" target="clean" inheritAll="false" />
+		<ant dir="${tts.root}" antfile="build-local.xml"
+			target="all" inheritAll="false" />
 		<ant dir="${tts.root}" target="debug" inheritAll="false" />
 	</target>
 

@@ -91,11 +91,8 @@
 		<jar destfile="${terminal.api}" basedir="${terminal.root}/bin/classes"
 				includesfile="${terminal.root}/jarfiles.txt">
 		</jar>
-		<copy file="${terminal.api}" todir="${terminal.root}/../RI/libs"/>
 		<copy file="${terminal.api}" todir="${terminal.root}/../tests/multistack/libs"/>
 		<copy file="${terminal.api}" todir="${terminal.root}/../tests/samples/libs"/>
-		<copy file="${terminal.api}" todir="${terminal.root}/../samples/tts/libs"/>
-		<copy file="${terminal.api}" todir="${terminal.root}/../samples/extension/libs"/>
 		<copy file="${terminal.api}" todir="${terminal.root}/../samples/session/libs"/>
 		<copy file="${terminal.api}" todir="${terminal.root}/../tests/cts/signature/libs"/>
 		<copy file="${terminal.api}" todir="${terminal.root}/../tests/cts/provider/libs"/>
