@@ -628,6 +628,9 @@ public class ImsConnectionManager implements Runnable {
                 /* Force to perform a new DNS lookup */
                 mDnsResolvedFields = null;
             } catch (SipNetworkException e) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(e.getMessage());
+                }
                 mCurrentNetworkInterface.getSipManager().closeStack();
                 /* Increment number of failures */
                 nbFailures++;

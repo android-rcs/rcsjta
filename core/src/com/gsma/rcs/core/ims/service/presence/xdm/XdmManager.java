@@ -50,6 +50,7 @@ import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.Context;
 import android.net.Uri;
+import android.text.TextUtils;
 
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -58,6 +59,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
@@ -78,8 +81,6 @@ public class XdmManager {
      */
     private static final String CRLF = "\r\n";
 
-    private static final char FORWARD_SLASH = '/';
-
     private static final String XCAP_SCHEME = "/org.openmobilealliance.xcap-directory/users/";
 
     private static final String PRES_RULES_SCHEME = "/org.openmobilealliance.pres-rules/users/";
@@ -99,6 +100,12 @@ public class XdmManager {
     private static final String CONTENT_TYPE_RESOURCE = "application/resource-lists+xml";
 
     private static final String CONTENT_TYPE_AUTH = "application/auth-policy+xml";
+
+    private static final String PROTOCOL_HTTPS = "https";
+
+    private static final int DEFAULT_HTTPS_PORT = 443;
+
+    private static final int DEFAULT_HTTP_PORT = 80;
 
     /**
      * XDM server address
@@ -188,11 +195,8 @@ public class XdmManager {
                 return sendRequestToXDMS(request);
 
             default:
-                if (sLogger.isActivated()) {
-                    sLogger.debug(new StringBuilder("Received ").append(responseCode)
-                            .append("response").toString());
-                }
-                return response;
+                throw new SipNetworkException("Invalid response : ".concat(String
+                        .valueOf(responseCode)));
         }
     }
 
@@ -214,17 +218,20 @@ public class XdmManager {
         InputStream is = null;
         OutputStream os = null;
         try {
-            /* Extract host & port */
-            String[] parts = xdmServerAddr.substring(7).split(":|/");
-            String host = parts[0];
-            int port = Integer.parseInt(parts[1]);
+            URL url = new URL(xdmServerAddr);
             StringBuilder serviceRoot = new StringBuilder();
-            if (parts.length > 2) {
-                serviceRoot.append(FORWARD_SLASH).append(parts[2]);
+            final String path = url.getPath();
+            if (!TextUtils.isEmpty(path)) {
+                serviceRoot.append(path);
             }
-
             /* Open connection with the XCAP server */
             conn = NetworkFactory.getFactory().createSocketClientConnection();
+            final String host = url.getHost();
+            int port = url.getPort();
+            if (port == -1) {
+                port = PROTOCOL_HTTPS.equals(url.getProtocol()) ? DEFAULT_HTTPS_PORT
+                        : DEFAULT_HTTP_PORT;
+            }
             conn.open(host, port);
             is = conn.getInputStream();
             os = conn.getOutputStream();
@@ -358,6 +365,10 @@ public class XdmManager {
             }
             return response;
 
+        } catch (MalformedURLException e) {
+            throw new SipPayloadException(
+                    "Failed to send http request, malformed uri: ".concat(xdmServerAddr), e);
+
         } catch (IOException e) {
             throw new SipNetworkException("Failed to send http request!", e);
 
@@ -375,58 +386,59 @@ public class XdmManager {
      * @throws SipNetworkException
      */
     public void initialize() throws SipPayloadException, SipNetworkException {
-        // Get the existing XCAP documents on the XDM server
         try {
             HttpResponse response = getXcapDocuments();
-            if ((response != null) && response.isSuccessfullResponse()) {
-                // Analyze the XCAP directory
-                InputSource input = new InputSource(new ByteArrayInputStream(response.getContent()));
-                XcapDirectoryParser parser = new XcapDirectoryParser(input);
-                documents = parser.getDocuments();
+            if (!response.isSuccessfullResponse()) {
+                throw new SipNetworkException(
+                        "Failed to get successfull response from presence server!");
+            }
+            // Analyze the XCAP directory
+            InputSource input = new InputSource(new ByteArrayInputStream(response.getContent()));
+            XcapDirectoryParser parser = new XcapDirectoryParser(input);
+            documents = parser.getDocuments();
 
-                // Check RCS list document
-                Folder folder = (Folder) documents.get("rls-services");
-                if ((folder == null) || (folder.getEntry() == null)) {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("The rls-services document does not exist");
-                    }
-
-                    // Set RCS list document
-                    setRcsList();
-                } else {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("The rls-services document already exists");
-                    }
+            // Check RCS list document
+            Folder folder = (Folder) documents.get("rls-services");
+            if ((folder == null) || (folder.getEntry() == null)) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("The rls-services document does not exist");
                 }
 
-                // Check resource list document
-                folder = (Folder) documents.get("resource-lists");
-                if ((folder == null) || (folder.getEntry() == null)) {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("The resource-lists document does not exist");
-                    }
+                // Set RCS list document
+                setRcsList();
+            } else {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("The rls-services document already exists");
+                }
+            }
 
-                    // Set resource list document
-                    setResourcesList();
-                } else {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("The resource-lists document already exists");
-                    }
+            // Check resource list document
+            folder = (Folder) documents.get("resource-lists");
+            if ((folder == null) || (folder.getEntry() == null)) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("The resource-lists document does not exist");
                 }
 
-                // Check presence rules document
-                folder = (Folder) documents.get("org.openmobilealliance.pres-rules");
-                if ((folder == null) || (folder.getEntry() == null)) {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("The org.openmobilealliance.pres-rules document does not exist");
-                    }
+                // Set resource list document
+                setResourcesList();
+            } else {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("The resource-lists document already exists");
+                }
+            }
 
-                    // Set presence rules document
-                    setPresenceRules();
-                } else {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("The org.openmobilealliance.pres-rules document already exists");
-                    }
+            // Check presence rules document
+            folder = (Folder) documents.get("org.openmobilealliance.pres-rules");
+            if ((folder == null) || (folder.getEntry() == null)) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("The org.openmobilealliance.pres-rules document does not exist");
+                }
+
+                // Set presence rules document
+                setPresenceRules();
+            } else {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("The org.openmobilealliance.pres-rules document already exists");
                 }
             }
         } catch (ParserConfigurationException e) {

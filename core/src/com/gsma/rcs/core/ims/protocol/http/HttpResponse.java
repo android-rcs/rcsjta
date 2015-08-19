@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +15,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.protocol.http;
+
+import android.text.TextUtils;
 
 import java.util.Hashtable;
 
@@ -32,7 +38,7 @@ public class HttpResponse {
     /**
      * Status line
      */
-    private String status = null;
+    private String mStatus;
 
     /**
      * Headers
@@ -56,7 +62,7 @@ public class HttpResponse {
      * @param status Status line
      */
     public void setStatusLine(String status) {
-        this.status = status;
+        mStatus = status;
     }
 
     /**
@@ -65,7 +71,7 @@ public class HttpResponse {
      * @return Status line
      */
     public String getStatusLine() {
-        return status;
+        return mStatus;
     }
 
     /**
@@ -95,9 +101,12 @@ public class HttpResponse {
      */
     public int getResponseCode() {
         try {
-            int index1 = status.indexOf(" ") + 1;
-            int index2 = status.indexOf(" ", index1);
-            return Integer.parseInt(status.substring(index1, index2));
+            if (TextUtils.isEmpty(mStatus)) {
+                return INVALID_RESPONSE;
+            }
+            int index1 = mStatus.indexOf(" ") + 1;
+            int index2 = mStatus.indexOf(" ", index1);
+            return Integer.parseInt(mStatus.substring(index1, index2));
 
         } catch (NumberFormatException e) {
             return INVALID_RESPONSE;
