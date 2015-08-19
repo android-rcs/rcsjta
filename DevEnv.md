@@ -8,35 +8,35 @@ From a console, build the third party libraries (DNS, NIST-SIP and BouncyCastle)
 
 From Eclipse, create a new project from existing source code and select the folder /core of your branch.
 
-
-# Build the RI application #
-
-From a console, build the RCS API library (rcs\_api.jar) via the command line:
-> _ant api_ (the produced JAR file is automatically added to the RI app and samples)
-
-Build the media player used by the Video sharing service, see next chapter.
-
-From Eclipse, create a new project from existing source code and select the folder /RI of your branch.
-
 # Build the Media player library #
 
 From Eclipse, create a new project from existing source code and select the folder /mediaplayer of your branch.
 
-From a console, build the RCS media library (rcs\_api.jar and .so codecs libs) via the command line:
-> _ant media_ (the produced JAR file is automatically added to the RI app)
+# Build the RI application #
 
+From a console, build the RCS API library and the media player library used by the Video sharing service. Via the command line in the folder /RI, enter:
+> _ant -f build-local.xml libs_ (rcs\_api.jar and rcs\_media.jar + .so codecs libs are produced in the directory ./libs)
+
+From Eclipse, create a new project from existing source code and select the folder /RI of your branch.
+
+# Build the RCS core control application #
+
+From a console, build the RCS API library and connection manager library via the command line in the /tools/core_control folder:
+> _ant -f build-local.xml libs_ (rcs\_api.jar and rcs\_cnx.jar are produced in the directory ./libs)
+
+From Eclipse, create a new project from existing source code and select the folder /tools/core_control of your branch.
 
 # Build the Javadoc #
+Define the ANDROID_TARGET environment variable to be used to generate the SDK. Example:
+> _export ANDROID_TARGET=android-19_
 
-From a console, build the Javadoc of the RCS API via the command line:
+From a console, build the Javadoc of the RCS API via the command line in the root folder of your branch:
 > _ant docs_ (the doc is produced in the directory ./doclava)
-
-
 
 # Build the SDK #
 
 From a console, build the RCS SDK via the command line:
-> _ant sdk_ (the SDK is produced in the directory ./sdk-joyn)
+> _ant sdk_ (the SDK is produced in the directory ./gen)
 
 
 # Apply the same source code format #
