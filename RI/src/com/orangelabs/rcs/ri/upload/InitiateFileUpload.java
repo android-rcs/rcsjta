@@ -197,12 +197,10 @@ public class InitiateFileUpload extends Activity {
      */
     private OnClickListener btnShowListener = new OnClickListener() {
         public void onClick(View v) {
-            // Show upload info
+            /* Show upload info */
             try {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                String filename = mUpload.getUploadInfo().getFile().toString() + "/"
-                        + mUpload.getUploadInfo().getFileName();
-                intent.setData(Uri.parse(filename));
+                intent.setData(mUpload.getUploadInfo().getFile());
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
             } catch (Exception e) {

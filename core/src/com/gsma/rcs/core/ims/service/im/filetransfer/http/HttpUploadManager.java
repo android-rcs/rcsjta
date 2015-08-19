@@ -363,9 +363,8 @@ public class HttpUploadManager extends HttpTransferManager {
                             }
                         } catch (IOException e) {
                             if (sLogger.isActivated()) {
-                                sLogger.warn("File Upload aborted due to "
-                                        + e.getLocalizedMessage()
-                                        + " now in state pause, waiting for resume...");
+                                sLogger.warn(
+                                        "File Upload paused due to error! Waiting for resume...", e);
                             }
                         }
                     } else {
@@ -377,8 +376,7 @@ public class HttpUploadManager extends HttpTransferManager {
                 }
             } catch (IOException e) {
                 if (sLogger.isActivated()) {
-                    sLogger.warn("File Upload paused due to " + e.getLocalizedMessage()
-                            + " and is now in state paused.");
+                    sLogger.warn("File Upload paused due to error!", e);
                 }
                 /*
                  * When there is a connection problem causing transfer terminated, state should be
@@ -424,8 +422,7 @@ public class HttpUploadManager extends HttpTransferManager {
         long size = mFileIcon.getSize();
         Uri fileIcon = mFileIcon.getUri();
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Write file icon ").append(fileIcon).append(" (size=")
-                    .append(size).append(")").toString());
+            sLogger.debug("Write file icon " + fileIcon + " (size=" + size + ")");
         }
         FileInputStream fileInputStream = null;
         try {
@@ -553,7 +550,7 @@ public class HttpUploadManager extends HttpTransferManager {
 
         if (resp == null) {
             if (sLogger.isActivated()) {
-                sLogger.debug("Unexpected Server response, will restart upload from begining");
+                sLogger.debug("Unexpected Server response, will restart upload from beginning");
             }
             return uploadFile();
         }
@@ -870,7 +867,7 @@ public class HttpUploadManager extends HttpTransferManager {
             return sendGetInfo(DOWNLOAD_INFO_REQUEST, false);
         } catch (IOException e) {
             if (sLogger.isActivated()) {
-                sLogger.warn("Could not get upload info due to " + e.getLocalizedMessage());
+                sLogger.warn("Could not get upload information!", e);
             }
             getListener().httpTransferPausedBySystem();
             return null;

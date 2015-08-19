@@ -20,7 +20,7 @@ package com.gsma.rcs.core.ims.protocol.sdp;
 
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.security.cert.KeyStoreManager;
-import com.gsma.rcs.utils.IpAddressUtils;
+import com.gsma.rcs.utils.InetAddressUtils;
 import com.gsma.rcs.utils.StringUtils;
 
 /**
@@ -150,10 +150,10 @@ public class SdpUtils {
      * @return "IN IP4 address" or "IN IP6 address"
      */
     public static String formatAddressType(String address) {
-        if (IpAddressUtils.isIPv6(address)) {
-            return "IN IP6 " + address;
+        if (InetAddressUtils.isIPv6Address(address)) {
+            return "IN IP6 ".concat(address);
         } else {
-            return "IN IP4 " + address;
+            return "IN IP4 ".concat(address);
         }
     }
 

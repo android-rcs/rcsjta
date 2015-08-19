@@ -30,7 +30,7 @@ import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.IpAddressUtils;
+import com.gsma.rcs.utils.InetAddressUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
 import java.io.IOException;
@@ -43,34 +43,17 @@ import java.util.Vector;
  * @author jexa7410
  */
 public class MsrpManager {
-    /**
-     * Local MSRP address
-     */
+
     private String mLocalMsrpAddress;
 
-    /**
-     * Local MSRP port
-     */
     private int mLocalMsrpPort;
 
-    /**
-     * MSRP session
-     */
     private MsrpSession mMsrpSession;
 
-    /**
-     * Session Id
-     */
     private long mSessionId;
 
-    /**
-     * Secured connection
-     */
     private boolean mSecured = false;
 
-    /**
-     * The logger
-     */
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
     private final RcsSettings mRcsSettings;
@@ -134,7 +117,7 @@ public class MsrpManager {
      * @return MSRP path
      */
     public String getLocalMsrpPath() {
-        if (IpAddressUtils.isIPv6(mLocalMsrpAddress)) {
+        if (InetAddressUtils.isIPv6Address(mLocalMsrpAddress)) {
             return getMsrpProtocol() + "://[" + mLocalMsrpAddress + "]:" + mLocalMsrpPort + "/"
                     + mSessionId + ";tcp";
         } else {

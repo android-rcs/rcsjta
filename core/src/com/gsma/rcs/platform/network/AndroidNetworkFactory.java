@@ -24,12 +24,10 @@ package com.gsma.rcs.platform.network;
 
 import com.gsma.rcs.core.ims.network.ImsNetworkInterface.DnsResolvedFields;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.utils.InetAddressUtils;
 import com.gsma.rcs.utils.IpAddressUtils;
-import com.gsma.rcs.utils.logger.Logger;
 
 import android.net.ConnectivityManager;
-
-import org.apache.http.conn.util.InetAddressUtils;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -42,11 +40,6 @@ import java.util.Enumeration;
  * @author jexa7410
  */
 public class AndroidNetworkFactory extends NetworkFactory {
-    // Changed by Deutsche Telekom
-    /**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
 
     private final RcsSettings mRcsSettings;
 

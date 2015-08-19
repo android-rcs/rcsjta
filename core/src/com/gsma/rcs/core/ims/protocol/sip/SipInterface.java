@@ -29,7 +29,7 @@ import com.gsma.rcs.core.ims.security.cert.KeyStoreManager;
 import com.gsma.rcs.core.ims.service.SessionAuthenticationAgent;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.IdGenerator;
-import com.gsma.rcs.utils.IpAddressUtils;
+import com.gsma.rcs.utils.InetAddressUtils;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -205,9 +205,6 @@ public class SipInterface implements SipListener {
      */
     private long mTimerT4 = 5000;
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(SipInterface.class.getSimpleName());
 
     /**
@@ -717,7 +714,7 @@ public class SipInterface implements SipListener {
      */
     public String getDefaultRoute() {
         String defaultRoute;
-        if (IpAddressUtils.isIPv6(mOutboundProxyAddr)) {
+        if (InetAddressUtils.isIPv6Address(mOutboundProxyAddr)) {
             defaultRoute = String.format("<sip:[%s]:%s;transport=%s;lr>", mOutboundProxyAddr,
                     mOutboundProxyPort, getProxyProtocol());
         } else {

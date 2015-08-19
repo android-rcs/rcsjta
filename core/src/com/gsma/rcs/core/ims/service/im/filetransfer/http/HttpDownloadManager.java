@@ -94,9 +94,8 @@ public class HttpDownloadManager extends HttpTransferManager {
         mDownloadedFile = content.getUri();
         mFile = new File(mDownloadedFile.getPath());
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("HttpDownloadManager file from ")
-                    .append(httpServerAddress).append(" length=").append(content.getSize())
-                    .toString());
+            sLogger.debug("HttpDownloadManager file from " + httpServerAddress + " length="
+                    + content.getSize());
         }
     }
 
@@ -199,9 +198,8 @@ public class HttpDownloadManager extends HttpTransferManager {
                     receivedBytes = Long.valueOf(mFile.length()).intValue();
                     break;
                 default:
-                    throw new FileNotDownloadedException(new StringBuilder(
-                            "Unhandled http response code : ").append(statusCode)
-                            .append(" for file download from server!").toString());
+                    throw new FileNotDownloadedException("Unhandled http response code : "
+                            + statusCode + " for file download from server!");
             }
             /* Read content */
             byte[] buffer = new byte[CHUNK_MAX_SIZE];
@@ -312,8 +310,7 @@ public class HttpDownloadManager extends HttpTransferManager {
                 }
                 return bOutputStream;
             }
-            throw new IOException(new StringBuilder("Received '").append(statusCode)
-                    .append("' from server").toString());
+            throw new IOException("Received '" + statusCode + "' from server");
 
         } finally {
             /* Close streams */

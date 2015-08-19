@@ -135,6 +135,17 @@ public class Logger {
     }
 
     /**
+     * Warning trace
+     * 
+     * @param trace Trace
+     * @param e Exception
+     */
+    public void warn(String trace, Throwable e) {
+        printTrace(trace, WARN_LEVEL);
+        printTrace(ExceptionUtil.getFullStackTrace(e), WARN_LEVEL);
+    }
+
+    /**
      * Error trace
      * 
      * @param trace Trace

@@ -18,10 +18,6 @@
 
 package com.gsma.rcs.utils;
 
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
 /**
  * IP address utility functions
  * 
@@ -60,21 +56,4 @@ public class IpAddressUtils {
         return host;
     }
 
-    /**
-     * is IPv6 Address
-     * 
-     * @param ipAddress address
-     * @return true if IPv6
-     */
-    public static boolean isIPv6(String ipAddress) {
-        InetAddress addr;
-        boolean isIPv6 = false;
-        try {
-            addr = InetAddress.getByName(ipAddress);
-            isIPv6 = addr instanceof Inet6Address;
-        } catch (UnknownHostException e) {
-            return false;
-        }
-        return isIPv6;
-    }
 }
