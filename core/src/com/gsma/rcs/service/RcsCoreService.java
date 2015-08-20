@@ -129,6 +129,7 @@ import android.os.IBinder;
 import java.io.IOException;
 import java.security.KeyStoreException;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -238,6 +239,8 @@ public class RcsCoreService extends Service implements CoreListener {
 
     private ContactManager mContactManager;
 
+    private CountDownLatch mLatch;
+
     /**
      * Handler to process messages & runnable associated with background thread.
      */
@@ -265,15 +268,13 @@ public class RcsCoreService extends Service implements CoreListener {
 
         mBackgroundHandler = new Handler(backgroundThread.getLooper());
 
-        // @FIXME: This is not the final implementation, this is certainly an improvement over the
-        // previous implementation as for now start core will run on worker thread instead of
-        // main thread. However there is a need to properly refactor the whole start & stop core
-        // functionality to properly handle simultaneous start/stop request's.
+        mLatch = new CountDownLatch(1);
         mBackgroundHandler.post(new Runnable() {
             @Override
             public void run() {
                 try {
                     startCore();
+                    mLatch.countDown();
                 } catch (RuntimeException e) {
                     /*
                      * Normally we are not allowed to catch runtime exceptions as these are genuine
@@ -283,10 +284,22 @@ public class RcsCoreService extends Service implements CoreListener {
                      * which is not intended.
                      */
                     sLogger.error("Unable to start IMS core!", e);
+                    mLatch.countDown();
                 }
-
             }
         });
+        try {
+            /*
+             * After moving startcore() to a side thread, onCreate will finish before startcore is
+             * done. This will lead to return null binder object when clients are trying to bind.
+             * And android will cache the binder object which means it will always return null
+             * afterward. Block main thread and wait for completion of startcore will prevent the
+             * issue mentioned above.
+             */
+            mLatch.await();
+        } catch (InterruptedException e) {
+            /* Do nothing */
+        }
     }
 
     @Override
