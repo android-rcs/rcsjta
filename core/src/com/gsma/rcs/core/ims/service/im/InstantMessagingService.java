@@ -319,19 +319,10 @@ public class InstantMessagingService extends ImsService {
             sLogger.debug(new StringBuilder("Remove OneToOneChatSession with contact '")
                     .append(contact).append("'").toString());
         }
-        /*
-         * Performing remove session operation on a new thread so that ongoing threads trying to get
-         * that session can finish up before it is actually removed
-         */
-        new Thread() {
-            @Override
-            public void run() {
-                synchronized (getImsServiceSessionOperationLock()) {
-                    mOneToOneChatSessionCache.remove(contact);
-                    removeImsServiceSession(session);
-                }
-            }
-        }.start();
+        synchronized (getImsServiceSessionOperationLock()) {
+            mOneToOneChatSessionCache.remove(contact);
+            removeImsServiceSession(session);
+        }
     }
 
     public OneToOneChatSession getOneToOneChatSession(ContactId contact) {
@@ -362,19 +353,10 @@ public class InstantMessagingService extends ImsService {
             sLogger.debug(new StringBuilder("Remove StoreAndForwardMsgSession with contact '")
                     .append(contact).append("'").toString());
         }
-        /*
-         * Performing remove session operation on a new thread so that ongoing threads trying to get
-         * that session can finish up before it is actually removed
-         */
-        new Thread() {
-            @Override
-            public void run() {
-                synchronized (getImsServiceSessionOperationLock()) {
-                    mStoreAndForwardMsgSessionCache.remove(contact);
-                    removeImsServiceSession(session);
-                }
-            }
-        }.start();
+        synchronized (getImsServiceSessionOperationLock()) {
+            mStoreAndForwardMsgSessionCache.remove(contact);
+            removeImsServiceSession(session);
+        }
     }
 
     public TerminatingStoreAndForwardOneToOneChatMessageSession getStoreAndForwardMsgSession(
@@ -408,19 +390,10 @@ public class InstantMessagingService extends ImsService {
                     "Remove StoreAndForwardNotifSessionCache with contact '").append(contact)
                     .append("'").toString());
         }
-        /*
-         * Performing remove session operation on a new thread so that ongoing threads trying to get
-         * that session can finish up before it is actually removed
-         */
-        new Thread() {
-            @Override
-            public void run() {
-                synchronized (getImsServiceSessionOperationLock()) {
-                    mStoreAndForwardNotifSessionCache.remove(contact);
-                    removeImsServiceSession(session);
-                }
-            }
-        }.start();
+        synchronized (getImsServiceSessionOperationLock()) {
+            mStoreAndForwardNotifSessionCache.remove(contact);
+            removeImsServiceSession(session);
+        }
     }
 
     public TerminatingStoreAndForwardOneToOneChatNotificationSession getStoreAndForwardNotifSession(
@@ -452,25 +425,16 @@ public class InstantMessagingService extends ImsService {
             sLogger.debug(new StringBuilder("Remove GroupChatSession with chatId '").append(chatId)
                     .append("'").toString());
         }
-        /*
-         * Performing remove session operation on a new thread so that ongoing threads trying to get
-         * that session can finish up before it is actually removed
-         */
-        new Thread() {
-            @Override
-            public void run() {
-                synchronized (getImsServiceSessionOperationLock()) {
-                    SipDialogPath conferenceSubscriberDialogPath = session
-                            .getConferenceEventSubscriber().getDialogPath();
-                    if (conferenceSubscriberDialogPath != null) {
-                        mGroupChatConferenceSubscriberCache.remove(conferenceSubscriberDialogPath
-                                .getCallId());
-                    }
-                    mGroupChatSessionCache.remove(chatId);
-                    removeImsServiceSession(session);
-                }
+        synchronized (getImsServiceSessionOperationLock()) {
+            SipDialogPath conferenceSubscriberDialogPath = session.getConferenceEventSubscriber()
+                    .getDialogPath();
+            if (conferenceSubscriberDialogPath != null) {
+                mGroupChatConferenceSubscriberCache.remove(conferenceSubscriberDialogPath
+                        .getCallId());
             }
-        }.start();
+            mGroupChatSessionCache.remove(chatId);
+            removeImsServiceSession(session);
+        }
     }
 
     public GroupChatSession getGroupChatSession(String chatId) {
@@ -498,18 +462,9 @@ public class InstantMessagingService extends ImsService {
             sLogger.debug(new StringBuilder("Remove GroupChatConferenceSubscriber with callId '")
                     .append(callId).append("'").toString());
         }
-        /*
-         * Performing remove session operation on a new thread so that ongoing threads trying to get
-         * that session can finish up before it is actually removed
-         */
-        new Thread() {
-            @Override
-            public void run() {
-                synchronized (getImsServiceSessionOperationLock()) {
-                    mGroupChatConferenceSubscriberCache.remove(callId);
-                }
-            }
-        }.start();
+        synchronized (getImsServiceSessionOperationLock()) {
+            mGroupChatConferenceSubscriberCache.remove(callId);
+        }
     }
 
     public GroupChatSession getGroupChatSessionOfConferenceSubscriber(String callId) {
@@ -576,29 +531,19 @@ public class InstantMessagingService extends ImsService {
             sLogger.debug(new StringBuilder("Remove FileSharingSession with fileTransfer ID '")
                     .append(fileTransferId).append("'").toString());
         }
-        /*
-         * Performing remove session operation on a new thread so that ongoing threads trying to get
-         * that session can finish up before it is actually removed
-         */
-        new Thread() {
-            @Override
-            public void run() {
-                synchronized (getImsServiceSessionOperationLock()) {
-                    mFileTransferSessionCache.remove(fileTransferId);
-                    /*
-                     * Only FileSharingSessions of type ImsFileSharingSession has a dialog path.
-                     * Hence it is possible to remove only those type of sessions from the
-                     * ImsServiceSession cache and remove HttpFileTransferSession from
-                     * ImsServiceSessionWithoutDialogPath cache.
-                     */
-                    if (session instanceof ImsFileSharingSession) {
-                        removeImsServiceSession(session);
-                    } else if (session instanceof HttpFileTransferSession) {
-                        removeImsServiceSessionWithoutDialogPath(session);
-                    }
-                }
+        synchronized (getImsServiceSessionOperationLock()) {
+            mFileTransferSessionCache.remove(fileTransferId);
+            /*
+             * Only FileSharingSessions of type ImsFileSharingSession has a dialog path. Hence it is
+             * possible to remove only those type of sessions from the ImsServiceSession cache and
+             * remove HttpFileTransferSession from ImsServiceSessionWithoutDialogPath cache.
+             */
+            if (session instanceof ImsFileSharingSession) {
+                removeImsServiceSession(session);
+            } else if (session instanceof HttpFileTransferSession) {
+                removeImsServiceSessionWithoutDialogPath(session);
             }
-        }.start();
+        }
     }
 
     public FileSharingSession getFileSharingSession(String fileTransferId) {
@@ -628,18 +573,9 @@ public class InstantMessagingService extends ImsService {
             sLogger.debug(new StringBuilder("Remove FileUploadSession with upload ID '")
                     .append(uploadId).append("'").toString());
         }
-        /*
-         * Performing remove session operation on a new thread so that ongoing threads trying to get
-         * that session can finish up before it is actually removed
-         */
-        new Thread() {
-            @Override
-            public void run() {
-                synchronized (getImsServiceSessionOperationLock()) {
-                    mFileUploadSessionCache.remove(uploadId);
-                }
-            }
-        }.start();
+        synchronized (getImsServiceSessionOperationLock()) {
+            mFileUploadSessionCache.remove(uploadId);
+        }
     }
 
     public FileUploadSession getFileUploadSession(String uploadId) {
@@ -1776,18 +1712,9 @@ public class InstantMessagingService extends ImsService {
      * @param chatId
      */
     public void removeGroupChatComposingStatus(final String chatId) {
-        /*
-         * Performing remove session operation on a new thread so that ongoing threads trying to get
-         * that session can finish up before it is actually removed
-         */
-        new Thread() {
-            @Override
-            public void run() {
-                synchronized (getImsServiceSessionOperationLock()) {
-                    mGroupChatComposingStatusToNotify.remove(chatId);
-                }
-            }
-        }.start();
+        synchronized (getImsServiceSessionOperationLock()) {
+            mGroupChatComposingStatusToNotify.remove(chatId);
+        }
     }
 
     /**
@@ -1822,18 +1749,9 @@ public class InstantMessagingService extends ImsService {
      * @param contact the remote contact
      */
     public void removeOneToOneChatComposingStatus(final ContactId contact) {
-        /*
-         * Performing remove session operation on a new thread so that ongoing threads trying to get
-         * that session can finish up before it is actually removed
-         */
-        new Thread() {
-            @Override
-            public void run() {
-                synchronized (getImsServiceSessionOperationLock()) {
-                    mOneToOneChatComposingStatusToNotify.remove(contact);
-                }
-            }
-        }.start();
+        synchronized (getImsServiceSessionOperationLock()) {
+            mOneToOneChatComposingStatusToNotify.remove(contact);
+        }
     }
 
     /**

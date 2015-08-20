@@ -281,19 +281,10 @@ public class RichcallService extends ImsService {
             sLogger.debug(new StringBuilder("Remove ImageTransferSession with sessionId '")
                     .append(sessionId).append("'").toString());
         }
-        /*
-         * Performing remove session operation on a new thread so that ongoing threads accessing
-         * that session can finish up before it is actually removed
-         */
-        new Thread() {
-            @Override
-            public void run() {
                 synchronized (getImsServiceSessionOperationLock()) {
                     mImageTransferSessionCache.remove(sessionId);
                     removeImsServiceSession(session);
                 }
-            }
-        }.start();
     }
 
     public ImageTransferSession getImageTransferSession(String sessionId) {
@@ -324,19 +315,10 @@ public class RichcallService extends ImsService {
             sLogger.debug(new StringBuilder("Remove VideoStreamingSession with sessionId '")
                     .append(sessionId).append("'").toString());
         }
-        /*
-         * Performing remove session operation on a new thread so that ongoing threads accessing
-         * that session can finish up before it is actually removed
-         */
-        new Thread() {
-            @Override
-            public void run() {
                 synchronized (getImsServiceSessionOperationLock()) {
                     mVideoStremaingSessionCache.remove(sessionId);
                     removeImsServiceSession(session);
                 }
-            }
-        }.start();
     }
 
     public VideoStreamingSession getVideoSharingSession(String sessionId) {
@@ -367,19 +349,10 @@ public class RichcallService extends ImsService {
             sLogger.debug(new StringBuilder("Remove GeolocTransferSession with sessionId '")
                     .append(sessionId).append("'").toString());
         }
-        /*
-         * Performing remove session operation on a new thread so that ongoing threads accessing
-         * that session can finish up before it is actually removed
-         */
-        new Thread() {
-            @Override
-            public void run() {
                 synchronized (getImsServiceSessionOperationLock()) {
                     mGeolocTransferSessionCache.remove(sessionId);
                     removeImsServiceSession(session);
                 }
-            }
-        }.start();
     }
 
     public GeolocTransferSession getGeolocTransferSession(String sessionId) {

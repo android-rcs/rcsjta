@@ -33,6 +33,7 @@ import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -243,10 +244,17 @@ public abstract class ImsService {
      */
     public void terminateAllSessions(TerminationReason reason) {
         synchronized (getImsServiceSessionOperationLock()) {
-            for (ImsServiceSession session : mImsServiceSessionCache.values()) {
+            /* Iterate over a copy of the session set to allow removal in the cache
+               map while iterating. */
+            for (ImsServiceSession session : new HashSet<ImsServiceSession>(
+                    mImsServiceSessionCache.values())) {
                 session.terminateSession(reason);
             }
-            for (ImsServiceSession session : mImsServiceSessionWithoutDialogPathCache.values()) {
+
+            /* Iterate over a copy of the session set to allow removal in the cache
+               map while iterating. */
+            for (ImsServiceSession session : new HashSet<ImsServiceSession>(
+                    mImsServiceSessionWithoutDialogPathCache.values())) {
                 session.terminateSession(reason);
             }
         }

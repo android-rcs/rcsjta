@@ -165,19 +165,10 @@ public class IPCallService extends ImsService {
             sLogger.debug(new StringBuilder("Remove IPCallSession with call ID '").append(callId)
                     .append("'").toString());
         }
-        /*
-         * Performing remove session operation on a new thread so that ongoing threads accessing
-         * that session can finish up before it is actually removed
-         */
-        new Thread() {
-            @Override
-            public void run() {
                 synchronized (getImsServiceSessionOperationLock()) {
                     mIPCallSessionCache.remove(callId);
                     removeImsServiceSession(session);
                 }
-            }
-        }.start();
     }
 
     public IPCallSession getIPCallSession(String sessionId) {
