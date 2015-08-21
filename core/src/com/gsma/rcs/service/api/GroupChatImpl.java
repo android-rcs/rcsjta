@@ -27,6 +27,8 @@ import com.gsma.rcs.core.CoreListener;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
@@ -42,6 +44,7 @@ import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.provider.history.HistoryLog;
 import com.gsma.rcs.provider.messaging.ChatMessagePersistedStorageAccessor;
 import com.gsma.rcs.provider.messaging.GroupChatPersistedStorageAccessor;
@@ -67,6 +70,7 @@ import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1532,21 +1536,35 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     }
 
     @Override
-    public void handleReceiveMessage(ChatMessage msg, boolean imdnDisplayedRequested) {
-        String msgId = msg.getMessageId();
-        ContactId remote = msg.getRemoteContact();
-        if (sLogger.isActivated()) {
-            sLogger.info("New IM with Id '" + msgId + "' received from " + remote);
-        }
-        synchronized (lock) {
-            mPersistentStorage.addIncomingGroupChatMessage(msg, imdnDisplayedRequested);
-            if (remote != null) {
-                mContactManager.mergeContactCapabilities(remote, new CapabilitiesBuilder()
-                        .setImSession(true).setTimestampOfLastResponse(msg.getTimestamp()).build(),
-                        RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE, msg.getDisplayName());
+    public void handleReceiveMessage(ChatMessage msg, boolean imdnDisplayedRequested)
+            throws SipPayloadException, SipNetworkException {
+        String msgId = null;
+        ContactId remote = null;
+        try {
+            msgId = msg.getMessageId();
+            remote = msg.getRemoteContact();
+            if (sLogger.isActivated()) {
+                sLogger.info(new StringBuilder("New IM with Id '").append(msgId)
+                        .append("' received from ").append(remote).toString());
             }
-            String mimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
-            mBroadcaster.broadcastMessageReceived(mimeType, msgId);
+            synchronized (lock) {
+                mPersistentStorage.addIncomingGroupChatMessage(msg, imdnDisplayedRequested);
+                if (remote != null) {
+                    mContactManager.mergeContactCapabilities(remote, new CapabilitiesBuilder()
+                            .setImSession(true).setTimestampOfLastResponse(msg.getTimestamp())
+                            .build(), RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE,
+                            msg.getDisplayName());
+                }
+                String mimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
+                mBroadcaster.broadcastMessageReceived(mimeType, msgId);
+            }
+        } catch (ContactManagerException e) {
+            throw new SipPayloadException(new StringBuilder("Failed to handle new IM with Id '")
+                    .append(msgId).append("' received from ").append(remote).toString(), e);
+
+        } catch (IOException e) {
+            throw new SipNetworkException(new StringBuilder("Failed to handle new IM with Id '")
+                    .append(msgId).append("' received from ").append(remote).toString(), e);
         }
     }
 

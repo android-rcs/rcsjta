@@ -284,6 +284,10 @@ public class ImsConnectionManager implements Runnable {
                     } catch (SipPayloadException e) {
                         sLogger.error("Unable to handle connection event for intent action : "
                                 .concat(intent.getAction()), e);
+                    } catch (SipNetworkException e) {
+                        if (sLogger.isActivated()) {
+                            sLogger.debug(e.getMessage());
+                        }
                     } catch (CertificateException e) {
                         sLogger.error("Unable to handle connection event for intent action : "
                                 .concat(intent.getAction()), e);
@@ -309,11 +313,13 @@ public class ImsConnectionManager implements Runnable {
      * @param intent Intent
      * @throws SipPayloadException
      * @throws CertificateException
+     * @throws SipNetworkException
      */
     // @FIXME: This method is doing so many things at this moment and has become too complex thus
     // needs a complete refactor, However at this moment due to other prior tasks the refactoring
     // task has been kept in backlog.
-    private void connectionEvent(Intent intent) throws SipPayloadException, CertificateException {
+    private void connectionEvent(Intent intent) throws SipPayloadException, CertificateException,
+            SipNetworkException {
         try {
             if (mDisconnectedByBattery) {
                 return;
@@ -503,8 +509,11 @@ public class ImsConnectionManager implements Runnable {
 
     /**
      * Disconnect from IMS network interface
+     * 
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void disconnectFromIms() {
+    private void disconnectFromIms() throws SipPayloadException, SipNetworkException {
         // Stop the IMS connection
         stopImsConnection(TerminationReason.TERMINATION_BY_CONNECTION_LOST);
 
@@ -532,8 +541,12 @@ public class ImsConnectionManager implements Runnable {
 
     /**
      * Stop the IMS connection
+     * 
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private synchronized void stopImsConnection(TerminationReason reasonCode) {
+    private synchronized void stopImsConnection(TerminationReason reasonCode)
+            throws SipPayloadException, SipNetworkException {
         if (mImsPollingThreadId == -1) {
             return;
         }
@@ -727,6 +740,10 @@ public class ImsConnectionManager implements Runnable {
                     } catch (SipPayloadException e) {
                         sLogger.error("Unable to handle connection event for intent action : "
                                 .concat(intent.getAction()), e);
+                    } catch (SipNetworkException e) {
+                        if (sLogger.isActivated()) {
+                            sLogger.debug(e.getMessage());
+                        }
                     } catch (CertificateException e) {
                         sLogger.error("Unable to handle connection event for intent action : "
                                 .concat(intent.getAction()), e);

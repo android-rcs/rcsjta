@@ -58,6 +58,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.http.DownloadFromInviteFile
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpThumbnail;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.IdGenerator;
@@ -161,8 +162,11 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * 
      * @param msg Chat message
      * @param imdnDisplayedRequested Indicates whether display report was requested
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    protected void receive(ChatMessage msg, boolean imdnDisplayedRequested) {
+    protected void receive(ChatMessage msg, boolean imdnDisplayedRequested)
+            throws SipPayloadException, SipNetworkException {
         if (mMessagingLog.isMessagePersisted(msg.getMessageId())) {
             // Message already received
             return;
@@ -691,141 +695,157 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param msgId Message ID
      * @param timestamp The local timestamp of the message for receiving a HttpFileTransfer
      * @param timestampSent Remote timestamp sent in payload for receiving a HttpFileTransfer
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     protected void receiveHttpFileTransfer(ContactId contact, String displayName,
             FileTransferHttpInfoDocument fileTransferInfo, String msgId, long timestamp,
-            long timestampSent) {
-        /*
-         * Update the remote contact's capabilities to include at least HTTP FT and IM session
-         * capabilities as we have just received a HTTP file transfer invitation from this contact
-         * so he/she must at least have this capability. We do not need any capability exchange
-         * response to determine that.
-         */
-        mContactManager.mergeContactCapabilities(contact,
-                new CapabilitiesBuilder().setImSession(true).setFileTransferHttp(true)
-                        .setTimestampOfLastResponse(timestamp).build(), RcsStatus.RCS_CAPABLE,
-                RegistrationState.ONLINE, displayName);
+            long timestampSent) throws SipPayloadException, SipNetworkException {
+        try {
+            /*
+             * Update the remote contact's capabilities to include at least HTTP FT and IM session
+             * capabilities as we have just received a HTTP file transfer invitation from this
+             * contact so he/she must at least have this capability. We do not need any capability
+             * exchange response to determine that.
+             */
+            mContactManager.mergeContactCapabilities(contact,
+                    new CapabilitiesBuilder().setImSession(true).setFileTransferHttp(true)
+                            .setTimestampOfLastResponse(timestamp).build(), RcsStatus.RCS_CAPABLE,
+                    RegistrationState.ONLINE, displayName);
 
-        FileTransferHttpThumbnail fileTransferHttpThumbnail = fileTransferInfo.getFileThumbnail();
-        if (mImService.isFileTransferAlreadyOngoing(msgId)) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder("File transfer with fileTransferId '")
-                        .append(msgId).append("' already ongoing, so ignoring this one.")
-                        .toString());
-            }
-            return;
-        }
-        boolean fileResent = mImService.isFileTransferResentAndNotAlreadyOngoing(msgId);
-        if (mContactManager.isBlockedForContact(contact)) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder("Contact ").append(contact)
-                        .append(" is blocked, reject the HTTP File transfer").toString());
-            }
-            if (fileResent) {
-                handleResendFileTransferInvitationRejected(msgId, contact,
-                        ReasonCode.REJECTED_SPAM, timestamp, timestampSent);
+            FileTransferHttpThumbnail fileTransferHttpThumbnail = fileTransferInfo
+                    .getFileThumbnail();
+            if (mImService.isFileTransferAlreadyOngoing(msgId)) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(new StringBuilder("File transfer with fileTransferId '")
+                            .append(msgId).append("' already ongoing, so ignoring this one.")
+                            .toString());
+                }
                 return;
             }
-            MmContent fileIconContent = (fileTransferHttpThumbnail == null) ? null
-                    : fileTransferHttpThumbnail.getLocalMmContent(msgId);
-            handleFileTransferInvitationRejected(contact, fileTransferInfo.getLocalMmContent(),
-                    fileIconContent, ReasonCode.REJECTED_SPAM, timestamp, timestampSent);
-            return;
-        }
-
-        /* Auto reject if file too big or size exceeds device storage capacity. */
-        FileSharingError error = FileSharingSession.isFileCapacityAcceptable(
-                fileTransferInfo.getSize(), mRcsSettings);
-        if (error != null) {
-            if (sLogger.isActivated()) {
-                sLogger.debug("File is too big or exceeds storage capacity, "
-                        .concat("reject the HTTP File transfer."));
+            boolean fileResent = mImService.isFileTransferResentAndNotAlreadyOngoing(msgId);
+            if (mContactManager.isBlockedForContact(contact)) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(new StringBuilder("Contact ").append(contact)
+                            .append(" is blocked, reject the HTTP File transfer").toString());
+                }
+                if (fileResent) {
+                    handleResendFileTransferInvitationRejected(msgId, contact,
+                            ReasonCode.REJECTED_SPAM, timestamp, timestampSent);
+                    return;
+                }
+                MmContent fileIconContent = (fileTransferHttpThumbnail == null) ? null
+                        : fileTransferHttpThumbnail.getLocalMmContent(msgId);
+                handleFileTransferInvitationRejected(contact, fileTransferInfo.getLocalMmContent(),
+                        fileIconContent, ReasonCode.REJECTED_SPAM, timestamp, timestampSent);
+                return;
             }
-            MmContent fileIconContent = (fileTransferHttpThumbnail == null) ? null
-                    : fileTransferHttpThumbnail.getLocalMmContent(msgId);
 
-            int errorCode = error.getErrorCode();
-            switch (errorCode) {
-                case FileSharingError.MEDIA_SIZE_TOO_BIG:
-                    if (fileResent) {
-                        handleResendFileTransferInvitationRejected(msgId, contact,
+            /* Auto reject if file too big or size exceeds device storage capacity. */
+            FileSharingError error = FileSharingSession.isFileCapacityAcceptable(
+                    fileTransferInfo.getSize(), mRcsSettings);
+            if (error != null) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("File is too big or exceeds storage capacity, "
+                            .concat("reject the HTTP File transfer."));
+                }
+                MmContent fileIconContent = (fileTransferHttpThumbnail == null) ? null
+                        : fileTransferHttpThumbnail.getLocalMmContent(msgId);
+
+                int errorCode = error.getErrorCode();
+                switch (errorCode) {
+                    case FileSharingError.MEDIA_SIZE_TOO_BIG:
+                        if (fileResent) {
+                            handleResendFileTransferInvitationRejected(msgId, contact,
+                                    ReasonCode.REJECTED_MAX_SIZE, timestamp, timestampSent);
+                            break;
+                        }
+                        handleFileTransferInvitationRejected(contact,
+                                fileTransferInfo.getLocalMmContent(), fileIconContent,
                                 ReasonCode.REJECTED_MAX_SIZE, timestamp, timestampSent);
                         break;
-                    }
-                    handleFileTransferInvitationRejected(contact,
-                            fileTransferInfo.getLocalMmContent(), fileIconContent,
-                            ReasonCode.REJECTED_MAX_SIZE, timestamp, timestampSent);
-                    break;
-                case FileSharingError.NOT_ENOUGH_STORAGE_SPACE:
-                    if (fileResent) {
-                        handleResendFileTransferInvitationRejected(msgId, contact,
+                    case FileSharingError.NOT_ENOUGH_STORAGE_SPACE:
+                        if (fileResent) {
+                            handleResendFileTransferInvitationRejected(msgId, contact,
+                                    ReasonCode.REJECTED_LOW_SPACE, timestamp, timestampSent);
+                            break;
+                        }
+                        handleFileTransferInvitationRejected(contact,
+                                fileTransferInfo.getLocalMmContent(), fileIconContent,
                                 ReasonCode.REJECTED_LOW_SPACE, timestamp, timestampSent);
                         break;
-                    }
-                    handleFileTransferInvitationRejected(contact,
-                            fileTransferInfo.getLocalMmContent(), fileIconContent,
-                            ReasonCode.REJECTED_LOW_SPACE, timestamp, timestampSent);
-                    break;
-                default:
-                    if (sLogger.isActivated()) {
-                        sLogger.error("Unexpected error while receiving HTTP file transfer."
-                                .concat(Integer.toString(errorCode)));
-                    }
-            }
-            return;
-        }
-
-        // Auto reject if number max of FT reached
-        if (!mImService.getImsModule().getInstantMessagingService()
-                .isFileTransferSessionAvailable()) {
-            if (sLogger.isActivated()) {
-                sLogger.debug("Max number of File Tranfer reached, reject the HTTP File transfer");
-            }
-            MmContent fileIconContent = (fileTransferHttpThumbnail == null) ? null
-                    : fileTransferHttpThumbnail.getLocalMmContent(msgId);
-            if (fileResent) {
-                handleResendFileTransferInvitationRejected(msgId, contact,
-                        ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp, timestampSent);
+                    default:
+                        if (sLogger.isActivated()) {
+                            sLogger.error("Unexpected error while receiving HTTP file transfer."
+                                    .concat(Integer.toString(errorCode)));
+                        }
+                }
                 return;
             }
-            handleFileTransferInvitationRejected(contact, fileTransferInfo.getLocalMmContent(),
-                    fileIconContent, ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp,
-                    timestampSent);
-            return;
-        }
-
-        DownloadFromInviteFileSharingSession fileSession = new DownloadFromInviteFileSharingSession(
-                mImService, this, fileTransferInfo, msgId, contact, displayName, mRcsSettings,
-                mMessagingLog, timestamp, timestampSent, mContactManager);
-        if (fileTransferHttpThumbnail != null) {
-            try {
-                fileSession.downloadFileIcon();
-            } catch (IOException e) {
+            if (!mImService.getImsModule().getInstantMessagingService()
+                    .isFileTransferSessionAvailable()) {
                 if (sLogger.isActivated()) {
-                    sLogger.error("Failed to download file icon", e);
+                    sLogger.debug("Max number of File Tranfer reached, reject the HTTP File transfer");
                 }
-                MmContent fileIconContent = fileTransferHttpThumbnail.getLocalMmContent(msgId);
+                MmContent fileIconContent = (fileTransferHttpThumbnail == null) ? null
+                        : fileTransferHttpThumbnail.getLocalMmContent(msgId);
                 if (fileResent) {
                     handleResendFileTransferInvitationRejected(msgId, contact,
                             ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp, timestampSent);
                     return;
                 }
                 handleFileTransferInvitationRejected(contact, fileTransferInfo.getLocalMmContent(),
-                        fileIconContent, ReasonCode.REJECTED_MEDIA_FAILED, timestamp, timestampSent);
+                        fileIconContent, ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp,
+                        timestampSent);
                 return;
             }
+
+            DownloadFromInviteFileSharingSession fileSession = new DownloadFromInviteFileSharingSession(
+                    mImService, this, fileTransferInfo, msgId, contact, displayName, mRcsSettings,
+                    mMessagingLog, timestamp, timestampSent, mContactManager);
+            if (fileTransferHttpThumbnail != null) {
+                try {
+                    fileSession.downloadFileIcon();
+                } catch (IOException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.error("Failed to download file icon", e);
+                    }
+                    MmContent fileIconContent = fileTransferHttpThumbnail.getLocalMmContent(msgId);
+                    if (fileResent) {
+                        handleResendFileTransferInvitationRejected(msgId, contact,
+                                ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp, timestampSent);
+                        return;
+                    }
+                    handleFileTransferInvitationRejected(contact,
+                            fileTransferInfo.getLocalMmContent(), fileIconContent,
+                            ReasonCode.REJECTED_MEDIA_FAILED, timestamp, timestampSent);
+                    return;
+                }
+            }
+            if (fileResent) {
+                mImService
+                        .getImsModule()
+                        .getCoreListener()
+                        .handleOneToOneResendFileTransferInvitation(fileSession, contact,
+                                displayName);
+            } else {
+                mImService
+                        .getImsModule()
+                        .getCoreListener()
+                        .handleFileTransferInvitation(fileSession, isGroupChat(), contact,
+                                displayName, fileTransferInfo.getExpiration());
+            }
+            fileSession.startSession();
+
+        } catch (ContactManagerException e) {
+            throw new SipPayloadException(new StringBuilder(
+                    "Failed to receive file transfer with fileTransferId : ").append(msgId)
+                    .append("for contact : ").append(contact).toString(), e);
+        } catch (IOException e) {
+            throw new SipNetworkException(new StringBuilder(
+                    "Failed to receive file transfer with fileTransferId : ").append(msgId)
+                    .append("for contact : ").append(contact).toString(), e);
         }
-        if (fileResent) {
-            mImService.getImsModule().getCoreListener()
-                    .handleOneToOneResendFileTransferInvitation(fileSession, contact, displayName);
-        } else {
-            mImService
-                    .getImsModule()
-                    .getCoreListener()
-                    .handleFileTransferInvitation(fileSession, isGroupChat(), contact, displayName,
-                            fileTransferInfo.getExpiration());
-        }
-        fileSession.startSession();
     }
 
     /**

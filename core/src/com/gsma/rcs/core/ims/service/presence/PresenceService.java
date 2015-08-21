@@ -50,6 +50,7 @@ import android.content.Context;
 import android.content.OperationApplicationException;
 import android.os.RemoteException;
 
+import java.io.IOException;
 import java.util.Set;
 
 /**
@@ -223,9 +224,10 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * @param list of granted contacts
      * @param list of blocked contacts
      * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     private void firstLaunchOrAccountChangedCheck(Set<ContactId> grantedContacts,
-            Set<ContactId> blockedContacts) throws SipPayloadException {
+            Set<ContactId> blockedContacts) throws SipPayloadException, SipNetworkException {
         final String publicUri = ImsModule.IMS_USER_PROFILE.getPublicUri();
         try {
             boolean logActivated = logger.isActivated();
@@ -279,6 +281,9 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
         } catch (RemoteException e) {
             throw new SipPayloadException("Failed creating contact : ".concat(publicUri), e);
+
+        } catch (IOException e) {
+            throw new SipNetworkException("Failed creating contact : ".concat(publicUri), e);
         }
     }
 

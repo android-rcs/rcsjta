@@ -23,6 +23,8 @@
 package com.gsma.rcs.core.ims.network.gsm;
 
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.capability.CapabilityService;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
@@ -246,6 +248,15 @@ public class CallManager {
                                 break;
                         }
 
+                    } catch (SipPayloadException e) {
+                        sLogger.error(
+                                new StringBuilder("Unable to handle call state : ").append(state)
+                                        .append(" for incoming number : ").append(incomingNumber)
+                                        .toString(), e);
+                    } catch (SipNetworkException e) {
+                        if (sLogger.isActivated()) {
+                            sLogger.debug(e.getMessage());
+                        }
                     } catch (RuntimeException e) {
                         /*
                          * Normally we are not allowed to catch runtime exceptions as these are
@@ -258,7 +269,6 @@ public class CallManager {
                                 new StringBuilder("Unable to handle call state : ").append(state)
                                         .append(" for incoming number : ").append(incomingNumber)
                                         .toString(), e);
-
                     }
                 }
             });
@@ -395,8 +405,10 @@ public class CallManager {
      * Connection event
      * 
      * @param connected Connection state
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void connectionEvent(boolean connected) {
+    public void connectionEvent(boolean connected) throws SipPayloadException, SipNetworkException {
         if (sContact == null) {
             return;
         }

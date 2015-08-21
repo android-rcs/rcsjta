@@ -267,8 +267,11 @@ public class ImsModule implements SipEventListener {
      * Stop IMS services
      * 
      * @param reasonCode The reason code
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void stopImsServices(TerminationReason reasonCode) {
+    public void stopImsServices(TerminationReason reasonCode) throws SipPayloadException,
+            SipNetworkException {
         // Terminate all pending sessions
         terminateAllSessions(reasonCode);
 

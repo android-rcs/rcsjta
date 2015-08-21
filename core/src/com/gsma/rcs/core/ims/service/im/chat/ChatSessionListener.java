@@ -22,6 +22,8 @@
 
 package com.gsma.rcs.core.ims.service.im.chat;
 
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.services.rcs.contact.ContactId;
@@ -37,8 +39,11 @@ public interface ChatSessionListener extends ImsSessionListener {
      * 
      * @param msg Chat message
      * @param imdnDisplayedRequested Indicates whether display notification is requested
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void handleReceiveMessage(ChatMessage msg, boolean imdnDisplayedRequested);
+    public void handleReceiveMessage(ChatMessage msg, boolean imdnDisplayedRequested)
+            throws SipPayloadException, SipNetworkException;
 
     /**
      * Is composing event

@@ -91,7 +91,6 @@ import com.gsma.services.rcs.capability.CapabilitiesLog;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactProvider;
 
-import android.accounts.AccountManager;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentResolver;
@@ -506,9 +505,10 @@ public final class ContactManager {
      * @param newInfo New contact info
      * @param oldInfo Old contact info
      * @throws ContactManagerException
+     * @throws IOException
      */
     private void setContactInfoInternal(ContactInfo newInfo, ContactInfo oldInfo)
-            throws ContactManagerException {
+            throws ContactManagerException, IOException {
         ContactId contact = newInfo.getContact();
         String contactNumber = contact.toString();
         boolean logActivated = sLogger.isActivated();
@@ -783,10 +783,15 @@ public final class ContactManager {
             /* Do the actual database modifications */
             try {
                 mContentResolver.applyBatch(ContactsContract.AUTHORITY, ops);
+
             } catch (RemoteException e) {
-                throw new ContactManagerException(e);
+                throw new ContactManagerException(
+                        "Unable to apply batch updates for contact :".concat(newInfo.getContact()
+                                .toString()), e);
             } catch (OperationApplicationException e) {
-                throw new ContactManagerException(e);
+                throw new ContactManagerException(
+                        "Unable to apply batch updates for contact :".concat(newInfo.getContact()
+                                .toString()), e);
             }
         }
     }
@@ -871,7 +876,13 @@ public final class ContactManager {
 
                 if (Boolean.parseBoolean(cursor.getString(cursor
                         .getColumnIndexOrThrow(KEY_PRESENCE_PHOTO_EXIST_FLAG)))) {
-                    presenceInfo.setPhotoIcon(getPhotoIcon(cursor, contact));
+                    try {
+                        presenceInfo.setPhotoIcon(getPhotoIcon(cursor, contact));
+                    } catch (IOException e) {
+                        if (sLogger.isActivated()) {
+                            sLogger.debug(e.getMessage());
+                        }
+                    }
                 }
 
                 // Get the capabilities infos
@@ -939,8 +950,9 @@ public final class ContactManager {
      * 
      * @param photoIcon
      * @param contact
+     * @throws IOException
      */
-    private void savePhotoIcon(PhotoIcon photoIcon, ContactId contact) {
+    private void savePhotoIcon(PhotoIcon photoIcon, ContactId contact) throws IOException {
         byte photoContent[] = photoIcon.getContent();
         if (photoContent == null) {
             return;
@@ -951,10 +963,6 @@ public final class ContactManager {
             outstream = mLocalContentResolver.openContentOutputStream(photoUri);
             outstream.write(photoContent);
             outstream.flush();
-        } catch (IOException e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Photo can't be saved", e);
-            }
         } finally {
             CloseableUtils.close(outstream);
         }
@@ -966,24 +974,19 @@ public final class ContactManager {
      * @param cursor
      * @param contact
      * @return PhotoIcon or null
+     * @throws IOException
      */
-    private PhotoIcon getPhotoIcon(Cursor cursor, ContactId contact) {
+    private PhotoIcon getPhotoIcon(Cursor cursor, ContactId contact) throws IOException {
         Uri photoUri = Uri.withAppendedPath(CONTENT_URI, contact.toString());
-        try {
-            String etag = cursor.getString(cursor.getColumnIndexOrThrow(KEY_PRESENCE_PHOTO_ETAG));
-            InputStream stream = mLocalContentResolver.openContentInputStream(photoUri);
-            byte[] content = new byte[stream.available()];
-            stream.read(content, 0, content.length);
-            Bitmap bmp = BitmapFactory.decodeByteArray(content, 0, content.length);
-            if (bmp != null) {
-                return new PhotoIcon(content, bmp.getWidth(), bmp.getHeight(), etag);
-            }
-        } catch (IOException e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Can't get the photo", e);
-            }
+        String etag = cursor.getString(cursor.getColumnIndexOrThrow(KEY_PRESENCE_PHOTO_ETAG));
+        InputStream stream = mLocalContentResolver.openContentInputStream(photoUri);
+        byte[] content = new byte[stream.available()];
+        stream.read(content, 0, content.length);
+        Bitmap bmp = BitmapFactory.decodeByteArray(content, 0, content.length);
+        if (bmp == null) {
+            throw new IOException("unable to create icon for contact :".concat(contact.toString()));
         }
-        return null;
+        return new PhotoIcon(content, bmp.getWidth(), bmp.getHeight(), etag);
     }
 
     /**
@@ -1001,8 +1004,9 @@ public final class ContactManager {
      * 
      * @param contact Contact ID
      * @throws ContactManagerException exception thrown if update operation has failed
+     * @throws IOException
      */
-    public void blockContact(ContactId contact) throws ContactManagerException {
+    public void blockContact(ContactId contact) throws ContactManagerException, IOException {
         if (sLogger.isActivated()) {
             sLogger.info("Block contact ".concat(contact.toString()));
         }
@@ -1774,8 +1778,11 @@ public final class ContactManager {
      * 
      * @param contact Contact Id
      * @param capabilities Capabilities to set
+     * @throws IOException
+     * @throws ContactManagerException
      */
-    public void setContactCapabilities(ContactId contact, Capabilities capabilities) {
+    public void setContactCapabilities(ContactId contact, Capabilities capabilities)
+            throws ContactManagerException, IOException {
         setContactCapabilities(contact, capabilities, getContactStatus(contact),
                 getRegistrationState(contact));
     }
@@ -1787,9 +1794,12 @@ public final class ContactManager {
      * @param capabilities Capabilities
      * @param contactType Contact type
      * @param registrationState Three possible values : online/offline/unknown
+     * @throws ContactManagerException
+     * @throws IOException
      */
     public void setContactCapabilities(ContactId contact, Capabilities capabilities,
-            RcsStatus contactType, RegistrationState registrationState) {
+            RcsStatus contactType, RegistrationState registrationState)
+            throws ContactManagerException, IOException {
         synchronized (mContactInfoCache) {
             /* Get the current information on this contact */
             ContactInfo oldInfo = getContactInfoInternal(contact);
@@ -1847,13 +1857,7 @@ public final class ContactManager {
                 return;
             }
             /* Save the modifications */
-            try {
-                setContactInfoInternal(newInfo, oldInfo);
-            } catch (ContactManagerException e) {
-                if (sLogger.isActivated()) {
-                    sLogger.error("Could not save the contact modifications", e);
-                }
-            }
+            setContactInfoInternal(newInfo, oldInfo);
         }
     }
 
@@ -1865,9 +1869,12 @@ public final class ContactManager {
      * @param contactType
      * @param registrationState
      * @param displayName
+     * @throws ContactManagerException
+     * @throws IOException
      */
     public void mergeContactCapabilities(ContactId contact, Capabilities capabilities,
-            RcsStatus contactType, RegistrationState registrationState, String displayName) {
+            RcsStatus contactType, RegistrationState registrationState, String displayName)
+            throws ContactManagerException, IOException {
         synchronized (mContactInfoCache) {
             /* Get the current information on this contact */
             ContactInfo oldInfo = getContactInfoInternal(contact);
@@ -1951,13 +1958,7 @@ public final class ContactManager {
                 return;
             }
             /* Save the modifications */
-            try {
-                setContactInfoInternal(newInfo, oldInfo);
-            } catch (ContactManagerException e) {
-                if (sLogger.isActivated()) {
-                    sLogger.error("Could not save the contact modifications", e);
-                }
-            }
+            setContactInfoInternal(newInfo, oldInfo);
         }
     }
 
@@ -2026,121 +2027,114 @@ public final class ContactManager {
      * @param info for the RCS raw contact
      * @param rawContactId of the raw contact we want to aggregate the RCS infos to
      * @return the RCS rawContactId concerning this newly created contact
+     * @throws ContactManagerException
      */
-    private long createRcsRawContact(final ContactInfo info, final long rawContactId) {
+    private long createRcsRawContact(final ContactInfo info, final long rawContactId)
+            throws ContactManagerException {
         ContactId contact = info.getContact();
-        String contactNumber = contact.toString();
-        if (sLogger.isActivated()) {
-            sLogger.debug("Create RCS rawcontact for '" + contactNumber
-                    + "' associated to rawContactId " + rawContactId);
-        }
-        ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
-        /* Create raw contact for RCS */
-        int rawContactRefIms = ops.size();
-        ops.add(ContentProviderOperation
-                .newInsert(RawContacts.CONTENT_URI)
-                .withValue(RawContacts.AGGREGATION_MODE, RawContacts.AGGREGATION_MODE_SUSPENDED)
-                .withValue(RawContacts.ACCOUNT_TYPE, RcsAccountManager.ACCOUNT_MANAGER_TYPE)
-                .withValue(RawContacts.ACCOUNT_NAME,
-                        mContext.getString(R.string.rcs_core_account_username)).build());
-
-        /* Insert number */
-        ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
-                .withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
-                .withValue(Data.MIMETYPE, MIMETYPE_NUMBER).withValue(Data.DATA1, contactNumber)
-                .build());
-
-        /* Insert capabilities if supported */
-        Capabilities capabilities = info.getCapabilities();
-        if (capabilities.isFileTransferMsrpSupported()) {
-            ops.add(createMimeTypeForContact(rawContactRefIms, contact,
-                    MIMETYPE_CAPABILITY_FILE_TRANSFER));
-        }
-        if (capabilities.isImageSharingSupported()) {
-            ops.add(createMimeTypeForContact(rawContactRefIms, contact,
-                    MIMETYPE_CAPABILITY_IMAGE_SHARE));
-        }
-        if (capabilities.isImSessionSupported()) {
-            ops.add(createMimeTypeForContact(rawContactRefIms, contact,
-                    MIMETYPE_CAPABILITY_IM_SESSION));
-        }
-        if (capabilities.isVideoSharingSupported()) {
-            ops.add(createMimeTypeForContact(rawContactRefIms, contact,
-                    MIMETYPE_CAPABILITY_VIDEO_SHARE));
-        }
-        if (capabilities.isIPVoiceCallSupported()) {
-            ops.add(createMimeTypeForContact(rawContactRefIms, contact,
-                    MIMETYPE_CAPABILITY_IP_VOICE_CALL));
-        }
-        if (capabilities.isIPVideoCallSupported()) {
-            ops.add(createMimeTypeForContact(rawContactRefIms, contact,
-                    MIMETYPE_CAPABILITY_IP_VIDEO_CALL));
-        }
-        if (capabilities.isGeolocationPushSupported()) {
-            ops.add(createMimeTypeForContact(rawContactRefIms, contact,
-                    MIMETYPE_CAPABILITY_GEOLOCATION_PUSH));
-        }
-        /* Extensions */
-        Set<String> exts = info.getCapabilities().getSupportedExtensions();
-        if (exts.size() > 0) {
+        try {
+            String contactNumber = contact.toString();
+            if (sLogger.isActivated()) {
+                sLogger.debug("Create RCS rawcontact for '" + contactNumber
+                        + "' associated to rawContactId " + rawContactId);
+            }
+            ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+            /* Create raw contact for RCS */
+            int rawContactRefIms = ops.size();
             ops.add(ContentProviderOperation
-                    .newInsert(Data.CONTENT_URI)
-                    .withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
-                    .withValue(Data.MIMETYPE, MIMETYPE_CAPABILITY_EXTENSIONS)
-                    .withValue(Data.DATA1, contactNumber)
-                    .withValue(Data.DATA2, ServiceExtensionManager.getExtensions(exts))
-                    .withValue(Data.DATA3,
-                            getMimeTypeDescriptionDetails(MIMETYPE_CAPABILITY_EXTENSIONS)).build());
-        }
+                    .newInsert(RawContacts.CONTENT_URI)
+                    .withValue(RawContacts.AGGREGATION_MODE, RawContacts.AGGREGATION_MODE_SUSPENDED)
+                    .withValue(RawContacts.ACCOUNT_TYPE, RcsAccountManager.ACCOUNT_MANAGER_TYPE)
+                    .withValue(RawContacts.ACCOUNT_NAME,
+                            mContext.getString(R.string.rcs_core_account_username)).build());
 
-        ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
-                .withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
-                .withValue(Data.MIMETYPE, MIMETYPE_REGISTRATION_STATE)
-                .withValue(Data.DATA1, contactNumber)
-                .withValue(Data.DATA2, info.getRegistrationState().toInt()).build());
-
-        ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
-                .withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
-                .withValue(Data.MIMETYPE, MIMETYPE_BLOCKING_STATE)
-                .withValue(Data.DATA1, contactNumber)
-                .withValue(Data.DATA2, info.getBlockingState().toInt()).build());
-
-        ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
-                .withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
-                .withValue(Data.MIMETYPE, MIMETYPE_BLOCKING_TIMESTAMP)
-                .withValue(Data.DATA1, contactNumber)
-                .withValue(Data.DATA2, info.getBlockingTimestamp()).build());
-
-        /* Add raw contact as membership to RCS group */
-        long rcsGroupId = getRcsGroupIdFromContactsContractGroups();
-        if (INVALID_ID != rcsGroupId) {
+            /* Insert number */
             ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
                     .withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
-                    .withValue(Data.MIMETYPE, GroupMembership.CONTENT_ITEM_TYPE)
-                    .withValue(GroupMembership.GROUP_ROW_ID, rcsGroupId).build());
-        }
+                    .withValue(Data.MIMETYPE, MIMETYPE_NUMBER).withValue(Data.DATA1, contactNumber)
+                    .build());
 
-        /* Create the RCS raw contact and get its ID */
-        long rcsRawContactId = INVALID_ID;
-        try {
-            ContentProviderResult[] results;
-            results = mContentResolver.applyBatch(ContactsContract.AUTHORITY, ops);
-            rcsRawContactId = ContentUris.parseId(results[rawContactRefIms].uri);
-        } catch (RemoteException e) {
-        } catch (OperationApplicationException e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Operation exception", e);
+            /* Insert capabilities if supported */
+            Capabilities capabilities = info.getCapabilities();
+            if (capabilities.isFileTransferMsrpSupported()) {
+                ops.add(createMimeTypeForContact(rawContactRefIms, contact,
+                        MIMETYPE_CAPABILITY_FILE_TRANSFER));
             }
-            return INVALID_ID;
-        }
-        /* Aggregate the newly RCS raw contact and the raw contact that has the phone number */
-        ops.clear();
-        ops.add(ContentProviderOperation
-                .newUpdate(ContactsContract.AggregationExceptions.CONTENT_URI)
-                .withValue(AggregationExceptions.TYPE, AggregationExceptions.TYPE_KEEP_TOGETHER)
-                .withValue(AggregationExceptions.RAW_CONTACT_ID1, rcsRawContactId)
-                .withValue(AggregationExceptions.RAW_CONTACT_ID2, rawContactId).build());
-        try {
+            if (capabilities.isImageSharingSupported()) {
+                ops.add(createMimeTypeForContact(rawContactRefIms, contact,
+                        MIMETYPE_CAPABILITY_IMAGE_SHARE));
+            }
+            if (capabilities.isImSessionSupported()) {
+                ops.add(createMimeTypeForContact(rawContactRefIms, contact,
+                        MIMETYPE_CAPABILITY_IM_SESSION));
+            }
+            if (capabilities.isVideoSharingSupported()) {
+                ops.add(createMimeTypeForContact(rawContactRefIms, contact,
+                        MIMETYPE_CAPABILITY_VIDEO_SHARE));
+            }
+            if (capabilities.isIPVoiceCallSupported()) {
+                ops.add(createMimeTypeForContact(rawContactRefIms, contact,
+                        MIMETYPE_CAPABILITY_IP_VOICE_CALL));
+            }
+            if (capabilities.isIPVideoCallSupported()) {
+                ops.add(createMimeTypeForContact(rawContactRefIms, contact,
+                        MIMETYPE_CAPABILITY_IP_VIDEO_CALL));
+            }
+            if (capabilities.isGeolocationPushSupported()) {
+                ops.add(createMimeTypeForContact(rawContactRefIms, contact,
+                        MIMETYPE_CAPABILITY_GEOLOCATION_PUSH));
+            }
+            /* Extensions */
+            Set<String> exts = info.getCapabilities().getSupportedExtensions();
+            if (exts.size() > 0) {
+                ops.add(ContentProviderOperation
+                        .newInsert(Data.CONTENT_URI)
+                        .withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
+                        .withValue(Data.MIMETYPE, MIMETYPE_CAPABILITY_EXTENSIONS)
+                        .withValue(Data.DATA1, contactNumber)
+                        .withValue(Data.DATA2, ServiceExtensionManager.getExtensions(exts))
+                        .withValue(Data.DATA3,
+                                getMimeTypeDescriptionDetails(MIMETYPE_CAPABILITY_EXTENSIONS))
+                        .build());
+            }
+
+            ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
+                    .withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
+                    .withValue(Data.MIMETYPE, MIMETYPE_REGISTRATION_STATE)
+                    .withValue(Data.DATA1, contactNumber)
+                    .withValue(Data.DATA2, info.getRegistrationState().toInt()).build());
+
+            ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
+                    .withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
+                    .withValue(Data.MIMETYPE, MIMETYPE_BLOCKING_STATE)
+                    .withValue(Data.DATA1, contactNumber)
+                    .withValue(Data.DATA2, info.getBlockingState().toInt()).build());
+
+            ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
+                    .withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
+                    .withValue(Data.MIMETYPE, MIMETYPE_BLOCKING_TIMESTAMP)
+                    .withValue(Data.DATA1, contactNumber)
+                    .withValue(Data.DATA2, info.getBlockingTimestamp()).build());
+
+            /* Add raw contact as membership to RCS group */
+            long rcsGroupId = getRcsGroupIdFromContactsContractGroups();
+            if (INVALID_ID != rcsGroupId) {
+                ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
+                        .withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
+                        .withValue(Data.MIMETYPE, GroupMembership.CONTENT_ITEM_TYPE)
+                        .withValue(GroupMembership.GROUP_ROW_ID, rcsGroupId).build());
+            }
+            ContentProviderResult[] results = mContentResolver.applyBatch(
+                    ContactsContract.AUTHORITY, ops);
+            long rcsRawContactId = ContentUris.parseId(results[rawContactRefIms].uri);
+
+            /* Aggregate the newly RCS raw contact and the raw contact that has the phone number */
+            ops.clear();
+            ops.add(ContentProviderOperation
+                    .newUpdate(ContactsContract.AggregationExceptions.CONTENT_URI)
+                    .withValue(AggregationExceptions.TYPE, AggregationExceptions.TYPE_KEEP_TOGETHER)
+                    .withValue(AggregationExceptions.RAW_CONTACT_ID1, rcsRawContactId)
+                    .withValue(AggregationExceptions.RAW_CONTACT_ID2, rawContactId).build());
             mContentResolver.applyBatch(ContactsContract.AUTHORITY, ops);
             /* Add to aggregation data provider */
             ContentValues values = new ContentValues();
@@ -2148,19 +2142,16 @@ public final class ContactManager {
             values.put(AggregationData.KEY_RCS_RAW_CONTACT_ID, rcsRawContactId);
             values.put(AggregationData.KEY_RCS_NUMBER, contactNumber);
             mLocalContentResolver.insert(AggregationData.CONTENT_URI, values);
+            return rcsRawContactId;
+
         } catch (RemoteException e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Remote exception", e);
-            }
-            return INVALID_ID;
+            throw new ContactManagerException(
+                    "Unable to apply batch updates for contact :".concat(contact.toString()), e);
 
         } catch (OperationApplicationException e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Operation exception", e);
-            }
-            return INVALID_ID;
+            throw new ContactManagerException(
+                    "Unable to apply batch updates for contact :".concat(contact.toString()), e);
         }
-        return rcsRawContactId;
     }
 
     /**
@@ -2191,83 +2182,73 @@ public final class ContactManager {
      * 
      * @return the rawContactId of the newly created contact or INVALID_ID is social presence is not
      *         supported or creation failed
+     * @throws ContactManagerException
      */
-    public long createMyContact() {
-        if (!mRcsSettings.isSocialPresenceSupported()) {
-            return INVALID_ID;
-        }
-        /* Check if IMS account exists before continue */
-        AccountManager am = AccountManager.get(mContext);
-        if (am.getAccountsByType(RcsAccountManager.ACCOUNT_MANAGER_TYPE).length == 0) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Could not create \"Me\" contact, no RCS account found");
+    public long createMyContact() throws ContactManagerException {
+        try {
+            if (!mRcsSettings.isSocialPresenceSupported()) {
+                return INVALID_ID;
             }
-            throw new IllegalStateException("No RCS account found");
-        }
-        /* Check if RCS raw contact for "Me" does not already exist */
-        long imsRawContactId = getRawContactIdForMe();
+            /* Check if RCS raw contact for "Me" does not already exist */
+            long imsRawContactId = getRawContactIdForMe();
 
-        if (INVALID_ID != imsRawContactId) {
+            if (INVALID_ID != imsRawContactId) {
+                if (sLogger.isActivated()) {
+                    sLogger.error("\"Me\" contact already exists, no need to recreate");
+                }
+                return imsRawContactId;
+            }
             if (sLogger.isActivated()) {
-                sLogger.error("\"Me\" contact already exists, no need to recreate");
+                sLogger.error("\"Me\" contact does not already exists, creating it");
             }
-            return imsRawContactId;
-        }
-        if (sLogger.isActivated()) {
-            sLogger.error("\"Me\" contact does not already exists, creating it");
-        }
-        ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
-        /* Create raw contact for RCS */
-        int rawContactRefIms = ops.size();
-        ops.add(ContentProviderOperation
-                .newInsert(RawContacts.CONTENT_URI)
-                .withValue(RawContacts.ACCOUNT_TYPE, RcsAccountManager.ACCOUNT_MANAGER_TYPE)
-                .withValue(RawContacts.ACCOUNT_NAME,
-                        mContext.getString(R.string.rcs_core_account_username))
-                .withValue(RawContacts.SOURCE_ID, MYSELF)
-                .withValue(RawContacts.AGGREGATION_MODE, RawContacts.AGGREGATION_MODE_DISABLED)
-                .build());
-        /* Set name */
-        ops.add(ContentProviderOperation
-                .newInsert(Data.CONTENT_URI)
-                .withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
-                .withValue(Data.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE)
-                .withValue(StructuredName.DISPLAY_NAME,
-                        mContext.getString(R.string.rcs_core_my_profile)).build());
-        /* Add raw contact as membership to RCS group */
-        long rcsGroupId = getRcsGroupIdFromContactsContractGroups();
-        if (INVALID_ID != rcsGroupId) {
-            ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
+            ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+            /* Create raw contact for RCS */
+            int rawContactRefIms = ops.size();
+            ops.add(ContentProviderOperation
+                    .newInsert(RawContacts.CONTENT_URI)
+                    .withValue(RawContacts.ACCOUNT_TYPE, RcsAccountManager.ACCOUNT_MANAGER_TYPE)
+                    .withValue(RawContacts.ACCOUNT_NAME,
+                            mContext.getString(R.string.rcs_core_account_username))
+                    .withValue(RawContacts.SOURCE_ID, MYSELF)
+                    .withValue(RawContacts.AGGREGATION_MODE, RawContacts.AGGREGATION_MODE_DISABLED)
+                    .build());
+            /* Set name */
+            ops.add(ContentProviderOperation
+                    .newInsert(Data.CONTENT_URI)
                     .withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
-                    .withValue(Data.MIMETYPE, GroupMembership.CONTENT_ITEM_TYPE)
-                    .withValue(GroupMembership.GROUP_ROW_ID, rcsGroupId).build());
-        }
-        try {
-            ContentProviderResult[] results;
-            results = mContentResolver.applyBatch(ContactsContract.AUTHORITY, ops);
-            imsRawContactId = ContentUris.parseId(results[rawContactRefIms].uri);
-        } catch (RemoteException e) {
-            imsRawContactId = INVALID_ID;
-        } catch (OperationApplicationException e) {
-            imsRawContactId = INVALID_ID;
-        }
-        ops.clear();
-        /* Set default free text to null and availability to online */
-        List<ContentProviderOperation> registrationStateOps = modifyContactRegistrationStateForMyself(
-                imsRawContactId, RegistrationState.ONLINE, RegistrationState.UNKNOWN, "", "");
-        for (ContentProviderOperation registrationStateOp : registrationStateOps) {
-            if (registrationStateOp != null) {
-                ops.add(registrationStateOp);
+                    .withValue(Data.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE)
+                    .withValue(StructuredName.DISPLAY_NAME,
+                            mContext.getString(R.string.rcs_core_my_profile)).build());
+            /* Add raw contact as membership to RCS group */
+            long rcsGroupId = getRcsGroupIdFromContactsContractGroups();
+            if (INVALID_ID != rcsGroupId) {
+                ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
+                        .withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
+                        .withValue(Data.MIMETYPE, GroupMembership.CONTENT_ITEM_TYPE)
+                        .withValue(GroupMembership.GROUP_ROW_ID, rcsGroupId).build());
             }
-        }
-        try {
+            ContentProviderResult[] results = mContentResolver.applyBatch(
+                    ContactsContract.AUTHORITY, ops);
+            imsRawContactId = ContentUris.parseId(results[rawContactRefIms].uri);
+
+            ops.clear();
+            /* Set default free text to null and availability to online */
+            List<ContentProviderOperation> registrationStateOps = modifyContactRegistrationStateForMyself(
+                    imsRawContactId, RegistrationState.ONLINE, RegistrationState.UNKNOWN, "", "");
+            for (ContentProviderOperation registrationStateOp : registrationStateOps) {
+                if (registrationStateOp != null) {
+                    ops.add(registrationStateOp);
+                }
+            }
             mContentResolver.applyBatch(ContactsContract.AUTHORITY, ops);
+            return imsRawContactId;
+
         } catch (RemoteException e) {
-            imsRawContactId = INVALID_ID;
+            throw new ContactManagerException("Unable to apply batch updates!", e);
+
         } catch (OperationApplicationException e) {
-            imsRawContactId = INVALID_ID;
+            throw new ContactManagerException("Unable to apply batch updates!", e);
         }
-        return imsRawContactId;
     }
 
     /**
@@ -2674,8 +2655,10 @@ public final class ContactManager {
 
     /**
      * Update UI strings when device's locale has changed
+     * 
+     * @throws ContactManagerException
      */
-    public void updateStrings() {
+    public void updateStrings() throws ContactManagerException {
         ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
         /* Update My profile display name */
         ContentValues values = new ContentValues();
@@ -2748,13 +2731,10 @@ public final class ContactManager {
             try {
                 mContentResolver.applyBatch(ContactsContract.AUTHORITY, ops);
             } catch (RemoteException e) {
-                if (sLogger.isActivated()) {
-                    sLogger.error("Something went wrong when updating the database strings", e);
-                }
+                throw new ContactManagerException("Unable to apply batch updates !", e);
+
             } catch (OperationApplicationException e) {
-                if (sLogger.isActivated()) {
-                    sLogger.error("Something went wrong when updating the database strings", e);
-                }
+                throw new ContactManagerException("Unable to apply batch updates !", e);
             }
         }
     }
@@ -2766,8 +2746,10 @@ public final class ContactManager {
      * This also creates a RCS raw contact for numbers that are present, have RCS raw contact but
      * not on all raw contacts (typical example: a RCS number is present in the address book and
      * another contact is created using the same number)
+     * 
+     * @throws ContactManagerException
      */
-    public void cleanRCSEntries() {
+    public void cleanRCSEntries() throws ContactManagerException {
         synchronized (mContactInfoCache) {
             cleanRCSRawContactsInAB();
             cleanEntriesInRcsContactProvider();
@@ -2776,13 +2758,10 @@ public final class ContactManager {
 
     /**
      * Clean Address Book
+     * 
+     * @throws ContactManagerException
      */
-    private void cleanRCSRawContactsInAB() {
-        /*
-         * Get all RCS raw contacts id Delete RCS Entry where number is not in the address book
-         * anymore.
-         */
-        ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+    private void cleanRCSRawContactsInAB() throws ContactManagerException {
         Cursor cursor = null;
         try {
             cursor = mContentResolver.query(Data.CONTENT_URI, PROJ_RAW_CONTACT_DATA1,
@@ -2793,6 +2772,11 @@ public final class ContactManager {
             }
             int contactColumnIdx = cursor.getColumnIndexOrThrow(Data.RAW_CONTACT_ID);
             int data1ColumnIdx = cursor.getColumnIndexOrThrow(Data.DATA1);
+            /*
+             * Get all RCS raw contacts id Delete RCS Entry where number is not in the address book
+             * anymore.
+             */
+            ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
             do {
                 String phoneNumber = cursor.getString(data1ColumnIdx);
                 PhoneNumber number = ContactUtil.getValidPhoneNumberFromAndroid(phoneNumber);
@@ -2816,22 +2800,18 @@ public final class ContactManager {
                             });
                 }
             } while (cursor.moveToNext());
+            if (!ops.isEmpty()) {
+                /* Do the actual database modifications */
+                mContentResolver.applyBatch(ContactsContract.AUTHORITY, ops);
+            }
+        } catch (RemoteException e) {
+            throw new ContactManagerException("Unable to apply batch updates !", e);
+
+        } catch (OperationApplicationException e) {
+            throw new ContactManagerException("Unable to apply batch updates !", e);
+
         } finally {
             CursorUtil.close(cursor);
-        }
-        if (!ops.isEmpty()) {
-            /* Do the actual database modifications */
-            try {
-                mContentResolver.applyBatch(ContactsContract.AUTHORITY, ops);
-            } catch (RemoteException e) {
-                if (sLogger.isActivated()) {
-                    sLogger.error("Something went wrong when updating the database strings", e);
-                }
-            } catch (OperationApplicationException e) {
-                if (sLogger.isActivated()) {
-                    sLogger.error("Something went wrong when updating the database strings", e);
-                }
-            }
         }
     }
 
@@ -2967,9 +2947,10 @@ public final class ContactManager {
      * @param contact Contact ID
      * @param state Blocking state
      * @throws ContactManagerException exception thrown if update operation has failed
+     * @throws IOException
      */
     public void setBlockingState(ContactId contact, BlockingState state)
-            throws ContactManagerException {
+            throws ContactManagerException, IOException {
         synchronized (mContactInfoCache) {
             /* Get the current information on this contact */
             ContactInfo oldInfo = getContactInfoInternal(contact);
@@ -3052,9 +3033,10 @@ public final class ContactManager {
      * 
      * @param contactInfo contact to aggregate with RCS raw contact. The contact must be RCS.
      * @throws ContactManagerException thrown is contact information setting fails
+     * @throws IOException
      */
     public void aggregateContactWithRcsRawContact(ContactInfo contactInfo)
-            throws ContactManagerException {
+            throws ContactManagerException, IOException {
         synchronized (mContactInfoCache) {
             /*
              * if RCS contact does not exist, it will be created and RCS raw contact also. if RCS
@@ -3079,6 +3061,7 @@ public final class ContactManager {
                 return ContactManager.INVALID_ID;
             }
             return cursor.getLong(cursor.getColumnIndexOrThrow(Groups._ID));
+
         } finally {
             CursorUtil.close(cursor);
         }

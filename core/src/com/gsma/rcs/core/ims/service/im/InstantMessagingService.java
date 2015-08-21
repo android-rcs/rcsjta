@@ -74,6 +74,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.msrp.OriginatingMsrpFileSha
 import com.gsma.rcs.core.ims.service.im.filetransfer.msrp.TerminatingMsrpFileSharingSession;
 import com.gsma.rcs.core.ims.service.upload.FileUploadSession;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -727,105 +728,116 @@ public class InstantMessagingService extends ImsService {
      */
     public void receiveMsrpFileTransferInvitation(SipRequest invite, long timestamp)
             throws SipPayloadException, SipNetworkException {
-        boolean logActivated = sLogger.isActivated();
-        String assertedId = SipUtils.getAssertedIdentity(invite);
-        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(assertedId);
-        if (number == null) {
-            if (logActivated) {
-                sLogger.error("Discard MSRP FileTransfer Invitation: invalid remote ID '"
-                        + assertedId + "'");
+        try {
+            boolean logActivated = sLogger.isActivated();
+            String assertedId = SipUtils.getAssertedIdentity(invite);
+            PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(assertedId);
+            if (number == null) {
+                if (logActivated) {
+                    sLogger.error("Discard MSRP FileTransfer Invitation: invalid remote ID '"
+                            + assertedId + "'");
+                }
+                sendErrorResponse(invite, Response.DECLINE);
+                return;
+
             }
-            sendErrorResponse(invite, Response.DECLINE);
-            return;
-
-        }
-        ContactId remote = ContactUtil.createContactIdFromValidatedData(number);
-        if (logActivated) {
-            sLogger.debug("Receive a file transfer session invitation from ".concat(remote
-                    .toString()));
-        }
-        String displayName = SipUtils.getDisplayNameFromUri(invite.getFrom());
-        /*
-         * Update the remote contact's capabilities to include at least MSRP FT capabilities as we
-         * have just received a MSRP file transfer session invitation from this contact so he/she
-         * must at least have this capability. We do not need any capability exchange response to
-         * determine that.
-         */
-        mContactManager.mergeContactCapabilities(remote, new CapabilitiesBuilder()
-                .setFileTransferMsrp(true).setTimestampOfLastResponse(timestamp).build(),
-                RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE, displayName);
-
-        /**
-         * Since in MSRP communication we do not have a timestampSent to be extracted from the
-         * payload then we need to fake that by using the local timestamp even if this is not the
-         * real proper timestamp from the remote side in this case.
-         */
-        long timestampSent = timestamp;
-        if (mContactManager.isBlockedForContact(remote)) {
+            ContactId remote = ContactUtil.createContactIdFromValidatedData(number);
             if (logActivated) {
-                sLogger.debug("Contact " + remote
-                        + " is blocked: automatically reject the file transfer invitation");
+                sLogger.debug("Receive a file transfer session invitation from ".concat(remote
+                        .toString()));
             }
-            handleMsrpFileTransferInvitationRejected(invite, remote,
-                    FileTransfer.ReasonCode.REJECTED_SPAM, timestamp, timestampSent);
-
-            sendErrorResponse(invite, Response.DECLINE);
-            return;
-        }
-
-        if (!isFileTransferSessionAvailable()) {
-            if (logActivated) {
-                sLogger.debug("The max number of file transfer sessions is achieved: reject the invitation from "
-                        .concat(remote.toString()));
-            }
-            handleMsrpFileTransferInvitationRejected(invite, remote,
-                    FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp, timestampSent);
-
-            sendErrorResponse(invite, Response.DECLINE);
-            return;
-        }
-        /*
-         * Reject if file is too big or size exceeds device storage capacity. This control should be
-         * done on UI. It is done after end user accepts invitation to enable prior handling by the
-         * application.
-         */
-        MmContent content = ContentManager.createMmContentFromSdp(invite, mRcsSettings);
-        FileSharingError error = FileSharingSession.isFileCapacityAcceptable(content.getSize(),
-                mRcsSettings);
-        if (error != null) {
+            String displayName = SipUtils.getDisplayNameFromUri(invite.getFrom());
             /*
-             * Extract of GSMA specification: If the file is bigger than FT MAX SIZE, a warning
-             * message is displayed when trying to send or receive a file larger than the mentioned
-             * limit and the transfer will be cancelled (that is at protocol level, the SIP INVITE
-             * request will never be sent or an automatic rejection response SIP 403 Forbidden with
-             * a Warning header set to 133 Size exceeded will be sent by the entity that detects
-             * that the file size is too big to the other end depending on the scenario).
+             * Update the remote contact's capabilities to include at least MSRP FT capabilities as
+             * we have just received a MSRP file transfer session invitation from this contact so
+             * he/she must at least have this capability. We do not need any capability exchange
+             * response to determine that.
              */
-            send403Forbidden(invite, sSizeExceededMsg);
-            int errorCode = error.getErrorCode();
-            switch (errorCode) {
-                case FileSharingError.MEDIA_SIZE_TOO_BIG:
-                    handleMsrpFileTransferInvitationRejected(invite, remote,
-                            FileTransfer.ReasonCode.REJECTED_MAX_SIZE, timestamp, timestampSent);
-                    break;
-                case FileSharingError.NOT_ENOUGH_STORAGE_SPACE:
-                    handleMsrpFileTransferInvitationRejected(invite, remote,
-                            FileTransfer.ReasonCode.REJECTED_LOW_SPACE, timestamp, timestampSent);
-                    break;
-                default:
-                    sLogger.error("Unexpected error while receiving MSRP file transfer invitation"
-                            .concat(Integer.toString(errorCode)));
+            mContactManager.mergeContactCapabilities(remote, new CapabilitiesBuilder()
+                    .setFileTransferMsrp(true).setTimestampOfLastResponse(timestamp).build(),
+                    RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE, displayName);
+
+            /**
+             * Since in MSRP communication we do not have a timestampSent to be extracted from the
+             * payload then we need to fake that by using the local timestamp even if this is not
+             * the real proper timestamp from the remote side in this case.
+             */
+            long timestampSent = timestamp;
+            if (mContactManager.isBlockedForContact(remote)) {
+                if (logActivated) {
+                    sLogger.debug("Contact " + remote
+                            + " is blocked: automatically reject the file transfer invitation");
+                }
+                handleMsrpFileTransferInvitationRejected(invite, remote,
+                        FileTransfer.ReasonCode.REJECTED_SPAM, timestamp, timestampSent);
+
+                sendErrorResponse(invite, Response.DECLINE);
+                return;
             }
-            return;
+
+            if (!isFileTransferSessionAvailable()) {
+                if (logActivated) {
+                    sLogger.debug("The max number of file transfer sessions is achieved: reject the invitation from "
+                            .concat(remote.toString()));
+                }
+                handleMsrpFileTransferInvitationRejected(invite, remote,
+                        FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp,
+                        timestampSent);
+
+                sendErrorResponse(invite, Response.DECLINE);
+                return;
+            }
+            /*
+             * Reject if file is too big or size exceeds device storage capacity. This control
+             * should be done on UI. It is done after end user accepts invitation to enable prior
+             * handling by the application.
+             */
+            MmContent content = ContentManager.createMmContentFromSdp(invite, mRcsSettings);
+            FileSharingError error = FileSharingSession.isFileCapacityAcceptable(content.getSize(),
+                    mRcsSettings);
+            if (error != null) {
+                /*
+                 * Extract of GSMA specification: If the file is bigger than FT MAX SIZE, a warning
+                 * message is displayed when trying to send or receive a file larger than the
+                 * mentioned limit and the transfer will be cancelled (that is at protocol level,
+                 * the SIP INVITE request will never be sent or an automatic rejection response SIP
+                 * 403 Forbidden with a Warning header set to 133 Size exceeded will be sent by the
+                 * entity that detects that the file size is too big to the other end depending on
+                 * the scenario).
+                 */
+                send403Forbidden(invite, sSizeExceededMsg);
+                int errorCode = error.getErrorCode();
+                switch (errorCode) {
+                    case FileSharingError.MEDIA_SIZE_TOO_BIG:
+                        handleMsrpFileTransferInvitationRejected(invite, remote,
+                                FileTransfer.ReasonCode.REJECTED_MAX_SIZE, timestamp, timestampSent);
+                        break;
+                    case FileSharingError.NOT_ENOUGH_STORAGE_SPACE:
+                        handleMsrpFileTransferInvitationRejected(invite, remote,
+                                FileTransfer.ReasonCode.REJECTED_LOW_SPACE, timestamp,
+                                timestampSent);
+                        break;
+                    default:
+                        sLogger.error("Unexpected error while receiving MSRP file transfer invitation"
+                                .concat(Integer.toString(errorCode)));
+                }
+                return;
+            }
+
+            FileSharingSession session = new TerminatingMsrpFileSharingSession(this, invite,
+                    remote, mRcsSettings, timestamp, timestampSent, mContactManager);
+
+            mCore.getListener().handleFileTransferInvitation(session, false, remote,
+                    session.getRemoteDisplayName(), FileTransferData.UNKNOWN_EXPIRATION);
+            session.startSession();
+
+        } catch (ContactManagerException e) {
+            throw new SipPayloadException("Failed to receive a file transfer session invitation!",
+                    e);
+        } catch (IOException e) {
+            throw new SipNetworkException("Failed to receive a file transfer session invitation!",
+                    e);
         }
-
-        FileSharingSession session = new TerminatingMsrpFileSharingSession(this, invite, remote,
-                mRcsSettings, timestamp, timestampSent, mContactManager);
-
-        mCore.getListener().handleFileTransferInvitation(session, false, remote,
-                session.getRemoteDisplayName(), FileTransferData.UNKNOWN_EXPIRATION);
-
-        session.startSession();
     }
 
     /**
@@ -855,130 +867,141 @@ public class InstantMessagingService extends ImsService {
      */
     public void receiveOne2OneChatSession(SipRequest invite, long timestamp)
             throws SipPayloadException, SipNetworkException {
-        boolean logActivated = sLogger.isActivated();
-        /*
-         * Invitation will be rejected if it is OMA SIMPLE IM solution but it doesn't contains first
-         * message. Reference to spec: Rich Communication Suite 5.1 Advanced Communications Services
-         * and Client Specification Version 4.0 Page 187 3.3.4.2 Technical Realization of 1-to-1
-         * Chat features when using OMA SIMPLE IM At the technical level the 1-to-1 Chat service
-         * implemented using OMA SIMPLE IM extends the concepts described in section 3.3.4.1 with
-         * the following concepts: For OMA SIMPLE IM, first message is always included in a
-         * CPIM/IMDN wrapper carried in the SIP INVITE request. So the configuration parameter FIRST
-         * MSG IN INVITE defined in Table 80 is always set to 1.
-         */
-        if (!ChatUtils.isContainingFirstMessage(invite)) {
-            ImMsgTech mode = mRcsSettings.getImMsgTech();
-            switch (mode) {
-                case CPM:
-                    /* Only reject the invitation when FirstMessageInInvite is true. */
-                    if (mRcsSettings.isFirstMessageInInvite()) {
+        try {
+            boolean logActivated = sLogger.isActivated();
+            /*
+             * Invitation will be rejected if it is OMA SIMPLE IM solution but it doesn't contains
+             * first message. Reference to spec: Rich Communication Suite 5.1 Advanced
+             * Communications Services and Client Specification Version 4.0 Page 187 3.3.4.2
+             * Technical Realization of 1-to-1 Chat features when using OMA SIMPLE IM At the
+             * technical level the 1-to-1 Chat service implemented using OMA SIMPLE IM extends the
+             * concepts described in section 3.3.4.1 with the following concepts: For OMA SIMPLE IM,
+             * first message is always included in a CPIM/IMDN wrapper carried in the SIP INVITE
+             * request. So the configuration parameter FIRST MSG IN INVITE defined in Table 80 is
+             * always set to 1.
+             */
+            if (!ChatUtils.isContainingFirstMessage(invite)) {
+                ImMsgTech mode = mRcsSettings.getImMsgTech();
+                switch (mode) {
+                    case CPM:
+                        /* Only reject the invitation when FirstMessageInInvite is true. */
+                        if (mRcsSettings.isFirstMessageInInvite()) {
+                            if (logActivated) {
+                                sLogger.error("Currently in Cpm mode, Reject 1-1 chat invition due to it doesn't"
+                                        .concat("carry first message."));
+                            }
+                            sendErrorResponse(invite, Response.DECLINE);
+                            return;
+                        }
+                    case SIMPLE_IM:
                         if (logActivated) {
-                            sLogger.error("Currently in Cpm mode, Reject 1-1 chat invition due to it doesn't"
+                            sLogger.error("Currently in SIMPLE_IM mode, Reject 1-1 chat invition due to it doesn't"
                                     .concat("carry first message."));
                         }
                         sendErrorResponse(invite, Response.DECLINE);
                         return;
-                    }
-                case SIMPLE_IM:
-                    if (logActivated) {
-                        sLogger.error("Currently in SIMPLE_IM mode, Reject 1-1 chat invition due to it doesn't"
-                                .concat("carry first message."));
-                    }
-                    sendErrorResponse(invite, Response.DECLINE);
-                    return;
-                default:
-                    if (sLogger.isActivated()) {
-                        sLogger.error("Unexpected ImMsgTech code:".concat(String.valueOf(mode)));
-                    }
-                    return;
-            }
-        }
-
-        String referredId = ChatUtils.getReferredIdentityAsContactUri(invite);
-        ContactId remote = ChatUtils.getReferredIdentityAsContactId(invite);
-        String displayName = SipUtils.getDisplayNameFromUri(invite.getFrom());
-        if (remote == null) {
-            if (logActivated) {
-                sLogger.error("Discard One2OneChatSession: invalid remote ID '" + referredId + "'");
-            }
-            sendErrorResponse(invite, Response.BUSY_HERE);
-            return;
-
-        }
-        if (logActivated) {
-            sLogger.debug("Receive a 1-1 chat session invitation from ".concat(remote.toString()));
-        }
-        /*
-         * Update the remote contact's capabilities to include at least IM session capabilities as
-         * we have just received a one-one chat session invitation from this contact so he/she must
-         * at least have this capability. We do not need any capability exchange response to
-         * determine that.
-         */
-        mContactManager.mergeContactCapabilities(remote,
-                new CapabilitiesBuilder().setImSession(true).setTimestampOfLastResponse(timestamp)
-                        .build(), RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE, displayName);
-
-        ChatMessage firstMsg = ChatUtils.getFirstMessage(invite, timestamp);
-        if (mContactManager.isBlockedForContact(remote)) {
-            if (logActivated) {
-                sLogger.debug("Contact " + remote
-                        + " is blocked: automatically reject the chat invitation");
-            }
-
-            if (firstMsg != null && !mMessagingLog.isMessagePersisted(firstMsg.getMessageId())) {
-                mMessagingLog.addOneToOneSpamMessage(firstMsg);
-            }
-
-            if (mImdnManager.isDeliveryDeliveredReportsEnabled()
-                    && ChatUtils.isImdnDeliveredRequested(invite)) {
-                String msgId = ChatUtils.getMessageId(invite);
-                if (msgId != null) {
-                    String remoteInstanceId = null;
-                    ContactHeader inviteContactHeader = (ContactHeader) invite
-                            .getHeader(ContactHeader.NAME);
-                    if (inviteContactHeader != null) {
-                        remoteInstanceId = inviteContactHeader
-                                .getParameter(SipUtils.SIP_INSTANCE_PARAM);
-                    }
-                    mImdnManager.sendMessageDeliveryStatusImmediately(remote.toString(), remote,
-                            msgId, ImdnDocument.DELIVERY_STATUS_DELIVERED, remoteInstanceId,
-                            timestamp);
+                    default:
+                        if (sLogger.isActivated()) {
+                            sLogger.error("Unexpected ImMsgTech code:".concat(String.valueOf(mode)));
+                        }
+                        return;
                 }
             }
 
-            sendErrorResponse(invite, Response.BUSY_HERE);
-            return;
-        }
+            String referredId = ChatUtils.getReferredIdentityAsContactUri(invite);
+            ContactId remote = ChatUtils.getReferredIdentityAsContactId(invite);
+            String displayName = SipUtils.getDisplayNameFromUri(invite.getFrom());
+            if (remote == null) {
+                if (logActivated) {
+                    sLogger.error("Discard One2OneChatSession: invalid remote ID '" + referredId
+                            + "'");
+                }
+                sendErrorResponse(invite, Response.BUSY_HERE);
+                return;
 
-        /*
-         * Save the message if it was not already persisted in the DB. We don't have to reject the
-         * session if the message was a duplicate one as the session rejection/keeping will be
-         * handled in TerminatingOneToOneChatSession.startSession() in an uniform way as according
-         * to the defined race conditions in the specification document.
-         */
-        if (firstMsg != null && !mMessagingLog.isMessagePersisted(firstMsg.getMessageId())) {
-            boolean imdnDisplayRequested = mImdnManager
-                    .isSendOneToOneDeliveryDisplayedReportsEnabled()
-                    && ChatUtils.isImdnDisplayedRequested(invite);
-            mMessagingLog.addIncomingOneToOneChatMessage(firstMsg, imdnDisplayRequested);
-        }
-
-        if (!isChatSessionAvailable()) {
+            }
             if (logActivated) {
-                sLogger.debug("The max number of chat sessions is achieved: reject the invitation from "
-                        .concat(remote.toString()));
+                sLogger.debug("Receive a 1-1 chat session invitation from ".concat(remote
+                        .toString()));
+            }
+            /*
+             * Update the remote contact's capabilities to include at least IM session capabilities
+             * as we have just received a one-one chat session invitation from this contact so
+             * he/she must at least have this capability. We do not need any capability exchange
+             * response to determine that.
+             */
+            mContactManager.mergeContactCapabilities(remote, new CapabilitiesBuilder()
+                    .setImSession(true).setTimestampOfLastResponse(timestamp).build(),
+                    RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE, displayName);
+
+            ChatMessage firstMsg = ChatUtils.getFirstMessage(invite, timestamp);
+            if (mContactManager.isBlockedForContact(remote)) {
+                if (logActivated) {
+                    sLogger.debug("Contact " + remote
+                            + " is blocked: automatically reject the chat invitation");
+                }
+
+                if (firstMsg != null && !mMessagingLog.isMessagePersisted(firstMsg.getMessageId())) {
+                    mMessagingLog.addOneToOneSpamMessage(firstMsg);
+                }
+
+                if (mImdnManager.isDeliveryDeliveredReportsEnabled()
+                        && ChatUtils.isImdnDeliveredRequested(invite)) {
+                    String msgId = ChatUtils.getMessageId(invite);
+                    if (msgId != null) {
+                        String remoteInstanceId = null;
+                        ContactHeader inviteContactHeader = (ContactHeader) invite
+                                .getHeader(ContactHeader.NAME);
+                        if (inviteContactHeader != null) {
+                            remoteInstanceId = inviteContactHeader
+                                    .getParameter(SipUtils.SIP_INSTANCE_PARAM);
+                        }
+                        mImdnManager.sendMessageDeliveryStatusImmediately(remote.toString(),
+                                remote, msgId, ImdnDocument.DELIVERY_STATUS_DELIVERED,
+                                remoteInstanceId, timestamp);
+                    }
+                }
+
+                sendErrorResponse(invite, Response.BUSY_HERE);
+                return;
             }
 
-            sendErrorResponse(invite, Response.BUSY_HERE);
-            return;
+            /*
+             * Save the message if it was not already persisted in the DB. We don't have to reject
+             * the session if the message was a duplicate one as the session rejection/keeping will
+             * be handled in TerminatingOneToOneChatSession.startSession() in an uniform way as
+             * according to the defined race conditions in the specification document.
+             */
+            if (firstMsg != null && !mMessagingLog.isMessagePersisted(firstMsg.getMessageId())) {
+                boolean imdnDisplayRequested = mImdnManager
+                        .isSendOneToOneDeliveryDisplayedReportsEnabled()
+                        && ChatUtils.isImdnDisplayedRequested(invite);
+                mMessagingLog.addIncomingOneToOneChatMessage(firstMsg, imdnDisplayRequested);
+            }
+
+            if (!isChatSessionAvailable()) {
+                if (logActivated) {
+                    sLogger.debug("The max number of chat sessions is achieved: reject the invitation from "
+                            .concat(remote.toString()));
+                }
+
+                sendErrorResponse(invite, Response.BUSY_HERE);
+                return;
+            }
+
+            TerminatingOneToOneChatSession session = new TerminatingOneToOneChatSession(this,
+                    invite, remote, mRcsSettings, mMessagingLog, firstMsg.getTimestamp(),
+                    mContactManager);
+
+            mCore.getListener().handleOneOneChatSessionInvitation(session);
+
+            session.startSession();
+        } catch (ContactManagerException e) {
+            throw new SipPayloadException("Failed to receive chat session invitation!", e);
+
+        } catch (IOException e) {
+            throw new SipNetworkException("Failed to receive chat session invitation!", e);
         }
-
-        TerminatingOneToOneChatSession session = new TerminatingOneToOneChatSession(this, invite,
-                remote, mRcsSettings, mMessagingLog, firstMsg.getTimestamp(), mContactManager);
-
-        mCore.getListener().handleOneOneChatSessionInvitation(session);
-
-        session.startSession();
     }
 
     /**
@@ -1019,81 +1042,93 @@ public class InstantMessagingService extends ImsService {
             throws SipPayloadException, SipNetworkException {
         boolean logActivated = sLogger.isActivated();
         ContactId contact = ChatUtils.getReferredIdentityAsContactId(invite);
-        if (logActivated) {
-            sLogger.debug("Receive an ad-hoc group chat session invitation from ".concat(contact
-                    .toString()));
-        }
-        String displayName = SipUtils.getDisplayNameFromUri(invite.getFrom());
-        /*
-         * Update the remote contact's capabilities to include at least IM session capabilities as
-         * we have just received a group chat session invitation from this contact so he/she must at
-         * least have this capability. We do not need any capability exchange response to determine
-         * that.
-         */
-        mContactManager.mergeContactCapabilities(contact,
-                new CapabilitiesBuilder().setImSession(true).setTimestampOfLastResponse(timestamp)
-                        .build(), RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE, displayName);
-
-        if (contact != null && mContactManager.isBlockedForContact(contact)) {
+        try {
             if (logActivated) {
-                sLogger.debug("Contact " + contact
-                        + " is blocked: automatically reject the chat invitation");
-            }
-
-            handleGroupChatInvitationRejected(invite, contact, GroupChat.ReasonCode.REJECTED_SPAM,
-                    timestamp);
-
-            sendErrorResponse(invite, Response.BUSY_HERE);
-            return;
-        }
-
-        if (!isChatSessionAvailable()) {
-            if (logActivated) {
-                sLogger.debug("The max number of chat sessions is achieved: reject the invitation from "
+                sLogger.debug("Receive an ad-hoc group chat session invitation from "
                         .concat(contact.toString()));
             }
+            String displayName = SipUtils.getDisplayNameFromUri(invite.getFrom());
+            /*
+             * Update the remote contact's capabilities to include at least IM session capabilities
+             * as we have just received a group chat session invitation from this contact so he/she
+             * must at least have this capability. We do not need any capability exchange response
+             * to determine that.
+             */
+            mContactManager.mergeContactCapabilities(contact, new CapabilitiesBuilder()
+                    .setImSession(true).setTimestampOfLastResponse(timestamp).build(),
+                    RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE, displayName);
 
-            handleGroupChatInvitationRejected(invite, contact,
-                    GroupChat.ReasonCode.REJECTED_MAX_CHATS, timestamp);
+            if (mContactManager.isBlockedForContact(contact)) {
+                if (logActivated) {
+                    sLogger.debug("Contact " + contact
+                            + " is blocked: automatically reject the chat invitation");
+                }
 
-            sendErrorResponse(invite, Response.BUSY_HERE);
-            return;
-        }
+                handleGroupChatInvitationRejected(invite, contact,
+                        GroupChat.ReasonCode.REJECTED_SPAM, timestamp);
 
-        /*
-         * Get the list of participants from the invite, give them the initial status INVITED as the
-         * actual status was not included in the invite.
-         */
-        Map<ContactId, ParticipantStatus> inviteParticipants = ChatUtils.getParticipants(invite,
-                ParticipantStatus.INVITED);
-        // @FIXME: This method should return an URI
-        String remoteUri = ChatUtils.getReferredIdentityAsContactUri(invite);
-
-        TerminatingAdhocGroupChatSession session = new TerminatingAdhocGroupChatSession(this,
-                invite, contact, inviteParticipants, Uri.parse(remoteUri), mRcsSettings,
-                mMessagingLog, timestamp, mContactManager);
-
-        /*--
-         * 6.3.3.1 Leaving a Group Chat that is idle
-         * In case the user expresses their desire to leave the Group Chat while it is inactive, the device will not offer the user
-         * the possibility any more to enter new messages and restart the chat and automatically decline the first incoming INVITE
-         * request for the chat with a SIP 603 DECLINE response. Subsequent INVITE requests should not be rejected as they may be
-         * received when the user is added again to the Chat by one of the participants.
-         */
-        boolean reject = mMessagingLog.isGroupChatNextInviteRejected(session.getContributionID());
-        if (reject) {
-            if (logActivated) {
-                sLogger.debug("Chat Id " + session.getContributionID()
-                        + " is declined since previously terminated by user while disconnected");
+                sendErrorResponse(invite, Response.BUSY_HERE);
+                return;
             }
-            sendErrorResponse(invite, Response.DECLINE);
-            mMessagingLog.acceptGroupChatNextInvitation(session.getContributionID());
-            return;
+
+            if (!isChatSessionAvailable()) {
+                if (logActivated) {
+                    sLogger.debug("The max number of chat sessions is achieved: reject the invitation from "
+                            .concat(contact.toString()));
+                }
+
+                handleGroupChatInvitationRejected(invite, contact,
+                        GroupChat.ReasonCode.REJECTED_MAX_CHATS, timestamp);
+
+                sendErrorResponse(invite, Response.BUSY_HERE);
+                return;
+            }
+
+            /*
+             * Get the list of participants from the invite, give them the initial status INVITED as
+             * the actual status was not included in the invite.
+             */
+            Map<ContactId, ParticipantStatus> inviteParticipants = ChatUtils.getParticipants(
+                    invite, ParticipantStatus.INVITED);
+            // @FIXME: This method should return an URI
+            String remoteUri = ChatUtils.getReferredIdentityAsContactUri(invite);
+
+            TerminatingAdhocGroupChatSession session = new TerminatingAdhocGroupChatSession(this,
+                    invite, contact, inviteParticipants, Uri.parse(remoteUri), mRcsSettings,
+                    mMessagingLog, timestamp, mContactManager);
+
+            /*--
+             * 6.3.3.1 Leaving a Group Chat that is idle
+             * In case the user expresses their desire to leave the Group Chat while it is inactive, the device will not offer the user
+             * the possibility any more to enter new messages and restart the chat and automatically decline the first incoming INVITE
+             * request for the chat with a SIP 603 DECLINE response. Subsequent INVITE requests should not be rejected as they may be
+             * received when the user is added again to the Chat by one of the participants.
+             */
+            boolean reject = mMessagingLog.isGroupChatNextInviteRejected(session
+                    .getContributionID());
+            if (reject) {
+                if (logActivated) {
+                    sLogger.debug("Chat Id " + session.getContributionID()
+                            + " is declined since previously terminated by user while disconnected");
+                }
+                sendErrorResponse(invite, Response.DECLINE);
+                mMessagingLog.acceptGroupChatNextInvitation(session.getContributionID());
+                return;
+            }
+
+            mCore.getListener().handleAdhocGroupChatSessionInvitation(session);
+
+            session.startSession();
+
+        } catch (ContactManagerException e) {
+            throw new SipPayloadException(
+                    "Failed to receive an ad-hoc group chat session invitation from ".concat(contact
+                            .toString()), e);
+        } catch (IOException e) {
+            throw new SipNetworkException(
+                    "Failed to receive an ad-hoc group chat session invitation from ".concat(contact
+                            .toString()), e);
         }
-
-        mCore.getListener().handleAdhocGroupChatSessionInvitation(session);
-
-        session.startSession();
     }
 
     /**
@@ -1386,174 +1421,189 @@ public class InstantMessagingService extends ImsService {
     public void receiveOneToOneHttpFileTranferInvitation(SipRequest invite,
             FileTransferHttpInfoDocument ftinfo, long timestamp) throws SipPayloadException,
             SipNetworkException {
-        boolean logActivated = sLogger.isActivated();
-        String referredId = ChatUtils.getReferredIdentityAsContactUri(invite);
-        ContactId remote = ChatUtils.getReferredIdentityAsContactId(invite);
-        String displayName = SipUtils.getDisplayNameFromUri(invite.getFrom());
-        if (remote == null) {
-            if (logActivated) {
-                sLogger.error("Discard OneToOne HttpFileTranferInvitation: invalid remote ID '"
-                        + referredId + "'");
-            }
-            sendErrorResponse(invite, Response.DECLINE);
-            return;
-
-        }
-        if (logActivated) {
-            sLogger.debug("Receive a single HTTP file transfer invitation from ".concat(remote
-                    .toString()));
-        }
-        /*
-         * Update the remote contact's capabilities to include at least HTTP FT and IM session
-         * capabilities as we have just received a HTTP file transfer invitation from this contact
-         * so he/she must at least have this capability. We do not need any capability exchange
-         * response to determine that.
-         */
-        mContactManager.mergeContactCapabilities(remote,
-                new CapabilitiesBuilder().setImSession(true).setFileTransferHttp(true)
-                        .setTimestampOfLastResponse(timestamp).build(), RcsStatus.RCS_CAPABLE,
-                RegistrationState.ONLINE, displayName);
-
-        String fileTransferId = ChatUtils.getMessageId(invite);
-        if (isFileTransferAlreadyOngoing(fileTransferId)) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder("File transfer with fileTransferId '")
-                        .append(fileTransferId).append("' already ongoing, so ignoring this one.")
-                        .toString());
-            }
-            return;
-        }
-        CpimMessage cpimMessage = ChatUtils.extractCpimMessage(invite);
-        long timestampSent = cpimMessage.getTimestampSent();
-        boolean fileResent = isFileTransferResentAndNotAlreadyOngoing(fileTransferId);
-        if (mContactManager.isBlockedForContact(remote)) {
-            if (logActivated) {
-                sLogger.debug(new StringBuilder("Contact ").append(remote)
-                        .append(" is blocked, automatically reject the HTTP File transfer")
-                        .toString());
-            }
-            sendErrorResponse(invite, Response.DECLINE);
-            if (fileResent) {
-                handleResendFileTransferInvitationRejected(fileTransferId, remote,
-                        FileTransfer.ReasonCode.REJECTED_SPAM, timestamp, timestampSent);
+        try {
+            boolean logActivated = sLogger.isActivated();
+            String referredId = ChatUtils.getReferredIdentityAsContactUri(invite);
+            ContactId remote = ChatUtils.getReferredIdentityAsContactId(invite);
+            String displayName = SipUtils.getDisplayNameFromUri(invite.getFrom());
+            if (remote == null) {
+                if (logActivated) {
+                    sLogger.error("Discard OneToOne HttpFileTranferInvitation: invalid remote ID '"
+                            + referredId + "'");
+                }
+                sendErrorResponse(invite, Response.DECLINE);
                 return;
+
             }
-            handleHttpFileTransferInvitationRejected(fileTransferId, ftinfo, remote,
-                    FileTransfer.ReasonCode.REJECTED_SPAM, timestamp, timestampSent);
-            return;
-
-        }
-
-        if (!isChatSessionAvailable()) {
             if (logActivated) {
-                sLogger.debug("The max number of chat sessions is achieved: reject the invitation from "
-                        .concat(remote.toString()));
+                sLogger.debug("Receive a single HTTP file transfer invitation from ".concat(remote
+                        .toString()));
             }
-            sendErrorResponse(invite, Response.BUSY_HERE);
             /*
-             * The more abstracted reason code REJECTED_MAX_FILE_TRANSFERS is used since the client
-             * need not be aware of chat session dependency here.
+             * Update the remote contact's capabilities to include at least HTTP FT and IM session
+             * capabilities as we have just received a HTTP file transfer invitation from this
+             * contact so he/she must at least have this capability. We do not need any capability
+             * exchange response to determine that.
              */
-            if (fileResent) {
-                handleResendFileTransferInvitationRejected(fileTransferId, remote,
-                        FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp,
-                        timestampSent);
+            mContactManager.mergeContactCapabilities(remote,
+                    new CapabilitiesBuilder().setImSession(true).setFileTransferHttp(true)
+                            .setTimestampOfLastResponse(timestamp).build(), RcsStatus.RCS_CAPABLE,
+                    RegistrationState.ONLINE, displayName);
+
+            String fileTransferId = ChatUtils.getMessageId(invite);
+            if (isFileTransferAlreadyOngoing(fileTransferId)) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(new StringBuilder("File transfer with fileTransferId '")
+                            .append(fileTransferId)
+                            .append("' already ongoing, so ignoring this one.").toString());
+                }
                 return;
             }
-            handleHttpFileTransferInvitationRejected(fileTransferId, ftinfo, remote,
-                    FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp, timestampSent);
-            return;
-        }
-
-        TerminatingOneToOneChatSession oneToOneChatSession = new TerminatingOneToOneChatSession(
-                this, invite, remote, mRcsSettings, mMessagingLog, timestamp, mContactManager);
-        CoreListener listener = mCore.getListener();
-        listener.handleOneOneChatSessionInitiation(oneToOneChatSession);
-        oneToOneChatSession.startSession();
-
-        if (!isFileTransferSessionAvailable()) {
-            if (logActivated) {
-                sLogger.debug("The max number of FT sessions is achieved, reject the HTTP File transfer from "
-                        .concat(remote.toString()));
-            }
-            sendErrorResponse(invite, Response.DECLINE);
-            if (fileResent) {
-                handleResendFileTransferInvitationRejected(fileTransferId, remote,
-                        FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp,
-                        timestampSent);
-                return;
-            }
-            handleHttpFileTransferInvitationRejected(fileTransferId, ftinfo, remote,
-                    FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp, timestampSent);
-            return;
-        }
-
-        // Reject if file is too big or size exceeds device storage capacity. This control
-        // should be done
-        // on UI. It is done after end user accepts invitation to enable prior handling by the
-        // application.
-        FileSharingError error = FileSharingSession.isFileCapacityAcceptable(ftinfo.getSize(),
-                mRcsSettings);
-        if (error != null) {
-            sendErrorResponse(invite, Response.DECLINE);
-            int errorCode = error.getErrorCode();
-            switch (errorCode) {
-                case FileSharingError.MEDIA_SIZE_TOO_BIG:
-                    if (fileResent) {
-                        handleResendFileTransferInvitationRejected(fileTransferId, remote,
-                                FileTransfer.ReasonCode.REJECTED_MAX_SIZE, timestamp, timestampSent);
-                        break;
-                    }
-                    handleHttpFileTransferInvitationRejected(fileTransferId, ftinfo, remote,
-                            FileTransfer.ReasonCode.REJECTED_MAX_SIZE, timestamp, timestampSent);
-                    break;
-                case FileSharingError.NOT_ENOUGH_STORAGE_SPACE:
-                    if (fileResent) {
-                        handleResendFileTransferInvitationRejected(fileTransferId, remote,
-                                FileTransfer.ReasonCode.REJECTED_LOW_SPACE, timestamp,
-                                timestampSent);
-                        break;
-                    }
-                    handleHttpFileTransferInvitationRejected(fileTransferId, ftinfo, remote,
-                            FileTransfer.ReasonCode.REJECTED_LOW_SPACE, timestamp, timestampSent);
-                    break;
-                default:
-                    sLogger.error(new StringBuilder(
-                            "Unexpected error while receiving HTTP file transfer invitation from ")
-                            .append(remote).append(" error : ").append(Integer.toString(errorCode))
+            CpimMessage cpimMessage = ChatUtils.extractCpimMessage(invite);
+            long timestampSent = cpimMessage.getTimestampSent();
+            boolean fileResent = isFileTransferResentAndNotAlreadyOngoing(fileTransferId);
+            if (mContactManager.isBlockedForContact(remote)) {
+                if (logActivated) {
+                    sLogger.debug(new StringBuilder("Contact ").append(remote)
+                            .append(" is blocked, automatically reject the HTTP File transfer")
                             .toString());
-            }
-            return;
-        }
-
-        DownloadFromInviteFileSharingSession fileSharingSession = new DownloadFromInviteFileSharingSession(
-                this, oneToOneChatSession, ftinfo, fileTransferId,
-                oneToOneChatSession.getRemoteContact(), oneToOneChatSession.getRemoteDisplayName(),
-                mRcsSettings, mMessagingLog, timestamp, timestampSent, mContactManager);
-        if (fileSharingSession.getFileicon() != null) {
-            try {
-                fileSharingSession.downloadFileIcon();
-            } catch (IOException e) {
-                sLogger.error("Failed to download file icon", e);
+                }
                 sendErrorResponse(invite, Response.DECLINE);
                 if (fileResent) {
                     handleResendFileTransferInvitationRejected(fileTransferId, remote,
-                            FileTransfer.ReasonCode.REJECTED_MEDIA_FAILED, timestamp, timestampSent);
+                            FileTransfer.ReasonCode.REJECTED_SPAM, timestamp, timestampSent);
                     return;
                 }
                 handleHttpFileTransferInvitationRejected(fileTransferId, ftinfo, remote,
-                        FileTransfer.ReasonCode.REJECTED_MEDIA_FAILED, timestamp, timestampSent);
+                        FileTransfer.ReasonCode.REJECTED_SPAM, timestamp, timestampSent);
+                return;
+
+            }
+
+            if (!isChatSessionAvailable()) {
+                if (logActivated) {
+                    sLogger.debug("The max number of chat sessions is achieved: reject the invitation from "
+                            .concat(remote.toString()));
+                }
+                sendErrorResponse(invite, Response.BUSY_HERE);
+                /*
+                 * The more abstracted reason code REJECTED_MAX_FILE_TRANSFERS is used since the
+                 * client need not be aware of chat session dependency here.
+                 */
+                if (fileResent) {
+                    handleResendFileTransferInvitationRejected(fileTransferId, remote,
+                            FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp,
+                            timestampSent);
+                    return;
+                }
+                handleHttpFileTransferInvitationRejected(fileTransferId, ftinfo, remote,
+                        FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp,
+                        timestampSent);
                 return;
             }
+
+            TerminatingOneToOneChatSession oneToOneChatSession = new TerminatingOneToOneChatSession(
+                    this, invite, remote, mRcsSettings, mMessagingLog, timestamp, mContactManager);
+            CoreListener listener = mCore.getListener();
+            listener.handleOneOneChatSessionInitiation(oneToOneChatSession);
+            oneToOneChatSession.startSession();
+
+            if (!isFileTransferSessionAvailable()) {
+                if (logActivated) {
+                    sLogger.debug("The max number of FT sessions is achieved, reject the HTTP File transfer from "
+                            .concat(remote.toString()));
+                }
+                sendErrorResponse(invite, Response.DECLINE);
+                if (fileResent) {
+                    handleResendFileTransferInvitationRejected(fileTransferId, remote,
+                            FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp,
+                            timestampSent);
+                    return;
+                }
+                handleHttpFileTransferInvitationRejected(fileTransferId, ftinfo, remote,
+                        FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp,
+                        timestampSent);
+                return;
+            }
+
+            // Reject if file is too big or size exceeds device storage capacity. This control
+            // should be done
+            // on UI. It is done after end user accepts invitation to enable prior handling by the
+            // application.
+            FileSharingError error = FileSharingSession.isFileCapacityAcceptable(ftinfo.getSize(),
+                    mRcsSettings);
+            if (error != null) {
+                sendErrorResponse(invite, Response.DECLINE);
+                int errorCode = error.getErrorCode();
+                switch (errorCode) {
+                    case FileSharingError.MEDIA_SIZE_TOO_BIG:
+                        if (fileResent) {
+                            handleResendFileTransferInvitationRejected(fileTransferId, remote,
+                                    FileTransfer.ReasonCode.REJECTED_MAX_SIZE, timestamp,
+                                    timestampSent);
+                            break;
+                        }
+                        handleHttpFileTransferInvitationRejected(fileTransferId, ftinfo, remote,
+                                FileTransfer.ReasonCode.REJECTED_MAX_SIZE, timestamp, timestampSent);
+                        break;
+                    case FileSharingError.NOT_ENOUGH_STORAGE_SPACE:
+                        if (fileResent) {
+                            handleResendFileTransferInvitationRejected(fileTransferId, remote,
+                                    FileTransfer.ReasonCode.REJECTED_LOW_SPACE, timestamp,
+                                    timestampSent);
+                            break;
+                        }
+                        handleHttpFileTransferInvitationRejected(fileTransferId, ftinfo, remote,
+                                FileTransfer.ReasonCode.REJECTED_LOW_SPACE, timestamp,
+                                timestampSent);
+                        break;
+                    default:
+                        sLogger.error(new StringBuilder(
+                                "Unexpected error while receiving HTTP file transfer invitation from ")
+                                .append(remote).append(" error : ")
+                                .append(Integer.toString(errorCode)).toString());
+                }
+                return;
+            }
+
+            DownloadFromInviteFileSharingSession fileSharingSession = new DownloadFromInviteFileSharingSession(
+                    this, oneToOneChatSession, ftinfo, fileTransferId,
+                    oneToOneChatSession.getRemoteContact(),
+                    oneToOneChatSession.getRemoteDisplayName(), mRcsSettings, mMessagingLog,
+                    timestamp, timestampSent, mContactManager);
+            if (fileSharingSession.getFileicon() != null) {
+                try {
+                    fileSharingSession.downloadFileIcon();
+                } catch (IOException e) {
+                    sLogger.error("Failed to download file icon", e);
+                    sendErrorResponse(invite, Response.DECLINE);
+                    if (fileResent) {
+                        handleResendFileTransferInvitationRejected(fileTransferId, remote,
+                                FileTransfer.ReasonCode.REJECTED_MEDIA_FAILED, timestamp,
+                                timestampSent);
+                        return;
+                    }
+                    handleHttpFileTransferInvitationRejected(fileTransferId, ftinfo, remote,
+                            FileTransfer.ReasonCode.REJECTED_MEDIA_FAILED, timestamp, timestampSent);
+                    return;
+                }
+            }
+            if (fileResent) {
+                listener.handleOneToOneResendFileTransferInvitation(fileSharingSession, remote,
+                        displayName);
+            } else {
+                listener.handleOneToOneFileTransferInvitation(fileSharingSession,
+                        oneToOneChatSession, ftinfo.getExpiration());
+            }
+            fileSharingSession.startSession();
+        } catch (ContactManagerException e) {
+            throw new SipPayloadException("Failed to receive a file transfer session invitation!",
+                    e);
+
+        } catch (IOException e) {
+            throw new SipNetworkException("Failed to receive a file transfer session invitation!",
+                    e);
         }
-        if (fileResent) {
-            listener.handleOneToOneResendFileTransferInvitation(fileSharingSession, remote,
-                    displayName);
-        } else {
-            listener.handleOneToOneFileTransferInvitation(fileSharingSession, oneToOneChatSession,
-                    ftinfo.getExpiration());
-        }
-        fileSharingSession.startSession();
     }
 
     private void handleHttpFileTransferInvitationRejected(String fileTransferId,

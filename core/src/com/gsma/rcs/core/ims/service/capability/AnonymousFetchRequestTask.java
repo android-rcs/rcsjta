@@ -36,11 +36,13 @@ import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.gsma.rcs.core.ims.service.SessionAuthenticationAgent;
 import com.gsma.rcs.core.ims.service.presence.PresenceError;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
+import java.io.IOException;
 import java.util.Vector;
 
 import javax2.sip.InvalidArgumentException;
@@ -177,38 +179,45 @@ public class AnonymousFetchRequestTask {
      */
     private void sendSubscribe(SipRequest subscribe) throws SipPayloadException,
             SipNetworkException {
-        if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Send SUBSCRIBE, expire=")
-                    .append(subscribe.getExpires()).append("ms").toString());
-        }
-
-        /* Send SUBSCRIBE request */
-        SipTransactionContext ctx = mImsModule.getSipManager().sendSipMessageAndWait(subscribe);
-
-        /* Analyze the received response */
-        if (ctx.isSipResponse()) {
-            /* A response has been received */
-            if ((ctx.getStatusCode() >= Response.OK)
-                    && (ctx.getStatusCode() < Response.MULTIPLE_CHOICES)) {
-                handle200OK(ctx);
-            } else if (Response.PROXY_AUTHENTICATION_REQUIRED == ctx.getStatusCode()) {
-                /* 407 Proxy Authentication Required */
-                handle407Authentication(ctx);
-            } else if (Response.NOT_FOUND == ctx.getStatusCode()) {
-                /* User not found */
-                handleUserNotFound(ctx);
-            } else {
-                /* Other error response */
-                handleError(new PresenceError(PresenceError.SUBSCRIBE_FAILED, ctx.getStatusCode()
-                        + " " + ctx.getReasonPhrase()));
-            }
-        } else {
+        try {
             if (sLogger.isActivated()) {
-                sLogger.debug("No response received for SUBSCRIBE");
+                sLogger.info(new StringBuilder("Send SUBSCRIBE, expire=")
+                        .append(subscribe.getExpires()).append("ms").toString());
             }
 
-            /* No response received: timeout */
-            handleError(new PresenceError(PresenceError.SUBSCRIBE_FAILED));
+            /* Send SUBSCRIBE request */
+            SipTransactionContext ctx = mImsModule.getSipManager().sendSipMessageAndWait(subscribe);
+
+            /* Analyze the received response */
+            if (ctx.isSipResponse()) {
+                /* A response has been received */
+                if ((ctx.getStatusCode() >= Response.OK)
+                        && (ctx.getStatusCode() < Response.MULTIPLE_CHOICES)) {
+                    handle200OK(ctx);
+                } else if (Response.PROXY_AUTHENTICATION_REQUIRED == ctx.getStatusCode()) {
+                    /* 407 Proxy Authentication Required */
+                    handle407Authentication(ctx);
+                } else if (Response.NOT_FOUND == ctx.getStatusCode()) {
+                    /* User not found */
+                    handleUserNotFound(ctx);
+                } else {
+                    /* Other error response */
+                    handleError(new PresenceError(PresenceError.SUBSCRIBE_FAILED,
+                            ctx.getStatusCode() + " " + ctx.getReasonPhrase()));
+                }
+            } else {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("No response received for SUBSCRIBE");
+                }
+
+                /* No response received: timeout */
+                handleError(new PresenceError(PresenceError.SUBSCRIBE_FAILED));
+            }
+        } catch (ContactManagerException e) {
+            throw new SipPayloadException("Failed to send SUBSCRIBE!", e);
+
+        } catch (IOException e) {
+            throw new SipNetworkException("Failed to send SUBSCRIBE!", e);
         }
     }
 
@@ -280,8 +289,11 @@ public class AnonymousFetchRequestTask {
      * Handle user not found
      * 
      * @param ctx SIP transaction context
+     * @throws ContactManagerException
+     * @throws IOException
      */
-    private void handleUserNotFound(SipTransactionContext ctx) {
+    private void handleUserNotFound(SipTransactionContext ctx) throws ContactManagerException,
+            IOException {
         if (sLogger.isActivated()) {
             sLogger.info("User not found (" + ctx.getStatusCode() + " error)");
         }

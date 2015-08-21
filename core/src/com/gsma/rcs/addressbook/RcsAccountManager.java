@@ -20,6 +20,7 @@ package com.gsma.rcs.addressbook;
 
 import com.gsma.rcs.R;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.contact.ContactManagerException;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -105,44 +106,47 @@ public class RcsAccountManager {
      * @throws RcsAccountException thrown if RCS account failed to be created
      */
     public void createRcsAccount(String username, boolean enableSync) throws RcsAccountException {
-        /* Save the account info into the AccountManager if needed */
-        Account account = getAccount(username);
-        if (account == null) {
-            account = new Account(username, ACCOUNT_MANAGER_TYPE);
-            AccountManager accountManager = AccountManager.get(mContext);
-            boolean resource = accountManager.addAccountExplicitly(account, null, null);
-            if (!resource) {
-                throw new RcsAccountException("Failed to create RCS account for username '"
-                        + username + "'!");
+        try {
+            /* Save the account info into the AccountManager if needed */
+            Account account = getAccount(username);
+            if (account == null) {
+                account = new Account(username, ACCOUNT_MANAGER_TYPE);
+                AccountManager accountManager = AccountManager.get(mContext);
+                boolean resource = accountManager.addAccountExplicitly(account, null, null);
+                if (!resource) {
+                    throw new RcsAccountException("Failed to create RCS account for username '"
+                            + username + "'!");
+                }
             }
-        }
-
-        /* Set contacts sync for this account. */
-        if (enableSync) {
-            ContentResolver.setIsSyncable(account, ContactsContract.AUTHORITY, 1);
-        }
-        ContentResolver.setSyncAutomatically(account, ContactsContract.AUTHORITY, enableSync);
-
-        /* Insert RCS group if it does not exist */
-        if (ContactManager.INVALID_ID == mContactManager.getRcsGroupIdFromContactsContractGroups()) {
-            ContentValues contentValues = new ContentValues();
-            contentValues.put(Groups.ACCOUNT_NAME, username);
-            contentValues.put(Groups.ACCOUNT_TYPE, ACCOUNT_MANAGER_TYPE);
-            contentValues.put(Groups.GROUP_VISIBLE, false);
-            contentValues.put(Groups.TITLE, mContext.getString(R.string.rcs_core_account_id));
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                contentValues.put(CONTACTSCONTRACT_GROUPS_COLUMN_TITLE_RES,
-                        R.string.rcs_core_account_id);
-                contentValues.put(CONTACTSCONTRACT_GROUPS_COLUMN_RES_PACKAGE,
-                        mContext.getPackageName());
-
+            /* Set contacts sync for this account. */
+            if (enableSync) {
+                ContentResolver.setIsSyncable(account, ContactsContract.AUTHORITY, 1);
             }
-            contentValues.put(Groups.GROUP_IS_READ_ONLY, 1);
-            mContentResolver.insert(Groups.CONTENT_URI, contentValues);
+            ContentResolver.setSyncAutomatically(account, ContactsContract.AUTHORITY, enableSync);
+            /* Insert RCS group if it does not exist */
+            if (ContactManager.INVALID_ID == mContactManager
+                    .getRcsGroupIdFromContactsContractGroups()) {
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(Groups.ACCOUNT_NAME, username);
+                contentValues.put(Groups.ACCOUNT_TYPE, ACCOUNT_MANAGER_TYPE);
+                contentValues.put(Groups.GROUP_VISIBLE, false);
+                contentValues.put(Groups.TITLE, mContext.getString(R.string.rcs_core_account_id));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    contentValues.put(CONTACTSCONTRACT_GROUPS_COLUMN_TITLE_RES,
+                            R.string.rcs_core_account_id);
+                    contentValues.put(CONTACTSCONTRACT_GROUPS_COLUMN_RES_PACKAGE,
+                            mContext.getPackageName());
+                }
+                contentValues.put(Groups.GROUP_IS_READ_ONLY, 1);
+                mContentResolver.insert(Groups.CONTENT_URI, contentValues);
+            }
+            /* Create the "Me" item */
+            mContactManager.createMyContact();
+        } catch (ContactManagerException e) {
+            throw new RcsAccountException(new StringBuilder(
+                    "Failed to create RCS account for username '").append(username).append("'!")
+                    .toString(), e);
         }
-
-        /* Create the "Me" item */
-        mContactManager.createMyContact();
     }
 
     /**

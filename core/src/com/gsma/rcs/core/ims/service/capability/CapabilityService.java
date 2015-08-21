@@ -37,6 +37,7 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -245,23 +246,37 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      * Reset the content sharing capabilities for a given contact identifier
      * 
      * @param contact Contact identifier
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void resetContactCapabilitiesForContentSharing(ContactId contact) {
-        Capabilities capabilities = mContactManager.getContactCapabilities(contact);
-        if (capabilities == null
-                || (!capabilities.isImageSharingSupported() && !capabilities
-                        .isVideoSharingSupported())) {
-            return;
-        }
-        CapabilitiesBuilder capaBuilder = new CapabilitiesBuilder(capabilities);
-        /* Force a reset of content sharing capabilities */
-        capaBuilder.setImageSharing(false);
-        capaBuilder.setVideoSharing(false);
-        capabilities = capaBuilder.build();
-        mContactManager.setContactCapabilities(contact, capabilities);
+    public void resetContactCapabilitiesForContentSharing(ContactId contact)
+            throws SipPayloadException, SipNetworkException {
+        try {
+            Capabilities capabilities = mContactManager.getContactCapabilities(contact);
+            if (capabilities == null
+                    || (!capabilities.isImageSharingSupported() && !capabilities
+                            .isVideoSharingSupported())) {
+                return;
+            }
+            CapabilitiesBuilder capaBuilder = new CapabilitiesBuilder(capabilities);
+            /* Force a reset of content sharing capabilities */
+            capaBuilder.setImageSharing(false);
+            capaBuilder.setVideoSharing(false);
+            capabilities = capaBuilder.build();
+            mContactManager.setContactCapabilities(contact, capabilities);
 
-        getImsModule().getCore().getListener()
-                .handleCapabilitiesNotification(contact, capabilities);
+            getImsModule().getCore().getListener()
+                    .handleCapabilitiesNotification(contact, capabilities);
+
+        } catch (ContactManagerException e) {
+            throw new SipPayloadException(
+                    "Failed to reset content share capabilities for contact : ".concat(contact
+                            .toString()), e);
+        } catch (IOException e) {
+            throw new SipNetworkException(
+                    "Failed to reset content share capabilities for contact : ".concat(contact
+                            .toString()), e);
+        }
     }
 
 }

@@ -35,6 +35,7 @@ import com.gsma.rcs.core.ims.service.presence.pidf.PidfDocument;
 import com.gsma.rcs.core.ims.service.presence.pidf.PidfParser;
 import com.gsma.rcs.core.ims.service.presence.pidf.Tuple;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
@@ -109,101 +110,105 @@ public class AnonymousFetchManager implements DiscoveryManager {
      */
     public void receiveNotification(SipRequest notify) throws SipPayloadException,
             SipNetworkException {
-        boolean logActivated = logger.isActivated();
-        if (logActivated) {
-            logger.debug("Anonymous fetch notification received");
-        }
-
-        /* Parse XML part */
-        byte[] content = notify.getContentBytes();
-        if (content != null) {
+        try {
+            boolean logActivated = logger.isActivated();
             if (logActivated) {
-                logger.debug("Anonymous fetch notification with PIDF document");
+                logger.debug("Anonymous fetch notification received");
             }
-            InputSource pidfInput = new InputSource(new ByteArrayInputStream(content));
-            PidfParser pidfParser = null;
-            try {
-                pidfParser = new PidfParser(pidfInput);
-            } catch (ParserConfigurationException e) {
-                throw new SipPayloadException("Can't parse XML notification! CallId=".concat(notify
-                        .getCallId()), e);
-            } catch (SAXException e) {
-                throw new SipPayloadException("Can't parse XML notification! CallId=".concat(notify
-                        .getCallId()), e);
-            } catch (IOException e) {
-                throw new SipNetworkException("Can't parse XML notification! CallId=".concat(notify
-                        .getCallId()), e);
-            }
-            PidfDocument presence = pidfParser.getPresence();
-            if (presence == null) {
-                return;
-            }
-            /* Extract capabilities */
-            Capabilities.CapabilitiesBuilder capaBuilder = new Capabilities.CapabilitiesBuilder();
 
-            /* We queried via anonymous fetch procedure, so set presence discovery to true */
-            capaBuilder.setPresenceDiscovery(true);
-
-            String entity = presence.getEntity();
-            PhoneNumber validPhoneNumber = ContactUtil.getValidPhoneNumberFromUri(entity);
-            if (validPhoneNumber == null) {
+            /* Parse XML part */
+            byte[] content = notify.getContentBytes();
+            if (content != null) {
                 if (logActivated) {
-                    logger.error(new StringBuilder("Discard XML notification: bad entity '")
-                            .append(entity).append("'").toString());
+                    logger.debug("Anonymous fetch notification with PIDF document");
                 }
-                return;
-            }
-            ContactId contact = ContactUtil.createContactIdFromValidatedData(validPhoneNumber);
-            for (Tuple tuple : presence.getTuplesList()) {
-                boolean state = false;
-                if (PresenceInfo.ONLINE.equals(tuple.getStatus().getBasic().getValue())) {
-                    state = true;
+                InputSource pidfInput = new InputSource(new ByteArrayInputStream(content));
+                PidfParser pidfParser = new PidfParser(pidfInput);
+                PidfDocument presence = pidfParser.getPresence();
+                if (presence == null) {
+                    return;
                 }
-                String id = tuple.getService().getId();
-                if (PresenceUtils.FEATURE_RCS2_VIDEO_SHARE.equalsIgnoreCase(id)) {
-                    capaBuilder.setVideoSharing(state);
+                /* Extract capabilities */
+                Capabilities.CapabilitiesBuilder capaBuilder = new Capabilities.CapabilitiesBuilder();
 
-                } else if (PresenceUtils.FEATURE_RCS2_IMAGE_SHARE.equalsIgnoreCase(id)) {
-                    capaBuilder.setImageSharing(state);
+                /* We queried via anonymous fetch procedure, so set presence discovery to true */
+                capaBuilder.setPresenceDiscovery(true);
 
-                } else if (PresenceUtils.FEATURE_RCS2_FT.equalsIgnoreCase(id)) {
-                    capaBuilder.setFileTransferMsrp(state);
-
-                } else if (PresenceUtils.FEATURE_RCS2_CS_VIDEO.equalsIgnoreCase(id)) {
-                    capaBuilder.setCsVideo(state);
-
-                } else if (PresenceUtils.FEATURE_RCS2_CHAT.equalsIgnoreCase(id)) {
-                    capaBuilder.setImSession(state);
+                String entity = presence.getEntity();
+                PhoneNumber validPhoneNumber = ContactUtil.getValidPhoneNumberFromUri(entity);
+                if (validPhoneNumber == null) {
+                    if (logActivated) {
+                        logger.error(new StringBuilder("Discard XML notification: bad entity '")
+                                .append(entity).append("'").toString());
+                    }
+                    return;
                 }
-            }
+                ContactId contact = ContactUtil.createContactIdFromValidatedData(validPhoneNumber);
+                for (Tuple tuple : presence.getTuplesList()) {
+                    boolean state = false;
+                    if (PresenceInfo.ONLINE.equals(tuple.getStatus().getBasic().getValue())) {
+                        state = true;
+                    }
+                    String id = tuple.getService().getId();
+                    if (PresenceUtils.FEATURE_RCS2_VIDEO_SHARE.equalsIgnoreCase(id)) {
+                        capaBuilder.setVideoSharing(state);
 
-            Capabilities capabilities = capaBuilder.build();
-            mContactManager.setContactCapabilities(contact, capabilities, RcsStatus.RCS_CAPABLE,
-                    RegistrationState.UNKNOWN);
+                    } else if (PresenceUtils.FEATURE_RCS2_IMAGE_SHARE.equalsIgnoreCase(id)) {
+                        capaBuilder.setImageSharing(state);
 
-            mImsModule.getCore().getListener()
-                    .handleCapabilitiesNotification(contact, capabilities);
-        } else {
-            if (logActivated) {
-                logger.debug("Anonymous fetch notification is empty");
-            }
-            String sipAssertedId = SipUtils.getAssertedIdentity(notify);
-            PhoneNumber validPhoneNumber = ContactUtil.getValidPhoneNumberFromUri(sipAssertedId);
-            if (validPhoneNumber == null) {
+                    } else if (PresenceUtils.FEATURE_RCS2_FT.equalsIgnoreCase(id)) {
+                        capaBuilder.setFileTransferMsrp(state);
+
+                    } else if (PresenceUtils.FEATURE_RCS2_CS_VIDEO.equalsIgnoreCase(id)) {
+                        capaBuilder.setCsVideo(state);
+
+                    } else if (PresenceUtils.FEATURE_RCS2_CHAT.equalsIgnoreCase(id)) {
+                        capaBuilder.setImSession(state);
+                    }
+                }
+
+                Capabilities capabilities = capaBuilder.build();
+                mContactManager.setContactCapabilities(contact, capabilities,
+                        RcsStatus.RCS_CAPABLE, RegistrationState.UNKNOWN);
+
+                mImsModule.getCore().getListener()
+                        .handleCapabilitiesNotification(contact, capabilities);
+            } else {
                 if (logActivated) {
-                    logger.error(new StringBuilder("Cannot process notification: invalid SIP id '")
-                            .append(sipAssertedId).append("'").toString());
+                    logger.debug("Anonymous fetch notification is empty");
                 }
-                return;
+                String sipAssertedId = SipUtils.getAssertedIdentity(notify);
+                PhoneNumber validPhoneNumber = ContactUtil
+                        .getValidPhoneNumberFromUri(sipAssertedId);
+                if (validPhoneNumber == null) {
+                    if (logActivated) {
+                        logger.error(new StringBuilder(
+                                "Cannot process notification: invalid SIP id '")
+                                .append(sipAssertedId).append("'").toString());
+                    }
+                    return;
+                }
+                ContactId contact = ContactUtil.createContactIdFromValidatedData(validPhoneNumber);
+
+                /* Notify content was empty : set default capabilities */
+                mContactManager.setContactCapabilities(contact, Capabilities.sDefaultCapabilities,
+                        RcsStatus.NO_INFO, RegistrationState.UNKNOWN);
+
+                mImsModule.getCore().getListener()
+                        .handleCapabilitiesNotification(contact, Capabilities.sDefaultCapabilities);
             }
-            ContactId contact = ContactUtil.createContactIdFromValidatedData(validPhoneNumber);
-
-            /* Notify content was empty : set default capabilities */
-            mContactManager.setContactCapabilities(contact, Capabilities.sDefaultCapabilities,
-                    RcsStatus.NO_INFO, RegistrationState.UNKNOWN);
-
-            mImsModule.getCore().getListener()
-                    .handleCapabilitiesNotification(contact, Capabilities.sDefaultCapabilities);
+        } catch (ParserConfigurationException e) {
+            throw new SipPayloadException("Can't parse XML notification! CallId=".concat(notify
+                    .getCallId()), e);
+        } catch (SAXException e) {
+            throw new SipPayloadException("Can't parse XML notification! CallId=".concat(notify
+                    .getCallId()), e);
+        } catch (ContactManagerException e) {
+            throw new SipPayloadException("Can't parse XML notification! CallId=".concat(notify
+                    .getCallId()), e);
+        } catch (IOException e) {
+            throw new SipNetworkException("Can't parse XML notification! CallId=".concat(notify
+                    .getCallId()), e);
         }
     }
 }

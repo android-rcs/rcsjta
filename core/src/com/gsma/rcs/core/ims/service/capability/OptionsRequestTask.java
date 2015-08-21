@@ -41,7 +41,10 @@ import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
+import java.io.IOException;
+
 import javax2.sip.InvalidArgumentException;
+import javax2.sip.message.Response;
 
 /**
  * Options request task
@@ -101,9 +104,13 @@ public class OptionsRequestTask implements Runnable {
                 sLogger.debug(e.getMessage());
             }
             handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, e));
-        } catch (ContactManagerException e) {
-            sLogger.error("Options request failed for contact " + mContact + " !", e);
         } catch (RuntimeException e) {
+            /*
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
+             */
             sLogger.error("Options request failed for contact " + mContact + " !", e);
         } finally {
             if (mCallback != null) {
@@ -124,8 +131,7 @@ public class OptionsRequestTask implements Runnable {
      * @throws ContactManagerException
      * @throws SipNetworkException
      */
-    private void sendOptions() throws SipPayloadException, SipNetworkException,
-            ContactManagerException {
+    private void sendOptions() throws SipPayloadException, SipNetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Send an options request to ".concat(mContact.toString()));
         }
@@ -159,42 +165,48 @@ public class OptionsRequestTask implements Runnable {
      * @throws ContactManagerException
      */
     private void sendAndWaitOptions(SipRequest options) throws SipPayloadException,
-            SipNetworkException, ContactManagerException {
-        if (sLogger.isActivated()) {
-            sLogger.info("Send OPTIONS");
-        }
-
-        // Send OPTIONS request
-        SipTransactionContext ctx = mImsModule.getSipManager().sendSipMessageAndWait(options);
-
-        // Analyze the received response
-        if (ctx.isSipResponse()) {
-            // A response has been received
-            if (ctx.getStatusCode() == 200) {
-                // 200 OK
-                handle200OK(ctx);
-            } else if (ctx.getStatusCode() == 407) {
-                // 407 Proxy Authentication Required
-                handle407Authentication(ctx);
-            } else if ((ctx.getStatusCode() == 480) || (ctx.getStatusCode() == 408)) {
-                // User not registered
-                handleUserNotRegistered(ctx);
-            } else if (ctx.getStatusCode() == 404) {
-                // User not found
-                handleUserNotFound(ctx);
-            } else {
-                // Other error response
-                handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, ctx.getStatusCode()
-                        + " " + ctx.getReasonPhrase()));
-            }
-        } else {
+            SipNetworkException {
+        try {
             if (sLogger.isActivated()) {
-                sLogger.debug("No response received for OPTIONS");
+                sLogger.info("Send OPTIONS");
             }
+            SipTransactionContext ctx = mImsModule.getSipManager().sendSipMessageAndWait(options);
+            final int statusCode = ctx.getStatusCode();
+            if (ctx.isSipResponse()) {
+                switch (statusCode) {
+                    case Response.OK:
+                        handle200OK(ctx);
+                        break;
+                    case Response.PROXY_AUTHENTICATION_REQUIRED:
+                        handle407Authentication(ctx);
+                        break;
+                    case Response.REQUEST_TIMEOUT:
+                        /* Intentional fall through */
+                    case Response.TEMPORARILY_UNAVAILABLE:
+                        handleUserNotRegistered(ctx);
+                        break;
+                    case Response.NOT_FOUND:
+                        handleUserNotFound(ctx);
+                        break;
+                    default:
+                        handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED,
+                                new StringBuilder(statusCode).append(' ')
+                                        .append(ctx.getReasonPhrase()).toString()));
+                        break;
+                }
+            } else {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("No response received for OPTIONS");
+                }
+                /* No response received: timeout */
+                handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, new StringBuilder(
+                        statusCode).append(' ').append(ctx.getReasonPhrase()).toString()));
+            }
+        } catch (ContactManagerException e) {
+            throw new SipPayloadException("Failed to send OPTIONS!", e);
 
-            // No response received: timeout
-            handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, ctx.getStatusCode()
-                    + " " + ctx.getReasonPhrase()));
+        } catch (IOException e) {
+            throw new SipNetworkException("Failed to send OPTIONS!", e);
         }
     }
 
@@ -202,8 +214,11 @@ public class OptionsRequestTask implements Runnable {
      * Handle user not registered
      * 
      * @param ctx SIP transaction context
+     * @throws ContactManagerException
+     * @throws IOException
      */
-    private void handleUserNotRegistered(SipTransactionContext ctx) {
+    private void handleUserNotRegistered(SipTransactionContext ctx) throws ContactManagerException,
+            IOException {
         /* 408 or 480 response received */
         if (sLogger.isActivated()) {
             sLogger.info("User " + mContact + " is not registered");
@@ -232,8 +247,11 @@ public class OptionsRequestTask implements Runnable {
      * Handle user not found
      * 
      * @param ctx SIP transaction context
+     * @throws ContactManagerException
+     * @throws IOException
      */
-    private void handleUserNotFound(SipTransactionContext ctx) {
+    private void handleUserNotFound(SipTransactionContext ctx) throws ContactManagerException,
+            IOException {
         /* 404 response received */
         if (sLogger.isActivated()) {
             sLogger.info("User " + mContact + " is not found");
@@ -249,8 +267,10 @@ public class OptionsRequestTask implements Runnable {
      * Handle 200 0K response
      * 
      * @param ctx SIP transaction context
+     * @throws ContactManagerException
+     * @throws IOException
      */
-    private void handle200OK(SipTransactionContext ctx) {
+    private void handle200OK(SipTransactionContext ctx) throws ContactManagerException, IOException {
         if (sLogger.isActivated()) {
             sLogger.info("200 OK response received for " + mContact);
         }
@@ -316,8 +336,6 @@ public class OptionsRequestTask implements Runnable {
             sendAndWaitOptions(options);
         } catch (InvalidArgumentException e) {
             throw new SipPayloadException("Unable to fetch Authorization header!", e);
-        } catch (ContactManagerException e) {
-            throw new SipPayloadException("Unable to fetch Authorization header!", e);
         }
     }
 
@@ -327,22 +345,36 @@ public class OptionsRequestTask implements Runnable {
      * @param error Error
      */
     private void handleError(CapabilityError error) {
-        if (sLogger.isActivated()) {
-            sLogger.info("Options has failed for contact " + mContact + ": " + error.getErrorCode()
-                    + ", reason=" + error.getMessage());
-        }
-        ContactInfo info = mContactManager.getContactInfo(mContact);
-        if (RcsStatus.NO_INFO.equals(info.getRcsStatus())) {
-            /*
-             * If there is no info on this contact: update the database with default capabilities
-             */
-            mContactManager.setContactCapabilities(mContact, Capabilities.sDefaultCapabilities,
-                    RcsStatus.NO_INFO, RegistrationState.OFFLINE);
-        } else {
-            /*
-             * There are info on this contact: update the database capabilities time of last request
-             */
-            mContactManager.updateCapabilitiesTimeLastRequest(mContact);
+        try {
+            if (sLogger.isActivated()) {
+                sLogger.info(new StringBuilder("Options has failed for contact ").append(mContact)
+                        .append(": ").append(error.getErrorCode()).append(", reason=")
+                        .append(error.getMessage()).toString());
+            }
+            ContactInfo info = mContactManager.getContactInfo(mContact);
+            if (RcsStatus.NO_INFO.equals(info.getRcsStatus())) {
+                /*
+                 * If there is no info on this contact: update the database with default
+                 * capabilities
+                 */
+                mContactManager.setContactCapabilities(mContact, Capabilities.sDefaultCapabilities,
+                        RcsStatus.NO_INFO, RegistrationState.OFFLINE);
+            } else {
+                /*
+                 * There are info on this contact: update the database capabilities time of last
+                 * request
+                 */
+                mContactManager.updateCapabilitiesTimeLastRequest(mContact);
+            }
+        } catch (ContactManagerException e) {
+            sLogger.error(
+                    new StringBuilder("Failed to handle Options error for contact ")
+                            .append(mContact).append(": ").append(error.getErrorCode())
+                            .append(", reason=").append(error.getMessage()).toString(), e);
+        } catch (IOException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
         }
     }
 

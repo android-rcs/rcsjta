@@ -33,12 +33,14 @@ import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.gsma.rcs.core.ims.service.capability.OptionsRequestTask.IOptionsRequestTaskListener;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -190,45 +192,58 @@ public class OptionsManager implements DiscoveryManager {
     public void receiveCapabilityRequest(SipRequest options) throws SipPayloadException,
             SipNetworkException {
         String sipId = SipUtils.getAssertedIdentity(options);
-        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(sipId);
-        if (number == null) {
-            if (sLogger.isActivated()) {
-                sLogger.warn("Invalid contact from capability request '" + sipId + "'");
+        try {
+            PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(sipId);
+            if (number == null) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(new StringBuilder("Invalid contact from capability request '")
+                            .append(sipId).append("'").toString());
+                }
+                return;
             }
-            return;
+            ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
+            if (sLogger.isActivated()) {
+                sLogger.debug("OPTIONS request received from ".concat(contact.toString()));
+            }
+
+            // Create 200 OK response
+            String ipAddress = mImsModule.getCurrentNetworkInterface().getNetworkAccess()
+                    .getIpAddress();
+            boolean richcall = mImsModule.getRichcallService().isCallConnectedWith(contact);
+            SipResponse resp = SipMessageFactory.create200OkOptionsResponse(options, mImsModule
+                    .getSipManager().getSipStack().getContact(),
+                    CapabilityUtils.getSupportedFeatureTags(richcall, mRcsSettings),
+                    CapabilityUtils.buildSdp(ipAddress, richcall, mRcsSettings));
+
+            // Send 200 OK response
+            mImsModule.getSipManager().sendSipResponse(resp);
+            // Read features tag in the request
+            Capabilities capabilities = CapabilityUtils.extractCapabilities(options);
+
+            // Update capabilities in database
+            if (capabilities.isImSessionSupported()) {
+                // RCS-e contact
+                mContactManager.setContactCapabilities(contact, capabilities,
+                        RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE);
+            } else {
+                // Not a RCS-e contact
+                mContactManager.setContactCapabilities(contact, capabilities, RcsStatus.NOT_RCS,
+                        RegistrationState.UNKNOWN);
+            }
+
+            // Notify listener
+            mImsModule.getCore().getListener()
+                    .handleCapabilitiesNotification(contact, capabilities);
+
+        } catch (ContactManagerException e) {
+            throw new SipPayloadException(new StringBuilder(
+                    "Failed to receive capability request '").append(sipId).append("'").toString(),
+                    e);
+        } catch (IOException e) {
+            throw new SipNetworkException(new StringBuilder(
+                    "Failed to receive capability request '").append(sipId).append("'").toString(),
+                    e);
         }
-        ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
-        if (sLogger.isActivated()) {
-            sLogger.debug("OPTIONS request received from ".concat(contact.toString()));
-        }
-
-        // Create 200 OK response
-        String ipAddress = mImsModule.getCurrentNetworkInterface().getNetworkAccess()
-                .getIpAddress();
-        boolean richcall = mImsModule.getRichcallService().isCallConnectedWith(contact);
-        SipResponse resp = SipMessageFactory.create200OkOptionsResponse(options, mImsModule
-                .getSipManager().getSipStack().getContact(),
-                CapabilityUtils.getSupportedFeatureTags(richcall, mRcsSettings),
-                CapabilityUtils.buildSdp(ipAddress, richcall, mRcsSettings));
-
-        // Send 200 OK response
-        mImsModule.getSipManager().sendSipResponse(resp);
-        // Read features tag in the request
-        Capabilities capabilities = CapabilityUtils.extractCapabilities(options);
-
-        // Update capabilities in database
-        if (capabilities.isImSessionSupported()) {
-            // RCS-e contact
-            mContactManager.setContactCapabilities(contact, capabilities, RcsStatus.RCS_CAPABLE,
-                    RegistrationState.ONLINE);
-        } else {
-            // Not a RCS-e contact
-            mContactManager.setContactCapabilities(contact, capabilities, RcsStatus.NOT_RCS,
-                    RegistrationState.UNKNOWN);
-        }
-
-        // Notify listener
-        mImsModule.getCore().getListener().handleCapabilitiesNotification(contact, capabilities);
     }
 
     /**

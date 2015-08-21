@@ -24,6 +24,7 @@ package com.gsma.rcs.addressbook;
 
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -44,15 +45,27 @@ public class LocaleChangedReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, final Intent intent) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("The Locale has changed, we update the RCS strings in Contacts");
+        try {
+            if (sLogger.isActivated()) {
+                sLogger.debug("The Locale has changed, we update the RCS strings in Contacts");
+            }
+            /* We have to modify the strings that are used in contacts manager */
+            ContentResolver contentResolver = context.getContentResolver();
+            LocalContentResolver localContentResolver = new LocalContentResolver(context);
+            RcsSettings rcsSettings = RcsSettings.createInstance(localContentResolver);
+            ContactManager contactManager = ContactManager.createInstance(context, contentResolver,
+                    localContentResolver, rcsSettings);
+            contactManager.updateStrings();
+        } catch (ContactManagerException e) {
+            sLogger.error("Failed to update rcs locale for action : ".concat(intent.getAction()), e);
+        } catch (RuntimeException e) {
+            /*
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
+             */
+            sLogger.error("Failed to update rcs locale for action : ".concat(intent.getAction()), e);
         }
-        /* We have to modify the strings that are used in contacts manager */
-        ContentResolver contentResolver = context.getContentResolver();
-        LocalContentResolver localContentResolver = new LocalContentResolver(context);
-        RcsSettings rcsSettings = RcsSettings.createInstance(localContentResolver);
-        ContactManager contactManager = ContactManager.createInstance(context, contentResolver,
-                localContentResolver, rcsSettings);
-        contactManager.updateStrings();
     }
 }
