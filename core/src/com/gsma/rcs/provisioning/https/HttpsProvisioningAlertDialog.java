@@ -24,14 +24,12 @@ import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 /**
@@ -42,65 +40,38 @@ import android.widget.TextView;
 public class HttpsProvisioningAlertDialog extends Activity {
 
     private static final long COUNTDOWN_INTERVAL_MSEC = 1000;
-    
-    private AlertDialog mErrorDialog;
-    
+
     private CountDownTimer mCountDownTimer;
-    
-    private static final Logger sLogger = Logger.getLogger(HttpsProvisioningAlertDialog.class.getSimpleName());
+    private LinearLayout mErrorLayout;
+    private LinearLayout mOkNomalLayout;
+    private TextView mMsisdn;
+    private Boolean normalCase = true;
+
+    private static final Logger sLogger = Logger.getLogger(HttpsProvisioningAlertDialog.class
+            .getSimpleName());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.rcs_wifi_provisioning);
+        setFinishOnTouchOutside(false);
 
-        Button ok_button = (Button) findViewById(R.id.ok_button);
+        mErrorLayout = (LinearLayout) findViewById(R.id.error_layout);
 
-        final TextView msisdn = (TextView) findViewById(R.id.msisdn);
+        mOkNomalLayout = (LinearLayout) findViewById(R.id.normal_layout);
+        mMsisdn = (TextView) findViewById(R.id.msisdn);
 
-        ok_button.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String contact = msisdn.getText().toString();
-                PhoneNumber phoneNumber = ContactUtil.getValidPhoneNumberFromAndroid(contact);
-                if (phoneNumber == null) {
-                    if (sLogger.isActivated())  {
-                        sLogger.warn("User entered a wrong MSISDN '"+contact+"'!");
-                    }
-                    mErrorDialog = new AlertDialog.Builder(HttpsProvisioningAlertDialog.this)
-                            .setTitle(R.string.label_invalid_phone_number)
-                            .setPositiveButton(R.string.label_ok,
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int whichButton) {
-                                            mErrorDialog.dismiss();
-                                            mErrorDialog = null;
-                                        }
-                                    }).create();
-                    mErrorDialog.setCanceledOnTouchOutside(false);
-                    mErrorDialog.show();
-                } else {
-                    if (sLogger.isActivated())  {
-                        sLogger.debug("User entered MSISDN ".concat(phoneNumber.getNumber()));
-                    }
-                    HttpsProvisioningMSISDNInput.getInstance().responseReceived(
-                            ContactUtil.createContactIdFromValidatedData(phoneNumber));
-                    finish();
-                }
-            }
-        });
+        Button okButton = (Button) findViewById(R.id.ok_button);
+        okButton.setOnClickListener(mNormalButtonClickListener);
 
         Button cancel_button = (Button) findViewById(R.id.cancel_button);
-        cancel_button.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (sLogger.isActivated())  {
-                    sLogger.warn("User cancelled the MSISDN dialog!");
-                }
-                HttpsProvisioningMSISDNInput.getInstance().responseReceived(null);
-                finish();
-            }
-        });
-        mCountDownTimer = new CountDownTimer(HttpsProvisioningUtils.INPUT_MSISDN_TIMEOUT, COUNTDOWN_INTERVAL_MSEC) {
+        cancel_button.setOnClickListener(mCancelButtonClickListener);
+
+        Button okErrorButton = (Button) findViewById(R.id.ok_error_button);
+        okErrorButton.setOnClickListener(mErrorButtonClickListener);
+
+        mCountDownTimer = new CountDownTimer(HttpsProvisioningUtils.INPUT_MSISDN_TIMEOUT,
+                COUNTDOWN_INTERVAL_MSEC) {
 
             @Override
             public void onTick(long millisUntilFinished) {
@@ -108,7 +79,7 @@ public class HttpsProvisioningAlertDialog extends Activity {
 
             @Override
             public void onFinish() {
-                if (sLogger.isActivated())  {
+                if (sLogger.isActivated()) {
                     sLogger.warn("MSISDN dialog has expired!");
                 }
                 HttpsProvisioningMSISDNInput.getInstance().responseReceived(null);
@@ -116,31 +87,90 @@ public class HttpsProvisioningAlertDialog extends Activity {
                 finish();
             }
         }.start();
+
+        if (savedInstanceState != null) {
+            normalCase = savedInstanceState.getBoolean("normalCase");
+        }
+        if (normalCase) {
+            showNormalCase();
+        } else {
+            showErrorCase();
+        }
+    }
+
+    private void showErrorCase() {
+        normalCase = false;
+        mErrorLayout.setVisibility(View.VISIBLE);
+        mOkNomalLayout.setVisibility(View.GONE);
+    }
+
+    private void showNormalCase() {
+        normalCase = true;
+        mErrorLayout.setVisibility(View.GONE);
+        mOkNomalLayout.setVisibility(View.VISIBLE);
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_BACK:
-                if (sLogger.isActivated())  {
-                    sLogger.warn("User exited the MSISDN dialog!");
-                }
-                HttpsProvisioningMSISDNInput.getInstance().responseReceived(null);
-                finish();
-                return true;
+    public void onBackPressed() {
+        if (sLogger.isActivated()) {
+            sLogger.warn("User exited the MSISDN dialog!");
         }
-        return super.onKeyDown(keyCode, event);
+        HttpsProvisioningMSISDNInput.getInstance().responseReceived(null);
+        super.onBackPressed();
     }
 
     @Override
     protected void onDestroy() {
-        if (mErrorDialog != null) {
-            mErrorDialog.dismiss();
-        }
         if (mCountDownTimer != null) {
             mCountDownTimer.cancel();
         }
         super.onDestroy();
     }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("normalCase", normalCase);
+    }
+
+    private OnClickListener mNormalButtonClickListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            String contact = mMsisdn.getText().toString();
+            PhoneNumber phoneNumber = ContactUtil.getValidPhoneNumberFromAndroid(contact);
+            if (phoneNumber == null) {
+                if (sLogger.isActivated()) {
+                    sLogger.warn("User entered a wrong MSISDN '" + contact + "'!");
+                }
+                showErrorCase();
+            } else {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("User entered MSISDN ".concat(phoneNumber.getNumber()));
+                }
+                HttpsProvisioningMSISDNInput.getInstance().responseReceived(
+                        ContactUtil.createContactIdFromValidatedData(phoneNumber));
+                finish();
+            }
+        }
+    };
+
+    private OnClickListener mCancelButtonClickListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (sLogger.isActivated()) {
+                sLogger.warn("User cancelled the MSISDN dialog!");
+            }
+            HttpsProvisioningMSISDNInput.getInstance().responseReceived(null);
+            finish();
+        }
+    };
+
+    private OnClickListener mErrorButtonClickListener = new OnClickListener() {
+
+        @Override
+        public void onClick(View v) {
+            showNormalCase();
+        }
+    };
 
 }

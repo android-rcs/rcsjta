@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.UserDialog" parent="android:style/Theme.Dialog">
-        <item name="android:windowIsTranslucent">false</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:background">#000000</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-    </style>
+	<style name="Theme.UserDialog" parent="android:style/Theme.Dialog">
+		<item name="android:windowIsTranslucent">false</item>
+		<item name="android:windowNoTitle">true</item>
+		<item name="android:background">@android:color/darker_gray</item>
+		<item name="android:textColor">@android:color/white</item>
+		<item name="android:windowBackground">@android:color/transparent</item>
+	</style>
 
 </resources>
