@@ -341,11 +341,13 @@
     <string name="label_file_thumb">Thumbnail</string>
     <string name="label_upload_failed">File upload failed</string>
     <string name="label_upload_aborted">File upload aborted</string>
-    <string name="label_show_upload">Show upload</string>
+    <string name="label_show_upload">Show uploaded file</string>
+    <string name="label_show_icon_upload">Show uploaded thumbnail</string>
     <string name="label_upload_max_size">File is too big. The max size authorised is %s</string>
     <string name="label_upload_started">STARTED</string>
     <string name="label_upload_transferred">TRANSFERRED</string>
-    <string name="label_open_upload_failed">Show file upload failed</string>
+    <string name="label_open_upload_failed">Show uploaded file failed</string>
+    <string name="label_open_icon_upload_failed">Show uploaded thumbnail failed</string>
 
     <!-- Group delivery information menu -->
     <string name="title_group_delivery_info">Group delivery information</string>
