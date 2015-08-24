@@ -8,6 +8,8 @@ From a console, build the third party libraries (DNS, NIST-SIP and BouncyCastle)
 
 From Eclipse, create a new project from existing source code and select the folder /core of your branch.
 
+To be backward compatible with older SDK releases, you should select the SDK defined in the target variable of the project.properties file. 
+
 # Build the Media player library #
 
 From Eclipse, create a new project from existing source code and select the folder /mediaplayer of your branch.
