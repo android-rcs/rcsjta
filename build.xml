@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="GSMA Terminal API" basedir=".">
+<project name="GSMA Terminal API" basedir="." default="help">
 	<tstamp>
 		<format property="TODAY_MY" pattern="yyyyMMdd-HHmmss" locale="en,UK" />
 	</tstamp>
@@ -15,9 +15,8 @@
 	<property name="stack.src" value="${stack.root}/src" />
 	<property name="tools" value="${terminal.root}/tools" />
 	<property name="samples" value="${terminal.root}/samples" />
-	<property name="prov_template.root"
-		value="${tools}/provisioning/RCSJTA_provisioning_template" />
-    <property name="core_control.root" value="${tools}/core_control" />
+	<property name="prov_template.root" value="${tools}/provisioning/prov_template" />
+	<property name="core_control.root" value="${tools}/core_control" />
 	<property name="extension.root" value="${samples}/extension" />
 	<property name="tts.root" value="${samples}/tts" />
 	<property name="javadoc.root" value="${terminal.root}/doclava" />
@@ -41,7 +40,7 @@
 	<!-- ********************* -->
 	<target name="sdk"
 		depends="ri-apk,docs,prov-template-apk,core-control-apk,extension-apk,tts-apk">
-		<echo>Generate RCS SDK for Android target ${android.target}</echo>
+		<echo>Generates RCS SDK for Android target ${android.target}</echo>
 		<mkdir dir="${generate.root}" />
 		<delete>
 			<fileset dir="${generate.root}">
@@ -57,7 +56,7 @@
 				includes="lib*.so" prefix="api/codecs" />
 			<zipfileset dir="${javadoc.root}" prefix="api/javadoc" />
 			<zipfileset dir="${prov_template.root}/bin" includes="*debug.apk"
-				fullpath="tools/RCS_provisioning_template.apk" />
+				fullpath="tools/RCS_prov_template.apk" />
 			<zipfileset dir="${core_control.root}/bin" includes="*debug.apk"
 				fullpath="tools/RCS_core_control.apk" />
 			<zipfileset dir="${stack.root}/bin" includes="*debug.apk"
@@ -72,52 +71,52 @@
 	</target>
 
 	<target name="mediaplayer" depends="core-apk">
-		<echo>Generate mediaplayer lib</echo>
+		<echo>Generates the mediaplayer library.</echo>
 		<ant dir="${terminal.root}/mediaplayer" target="clean" inheritAll="false" />
 		<ant dir="${terminal.root}/mediaplayer" target="debug" inheritAll="false" />
 	</target>
 
 	<target name="core-apk">
-		<echo>Generate Core apk</echo>
+		<echo>Generates the Core apk.</echo>
 		<ant dir="${stack.root}" target="clean" inheritAll="false" />
 		<ant dir="${stack.root}" target="debug" inheritAll="false" />
 	</target>
 
 	<target name="ri-apk" depends="mediaplayer">
-		<echo>Generate RI apk</echo>
+		<echo>Generates the RI apk.</echo>
 		<ant dir="${ri.root}" target="clean" inheritAll="false" />
-		<ant dir="${ri.root}" antfile="build-local.xml"
-			target="all" inheritAll="false" />
+		<ant dir="${ri.root}" antfile="build-local.xml" target="all"
+			inheritAll="false" />
 		<ant dir="${ri.root}" target="debug" inheritAll="false" />
 	</target>
 
 	<target name="prov-template-apk">
-		<echo>Generate RCS provisioning template apk</echo>
+		<echo>Generates the RCS provisioning template apk.</echo>
 		<ant dir="${prov_template.root}" target="clean" inheritAll="false" />
 		<ant dir="${prov_template.root}" target="debug" inheritAll="false" />
 	</target>
-	
+
 	<target name="core-control-apk" depends="ri-apk">
-		<echo>Generate RCS core control apk</echo>
+		<echo>Generates the RCS core control apk.</echo>
 		<ant dir="${core_control.root}" target="clean" inheritAll="false" />
-		<ant dir="${core_control.root}" antfile="build-local.xml"
-			target="all" inheritAll="false" />
+		<ant dir="${core_control.root}" antfile="build-local.xml" target="all"
+			inheritAll="false" />
 		<ant dir="${core_control.root}" target="debug" inheritAll="false" />
 	</target>
 
 	<target name="extension-apk" depends="core-apk">
-		<echo>Generate samples extension apk</echo>
+		<echo>Generates the sample extension apk.</echo>
 		<ant dir="${extension.root}" target="clean" inheritAll="false" />
-		<ant dir="${extension.root}" antfile="build-local.xml"
-			target="all" inheritAll="false" />
+		<ant dir="${extension.root}" antfile="build-local.xml" target="all"
+			inheritAll="false" />
 		<ant dir="${extension.root}" target="debug" inheritAll="false" />
 	</target>
 
 	<target name="tts-apk" depends="core-apk">
-		<echo>Generate samples tts apk</echo>
+		<echo>Generates the sample tts apk.</echo>
 		<ant dir="${tts.root}" target="clean" inheritAll="false" />
-		<ant dir="${tts.root}" antfile="build-local.xml"
-			target="all" inheritAll="false" />
+		<ant dir="${tts.root}" antfile="build-local.xml" target="all"
+			inheritAll="false" />
 		<ant dir="${tts.root}" target="debug" inheritAll="false" />
 	</target>
 
@@ -130,7 +129,7 @@
 			</fileset>
 		</delete>
 
-		<echo>Generate Javadoc to ${terminal.root}/doclava</echo>
+		<echo>Generates the Javadoc to ${terminal.root}/doclava.</echo>
 
 		<fail unless="env.ANDROID_TARGET"
 			message="variable $ANDROID_TARGET not set! Please define variable like 'export ANDROID_TARGET=android-19'" />
@@ -161,5 +160,17 @@
 		</javadoc>
 	</target>
 
+	<target name="help">
+		<echo>Available targets:</echo>
+		<echo> help: Displays this help.</echo>
+		<echo> sdk: Generates RCS SDK for Android target ${android.target}.</echo>
+		<echo> mediaplayer: Generates the mediaplayer library.</echo>
+		<echo> core-apk: Generates the Core apk.</echo>
+		<echo> ri-apk: Generates the RI apk.</echo>
+		<echo> prov-template-apk: Generates the RCS provisioning template apk.</echo>
+		<echo> core-control-apk: Generates the RCS core control apk.</echo>
+		<echo> extension-apk: Generates the sample extension apk.</echo>
+		<echo> tts-apk: Generates the sample tts apk.</echo>
+	</target>
 </project>
 
