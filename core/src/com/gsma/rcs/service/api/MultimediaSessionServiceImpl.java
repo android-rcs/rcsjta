@@ -250,7 +250,6 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
     public void receiveSipMsrpSessionInvitation(Intent msrpSessionInvite,
             GenericSipMsrpSession session) {
         ContactId remote = session.getRemoteContact();
-        // Add session in the list
         MultimediaMessagingSessionImpl multimediaMessaging = new MultimediaMessagingSessionImpl(
                 session.getSessionID(), mMultimediaMessagingSessionEventBroadcaster, mSipService,
                 this, Direction.INCOMING, remote, session.getServiceId(), State.INVITED);
@@ -271,15 +270,6 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
                 this, Direction.INCOMING, remote, session.getServiceId(), State.INVITED);
         session.addListener(multimediaStreaming);
         addMultimediaStreaming(multimediaStreaming);
-
-        // Broadcast intent related to the received invitation
-        IntentUtils.tryToSetExcludeStoppedPackagesFlag(rtpSessionInvite);
-        IntentUtils.tryToSetReceiverForegroundFlag(rtpSessionInvite);
-        rtpSessionInvite.putExtra(MultimediaStreamingSessionIntent.EXTRA_SESSION_ID,
-                session.getSessionID());
-
-        // Broadcast intent related to the received invitation
-        AndroidFactory.getApplicationContext().sendBroadcast(rtpSessionInvite);
     }
 
     /**
