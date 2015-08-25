@@ -243,6 +243,7 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
                 session.setSuccessReportOption(false);
                 /* Open the MSRP session */
                 getMsrpMgr().openMsrpSession();
+                getMsrpMgr().sendEmptyChunk();
             }
 
             /* wait a response */
@@ -270,6 +271,7 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
                     session.setFailureReportOption(false);
                     session.setSuccessReportOption(false);
                     getMsrpMgr().openMsrpSession();
+                    getMsrpMgr().sendEmptyChunk();
                 }
 
                 // The session is established
