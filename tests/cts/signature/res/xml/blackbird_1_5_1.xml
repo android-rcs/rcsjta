@@ -1070,7 +1070,7 @@
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;com.gsma.services.rcs.action.SERVICE_PROVISIONNING_DATA_CHANGED&quot;"
+ value="&quot;com.gsma.services.rcs.action.SERVICE_PROVISIONING_DATA_CHANGED&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"

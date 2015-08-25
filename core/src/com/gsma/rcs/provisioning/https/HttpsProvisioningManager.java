@@ -958,14 +958,14 @@ public class HttpsProvisioningManager {
             if (sLogger.isActivated()) {
                 sLogger.debug("Retry after 511 error (" + mRetryAfter511ErrorCount + "/"
                         + HttpsProvisioningUtils.RETRY_AFTER_511_ERROR_MAX_COUNT
-                        + ") provisionning after "
+                        + ") provisioning after "
                         + HttpsProvisioningUtils.RETRY_AFTER_511_ERROR_TIMEOUT + "ms");
             }
             return true;
         }
 
         if (sLogger.isActivated()) {
-            sLogger.debug("No more retry after 511 error for provisionning");
+            sLogger.debug("No more retry after 511 error for provisioning");
         }
 
         // Reset after 511 counter
@@ -997,11 +997,11 @@ public class HttpsProvisioningManager {
                     * HttpsProvisioningUtils.RETRY_BASE_TIMEOUT;
             HttpsProvisioningService.startRetryAlarm(mCtx, mRetryIntent, retryDelay);
             if (sLogger.isActivated()) {
-                sLogger.debug("Retry provisionning count: " + mRetryCount);
+                sLogger.debug("Retry provisioning count: " + mRetryCount);
             }
         } else {
             if (sLogger.isActivated()) {
-                sLogger.debug("No more retry for provisionning");
+                sLogger.debug("No more retry for provisioning");
             }
         }
     }

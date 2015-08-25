@@ -45,7 +45,7 @@ public abstract class RcsService {
     /**
      * Action to broadcast when RCS service is provisioned.
      */
-    public static final String ACTION_SERVICE_PROVISIONING_DATA_CHANGED = "com.gsma.services.rcs.action.SERVICE_PROVISIONNING_DATA_CHANGED";
+    public static final String ACTION_SERVICE_PROVISIONING_DATA_CHANGED = "com.gsma.services.rcs.action.SERVICE_PROVISIONING_DATA_CHANGED";
 
     protected final RcsServiceControl mRcsServiceControl;
 
