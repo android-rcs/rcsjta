@@ -17,13 +17,13 @@
 package com.gsma.rcs.service.broadcaster;
 
 import com.gsma.rcs.platform.AndroidFactory;
-import com.gsma.rcs.service.ipcalldraft.IPCallIntent;
+import com.gsma.rcs.service.ipcalldraft.IIPCallListener;
 import com.gsma.rcs.service.ipcalldraft.IPCall.ReasonCode;
 import com.gsma.rcs.service.ipcalldraft.IPCall.State;
+import com.gsma.rcs.service.ipcalldraft.IPCallIntent;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.rcs.service.ipcalldraft.IIPCallListener;
 
 import android.content.Intent;
 import android.os.RemoteCallbackList;
@@ -70,7 +70,7 @@ public class IPCallEventBroadcaster implements IIPCallEventBroadcaster {
 
     public void broadcastIPCallInvitation(String callId) {
         Intent invitation = new Intent(IPCallIntent.ACTION_NEW_INVITATION);
-        IntentUtils.tryToSetExcludeStoppedPackagesFlag(invitation);
+        invitation.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
         IntentUtils.tryToSetReceiverForegroundFlag(invitation);
         invitation.putExtra(IPCallIntent.EXTRA_CALL_ID, callId);
         AndroidFactory.getApplicationContext().sendBroadcast(invitation);

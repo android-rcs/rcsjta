@@ -336,12 +336,6 @@ public class StartService extends Service {
         mNetworkStateListener = null;
     }
 
-    private void broadcastEvent(Context context, String action) {
-        Intent serviceProvisioned = new Intent(action);
-        IntentUtils.tryToSetReceiverForegroundFlag(serviceProvisioned);
-        context.sendBroadcast(serviceProvisioned);
-    }
-
     /**
      * Check account
      * 
@@ -407,7 +401,8 @@ public class StartService extends Service {
              * Send service provisioned intent as the configuration settings are now loaded by means
              * of restoring previous values that were backed up during SIM Swap.
              */
-            broadcastEvent(mContext, RcsService.ACTION_SERVICE_PROVISIONING_DATA_CHANGED);
+            IntentUtils.sendBroadcastEvent(mContext,
+                    RcsService.ACTION_SERVICE_PROVISIONING_DATA_CHANGED);
 
             /* Activate service if new account */
             mRcsSettings.setServiceActivationState(true);

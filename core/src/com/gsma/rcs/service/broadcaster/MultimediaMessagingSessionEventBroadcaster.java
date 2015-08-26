@@ -86,7 +86,7 @@ public class MultimediaMessagingSessionEventBroadcaster implements
     }
 
     public void broadcastInvitation(String sessionId, Intent msrpSessionInvite) {
-        IntentUtils.tryToSetExcludeStoppedPackagesFlag(msrpSessionInvite);
+        msrpSessionInvite.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
         IntentUtils.tryToSetReceiverForegroundFlag(msrpSessionInvite);
         msrpSessionInvite.putExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID, sessionId);
 

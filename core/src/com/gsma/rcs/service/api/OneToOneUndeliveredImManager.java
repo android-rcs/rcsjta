@@ -87,7 +87,7 @@ public class OneToOneUndeliveredImManager {
          * PendingIntent
          */
         undeliveredMessage.putExtra(EXTRA_CONTACT, contact.toString());
-        IntentUtils.tryToSetExcludeStoppedPackagesFlag(undeliveredMessage);
+        undeliveredMessage.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
         IntentUtils.tryToSetReceiverForegroundFlag(undeliveredMessage);
         int requestCode = msgId.hashCode();
         return PendingIntent.getService(mCtx, requestCode, undeliveredMessage,
@@ -103,7 +103,7 @@ public class OneToOneUndeliveredImManager {
          * PendingIntent
          */
         undeliveredFile.putExtra(EXTRA_CONTACT, contact.toString());
-        IntentUtils.tryToSetExcludeStoppedPackagesFlag(undeliveredFile);
+        undeliveredFile.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
         IntentUtils.tryToSetReceiverForegroundFlag(undeliveredFile);
         int requestCode = msgId.hashCode();
         return PendingIntent.getService(mCtx, requestCode, undeliveredFile,
@@ -158,7 +158,7 @@ public class OneToOneUndeliveredImManager {
         mImService.getImsModule().getCapabilityService().requestContactCapabilities(contact);
 
         Intent undeliveredMessage = new Intent(OneToOneChatIntent.ACTION_MESSAGE_DELIVERY_EXPIRED);
-        IntentUtils.tryToSetExcludeStoppedPackagesFlag(undeliveredMessage);
+        undeliveredMessage.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
         IntentUtils.tryToSetReceiverForegroundFlag(undeliveredMessage);
         undeliveredMessage.putExtra(OneToOneChatIntent.EXTRA_CONTACT, (Parcelable) contact);
         undeliveredMessage.putExtra(OneToOneChatIntent.EXTRA_MESSAGE_ID, msgId);
@@ -172,7 +172,7 @@ public class OneToOneUndeliveredImManager {
 
         Intent undeliveredFile = new Intent(
                 FileTransferIntent.ACTION_FILE_TRANSFER_DELIVERY_EXPIRED);
-        IntentUtils.tryToSetExcludeStoppedPackagesFlag(undeliveredFile);
+        undeliveredFile.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
         IntentUtils.tryToSetReceiverForegroundFlag(undeliveredFile);
         undeliveredFile.putExtra(FileTransferIntent.EXTRA_CONTACT, (Parcelable) contact);
         undeliveredFile.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, fileTransferId);

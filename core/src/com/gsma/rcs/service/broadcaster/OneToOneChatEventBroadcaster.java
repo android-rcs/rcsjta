@@ -90,7 +90,7 @@ public class OneToOneChatEventBroadcaster implements IOneToOneChatEventBroadcast
     public void broadcastMessageReceived(String mimeType, String msgId) {
         Intent newOneToOneMessage = new Intent(
                 OneToOneChatIntent.ACTION_NEW_ONE_TO_ONE_CHAT_MESSAGE);
-        IntentUtils.tryToSetExcludeStoppedPackagesFlag(newOneToOneMessage);
+        newOneToOneMessage.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
         IntentUtils.tryToSetReceiverForegroundFlag(newOneToOneMessage);
         newOneToOneMessage.putExtra(OneToOneChatIntent.EXTRA_MIME_TYPE, mimeType);
         newOneToOneMessage.putExtra(OneToOneChatIntent.EXTRA_MESSAGE_ID, msgId);

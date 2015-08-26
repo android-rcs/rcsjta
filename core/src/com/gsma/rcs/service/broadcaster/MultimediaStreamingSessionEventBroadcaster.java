@@ -86,7 +86,7 @@ public class MultimediaStreamingSessionEventBroadcaster implements
     }
 
     public void broadcastInvitation(String sessionId, Intent rtpSessionInvite) {
-        IntentUtils.tryToSetExcludeStoppedPackagesFlag(rtpSessionInvite);
+        rtpSessionInvite.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
         IntentUtils.tryToSetReceiverForegroundFlag(rtpSessionInvite);
         rtpSessionInvite.putExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID, sessionId);
 

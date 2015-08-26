@@ -75,7 +75,7 @@ public class VideoSharingEventBroadcaster implements IVideoSharingEventBroadcast
 
     public void broadcastInvitation(String sharingId) {
         Intent newInvitation = new Intent(VideoSharingIntent.ACTION_NEW_INVITATION);
-        IntentUtils.tryToSetExcludeStoppedPackagesFlag(newInvitation);
+        newInvitation.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
         IntentUtils.tryToSetReceiverForegroundFlag(newInvitation);
         newInvitation.putExtra(VideoSharingIntent.EXTRA_SHARING_ID, sharingId);
         AndroidFactory.getApplicationContext().sendBroadcast(newInvitation);

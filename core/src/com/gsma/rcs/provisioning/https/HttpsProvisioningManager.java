@@ -811,11 +811,8 @@ public class HttpsProvisioningManager {
                     LauncherUtils.launchRcsCoreService(mCtx, mRcsSettings);
                 }
 
-                // Send service provisioning intent
-                Intent serviceProvisioned = new Intent(
+                IntentUtils.sendBroadcastEvent(mCtx,
                         RcsService.ACTION_SERVICE_PROVISIONING_DATA_CHANGED);
-                IntentUtils.tryToSetReceiverForegroundFlag(serviceProvisioned);
-                mCtx.sendBroadcast(serviceProvisioned);
             } catch (SAXException e) {
                 if (logActivated) {
                     sLogger.debug("Can't parse provisioning document");

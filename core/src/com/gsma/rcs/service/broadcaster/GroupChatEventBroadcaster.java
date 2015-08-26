@@ -142,7 +142,7 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
 
     public void broadcastInvitation(String chatId) {
         Intent invitation = new Intent(GroupChatIntent.ACTION_NEW_INVITATION);
-        IntentUtils.tryToSetExcludeStoppedPackagesFlag(invitation);
+        invitation.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
         IntentUtils.tryToSetReceiverForegroundFlag(invitation);
         invitation.putExtra(GroupChatIntent.EXTRA_CHAT_ID, chatId);
         AndroidFactory.getApplicationContext().sendBroadcast(invitation);
@@ -150,7 +150,7 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
 
     public void broadcastMessageReceived(String apiMimeType, String msgId) {
         Intent newGroupChatMessage = new Intent(GroupChatIntent.ACTION_NEW_GROUP_CHAT_MESSAGE);
-        IntentUtils.tryToSetExcludeStoppedPackagesFlag(newGroupChatMessage);
+        newGroupChatMessage.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
         IntentUtils.tryToSetReceiverForegroundFlag(newGroupChatMessage);
         newGroupChatMessage.putExtra(GroupChatIntent.EXTRA_MIME_TYPE, apiMimeType);
         newGroupChatMessage.putExtra(GroupChatIntent.EXTRA_MESSAGE_ID, msgId);

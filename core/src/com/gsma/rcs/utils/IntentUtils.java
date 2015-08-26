@@ -16,25 +16,17 @@
 
 package com.gsma.rcs.utils;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 
 /**
- * IntentUtils class sets appropriate flags to an intent using reflection
+ * IntentUtils class
  */
 public class IntentUtils {
 
     /**
-     * Using reflection to add FLAG_EXCLUDE_STOPPED_PACKAGES support backward compatibility.
-     *
-     * @param intent Intent to set flags
-     */
-    public static void tryToSetExcludeStoppedPackagesFlag(Intent intent) {
-        intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-    }
-
-    /**
-     * Using reflection to add FLAG_RECEIVER_FOREGROUND support backward compatibility.
+     * Try to allow the recipient to run at foreground priority, with a shorter timeout interval.
      *
      * @param intent Intent to set flags
      */
@@ -48,5 +40,17 @@ public class IntentUtils {
             return;
         }
         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+    }
+
+    /**
+     * Sends broadcast event
+     * 
+     * @param context the Context
+     * @param action the intent action
+     */
+    public static void sendBroadcastEvent(Context context, String action) {
+        Intent intent = new Intent(action);
+        IntentUtils.tryToSetReceiverForegroundFlag(intent);
+        context.sendBroadcast(intent);
     }
 }

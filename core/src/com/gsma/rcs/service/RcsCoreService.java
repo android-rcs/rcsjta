@@ -688,10 +688,7 @@ public class RcsCoreService extends Service implements CoreListener {
          */
         mImOperationExecutor.execute(new RecreateDeliveryExpirationAlarms(mMessagingLog,
                 mOneToOneUndeliveredImManager, mOperationLock));
-        // Send service up intent
-        Intent serviceUp = new Intent(RcsService.ACTION_SERVICE_UP);
-        IntentUtils.tryToSetReceiverForegroundFlag(serviceUp);
-        mCtx.sendBroadcast(serviceUp);
+        IntentUtils.sendBroadcastEvent(mCtx, RcsService.ACTION_SERVICE_UP);
     }
 
     @Override

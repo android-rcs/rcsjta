@@ -91,7 +91,7 @@ public class ImageSharingEventBroadcaster implements IImageSharingEventBroadcast
 
     public void broadcastInvitation(String sharingId) {
         Intent invitation = new Intent(ImageSharingIntent.ACTION_NEW_INVITATION);
-        IntentUtils.tryToSetExcludeStoppedPackagesFlag(invitation);
+        invitation.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
         IntentUtils.tryToSetReceiverForegroundFlag(invitation);
         invitation.putExtra(ImageSharingIntent.EXTRA_SHARING_ID, sharingId);
         AndroidFactory.getApplicationContext().sendBroadcast(invitation);

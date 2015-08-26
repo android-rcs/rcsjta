@@ -91,7 +91,7 @@ public class OneToOneFileTransferBroadcaster implements IOneToOneFileTransferBro
 
     public void broadcastInvitation(String fileTransferId) {
         Intent invitation = new Intent(FileTransferIntent.ACTION_NEW_INVITATION);
-        IntentUtils.tryToSetExcludeStoppedPackagesFlag(invitation);
+        invitation.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
         IntentUtils.tryToSetReceiverForegroundFlag(invitation);
         invitation.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, fileTransferId);
         AndroidFactory.getApplicationContext().sendBroadcast(invitation);
@@ -99,7 +99,7 @@ public class OneToOneFileTransferBroadcaster implements IOneToOneFileTransferBro
 
     public void broadcastResumeFileTransfer(String filetransferId) {
         Intent resumeFileTransfer = new Intent(FileTransferIntent.ACTION_RESUME);
-        IntentUtils.tryToSetExcludeStoppedPackagesFlag(resumeFileTransfer);
+        resumeFileTransfer.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
         IntentUtils.tryToSetReceiverForegroundFlag(resumeFileTransfer);
         resumeFileTransfer.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, filetransferId);
         AndroidFactory.getApplicationContext().sendBroadcast(resumeFileTransfer);
