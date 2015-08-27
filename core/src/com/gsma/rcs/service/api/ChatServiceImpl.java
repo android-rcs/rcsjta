@@ -352,40 +352,29 @@ public class ChatServiceImpl extends IChatService.Stub {
                 || ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
             ReasonCode reasonCode = imdnToFailedReasonCode(imdn);
             synchronized (mLock) {
-                // TODO: Potential race condition, the message may have been removed at this
-                // point which means the database won't be updated, but we'll still do the
-                // broadcast. A local lock like mLock isn't much help since mMessagingLog is
-                // accessed from many other places.
-                mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.FAILED, reasonCode);
-
-                mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, mimeType,
-                        msgId, Status.FAILED, reasonCode);
+                if (mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.FAILED,
+                        reasonCode)) {
+                    mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, mimeType,
+                            msgId, Status.FAILED, reasonCode);
+                }
             }
 
         } else if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
             mOneToOneUndeliveredImManager.cancelDeliveryTimeoutAlarm(msgId);
             synchronized (mLock) {
-                // TODO: Potential race condition, the message may have been removed at this
-                // point which means the database won't be updated, but we'll still do the
-                // broadcast. A local lock like mLock isn't much help since mMessagingLog is
-                // accessed from many other places.
-                mMessagingLog.setChatMessageStatusDelivered(msgId, timestamp);
-
-                mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, mimeType,
-                        msgId, Status.DELIVERED, ReasonCode.UNSPECIFIED);
+                if (mMessagingLog.setChatMessageStatusDelivered(msgId, timestamp)) {
+                    mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, mimeType,
+                            msgId, Status.DELIVERED, ReasonCode.UNSPECIFIED);
+                }
             }
 
         } else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
             mOneToOneUndeliveredImManager.cancelDeliveryTimeoutAlarm(msgId);
             synchronized (mLock) {
-                // TODO: Potential race condition, the message may have been removed at this
-                // point which means the database won't be updated, but we'll still do the
-                // broadcast. A local lock like mLock isn't much help since mMessagingLog is
-                // accessed from many other places.
-                mMessagingLog.setChatMessageStatusDisplayed(msgId, timestamp);
-
-                mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, mimeType,
-                        msgId, Status.DISPLAYED, ReasonCode.UNSPECIFIED);
+                if (mMessagingLog.setChatMessageStatusDisplayed(msgId, timestamp)) {
+                    mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, mimeType,
+                            msgId, Status.DISPLAYED, ReasonCode.UNSPECIFIED);
+                }
             }
         }
     }
@@ -1042,9 +1031,10 @@ public class ChatServiceImpl extends IChatService.Stub {
      */
     public void setOneToOneChatMessageStatusAndReasonCode(String msgId, String mimeType,
             ContactId contact, Status status, ReasonCode reasonCode) {
-        mMessagingLog.setChatMessageStatusAndReasonCode(msgId, status, reasonCode);
-        mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, mimeType, msgId,
-                status, reasonCode);
+        if (mMessagingLog.setChatMessageStatusAndReasonCode(msgId, status, reasonCode)) {
+            mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, mimeType, msgId,
+                    status, reasonCode);
+        }
     }
 
     /**
@@ -1058,9 +1048,10 @@ public class ChatServiceImpl extends IChatService.Stub {
      */
     public void setGroupChatMessageStatusAndReasonCode(String msgId, String mimeType,
             String chatId, Status status, ReasonCode reasonCode) {
-        mMessagingLog.setChatMessageStatusAndReasonCode(msgId, status, reasonCode);
-        mGroupChatEventBroadcaster.broadcastMessageStatusChanged(chatId, mimeType, msgId, status,
-                reasonCode);
+        if (mMessagingLog.setChatMessageStatusAndReasonCode(msgId, status, reasonCode)) {
+            mGroupChatEventBroadcaster.broadcastMessageStatusChanged(chatId, mimeType, msgId,
+                    status, reasonCode);
+        }
     }
 
     public void broadcastGroupChatMessagesDeleted(String chatId, Set<String> msgIds) {

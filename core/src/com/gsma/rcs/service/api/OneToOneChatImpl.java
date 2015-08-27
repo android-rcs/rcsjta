@@ -390,9 +390,10 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * @param state state of message
      */
     private void setChatMessageStatus(String msgId, String mimeType, Status status) {
-        mMessagingLog.setChatMessageStatusAndReasonCode(msgId, status, ReasonCode.UNSPECIFIED);
-        mBroadcaster.broadcastMessageStatusChanged(mContact, mimeType, msgId, status,
-                ReasonCode.UNSPECIFIED);
+        if (mMessagingLog.setChatMessageStatusAndReasonCode(msgId, status, ReasonCode.UNSPECIFIED)) {
+            mBroadcaster.broadcastMessageStatusChanged(mContact, mimeType, msgId, status,
+                    ReasonCode.UNSPECIFIED);
+        }
     }
 
     /**
@@ -951,10 +952,11 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                     .toString());
         }
         synchronized (lock) {
-            mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.SENT,
-                    ReasonCode.UNSPECIFIED);
-            mBroadcaster.broadcastMessageStatusChanged(mContact, mimeType, msgId, Status.SENT,
-                    ReasonCode.UNSPECIFIED);
+            if (mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.SENT,
+                    ReasonCode.UNSPECIFIED)) {
+                mBroadcaster.broadcastMessageStatusChanged(mContact, mimeType, msgId, Status.SENT,
+                        ReasonCode.UNSPECIFIED);
+            }
         }
     }
 
@@ -965,11 +967,11 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                     .toString());
         }
         synchronized (lock) {
-            mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.FAILED,
-                    ReasonCode.FAILED_SEND);
-
-            mBroadcaster.broadcastMessageStatusChanged(mContact, mimeType, msgId, Status.FAILED,
-                    ReasonCode.FAILED_SEND);
+            if (mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.FAILED,
+                    ReasonCode.FAILED_SEND)) {
+                mBroadcaster.broadcastMessageStatusChanged(mContact, mimeType, msgId,
+                        Status.FAILED, ReasonCode.FAILED_SEND);
+            }
         }
     }
 

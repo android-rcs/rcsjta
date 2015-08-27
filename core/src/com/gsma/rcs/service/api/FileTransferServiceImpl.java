@@ -399,8 +399,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param remoteContact Contact ID of remote contact
      * @param displayName the display name of the remote contact
      */
-    public void receiveResendFileTransferInvitation(FileSharingSession session, ContactId remoteContact,
-            String displayName) {
+    public void receiveResendFileTransferInvitation(FileSharingSession session,
+            ContactId remoteContact, String displayName) {
         if (sLogger.isActivated()) {
             sLogger.info("Receive resend FT invitation from " + remoteContact + " displayName="
                     + displayName);
@@ -1251,60 +1251,58 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         String fileTransferId = imdn.getMsgId();
         if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
             mOneToOneUndeliveredImManager.cancelDeliveryTimeoutAlarm(fileTransferId);
-            mMessagingLog.setFileTransferDelivered(fileTransferId, timestamp);
-
-            mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
-                    State.DELIVERED, ReasonCode.UNSPECIFIED);
+            if (mMessagingLog.setFileTransferDelivered(fileTransferId, timestamp)) {
+                mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
+                        State.DELIVERED, ReasonCode.UNSPECIFIED);
+            }
         } else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
             mOneToOneUndeliveredImManager.cancelDeliveryTimeoutAlarm(fileTransferId);
-            mMessagingLog.setFileTransferDisplayed(fileTransferId, timestamp);
-
-            mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
-                    State.DISPLAYED, ReasonCode.UNSPECIFIED);
+            if (mMessagingLog.setFileTransferDisplayed(fileTransferId, timestamp)) {
+                mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
+                        State.DISPLAYED, ReasonCode.UNSPECIFIED);
+            }
         } else if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)
                 || ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)
                 || ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
             ReasonCode reasonCode = imdnToFileTransferFailedReasonCode(imdn);
 
-            mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, State.FAILED,
-                    reasonCode);
-
-            mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
-                    State.FAILED, reasonCode);
+            if (mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, State.FAILED,
+                    reasonCode)) {
+                mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
+                        State.FAILED, reasonCode);
+            }
         }
     }
 
     private void handleGroupFileDeliveryStatusDelivered(String chatId, String fileTransferId,
             ContactId contact, long timestampDelivered) {
-        // TODO: Potential race condition, the message may have been removed at this point which
-        // means the database won't be updated, but we'll still do the broadcast.
-        mMessagingLog.setGroupChatDeliveryInfoDelivered(chatId, contact, fileTransferId,
-                timestampDelivered);
-        mGroupFileTransferBroadcaster.broadcastDeliveryInfoChanged(chatId, contact, fileTransferId,
-                GroupDeliveryInfo.Status.DELIVERED, GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
-        if (mMessagingLog.isDeliveredToAllRecipients(fileTransferId)) {
-            // TODO: Potential race condition, the message may have been removed at this point which
-            // means the database won't be updated, but we'll still do the broadcast.
-            mMessagingLog.setFileTransferDelivered(fileTransferId, timestampDelivered);
-            mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId,
-                    State.DELIVERED, ReasonCode.UNSPECIFIED);
+        if (mMessagingLog.setGroupChatDeliveryInfoDelivered(chatId, contact, fileTransferId,
+                timestampDelivered)) {
+            mGroupFileTransferBroadcaster.broadcastDeliveryInfoChanged(chatId, contact,
+                    fileTransferId, GroupDeliveryInfo.Status.DELIVERED,
+                    GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
+            if (mMessagingLog.isDeliveredToAllRecipients(fileTransferId)) {
+                if (mMessagingLog.setFileTransferDelivered(fileTransferId, timestampDelivered)) {
+                    mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId,
+                            State.DELIVERED, ReasonCode.UNSPECIFIED);
+                }
+            }
         }
     }
 
     private void handleGroupFileDeliveryStatusDisplayed(String chatId, String fileTransferId,
             ContactId contact, long timestampDisplayed) {
-        // TODO: Potential race condition, the file transfer may have been removed at this point
-        // which means the database won't be updated, but we'll still do the broadcast.
-        mMessagingLog.setGroupChatDeliveryInfoDisplayed(chatId, contact, fileTransferId,
-                timestampDisplayed);
-        mGroupFileTransferBroadcaster.broadcastDeliveryInfoChanged(chatId, contact, fileTransferId,
-                GroupDeliveryInfo.Status.DISPLAYED, GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
-        if (mMessagingLog.isDisplayedByAllRecipients(fileTransferId)) {
-            // TODO: Potential race condition, the file transfer may have been removed at this point
-            // which means the database won't be updated, but we'll still do the broadcast.
-            mMessagingLog.setFileTransferDisplayed(fileTransferId, timestampDisplayed);
-            mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId,
-                    State.DISPLAYED, ReasonCode.UNSPECIFIED);
+        if (mMessagingLog.setGroupChatDeliveryInfoDisplayed(chatId, contact, fileTransferId,
+                timestampDisplayed)) {
+            mGroupFileTransferBroadcaster.broadcastDeliveryInfoChanged(chatId, contact,
+                    fileTransferId, GroupDeliveryInfo.Status.DISPLAYED,
+                    GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
+            if (mMessagingLog.isDisplayedByAllRecipients(fileTransferId)) {
+                if (mMessagingLog.setFileTransferDisplayed(fileTransferId, timestampDisplayed)) {
+                    mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId,
+                            State.DISPLAYED, ReasonCode.UNSPECIFIED);
+                }
+            }
         }
     }
 
@@ -1658,9 +1656,10 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      */
     public void setOneToOneFileTransferStateAndReasonCode(String fileTransferId, ContactId contact,
             State state, ReasonCode reasonCode) {
-        mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, state, reasonCode);
-        mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId, state,
-                reasonCode);
+        if (mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, state, reasonCode)) {
+            mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId, state,
+                    reasonCode);
+        }
     }
 
     /**
@@ -1673,9 +1672,10 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      */
     public void setGroupFileTransferStateAndReasonCode(String fileTransferId, String chatId,
             State state, ReasonCode reasonCode) {
-        mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, state, reasonCode);
-        mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId, state,
-                reasonCode);
+        if (mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, state, reasonCode)) {
+            mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId, state,
+                    reasonCode);
+        }
     }
 
     public void broadcastOneToOneFileTransferDeleted(ContactId contact, Set<String> transferIds) {

@@ -186,15 +186,17 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             long timestampDelivered) {
         String mimeType = mMessagingLog.getMessageMimeType(msgId);
         synchronized (lock) {
-            mPersistentStorage.setGroupChatDeliveryInfoDelivered(mChatId, contact, msgId,
-                    timestampDelivered);
-            mBroadcaster.broadcastMessageGroupDeliveryInfoChanged(mChatId, contact, mimeType,
-                    msgId, GroupDeliveryInfo.Status.DELIVERED,
-                    GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
-            if (mPersistentStorage.isDeliveredToAllRecipients(msgId)) {
-                mPersistentStorage.setMessageStatusDelivered(msgId, timestampDelivered);
-                mBroadcaster.broadcastMessageStatusChanged(mChatId, mimeType, msgId,
-                        Status.DELIVERED, Content.ReasonCode.UNSPECIFIED);
+            if (mPersistentStorage.setGroupChatDeliveryInfoDelivered(mChatId, contact, msgId,
+                    timestampDelivered)) {
+                mBroadcaster.broadcastMessageGroupDeliveryInfoChanged(mChatId, contact, mimeType,
+                        msgId, GroupDeliveryInfo.Status.DELIVERED,
+                        GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
+                if (mPersistentStorage.isDeliveredToAllRecipients(msgId)) {
+                    if (mPersistentStorage.setMessageStatusDelivered(msgId, timestampDelivered)) {
+                        mBroadcaster.broadcastMessageStatusChanged(mChatId, mimeType, msgId,
+                                Status.DELIVERED, Content.ReasonCode.UNSPECIFIED);
+                    }
+                }
             }
         }
     }
@@ -203,15 +205,17 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             long timestampDisplayed) {
         String mimeType = mMessagingLog.getMessageMimeType(msgId);
         synchronized (lock) {
-            mPersistentStorage
-                    .setDeliveryInfoDisplayed(mChatId, contact, msgId, timestampDisplayed);
-            mBroadcaster.broadcastMessageGroupDeliveryInfoChanged(mChatId, contact, mimeType,
-                    msgId, GroupDeliveryInfo.Status.DISPLAYED,
-                    GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
-            if (mPersistentStorage.isDisplayedByAllRecipients(msgId)) {
-                mPersistentStorage.setMessageStatusDisplayed(msgId, timestampDisplayed);
-                mBroadcaster.broadcastMessageStatusChanged(mChatId, mimeType, msgId,
-                        Status.DISPLAYED, Content.ReasonCode.UNSPECIFIED);
+            if (mPersistentStorage.setDeliveryInfoDisplayed(mChatId, contact, msgId,
+                    timestampDisplayed)) {
+                mBroadcaster.broadcastMessageGroupDeliveryInfoChanged(mChatId, contact, mimeType,
+                        msgId, GroupDeliveryInfo.Status.DISPLAYED,
+                        GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
+                if (mPersistentStorage.isDisplayedByAllRecipients(msgId)) {
+                    if (mPersistentStorage.setMessageStatusDisplayed(msgId, timestampDisplayed)) {
+                        mBroadcaster.broadcastMessageStatusChanged(mChatId, mimeType, msgId,
+                                Status.DISPLAYED, Content.ReasonCode.UNSPECIFIED);
+                    }
+                }
             }
         }
     }
@@ -959,8 +963,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             sLogger.error(
                     new StringBuilder("Failed to send chat message with msgId '").append(msgId)
                             .append("' within chat session").toString(), e);
-            mChatService.setGroupChatMessageStatusAndReasonCode(msgId, msg.getMimeType(),
-                    mChatId, Status.FAILED, Content.ReasonCode.FAILED_SEND);
+            mChatService.setGroupChatMessageStatusAndReasonCode(msgId, msg.getMimeType(), mChatId,
+                    Status.FAILED, Content.ReasonCode.FAILED_SEND);
         }
     }
 
@@ -1006,8 +1010,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     private void dequeueChatMessageAndBroadcastStatusChange(ChatMessage msg) {
         mMessagingLog.dequeueChatMessage(msg);
         mBroadcaster.broadcastMessageStatusChanged(mChatId,
-                ChatUtils.networkMimeTypeToApiMimeType(msg), msg.getMessageId(),
-                Status.SENDING, Content.ReasonCode.UNSPECIFIED);
+                ChatUtils.networkMimeTypeToApiMimeType(msg), msg.getMessageId(), Status.SENDING,
+                Content.ReasonCode.UNSPECIFIED);
     }
 
     /**
