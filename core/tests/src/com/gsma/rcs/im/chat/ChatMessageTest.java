@@ -27,6 +27,7 @@ import com.gsma.rcs.provider.messaging.MessageData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtilMockContext;
+import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.Message;
@@ -70,7 +71,7 @@ public class ChatMessageTest extends AndroidTestCase {
         mContact = contactUtils.formatContact("+339000000");
         ImsModule.IMS_USER_PROFILE = new UserProfile(mContact, "homeDomain", "privateID",
                 "password", "realm", "xdmServerAddr", "xdmServerLogin", "xdmServerPassword",
-                "imConferenceUri", mRcsSettings);
+                formatSipUri("imConferenceUri"), mRcsSettings);
         mTimestamp = mRandom.nextLong();
         mTimestampSent = mRandom.nextLong();
         mText = Long.toString(mRandom.nextLong());
@@ -161,5 +162,16 @@ public class ChatMessageTest extends AndroidTestCase {
         mLocalContentResolver.delete(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), null,
                 null);
         assertFalse(mMessagingLog.isMessagePersisted(msgId));
+    }
+
+    /**
+     * Format to SIP-URI
+     * 
+     * @param path Sip Uri path
+     * @return SIP-URI
+     */
+    private Uri formatSipUri(String path) {
+        return path.startsWith(PhoneUtils.SIP_URI_HEADER) ? Uri.parse(path) : Uri
+                .parse(new StringBuilder(PhoneUtils.SIP_URI_HEADER).append(path).toString());
     }
 }
