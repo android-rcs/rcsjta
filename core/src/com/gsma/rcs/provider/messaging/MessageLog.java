@@ -103,6 +103,9 @@ public class MessageLog implements IMessageLog {
 
     private static final String ORDER_BY_TIMESTAMP_ASC = MessageData.KEY_TIMESTAMP.concat(" ASC");
 
+    private static final String SELECTION_BY_NOT_DISPLAYED = new StringBuilder(
+            MessageData.KEY_STATUS).append("<>").append(Status.DISPLAYED.toInt()).toString();
+
     /**
      * Constructor
      * 
@@ -653,13 +656,15 @@ public class MessageLog implements IMessageLog {
             sLogger.debug(new StringBuilder("setChatMessageStatusDelivered msgId=").append(msgId)
                     .append(", timestampDelivered=").append(timestampDelivered).toString());
         }
+
         ContentValues values = new ContentValues();
         values.put(MessageData.KEY_STATUS, Status.DELIVERED.toInt());
         values.put(MessageData.KEY_REASON_CODE, ReasonCode.UNSPECIFIED.toInt());
         values.put(MessageData.KEY_TIMESTAMP_DELIVERED, timestampDelivered);
         values.put(MessageData.KEY_EXPIRED_DELIVERY, 0);
+
         return mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
-                values, null, null) > 0;
+                values, SELECTION_BY_NOT_DISPLAYED, null) > 0;
     }
 
     @Override
@@ -668,13 +673,16 @@ public class MessageLog implements IMessageLog {
             sLogger.debug(new StringBuilder("setChatMessageStatusDisplayed msgId=").append(msgId)
                     .append(", timestampDisplayed=").append(timestampDisplayed).toString());
         }
+
+
         ContentValues values = new ContentValues();
         values.put(MessageData.KEY_STATUS, Status.DISPLAYED.toInt());
         values.put(MessageData.KEY_REASON_CODE, ReasonCode.UNSPECIFIED.toInt());
         values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, timestampDisplayed);
         values.put(MessageData.KEY_EXPIRED_DELIVERY, 0);
-        return mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
-                values, null, null) > 0;
+        return mLocalContentResolver.update(
+                Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), values,
+                null, null) > 0;
     }
 
     @Override

@@ -42,6 +42,12 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
             GroupDeliveryInfoData.KEY_ID).append("=? AND ")
             .append(GroupDeliveryInfoData.KEY_CONTACT).append("=?").toString();
 
+    private static final String SELECTION_DELIVERY_INFO_BY_MSG_ID_AND_CONTACT_EXCLUDE_DISPLAYED = new StringBuilder(
+            GroupDeliveryInfoData.KEY_ID).append("=? AND ")
+            .append(GroupDeliveryInfoData.KEY_CONTACT).append("=?").append(" AND ")
+            .append(GroupDeliveryInfoData.KEY_STATUS).append("<>").append(Status.DISPLAYED.toInt())
+            .toString();
+
     private static final String SELECTION_CONTACTS_NOT_RECEIVED_MESSAGE = new StringBuilder(
             GroupDeliveryInfoData.KEY_STATUS).append("=").append(Status.NOT_DELIVERED.toInt())
             .append(" OR (").append(GroupDeliveryInfoData.KEY_STATUS).append("=")
@@ -53,6 +59,10 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
     private static final String SELECTION_DELIVERY_INFO_NOT_DISPLAYED = new StringBuilder(
             GroupDeliveryInfoData.KEY_STATUS).append("<>").append(Status.DISPLAYED.toInt())
             .toString();
+
+    private static final String[] PROJECTION_MESSAGE_ID = new String[] {
+        GroupDeliveryInfoData.KEY_ID
+    };
 
     private final LocalContentResolver mLocalContentResolver;
 
@@ -80,7 +90,10 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
     }
 
     /**
-     * Set delivery status for outgoing group chat messages and files
+     * Set delivery status for outgoing group chat messages and files. Note that this method should
+     * not be used for Status.DELIVERED and Status.DISPLAYED. These states require timestamps and
+     * should be set through setGroupChatDeliveryInfoDisplayed and setGroupChatDeliveryInfoDisplayed
+     * respectively.
      * 
      * @param chatId Group chat ID
      * @param contact The contact ID for which the entry is to be updated
@@ -97,6 +110,15 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
         String[] selectionArgs = new String[] {
                 msgId, contact.toString()
         };
+
+        switch (status) {
+            case DELIVERED:
+            case DISPLAYED:
+                throw new IllegalArgumentException(new StringBuilder("Status that requires ")
+                        .append("timestamp passed, use specific method taking timestamp")
+                        .append(" to set status ").append(status.toString()).toString());
+            default:
+        }
 
         return (mLocalContentResolver.update(GroupDeliveryInfoData.CONTENT_URI, values,
                 SELECTION_DELIVERY_INFO_BY_MSG_ID_AND_CONTACT, selectionArgs) >= 1);
@@ -158,15 +180,34 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
         };
 
         if (mLocalContentResolver.update(GroupDeliveryInfoData.CONTENT_URI, values,
-                SELECTION_DELIVERY_INFO_BY_MSG_ID_AND_CONTACT, selectionArgs) < 1) {
-            /*
-             * No entry updated means that there was no matching row. Adding row and setting
-             * displayed timestamp to 0.
-             */
-            addGroupChatDeliveryInfoEntry(chatId, contact, msgId, status, reason,
-                    timestampDelivered, 0);
+                SELECTION_DELIVERY_INFO_BY_MSG_ID_AND_CONTACT_EXCLUDE_DISPLAYED, selectionArgs) > 0) {
+            /* A matching GDI row was found and updated. */
+            return true;
         }
-        return true;
+
+        Cursor cursor = null;
+        try {
+            Uri contentUri = GroupDeliveryInfoData.CONTENT_URI;
+            cursor = mLocalContentResolver.query(contentUri, PROJECTION_MESSAGE_ID,
+                    SELECTION_DELIVERY_INFO_BY_MSG_ID_AND_CONTACT, selectionArgs, null);
+            CursorUtil.assertCursorIsNotNull(cursor, contentUri);
+            if (cursor.getCount() < 1) {
+                /*
+                 * No entry updated means that there was no matching row. Adding row and setting
+                 * displayed timestamp to 0.
+                 */
+                addGroupChatDeliveryInfoEntry(chatId, contact, msgId, status, reason,
+                        timestampDelivered, 0);
+                return true;
+            }
+            /*
+             * A matching row was found but since it was not already updated above we can assume it
+             * shouldn't be updated.
+             */
+            return false;
+        } finally {
+            CursorUtil.close(cursor);
+        }
     }
 
     @Override

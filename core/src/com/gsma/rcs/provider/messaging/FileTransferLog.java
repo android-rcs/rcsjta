@@ -82,6 +82,9 @@ public class FileTransferLog implements IFileTransferLog {
     private static final String SELECTION_BY_MULTIPLE_FT_IDS = new StringBuilder(
             FileTransferData.KEY_FT_ID).append(" IN(").append("=?)").toString();
 
+    private static final String SELECTION_BY_NOT_DISPLAYED = new StringBuilder(
+            FileTransferData.KEY_STATE).append("<>").append(State.DISPLAYED.toInt()).toString();
+
     private static final int FILE_TRANSFER_DELIVERY_EXPIRED = 1;
 
     private static final int FILE_TRANSFER_DELIVERY_EXPIRATION_NOT_APPLICABLE = 0;
@@ -122,7 +125,8 @@ public class FileTransferLog implements IFileTransferLog {
      * @param rcsSettings RcsSettings
      */
     /* package private */FileTransferLog(LocalContentResolver localContentResolver,
-            GroupChatLog groupChatLog, GroupDeliveryInfoLog groupChatDeliveryInfoLog, RcsSettings rcsSettings) {
+            GroupChatLog groupChatLog, GroupDeliveryInfoLog groupChatDeliveryInfoLog,
+            RcsSettings rcsSettings) {
         mLocalContentResolver = localContentResolver;
         mGroupChatLog = groupChatLog;
         mGroupChatDeliveryInfoLog = groupChatDeliveryInfoLog;
@@ -829,8 +833,8 @@ public class FileTransferLog implements IFileTransferLog {
         values.put(FileTransferData.KEY_EXPIRED_DELIVERY, 0);
 
         return mLocalContentResolver.update(
-                Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
-                null) > 0;
+                Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values,
+                SELECTION_BY_NOT_DISPLAYED, null) > 0;
     }
 
     public boolean setFileTransferDisplayed(String fileTransferId, long timestampDisplayed) {
