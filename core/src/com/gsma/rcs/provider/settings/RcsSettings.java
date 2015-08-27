@@ -35,6 +35,7 @@ import com.gsma.rcs.provider.settings.RcsSettingsData.GsmaRelease;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ImMsgTech;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ImSessionStartMode;
 import com.gsma.rcs.provider.settings.RcsSettingsData.NetworkAccessType;
+import com.gsma.rcs.provider.settings.RcsSettingsData.TermsAndConditionsResponse;
 import com.gsma.rcs.provisioning.ProvisioningInfo;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMethod;
@@ -1667,12 +1668,12 @@ public class RcsSettings {
     }
 
     /**
-     * Is Terms and conditions via provisioning is accepted
+     * Get terms and conditions via provisioning response
      * 
-     * @return Boolean
+     * @return TermsAndConditionsResponse
      */
-    public boolean isProvisioningTermsAccepted() {
-        return readBoolean(RcsSettingsData.PROVISIONING_TERMS_ACCEPTED);
+    public TermsAndConditionsResponse getTermsAndConditionsResponse() {
+        return TermsAndConditionsResponse.valueOf(readInteger(RcsSettingsData.TC_RESPONSE));
     }
 
     /**
@@ -1694,12 +1695,12 @@ public class RcsSettings {
     }
 
     /**
-     * Set Terms and conditions via provisioning accepted
+     * Set terms and conditions response
      * 
-     * @param state State
+     * @param resp The terms and conditions response
      */
-    public void setProvisioningTermsAccepted(boolean state) {
-        writeBoolean(RcsSettingsData.PROVISIONING_TERMS_ACCEPTED, state);
+    public void setTermsAndConditionsResponse(TermsAndConditionsResponse resp) {
+        writeInteger(RcsSettingsData.TC_RESPONSE, resp.toInt());
     }
 
     /**
@@ -2313,4 +2314,45 @@ public class RcsSettings {
     public void setMobileNetworkCode(int mnc) {
         writeInteger(RcsSettingsData.MOBILE_NETWORK_CODE, mnc);
     }
+
+    /**
+     * Sets whether an Accept button is shown with the message in the terms and conditions pop-up
+     * 
+     * @param accept True if an Accept button is shown with the message in the terms and conditions
+     *            pop-up
+     */
+    public void setProvisioningAcceptButton(boolean accept) {
+        writeBoolean(RcsSettingsData.PROV_ACCEPT_BUTTON, accept);
+    }
+
+    /**
+     * Is Accept button shown with the message in the terms and conditions pop-up
+     * 
+     * @return Boolean True if Accept button shown with the message in the terms and conditions
+     *         pop-up
+     */
+    public boolean isProvisioningAcceptButton() {
+        return readBoolean(RcsSettingsData.PROV_ACCEPT_BUTTON);
+    }
+
+    /**
+     * Sets whether a Decline button is shown with the message in the terms and conditions pop-up
+     * 
+     * @param reject True if a Decline button is shown with the message in the terms and conditions
+     *            pop-up
+     */
+    public void setProvisioningRejectButton(boolean reject) {
+        writeBoolean(RcsSettingsData.PROV_REJECT_BUTTON, reject);
+    }
+
+    /**
+     * Is Decline button shown with the message in the terms and conditions pop-up
+     * 
+     * @return Boolean True if a Decline button is shown with the message in the terms and
+     *         conditions pop-up
+     */
+    public boolean isProvisioningRejectButton() {
+        return readBoolean(RcsSettingsData.PROV_REJECT_BUTTON);
+    }
+
 }

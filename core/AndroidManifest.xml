@@ -219,11 +219,6 @@
         <activity
             android:name="com.gsma.rcs.provisioning.TermsAndConditionsRequest"
             android:theme="@style/Theme.UserDialog" >
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
         </activity>
 
         <!-- RCS API -->

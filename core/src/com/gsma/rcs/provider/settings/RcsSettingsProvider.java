@@ -323,8 +323,7 @@ public class RcsSettingsProvider extends ContentProvider {
                     RcsSettingsData.DEFAULT_USE_IMEI_AS_DEVICE_ID);
             addParameter(db, RcsSettingsData.CPU_ALWAYS_ON, RcsSettingsData.DEFAULT_CPU_ALWAYS_ON);
             addParameter(db, RcsSettingsData.CONFIG_MODE, RcsSettingsData.DEFAULT_CONFIG_MODE);
-            addParameter(db, RcsSettingsData.PROVISIONING_TERMS_ACCEPTED,
-                    RcsSettingsData.DEFAULT_PROVISIONING_TERMS_ACCEPTED);
+            addParameter(db, RcsSettingsData.TC_RESPONSE, RcsSettingsData.DEFAULT_TC_RESPONSE);
             addParameter(db, RcsSettingsData.PROVISIONING_VERSION,
                     RcsSettingsData.DEFAULT_PROVISIONING_VERSION);
             addParameter(db, RcsSettingsData.PROVISIONING_TOKEN,
@@ -393,6 +392,10 @@ public class RcsSettingsProvider extends ContentProvider {
                     RcsSettingsData.DEFAULT_MOBILE_COUNTRY_CODE);
             addParameter(db, RcsSettingsData.MOBILE_NETWORK_CODE,
                     RcsSettingsData.DEFAULT_MOBILE_NETWORK_CODE);
+            addParameter(db, RcsSettingsData.PROV_ACCEPT_BUTTON,
+                    RcsSettingsData.DEFAULT_PROV_ACCEPT_BUTTON);
+            addParameter(db, RcsSettingsData.PROV_REJECT_BUTTON,
+                    RcsSettingsData.DEFAULT_PROV_REJECT_BUTTON);
         }
 
         @Override

@@ -32,6 +32,7 @@
     <string name="rcs_core_account_stopping_after_deletion">The RCS service will be stopped as the RCS account was deleted</string>
 
     <!-- Terms and Conditions -->
+    <string name="rcs_core_terms_title">Terms and conditions</string>
     <string name="rcs_core_terms_accept">Accept</string>
     <string name="rcs_core_terms_decline">Decline</string>
     <string name="rcs_core_terms_ok">Ok</string>

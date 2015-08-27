@@ -34,7 +34,8 @@ import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ConfigurationMode;
-import com.gsma.rcs.provisioning.ProvisioningInfo;
+import com.gsma.rcs.provider.settings.RcsSettingsData.TermsAndConditionsResponse;
+import com.gsma.rcs.provisioning.ProvisioningInfo.Version;
 import com.gsma.rcs.provisioning.https.HttpsProvisioningService;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.TimerUtils;
@@ -462,16 +463,17 @@ public class StartService extends Service {
         }
         if (ConfigurationMode.AUTO != mode) {
             mAccountUtility.createRcsAccount(mRcsAccountUsername, true);
-            // Manual provisioning: accept terms and conditions
-            mRcsSettings.setProvisioningTermsAccepted(true);
-            // No auto config: directly start the RCS core service
+            /* Manual provisioning: accept terms and conditions */
+            mRcsSettings.setTermsAndConditionsResponse(TermsAndConditionsResponse.ACCEPTED);
+            /* No auto configuration: directly start the RCS core service */
             LauncherUtils.launchRcsCoreService(mContext, mRcsSettings);
             return;
         }
-        // HTTPS auto config
+
+        /* HTTPS auto configuration */
         int version = mRcsSettings.getProvisioningVersion();
         // Check the last provisioning version
-        if (ProvisioningInfo.Version.RESETED_NOQUERY.toInt() == version) {
+        if (Version.RESETED_NOQUERY.toInt() == version) {
             // (-1) : RCS service is permanently disabled. SIM change is required
             if (hasChangedAccount()) {
                 // Start provisioning as a first launch
@@ -486,7 +488,7 @@ public class StartService extends Service {
             // First launch: start the auto config service with special tag
             HttpsProvisioningService.startHttpsProvisioningService(mContext, true, user);
 
-        } else if (ProvisioningInfo.Version.DISABLED_NOQUERY.toInt() == version) {
+        } else if (Version.DISABLED_NOQUERY.toInt() == version) {
             // -2 : RCS client and configuration query is disabled
             if (user) {
                 // Only start query if requested by user action
@@ -496,7 +498,7 @@ public class StartService extends Service {
         } else {
             // Start or restart the HTTP provisioning service
             HttpsProvisioningService.startHttpsProvisioningService(mContext, false, user);
-            if (ProvisioningInfo.Version.DISABLED_DORMANT.toInt() == version) {
+            if (Version.DISABLED_DORMANT.toInt() == version) {
                 // -3 : RCS client is disabled but configuration query is not
             } else {
                 // Start the RCS core service

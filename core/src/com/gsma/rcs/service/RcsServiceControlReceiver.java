@@ -25,6 +25,8 @@ package com.gsma.rcs.service;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.settings.RcsSettingsData.TermsAndConditionsResponse;
+import com.gsma.rcs.provisioning.TermsAndConditionsRequest;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Intents;
 import com.gsma.services.rcs.RcsService;
@@ -146,8 +148,15 @@ public class RcsServiceControlReceiver extends BroadcastReceiver {
         }
         mRcsSettings.setServiceActivationState(active);
         if (active) {
+            if (TermsAndConditionsResponse.DECLINED == mRcsSettings.getTermsAndConditionsResponse()) {
+                /*
+                 * Since user activates the stack he does not decline RCS service anymore.
+                 */
+                mRcsSettings.setTermsAndConditionsResponse(TermsAndConditionsResponse.NO_ANSWER);
+            }
             LauncherUtils.launchRcsService(ctx, false, true, mRcsSettings);
         } else {
+            TermsAndConditionsRequest.cancelTermsAndConditionsNotification(ctx);
             LauncherUtils.stopRcsService(ctx);
         }
         return active;

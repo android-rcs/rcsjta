@@ -27,8 +27,10 @@ import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.settings.RcsSettingsData.TermsAndConditionsResponse;
 import com.gsma.rcs.provisioning.ProvisioningFailureReasons;
 import com.gsma.rcs.provisioning.ProvisioningInfo.Version;
+import com.gsma.rcs.provisioning.TermsAndConditionsRequest;
 import com.gsma.rcs.service.LauncherUtils;
 import com.gsma.rcs.utils.TimerUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -44,6 +46,7 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.IBinder;
 import android.telephony.TelephonyManager;
+import android.text.format.DateUtils;
 
 import java.io.IOException;
 
@@ -125,10 +128,7 @@ public class HttpsProvisioningService extends Service {
             user = intent.getBooleanExtra(USER_KEY, false);
         }
         int version = mRcsSettings.getProvisioningVersion();
-        /*
-         * It makes no sense to start service if version is 0 (unconfigured). If version = 0, then
-         * (re)set first to true.
-         */
+
         if (Version.RESETED.toInt() == version) {
             first = true;
         }
@@ -143,12 +143,19 @@ public class HttpsProvisioningService extends Service {
                 mLocalContentResolver, mRetryIntent, first, user, mRcsSettings, mMessagingLog,
                 mContactManager);
         if (logActivated) {
-            sLogger.debug(new StringBuilder("Provisioning (boot=").append(first).append(") (user=")
-                    .append(user).append(") (version=").append(version).append(")").toString());
+            sLogger.debug(new StringBuilder("Provisioning (first=").append(first)
+                    .append(") (user=").append(user).append(") (version=").append(version)
+                    .append(")").toString());
         }
 
         boolean requestConfig = false;
-        if (first) {
+        if (TermsAndConditionsResponse.DECLINED == mRcsSettings.getTermsAndConditionsResponse()) {
+            if (logActivated) {
+                sLogger.debug("Do not request configuration since TC were declined!");
+            }
+        } else if (first) {
+            requestConfig = true;
+        } else if (Version.RESETED.toInt() == version) {
             requestConfig = true;
         } else if (Version.RESETED_NOQUERY.toInt() == version) {
             // Nothing to do
@@ -166,20 +173,27 @@ public class HttpsProvisioningService extends Service {
                 long now = System.currentTimeMillis();
                 if (expiration <= now) {
                     if (logActivated) {
-                        sLogger.debug("Configuration validity expired at ".concat(String
-                                .valueOf(expiration)));
+                        sLogger.debug("Configuration validity expired at ".concat(DateUtils
+                                .formatDateTime(mContext, expiration, DateUtils.FORMAT_SHOW_DATE
+                                        | DateUtils.FORMAT_SHOW_TIME
+                                        | DateUtils.FORMAT_NUMERIC_DATE)));
                     }
                     requestConfig = true;
                 } else {
+                    if (TermsAndConditionsResponse.NO_ANSWER == mRcsSettings
+                            .getTermsAndConditionsResponse()) {
+                        TermsAndConditionsRequest.showTermsAndConditions(mContext);
+                    }
                     long delay = expiration - now;
                     long validity = LauncherUtils.getProvisioningValidity(this);
                     if (validity > 0 && delay > validity) {
                         delay = validity;
                     }
                     if (logActivated) {
-                        sLogger.debug(new StringBuilder("Configuration will expire in ")
-                                .append(delay).append(" millisecs at ").append(expiration)
-                                .toString());
+                        sLogger.debug(new StringBuilder("Configuration will expire at ").append(
+                                DateUtils.formatDateTime(mContext, expiration,
+                                        DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME
+                                                | DateUtils.FORMAT_NUMERIC_DATE)).toString());
                     }
                     startRetryAlarm(this, mRetryIntent, delay);
                 }
@@ -249,8 +263,8 @@ public class HttpsProvisioningService extends Service {
      */
     public static void startRetryAlarm(Context context, PendingIntent intent, long delay) {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Retry HTTP configuration update in ").append(delay)
-                    .append(" millisecs").toString());
+            sLogger.debug(new StringBuilder("Retry HTTP configuration update in ").append(
+                    DateUtils.formatElapsedTime(delay / 1000)).toString());
         }
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         TimerUtils.setExactTimer(am, System.currentTimeMillis() + delay, intent);

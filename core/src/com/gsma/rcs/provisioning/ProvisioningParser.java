@@ -79,23 +79,16 @@ public class ProvisioningParser {
 
     private static final String PROTOCOL_HTTPS = "https";
 
-    /**
-     * Provisioning info
-     */
     private ProvisioningInfo provisioningInfo = new ProvisioningInfo();
 
-    /**
-     * Content
-     */
     private String mContent;
 
     private RcsSettings mRcsSettings;
 
     private boolean mFirst = false;
 
-    /**
-     * The logger
-     */
+    private static final String STRING_BOOLEAN_TRUE = "1";
+
     private static final Logger sLogger = Logger.getLogger(ProvisioningParser.class.getName());
 
     /**
@@ -344,21 +337,17 @@ public class ProvisioningParser {
                 }
                 if (acceptBtn == null) {
                     if ((acceptBtn = getValueByParamName("Accept_btn", childnode, TYPE_INT)) != null) {
-                        if (acceptBtn.equals("1")) {
-                            provisioningInfo.setAcceptBtn(true);
-                        } else {
-                            provisioningInfo.setAcceptBtn(false);
-                        }
+                        boolean accept = STRING_BOOLEAN_TRUE.equals(acceptBtn);
+                        mRcsSettings.setProvisioningAcceptButton(accept);
+                        provisioningInfo.setAcceptBtn(accept);
                         continue;
                     }
                 }
                 if (rejectBtn == null) {
                     if ((rejectBtn = getValueByParamName("Reject_btn", childnode, TYPE_INT)) != null) {
-                        if (rejectBtn.equals("1")) {
-                            provisioningInfo.setRejectBtn(true);
-                        } else {
-                            provisioningInfo.setRejectBtn(false);
-                        }
+                        boolean reject = STRING_BOOLEAN_TRUE.equals(rejectBtn);
+                        mRcsSettings.setProvisioningRejectButton(reject);
+                        provisioningInfo.setRejectBtn(reject);
                         continue;
                     }
                 }

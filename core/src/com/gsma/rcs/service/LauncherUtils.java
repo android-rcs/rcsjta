@@ -31,6 +31,7 @@ import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.ipcall.IPCallHistory;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.settings.RcsSettingsData.TermsAndConditionsResponse;
 import com.gsma.rcs.provider.sharing.RichCallHistory;
 import com.gsma.rcs.provisioning.ProvisioningInfo;
 import com.gsma.rcs.provisioning.https.HttpsProvisioningService;
@@ -114,9 +115,10 @@ public class LauncherUtils {
             }
             return;
         }
-        if (!rcsSettings.isProvisioningTermsAccepted()) {
+        TermsAndConditionsResponse tcResponse = rcsSettings.getTermsAndConditionsResponse();
+        if (TermsAndConditionsResponse.ACCEPTED != tcResponse) {
             if (logActivated) {
-                sLogger.debug("Provisioning terms are not accepted");
+                sLogger.debug("Terms and conditions response: ".concat(tcResponse.name()));
             }
             return;
         }
@@ -197,7 +199,7 @@ public class LauncherUtils {
         AccountChangedReceiver.setAccountResetByEndUser(false);
 
         /* Clean terms status */
-        rcsSettings.setProvisioningTermsAccepted(false);
+        rcsSettings.setTermsAndConditionsResponse(TermsAndConditionsResponse.NO_ANSWER);
 
         /* Set the configuration validity flag to false */
         rcsSettings.setConfigurationValid(false);

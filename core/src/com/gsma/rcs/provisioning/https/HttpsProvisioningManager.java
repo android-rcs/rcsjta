@@ -33,6 +33,7 @@ import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.GsmaRelease;
+import com.gsma.rcs.provider.settings.RcsSettingsData.TermsAndConditionsResponse;
 import com.gsma.rcs.provisioning.ProvisioningFailureReasons;
 import com.gsma.rcs.provisioning.ProvisioningInfo;
 import com.gsma.rcs.provisioning.ProvisioningInfo.Version;
@@ -50,7 +51,6 @@ import com.gsma.services.rcs.contact.ContactId;
 
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -184,7 +184,6 @@ public class HttpsProvisioningManager {
      * 
      * @param imei International Mobile Equipment Identity
      * @param imsi International Mobile Subscriber Identity
-     * @param mncMccInfo
      * @param context application context
      * @param localContentResolver Local content resolver
      * @param retryIntent pending intent to update periodically the configuration
@@ -790,25 +789,31 @@ public class HttpsProvisioningManager {
                             mMessagingLog, mContactManager);
 
                 } else {
-                    // Start retry alarm
+                    /* Start retry alarm */
                     if (validity > 0) {
                         HttpsProvisioningService.startRetryAlarm(mCtx, mRetryIntent, validity);
                     }
-                    // Terms request
-                    if (info.getMessage() != null && !mRcsSettings.isProvisioningTermsAccepted()) {
-                        showTermsAndConditions(info);
+                    boolean tcNotAnswered = TermsAndConditionsResponse.NO_ANSWER == mRcsSettings
+                            .getTermsAndConditionsResponse();
+                    boolean requestTermsAndConditions = mRcsSettings.isProvisioningAcceptButton()
+                            || mRcsSettings.isProvisioningRejectButton();
+                    /* Check if Terms and conditions should be requested. */
+                    if (requestTermsAndConditions && tcNotAnswered) {
+                        TermsAndConditionsRequest.showTermsAndConditions(mCtx);
                     } else {
-                        if (logActivated) {
-                            sLogger.debug("No special terms and conditions");
+                        if (tcNotAnswered) {
+                            if (logActivated) {
+                                sLogger.debug("Terms and conditions implicitly accepted");
+                            }
+                            mRcsAccountManager.createRcsAccount(
+                                    mCtx.getString(R.string.rcs_core_account_username), true);
+                            mRcsSettings
+                                    .setTermsAndConditionsResponse(TermsAndConditionsResponse.ACCEPTED);
                         }
-                        mRcsAccountManager.createRcsAccount(
-                                mCtx.getString(R.string.rcs_core_account_username), true);
-                        mRcsSettings.setProvisioningTermsAccepted(true);
+                        /* We parsed successfully the configuration */
+                        mRcsSettings.setConfigurationValid(true);
+                        LauncherUtils.launchRcsCoreService(mCtx, mRcsSettings);
                     }
-                    // We parsed successfully the configuration
-                    mRcsSettings.setConfigurationValid(true);
-                    // Start the RCS core service
-                    LauncherUtils.launchRcsCoreService(mCtx, mRcsSettings);
                 }
 
                 IntentUtils.sendBroadcastEvent(mCtx,
@@ -918,28 +923,6 @@ public class HttpsProvisioningManager {
                     retry();
             }
         }
-    }
-
-    /**
-     * Show the terms and conditions request
-     * 
-     * @param info Provisioning info
-     */
-    private void showTermsAndConditions(ProvisioningInfo info) {
-        final Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setClass(mCtx, TermsAndConditionsRequest.class);
-
-        // Required as the activity is started outside of an Activity context
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-
-        // Add intent parameters
-        intent.putExtra(TermsAndConditionsRequest.EXTRA_ACCEPT_BTN, info.getAcceptBtn());
-        intent.putExtra(TermsAndConditionsRequest.EXTRA_REJECT_BTN, info.getRejectBtn());
-        intent.putExtra(TermsAndConditionsRequest.EXTRA_TITLE, info.getTitle());
-        intent.putExtra(TermsAndConditionsRequest.EXTRA_MESSAGE, info.getMessage());
-
-        mCtx.startActivity(intent);
     }
 
     /**

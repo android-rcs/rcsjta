@@ -140,6 +140,46 @@ public class RcsSettingsData {
 
     }
 
+    public static enum TermsAndConditionsResponse {
+
+        NO_ANSWER(0), DECLINED(1), ACCEPTED(2);
+
+        private final int mValue;
+
+        private static SparseArray<TermsAndConditionsResponse> mValueToEnum = new SparseArray<TermsAndConditionsResponse>();
+        static {
+            for (TermsAndConditionsResponse entry : TermsAndConditionsResponse.values()) {
+                mValueToEnum.put(entry.toInt(), entry);
+            }
+        }
+
+        private TermsAndConditionsResponse(int value) {
+            mValue = value;
+        }
+
+        /**
+         * @return value
+         */
+        public final int toInt() {
+            return mValue;
+        }
+
+        /**
+         * @param value
+         * @return TermAndConditionsResponse
+         */
+        public final static TermsAndConditionsResponse valueOf(int value) {
+            TermsAndConditionsResponse entry = mValueToEnum.get(value);
+            if (entry != null) {
+                return entry;
+            }
+            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                    .append(TermsAndConditionsResponse.class.getName()).append(".").append(value)
+                    .toString());
+        }
+
+    }
+
     public static enum ImMsgTech {
 
         SIMPLE_IM(0),
@@ -1137,10 +1177,11 @@ public class RcsSettingsData {
     /* package private */static final Integer DEFAULT_CONFIG_MODE = ConfigurationMode.AUTO.toInt();
 
     /**
-     * Provisioning terms accepted
+     * Terms and conditions response
      */
-    public static final String PROVISIONING_TERMS_ACCEPTED = "ProvisioningTermsAccepted";
-    /* package private */static final Boolean DEFAULT_PROVISIONING_TERMS_ACCEPTED = false;
+    /* package private */static final String TC_RESPONSE = "TCResp";
+    /* package private */static final Integer DEFAULT_TC_RESPONSE = TermsAndConditionsResponse.NO_ANSWER
+            .toInt();
 
     /**
      * Provisioning version
@@ -1322,12 +1363,18 @@ public class RcsSettingsData {
     /**
      * Mobile Country Code (0 if undefined)
      */
-    public static final String MOBILE_COUNTRY_CODE = "mcc";
+    /* package private */static final String MOBILE_COUNTRY_CODE = "mcc";
     /* package private */static final Integer DEFAULT_MOBILE_COUNTRY_CODE = 0;
 
     /**
      * Mobile Network Code (0 if undefined)
      */
-    public static final String MOBILE_NETWORK_CODE = "mnc";
+    /* package private */static final String MOBILE_NETWORK_CODE = "mnc";
     /* package private */static final Integer DEFAULT_MOBILE_NETWORK_CODE = 0;
+
+    /* package private */static final String PROV_ACCEPT_BUTTON = "Accept_btn";
+    /* package private */static final Boolean DEFAULT_PROV_ACCEPT_BUTTON = false;
+
+    /* package private */static final String PROV_REJECT_BUTTON = "Reject_btn";
+    /* package private */static final Boolean DEFAULT_PROV_REJECT_BUTTON = false;
 }
