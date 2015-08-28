@@ -168,19 +168,24 @@ public class Provisioning extends TabActivity {
      * 
      * @param spinner the spinner
      * @param settingsKey the key of the RCS parameter
+     * @param isSettingInteger True is setting value is of integer type
      * @param selection table of string representing choice selection
      * @param helper
      * @return the index of the spinner selection
      */
     /* package private */static int setSpinnerParameter(final Spinner spinner, String settingsKey,
-            final String[] selection, ProvisioningHelper helper) {
+            boolean isSettingInteger, final String[] selection, ProvisioningHelper helper) {
         Integer parameter = null;
         Bundle bundle = helper.getBundle();
         if (bundle != null && bundle.containsKey(settingsKey)) {
             parameter = bundle.getInt(settingsKey);
         } else {
-            String selected = helper.getRcsSettings().readString(settingsKey);
-            parameter = java.util.Arrays.asList(selection).indexOf(selected);
+            if (isSettingInteger) {
+                parameter = helper.getRcsSettings().readInteger(settingsKey);
+            } else {
+                String selected = helper.getRcsSettings().readString(settingsKey);
+                parameter = java.util.Arrays.asList(selection).indexOf(selected);
+            }
         }
         spinner.setSelection(parameter % selection.length);
         return parameter;

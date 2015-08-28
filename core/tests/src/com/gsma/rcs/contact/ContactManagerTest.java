@@ -73,13 +73,18 @@ public class ContactManagerTest extends AndroidTestCase {
     }
 
     public void testCreateMyContact() {
-        long myraw = mContactManager.createMyContact();
-        if (sLogger.isActivated()) {
-            sLogger.debug("my rawId = ".concat(Long.toString(myraw)));
+        try {
+            long myraw = mContactManager.createMyContact();
+            if (sLogger.isActivated()) {
+                sLogger.debug("my rawId = ".concat(Long.toString(myraw)));
+            }
+            if (mRcsSettings.isSocialPresenceSupported()) {
+                assertTrue(ContactManager.INVALID_ID != myraw);
+            }
+        } catch (ContactManagerException e) {
+            fail(e.getMessage());
         }
-        if (mRcsSettings.isSocialPresenceSupported()) {
-            assertTrue(ContactManager.INVALID_ID != myraw);
-        }
+
     }
 
     public void testGetRcsContactInfo() {
@@ -172,7 +177,7 @@ public class ContactManagerTest extends AndroidTestCase {
         try {
             mContactManager.setBlockingState(mContact, BlockingState.BLOCKED);
             assertTrue(mContactManager.isBlockedForContact(mContact));
-        } catch (ContactManagerException e) {
+        } catch (Exception e) {
             fail(e.getMessage());
         }
     }
@@ -203,8 +208,12 @@ public class ContactManagerTest extends AndroidTestCase {
         capaBuilder.setSipAutomata(mRandom.nextBoolean());
         capaBuilder.setTimestampOfLastResponse(now);
         /* This will create a RCS contact with default presence information */
-        mContactManager.setContactCapabilities(mContact, capaBuilder.build(),
-                RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE);
+        try {
+            mContactManager.setContactCapabilities(mContact, capaBuilder.build(),
+                    RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
         return capaBuilder;
     }
 

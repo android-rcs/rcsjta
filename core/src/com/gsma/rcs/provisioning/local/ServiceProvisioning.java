@@ -145,7 +145,7 @@ public class ServiceProvisioning extends Activity {
                 android.R.layout.simple_spinner_item, IM_SESSION_START_MODES);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-        Provisioning.setSpinnerParameter(spinner, RcsSettingsData.IM_SESSION_START,
+        Provisioning.setSpinnerParameter(spinner, RcsSettingsData.IM_SESSION_START, true,
                 IM_SESSION_START_MODES, helper);
 
         setCheckBoxParam(R.id.SmsFallbackService, RcsSettingsData.SMS_FALLBACK_SERVICE, helper);

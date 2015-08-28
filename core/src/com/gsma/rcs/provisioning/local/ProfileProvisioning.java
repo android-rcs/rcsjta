@@ -162,7 +162,7 @@ public class ProfileProvisioning extends Activity {
                 android.R.layout.simple_spinner_item, MOBILE_IMS_AUTHENT);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-        setSpinnerParameter(spinner, RcsSettingsData.IMS_AUTHENT_PROCEDURE_MOBILE,
+        setSpinnerParameter(spinner, RcsSettingsData.IMS_AUTHENT_PROCEDURE_MOBILE, false,
                 MOBILE_IMS_AUTHENT, helper);
 
         spinner = (Spinner) findViewById(R.id.ImsAuthenticationProcedureForWifi);
