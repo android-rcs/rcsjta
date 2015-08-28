@@ -55,7 +55,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 
     private final String mSharingId;
 
-    private long mStartTime;
+    private long mStartTime = 0;
 
     private final IVideoSharingEventBroadcaster mBroadcaster;
 
@@ -139,7 +139,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
                 break;
             case ABORTED:
             case FAILED:
-                duration = System.currentTimeMillis() - mStartTime;
+                duration = mStartTime > 0 ? System.currentTimeMillis() - mStartTime : 0;
             default:
                 break;
         }
@@ -467,8 +467,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
             if (session == null) {
                 return mPersistentStorage.getDuration();
             }
-            long duration = System.currentTimeMillis() - mStartTime;
-            return duration > 0 ? duration : 0;
+            return mStartTime > 0 ? System.currentTimeMillis() - mStartTime : 0;
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
