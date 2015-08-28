@@ -216,7 +216,7 @@ public class InstantMessagingService extends ImsService {
         mMessagingLog = messagingLog;
         mStoreAndFwdMgr = new StoreAndForwardManager(this, mRcsSettings, mContactManager,
                 mMessagingLog);
-        mImdnManager = new ImdnManager(this, mCore, mRcsSettings, mMessagingLog);
+        mImdnManager = new ImdnManager(this, mCore, mRcsSettings);
         mImdnManager.start();
     }
 

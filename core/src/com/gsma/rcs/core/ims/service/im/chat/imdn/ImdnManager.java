@@ -37,7 +37,6 @@ import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.SessionAuthenticationAgent;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
-import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.FifoBuffer;
 import com.gsma.rcs.utils.PhoneUtils;
@@ -45,6 +44,7 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
 import javax2.sip.InvalidArgumentException;
+import javax2.sip.message.Response;
 
 /**
  * IMDN manager (see RFC5438)
@@ -66,8 +66,6 @@ public class ImdnManager extends Thread {
 
     private final RcsSettings mRcsSettings;
 
-    private final MessagingLog mMessagingLog;
-
     /**
      * The logger
      */
@@ -78,14 +76,11 @@ public class ImdnManager extends Thread {
      * 
      * @param imsService IMS service
      * @param rcsSettings
-     * @param messagingLog
      */
-    public ImdnManager(ImsService imsService, Core core, RcsSettings rcsSettings,
-            MessagingLog messagingLog) {
+    public ImdnManager(ImsService imsService, Core core, RcsSettings rcsSettings) {
         mImsService = imsService;
         mCore = core;
         mRcsSettings = rcsSettings;
-        mMessagingLog = messagingLog;
     }
 
     /**
@@ -145,7 +140,6 @@ public class ImdnManager extends Thread {
         while ((delivery = (DeliveryStatus) mBuffer.getObject()) != null) {
             try {
                 sendSipMessageDeliveryStatus(delivery, null); // TODO: add sip.instance
-
                 /*
                  * Update rich messaging history when sending DISPLAYED report Since the requested
                  * display report was now successfully send we mark this message as fully received
@@ -162,6 +156,14 @@ public class ImdnManager extends Thread {
                 if (sLogger.isActivated()) {
                     sLogger.debug(e.getMessage());
                 }
+            } catch (RuntimeException e) {
+                /*
+                 * Intentionally catch runtime exceptions as else it will abruptly end the thread
+                 * and eventually bring the whole system down, which is not intended.
+                 */
+                sLogger.error(
+                        "Failed to send delivery status for chatId : ".concat(delivery.getChatId()),
+                        e);
             }
         }
     }
@@ -200,6 +202,49 @@ public class ImdnManager extends Thread {
         // Execute request in background
         final DeliveryStatus delivery = new DeliveryStatus(chatId, remote, msgId, status, timestamp);
         sendSipMessageDeliveryStatus(delivery, remoteInstanceId);
+    }
+
+    private void analyzeSipResponse(SipTransactionContext ctx,
+            SessionAuthenticationAgent authenticationAgent, SipDialogPath dialogPath, String cpim)
+            throws SipNetworkException, SipPayloadException, InvalidArgumentException {
+        int statusCode = ctx.getStatusCode();
+        switch (statusCode) {
+            case Response.PROXY_AUTHENTICATION_REQUIRED:
+
+                if (sLogger.isActivated()) {
+                    sLogger.info("407 response received");
+                }
+
+                /* Set the Proxy-Authorization header */
+                authenticationAgent.readProxyAuthenticateHeader(ctx.getSipResponse());
+
+                /* Increment the Cseq number of the dialog path */
+                dialogPath.incrementCseq();
+
+                /* Create a second MESSAGE request with the right token */
+                if (sLogger.isActivated()) {
+                    sLogger.info("Send second MESSAGE.");
+                }
+                SipRequest msg = SipMessageFactory.createMessage(dialogPath,
+                        FeatureTags.FEATURE_OMA_IM, CpimMessage.MIME_TYPE, cpim.getBytes(UTF8));
+
+                /* Set the Authorization header */
+                authenticationAgent.setProxyAuthorizationHeader(msg);
+
+                ctx = mImsService.getImsModule().getSipManager().sendSipMessageAndWait(msg);
+
+                analyzeSipResponse(ctx, authenticationAgent, dialogPath, cpim);
+                break;
+            case Response.OK:
+            case Response.ACCEPTED:
+                if (sLogger.isActivated()) {
+                    sLogger.info("20x OK response received");
+                }
+                break;
+            default:
+                throw new SipNetworkException(new StringBuilder("Delivery report has failed: ")
+                        .append(statusCode).append(" response received").toString());
+        }
     }
 
     /**
@@ -253,56 +298,8 @@ public class ImdnManager extends Thread {
                     .sendSipMessageAndWait(msg);
 
             // Analyze received message
-            if (ctx.getStatusCode() == 407) {
-                // 407 response received
-                if (sLogger.isActivated()) {
-                    sLogger.info("407 response received");
-                }
+            analyzeSipResponse(ctx, authenticationAgent, dialogPath, cpim);
 
-                // Set the Proxy-Authorization header
-                authenticationAgent.readProxyAuthenticateHeader(ctx.getSipResponse());
-
-                // Increment the Cseq number of the dialog path
-                dialogPath.incrementCseq();
-
-                // Create a second MESSAGE request with the right token
-                if (sLogger.isActivated()) {
-                    sLogger.info("Send second MESSAGE.");
-                }
-                msg = SipMessageFactory.createMessage(dialogPath, FeatureTags.FEATURE_OMA_IM,
-                        CpimMessage.MIME_TYPE, cpim.getBytes(UTF8));
-
-                // Set the Authorization header
-                authenticationAgent.setProxyAuthorizationHeader(msg);
-
-                // Send MESSAGE request
-                ctx = mImsService.getImsModule().getSipManager().sendSipMessageAndWait(msg);
-
-                // Analyze received message
-                if ((ctx.getStatusCode() == 200) || (ctx.getStatusCode() == 202)) {
-                    // 200 OK response
-                    if (sLogger.isActivated()) {
-                        sLogger.info("20x OK response received");
-                    }
-                } else {
-                    // Error
-                    if (sLogger.isActivated()) {
-                        sLogger.info("Delivery report has failed: " + ctx.getStatusCode()
-                                + " response received");
-                    }
-                }
-            } else if ((ctx.getStatusCode() == 200) || (ctx.getStatusCode() == 202)) {
-                // 200 OK received
-                if (sLogger.isActivated()) {
-                    sLogger.info("20x OK response received");
-                }
-            } else {
-                // Error responses
-                if (sLogger.isActivated()) {
-                    sLogger.info("Delivery report has failed: " + ctx.getStatusCode()
-                            + " response received");
-                }
-            }
         } catch (InvalidArgumentException e) {
             throw new SipPayloadException(
                     "Unable to set authorization header for remoteInstanceId : "
