@@ -138,6 +138,12 @@ public class TermsAndConditionsRequest extends Activity {
     }
 
     @Override
+    protected void onResume() {
+        cancelTermsAndConditionsNotification(this);
+        super.onResume();
+    }
+
+    @Override
     public void onPause() {
         if (!isFinishing() && !isChangingConfigurations()) {
             if (sLogger.isActivated()) {
