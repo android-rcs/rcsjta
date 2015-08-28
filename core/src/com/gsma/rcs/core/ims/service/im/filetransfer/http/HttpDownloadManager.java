@@ -42,6 +42,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.net.ssl.SSLHandshakeException;
+
 /**
  * HTTP upload manager
  * 
@@ -142,6 +144,13 @@ public class HttpDownloadManager extends HttpTransferManager {
         try {
             writeHttpContentToFile(new URL(getHttpServerAddr().toString()),
                     new HashMap<String, String>());
+        } catch (SSLHandshakeException e) {
+            /*
+             * If there are issues during handshake between UE and server then we should not proceed
+             * any further with file download, we should immediately cancel the transfer, One on the
+             * possible case would be a certificate mismatch
+             */
+            throw e;
         } catch (IOException e) {
             /*
              * Either the stream is currently not open or there has been a connection time out, In
@@ -357,6 +366,13 @@ public class HttpDownloadManager extends HttpTransferManager {
 
         try {
             writeHttpContentToFile(new URL(serverAddress.toString()), properties);
+        } catch (SSLHandshakeException e) {
+            /*
+             * If there are issues during handshake between UE and server then we should not proceed
+             * any further with file download, we should immediately cancel the transfer, One on the
+             * possible case would be a certificate mismatch
+             */
+            throw e;
         } catch (IOException e) {
             /*
              * Either the stream is currently not open or there has been a connection time out, In
