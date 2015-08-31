@@ -59,7 +59,7 @@ public class FifoBuffer {
             try {
                 wait();
             } catch (InterruptedException e) {
-                // Nothing to do
+                /* Nothing to be done here */
             }
         }
         if (numMessage != 0) {
@@ -84,7 +84,7 @@ public class FifoBuffer {
             try {
                 wait(timeout);
             } catch (InterruptedException e) {
-                // Nothing to do
+                /* Nothing to be done here */
             }
         }
         if (numMessage != 0) {

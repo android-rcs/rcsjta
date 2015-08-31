@@ -454,7 +454,7 @@ public class HttpsProvisioningManager {
             }
             return sb.toString();
         } finally {
-            CloseableUtils.close(in);
+            CloseableUtils.tryToClose(in);
         }
     }
 
@@ -584,7 +584,7 @@ public class HttpsProvisioningManager {
             return br.readLine();
 
         } finally {
-            CloseableUtils.close(dataInputStream);
+            CloseableUtils.tryToClose(dataInputStream);
         }
     }
 

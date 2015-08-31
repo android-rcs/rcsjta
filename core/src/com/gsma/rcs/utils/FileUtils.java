@@ -89,8 +89,8 @@ public class FileUtils {
                 output.write(buffer, 0, length);
             }
         } finally {
-            CloseableUtils.close(input);
-            CloseableUtils.close(output);
+            CloseableUtils.tryToClose(input);
+            CloseableUtils.tryToClose(output);
         }
         // check if full content is copied
         if (srcFile.length() != destFile.length()) {

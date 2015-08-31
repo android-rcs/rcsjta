@@ -156,7 +156,7 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
         SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(UTF8));
         MediaDescription mediaVideo = parser.getMediaDescription("video");
         String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaVideo);
-        int remotePort = mediaVideo.port;
+        int remotePort = mediaVideo.mPort;
 
         // Extract video codecs from SDP
         Vector<MediaDescription> medias = parser.getMediaDescriptions("video");

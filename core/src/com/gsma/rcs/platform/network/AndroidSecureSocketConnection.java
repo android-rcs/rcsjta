@@ -311,8 +311,8 @@ public class AndroidSecureSocketConnection extends AndroidSocketConnection {
                         e);
 
             } finally {
-                CloseableUtils.close(ksFileInputStream);
-                CloseableUtils.close(tsFileInputStream);
+                CloseableUtils.tryToClose(ksFileInputStream);
+                CloseableUtils.tryToClose(tsFileInputStream);
             }
         }
         return mSslSocketFactory;

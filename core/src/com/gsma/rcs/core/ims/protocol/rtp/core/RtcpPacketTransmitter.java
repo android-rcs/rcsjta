@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.protocol.rtp.core;
@@ -22,6 +26,7 @@ import com.gsma.rcs.platform.network.DatagramConnection;
 import com.gsma.rcs.platform.network.NetworkFactory;
 import com.gsma.rcs.utils.logger.Logger;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.Random;
 import java.util.Vector;
@@ -31,7 +36,7 @@ import java.util.Vector;
  * 
  * @author jexa7410
  */
-public class RtcpPacketTransmitter extends Thread {
+public class RtcpPacketTransmitter extends Thread implements Closeable {
     /**
      * Remote address
      */
@@ -217,6 +222,10 @@ public class RtcpPacketTransmitter extends Thread {
                     rtcpSession.isByeRequested = true;
                 }
             }
+        } catch (IOException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
@@ -244,8 +253,8 @@ public class RtcpPacketTransmitter extends Thread {
         // SDES packets
         Vector<RtcpSdesPacket> repvec = makereports();
         for (int i = 0; i < repvec.size(); i++) {
-            if (repvec.elementAt(i).data != null)
-                data = RtcpPacketUtils.append(data, repvec.elementAt(i).data);
+            if (repvec.elementAt(i).mData != null)
+                data = RtcpPacketUtils.append(data, repvec.elementAt(i).mData);
         }
 
         // BYE packet
@@ -255,7 +264,7 @@ public class RtcpPacketTransmitter extends Thread {
                 rtcpSession.SSRC
             };
             byepacket = new RtcpByePacket(ssrc, null);
-            data = RtcpPacketUtils.append(data, byepacket.data);
+            data = RtcpPacketUtils.append(data, byepacket.mData);
         }
 
         return data;
@@ -367,31 +376,6 @@ public class RtcpPacketTransmitter extends Thread {
     }
 
     /**
-     * Send a BYE packet
-     */
-    public void sendByePacket() {
-        // Create a report
-        Vector<RtcpSdesPacket> repvec = makereports();
-        RtcpPacket[] packets = new RtcpPacket[repvec.size() + 1];
-        repvec.copyInto(packets);
-
-        // Create a RTCP bye packet
-        int ssrc[] = {
-            rtcpSession.SSRC
-        };
-        RtcpByePacket rtcpbyepacket = new RtcpByePacket(ssrc, null);
-        packets[packets.length - 1] = rtcpbyepacket;
-
-        // Create a RTCP compound packet
-        RtcpCompoundPacket cp = new RtcpCompoundPacket(packets);
-
-        rtcpSession.getMySource().activeSender = false;
-
-        // Send the RTCP packet
-        transmit(cp);
-    }
-
-    /**
      * Generate a RTCP report
      * 
      * @return Vector
@@ -416,48 +400,37 @@ public class RtcpPacketTransmitter extends Thread {
      * Transmit a RTCP compound packet to the remote destination
      * 
      * @param packet Compound packet to be sent
+     * @throws IOException
      */
-    private void transmit(RtcpCompoundPacket packet) {
+    private void transmit(RtcpCompoundPacket packet) throws IOException {
         // Prepare data to be sent
-        byte[] data = packet.data;
-        if (packet.offset > 0) {
-            System.arraycopy(data, packet.offset, data = new byte[packet.length], 0, packet.length);
+        byte[] data = packet.mData;
+        if (packet.mOffset > 0) {
+            System.arraycopy(data, packet.mOffset, data = new byte[packet.mLength], 0, packet.mLength);
         }
 
         // Update statistics
-        stats.numBytes += packet.length;
+        stats.numBytes += packet.mLength;
         stats.numPackets++;
-        rtcpSession.updateavgrtcpsize(packet.length);
+        rtcpSession.updateavgrtcpsize(packet.mLength);
         rtcpSession.timeOfLastRTCPSent = rtcpSession.currentTime();
         // Send data over UDP
-        try {
-            datagramConnection.send(remoteAddress, remotePort, data);
-        } catch (IOException e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Can't send the RTCP packet", e);
-            }
-        }
+        datagramConnection.send(remoteAddress, remotePort, data);
     }
 
     /**
      * Transmit a RTCP compound packet to the remote destination
      * 
      * @param packet Compound packet to be sent
+     * @throws IOException
      */
-    private void transmit(byte packet[]) {
-        // Update statistics
+    private void transmit(byte packet[]) throws IOException {
         stats.numBytes += packet.length;
         stats.numPackets++;
         rtcpSession.updateavgrtcpsize(packet.length);
         rtcpSession.timeOfLastRTCPSent = rtcpSession.currentTime();
-        // Send data over UDP
-        try {
-            datagramConnection.send(remoteAddress, remotePort, packet);
-        } catch (IOException e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Can't send the RTCP packet", e);
-            }
-        }
+        /* Send data over UDP */
+        datagramConnection.send(remoteAddress, remotePort, packet);
     }
 
     /**
@@ -471,8 +444,10 @@ public class RtcpPacketTransmitter extends Thread {
 
     /**
      * Send a SDES packet
+     * 
+     * @throws IOException
      */
-    private void sendSdesPacket() {
+    private void sendSdesPacket() throws IOException {
         // Create a report
         Vector<RtcpSdesPacket> repvec = makereports();
         RtcpPacket packets[] = new RtcpPacket[repvec.size()];

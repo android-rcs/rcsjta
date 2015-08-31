@@ -251,7 +251,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
             MediaAttribute attr1 = mediaDesc.getMediaAttribute("path");
             String remotePath = attr1.getValue();
             String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
-            int remotePort = mediaDesc.port;
+            int remotePort = mediaDesc.mPort;
 
             /* Changed by Deutsche Telekom */
             String fingerprint = SdpUtils.extractFingerprint(parser, mediaDesc);

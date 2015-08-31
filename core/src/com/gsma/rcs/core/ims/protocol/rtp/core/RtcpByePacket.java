@@ -33,7 +33,7 @@ public class RtcpByePacket extends RtcpPacket {
 
     public RtcpByePacket(RtcpPacket parent) {
         super(parent);
-        super.type = 203;
+        super.mType = 203;
     }
 
     public RtcpByePacket(int ssrc[], byte reason[]) {

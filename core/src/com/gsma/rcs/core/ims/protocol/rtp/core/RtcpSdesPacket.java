@@ -32,7 +32,7 @@ public class RtcpSdesPacket extends RtcpPacket {
 
     public RtcpSdesPacket(RtcpPacket parent) {
         super(parent);
-        super.type = 202;
+        super.mType = 202;
     }
 
     public RtcpSdesPacket(RtcpSdesBlock sdes[]) {

@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.protocol.rtp.util;
@@ -27,22 +31,22 @@ public class Packet {
     /**
      * Data
      */
-    public byte[] data;
+    public byte[] mData;
 
     /**
      * Packet length
      */
-    public int length;
+    public int mLength;
 
     /**
      * Offset
      */
-    public int offset;
+    public int mOffset;
 
     /**
      * Received at
      */
-    public long receivedAt;
+    public long mReceivedAt;
 
     /**
      * Constructor
@@ -56,9 +60,9 @@ public class Packet {
      * @param packet Packet
      */
     public Packet(Packet packet) {
-        data = packet.data;
-        length = packet.length;
-        offset = packet.offset;
-        receivedAt = packet.receivedAt;
+        mData = packet.mData;
+        mLength = packet.mLength;
+        mOffset = packet.mOffset;
+        mReceivedAt = packet.mReceivedAt;
     }
 }

@@ -129,7 +129,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
             }
             return data;
         } finally {
-            CloseableUtils.close(fileInputStream);
+            CloseableUtils.tryToClose(fileInputStream);
         }
     }
 

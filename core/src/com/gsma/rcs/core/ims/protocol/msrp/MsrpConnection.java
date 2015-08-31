@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.protocol.msrp;
 
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.platform.network.SocketConnection;
+import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
 import java.io.IOException;
@@ -44,37 +45,37 @@ public abstract class MsrpConnection {
     /**
      * MSRP session
      */
-    private MsrpSession session;
+    private MsrpSession mSession;
 
     /**
      * Socket connection
      */
-    private SocketConnection socket = null;
+    private SocketConnection mSocket;
 
     /**
      * Socket output stream
      */
-    private OutputStream outputStream = null;
+    private OutputStream mOutputStream;
 
     /**
      * Socket input stream
      */
-    private InputStream inputStream = null;
+    private InputStream mInputStream;
 
     /**
      * Chunk receiver
      */
-    private ChunkReceiver receiver;
+    private ChunkReceiver mReceiver;
 
     /**
      * Chunk sender
      */
-    private ChunkSender sender;
+    private ChunkSender mSender;
 
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(MsrpConnection.class.getName());
 
     /**
      * Constructor
@@ -82,7 +83,7 @@ public abstract class MsrpConnection {
      * @param session MSRP session
      */
     public MsrpConnection(MsrpSession session) {
-        this.session = session;
+        mSession = session;
     }
 
     /**
@@ -91,7 +92,7 @@ public abstract class MsrpConnection {
      * @return MSRP session
      */
     public MsrpSession getSession() {
-        return session;
+        return mSession;
     }
 
     /**
@@ -102,22 +103,22 @@ public abstract class MsrpConnection {
      */
     public void open() throws IOException, SipPayloadException {
         // Open socket connection
-        socket = getSocketConnection();
+        mSocket = getSocketConnection();
 
         // Open I/O stream
-        inputStream = socket.getInputStream();
-        outputStream = socket.getOutputStream();
+        mInputStream = mSocket.getInputStream();
+        mOutputStream = mSocket.getOutputStream();
 
         // Create the chunk receiver
-        receiver = new ChunkReceiver(this, inputStream);
-        receiver.start();
+        mReceiver = new ChunkReceiver(this, mInputStream);
+        mReceiver.start();
 
         // Create the chunk sender
-        sender = new ChunkSender(this, outputStream);
-        sender.start();
+        mSender = new ChunkSender(this, mOutputStream);
+        mSender.start();
 
-        if (logger.isActivated()) {
-            logger.debug("Connection has been opened");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Connection has been opened");
         }
     }
 
@@ -130,25 +131,25 @@ public abstract class MsrpConnection {
      */
     public void open(long timeout) throws IOException, SipPayloadException {
         // Open socket connection
-        socket = getSocketConnection();
+        mSocket = getSocketConnection();
 
         // Set SoTimeout
-        socket.setSoTimeout(timeout);
+        mSocket.setSoTimeout(timeout);
 
         // Open I/O stream
-        inputStream = socket.getInputStream();
-        outputStream = socket.getOutputStream();
+        mInputStream = mSocket.getInputStream();
+        mOutputStream = mSocket.getOutputStream();
 
         // Create the chunk receiver
-        receiver = new ChunkReceiver(this, inputStream);
-        receiver.start();
+        mReceiver = new ChunkReceiver(this, mInputStream);
+        mReceiver.start();
 
         // Create the chunk sender
-        sender = new ChunkSender(this, outputStream);
-        sender.start();
+        mSender = new ChunkSender(this, mOutputStream);
+        mSender.start();
 
-        if (logger.isActivated()) {
-            logger.debug("Connection has been opened");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Connection has been opened");
         }
     }
 
@@ -156,41 +157,24 @@ public abstract class MsrpConnection {
      * Close the connection
      */
     public void close() {
-        if (sender != null) {
-            sender.terminate();
+        if (mSender != null) {
+            mSender.terminate();
         }
 
-        if (receiver != null) {
-            receiver.terminate();
+        if (mReceiver != null) {
+            mReceiver.terminate();
         }
 
-        if (logger.isActivated()) {
-            logger.debug("Close the socket connection");
-        }
-        if (inputStream != null) {
-            try {
-                inputStream.close();
-            } catch (IOException ignore) {
-                /* Do nothing */
-            }
-        }
-        if (outputStream != null) {
-            try {
-                outputStream.close();
-            } catch (IOException ignore) {
-                /* Do nothing */
-            }
-        }
-        if (socket != null) {
-            try {
-                socket.close();
-            } catch (IOException ignore) {
-                /* Do nothing */
-            }
+        if (sLogger.isActivated()) {
+            sLogger.debug("Close the socket connection");
         }
 
-        if (logger.isActivated()) {
-            logger.debug("Connection has been closed");
+        CloseableUtils.tryToClose(mInputStream);
+        CloseableUtils.tryToClose(mOutputStream);
+        CloseableUtils.tryToClose(mSocket);
+
+        if (sLogger.isActivated()) {
+            sLogger.debug("Connection has been closed");
         }
     }
 
@@ -201,10 +185,10 @@ public abstract class MsrpConnection {
      * @throws IOException
      */
     public void sendChunk(byte chunk[]) throws IOException {
-        if (sender == null) {
+        if (mSender == null) {
             throw new IOException("ChunkSender is already closed!");
         }
-        sender.sendChunk(chunk);
+        mSender.sendChunk(chunk);
     }
 
     /**
@@ -214,7 +198,7 @@ public abstract class MsrpConnection {
      * @throws IOException
      */
     public void sendChunkImmediately(byte chunk[]) throws IOException {
-        sender.sendChunkImmediately(chunk);
+        mSender.sendChunkImmediately(chunk);
     }
 
     /**

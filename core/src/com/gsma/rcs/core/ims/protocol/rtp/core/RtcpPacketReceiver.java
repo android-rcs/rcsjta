@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.protocol.rtp.core;
@@ -31,6 +35,7 @@ import com.gsma.rcs.platform.network.NetworkFactory;
 import com.gsma.rcs.utils.logger.Logger;
 
 import java.io.ByteArrayInputStream;
+import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
@@ -41,7 +46,7 @@ import java.util.Vector;
  * 
  * @author jexa7410
  */
-public class RtcpPacketReceiver extends Thread {
+public class RtcpPacketReceiver extends Thread implements Closeable {
     /**
      * Datagram connection
      */
@@ -132,15 +137,15 @@ public class RtcpPacketReceiver extends Thread {
 
                 // Create a packet object
                 Packet packet = new Packet();
-                packet.data = data;
-                packet.length = data.length;
-                packet.offset = 0;
-                packet.receivedAt = System.currentTimeMillis();
+                packet.mData = data;
+                packet.mLength = data.length;
+                packet.mOffset = 0;
+                packet.mReceivedAt = System.currentTimeMillis();
 
                 // Process the received packet
                 /* Update statistics */
                 stats.numRtcpPkts++;
-                stats.numRtcpBytes += packet.length;
+                stats.numRtcpBytes += packet.mLength;
                 parseRtcpPacket(packet);
             }
         } catch (SocketTimeoutException e) {
@@ -176,11 +181,11 @@ public class RtcpPacketReceiver extends Thread {
     private RtcpPacket parseRtcpPacket(Packet packet) throws IOException {
         RtcpCompoundPacket compoundPacket = new RtcpCompoundPacket(packet);
         Vector<RtcpPacket> subpackets = new Vector<RtcpPacket>();
-        DataInputStream in = new DataInputStream(new ByteArrayInputStream(compoundPacket.data,
-                compoundPacket.offset, compoundPacket.length));
-        rtcpSession.updateavgrtcpsize(compoundPacket.length);
+        DataInputStream in = new DataInputStream(new ByteArrayInputStream(compoundPacket.mData,
+                compoundPacket.mOffset, compoundPacket.mLength));
+        rtcpSession.updateavgrtcpsize(compoundPacket.mLength);
         int length = 0;
-        for (int offset = 0; offset < compoundPacket.length; offset += length) {
+        for (int offset = 0; offset < compoundPacket.mLength; offset += length) {
             int firstbyte = in.readUnsignedByte();
             if ((firstbyte & 0xc0) != 128) {
                 throw new IOException(new StringBuilder("Bad RTCP packet version for firstbyte : ")
@@ -194,13 +199,13 @@ public class RtcpPacketReceiver extends Thread {
             length = in.readUnsignedShort();
             length = length + 1 << 2;
             int padlen = 0;
-            if (offset + length > compoundPacket.length) {
+            if (offset + length > compoundPacket.mLength) {
                 throw new IOException(new StringBuilder("Bad RTCP packet length : ").append(
                         offset + length).toString());
             }
-            if (offset + length == compoundPacket.length) {
+            if (offset + length == compoundPacket.mLength) {
                 if ((firstbyte & 0x20) != 0) {
-                    padlen = compoundPacket.data[compoundPacket.offset + compoundPacket.length - 1] & 0xff;
+                    padlen = compoundPacket.mData[compoundPacket.mOffset + compoundPacket.mLength - 1] & 0xff;
                     if (padlen == 0) {
                         if (sLogger.isActivated()) {
                             sLogger.error("Bad RTCP packet format");
@@ -373,9 +378,9 @@ public class RtcpPacketReceiver extends Thread {
                     appp.ssrc = in.readInt();
                     appp.name = in.readInt();
                     appp.subtype = firstbyte;
-                    appp.data = new byte[inlength - 12];
-                    in.readFully(appp.data);
-                    int skipApp = inlength - 12 - appp.data.length;
+                    appp.mData = new byte[inlength - 12];
+                    in.readFully(appp.mData);
+                    int skipApp = inlength - 12 - appp.mData.length;
                     if (in.skip(skipApp) != skipApp) {
                         throw new IOException("Bad RTCP APP packet format");
                     }
@@ -387,15 +392,15 @@ public class RtcpPacketReceiver extends Thread {
                     stats.numUnknownTypes++;
                     throw new IOException("Bad RTCP packet format");
             }
-            subpacket.offset = offset;
-            subpacket.length = length;
+            subpacket.mOffset = offset;
+            subpacket.mLength = length;
             subpackets.addElement(subpacket);
             if (in.skipBytes(padlen) != padlen) {
                 throw new IOException("Bad RTCP packet format");
             }
         }
-        compoundPacket.packets = new RtcpPacket[subpackets.size()];
-        subpackets.copyInto(compoundPacket.packets);
+        compoundPacket.mPackets = new RtcpPacket[subpackets.size()];
+        subpackets.copyInto(compoundPacket.mPackets);
         return compoundPacket;
     }
 

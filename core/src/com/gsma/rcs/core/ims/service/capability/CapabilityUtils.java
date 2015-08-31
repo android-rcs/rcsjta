@@ -252,8 +252,8 @@ public class CapabilityUtils {
                 MediaAttribute attr = desc.getMediaAttribute("rtpmap");
                 if (attr != null) {
                     String rtpmap = attr.getValue();
-                    String encoding = rtpmap.substring(rtpmap.indexOf(desc.payload)
-                            + desc.payload.length() + 1);
+                    String encoding = rtpmap.substring(rtpmap.indexOf(desc.mPayload)
+                            + desc.mPayload.length() + 1);
                     String codec = encoding.toLowerCase().trim();
                     int index = encoding.indexOf("/");
                     if (index != -1) {

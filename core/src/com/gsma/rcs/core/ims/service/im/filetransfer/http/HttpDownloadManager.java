@@ -276,7 +276,7 @@ public class HttpDownloadManager extends HttpTransferManager {
             /* Save data to file on disk */
             fileIcon.writeData2File(baos.toByteArray());
         } finally {
-            CloseableUtils.close(baos);
+            CloseableUtils.tryToClose(baos);
             if (fileIcon != null) {
                 try {
                     fileIcon.closeFile();

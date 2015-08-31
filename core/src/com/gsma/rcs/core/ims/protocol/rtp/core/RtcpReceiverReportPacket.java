@@ -39,7 +39,7 @@ public class RtcpReceiverReportPacket extends RtcpPacket {
 
     public RtcpReceiverReportPacket(RtcpPacket rtcppacket) {
         super(rtcppacket);
-        type = 201;
+        mType = 201;
     }
 
     public void assemble(DataOutputStream dataoutputstream) throws IOException {

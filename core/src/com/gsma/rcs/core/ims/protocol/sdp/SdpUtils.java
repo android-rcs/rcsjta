@@ -72,8 +72,8 @@ public class SdpUtils {
         String remoteHost = null;
 
         // First we need try to use the media description connection info
-        if ((mediaDescription != null) && (mediaDescription.connectionInfo != null)) {
-            remoteHost = extractRemoteHost(mediaDescription.connectionInfo);
+        if ((mediaDescription != null) && (mediaDescription.mConnectionInfo != null)) {
+            remoteHost = extractRemoteHost(mediaDescription.mConnectionInfo);
         }
 
         // If media description has no connection info or remote host information, we need to try
@@ -155,32 +155,6 @@ public class SdpUtils {
         } else {
             return "IN IP4 ".concat(address);
         }
-    }
-
-    // Changed by Deutsche Telekom
-    /**
-     * Get parameter value from SDP parameters string with parameter-value format 'key1=value1; ...
-     * keyN=valueN'
-     * 
-     * @param paramKey parameter name
-     * @param params parameters string
-     * @return if parameter exists return {@link String} with value, otherwise return
-     *         <code>null</code>
-     */
-    public static String getParameterValue(String paramKey, String params) {
-        String value = null;
-        if (params != null && params.length() > 0) {
-            try {
-                java.util.regex.Pattern p = java.util.regex.Pattern.compile("(?<=" + paramKey
-                        + "=).*?(?=;|$)");
-                java.util.regex.Matcher m = p.matcher(params);
-                if (m.find()) {
-                    value = m.group(0);
-                }
-            } catch (java.util.regex.PatternSyntaxException ex) {
-            }
-        }
-        return value;
     }
 
     // Changed by Deutsche Telekom

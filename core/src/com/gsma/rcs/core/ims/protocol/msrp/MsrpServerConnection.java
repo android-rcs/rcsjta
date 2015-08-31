@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.protocol.msrp;
@@ -23,6 +27,7 @@ import java.io.IOException;
 import com.gsma.rcs.platform.network.NetworkFactory;
 import com.gsma.rcs.platform.network.SocketConnection;
 import com.gsma.rcs.platform.network.SocketServerConnection;
+import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
 /**
@@ -34,17 +39,17 @@ public class MsrpServerConnection extends MsrpConnection {
     /**
      * Local TCP port number
      */
-    private int localPort;
+    private int mLocalPort;
 
     /**
      * Socket server connection
      */
-    private SocketServerConnection socketServer = null;
+    private SocketServerConnection mSocketServer;
 
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(MsrpServerConnection.class.getName());
 
     /**
      * Constructor
@@ -54,7 +59,7 @@ public class MsrpServerConnection extends MsrpConnection {
      */
     public MsrpServerConnection(MsrpSession session, int localPort) {
         super(session);
-        this.localPort = localPort;
+        mLocalPort = localPort;
     }
 
     /**
@@ -64,19 +69,19 @@ public class MsrpServerConnection extends MsrpConnection {
      * @throws IOException
      */
     public SocketConnection getSocketConnection() throws IOException {
-        if (logger.isActivated()) {
-            logger.debug("Open server socket at " + localPort);
+        if (sLogger.isActivated()) {
+            sLogger.debug("Open server socket at " + mLocalPort);
         }
-        socketServer = NetworkFactory.getFactory().createSocketServerConnection();
-        socketServer.open(localPort);
+        mSocketServer = NetworkFactory.getFactory().createSocketServerConnection();
+        mSocketServer.open(mLocalPort);
 
-        if (logger.isActivated()) {
-            logger.debug("Wait client connection");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Wait client connection");
         }
 
-        SocketConnection socket = socketServer.acceptConnection();
-        if (logger.isActivated()) {
-            logger.debug("Socket connected to " + socket.getRemoteAddress() + ":"
+        SocketConnection socket = mSocketServer.acceptConnection();
+        if (sLogger.isActivated()) {
+            sLogger.debug("Socket connected to " + socket.getRemoteAddress() + ":"
                     + socket.getRemotePort());
         }
         return socket;
@@ -87,13 +92,6 @@ public class MsrpServerConnection extends MsrpConnection {
      */
     public void close() {
         super.close();
-
-        try {
-            if (socketServer != null) {
-                socketServer.close();
-            }
-        } catch (IOException e) {
-            // Nothing to do
-        }
+        CloseableUtils.tryToClose(mSocketServer);
     }
 }

@@ -208,15 +208,15 @@ public class ContentManager {
         MediaDescription desc = media.elementAt(0);
         if (media.size() == 1) { // if only one media in SDP, test if 'video', if not then return
                                  // null
-            if (!desc.name.equals("video")) {
+            if (!desc.mName.equals("video")) {
                 return null;
             }
         }
         if (media.size() == 2) { // if two media in SDP, test if first 'video', if not then choose
                                  // second and test if video, if not return null
-            if (!desc.name.equals("video")) {
+            if (!desc.mName.equals("video")) {
                 desc = media.elementAt(1);
-                if (!desc.name.equals("video")) {
+                if (!desc.mName.equals("video")) {
                     return null;
                 }
             }
@@ -226,7 +226,7 @@ public class ContentManager {
 
         // Extract the video encoding
         String encoding = rtpmap
-                .substring(rtpmap.indexOf(desc.payload) + desc.payload.length() + 1);
+                .substring(rtpmap.indexOf(desc.mPayload) + desc.mPayload.length() + 1);
         String codec = encoding.toLowerCase().trim();
         int index = encoding.indexOf("/");
         if (index != -1) {
@@ -240,10 +240,10 @@ public class ContentManager {
         if (frameSize != null) {
             try {
                 String value = frameSize.getValue();
-                index = value.indexOf(desc.payload);
+                index = value.indexOf(desc.mPayload);
                 int separator = value.indexOf('-');
                 if (index != -1 && separator != -1) {
-                    width = Integer.parseInt(value.substring(index + desc.payload.length() + 1,
+                    width = Integer.parseInt(value.substring(index + desc.mPayload.length() + 1,
                             separator));
                     height = Integer.parseInt(value.substring(separator + 1));
                 }
@@ -274,27 +274,27 @@ public class ContentManager {
         MediaDescription desc = media.elementAt(0);
         if (media.size() == 1) { // if only one media in SDP, test if 'audio', if not then return
                                  // null
-            if (!desc.name.equals("audio")) {
+            if (!desc.mName.equals("audio")) {
                 return null;
             }
         }
         if (media.size() == 2) { // if two media in SDP, test if first 'audio', if not then choose
                                  // second and test if 'audio', if not return null
-            if (!desc.name.equals("audio")) {
+            if (!desc.mName.equals("audio")) {
                 desc = media.elementAt(1);
-                if (!desc.name.equals("audio")) {
+                if (!desc.mName.equals("audio")) {
                     return null;
                 }
             }
         }
-        if (!desc.name.equals("audio")) {
+        if (!desc.mName.equals("audio")) {
             return null;
         }
         String rtpmap = desc.getMediaAttribute("rtpmap").getValue();
 
         // Extract the audio encoding
         String encoding = rtpmap
-                .substring(rtpmap.indexOf(desc.payload) + desc.payload.length() + 1);
+                .substring(rtpmap.indexOf(desc.mPayload) + desc.mPayload.length() + 1);
         String codec = encoding.toLowerCase().trim();
         int index = encoding.indexOf("/");
         if (index != -1) {

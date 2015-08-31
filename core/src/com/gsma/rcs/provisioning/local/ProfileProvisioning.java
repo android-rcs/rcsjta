@@ -427,7 +427,7 @@ public class ProfileProvisioning extends Activity {
             return text.toString();
 
         } finally {
-            CloseableUtils.close(br);
+            CloseableUtils.tryToClose(br);
         }
     }
 

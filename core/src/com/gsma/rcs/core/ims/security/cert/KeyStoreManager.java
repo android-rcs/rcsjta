@@ -432,7 +432,7 @@ public class KeyStoreManager {
                         CertificateFactory cf = CertificateFactory.getInstance("X.509");
                         inStream = new FileInputStream(file);
                         X509Certificate cert = (X509Certificate) cf.generateCertificate(inStream);
-                        CloseableUtils.close(inStream);
+                        CloseableUtils.tryToClose(inStream);
                         ks.setCertificateEntry(buildCertificateAlias(certificateFile), cert);
                         // Changed by Deutsche Telekom
                         saveKeyStoreToFile(ks);
@@ -457,7 +457,7 @@ public class KeyStoreManager {
                     .append(certificateFile).append(" failed!").toString(), e);
 
         } finally {
-            CloseableUtils.close(inStream);
+            CloseableUtils.tryToClose(inStream);
         }
     }
 
@@ -570,7 +570,7 @@ public class KeyStoreManager {
                 throw new KeyStoreException("Loading of key store from file failed!", e);
 
             } finally {
-                CloseableUtils.close(fis);
+                CloseableUtils.tryToClose(fis);
             }
         }
         return sKeyStore;
@@ -601,7 +601,7 @@ public class KeyStoreManager {
             throw new KeyStoreException("Saving of key store to file failed!", e);
 
         } finally {
-            CloseableUtils.close(fos);
+            CloseableUtils.tryToClose(fos);
         }
     }
 }

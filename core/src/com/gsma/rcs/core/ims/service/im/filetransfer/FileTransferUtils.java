@@ -152,7 +152,7 @@ public class FileTransferUtils {
             }
             return fileIcon;
         } finally {
-            CloseableUtils.close(in);
+            CloseableUtils.tryToClose(in);
         }
     }
 

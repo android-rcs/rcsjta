@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.protocol.rtp.core;
@@ -69,9 +73,9 @@ public abstract class RtcpPacket extends Packet {
      */
     public static final int RTCP_COMPOUND = -1;
 
-    public Packet base;
+    public Packet mBase;
 
-    public int type;
+    public int mType;
 
     public RtcpPacket() {
     }
@@ -79,13 +83,13 @@ public abstract class RtcpPacket extends Packet {
     public RtcpPacket(RtcpPacket rtcppacket) {
         super((Packet) rtcppacket);
 
-        base = rtcppacket.base;
+        mBase = rtcppacket.mBase;
     }
 
     public RtcpPacket(Packet packet) {
         super(packet);
 
-        base = packet;
+        mBase = packet;
     }
 
     public abstract void assemble(DataOutputStream dataoutputstream) throws IOException;

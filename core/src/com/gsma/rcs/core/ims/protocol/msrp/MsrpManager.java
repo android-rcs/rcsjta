@@ -222,8 +222,8 @@ public class MsrpManager {
         } else {
             logger.error("Media attribute \"setup\" is missing!");
             logger.warn("media=" + mediaDesc.toString());
-            if (mediaDesc.mediaAttributes != null)
-                for (MediaAttribute attribute : mediaDesc.mediaAttributes) {
+            if (mediaDesc.mMediaAttributes != null)
+                for (MediaAttribute attribute : mediaDesc.mMediaAttributes) {
                     logger.warn("attribute key=" + attribute.getName() + " value="
                             + attribute.getValue());
                 }
@@ -234,7 +234,7 @@ public class MsrpManager {
             session = createMsrpServerSession(remoteMsrpPath, listener);
         } else {
             String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
-            int remotePort = mediaDesc.port;
+            int remotePort = mediaDesc.mPort;
             String fingerprint = SdpUtils.extractFingerprint(parser, mediaDesc);
             session = createMsrpClientSession(remoteHost, remotePort, remoteMsrpPath, listener,
                     fingerprint);

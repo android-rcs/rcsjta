@@ -176,7 +176,7 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
         SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(UTF8));
         MediaDescription mediaApp = parser.getMediaDescription("application");
         String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaApp);
-        int remotePort = mediaApp.port;
+        int remotePort = mediaApp.mPort;
 
         mRtpReceiver.prepareSession(remoteHost, remotePort, mDataReceiver, mFormat, this);
         mRtpSender.prepareSession(mDataSender, remoteHost, remotePort,

@@ -451,7 +451,7 @@ public class MsrpSession {
                             try {
                                 Thread.sleep(500);
                             } catch (InterruptedException e) {
-                                e.printStackTrace();
+                                /* Nothing to be done here */
                             }
                         }
                     }
@@ -553,7 +553,7 @@ public class MsrpSession {
             throw new MsrpException("Send chunk failed for msgId : ".concat(msgId), e);
 
         } finally {
-            CloseableUtils.close(inputStream);
+            CloseableUtils.tryToClose(inputStream);
         }
     }
 

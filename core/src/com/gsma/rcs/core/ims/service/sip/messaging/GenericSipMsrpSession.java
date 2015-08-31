@@ -177,7 +177,7 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
         MediaAttribute attr = mediaDesc.getMediaAttribute("path");
         String remoteMsrpPath = attr.getValue();
         String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
-        int remotePort = mediaDesc.port;
+        int remotePort = mediaDesc.mPort;
 
         // Create the MSRP session
         MsrpSession session = getMsrpMgr().createMsrpClientSession(remoteHost, remotePort,

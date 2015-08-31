@@ -964,7 +964,7 @@ public final class ContactManager {
             outstream.write(photoContent);
             outstream.flush();
         } finally {
-            CloseableUtils.close(outstream);
+            CloseableUtils.tryToClose(outstream);
         }
     }
 
@@ -2173,7 +2173,7 @@ public final class ContactManager {
             return null;
 
         } finally {
-            CloseableUtils.close(out);
+            CloseableUtils.tryToClose(out);
         }
     }
 

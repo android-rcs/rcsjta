@@ -35,6 +35,8 @@ public class ReportTransaction extends Object {
      */
     private final static long TIMEOUT = 3600000; // TODO: which value ?
 
+    private static final int INVALID_STATUS_RESPONSE = -1;
+
     /**
      * Reported size
      */
@@ -94,7 +96,7 @@ public class ReportTransaction extends Object {
                 // Wait semaphore
                 super.wait(TIMEOUT);
             } catch (InterruptedException e) {
-                // Nothing to do
+                /* Nothing to do */
             }
         }
     }
@@ -152,18 +154,19 @@ public class ReportTransaction extends Object {
      * @return
      */
     public static int parseStatusCode(Hashtable<String, String> headers) {
-        int statusCode = -1;
-        String status = headers.get(MsrpConstants.HEADER_STATUS);
-        if ((status != null) && (status.startsWith("000 "))) {
-            String[] parts = status.split(" ");
-            if (parts.length > 0) {
-                try {
-                    statusCode = Integer.parseInt(parts[1]);
-                } catch (NumberFormatException e) {
-                    // Nothing to do
-                }
-            }
+        final String status = headers.get(MsrpConstants.HEADER_STATUS);
+        if (status == null || status.startsWith("000 ")) {
+            return INVALID_STATUS_RESPONSE;
         }
-        return statusCode;
+        String[] parts = status.split(" ");
+        if (parts.length < 2) {
+            return INVALID_STATUS_RESPONSE;
+        }
+        try {
+            return Integer.parseInt(parts[1]);
+
+        } catch (NumberFormatException e) {
+            return INVALID_STATUS_RESPONSE;
+        }
     }
 }

@@ -53,8 +53,8 @@ public class RtpPacket extends Packet {
     }
 
     public void assemble(int length) throws IOException {
-        this.length = length;
-        this.offset = 0;
+        this.mLength = length;
+        this.mOffset = 0;
 
         ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream(length);
         DataOutputStream dataoutputstream = new DataOutputStream(bytearrayoutputstream);
@@ -84,8 +84,8 @@ public class RtpPacket extends Packet {
                 dataoutputstream.writeInt(orientationElement);
             }
         }
-        dataoutputstream.write(base.data, base.offset, base.length);
-        data = bytearrayoutputstream.toByteArray();
+        dataoutputstream.write(base.mData, base.mOffset, base.mLength);
+        mData = bytearrayoutputstream.toByteArray();
     }
 
     public int calcLength() {

@@ -122,7 +122,7 @@ public class VideoCodecManager {
 
             // Extract encoding name
             String encoding = rtpmap.substring(
-                    rtpmap.indexOf(media.payload) + media.payload.length() + 1).trim();
+                    rtpmap.indexOf(media.mPayload) + media.mPayload.length() + 1).trim();
             String codecName = encoding;
 
             // Extract clock rate
@@ -140,11 +140,11 @@ public class VideoCodecManager {
             if (frameSize != null) {
                 try {
                     String value = frameSize.getValue();
-                    index = value.indexOf(media.payload);
+                    index = value.indexOf(media.mPayload);
                     int separator = value.indexOf('-');
                     if ((index != -1) && (separator != -1)) {
                         videoWidth = Integer.parseInt(value.substring(
-                                index + media.payload.length() + 1, separator));
+                                index + media.mPayload.length() + 1, separator));
                         videoHeight = Integer.parseInt(value.substring(separator + 1));
                     }
                 } catch (NumberFormatException e) {
@@ -158,9 +158,9 @@ public class VideoCodecManager {
             if (attr != null) {
                 try {
                     String value = attr.getValue();
-                    index = value.indexOf(media.payload);
-                    if ((index != -1) && (value.length() > media.payload.length())) {
-                        frameRate = Integer.parseInt(value.substring(index + media.payload.length()
+                    index = value.indexOf(media.mPayload);
+                    if ((index != -1) && (value.length() > media.mPayload.length())) {
+                        frameRate = Integer.parseInt(value.substring(index + media.mPayload.length()
                                 + 1));
                     } else {
                         frameRate = Integer.parseInt(value);
@@ -176,13 +176,13 @@ public class VideoCodecManager {
             if (fmtp != null) {
                 String value = fmtp.getValue();
                 index = 0; // value.indexOf(media.payload);
-                if ((index != -1) && (value.length() > media.payload.length())) {
-                    codecParameters = value.substring(index + media.payload.length() + 1);
+                if ((index != -1) && (value.length() > media.mPayload.length())) {
+                    codecParameters = value.substring(index + media.mPayload.length() + 1);
                 }
             }
 
             // Create a video codec
-            VideoCodec videoCodec = new VideoCodec(codecName, Integer.parseInt(media.payload),
+            VideoCodec videoCodec = new VideoCodec(codecName, Integer.parseInt(media.mPayload),
                     clockRate, frameRate, 0, videoWidth, videoHeight, codecParameters);
 
             return videoCodec;

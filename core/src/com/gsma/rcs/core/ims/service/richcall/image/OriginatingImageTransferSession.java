@@ -114,7 +114,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
             }
             return data;
         } finally {
-            CloseableUtils.close(fileInputStream);
+            CloseableUtils.tryToClose(fileInputStream);
         }
     }
 

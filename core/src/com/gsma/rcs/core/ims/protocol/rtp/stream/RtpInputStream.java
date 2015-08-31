@@ -33,6 +33,7 @@ import com.gsma.rcs.core.ims.protocol.rtp.format.Format;
 import com.gsma.rcs.core.ims.protocol.rtp.format.video.VideoOrientation;
 import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.rtp.util.Buffer;
+import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
 import java.io.IOException;
@@ -51,75 +52,72 @@ public class RtpInputStream implements ProcessorInputStream {
      */
     private static final int RTP_SOCKET_TIMEOUT = 20000;
 
+    private static final int MAX_RTP_PACKETS = 5;
+
     /**
      * Remote address
      */
-    private String remoteAddress;
+    private String mRemoteAddress;
 
     /**
      * Remote port
      */
-    private int remotePort;
+    private int mRemotePort;
 
     /**
      * Local port
      */
-    private int localPort;
+    private int mLocalPort;
 
     /**
      * RTP receiver
      */
-    private RtpPacketReceiver rtpReceiver = null;
+    private RtpPacketReceiver mRtpReceiver;
 
     /**
      * RTCP receiver
      */
-    private RtcpPacketReceiver rtcpReceiver = null;
+    private RtcpPacketReceiver mRtcpReceiver;
 
     /**
      * RTCP transmitter
      */
-    private RtcpPacketTransmitter rtcpTransmitter = null;
+    private RtcpPacketTransmitter mRtcpTransmitter;
 
     /**
      * Input buffer
      */
-    private Buffer buffer = new Buffer();
+    private Buffer mBuffer = new Buffer();
 
     /**
      * Input format
      */
-    private Format inputFormat = null;
+    private Format mInputFormat;
 
     /**
      * RTCP Session
      */
-    private RtcpSession rtcpSession = null;
+    private RtcpSession mRtcpSession;
 
     /**
      * RTP stream listener
      */
-    private RtpStreamListener rtpStreamListener;
+    private RtpStreamListener mRtpStreamListener;
 
     /**
      * The negotiated orientation extension header id
      */
-    private int extensionHeaderId = RtpUtils.RTP_DEFAULT_EXTENSION_ID;
+    private int mExtensionHeaderId = RtpUtils.RTP_DEFAULT_EXTENSION_ID;
 
     /**
      * Indicates if the stream was closed
      */
-    private boolean isClosed = false;
+    private boolean mIsClosed;
 
     /**
      * Sequence RTP packets buffer
      */
-    private PriorityQueue<RtpPacket> rtpPacketsBuffer;
-
-    /**
-     * The logger
-     */
-    private final Logger logger = Logger.getLogger(this.getClass().getName());
+    private PriorityQueue<RtpPacket> mRtpPacketsBuffer;
 
     /**
      * Constructor
@@ -128,14 +126,14 @@ public class RtpInputStream implements ProcessorInputStream {
      * @param inputFormat Input format
      */
     public RtpInputStream(String remoteAddress, int remotePort, int localPort, Format inputFormat) {
-        this.remoteAddress = remoteAddress;
-        this.remotePort = remotePort;
-        this.localPort = localPort;
-        this.inputFormat = inputFormat;
+        mRemoteAddress = remoteAddress;
+        mRemotePort = remotePort;
+        mLocalPort = localPort;
+        mInputFormat = inputFormat;
 
-        rtcpSession = new RtcpSession(false, 16000);
+        mRtcpSession = new RtcpSession(false, 16000);
 
-        rtpPacketsBuffer = new PriorityQueue<RtpPacket>(10, new Comparator<RtpPacket>() {
+        mRtpPacketsBuffer = new PriorityQueue<RtpPacket>(10, new Comparator<RtpPacket>() {
             @Override
             public int compare(RtpPacket object1, RtpPacket object2) {
                 if (object1.seqnum == object2.seqnum) {
@@ -155,48 +153,28 @@ public class RtpInputStream implements ProcessorInputStream {
      * @throws IOException
      */
     public void open() throws IOException {
-        // Create the RTP receiver
-        rtpReceiver = new RtpPacketReceiver(localPort, rtcpSession, RTP_SOCKET_TIMEOUT);
-        rtpReceiver.start();
+        mRtpReceiver = new RtpPacketReceiver(mLocalPort, mRtcpSession, RTP_SOCKET_TIMEOUT);
+        mRtpReceiver.start();
 
-        // Create the RTCP receiver
-        rtcpReceiver = new RtcpPacketReceiver(localPort + 1, rtcpSession);
-        rtcpReceiver.start();
+        mRtcpReceiver = new RtcpPacketReceiver(mLocalPort + 1, mRtcpSession);
+        mRtcpReceiver.start();
 
-        // Create the RTCP transmitter
-        rtcpTransmitter = new RtcpPacketTransmitter(remoteAddress, remotePort + 1, rtcpSession,
-                rtcpReceiver.getConnection());
-        rtcpTransmitter.start();
+        mRtcpTransmitter = new RtcpPacketTransmitter(mRemoteAddress, mRemotePort + 1, mRtcpSession,
+                mRtcpReceiver.getConnection());
+        mRtcpTransmitter.start();
 
-        isClosed = false;
+        mIsClosed = false;
     }
 
     /**
      * Close the input stream
      */
     public void close() {
-        try {
-            isClosed = true;
-
-            // Close the RTCP transmitter
-            if (rtcpTransmitter != null)
-                rtcpTransmitter.close();
-
-            // Close the RTP receiver
-            if (rtpReceiver != null) {
-                rtpReceiver.close();
-            }
-
-            // Close the RTCP receiver
-            if (rtcpReceiver != null) {
-                rtcpReceiver.close();
-            }
-            rtpStreamListener = null;
-        } catch (IOException e) {
-            if (logger.isActivated()) {
-                logger.debug(e.getMessage());
-            }
-        }
+        mIsClosed = true;
+        CloseableUtils.tryToClose(mRtcpTransmitter);
+        CloseableUtils.tryToClose(mRtpReceiver);
+        CloseableUtils.tryToClose(mRtcpReceiver);
+        mRtpStreamListener = null;
     }
 
     /**
@@ -205,7 +183,7 @@ public class RtpInputStream implements ProcessorInputStream {
      * @return RTP receiver
      */
     public RtpPacketReceiver getRtpReceiver() {
-        return rtpReceiver;
+        return mRtpReceiver;
     }
 
     /**
@@ -214,7 +192,7 @@ public class RtpInputStream implements ProcessorInputStream {
      * @return RTCP receiver
      */
     public RtcpPacketReceiver getRtcpReceiver() {
-        return rtcpReceiver;
+        return mRtcpReceiver;
     }
 
     /**
@@ -227,41 +205,41 @@ public class RtpInputStream implements ProcessorInputStream {
         do {
             try {
                 /* Wait and read a RTP packet */
-                RtpPacket rtpPacket = rtpReceiver.readRtpPacket();
+                RtpPacket rtpPacket = mRtpReceiver.readRtpPacket();
                 if (rtpPacket == null) {
                     throw new MediaException("Unable to read RTP packet!");
                 }
 
-                rtpPacketsBuffer.add(rtpPacket);
+                mRtpPacketsBuffer.add(rtpPacket);
             } catch (TimeoutException e) {
-                if (!isClosed) {
-                    if (rtpStreamListener != null) {
-                        rtpStreamListener.rtpStreamAborted();
+                if (!mIsClosed) {
+                    if (mRtpStreamListener != null) {
+                        mRtpStreamListener.rtpStreamAborted();
                     }
                 }
                 throw new MediaException("RTP Packet reading timeout!", e);
             }
-        } while (rtpPacketsBuffer.size() <= 5);
+        } while (mRtpPacketsBuffer.size() <= MAX_RTP_PACKETS);
 
-        RtpPacket packet = rtpPacketsBuffer.poll();
+        RtpPacket packet = mRtpPacketsBuffer.poll();
 
-        buffer.setData(packet.data);
-        buffer.setLength(packet.payloadlength);
-        buffer.setOffset(0);
-        buffer.setFormat(inputFormat);
-        buffer.setSequenceNumber(packet.seqnum);
-        buffer.setRTPMarker(packet.marker != 0);
-        buffer.setTimestamp(packet.timestamp);
+        mBuffer.setData(packet.mData);
+        mBuffer.setLength(packet.payloadlength);
+        mBuffer.setOffset(0);
+        mBuffer.setFormat(mInputFormat);
+        mBuffer.setSequenceNumber(packet.seqnum);
+        mBuffer.setRTPMarker(packet.marker != 0);
+        mBuffer.setTimestamp(packet.timestamp);
 
         if (packet.extensionHeader != null) {
-            ExtensionElement element = packet.extensionHeader.getElementById(extensionHeaderId);
+            ExtensionElement element = packet.extensionHeader.getElementById(mExtensionHeaderId);
             if (element != null) {
-                buffer.setVideoOrientation(VideoOrientation.parse(element.data[0]));
+                mBuffer.setVideoOrientation(VideoOrientation.parse(element.data[0]));
             }
         }
 
-        inputFormat = null;
-        return buffer;
+        mInputFormat = null;
+        return mBuffer;
     }
 
     /**
@@ -270,7 +248,7 @@ public class RtpInputStream implements ProcessorInputStream {
      * @param rtpStreamListener
      */
     public void addRtpStreamListener(RtpStreamListener rtpStreamListener) {
-        this.rtpStreamListener = rtpStreamListener;
+        mRtpStreamListener = rtpStreamListener;
     }
 
     /**
@@ -279,7 +257,7 @@ public class RtpInputStream implements ProcessorInputStream {
      * @param extensionHeaderId Header id
      */
     public void setExtensionHeaderId(int extensionHeaderId) {
-        this.extensionHeaderId = extensionHeaderId;
+        mExtensionHeaderId = extensionHeaderId;
     }
 
 }

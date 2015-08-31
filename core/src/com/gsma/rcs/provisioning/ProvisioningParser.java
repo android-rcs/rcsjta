@@ -246,7 +246,7 @@ public class ProvisioningParser {
             throw new SAXException("Can't parse provisioning content document!", e);
 
         } finally {
-            CloseableUtils.close(inputStream);
+            CloseableUtils.tryToClose(inputStream);
         }
     }
 

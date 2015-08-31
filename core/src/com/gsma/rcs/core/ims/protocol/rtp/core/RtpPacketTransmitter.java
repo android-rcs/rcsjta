@@ -24,6 +24,7 @@ import com.gsma.rcs.platform.network.DatagramConnection;
 import com.gsma.rcs.platform.network.NetworkFactory;
 import com.gsma.rcs.utils.logger.Logger;
 
+import java.io.Closeable;
 import java.io.IOException;
 
 /**
@@ -31,7 +32,7 @@ import java.io.IOException;
  * 
  * @author jexa7410
  */
-public class RtpPacketTransmitter {
+public class RtpPacketTransmitter implements Closeable {
 
     /**
      * Sequence number
@@ -165,9 +166,9 @@ public class RtpPacketTransmitter {
             return null;
         }
         Packet packet = new Packet();
-        packet.data = data;
-        packet.offset = 0;
-        packet.length = buffer.getLength();
+        packet.mData = data;
+        packet.mOffset = 0;
+        packet.mLength = buffer.getLength();
 
         RtpPacket rtppacket = new RtpPacket(packet);
         if (buffer.isRTPMarkerSet()) {
@@ -199,31 +200,20 @@ public class RtpPacketTransmitter {
      * @param packet RTP packet
      * @throws IOException
      */
-    private void transmit(Packet packet) {
-        // Prepare data to be sent
-        byte[] data = packet.data;
-        if (packet.offset > 0) {
-            System.arraycopy(data, packet.offset, data = new byte[packet.length], 0, packet.length);
+    private void transmit(Packet packet) throws IOException {
+        byte[] data = packet.mData;
+        if (packet.mOffset > 0) {
+            System.arraycopy(data, packet.mOffset, data = new byte[packet.mLength], 0, packet.mLength);
         }
-
-        // Update statistics
-        stats.numBytes += packet.length;
+        stats.numBytes += packet.mLength;
         stats.numPackets++;
-
-        // Send data over UDP
-        try {
-            datagramConnection.send(remoteAddress, remotePort, data);
-
-            RtpSource s = rtcpSession.getMySource();
-            s.activeSender = true;
-            rtcpSession.timeOfLastRTPSent = rtcpSession.currentTime();
-            rtcpSession.packetCount++;
-            rtcpSession.octetCount += data.length;
-        } catch (IOException e) {
-            // if (logger.isActivated()) {
-            // logger.error("Can't send the RTP packet", e);
-            // }
-        }
+        /* Send data over UDP */
+        datagramConnection.send(remoteAddress, remotePort, data);
+        RtpSource s = rtcpSession.getMySource();
+        s.activeSender = true;
+        rtcpSession.timeOfLastRTPSent = rtcpSession.currentTime();
+        rtcpSession.packetCount++;
+        rtcpSession.octetCount += data.length;
     }
 
     /**

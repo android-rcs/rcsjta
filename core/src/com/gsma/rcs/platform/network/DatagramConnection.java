@@ -18,6 +18,7 @@
 
 package com.gsma.rcs.platform.network;
 
+import java.io.Closeable;
 import java.io.IOException;
 
 /**
@@ -25,7 +26,7 @@ import java.io.IOException;
  * 
  * @author jexa7410
  */
-public interface DatagramConnection {
+public interface DatagramConnection extends Closeable {
     /**
      * Default datagram packet size
      */

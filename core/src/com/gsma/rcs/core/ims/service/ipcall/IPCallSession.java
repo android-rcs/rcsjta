@@ -228,11 +228,11 @@ public abstract class IPCallSession extends ImsServiceSession {
 
             // Extract media ports
             MediaDescription mediaAudio = parser.getMediaDescription("audio");
-            int audioRemotePort = mediaAudio.port;
+            int audioRemotePort = mediaAudio.mPort;
             MediaDescription mediaVideo = parser.getMediaDescription("video");
             int videoRemotePort = -1;
             if (mediaVideo != null) {
-                videoRemotePort = mediaVideo.port;
+                videoRemotePort = mediaVideo.mPort;
             }
 
             // Extract audio codecs from SDP

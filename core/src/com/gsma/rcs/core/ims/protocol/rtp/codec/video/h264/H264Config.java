@@ -113,18 +113,8 @@ public class H264Config {
      *         <code>null</code>
      */
     private static String getParameterValue(String paramKey, String params) {
-        String value = null;
-        if (params != null && params.length() > 0) {
-            try {
-                Pattern p = Pattern.compile("(?<=" + paramKey + "=).*?(?=;|$)");
-                Matcher m = p.matcher(params);
-                if (m.find()) {
-                    value = m.group(0);
-                }
-            } catch (PatternSyntaxException e) {
-                // Nothing to do
-            }
-        }
-        return value;
+        Pattern p = Pattern.compile("(?<=" + paramKey + "=).*?(?=;|$)");
+        Matcher m = p.matcher(params);
+        return m.find() ? m.group(0) : null;
     }
 }

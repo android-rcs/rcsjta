@@ -81,7 +81,7 @@ public class MsrpTransaction extends Object {
                 // Wait semaphore
                 super.wait();
             } catch (InterruptedException e) {
-                // Nothing to do
+                /* Nothing to do */
             }
         }
     }

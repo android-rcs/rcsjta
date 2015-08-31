@@ -190,7 +190,7 @@ public class SdpParser extends Parser {
             if (getToken(bin, "i=")) {
                 String mediaTitle = getLine(bin);
                 for (int i = 0; i < descs.size(); i++) {
-                    descs.elementAt(i).mediaTitle = mediaTitle;
+                    descs.elementAt(i).mMediaTitle = mediaTitle;
                 }
             }
 
@@ -198,7 +198,7 @@ public class SdpParser extends Parser {
             if (getToken(bin, "c=")) {
                 String connectionInfo = getLine(bin);
                 for (int i = 0; i < descs.size(); i++) {
-                    descs.elementAt(i).connectionInfo = connectionInfo;
+                    descs.elementAt(i).mConnectionInfo = connectionInfo;
                 }
             }
 
@@ -210,15 +210,15 @@ public class SdpParser extends Parser {
                     String valueAttribute = line.substring(index + 1);
                     if (line.contains("AS")) {
                         for (int i = 0; i < descs.size(); i++) {
-                            descs.elementAt(i).bandwidthInfo = valueAttribute;
+                            descs.elementAt(i).mBandwidthInfo = valueAttribute;
                         }
                     } else if (line.contains("RS")) {
                         for (int i = 0; i < descs.size(); i++) {
-                            descs.elementAt(i).senderBandwidthInfo = valueAttribute;
+                            descs.elementAt(i).mSenderBandwidthInfo = valueAttribute;
                         }
                     } else if (line.contains("RR")) {
                         for (int i = 0; i < descs.size(); i++) {
-                            descs.elementAt(i).receiverBandwidthInfo = valueAttribute;
+                            descs.elementAt(i).mReceiverBandwidthInfo = valueAttribute;
                         }
                     }
                 }
@@ -228,7 +228,7 @@ public class SdpParser extends Parser {
             if (getToken(bin, "k=")) {
                 String encryptionKey = getLine(bin);
                 for (int i = 0; i < descs.size(); i++) {
-                    descs.elementAt(i).encryptionKey = encryptionKey;
+                    descs.elementAt(i).mEncryptionKey = encryptionKey;
                 }
             }
 
@@ -247,21 +247,21 @@ public class SdpParser extends Parser {
                         boolean payloadFound = false;
                         for (int i = 0; i < descs.size(); i++) {
                             // Check if first element is a payload
-                            if (valueAttribute.startsWith(descs.elementAt(i).payload)) {
-                                descs.elementAt(i).mediaAttributes.addElement(attribute);
+                            if (valueAttribute.startsWith(descs.elementAt(i).mPayload)) {
+                                descs.elementAt(i).mMediaAttributes.addElement(attribute);
                                 payloadFound = true;
                             }
                         }
                         // Add for all if first element is not a payload
                         if (!payloadFound) {
                             for (int i = 0; i < descs.size(); i++) {
-                                descs.elementAt(i).mediaAttributes.addElement(attribute);
+                                descs.elementAt(i).mMediaAttributes.addElement(attribute);
                             }
                         }
                     } else {
                         // Add for all
                         for (int i = 0; i < descs.size(); i++) {
-                            descs.elementAt(i).mediaAttributes.addElement(attribute);
+                            descs.elementAt(i).mMediaAttributes.addElement(attribute);
                         }
                     }
                 }
@@ -299,7 +299,7 @@ public class SdpParser extends Parser {
         if (mediaDescriptions != null) {
             for (int i = 0; i < mediaDescriptions.size(); i++) {
                 MediaDescription entry = (MediaDescription) mediaDescriptions.elementAt(i);
-                if (entry.name.equals(name)) {
+                if (entry.mName.equals(name)) {
                     description = entry;
                     break;
                 }
@@ -319,7 +319,7 @@ public class SdpParser extends Parser {
         if (mediaDescriptions != null) {
             for (int i = 0; i < mediaDescriptions.size(); i++) {
                 MediaDescription entry = (MediaDescription) mediaDescriptions.elementAt(i);
-                if (entry.name.equals(name)) {
+                if (entry.mName.equals(name)) {
                     result.add(entry);
                 }
             }

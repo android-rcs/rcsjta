@@ -73,10 +73,9 @@ public class RequestTransaction extends Object {
     public void waitResponse() {
         synchronized (this) {
             try {
-                // Wait semaphore
                 super.wait(mRcsSettings.getMsrpTransactionTimeout());
             } catch (InterruptedException e) {
-                // Nothing to do
+                /* Nothing to do */
             }
         }
     }

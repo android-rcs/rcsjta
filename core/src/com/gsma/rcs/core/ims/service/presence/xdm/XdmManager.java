@@ -373,9 +373,9 @@ public class XdmManager {
             throw new SipNetworkException("Failed to send http request!", e);
 
         } finally {
-            CloseableUtils.close(conn);
-            CloseableUtils.close(is);
-            CloseableUtils.close(os);
+            CloseableUtils.tryToClose(conn);
+            CloseableUtils.tryToClose(is);
+            CloseableUtils.tryToClose(os);
         }
     }
 

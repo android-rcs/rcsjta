@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +15,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.protocol.rtp.core;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.concurrent.TimeoutException;
 
 import com.gsma.rcs.platform.network.DatagramConnection;
 import com.gsma.rcs.platform.network.NetworkFactory;
+import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.FifoBuffer;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -32,7 +38,7 @@ import com.gsma.rcs.utils.logger.Logger;
  * 
  * @author jexa7410
  */
-public class RtpPacketReceiver extends Thread {
+public class RtpPacketReceiver extends Thread implements Closeable {
     /**
      * Statistics
      */
@@ -127,18 +133,8 @@ public class RtpPacketReceiver extends Thread {
     public void close() {
         mInterrupted = true;
         interrupt();
-
-        if (mDatagramConnection != null) {
-            try {
-                mClosed = true;
-                mDatagramConnection.close();
-            } catch (IOException e) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug(e.getMessage());
-                }
-            }
-            mDatagramConnection = null;
-        }
+        mClosed = true;
+        CloseableUtils.tryToClose(mDatagramConnection);
     }
 
     /**
@@ -174,18 +170,22 @@ public class RtpPacketReceiver extends Thread {
             }
         } catch (SocketTimeoutException e) {
             if (!mInterrupted) {
-                sLogger.error("Datagram socket server failed", e);
+                if (sLogger.isActivated()) {
+                    sLogger.debug(e.getMessage());
+                }
             }
         } catch (IOException e) {
             if (!mInterrupted) {
-                sLogger.debug(e.getMessage());
+                if (sLogger.isActivated()) {
+                    sLogger.debug(e.getMessage());
+                }
             }
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
-            sLogger.error("Datagram socket server failed", e);
+            sLogger.error("Datagram socket server failed!", e);
         }
     }
 
@@ -231,10 +231,10 @@ public class RtpPacketReceiver extends Thread {
     private RtpPacket parseRtpPacket(byte[] data) {
         RtpPacket packet = new RtpPacket();
         // Read RTP packet length
-        packet.length = data.length;
+        packet.mLength = data.length;
 
         // Set received timestamp
-        packet.receivedAt = System.currentTimeMillis();
+        packet.mReceivedAt = System.currentTimeMillis();
 
         // Read extension bit
         packet.extension = (data[0] & 0x10) > 0;
@@ -278,9 +278,9 @@ public class RtpPacketReceiver extends Thread {
         } else {
             packet.payloadoffset = 12;
         }
-        packet.payloadlength = packet.length - packet.payloadoffset;
-        packet.data = new byte[packet.payloadlength];
-        System.arraycopy(data, packet.payloadoffset, packet.data, 0, packet.payloadlength);
+        packet.payloadlength = packet.mLength - packet.payloadoffset;
+        packet.mData = new byte[packet.payloadlength];
+        System.arraycopy(data, packet.payloadoffset, packet.mData, 0, packet.payloadlength);
 
         return packet;
     }

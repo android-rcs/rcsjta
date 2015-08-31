@@ -59,6 +59,8 @@ import java.util.Random;
  */
 public class ImsConnectionManager implements Runnable {
 
+    private static final long DEFAULT_RETRY_PERIOD = 5000;
+
     /**
      * Core
      */
@@ -243,27 +245,17 @@ public class ImsConnectionManager implements Runnable {
         if (sLogger.isActivated()) {
             sLogger.info("Terminate the IMS connection manager");
         }
-
-        // Unregister battery listener
-        try {
-            AndroidFactory.getApplicationContext().unregisterReceiver(mBatteryLevelListener);
-        } catch (IllegalArgumentException e) {
-            // Nothing to do
+        final Context ctx = AndroidFactory.getApplicationContext();
+        if (mBatteryLevelListener != null) {
+            ctx.unregisterReceiver(mBatteryLevelListener);
+            mBatteryLevelListener = null;
         }
-
-        // Unregister network state listener
-        try {
-            AndroidFactory.getApplicationContext().unregisterReceiver(mNetworkStateListener);
-        } catch (IllegalArgumentException e) {
-            // Nothing to do
+        if (mNetworkStateListener != null) {
+            ctx.unregisterReceiver(mNetworkStateListener);
+            mNetworkStateListener = null;
         }
-
-        // Stop the IMS connection manager
         stopImsConnection(TerminationReason.TERMINATION_BY_SYSTEM);
-
-        // Unregister from the IMS
         mCurrentNetworkInterface.unregister();
-
         if (sLogger.isActivated()) {
             sLogger.info("IMS connection manager has been terminated");
         }
@@ -566,137 +558,152 @@ public class ImsConnectionManager implements Runnable {
     /**
      * Background processing
      */
+    // @FIXME: This run method needs to be refactored as the current logic of polling is bit too
+    // complex and can be made much more simpler.
     public void run() {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Start polling of the IMS connection");
-        }
-
-        long servicePollingPeriod = mRcsSettings.getImsServicePollingPeriod();
-        long regBaseTime = mRcsSettings.getRegisterRetryBaseTime();
-        long regMaxTime = mRcsSettings.getRegisterRetryMaxTime();
-        Random random = new Random();
-        int nbFailures = 0;
-
-        while (mImsPollingThreadId == Thread.currentThread().getId()) {
+        try {
             if (sLogger.isActivated()) {
-                sLogger.debug("Polling: check IMS connection");
+                sLogger.debug("Start polling of the IMS connection");
             }
 
-            // Connection management
-            try {
-                // Test IMS registration
-                if (!mCurrentNetworkInterface.isRegistered()) {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("Not yet registered to IMS: try registration");
-                    }
+            long servicePollingPeriod = mRcsSettings.getImsServicePollingPeriod();
+            long regBaseTime = mRcsSettings.getRegisterRetryBaseTime();
+            long regMaxTime = mRcsSettings.getRegisterRetryMaxTime();
+            Random random = new Random();
+            int nbFailures = 0;
 
-                    // Try to register to IMS
-                    mCurrentNetworkInterface.register(mDnsResolvedFields);
+            while (mImsPollingThreadId == Thread.currentThread().getId()) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Polling: check IMS connection");
+                }
 
-                    // InterruptedException thrown by stopImsConnection() may be caught by one
-                    // of the methods used in currentNetworkInterface.register() above
-                    if (mImsPollingThreadId != Thread.currentThread().getId()) {
+                // Connection management
+                try {
+                    // Test IMS registration
+                    if (!mCurrentNetworkInterface.isRegistered()) {
                         if (sLogger.isActivated()) {
-                            sLogger.debug("IMS connection polling thread race condition");
-                        }
-                        break;
-                    } else {
-                        if (sLogger.isActivated()) {
-                            sLogger.debug("Registered to the IMS with success: start IMS services");
-                        }
-                        if (mImsModule.isInitializationFinished() && !mImsServicesStarted) {
-                            mImsModule.startImsServices();
-                            mImsServicesStarted = true;
+                            sLogger.debug("Not yet registered to IMS: try registration");
                         }
 
-                        // Reset number of failures
-                        nbFailures = 0;
-                    }
+                        // Try to register to IMS
+                        mCurrentNetworkInterface.register(mDnsResolvedFields);
 
-                } else {
-                    if (mImsModule.isInitializationFinished()) {
-                        if (!mImsServicesStarted) {
+                        // InterruptedException thrown by stopImsConnection() may be caught by one
+                        // of the methods used in currentNetworkInterface.register() above
+                        if (mImsPollingThreadId != Thread.currentThread().getId()) {
                             if (sLogger.isActivated()) {
-                                sLogger.debug("Already registered to IMS: start IMS services");
+                                sLogger.debug("IMS connection polling thread race condition");
                             }
-                            mImsModule.startImsServices();
-                            mImsServicesStarted = true;
+                            break;
                         } else {
                             if (sLogger.isActivated()) {
-                                sLogger.debug("Already registered to IMS: check IMS services");
+                                sLogger.debug("Registered to the IMS with success: start IMS services");
                             }
-                            mImsModule.checkImsServices();
+                            if (mImsModule.isInitializationFinished() && !mImsServicesStarted) {
+                                mImsModule.startImsServices();
+                                mImsServicesStarted = true;
+                            }
+
+                            // Reset number of failures
+                            nbFailures = 0;
                         }
+
                     } else {
-                        if (sLogger.isActivated()) {
-                            sLogger.debug("Already registered to IMS: IMS services not yet started");
+                        if (mImsModule.isInitializationFinished()) {
+                            if (!mImsServicesStarted) {
+                                if (sLogger.isActivated()) {
+                                    sLogger.debug("Already registered to IMS: start IMS services");
+                                }
+                                mImsModule.startImsServices();
+                                mImsServicesStarted = true;
+                            } else {
+                                if (sLogger.isActivated()) {
+                                    sLogger.debug("Already registered to IMS: check IMS services");
+                                }
+                                mImsModule.checkImsServices();
+                            }
+                        } else {
+                            if (sLogger.isActivated()) {
+                                sLogger.debug("Already registered to IMS: IMS services not yet started");
+                            }
                         }
                     }
-                }
-            } catch (SipPayloadException e) {
-                sLogger.error("Can't register to the IMS!", e);
-                mCurrentNetworkInterface.getSipManager().closeStack();
-                /* Increment number of failures */
-                nbFailures++;
-                /* Force to perform a new DNS lookup */
-                mDnsResolvedFields = null;
-            } catch (SipNetworkException e) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug(e.getMessage());
-                }
-                mCurrentNetworkInterface.getSipManager().closeStack();
-                /* Increment number of failures */
-                nbFailures++;
-                /* Force to perform a new DNS lookup */
-                mDnsResolvedFields = null;
-            }
-
-            // InterruptedException thrown by stopImsConnection() may be caught by one
-            // of the methods used in currentNetworkInterface.register() above
-            if (mImsPollingThreadId != Thread.currentThread().getId()) {
-                sLogger.debug("IMS connection polling thread race condition");
-                break;
-            }
-
-            // Make a pause before the next polling
-            try {
-                if (!mCurrentNetworkInterface.isRegistered()) {
-                    final long retryAfterHeaderDuration = mCurrentNetworkInterface
-                            .getRetryAfterHeaderDuration();
-                    if (retryAfterHeaderDuration > 0) {
-                        Thread.sleep(retryAfterHeaderDuration);
-                    } else {
-                        // Pause before the next register attempt
-                        double w = Math.min(regMaxTime, (regBaseTime * Math.pow(2, nbFailures)));
-                        double coeff = (random.nextInt(51) + 50) / 100.0; // Coeff between 50% and
-                                                                          // 100%
-                        long retryPeriod = (long) (coeff * w);
-                        if (sLogger.isActivated()) {
-                            sLogger.debug(new StringBuilder("Wait ").append(retryPeriod)
-                                    .append("ms before retry registration (failures=")
-                                    .append(nbFailures).append(", coeff=").append(coeff)
-                                    .append(')').toString());
-                        }
-                        Thread.sleep(retryPeriod);
-                    }
-                } else if (!mImsServicesStarted) {
-                    long retryPeriod = 5000;
+                } catch (SipPayloadException e) {
+                    sLogger.error("Can't register to the IMS!", e);
+                    mCurrentNetworkInterface.getSipManager().closeStack();
+                    /* Increment number of failures */
+                    nbFailures++;
+                    /* Force to perform a new DNS lookup */
+                    mDnsResolvedFields = null;
+                } catch (SipNetworkException e) {
                     if (sLogger.isActivated()) {
-                        sLogger.debug(new StringBuilder("Wait ").append(retryPeriod)
-                                .append("ms before retry to start services").toString());
+                        sLogger.debug(e.getMessage());
                     }
-                    Thread.sleep(retryPeriod);
-                } else {
-                    // Pause before the next service check
-                    Thread.sleep(servicePollingPeriod);
+                    mCurrentNetworkInterface.getSipManager().closeStack();
+                    /* Increment number of failures */
+                    nbFailures++;
+                    /* Force to perform a new DNS lookup */
+                    mDnsResolvedFields = null;
                 }
-            } catch (InterruptedException e) {
-                break;
-            }
-        }
 
-        if (sLogger.isActivated()) {
-            sLogger.debug("IMS connection polling is terminated");
+                // InterruptedException thrown by stopImsConnection() may be caught by one
+                // of the methods used in currentNetworkInterface.register() above
+                if (mImsPollingThreadId != Thread.currentThread().getId()) {
+                    sLogger.debug("IMS connection polling thread race condition");
+                    break;
+                }
+
+                // Make a pause before the next polling
+                try {
+                    if (!mCurrentNetworkInterface.isRegistered()) {
+                        final long retryAfterHeaderDuration = mCurrentNetworkInterface
+                                .getRetryAfterHeaderDuration();
+                        if (retryAfterHeaderDuration > 0) {
+                            Thread.sleep(retryAfterHeaderDuration);
+                        } else {
+                            // Pause before the next register attempt
+                            double w = Math
+                                    .min(regMaxTime, (regBaseTime * Math.pow(2, nbFailures)));
+                            double coeff = (random.nextInt(51) + 50) / 100.0; // Coeff between 50%
+                                                                              // and
+                                                                              // 100%
+                            long retryPeriod = (long) (coeff * w);
+                            if (sLogger.isActivated()) {
+                                sLogger.debug(new StringBuilder("Wait ").append(retryPeriod)
+                                        .append("ms before retry registration (failures=")
+                                        .append(nbFailures).append(", coeff=").append(coeff)
+                                        .append(')').toString());
+                            }
+                            Thread.sleep(retryPeriod);
+                        }
+                    } else if (!mImsServicesStarted) {
+                        if (sLogger.isActivated()) {
+                            sLogger.debug(new StringBuilder("Wait ").append(DEFAULT_RETRY_PERIOD)
+                                    .append("ms before retry to start services").toString());
+                        }
+                        Thread.sleep(DEFAULT_RETRY_PERIOD);
+                    } else {
+                        // Pause before the next service check
+                        Thread.sleep(servicePollingPeriod);
+                    }
+                } catch (InterruptedException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.warn("IMS connection polling is interrupted", e);
+                    }
+                    break;
+                }
+            }
+            if (sLogger.isActivated()) {
+                sLogger.debug("IMS connection polling is terminated");
+            }
+        } catch (RuntimeException e) {
+            /*
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
+             */
+            sLogger.error("Failed to poll for ims connection!", e);
         }
     }
 

@@ -77,7 +77,7 @@ public class AudioCodecManager {
 
             // Extract encoding name
             String encoding = rtpmap.substring(
-                    rtpmap.indexOf(media.payload) + media.payload.length() + 1).trim();
+                    rtpmap.indexOf(media.mPayload) + media.mPayload.length() + 1).trim();
             String codecName = encoding;
 
             int index = encoding.indexOf("/");
@@ -91,10 +91,10 @@ public class AudioCodecManager {
             if (attr != null) {
                 try {
                     String value = attr.getValue();
-                    index = value.indexOf(media.payload);
-                    if ((index != -1) && (value.length() > media.payload.length())) {
+                    index = value.indexOf(media.mPayload);
+                    if ((index != -1) && (value.length() > media.mPayload.length())) {
                         sampleRate = Integer.parseInt(value.substring(index
-                                + media.payload.length() + 1));
+                                + media.mPayload.length() + 1));
                     } else {
                         sampleRate = Integer.parseInt(value);
                     }
@@ -109,13 +109,13 @@ public class AudioCodecManager {
             if (fmtp != null) {
                 String value = fmtp.getValue();
                 index = 0; // value.indexOf(media.payload);
-                if ((index != -1) && (value.length() > media.payload.length())) {
-                    codecParameters = value.substring(index + media.payload.length() + 1);
+                if ((index != -1) && (value.length() > media.mPayload.length())) {
+                    codecParameters = value.substring(index + media.mPayload.length() + 1);
                 }
             }
 
             // Create an audio codec
-            AudioCodec audioCodec = new AudioCodec(codecName, Integer.parseInt(media.payload),
+            AudioCodec audioCodec = new AudioCodec(codecName, Integer.parseInt(media.mPayload),
                     sampleRate, codecParameters);
             return audioCodec;
         } catch (NullPointerException e) {

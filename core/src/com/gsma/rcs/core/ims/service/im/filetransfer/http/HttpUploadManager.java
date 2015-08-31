@@ -444,7 +444,7 @@ public class HttpUploadManager extends HttpTransferManager {
             outputStream.write(fileIconData);
             outputStream.writeBytes(LINE_END);
         } finally {
-            CloseableUtils.close(fileInputStream);
+            CloseableUtils.tryToClose(fileInputStream);
         }
     }
 
@@ -503,7 +503,7 @@ public class HttpUploadManager extends HttpTransferManager {
                 bytesRead = fileInputStream.read(buffer, 0, bufferSize);
             }
         } finally {
-            CloseableUtils.close(fileInputStream);
+            CloseableUtils.tryToClose(fileInputStream);
         }
         if (!isCancelled()) {
             outputStream.writeBytes(LINE_END);
@@ -528,7 +528,7 @@ public class HttpUploadManager extends HttpTransferManager {
         } catch (IOException e) {
             // Nothing to do
         } finally {
-            CloseableUtils.close(is);
+            CloseableUtils.tryToClose(is);
         }
         return sb.toString().getBytes(UTF8);
     }
@@ -756,7 +756,7 @@ public class HttpUploadManager extends HttpTransferManager {
 
             }
         } finally {
-            CloseableUtils.close(fileInputStream);
+            CloseableUtils.tryToClose(fileInputStream);
         }
     }
 
@@ -853,7 +853,7 @@ public class HttpUploadManager extends HttpTransferManager {
             }
             return sb.toString();
         } finally {
-            CloseableUtils.close(in);
+            CloseableUtils.tryToClose(in);
         }
     }
 

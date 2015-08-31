@@ -209,7 +209,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
             MediaAttribute attr3 = mediaDesc.getMediaAttribute("path");
             String remotePath = attr3.getValue();
             String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
-            int remotePort = mediaDesc.port;
+            int remotePort = mediaDesc.mPort;
 
             // Extract the "setup" parameter
             String remoteSetup = "passive";

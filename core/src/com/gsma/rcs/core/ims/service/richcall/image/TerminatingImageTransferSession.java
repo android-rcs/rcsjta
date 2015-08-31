@@ -211,7 +211,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
             SdpParser parser = new SdpParser(remoteSdp.getBytes(UTF8));
             Vector<MediaDescription> media = parser.getMediaDescriptions();
             MediaDescription mediaDesc = media.elementAt(0);
-            String protocol = mediaDesc.protocol;
+            String protocol = mediaDesc.mProtocol;
             boolean isSecured = false;
             if (protocol != null) {
                 isSecured = protocol.equalsIgnoreCase(MsrpConstants.SOCKET_MSRP_SECURED_PROTOCOL);
@@ -223,7 +223,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
             MediaAttribute attr3 = mediaDesc.getMediaAttribute("path");
             String remotePath = attr3.getValue();
             String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
-            int remotePort = mediaDesc.port;
+            int remotePort = mediaDesc.mPort;
 
             // Changed by Deutsche Telekom
             String fingerprint = SdpUtils.extractFingerprint(parser, mediaDesc);

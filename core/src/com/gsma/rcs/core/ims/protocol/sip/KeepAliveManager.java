@@ -82,23 +82,20 @@ public class KeepAliveManager extends PeriodicRefresher {
 
     /**
      * Keep-alive processing
+     * 
+     * @throws SipNetworkException
      */
-    public void periodicProcessing() {
+    public void periodicProcessing() throws SipNetworkException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.debug("Send keep-alive");
             }
-
-            // Send a double-CRLF
+            /* Send a double-CRLF */
             mSip.getDefaultSipProvider().getListeningPoints()[0].sendHeartbeat(
                     mSip.getOutboundProxyAddr(), mSip.getOutboundProxyPort());
-
-            // Start timer
             startTimer(System.currentTimeMillis(), mPeriod);
         } catch (IOException e) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(e.getMessage());
-            }
+            throw new SipNetworkException("Failed to send keep-alive!", e);
         }
     }
 

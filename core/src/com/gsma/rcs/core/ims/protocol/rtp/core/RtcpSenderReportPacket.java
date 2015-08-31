@@ -44,7 +44,7 @@ public class RtcpSenderReportPacket extends RtcpPacket {
 
     public RtcpSenderReportPacket(RtcpPacket rtcppacket) {
         super(rtcppacket);
-        type = 200;
+        mType = 200;
     }
 
     public void assemble(DataOutputStream dataoutputstream) throws IOException {
