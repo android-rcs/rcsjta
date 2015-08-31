@@ -117,7 +117,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     /**
      * Lock used for synchronization
      */
-    private final Object lock = new Object();
+    private final Object mLock = new Object();
 
     /**
      * The logger
@@ -175,7 +175,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     private void handleSessionRejected(ReasonCode reasonCode) {
         setRejoinedAsPartOfSendOperation(false);
-        synchronized (lock) {
+        synchronized (mLock) {
             mChatService.removeGroupChat(mChatId);
             setStateAndReasonCode(State.REJECTED, reasonCode);
         }
@@ -189,7 +189,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     private void handleMessageDeliveryStatusDelivered(ContactId contact, String msgId,
             long timestampDelivered) {
         String mimeType = mMessagingLog.getMessageMimeType(msgId);
-        synchronized (lock) {
+        synchronized (mLock) {
             if (mPersistentStorage.setGroupChatDeliveryInfoDelivered(mChatId, contact, msgId,
                     timestampDelivered)) {
                 mBroadcaster.broadcastMessageGroupDeliveryInfoChanged(mChatId, contact, mimeType,
@@ -208,7 +208,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     private void handleMessageDeliveryStatusDisplayed(ContactId contact, String msgId,
             long timestampDisplayed) {
         String mimeType = mMessagingLog.getMessageMimeType(msgId);
-        synchronized (lock) {
+        synchronized (mLock) {
             if (mPersistentStorage.setDeliveryInfoDisplayed(mChatId, contact, msgId,
                     timestampDisplayed)) {
                 mBroadcaster.broadcastMessageGroupDeliveryInfoChanged(mChatId, contact, mimeType,
@@ -227,7 +227,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     private void handleMessageDeliveryStatusFailed(ContactId contact, String msgId,
             Content.ReasonCode reasonCode) {
         String mimeType = mMessagingLog.getMessageMimeType(msgId);
-        synchronized (lock) {
+        synchronized (mLock) {
             if (Content.ReasonCode.FAILED_DELIVERY == reasonCode) {
                 if (!mPersistentStorage.setGroupDeliveryInfoStatusAndReasonCode(mChatId, contact,
                         msgId, GroupDeliveryInfo.Status.FAILED,
@@ -1012,10 +1012,12 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     }
 
     private void dequeueChatMessageAndBroadcastStatusChange(ChatMessage msg) {
-        mMessagingLog.dequeueChatMessage(msg);
-        mBroadcaster.broadcastMessageStatusChanged(mChatId,
-                ChatUtils.networkMimeTypeToApiMimeType(msg), msg.getMessageId(), Status.SENDING,
-                Content.ReasonCode.UNSPECIFIED);
+        synchronized (mLock) {
+            mMessagingLog.dequeueChatMessage(msg);
+            mBroadcaster.broadcastMessageStatusChanged(mChatId,
+                    ChatUtils.networkMimeTypeToApiMimeType(msg), msg.getMessageId(),
+                    Status.SENDING, Content.ReasonCode.UNSPECIFIED);
+        }
     }
 
     /**
@@ -1441,7 +1443,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             sLogger.info("Session started");
         }
         setRejoinedAsPartOfSendOperation(false);
-        synchronized (lock) {
+        synchronized (mLock) {
             GroupChatSession session = mImService.getGroupChatSession(mChatId);
             Boolean composingStatus = mImService.getGroupChatComposingStatus(mChatId);
             if (composingStatus != null) {
@@ -1496,7 +1498,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     .append(" terminationReason ").append(reason).toString());
         }
         setRejoinedAsPartOfSendOperation(false);
-        synchronized (lock) {
+        synchronized (mLock) {
             mChatService.removeGroupChat(mChatId);
             switch (reason) {
                 case TERMINATION_BY_CONNECTION_LOST:
@@ -1547,7 +1549,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 sLogger.info(new StringBuilder("New IM with Id '").append(msgId)
                         .append("' received from ").append(remote).toString());
             }
-            synchronized (lock) {
+            synchronized (mLock) {
                 mPersistentStorage.addIncomingGroupChatMessage(msg, imdnDisplayedRequested);
                 if (remote != null) {
                     mContactManager.mergeContactCapabilities(remote, new CapabilitiesBuilder()
@@ -1588,7 +1590,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("IM error ").append(chatErrorCode).toString());
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             mChatService.removeGroupChat(mChatId);
             int chatError = error.getErrorCode();
             switch (chatError) {
@@ -1651,7 +1653,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             sLogger.info(new StringBuilder().append(contact).append(" is composing status set to ")
                     .append(status).toString());
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             // Notify event listeners
             mBroadcaster.broadcastComposingEvent(mChatId, contact, status);
         }
@@ -1664,7 +1666,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     .append("mimeType=").append(mimeType).append(".").toString());
         }
 
-        synchronized (lock) {
+        synchronized (mLock) {
             if (mPersistentStorage.setMessageStatusAndReasonCode(msgId, Status.FAILED,
                     Content.ReasonCode.FAILED_SEND)) {
                 mBroadcaster.broadcastMessageStatusChanged(getChatId(), mimeType, msgId,
@@ -1680,7 +1682,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     .append("mimeType=").append(mimeType).append(".").toString());
         }
 
-        synchronized (lock) {
+        synchronized (mLock) {
             if (mPersistentStorage.setMessageStatusAndReasonCode(msgId, Status.SENT,
                     Content.ReasonCode.UNSPECIFIED)) {
                 mBroadcaster.broadcastMessageStatusChanged(getChatId(), mimeType, msgId,
@@ -1694,7 +1696,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         if (sLogger.isActivated()) {
             sLogger.info("New conference event " + status.toString() + " for " + contact);
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             if (ParticipantStatus.CONNECTED.equals(status)) {
                 mPersistentStorage.addGroupChatEvent(mChatId, contact,
                         GroupChatEvent.Status.JOINED, timestamp);
@@ -1762,7 +1764,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             sLogger.info("Add participant request has failed " + reason);
         }
 
-        synchronized (lock) {
+        synchronized (mLock) {
             mBroadcaster.broadcastParticipantStatusChanged(mChatId, contact,
                     ParticipantStatus.FAILED);
         }
@@ -1773,7 +1775,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         if (sLogger.isActivated()) {
             sLogger.info("Accepting group chat session");
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             setStateAndReasonCode(State.ACCEPTING, ReasonCode.UNSPECIFIED);
         }
     }
@@ -1806,7 +1808,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         if (sLogger.isActivated()) {
             sLogger.info("Invited to group chat session");
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             if (mMessagingLog.isGroupChatPersisted(mChatId)
                     && mPersistentStorage.setParticipantsStateAndReasonCode(participants,
                             State.INVITED, ReasonCode.UNSPECIFIED)) {
@@ -1825,7 +1827,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         if (sLogger.isActivated()) {
             sLogger.info("Session auto accepted");
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             if (mMessagingLog.isGroupChatPersisted(mChatId)
                     && mPersistentStorage.setParticipantsStateAndReasonCode(participants,
                             State.ACCEPTING, ReasonCode.UNSPECIFIED)) {
@@ -1841,7 +1843,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     @Override
     public void handleParticipantUpdates(Map<ContactId, ParticipantStatus> updatedParticipants,
             Map<ContactId, ParticipantStatus> allParticipants) {
-        synchronized (lock) {
+        synchronized (mLock) {
             if (!mMessagingLog.setGroupChatParticipants(mChatId, allParticipants)) {
                 return;
             }
@@ -1862,11 +1864,13 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     @Override
     public void handleChatMessageDisplayReportSent(String msgId) {
-        if (mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Content.Status.RECEIVED,
-                Content.ReasonCode.UNSPECIFIED)) {
-            String apiMimeType = mMessagingLog.getMessageMimeType(msgId);
-            mBroadcaster.broadcastMessageStatusChanged(mChatId, apiMimeType, msgId,
-                    Content.Status.RECEIVED, Content.ReasonCode.UNSPECIFIED);
+        synchronized (mLock) {
+            if (mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Content.Status.RECEIVED,
+                    Content.ReasonCode.UNSPECIFIED)) {
+                String apiMimeType = mMessagingLog.getMessageMimeType(msgId);
+                mBroadcaster.broadcastMessageStatusChanged(mChatId, apiMimeType, msgId,
+                        Content.Status.RECEIVED, Content.ReasonCode.UNSPECIFIED);
+            }
         }
     }
 

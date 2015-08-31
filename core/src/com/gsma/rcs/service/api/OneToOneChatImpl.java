@@ -87,7 +87,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     /**
      * Lock used for synchronization
      */
-    private final Object lock = new Object();
+    private final Object mLock = new Object();
 
     /**
      * The logger
@@ -151,7 +151,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * @param msg Message
      */
     private void sendChatMessage(final ChatMessage msg) {
-        synchronized (lock) {
+        synchronized (mLock) {
             boolean loggerActivated = sLogger.isActivated();
             if (loggerActivated) {
                 sLogger.debug(new StringBuilder("Send chat message, msgId ")
@@ -214,7 +214,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * @param msg Message
      */
     private void resendChatMessage(final ChatMessage msg) {
-        synchronized (lock) {
+        synchronized (mLock) {
             String msgId = msg.getMessageId();
             String mimeType = msg.getMimeType();
             if (sLogger.isActivated()) {
@@ -390,9 +390,12 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * @param state state of message
      */
     private void setChatMessageStatus(String msgId, String mimeType, Status status) {
-        if (mMessagingLog.setChatMessageStatusAndReasonCode(msgId, status, ReasonCode.UNSPECIFIED)) {
-            mBroadcaster.broadcastMessageStatusChanged(mContact, mimeType, msgId, status,
-                    ReasonCode.UNSPECIFIED);
+        synchronized (mLock) {
+            if (mMessagingLog.setChatMessageStatusAndReasonCode(msgId, status,
+                    ReasonCode.UNSPECIFIED)) {
+                mBroadcaster.broadcastMessageStatusChanged(mContact, mimeType, msgId, status,
+                        ReasonCode.UNSPECIFIED);
+            }
         }
     }
 
@@ -503,10 +506,12 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     }
 
     private void dequeueChatMessageAndBroadcastStatusChange(ChatMessage msg) {
-        mMessagingLog.dequeueChatMessage(msg);
-        String mimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
-        mBroadcaster.broadcastMessageStatusChanged(mContact, mimeType, msg.getMessageId(),
-                Status.SENDING, ReasonCode.UNSPECIFIED);
+        synchronized (mLock) {
+            mMessagingLog.dequeueChatMessage(msg);
+            String mimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
+            mBroadcaster.broadcastMessageStatusChanged(mContact, mimeType, msg.getMessageId(),
+                    Status.SENDING, ReasonCode.UNSPECIFIED);
+        }
     }
 
     /**
@@ -829,7 +834,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         if (loggerActivated) {
             sLogger.info("Session started");
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             Boolean composingStatus = mImService.getOneToOneChatComposingStatus(mContact);
             if (composingStatus != null) {
                 if (loggerActivated) {
@@ -863,7 +868,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             sLogger.info(new StringBuilder("Session aborted (reason ").append(reason).append(")")
                     .toString());
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             mChatService.removeOneToOneChat(mContact);
         }
         mCore.getListener().tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(mCore);
@@ -877,7 +882,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                     .append("' received from ").append(mContact).append(".").toString());
         }
         String mimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
-        synchronized (lock) {
+        synchronized (mLock) {
             if (mContactManager.isBlockedForContact(mContact)) {
                 if (sLogger.isActivated()) {
                     sLogger.debug("Contact "
@@ -905,7 +910,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                     .append(" ; First message '").append(msgId).append("'").toString());
         }
         CoreListener listener = mCore.getListener();
-        synchronized (lock) {
+        synchronized (mLock) {
             mChatService.removeOneToOneChat(mContact);
             switch (errorCode) {
                 case ChatError.SESSION_INITIATION_FAILED:
@@ -940,7 +945,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             sLogger.info(new StringBuilder("").append(contact)
                     .append(" is composing status set to ").append(status).toString());
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             mBroadcaster.broadcastComposingEvent(contact, status);
         }
     }
@@ -951,7 +956,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             sLogger.info(new StringBuilder("Message sent; msgId=").append(msgId).append(".")
                     .toString());
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             if (mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.SENT,
                     ReasonCode.UNSPECIFIED)) {
                 mBroadcaster.broadcastMessageStatusChanged(mContact, mimeType, msgId, Status.SENT,
@@ -966,7 +971,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             sLogger.info(new StringBuilder("Message sent; msgId=").append(msgId).append(".")
                     .toString());
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             if (mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.FAILED,
                     ReasonCode.FAILED_SEND)) {
                 mBroadcaster.broadcastMessageStatusChanged(mContact, mimeType, msgId,
@@ -1026,7 +1031,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                             "Unknown reason RejectedReason=").append(reason).append("!").toString());
             }
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             mChatService.removeOneToOneChat(mContact);
         }
         mCore.getListener().tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(mCore);
@@ -1049,11 +1054,13 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
 
     @Override
     public void handleChatMessageDisplayReportSent(String msgId) {
-        if (mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.RECEIVED,
-                ReasonCode.UNSPECIFIED)) {
-            String apiMimeType = mMessagingLog.getMessageMimeType(msgId);
-            mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId,
-                    Status.RECEIVED, ReasonCode.UNSPECIFIED);
+        synchronized (mLock) {
+            if (mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.RECEIVED,
+                    ReasonCode.UNSPECIFIED)) {
+                String apiMimeType = mMessagingLog.getMessageMimeType(msgId);
+                mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId,
+                        Status.RECEIVED, ReasonCode.UNSPECIFIED);
+            }
         }
     }
 
