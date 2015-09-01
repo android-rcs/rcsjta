@@ -103,7 +103,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.xml.parsers.ParserConfigurationException;
-
 import javax2.sip.header.ContactHeader;
 import javax2.sip.message.Response;
 
@@ -935,6 +934,28 @@ public class InstantMessagingService extends ImsService {
                     RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE, displayName);
 
             ChatMessage firstMsg = ChatUtils.getFirstMessage(invite, timestamp);
+            /*
+             * Automatically reject the chat invitation is first message in the invite doesn't exist
+             * or is empty. Specification reference: Rich Communication Suite 5.1 Advanced
+             * Communications Services and Client Specification Version 3.0 Page 182 3.3.4.2
+             * Technical Realization of 1-to-1 Chat features when using OMA SIMPLE IM For OMA SIMPLE
+             * IM, first message is always included in a CPIM/IMDN wrapper carried in the SIP INVITE
+             * request. So the configuration parameter FIRST MSG IN INVITE defined in Table 77 is
+             * always set to 1. A client should always include "positive-delivery" in the value for
+             * the Disposition-Notification header field in that message. That means that the value
+             * of the header field is either "positive-delivery" or "positive-delivery,display"
+             * depending on whether display notifications were requested. The value of
+             * "negativedelivery" is not used in RCS for 1-to-1 Chat. SIP INVITE requests for a
+             * one-to-one session that carry a message in CPIM/IMDN wrapper shall be rejected by the
+             * server unless they carry a Disposition-Notification header that at least includes
+             * "positivedelivery".
+             */
+            if (firstMsg == null) {
+                sLogger.error("First message in the invite is empty or doesn't exist, "
+                        + "automatically reject the chat invitation.");
+                sendErrorResponse(invite, Response.BUSY_HERE);
+                return;
+            }
             if (mContactManager.isBlockedForContact(remote)) {
                 if (logActivated) {
                     sLogger.debug("Contact " + remote
@@ -1340,6 +1361,28 @@ public class InstantMessagingService extends ImsService {
             sLogger.debug("Receive S&F push messages invitation");
         }
         ChatMessage firstMsg = ChatUtils.getFirstMessage(invite, timestamp);
+
+        /*
+         * Automatically reject the chat invitation is first message in the invite doesn't exist or
+         * is empty. Specification reference: Rich Communication Suite 5.1 Advanced Communications
+         * Services and Client Specification Version 3.0 Page 182 3.3.4.2 Technical Realization of
+         * 1-to-1 Chat features when using OMA SIMPLE IM For OMA SIMPLE IM, first message is always
+         * included in a CPIM/IMDN wrapper carried in the SIP INVITE request. So the configuration
+         * parameter FIRST MSG IN INVITE defined in Table 77 is always set to 1. A client should
+         * always include "positive-delivery" in the value for the Disposition-Notification header
+         * field in that message. That means that the value of the header field is either
+         * "positive-delivery" or "positive-delivery,display" depending on whether display
+         * notifications were requested. The value of "negative-delivery" is not used in RCS for
+         * 1-to-1 Chat. SIP INVITE requests for a one-to-one session that carry a message in
+         * CPIM/IMDN wrapper shall be rejected by the server unless they carry a
+         * Disposition-Notification header that at least includes "positive-delivery".
+         */
+        if (firstMsg == null) {
+            sLogger.error("First message in the invite is empty or doesn't exist, "
+                    + "automatically reject the chat invitation.");
+            sendErrorResponse(invite, Response.BUSY_HERE);
+            return;
+        }
 
         // Test if the contact is blocked
         if (mContactManager.isBlockedForContact(remote)) {

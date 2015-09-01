@@ -56,7 +56,6 @@ import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 
-import android.net.Uri;
 import android.text.TextUtils;
 
 import org.xml.sax.InputSource;
@@ -71,7 +70,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
-
 import javax2.sip.header.ContactHeader;
 import javax2.sip.header.ExtensionHeader;
 
@@ -766,9 +764,8 @@ public class ChatUtils {
         ChatMessage msg = getFirstMessageFromCpim(invite, timestamp);
         if (msg != null) {
             return msg;
-        } else {
-            return getFirstMessageFromSubject(invite, timestamp);
         }
+        return getFirstMessageFromSubject(invite, timestamp);
     }
 
     public static boolean isContainingFirstMessage(SipRequest invite) {
@@ -840,18 +837,17 @@ public class ChatUtils {
      * @param invite Request
      * @param timestamp Local timestamp
      * @return First message
+     * @throws SipPayloadException
      */
-    private static ChatMessage getFirstMessageFromSubject(SipRequest invite, long timestamp) {
+    private static ChatMessage getFirstMessageFromSubject(SipRequest invite, long timestamp)
+            throws SipPayloadException {
         String subject = invite.getSubject();
         if (TextUtils.isEmpty(subject)) {
             return null;
         }
         ContactId remote = getReferredIdentityAsContactId(invite);
         if (remote == null) {
-            if (sLogger.isActivated()) {
-                sLogger.warn("getFirstMessageFromSubject: cannot parse contact");
-            }
-            return null;
+            throw new SipPayloadException("Cannot parse contact from message subject!");
         }
         /**
          * Since in subject, there is no DateTime or datetime included, then we need to fake that by

@@ -1153,7 +1153,32 @@ public class ProvisioningParser {
                 if (firstMessageInvite == null) {
                     if ((firstMessageInvite = getValueByParamName("firstMsgInvite", childnode,
                             TYPE_INT)) != null) {
-                        mRcsSettings.setFirstMessageInInvite(!firstMessageInvite.equals("0"));
+                        boolean isFirstMessageInvite = !firstMessageInvite.equals("0");
+                        /*
+                         * Stack only support simple IM now, means isFirstMessageInvite must be set
+                         * to true. Specification reference: Rich Communication Suite 5.1 Advanced
+                         * Communications Services and Client Specification Version 3.0 Page 182
+                         * 3.3.4.2 Technical Realization of 1-to-1 Chat features when using OMA
+                         * SIMPLE IM For OMA SIMPLE IM, first message is always included in a
+                         * CPIM/IMDN wrapper carried in the SIP INVITE request. So the configuration
+                         * parameter FIRST MSG IN INVITE defined in Table 77 is always set to 1. A
+                         * client should always include "positive-delivery" in the value for the
+                         * Disposition-Notification header field in that message. That means that
+                         * the value of the header field is either "positive-delivery" or
+                         * "positive-delivery,display" depending on whether display notifications
+                         * were requested. The value of "negativedelivery" is not used in RCS for
+                         * 1-to-1 Chat. SIP INVITE requests for a one-to-one session that carry a
+                         * message in CPIM/IMDN wrapper shall be rejected by the server unless they
+                         * carry a Disposition-Notification header that at least includes
+                         * "positivedelivery".
+                         */
+                        if (!isFirstMessageInvite) {
+                            sLogger.error("isFirstMessageInInvite is set to false, it is incorrect according"
+                                    + " to Blackbird protocol, please check provisioning values. Ignoring the "
+                                    + "set to false request.");
+                            continue;
+                        }
+                        mRcsSettings.setFirstMessageInInvite(isFirstMessageInvite);
                         continue;
                     }
                 }
