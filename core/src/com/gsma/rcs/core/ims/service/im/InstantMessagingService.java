@@ -1321,47 +1321,53 @@ public class InstantMessagingService extends ImsService {
      */
     public void receiveStoredAndForwardPushMessages(SipRequest invite, long timestamp)
             throws SipPayloadException, SipNetworkException {
-        boolean logActivated = sLogger.isActivated();
-        String referredId = ChatUtils.getReferredIdentityAsContactUri(invite);
-        ContactId remote = ChatUtils.getReferredIdentityAsContactId(invite);
-        if (remote == null) {
-            if (logActivated) {
-                sLogger.error("Discard S&F PushMessages: invalid remote ID '" + referredId + "'");
+        try {
+            boolean logActivated = sLogger.isActivated();
+            String referredId = ChatUtils.getReferredIdentityAsContactUri(invite);
+            ContactId remote = ChatUtils.getReferredIdentityAsContactId(invite);
+            if (remote == null) {
+                if (logActivated) {
+                    sLogger.error("Discard S&F PushMessages: invalid remote ID '" + referredId
+                            + "'");
+                }
+                sendErrorResponse(invite, Response.BUSY_HERE);
+                return;
             }
-            sendErrorResponse(invite, Response.BUSY_HERE);
-            return;
-        }
-        if (logActivated) {
-            sLogger.debug("Receive S&F push messages invitation");
-        }
-        ChatMessage firstMsg = ChatUtils.getFirstMessage(invite, timestamp);
-
-        // Test if the contact is blocked
-        if (mContactManager.isBlockedForContact(remote)) {
             if (logActivated) {
-                sLogger.debug("Contact " + remote
-                        + " is blocked: automatically reject the S&F invitation");
+                sLogger.debug("Receive S&F push messages invitation");
+            }
+            ChatMessage firstMsg = ChatUtils.getFirstMessage(invite, timestamp);
+
+            // Test if the contact is blocked
+            if (mContactManager.isBlockedForContact(remote)) {
+                if (logActivated) {
+                    sLogger.debug("Contact " + remote
+                            + " is blocked: automatically reject the S&F invitation");
+                }
+
+                // Send a 486 Busy response
+                sendErrorResponse(invite, Response.BUSY_HERE);
+                return;
             }
 
-            // Send a 486 Busy response
+            /*
+             * Save the message if it was not already persisted in the DB. We don't have to reject
+             * the session if the message was a duplicate one as the session rejection/keeping will
+             * be handled in TerminatingOneToOneChatSession.startSession() in an uniform way as
+             * according to the defined race conditions in the specification document.
+             */
+            if (firstMsg != null && !mMessagingLog.isMessagePersisted(firstMsg.getMessageId())) {
+                boolean imdnDisplayRequested = mImdnManager
+                        .isSendOneToOneDeliveryDisplayedReportsEnabled()
+                        && ChatUtils.isImdnDisplayedRequested(invite);
+                mMessagingLog.addIncomingOneToOneChatMessage(firstMsg, imdnDisplayRequested);
+            }
+
+            getStoreAndForwardManager().receiveStoredMessages(invite, remote, timestamp);
+        } catch (IOException e) {
             sendErrorResponse(invite, Response.BUSY_HERE);
-            return;
+            throw new SipNetworkException("Failed to receive S&F PushMessages!", e);
         }
-
-        /*
-         * Save the message if it was not already persisted in the DB. We don't have to reject the
-         * session if the message was a duplicate one as the session rejection/keeping will be
-         * handled in TerminatingOneToOneChatSession.startSession() in an uniform way as according
-         * to the defined race conditions in the specification document.
-         */
-        if (firstMsg != null && !mMessagingLog.isMessagePersisted(firstMsg.getMessageId())) {
-            boolean imdnDisplayRequested = mImdnManager
-                    .isSendOneToOneDeliveryDisplayedReportsEnabled()
-                    && ChatUtils.isImdnDisplayedRequested(invite);
-            mMessagingLog.addIncomingOneToOneChatMessage(firstMsg, imdnDisplayRequested);
-        }
-
-        getStoreAndForwardManager().receiveStoredMessages(invite, remote, timestamp);
 
     }
 

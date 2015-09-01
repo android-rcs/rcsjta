@@ -50,6 +50,7 @@ import com.gsma.services.rcs.contact.ContactId;
 
 import android.net.Uri;
 
+import java.text.ParseException;
 import java.util.List;
 
 import javax2.sip.message.Response;
@@ -228,10 +229,15 @@ public abstract class OneToOneChatSession extends ChatSession {
      * @throws SipPayloadException
      */
     private SipRequest createMultipartInviteRequest(String content) throws SipPayloadException {
-        SipRequest invite = SipMessageFactory.createMultipartInvite(getDialogPath(),
-                getFeatureTags(), content, BOUNDARY_TAG);
-        invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());
-        return invite;
+        try {
+            SipRequest invite = SipMessageFactory.createMultipartInvite(getDialogPath(),
+                    getFeatureTags(), content, BOUNDARY_TAG);
+            invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());
+            return invite;
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Failed to create multipart invite request!", e);
+        }
     }
 
     /**
@@ -242,10 +248,15 @@ public abstract class OneToOneChatSession extends ChatSession {
      * @throws SipPayloadException
      */
     private SipRequest createInviteRequest(String content) throws SipPayloadException {
-        SipRequest invite = SipMessageFactory.createInvite(getDialogPath(),
-                InstantMessagingService.CHAT_FEATURE_TAGS, content);
-        invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());
-        return invite;
+        try {
+            SipRequest invite = SipMessageFactory.createInvite(getDialogPath(),
+                    InstantMessagingService.CHAT_FEATURE_TAGS, content);
+            invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());
+            return invite;
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Failed to create invite request!", e);
+        }
     }
 
     /**
@@ -357,7 +368,7 @@ public abstract class OneToOneChatSession extends ChatSession {
     }
 
     @Override
-    public void receiveBye(SipRequest bye) {
+    public void receiveBye(SipRequest bye) throws SipPayloadException, SipNetworkException {
         super.receiveBye(bye);
         ContactId remote = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {

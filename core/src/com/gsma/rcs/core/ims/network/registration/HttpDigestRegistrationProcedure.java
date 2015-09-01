@@ -30,6 +30,8 @@ import com.gsma.rcs.core.ims.security.HttpDigestMd5Authentication;
 import com.gsma.rcs.core.ims.userprofile.UserProfile;
 import com.gsma.rcs.utils.PhoneUtils;
 
+import java.text.ParseException;
+
 import javax2.sip.header.AuthenticationInfoHeader;
 import javax2.sip.header.AuthorizationHeader;
 import javax2.sip.header.WWWAuthenticateHeader;
@@ -83,43 +85,48 @@ public class HttpDigestRegistrationProcedure extends RegistrationProcedure {
      * Write security header to REGISTER request
      * 
      * @param request Request
+     * @throws SipPayloadException
      */
-    public void writeSecurityHeader(SipRequest request) {
-        String realm = mDigest.getRealm();
-        UserProfile profile = ImsModule.getImsUserProfile();
-        if (realm == null) {
-            realm = profile.getRealm();
-        }
+    public void writeSecurityHeader(SipRequest request) throws SipPayloadException {
+        try {
+            String realm = mDigest.getRealm();
+            UserProfile profile = ImsModule.getImsUserProfile();
+            if (realm == null) {
+                realm = profile.getRealm();
+            }
 
-        String nonce = "";
-        if (mDigest.getNextnonce() != null) {
-            mDigest.updateNonceParameters();
-            nonce = mDigest.getNonce();
-        }
-        String requestUri = request.getRequestURI();
-        String user = profile.getPrivateID();
-        String response = "";
-        if (nonce.length() > 0) {
-            String password = profile.getPassword();
-            response = mDigest.calculateResponse(user, password, request.getMethod(), requestUri,
-                    mDigest.buildNonceCounter(), request.getContent());
-        }
+            String nonce = "";
+            if (mDigest.getNextnonce() != null) {
+                mDigest.updateNonceParameters();
+                nonce = mDigest.getNonce();
+            }
+            String requestUri = request.getRequestURI();
+            String user = profile.getPrivateID();
+            String response = "";
+            if (nonce.length() > 0) {
+                String password = profile.getPassword();
+                response = mDigest.calculateResponse(user, password, request.getMethod(),
+                        requestUri, mDigest.buildNonceCounter(), request.getContent());
+            }
 
-        /* Build the Authorization header */
-        StringBuilder auth = new StringBuilder("Digest username=\"").append(user)
-                .append("\",uri=\"").append(requestUri).append("\",algorithm=MD5,realm=\"")
-                .append(realm).append("\",nonce=\"").append(nonce).append("\",response=\"")
-                .append(response).append("\"");
-        String opaque = mDigest.getOpaque();
-        if (opaque != null) {
-            auth.append(",opaque=\"").append(opaque).append("\"");
+            /* Build the Authorization header */
+            StringBuilder auth = new StringBuilder("Digest username=\"").append(user)
+                    .append("\",uri=\"").append(requestUri).append("\",algorithm=MD5,realm=\"")
+                    .append(realm).append("\",nonce=\"").append(nonce).append("\",response=\"")
+                    .append(response).append("\"");
+            String opaque = mDigest.getOpaque();
+            if (opaque != null) {
+                auth.append(",opaque=\"").append(opaque).append("\"");
+            }
+            String qop = mDigest.getQop();
+            if (qop != null && qop.startsWith("auth")) {
+                auth.append(",nc=").append(mDigest.buildNonceCounter()).append(",qop=").append(qop)
+                        .append(",cnonce=\"").append(mDigest.getCnonce()).append("\"");
+            }
+            request.addHeader(AuthorizationHeader.NAME, auth.toString());
+        } catch (ParseException e) {
+            throw new SipPayloadException("Failed to write security header!", e);
         }
-        String qop = mDigest.getQop();
-        if (qop != null && qop.startsWith("auth")) {
-            auth.append(",nc=").append(mDigest.buildNonceCounter()).append(",qop=").append(qop)
-                    .append(",cnonce=\"").append(mDigest.getCnonce()).append("\"");
-        }
-        request.addHeader(AuthorizationHeader.NAME, auth.toString());
     }
 
     /**

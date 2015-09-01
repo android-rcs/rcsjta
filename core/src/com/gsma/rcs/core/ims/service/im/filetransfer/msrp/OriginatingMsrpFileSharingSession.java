@@ -62,6 +62,7 @@ import android.net.Uri;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
 
 import javax2.sip.InvalidArgumentException;
 import javax2.sip.header.ContentDispositionHeader;
@@ -238,21 +239,24 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
 
             /* Send INVITE request */
             sendInvite(invite);
-        } catch (SipPayloadException e) {
-            mLogger.error("Unable to set and send initial invite!", e);
-            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
-        } catch (SipNetworkException e) {
-            if (mLogger.isActivated()) {
-                mLogger.debug(e.getMessage());
-            }
-            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
         } catch (InvalidArgumentException e) {
+            mLogger.error("Unable to set authorization header!", e);
+            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (ParseException e) {
             mLogger.error("Unable to set authorization header!", e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
         } catch (IOException e) {
             if (mLogger.isActivated()) {
                 mLogger.debug("Failed to initiate a file transfer session with fileTransferId "
                         .concat(getFileTransferId()));
+            }
+            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (SipPayloadException e) {
+            mLogger.error("Unable to set and send initial invite!", e);
+            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (SipNetworkException e) {
+            if (mLogger.isActivated()) {
+                mLogger.debug(e.getMessage());
             }
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
         } catch (RuntimeException e) {
@@ -324,34 +328,41 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * @param msgId Message ID
      */
     public void msrpDataTransfered(String msgId) {
-        if (mLogger.isActivated()) {
-            mLogger.info("Data transfered");
+        try {
+            if (mLogger.isActivated()) {
+                mLogger.info("Data transfered");
+            }
+            long timestamp = System.currentTimeMillis();
+            fileTransfered();
+            closeMediaSession();
+            closeSession(TerminationReason.TERMINATION_BY_USER);
+            removeSession();
+            ContactId contact = getRemoteContact();
+            MmContent content = getContent();
+            for (ImsSessionListener listener : getListeners()) {
+                ((FileSharingSessionListener) listener).handleFileTransfered(content, contact,
+                        FileTransferData.UNKNOWN_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION,
+                        FileTransferProtocol.MSRP);
+            }
+
+            ((InstantMessagingService) getImsService()).receiveOneToOneFileDeliveryStatus(contact,
+                    new ImdnDocument(getFileTransferId(), ImdnDocument.DISPLAY,
+                            ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp));
+        } catch (SipPayloadException e) {
+            mLogger.error("Failed to notify msrp data transfered for msgId : ".concat(msgId), e);
+        } catch (SipNetworkException e) {
+            if (mLogger.isActivated()) {
+                mLogger.debug(e.getMessage());
+            }
+        } catch (RuntimeException e) {
+            /*
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
+             */
+            mLogger.error("Failed to notify msrp data transfered for msgId : ".concat(msgId), e);
         }
-
-        long timestamp = System.currentTimeMillis();
-
-        // File has been transfered
-        fileTransfered();
-
-        // Close the media session
-        closeMediaSession();
-
-        closeSession(TerminationReason.TERMINATION_BY_USER);
-
-        // Remove the current session
-        removeSession();
-
-        ContactId contact = getRemoteContact();
-        MmContent content = getContent();
-        for (ImsSessionListener listener : getListeners()) {
-            ((FileSharingSessionListener) listener).handleFileTransfered(content, contact,
-                    FileTransferData.UNKNOWN_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION,
-                    FileTransferProtocol.MSRP);
-        }
-
-        ((InstantMessagingService) getImsService()).receiveOneToOneFileDeliveryStatus(contact,
-                new ImdnDocument(getFileTransferId(), ImdnDocument.DISPLAY,
-                        ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp));
     }
 
     /**

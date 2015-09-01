@@ -24,6 +24,8 @@ package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
@@ -992,7 +994,8 @@ public class ChatServiceImpl extends IChatService.Stub {
      * 
      * @param chatId
      */
-    public void handleRejoinGroupChatAsPartOfSendOperation(String chatId) {
+    public void handleRejoinGroupChatAsPartOfSendOperation(String chatId)
+            throws SipPayloadException, SipNetworkException {
         GroupChatImpl groupChat = getOrCreateGroupChat(chatId);
         groupChat.setRejoinedAsPartOfSendOperation(true);
         groupChat.rejoinGroupChat();
@@ -1002,8 +1005,11 @@ public class ChatServiceImpl extends IChatService.Stub {
      * Handle rejoin group chat
      * 
      * @param chatId
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void handleRejoinGroupChat(String chatId) {
+    public void handleRejoinGroupChat(String chatId) throws SipPayloadException,
+            SipNetworkException {
         GroupChatImpl groupChat = getOrCreateGroupChat(chatId);
         groupChat.rejoinGroupChat();
     }

@@ -43,6 +43,7 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.Vector;
 
 import javax2.sip.InvalidArgumentException;
@@ -156,18 +157,16 @@ public class AnonymousFetchRequestTask {
      * @throws SipPayloadException
      */
     private SipRequest createSubscribe() throws SipPayloadException {
-        SipRequest subscribe = SipMessageFactory.createSubscribe(mDialogPath, 0);
+        try {
+            SipRequest subscribe = SipMessageFactory.createSubscribe(mDialogPath, 0);
+            subscribe.addHeader(SipUtils.HEADER_PRIVACY, "id");
+            subscribe.addHeader(EventHeader.NAME, "presence");
+            subscribe.addHeader(AcceptHeader.NAME, "application/pidf+xml");
+            return subscribe;
 
-        /* Set the Privacy header */
-        subscribe.addHeader(SipUtils.HEADER_PRIVACY, "id");
-
-        /* Set the Event header */
-        subscribe.addHeader(EventHeader.NAME, "presence");
-
-        /* Set the Accept header */
-        subscribe.addHeader(AcceptHeader.NAME, "application/pidf+xml");
-
-        return subscribe;
+        } catch (ParseException e) {
+            throw new SipPayloadException("Failed to create subscribe request!", e);
+        }
     }
 
     /**
@@ -265,7 +264,10 @@ public class AnonymousFetchRequestTask {
 
             sendSubscribe(subscribe);
         } catch (InvalidArgumentException e) {
-            throw new SipPayloadException("Unable to fetch Authorization header!", e);
+            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
         }
     }
 

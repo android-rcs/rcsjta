@@ -35,6 +35,8 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
+import java.text.ParseException;
+
 import javax2.sip.InvalidArgumentException;
 
 /**
@@ -102,6 +104,12 @@ public class OriginatingSipRtpSession extends GenericSipRtpSession {
                             .append(getDialogPath().getCallId()).append(" ContactId=")
                             .append(getRemoteContact()).toString(), e);
             handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED, e));
+        } catch (ParseException e) {
+            sLogger.error(
+                    new StringBuilder("Session initiation has failed for CallId=")
+                            .append(getDialogPath().getCallId()).append(" ContactId=")
+                            .append(getRemoteContact()).toString(), e);
+            handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED, e));
         } catch (SipPayloadException e) {
             sLogger.error(
                     new StringBuilder("Session initiation has failed for CallId=")
@@ -140,5 +148,12 @@ public class OriginatingSipRtpSession extends GenericSipRtpSession {
         for (ImsSessionListener listener : getListeners()) {
             ((SipSessionListener) listener).handle180Ringing(contact);
         }
+    }
+
+    /**
+     * Session inactivity event
+     */
+    public void handleInactivityEvent() {
+        /* Not need in this class */
     }
 }

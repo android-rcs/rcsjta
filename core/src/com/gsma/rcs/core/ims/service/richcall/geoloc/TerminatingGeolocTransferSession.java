@@ -349,20 +349,27 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
      * @param msgId Message ID
      * @param data Last received data chunk
      * @param mimeType Data mime-type
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void msrpDataReceived(String msgId, byte[] data, String mimeType) {
-        if (sLogger.isActivated()) {
-            sLogger.info("Data received");
-        }
-        ContactId contact = getRemoteContact();
-        String geolocDoc = new String(data, UTF8);
-        Geoloc geoloc = ChatUtils.parseGeolocDocument(geolocDoc);
-        setGeoloc(geoloc);
-        geolocTransfered();
-        boolean initiatedByRemote = isInitiatedByRemote();
-        for (int j = 0; j < getListeners().size(); j++) {
-            ((GeolocTransferSessionListener) getListeners().get(j)).handleContentTransfered(
-                    contact, geoloc, initiatedByRemote);
+    public void msrpDataReceived(String msgId, byte[] data, String mimeType)
+            throws SipPayloadException, SipNetworkException {
+        try {
+            if (sLogger.isActivated()) {
+                sLogger.info("Data received");
+            }
+            ContactId contact = getRemoteContact();
+            String geolocDoc = new String(data, UTF8);
+            Geoloc geoloc = ChatUtils.parseGeolocDocument(geolocDoc);
+            setGeoloc(geoloc);
+            geolocTransfered();
+            boolean initiatedByRemote = isInitiatedByRemote();
+            for (ImsSessionListener listener : getListeners()) {
+                ((GeolocTransferSessionListener) listener).handleContentTransfered(contact, geoloc,
+                        initiatedByRemote);
+            }
+        } catch (IOException e) {
+            throw new SipNetworkException("Failed to receive msrp data for msgId".concat(msgId), e);
         }
     }
 
@@ -406,27 +413,48 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
      * @param typeMsrpChunk Type of MSRP chunk
      */
     public void msrpTransferError(String msgId, String error, TypeMsrpChunk typeMsrpChunk) {
-        if (isSessionInterrupted()) {
-            return;
-        }
-        boolean logActivated = sLogger.isActivated();
+        try {
+            if (isSessionInterrupted()) {
+                return;
+            }
+            boolean logActivated = sLogger.isActivated();
 
-        if (logActivated) {
-            sLogger.info("Data transfer error ".concat(error));
-        }
-        closeMediaSession();
-        closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
+            if (logActivated) {
+                sLogger.info("Data transfer error ".concat(error));
+            }
+            closeMediaSession();
+            closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
 
-        ContactId contact = getRemoteContact();
-        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(contact);
-        removeSession();
+            ContactId contact = getRemoteContact();
+            getImsService().getImsModule().getCapabilityService()
+                    .requestContactCapabilities(contact);
+            removeSession();
 
-        if (isGeolocTransfered()) {
-            return;
-        }
-        for (ImsSessionListener listener : getListeners()) {
-            ((GeolocTransferSessionListener) listener).handleSharingError(contact,
-                    new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
+            if (isGeolocTransfered()) {
+                return;
+            }
+            for (ImsSessionListener listener : getListeners()) {
+                ((GeolocTransferSessionListener) listener).handleSharingError(contact,
+                        new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
+            }
+        } catch (SipPayloadException e) {
+            sLogger.error(
+                    new StringBuilder("Failed to handle msrp error").append(error)
+                            .append(" for message ").append(msgId).toString(), e);
+        } catch (SipNetworkException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
+        } catch (RuntimeException e) {
+            /*
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
+             */
+            sLogger.error(
+                    new StringBuilder("Failed to handle msrp error").append(error)
+                            .append(" for message ").append(msgId).toString(), e);
         }
     }
 

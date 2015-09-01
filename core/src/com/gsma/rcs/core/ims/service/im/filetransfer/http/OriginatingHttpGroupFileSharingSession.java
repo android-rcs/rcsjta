@@ -361,7 +361,8 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
     }
 
     @Override
-    public void terminateSession(TerminationReason reason) {
+    public void terminateSession(TerminationReason reason) throws SipPayloadException,
+            SipNetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug("terminateSession reason=".concat(reason.toString()));
         }

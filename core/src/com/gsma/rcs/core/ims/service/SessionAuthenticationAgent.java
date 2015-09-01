@@ -30,6 +30,8 @@ import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.security.HttpDigestMd5Authentication;
 import com.gsma.rcs.core.ims.userprofile.UserProfile;
 
+import java.text.ParseException;
+
 import javax2.sip.InvalidArgumentException;
 import javax2.sip.header.ProxyAuthenticateHeader;
 import javax2.sip.header.ProxyAuthorizationHeader;
@@ -70,8 +72,10 @@ public class SessionAuthenticationAgent {
      * 
      * @param request SIP request
      * @throws InvalidArgumentException
+     * @throws ParseException
      */
-    public void setProxyAuthorizationHeader(SipRequest request) throws InvalidArgumentException {
+    public void setProxyAuthorizationHeader(SipRequest request) throws InvalidArgumentException,
+            ParseException {
         String realm = mDigest.getRealm();
         if (realm == null || mDigest.getNextnonce() == null) {
             return;
@@ -119,8 +123,10 @@ public class SessionAuthenticationAgent {
      * 
      * @param request SIP request
      * @throws InvalidArgumentException
+     * @throws ParseException
      */
-    public void setAuthorizationHeader(SipRequest request) throws InvalidArgumentException {
+    public void setAuthorizationHeader(SipRequest request) throws InvalidArgumentException,
+            ParseException {
         String nextNonce = mRegisterDigest.getNextnonce();
         /* Re-use the registration authentication (nonce caching) */
         if (mRegisterDigest == null || nextNonce == null) {

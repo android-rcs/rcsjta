@@ -66,6 +66,7 @@ import android.net.Uri;
 import gov2.nist.javax2.sip.header.Reason;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -272,7 +273,7 @@ public abstract class GroupChatSession extends ChatSession {
      * @param contacts The contacts that should have their status set.
      * @param status The status to set.
      */
-    public void updateParticipants(final Set<ContactId> contacts, ParticipantStatus status) {
+    private void updateParticipants(final Set<ContactId> contacts, ParticipantStatus status) {
         Map<ContactId, ParticipantStatus> participants = new HashMap<ContactId, ParticipantStatus>();
 
         for (ContactId contact : contacts) {
@@ -327,20 +328,19 @@ public abstract class GroupChatSession extends ChatSession {
      * Close session
      * 
      * @param reason Reason
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void closeSession(TerminationReason reason) {
-        // Stop conference subscription
+    public void closeSession(TerminationReason reason) throws SipPayloadException,
+            SipNetworkException {
         mConferenceSubscriber.terminate();
-
         super.closeSession(reason);
     }
 
     @Override
-    public void receiveBye(SipRequest bye) {
+    public void receiveBye(SipRequest bye) throws SipPayloadException, SipNetworkException {
         mConferenceSubscriber.terminate();
-
         super.receiveBye(bye);
-
         /*
          * When group chat reaches the minimum number of active participants, the Controlling
          * Function indicates this by including a Reason header field with the protocol set to SIP
@@ -532,8 +532,10 @@ public abstract class GroupChatSession extends ChatSession {
      * Invite a contact to the session
      * 
      * @param contact Contact to invite
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void inviteContact(ContactId contact) {
+    public void inviteContact(ContactId contact) throws SipPayloadException, SipNetworkException {
         Set<ContactId> contacts = new HashSet<ContactId>();
         contacts.add(contact);
         inviteParticipants(contacts);
@@ -543,8 +545,11 @@ public abstract class GroupChatSession extends ChatSession {
      * Add a set of participants to the session
      * 
      * @param contacts set of participants
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void inviteParticipants(Set<ContactId> contacts) {
+    public void inviteParticipants(Set<ContactId> contacts) throws SipPayloadException,
+            SipNetworkException {
         try {
             int nbrOfContacts = contacts.size();
 
@@ -632,13 +637,10 @@ public abstract class GroupChatSession extends ChatSession {
                 updateParticipants(contacts, ParticipantStatus.FAILED);
             }
         } catch (InvalidArgumentException e) {
-            sLogger.error("REFER request has failed for contacts : " + contacts, e);
-            updateParticipants(contacts, ParticipantStatus.FAILED);
-        } catch (SipPayloadException e) {
-            sLogger.error("REFER request has failed for contacts : " + contacts, e);
-            updateParticipants(contacts, ParticipantStatus.FAILED);
-        } catch (SipNetworkException e) {
-            updateParticipants(contacts, ParticipantStatus.FAILED);
+            throw new SipPayloadException("REFER request has failed for contacts : " + contacts, e);
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("REFER request has failed for contacts : " + contacts, e);
         }
     }
 
@@ -866,7 +868,8 @@ public abstract class GroupChatSession extends ChatSession {
     }
 
     @Override
-    public void terminateSession(TerminationReason reason) {
+    public void terminateSession(TerminationReason reason) throws SipPayloadException,
+            SipNetworkException {
         /*
          * If there is an ongoing group chat session with same chatId, this session has to be
          * silently aborted so after aborting the session we make sure to not call the rest of this
@@ -892,70 +895,90 @@ public abstract class GroupChatSession extends ChatSession {
 
     @Override
     public void msrpTransferError(String msgId, String error, TypeMsrpChunk typeMsrpChunk) {
-        if (isSessionInterrupted()) {
-            return;
-        }
-        if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Data transfer error ").append(error)
-                    .append(" for message ").append(msgId).append(" (MSRP chunk type: ")
-                    .append(typeMsrpChunk).append(")").toString());
-        }
-
-        String chatId = getContributionID();
-        if (TypeMsrpChunk.MessageDeliveredReport.equals(typeMsrpChunk)) {
-            for (ImsSessionListener listener : getListeners()) {
-                ((GroupChatSessionListener) listener).handleDeliveryReportSendViaMsrpFailure(msgId,
-                        chatId, typeMsrpChunk);
+        try {
+            if (isSessionInterrupted()) {
+                return;
             }
-        } else if (TypeMsrpChunk.MessageDisplayedReport.equals(typeMsrpChunk)) {
-            for (ImsSessionListener listener : getListeners()) {
-                ((GroupChatSessionListener) listener).handleDeliveryReportSendViaMsrpFailure(msgId,
-                        chatId, typeMsrpChunk);
+            if (sLogger.isActivated()) {
+                sLogger.info(new StringBuilder("Data transfer error ").append(error)
+                        .append(" for message ").append(msgId).append(" (MSRP chunk type: ")
+                        .append(typeMsrpChunk).append(")").toString());
             }
-        } else if ((msgId != null) && TypeMsrpChunk.TextMessage.equals(typeMsrpChunk)) {
-            for (ImsSessionListener listener : getListeners()) {
-                ImdnDocument imdn = new ImdnDocument(msgId, ImdnDocument.DELIVERY_NOTIFICATION,
-                        ImdnDocument.DELIVERY_STATUS_FAILED, ImdnDocument.IMDN_DATETIME_NOT_SET);
-                ContactId contact = null;
-                ((ChatSessionListener) listener).handleMessageDeliveryStatus(contact, imdn);
+
+            String chatId = getContributionID();
+            if (TypeMsrpChunk.MessageDeliveredReport.equals(typeMsrpChunk)) {
+                for (ImsSessionListener listener : getListeners()) {
+                    ((GroupChatSessionListener) listener).handleDeliveryReportSendViaMsrpFailure(
+                            msgId, chatId, typeMsrpChunk);
+                }
+            } else if (TypeMsrpChunk.MessageDisplayedReport.equals(typeMsrpChunk)) {
+                for (ImsSessionListener listener : getListeners()) {
+                    ((GroupChatSessionListener) listener).handleDeliveryReportSendViaMsrpFailure(
+                            msgId, chatId, typeMsrpChunk);
+                }
+            } else if ((msgId != null) && TypeMsrpChunk.TextMessage.equals(typeMsrpChunk)) {
+                for (ImsSessionListener listener : getListeners()) {
+                    ImdnDocument imdn = new ImdnDocument(msgId, ImdnDocument.DELIVERY_NOTIFICATION,
+                            ImdnDocument.DELIVERY_STATUS_FAILED, ImdnDocument.IMDN_DATETIME_NOT_SET);
+                    ContactId contact = null;
+                    ((ChatSessionListener) listener).handleMessageDeliveryStatus(contact, imdn);
+                }
+            } else {
+                // do nothing
+                sLogger.error(new StringBuilder("MSRP transfer error not handled for message '")
+                        .append(msgId).append("' and chunk type : '").append(typeMsrpChunk)
+                        .append("'!").toString());
             }
-        } else {
-            // do nothing
-            sLogger.error(new StringBuilder("MSRP transfer error not handled for message '")
-                    .append(msgId).append("' and chunk type : '").append(typeMsrpChunk)
-                    .append("'!").toString());
-        }
 
-        int errorCode;
+            int errorCode;
 
-        if ((error != null)
-                && (error.contains(String.valueOf(Response.REQUEST_ENTITY_TOO_LARGE)) || error
-                        .contains(String.valueOf(Response.REQUEST_TIMEOUT)))) {
+            if ((error != null)
+                    && (error.contains(String.valueOf(Response.REQUEST_ENTITY_TOO_LARGE)) || error
+                            .contains(String.valueOf(Response.REQUEST_TIMEOUT)))) {
+                /*
+                 * Session should not be torn down immediately as there may be more errors to come
+                 * but as errors occurred we shouldn't use it for sending any longer RFC 4975 408:
+                 * An endpoint MUST treat a 408 response in the same manner as it would treat a
+                 * local timeout. 413: If a message sender receives a 413 in a response, or in a
+                 * REPORT request, it MUST NOT send any further chunks in the message, that is, any
+                 * further chunks with the same Message-ID value. If the sender receives the 413
+                 * while in the process of sending a chunk, and the chunk is interruptible, the
+                 * sender MUST interrupt it.
+                 */
+
+                errorCode = ChatError.MEDIA_SESSION_BROKEN;
+            } else {
+                /*
+                 * Default error; used e.g. for 481 or any other error RFC 4975 481: A 481 response
+                 * indicates that the indicated session does not exist. The sender should terminate
+                 * the session.
+                 */
+
+                errorCode = ChatError.MEDIA_SESSION_FAILED;
+            }
+
+            ChatError chatError = new ChatError(errorCode, error);
+            for (ImsSessionListener listener : getListeners()) {
+                ((GroupChatSessionListener) listener).handleImError(chatError);
+            }
+        } catch (SipPayloadException e) {
+            sLogger.error(
+                    new StringBuilder("Failed to handle msrp error").append(error)
+                            .append(" for message ").append(msgId).toString(), e);
+        } catch (SipNetworkException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
+        } catch (RuntimeException e) {
             /*
-             * Session should not be torn down immediately as there may be more errors to come but
-             * as errors occurred we shouldn't use it for sending any longer RFC 4975 408: An
-             * endpoint MUST treat a 408 response in the same manner as it would treat a local
-             * timeout. 413: If a message sender receives a 413 in a response, or in a REPORT
-             * request, it MUST NOT send any further chunks in the message, that is, any further
-             * chunks with the same Message-ID value. If the sender receives the 413 while in the
-             * process of sending a chunk, and the chunk is interruptible, the sender MUST interrupt
-             * it.
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
              */
-
-            errorCode = ChatError.MEDIA_SESSION_BROKEN;
-        } else {
-            /*
-             * Default error; used e.g. for 481 or any other error RFC 4975 481: A 481 response
-             * indicates that the indicated session does not exist. The sender should terminate the
-             * session.
-             */
-
-            errorCode = ChatError.MEDIA_SESSION_FAILED;
-        }
-
-        ChatError chatError = new ChatError(errorCode, error);
-        for (ImsSessionListener listener : getListeners()) {
-            ((GroupChatSessionListener) listener).handleImError(chatError);
+            sLogger.error(
+                    new StringBuilder("Failed to handle msrp error").append(error)
+                            .append(" for message ").append(msgId).toString(), e);
         }
     }
 
@@ -966,20 +989,38 @@ public abstract class GroupChatSession extends ChatSession {
      */
     @Override
     public void handleError(ImsServiceError error) {
-        if (isSessionInterrupted()) {
-            return;
-        }
-        if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Session error: ").append(error.getErrorCode())
-                    .append(", reason=").append(error.getMessage()).toString());
-        }
-        closeMediaSession();
+        try {
+            if (isSessionInterrupted()) {
+                return;
+            }
+            if (sLogger.isActivated()) {
+                sLogger.info(new StringBuilder("Session error: ").append(error.getErrorCode())
+                        .append(", reason=").append(error.getMessage()).toString());
+            }
+            closeMediaSession();
 
-        removeSession();
+            removeSession();
 
-        ChatError chatError = new ChatError(error);
-        for (ImsSessionListener listener : getListeners()) {
-            ((GroupChatSessionListener) listener).handleImError(chatError);
+            ChatError chatError = new ChatError(error);
+            for (ImsSessionListener listener : getListeners()) {
+                ((GroupChatSessionListener) listener).handleImError(chatError);
+            }
+        } catch (SipPayloadException e) {
+            sLogger.error(new StringBuilder("Failed to handle error").append(error).append("!")
+                    .toString(), e);
+        } catch (SipNetworkException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
+        } catch (RuntimeException e) {
+            /*
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
+             */
+            sLogger.error(new StringBuilder("Failed to handle error").append(error).append("!")
+                    .toString(), e);
         }
     }
 }

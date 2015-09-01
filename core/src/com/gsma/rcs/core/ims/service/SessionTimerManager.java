@@ -35,6 +35,8 @@ import com.gsma.rcs.utils.PeriodicRefresher;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
+import java.text.ParseException;
+
 import javax2.sip.Dialog;
 import javax2.sip.InvalidArgumentException;
 import javax2.sip.message.Response;
@@ -208,7 +210,10 @@ public class SessionTimerManager extends PeriodicRefresher {
             // Send RE-INVITE request
             sendReInvite(reInvite);
         } catch (InvalidArgumentException e) {
-            throw new SipPayloadException("Unable to set authorization header for re-invite!", e);
+            throw new SipPayloadException("Unable to process Session timer refresh (UAC role)!", e);
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Unable to process Session timer refresh (UAC role)!", e);
         }
     }
 
@@ -299,14 +304,20 @@ public class SessionTimerManager extends PeriodicRefresher {
             }
         } catch (InvalidArgumentException e) {
             throw new SipPayloadException("Unable to fetch Authorization header!", e);
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Unable to fetch Authorization header!", e);
         }
     }
 
     /**
      * Session refresh processing for UAS role. If the refresher never gets a response from the
      * remote then the session should be terminated.
+     * 
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    private void sessionRefreshForUAS() {
+    private void sessionRefreshForUAS() throws SipPayloadException, SipNetworkException {
         if (mLogger.isActivated()) {
             mLogger.debug("Session timer refresh (UAS role)");
         }

@@ -35,6 +35,8 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
+import java.text.ParseException;
+
 import javax2.sip.InvalidArgumentException;
 
 /**
@@ -102,6 +104,18 @@ public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
 
             // Send INVITE request
             sendInvite(invite);
+        } catch (InvalidArgumentException e) {
+            sLogger.error(
+                    new StringBuilder("Session initiation has failed for CallId=")
+                            .append(getDialogPath().getCallId()).append(" ContactId=")
+                            .append(getRemoteContact()).toString(), e);
+            handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED, e));
+        } catch (ParseException e) {
+            sLogger.error(
+                    new StringBuilder("Session initiation has failed for CallId=")
+                            .append(getDialogPath().getCallId()).append(" ContactId=")
+                            .append(getRemoteContact()).toString(), e);
+            handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED, e));
         } catch (SipPayloadException e) {
             sLogger.error(
                     new StringBuilder("Session initiation has failed for CallId=")
@@ -112,12 +126,6 @@ public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
-            handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED, e));
-        } catch (InvalidArgumentException e) {
-            sLogger.error(
-                    new StringBuilder("Session initiation has failed for CallId=")
-                            .append(getDialogPath().getCallId()).append(" ContactId=")
-                            .append(getRemoteContact()).toString(), e);
             handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED, e));
         } catch (RuntimeException e) {
             /**

@@ -235,8 +235,11 @@ public abstract class ImsService {
      * started state.
      * 
      * @param reason termination reason
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void terminateAllSessions(TerminationReason reason) {
+    public void terminateAllSessions(TerminationReason reason) throws SipPayloadException,
+            SipNetworkException {
         synchronized (getImsServiceSessionOperationLock()) {
             /*
              * Iterate over a copy of the session set to allow removal in the cache map while

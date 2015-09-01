@@ -446,8 +446,11 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
      * Invite missing participants.
      * 
      * @param participants Set of missing participant identifiers
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    private void inviteMissingParticipants(final Set<ContactId> participants) {
+    private void inviteMissingParticipants(final Set<ContactId> participants)
+            throws SipPayloadException, SipNetworkException {
         final boolean logActivated = sLogger.isActivated();
         if (logActivated) {
             sLogger.info("Invite missing participants: ".concat(participants.toString()));
@@ -517,7 +520,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
     }
 
     @Override
-    public void receiveBye(SipRequest bye) {
+    public void receiveBye(SipRequest bye) throws SipPayloadException, SipNetworkException {
         super.receiveBye(bye);
 
         requestContactCapabilities(getDialogPath().getRemoteParty());

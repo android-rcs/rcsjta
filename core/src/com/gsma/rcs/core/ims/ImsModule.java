@@ -408,8 +408,11 @@ public class ImsModule implements SipEventListener {
      * started state.
      * 
      * @param reasonCode The reason code
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void terminateAllSessions(TerminationReason reasonCode) {
+    public void terminateAllSessions(TerminationReason reasonCode) throws SipPayloadException,
+            SipNetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug("Terminate all sessions");
         }

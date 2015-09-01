@@ -658,26 +658,26 @@ public class ChatUtils {
      * 
      * @param xml XML document
      * @return Geolocation
-     * @throws IllegalArgumentException
+     * @throws SipPayloadException
+     * @throws IOException
      */
-    public static Geoloc parseGeolocDocument(String xml) {
+    public static Geoloc parseGeolocDocument(String xml) throws SipPayloadException, IOException {
         try {
             InputSource geolocInput = new InputSource(new ByteArrayInputStream(xml.getBytes(UTF8)));
             GeolocInfoParser geolocParser = new GeolocInfoParser(geolocInput);
             GeolocInfoDocument geolocDocument = geolocParser.getGeoLocInfo();
             if (geolocDocument == null) {
-                throw new IllegalArgumentException("Unable to parse geoloc document!");
+                throw new SipPayloadException("Unable to parse geoloc document!");
             }
             Geoloc geoloc = new Geoloc(geolocDocument.getLabel(), geolocDocument.getLatitude(),
                     geolocDocument.getLongitude(), geolocDocument.getExpiration(),
                     geolocDocument.getRadius());
             return geoloc;
         } catch (ParserConfigurationException e) {
-            throw new IllegalArgumentException("Unable to parse geoloc document!", e);
+            throw new SipPayloadException("Unable to parse geoloc document!", e);
+
         } catch (SAXException e) {
-            throw new IllegalArgumentException("Unable to parse geoloc document!", e);
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Unable to parse geoloc document!", e);
+            throw new SipPayloadException("Unable to parse geoloc document!", e);
         }
     }
 
@@ -968,8 +968,11 @@ public class ChatUtils {
      * 
      * @param msg
      * @return Persisted content
+     * @throws IOException
+     * @throws SipPayloadException
      */
-    public static String networkContentToPersistedContent(ChatMessage msg) {
+    public static String networkContentToPersistedContent(ChatMessage msg)
+            throws SipPayloadException, IOException {
         /*
          * Geolocation chat messages does not have the same mimetype in the payload as in the TAPI.
          * Text chat messages do.

@@ -19,6 +19,8 @@ package com.gsma.rcs.provider.history;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
@@ -139,6 +141,18 @@ public class OneToOneChatDequeueTask extends DequeueTask {
                                             .append("' message for contact '").append(contact)
                                             .append("' due to: ").append(e.getMessage()).toString());
                                 }
+                            } catch (SipPayloadException e) {
+                                mLogger.error(new StringBuilder(
+                                        "Failed to dequeue one-one chat message '").append(id)
+                                        .append("' message for contact '").append(contact)
+                                        .toString(), e);
+                            } catch (SipNetworkException e) {
+                                if (logActivated) {
+                                    mLogger.debug(new StringBuilder(
+                                            "Failed to dequeue one-one chat message '").append(id)
+                                            .append("' message for contact '").append(contact)
+                                            .append("' due to: ").append(e.getMessage()).toString());
+                                }
                             }
                             break;
                         case FileTransferData.HISTORYLOG_MEMBER_ID:
@@ -184,6 +198,19 @@ public class OneToOneChatDequeueTask extends DequeueTask {
                                                 displayedReportEnabled, deliveryReportEnabled,
                                                 oneToOneFileTransfer);
                                     } catch (MsrpException e) {
+                                        if (logActivated) {
+                                            mLogger.debug(new StringBuilder(
+                                                    "Failed to dequeue one-one file info '")
+                                                    .append(id).append("' message for contact '")
+                                                    .append(contact).append("' due to: ")
+                                                    .append(e.getMessage()).toString());
+                                        }
+                                    } catch (SipPayloadException e) {
+                                        mLogger.error(new StringBuilder(
+                                                "Failed to dequeue one-one file info '").append(id)
+                                                .append("' message for contact '").append(contact)
+                                                .toString(), e);
+                                    } catch (SipNetworkException e) {
                                         if (logActivated) {
                                             mLogger.debug(new StringBuilder(
                                                     "Failed to dequeue one-one file info '")

@@ -402,7 +402,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     }
 
     private void addOutgoingGroupChatMessage(ChatMessage msg, Status status,
-            Content.ReasonCode reasonCode) {
+            Content.ReasonCode reasonCode) throws SipPayloadException, IOException {
         Set<ContactId> recipients = getRecipients();
         if (recipients == null) {
             throw new ServerApiPersistentStorageException(
@@ -710,7 +710,27 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             /* Terminate the session */
             new Thread() {
                 public void run() {
-                    session.terminateSession(TerminationReason.TERMINATION_BY_USER);
+                    // @FIXME:Terminate Session should not run on a new thread
+                    try {
+                        session.terminateSession(TerminationReason.TERMINATION_BY_USER);
+                    } catch (SipPayloadException e) {
+                        sLogger.error(
+                                "Failed to terminate session with sessionId : ".concat(mChatId), e);
+                    } catch (SipNetworkException e) {
+                        if (sLogger.isActivated()) {
+                            sLogger.debug(e.getMessage());
+                        }
+                    } catch (RuntimeException e) {
+                        /*
+                         * Normally we are not allowed to catch runtime exceptions as these are
+                         * genuine bugs which should be handled/fixed within the code. However the
+                         * cases when we are executing operations on a thread unhandling such
+                         * exceptions will eventually lead to exit the system and thus can bring the
+                         * whole system down, which is not intended.
+                         */
+                        sLogger.error(
+                                "Failed to terminate session with sessionId : ".concat(mChatId), e);
+                    }
                 }
             }.start();
 
@@ -954,7 +974,27 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
         new Thread() {
             public void run() {
-                session.inviteParticipants(participants);
+                try {
+                    session.inviteParticipants(participants);
+                } catch (SipPayloadException e) {
+                    sLogger.error("Failed to invite participants for group chat!", e);
+                    session.handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
+                } catch (SipNetworkException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(e.getMessage());
+                    }
+                    session.handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error("Failed to invite participants for group chat!", e);
+                    session.handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
+                }
             }
         }.start();
     }
@@ -976,39 +1016,50 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * Actual send operation of message performed
      * 
      * @param msg Chat message
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    private void sendChatMessage(final ChatMessage msg) {
-        final GroupChatSession groupChatSession = mImService.getGroupChatSession(mChatId);
-        if (groupChatSession == null) {
-            /*
-             * If groupChatSession is not established, queue message and try to rejoin group chat
-             * session
-             */
+    private void sendChatMessage(final ChatMessage msg) throws SipPayloadException,
+            SipNetworkException {
+        try {
+            final GroupChatSession groupChatSession = mImService.getGroupChatSession(mChatId);
+            if (groupChatSession == null) {
+                /*
+                 * If groupChatSession is not established, queue message and try to rejoin group
+                 * chat session
+                 */
+                addOutgoingGroupChatMessage(msg, Content.Status.QUEUED,
+                        Content.ReasonCode.UNSPECIFIED);
+                setRejoinedAsPartOfSendOperation(true);
+                rejoinGroupChat();
+                /*
+                 * Observe that the queued message above will be dequeued on the trigger of
+                 * established rejoined group chat and so the sendChatMessage method is finished
+                 * here for now
+                 */
+                return;
+            }
+            SipDialogPath chatSessionDialogPath = groupChatSession.getDialogPath();
+            if (chatSessionDialogPath != null && chatSessionDialogPath.isSessionEstablished()) {
+                // TODO: Handle the failure of insert + exception use case later.
+                addOutgoingGroupChatMessage(msg, Content.Status.SENDING,
+                        Content.ReasonCode.UNSPECIFIED);
+                sendChatMessageWithinSession(groupChatSession, msg);
+                return;
+            }
             addOutgoingGroupChatMessage(msg, Content.Status.QUEUED, Content.ReasonCode.UNSPECIFIED);
-            setRejoinedAsPartOfSendOperation(true);
-            rejoinGroupChat();
-            /*
-             * Observe that the queued message above will be dequeued on the trigger of established
-             * rejoined group chat and so the sendChatMessage method is finished here for now
-             */
-            return;
+            if (!groupChatSession.isInitiatedByRemote()) {
+                return;
+            }
+            if (sLogger.isActivated()) {
+                sLogger.debug(new StringBuilder("Group chat session with chatId '").append(mChatId)
+                        .append("' is pending for acceptance, accept it.").toString());
+            }
+            groupChatSession.acceptSession();
+        } catch (IOException e) {
+            throw new SipNetworkException("Failed to send message with chatId : ".concat(mChatId),
+                    e);
         }
-        SipDialogPath chatSessionDialogPath = groupChatSession.getDialogPath();
-        if (chatSessionDialogPath != null && chatSessionDialogPath.isSessionEstablished()) {
-            // TODO: Handle the failure of insert + exception use case later.
-            addOutgoingGroupChatMessage(msg, Content.Status.SENDING, Content.ReasonCode.UNSPECIFIED);
-            sendChatMessageWithinSession(groupChatSession, msg);
-            return;
-        }
-        addOutgoingGroupChatMessage(msg, Content.Status.QUEUED, Content.ReasonCode.UNSPECIFIED);
-        if (!groupChatSession.isInitiatedByRemote()) {
-            return;
-        }
-        if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Group chat session with chatId '").append(mChatId)
-                    .append("' is pending for acceptance, accept it.").toString());
-        }
-        groupChatSession.acceptSession();
     }
 
     private void dequeueChatMessageAndBroadcastStatusChange(ChatMessage msg) {
@@ -1025,8 +1076,12 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * 
      * @param msg
      * @throws MsrpException
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void dequeueGroupChatMessage(ChatMessage msg) throws MsrpException {
+    public void dequeueGroupChatMessage(ChatMessage msg) throws MsrpException, SipPayloadException,
+            SipNetworkException {
+        String msgId = msg.getMessageId();
         final GroupChatSession session = mImService.getGroupChatSession(mChatId);
         if (session == null) {
             mCore.getListener().handleRejoinGroupChatAsPartOfSendOperation(mChatId);
@@ -1056,10 +1111,13 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * @param deliveredReportEnabled
      * @param groupFileTransfer
      * @throws MsrpException
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
     public void dequeueGroupFileInfo(String fileTransferId, String fileInfo,
             boolean displayedReportEnabled, boolean deliveredReportEnabled,
-            GroupFileTransferImpl groupFileTransfer) throws MsrpException {
+            GroupFileTransferImpl groupFileTransfer) throws MsrpException, SipPayloadException,
+            SipNetworkException {
         GroupChatSession session = mImService.getGroupChatSession(mChatId);
         if (session == null) {
             mCore.getListener().handleRejoinGroupChatAsPartOfSendOperation(mChatId);
@@ -1334,8 +1392,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * Rejoins an existing group chat from its unique chat ID
      * 
      * @return Group chat
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public IGroupChat rejoinGroupChat() {
+    public IGroupChat rejoinGroupChat() throws SipPayloadException, SipNetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Rejoin group chat session related to the conversation " + mChatId);
         }
@@ -1353,8 +1413,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * Restarts a previous group chat from its unique chat ID
      * 
      * @return Group chat
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public IGroupChat restartGroupChat() {
+    public IGroupChat restartGroupChat() throws SipPayloadException, SipNetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Restart group chat session related to the conversation " + mChatId);
         }
@@ -1421,8 +1483,12 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     /**
      * Try to restart group chat session on failure of restart
+     * 
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    private void handleGroupChatRejoinAsPartOfSendOperationFailed() {
+    private void handleGroupChatRejoinAsPartOfSendOperationFailed() throws SipPayloadException,
+            SipNetworkException {
         restartGroupChat();
     }
 
@@ -1570,7 +1636,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     }
 
     @Override
-    public void handleImError(ChatError error) {
+    public void handleImError(ChatError error) throws SipPayloadException, SipNetworkException {
         GroupChatSession session = mImService.getGroupChatSession(mChatId);
         int chatErrorCode = error.getErrorCode();
         if (session != null && session.isPendingForRemoval()) {

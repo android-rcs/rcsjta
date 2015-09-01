@@ -49,9 +49,11 @@ import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.Vector;
 
 import javax.xml.parsers.ParserConfigurationException;
+
 import javax2.sip.header.AcceptHeader;
 import javax2.sip.header.EventHeader;
 import javax2.sip.header.SubscriptionStateHeader;
@@ -99,20 +101,17 @@ public class PresenceSubscribeManager extends SubscribeManager {
     @Override
     public SipRequest createSubscribe(SipDialogPath dialog, long expirePeriod)
             throws SipPayloadException {
-        // Create SUBSCRIBE message
-        SipRequest subscribe = SipMessageFactory.createSubscribe(dialog, expirePeriod);
+        try {
+            SipRequest subscribe = SipMessageFactory.createSubscribe(dialog, expirePeriod);
+            subscribe.addHeader(EventHeader.NAME, "presence");
+            subscribe.addHeader(AcceptHeader.NAME,
+                    "application/pidf+xml, application/rlmi+xml, multipart/related");
+            subscribe.addHeader(SupportedHeader.NAME, "eventlist");
+            return subscribe;
 
-        // Set the Event header
-        subscribe.addHeader(EventHeader.NAME, "presence");
-
-        // Set the Accept header
-        subscribe.addHeader(AcceptHeader.NAME,
-                "application/pidf+xml, application/rlmi+xml, multipart/related");
-
-        // Set the Supported header
-        subscribe.addHeader(SupportedHeader.NAME, "eventlist");
-
-        return subscribe;
+        } catch (ParseException e) {
+            throw new SipPayloadException("Failed to create subscribe request!", e);
+        }
     }
 
     /**

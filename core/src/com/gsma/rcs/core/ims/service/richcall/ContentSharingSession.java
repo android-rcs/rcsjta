@@ -117,7 +117,7 @@ public abstract class ContentSharingSession extends ImsServiceSession {
     }
 
     @Override
-    public void receiveBye(SipRequest bye) {
+    public void receiveBye(SipRequest bye) throws SipPayloadException, SipNetworkException {
         super.receiveBye(bye);
         ContactId remote = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {

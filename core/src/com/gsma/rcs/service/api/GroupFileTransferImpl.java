@@ -19,6 +19,8 @@ package com.gsma.rcs.service.api;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.InvitationStatus;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -698,7 +700,28 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             }
             new Thread() {
                 public void run() {
-                    session.terminateSession(TerminationReason.TERMINATION_BY_USER);
+                    // @FIXME:Terminate Session should not run on a new thread
+                    try {
+                        session.terminateSession(TerminationReason.TERMINATION_BY_USER);
+                    } catch (SipPayloadException e) {
+                        sLogger.error("Failed to terminate session with fileTransferId : "
+                                .concat(mFileTransferId), e);
+                    } catch (SipNetworkException e) {
+                        if (sLogger.isActivated()) {
+                            sLogger.debug(e.getMessage());
+                        }
+                    } catch (RuntimeException e) {
+                        /*
+                         * Normally we are not allowed to catch runtime exceptions as these are
+                         * genuine bugs which should be handled/fixed within the code. However the
+                         * cases when we are executing operations on a thread unhandling such
+                         * exceptions will eventually lead to exit the system and thus can bring the
+                         * whole system down, which is not intended.
+                         */
+                        sLogger.error("Failed to terminate session with fileTransferId : "
+                                .concat(mFileTransferId), e);
+                    }
+
                 }
             }.start();
 

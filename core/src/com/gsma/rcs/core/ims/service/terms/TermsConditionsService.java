@@ -50,9 +50,11 @@ import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.Locale;
 
 import javax.xml.parsers.ParserConfigurationException;
+
 import javax2.sip.InvalidArgumentException;
 import javax2.sip.message.Response;
 
@@ -370,6 +372,9 @@ public class TermsConditionsService extends ImsService {
                             .append(statusCode).append(" received!").toString());
             }
         } catch (InvalidArgumentException e) {
+            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
+
+        } catch (ParseException e) {
             throw new SipPayloadException("Failed to handle 407 authentication response!", e);
         }
     }

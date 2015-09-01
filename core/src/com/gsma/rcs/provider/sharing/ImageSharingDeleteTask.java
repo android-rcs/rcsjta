@@ -16,16 +16,21 @@
 
 package com.gsma.rcs.provider.sharing;
 
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.richcall.image.ImageTransferSession;
 import com.gsma.rcs.provider.DeleteTask;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.service.api.ImageSharingServiceImpl;
+import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
 import java.util.Set;
 
 public class ImageSharingDeleteTask extends DeleteTask.GroupedByContactId {
+
+    private static final Logger sLogger = Logger.getLogger(ImageSharingDeleteTask.class.getName());
 
     private final ImageSharingServiceImpl mImageSharingService;
 
@@ -84,14 +89,25 @@ public class ImageSharingDeleteTask extends DeleteTask.GroupedByContactId {
     }
 
     @Override
-    protected void onRowDelete(ContactId contact, String sharingId) {
+    protected void onRowDelete(ContactId contact, String sharingId) throws SipPayloadException {
         ImageTransferSession session = mRichcallService.getImageTransferSession(sharingId);
         if (session == null) {
             mImageSharingService.removeImageSharing(sharingId);
             return;
 
         }
-        session.deleteSession();
+        try {
+            session.deleteSession();
+        } catch (SipNetworkException e) {
+            /*
+             * If network is lost during a delete operation the remaining part of the delete
+             * operation (delete from persistent storage) can succeed to 100% anyway since delete
+             * can be executed anyway while no network connectivity is present and still succeed.
+             */
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
+        }
         mImageSharingService.removeImageSharing(sharingId);
     }
 

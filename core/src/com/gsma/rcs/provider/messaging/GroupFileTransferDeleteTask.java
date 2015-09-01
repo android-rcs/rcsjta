@@ -16,15 +16,21 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.provider.DeleteTask;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
+import com.gsma.rcs.utils.logger.Logger;
 
 import java.util.Set;
 
 public class GroupFileTransferDeleteTask extends DeleteTask.GroupedByChatId {
+
+    private static final Logger sLogger = Logger.getLogger(GroupFileTransferDeleteTask.class
+            .getName());
 
     private static final String SELECTION_ALL_GROUP_FILETRANSFERS = new StringBuilder(
             FileTransferData.KEY_CHAT_ID).append("<>").append(FileTransferData.KEY_CONTACT)
@@ -91,7 +97,7 @@ public class GroupFileTransferDeleteTask extends DeleteTask.GroupedByChatId {
     }
 
     @Override
-    protected void onRowDelete(String chatId, String transferId) {
+    protected void onRowDelete(String chatId, String transferId) throws SipPayloadException {
         FileSharingSession session = mImService.getFileSharingSession(transferId);
         if (session == null) {
             mFileTransferService.ensureThumbnailIsDeleted(transferId);
@@ -99,7 +105,18 @@ public class GroupFileTransferDeleteTask extends DeleteTask.GroupedByChatId {
             return;
 
         }
-        session.deleteSession();
+        try {
+            session.deleteSession();
+        } catch (SipNetworkException e) {
+            /*
+             * If network is lost during a delete operation the remaining part of the delete
+             * operation (delete from persistent storage) can succeed to 100% anyway since delete
+             * can be executed anyway while no network connectivity is present and still succeed.
+             */
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
+        }
         mFileTransferService.ensureThumbnailIsDeleted(transferId);
         mFileTransferService.removeGroupFileTransfer(transferId);
     }

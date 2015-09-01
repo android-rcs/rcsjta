@@ -42,6 +42,7 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
 import java.io.IOException;
+import java.text.ParseException;
 
 import javax2.sip.InvalidArgumentException;
 import javax2.sip.message.Response;
@@ -97,7 +98,7 @@ public class OptionsRequestTask implements Runnable {
         try {
             sendOptions();
         } catch (SipPayloadException e) {
-            sLogger.error("Options request failed for contact " + mContact + " !", e);
+            sLogger.error("Options request failed for contact : ".concat(mContact.toString()), e);
             handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, e));
         } catch (SipNetworkException e) {
             if (sLogger.isActivated()) {
@@ -111,14 +112,21 @@ public class OptionsRequestTask implements Runnable {
              * executing operations on a thread unhandling such exceptions will eventually lead to
              * exit the system and thus can bring the whole system down, which is not intended.
              */
-            sLogger.error("Options request failed for contact " + mContact + " !", e);
+            sLogger.error("Options request failed for contact : ".concat(mContact.toString()), e);
         } finally {
             if (mCallback != null) {
                 try {
                     mCallback.endOfOptionsRequestTask(mContact);
                 } catch (RuntimeException e) {
-                    sLogger.error("Failed to notify end of options request for contact " + mContact
-                            + " !", e);
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error("Failed to notify end of options request for contact : "
+                            .concat(mContact.toString()), e);
                 }
             }
         }
@@ -336,7 +344,10 @@ public class OptionsRequestTask implements Runnable {
 
             sendAndWaitOptions(options);
         } catch (InvalidArgumentException e) {
-            throw new SipPayloadException("Unable to fetch Authorization header!", e);
+            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
         }
     }
 

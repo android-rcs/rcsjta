@@ -48,6 +48,7 @@ import com.gsma.services.rcs.sharing.video.VideoCodec;
 
 import android.os.RemoteException;
 
+import java.text.ParseException;
 import java.util.Vector;
 
 import javax2.sip.InvalidArgumentException;
@@ -122,6 +123,15 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
 
             // Send INVITE request
             sendInvite(invite);
+        } catch (InvalidArgumentException e) {
+            sLogger.error("Failed to send invite!", e);
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (ParseException e) {
+            sLogger.error("Failed to send invite!", e);
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (RemoteException e) {
+            sLogger.error("Failed initiate a new live video sharing session as originating!", e);
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         } catch (SipPayloadException e) {
             sLogger.error("Failed to send invite!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
@@ -129,12 +139,6 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
-            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
-        } catch (InvalidArgumentException e) {
-            sLogger.error("Failed to send invite!", e);
-            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
-        } catch (RemoteException e) {
-            sLogger.error("Failed initiate a new live video sharing session as originating!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         } catch (RuntimeException e) {
             /**
@@ -150,8 +154,11 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
      * Prepare media session
      * 
      * @throws MediaException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
-    public void prepareMediaSession() throws MediaException {
+    public void prepareMediaSession() throws MediaException, SipPayloadException,
+            SipNetworkException {
         // Parse the remote SDP part
         SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(UTF8));
         MediaDescription mediaVideo = parser.getMediaDescription("video");

@@ -881,8 +881,11 @@ public class RichcallService extends ImsService {
     /**
      * This function is used when all session needs to terminated in both invitation pending and
      * started state.
+     * 
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void terminateAllSessions() {
+    public void terminateAllSessions() throws SipPayloadException, SipNetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug("Terminate all sessions");
         }

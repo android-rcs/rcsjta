@@ -36,6 +36,8 @@ import com.gsma.rcs.utils.logger.Logger;
 
 import android.text.TextUtils;
 
+import java.text.ParseException;
+
 import javax2.sip.InvalidArgumentException;
 import javax2.sip.header.SubjectHeader;
 
@@ -63,8 +65,7 @@ public class RejoinGroupChatSession extends GroupChatSession {
     public RejoinGroupChatSession(InstantMessagingService imService, GroupChatInfo groupChatInfo,
             RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
             ContactManager contactManager) {
-        super(imService, null, groupChatInfo.getRejoinId(), groupChatInfo
-                .getParticipants(),
+        super(imService, null, groupChatInfo.getRejoinId(), groupChatInfo.getParticipants(),
                 rcsSettings, messagingLog, timestamp, contactManager);
 
         if (!TextUtils.isEmpty(groupChatInfo.getSubject())) {
@@ -117,6 +118,9 @@ public class RejoinGroupChatSession extends GroupChatSession {
         } catch (InvalidArgumentException e) {
             mLogger.error("Unable to set authorization header for chat invite!", e);
             handleError(new ChatError(ChatError.SESSION_REJOIN_FAILED, e));
+        } catch (ParseException e) {
+            mLogger.error("Unable to set authorization header for chat invite!", e);
+            handleError(new ChatError(ChatError.SESSION_REJOIN_FAILED, e));
         } catch (SipPayloadException e) {
             mLogger.error("Unable to send 200OK response!", e);
             handleError(new ChatError(ChatError.SESSION_REJOIN_FAILED, e));
@@ -143,13 +147,19 @@ public class RejoinGroupChatSession extends GroupChatSession {
      * @throws SipPayloadException
      */
     private SipRequest createInviteRequest(String content) throws SipPayloadException {
-        SipRequest invite = SipMessageFactory.createInvite(getDialogPath(), getFeatureTags(),
-                getAcceptContactTags(), content);
-        if (getSubject() != null) {
-            invite.addHeader(SubjectHeader.NAME, getSubject());
+        try {
+            SipRequest invite = SipMessageFactory.createInvite(getDialogPath(), getFeatureTags(),
+                    getAcceptContactTags(), content);
+            final String subject = getSubject();
+            if (subject != null) {
+                invite.addHeader(SubjectHeader.NAME, subject);
+            }
+            invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());
+            return invite;
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Failed to create invite request!", e);
         }
-        invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());
-        return invite;
     }
 
     /**

@@ -401,7 +401,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
     }
 
     @Override
-    public void startSession() {
+    public void startSession() throws SipPayloadException, SipNetworkException {
         final boolean logActivated = sLogger.isActivated();
         ContactId remote = getRemoteContact();
         if (logActivated) {

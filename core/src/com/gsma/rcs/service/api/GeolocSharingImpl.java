@@ -23,6 +23,8 @@
 package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.InvitationStatus;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
@@ -68,7 +70,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
     /**
      * The logger
      */
-    private final static Logger logger = Logger.getLogger(GeolocSharingImpl.class.getSimpleName());
+    private final static Logger sLogger = Logger.getLogger(GeolocSharingImpl.class.getSimpleName());
 
     /**
      * Constructor
@@ -100,12 +102,12 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                logger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            logger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -127,12 +129,12 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                logger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            logger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -153,12 +155,12 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                logger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            logger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -192,12 +194,12 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                logger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            logger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -218,12 +220,12 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                logger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            logger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -248,12 +250,12 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                logger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            logger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -276,12 +278,12 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                logger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            logger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -293,8 +295,8 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
      */
     public void acceptInvitation() throws RemoteException {
         try {
-            if (logger.isActivated()) {
-                logger.info("Accept session invitation");
+            if (sLogger.isActivated()) {
+                sLogger.info("Accept session invitation");
             }
             final GeolocTransferSession session = mRichcallService
                     .getGeolocTransferSession(mSharingId);
@@ -305,12 +307,12 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
             session.acceptSession();
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                logger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            logger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -322,8 +324,8 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
      */
     public void rejectInvitation() throws RemoteException {
         try {
-            if (logger.isActivated()) {
-                logger.info("Reject session invitation");
+            if (sLogger.isActivated()) {
+                sLogger.info("Reject session invitation");
             }
             final GeolocTransferSession session = mRichcallService
                     .getGeolocTransferSession(mSharingId);
@@ -334,12 +336,12 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
             session.rejectSession(InvitationStatus.INVITATION_REJECTED_DECLINE);
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                logger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            logger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -351,8 +353,8 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
      */
     public void abortSharing() throws RemoteException {
         try {
-            if (logger.isActivated()) {
-                logger.info("Cancel session");
+            if (sLogger.isActivated()) {
+                sLogger.info("Cancel session");
             }
             final GeolocTransferSession session = mRichcallService
                     .getGeolocTransferSession(mSharingId);
@@ -366,18 +368,40 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
             }
             new Thread() {
                 public void run() {
-                    session.terminateSession(TerminationReason.TERMINATION_BY_USER);
+                    // @FIXME:Terminate Session should not run on a new thread
+                    try {
+                        session.terminateSession(TerminationReason.TERMINATION_BY_USER);
+                    } catch (SipPayloadException e) {
+                        sLogger.error(
+                                "Failed to terminate session with sharing ID : ".concat(mSharingId),
+                                e);
+                    } catch (SipNetworkException e) {
+                        if (sLogger.isActivated()) {
+                            sLogger.debug(e.getMessage());
+                        }
+                    } catch (RuntimeException e) {
+                        /*
+                         * Normally we are not allowed to catch runtime exceptions as these are
+                         * genuine bugs which should be handled/fixed within the code. However the
+                         * cases when we are executing operations on a thread unhandling such
+                         * exceptions will eventually lead to exit the system and thus can bring the
+                         * whole system down, which is not intended.
+                         */
+                        sLogger.error(
+                                "Failed to terminate session with sharing ID : ".concat(mSharingId),
+                                e);
+                    }
                 }
             }.start();
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                logger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            logger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -418,8 +442,8 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
     }
 
     private void handleSessionRejected(ReasonCode reasonCode, ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Session rejected; reasonCode=" + reasonCode + ".");
+        if (sLogger.isActivated()) {
+            sLogger.info("Session rejected; reasonCode=" + reasonCode + ".");
         }
         synchronized (lock) {
             mGeolocSharingService.removeGeolocSharing(mSharingId);
@@ -431,8 +455,8 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
      * Session is started
      */
     public void handleSessionStarted(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Session started.");
+        if (sLogger.isActivated()) {
+            sLogger.info("Session started.");
         }
         synchronized (lock) {
             setStateAndReasonCode(contact, State.STARTED, ReasonCode.UNSPECIFIED);
@@ -446,8 +470,8 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
      * @param reason Termination reason
      */
     public void handleSessionAborted(ContactId contact, TerminationReason reason) {
-        if (logger.isActivated()) {
-            logger.info(new StringBuilder("Session aborted; reason=").append(reason).append(".")
+        if (sLogger.isActivated()) {
+            sLogger.info(new StringBuilder("Session aborted; reason=").append(reason).append(".")
                     .toString());
         }
         synchronized (lock) {
@@ -488,8 +512,8 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
      * @param error Error
      */
     public void handleSharingError(ContactId contact, ContentSharingError error) {
-        if (logger.isActivated()) {
-            logger.info(new StringBuilder("Sharing error ").append(error.getErrorCode())
+        if (sLogger.isActivated()) {
+            sLogger.info(new StringBuilder("Sharing error ").append(error.getErrorCode())
                     .append(".").toString());
         }
         GeolocSharingStateAndReasonCode stateAndReasonCode = toStateAndReasonCode(error);
@@ -509,8 +533,8 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
      * @param initiatedByRemote
      */
     public void handleContentTransfered(ContactId contact, Geoloc geoloc, boolean initiatedByRemote) {
-        if (logger.isActivated()) {
-            logger.info("Geoloc transferred.");
+        if (sLogger.isActivated()) {
+            sLogger.info("Geoloc transferred.");
         }
         synchronized (lock) {
             mGeolocSharingService.removeGeolocSharing(mSharingId);
@@ -531,8 +555,8 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 
     @Override
     public void handleSessionAccepted(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Accepting sharing.");
+        if (sLogger.isActivated()) {
+            sLogger.info("Accepting sharing.");
         }
         synchronized (lock) {
             setStateAndReasonCode(contact, State.ACCEPTING, ReasonCode.UNSPECIFIED);

@@ -43,6 +43,8 @@ import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
+import java.text.ParseException;
+
 import javax2.sip.InvalidArgumentException;
 import javax2.sip.message.Response;
 
@@ -197,7 +199,8 @@ public class ImdnManager extends Thread {
 
     private void analyzeSipResponse(SipTransactionContext ctx,
             SessionAuthenticationAgent authenticationAgent, SipDialogPath dialogPath, String cpim)
-            throws SipNetworkException, SipPayloadException, InvalidArgumentException {
+            throws SipNetworkException, SipPayloadException, InvalidArgumentException,
+            ParseException {
         int statusCode = ctx.getStatusCode();
         switch (statusCode) {
             case Response.PROXY_AUTHENTICATION_REQUIRED:
@@ -292,6 +295,11 @@ public class ImdnManager extends Thread {
             analyzeSipResponse(ctx, authenticationAgent, dialogPath, cpim);
 
         } catch (InvalidArgumentException e) {
+            throw new SipPayloadException(
+                    "Unable to set authorization header for remoteInstanceId : "
+                            .concat(remoteInstanceId),
+                    e);
+        } catch (ParseException e) {
             throw new SipPayloadException(
                     "Unable to set authorization header for remoteInstanceId : "
                             .concat(remoteInstanceId),

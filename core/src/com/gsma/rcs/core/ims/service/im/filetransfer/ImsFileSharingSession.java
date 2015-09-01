@@ -25,6 +25,8 @@ package com.gsma.rcs.core.ims.service.im.filetransfer;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
+import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
@@ -40,6 +42,8 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.net.Uri;
+
+import java.text.ParseException;
 
 /**
  * Abstract IMS file transfer session
@@ -125,17 +129,23 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
      * @throws SipPayloadException
      */
     public SipRequest createInvite() throws SipPayloadException {
-        SipRequest invite;
-        if (getFileicon() != null) {
-            invite = SipMessageFactory.createMultipartInvite(getDialogPath(),
-                    InstantMessagingService.FT_FEATURE_TAGS, getDialogPath().getLocalContent(),
-                    BOUNDARY_TAG);
-        } else {
-            invite = SipMessageFactory.createInvite(getDialogPath(),
-                    InstantMessagingService.FT_FEATURE_TAGS, getDialogPath().getLocalContent());
+        try {
+            SipRequest invite;
+            SipDialogPath dialogPath = getDialogPath();
+            if (getFileicon() != null) {
+                invite = SipMessageFactory.createMultipartInvite(dialogPath,
+                        InstantMessagingService.FT_FEATURE_TAGS, dialogPath.getLocalContent(),
+                        BOUNDARY_TAG);
+            } else {
+                invite = SipMessageFactory.createInvite(dialogPath,
+                        InstantMessagingService.FT_FEATURE_TAGS, dialogPath.getLocalContent());
+            }
+            invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());
+            return invite;
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Failed to create invite request!", e);
         }
-        invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());
-        return invite;
     }
 
     /**
@@ -170,27 +180,47 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
      */
     public void msrpTransferError(String msgId, String error,
             MsrpSession.TypeMsrpChunk typeMsrpChunk) {
-        if (isSessionInterrupted() || getDialogPath().isSessionTerminated()) {
-            return;
-        }
-        if (sLogger.isActivated()) {
-            sLogger.info("Data transfer error: ".concat(error));
-        }
-        closeSession(ImsServiceSession.TerminationReason.TERMINATION_BY_SYSTEM);
-        closeMediaSession();
+        try {
+            if (isSessionInterrupted() || getDialogPath().isSessionTerminated()) {
+                return;
+            }
+            if (sLogger.isActivated()) {
+                sLogger.debug("Data transfer error: ".concat(error));
+            }
+            closeSession(ImsServiceSession.TerminationReason.TERMINATION_BY_SYSTEM);
+            closeMediaSession();
 
-        getImsService().getImsModule().getCapabilityService()
-                .requestContactCapabilities(getRemoteContact());
+            getImsService().getImsModule().getCapabilityService()
+                    .requestContactCapabilities(getRemoteContact());
 
-        removeSession();
+            removeSession();
 
-        if (isFileTransfered()) {
-            return;
-        }
-        ContactId contact = getRemoteContact();
-        for (ImsSessionListener listener : getListeners()) {
-            ((FileSharingSessionListener) listener).handleTransferError(new FileSharingError(
-                    FileSharingError.MEDIA_TRANSFER_FAILED, error), contact);
+            if (isFileTransfered()) {
+                return;
+            }
+            ContactId contact = getRemoteContact();
+            for (ImsSessionListener listener : getListeners()) {
+                ((FileSharingSessionListener) listener).handleTransferError(new FileSharingError(
+                        FileSharingError.MEDIA_TRANSFER_FAILED, error), contact);
+            }
+        } catch (SipPayloadException e) {
+            sLogger.error(
+                    new StringBuilder("Failed to handle msrp error").append(error)
+                            .append(" for message ").append(msgId).toString(), e);
+        } catch (SipNetworkException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
+        } catch (RuntimeException e) {
+            /*
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
+             */
+            sLogger.error(
+                    new StringBuilder("Failed to handle msrp error").append(error)
+                            .append(" for message ").append(msgId).toString(), e);
         }
     }
 
@@ -205,7 +235,7 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
     }
 
     @Override
-    public void receiveBye(SipRequest bye) {
+    public void receiveBye(SipRequest bye) throws SipPayloadException, SipNetworkException {
         super.receiveBye(bye);
         ContactId contact = getRemoteContact();
         /*

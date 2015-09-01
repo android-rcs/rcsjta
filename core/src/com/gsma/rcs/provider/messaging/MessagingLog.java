@@ -23,6 +23,8 @@
 package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
@@ -45,6 +47,7 @@ import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 import android.database.Cursor;
 import android.net.Uri;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -143,30 +146,33 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public void addOneToOneSpamMessage(ChatMessage msg) {
+    public void addOneToOneSpamMessage(ChatMessage msg) throws SipPayloadException, IOException {
         mMessageLog.addOneToOneSpamMessage(msg);
     }
 
     @Override
-    public void addIncomingOneToOneChatMessage(ChatMessage msg, boolean imdnDisplayedRequested) {
+    public void addIncomingOneToOneChatMessage(ChatMessage msg, boolean imdnDisplayedRequested)
+            throws SipPayloadException, IOException {
         mMessageLog.addIncomingOneToOneChatMessage(msg, imdnDisplayedRequested);
     }
 
     @Override
     public void addOutgoingOneToOneChatMessage(ChatMessage msg, Status status,
-            Content.ReasonCode reasonCode, long deliveryExpiration) {
+            Content.ReasonCode reasonCode, long deliveryExpiration) throws SipPayloadException,
+            IOException {
         mMessageLog.addOutgoingOneToOneChatMessage(msg, status, reasonCode, deliveryExpiration);
     }
 
     @Override
     public void addIncomingGroupChatMessage(String chatId, ChatMessage msg,
-            boolean imdnDisplayedRequested) {
+            boolean imdnDisplayedRequested) throws SipPayloadException, IOException {
         mMessageLog.addIncomingGroupChatMessage(chatId, msg, imdnDisplayedRequested);
     }
 
     @Override
     public void addOutgoingGroupChatMessage(String chatId, ChatMessage msg,
-            Set<ContactId> recipients, Status status, Content.ReasonCode reasonCode) {
+            Set<ContactId> recipients, Status status, Content.ReasonCode reasonCode)
+            throws SipPayloadException, IOException {
         mMessageLog.addOutgoingGroupChatMessage(chatId, msg, recipients, status, reasonCode);
     }
 

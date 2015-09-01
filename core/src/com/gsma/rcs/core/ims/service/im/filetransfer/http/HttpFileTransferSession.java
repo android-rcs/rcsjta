@@ -23,6 +23,7 @@
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
@@ -162,7 +163,8 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
         return null;
     }
 
-    protected void closeHttpSession(TerminationReason reason) {
+    protected void closeHttpSession(TerminationReason reason) throws SipPayloadException,
+            SipNetworkException {
         interruptSession();
 
         closeSession(reason);
@@ -339,7 +341,7 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
     }
 
     @Override
-    public void receiveBye(SipRequest bye) {
+    public void receiveBye(SipRequest bye) throws SipPayloadException, SipNetworkException {
         super.receiveBye(bye);
         ContactId remote = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {

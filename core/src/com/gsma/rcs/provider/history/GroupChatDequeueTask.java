@@ -20,6 +20,8 @@ package com.gsma.rcs.provider.history;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
@@ -140,6 +142,18 @@ public class GroupChatDequeueTask extends DequeueTask {
                                             .append("' message on group chat '").append(mChatId)
                                             .append("' due to: ").append(e.getMessage()).toString());
                                 }
+                            } catch (SipPayloadException e) {
+                                mLogger.error(new StringBuilder(
+                                        "Failed to dequeue group chat message '").append(id)
+                                        .append("' message on group chat '").append(mChatId)
+                                        .toString(), e);
+                            } catch (SipNetworkException e) {
+                                if (logActivated) {
+                                    mLogger.debug(new StringBuilder(
+                                            "Failed to dequeue group chat message '").append(id)
+                                            .append("' message on group chat '").append(mChatId)
+                                            .append("' due to: ").append(e.getMessage()).toString());
+                                }
                             }
                             break;
                         case FileTransferData.HISTORYLOG_MEMBER_ID:
@@ -175,6 +189,20 @@ public class GroupChatDequeueTask extends DequeueTask {
                                                     .append(mChatId).append("' due to: ")
                                                     .append(e.getMessage()).toString());
                                         }
+                                    } catch (SipPayloadException e) {
+                                        mLogger.error(
+                                                new StringBuilder(
+                                                        "Failed to dequeue group file transfer with fileTransferId '")
+                                                        .append(id).append("' on group chat '")
+                                                        .append(mChatId).toString(), e);
+                                    } catch (SipNetworkException e) {
+                                        if (logActivated) {
+                                            mLogger.debug(new StringBuilder(
+                                                    "Failed to dequeue group file transfer with fileTransferId '")
+                                                    .append(id).append("' on group chat '")
+                                                    .append(mChatId).append("' due to: ")
+                                                    .append(e.getMessage()).toString());
+                                        }
                                     }
                                     break;
                                 case STARTED:
@@ -193,6 +221,19 @@ public class GroupChatDequeueTask extends DequeueTask {
                                                 groupFileTransfer);
 
                                     } catch (MsrpException e) {
+                                        if (logActivated) {
+                                            mLogger.debug(new StringBuilder(
+                                                    "Failed to dequeue group file info '")
+                                                    .append(id).append("' message on group chat '")
+                                                    .append(mChatId).append("' due to: ")
+                                                    .append(e.getMessage()).toString());
+                                        }
+                                    } catch (SipPayloadException e) {
+                                        mLogger.error(new StringBuilder(
+                                                "Failed to dequeue group file info '").append(id)
+                                                .append("' message on group chat '")
+                                                .append(mChatId).toString(), e);
+                                    } catch (SipNetworkException e) {
                                         if (logActivated) {
                                             mLogger.debug(new StringBuilder(
                                                     "Failed to dequeue group file info '")

@@ -42,6 +42,7 @@ import com.gsma.services.rcs.contact.ContactId;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import java.text.ParseException;
 import java.util.Map;
 
 import javax2.sip.InvalidArgumentException;
@@ -150,6 +151,9 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
         } catch (InvalidArgumentException e) {
             sLogger.error("Unable to set authorization header for chat invite!", e);
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
+        } catch (ParseException e) {
+            sLogger.error("Unable to set authorization header for chat invite!", e);
+            handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
         } catch (SipPayloadException e) {
             sLogger.error("Unable to send 200OK response!", e);
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
@@ -176,14 +180,19 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
      * @throws SipPayloadException
      */
     private SipRequest createInviteRequest(String content) throws SipPayloadException {
-        SipRequest invite = SipMessageFactory.createMultipartInvite(getDialogPath(),
-                getFeatureTags(), getAcceptContactTags(), content, BOUNDARY_TAG);
-        if (getSubject() != null) {
-            invite.addHeader(SubjectHeader.NAME, getSubject());
+        try {
+            SipRequest invite = SipMessageFactory.createMultipartInvite(getDialogPath(),
+                    getFeatureTags(), getAcceptContactTags(), content, BOUNDARY_TAG);
+            if (getSubject() != null) {
+                invite.addHeader(SubjectHeader.NAME, getSubject());
+            }
+            invite.addHeader(RequireHeader.NAME, "recipient-list-invite");
+            invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());
+            return invite;
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Failed to create invite request!", e);
         }
-        invite.addHeader(RequireHeader.NAME, "recipient-list-invite");
-        invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());
-        return invite;
     }
 
     /**

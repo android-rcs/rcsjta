@@ -120,14 +120,11 @@ public abstract class SipMessage {
      * 
      * @param name Header name
      * @param value Header value
+     * @throws ParseException
      */
-    public void addHeader(String name, String value) {
-        try {
+    public void addHeader(String name, String value) throws ParseException {
             Header header = SipUtils.HEADER_FACTORY.createHeader(name, value);
-            mStackMessage.setHeader(header);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        mStackMessage.setHeader(header);
     }
 
     /**

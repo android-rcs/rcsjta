@@ -35,7 +35,10 @@ import com.gsma.rcs.core.ims.protocol.rtp.stream.RtpStreamListener;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsService;
+import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.sip.GenericSipSession;
 import com.gsma.rcs.core.ims.service.sip.SipSessionError;
 import com.gsma.rcs.core.ims.service.sip.SipSessionListener;
@@ -235,26 +238,35 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
      * Invoked when the RTP stream was aborted
      */
     public void rtpStreamAborted() {
-        if (isSessionInterrupted()) {
-            return;
-        }
-
-        if (sLogger.isActivated()) {
-            sLogger.error("Media has failed: network failure");
-        }
-
-        // Close the media session
-        closeMediaSession();
-
-        closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
-
-        // Remove the current session
-        removeSession();
-
-        ContactId contact = getRemoteContact();
-        for (int j = 0; j < getListeners().size(); j++) {
-            ((SipSessionListener) getListeners().get(j)).handleSessionError(contact,
-                    new SipSessionError(SipSessionError.MEDIA_FAILED));
+        try {
+            if (isSessionInterrupted()) {
+                return;
+            }
+            if (sLogger.isActivated()) {
+                sLogger.error("Media has failed: network failure");
+            }
+            closeMediaSession();
+            closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
+            removeSession();
+            ContactId contact = getRemoteContact();
+            for (ImsSessionListener listener : getListeners()) {
+                ((SipSessionListener) listener).handleSessionError(contact, new SipSessionError(
+                        SipSessionError.MEDIA_FAILED));
+            }
+        } catch (SipPayloadException e) {
+            sLogger.error("Failed to abort rtp stream!", e);
+        } catch (SipNetworkException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
+        } catch (RuntimeException e) {
+            /*
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
+             */
+            sLogger.error("Failed to abort rtp stream!", e);
         }
     }
 

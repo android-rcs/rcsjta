@@ -448,27 +448,48 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
      * @param typeMsrpChunk Type of MSRP chunk
      */
     public void msrpTransferError(String msgId, String error, TypeMsrpChunk typeMsrpChunk) {
-        if (isSessionInterrupted() || isInterrupted() || getDialogPath().isSessionTerminated()) {
-            return;
-        }
+        try {
+            if (isSessionInterrupted() || isInterrupted() || getDialogPath().isSessionTerminated()) {
+                return;
+            }
 
-        if (sLogger.isActivated()) {
-            sLogger.info("Data transfer error " + error);
-        }
+            if (sLogger.isActivated()) {
+                sLogger.info("Data transfer error " + error);
+            }
 
-        closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
-        closeMediaSession();
+            closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
+            closeMediaSession();
 
-        ContactId contact = getRemoteContact();
-        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(contact);
-        removeSession();
+            ContactId contact = getRemoteContact();
+            getImsService().getImsModule().getCapabilityService()
+                    .requestContactCapabilities(contact);
+            removeSession();
 
-        if (isImageTransfered()) {
-            return;
-        }
-        for (ImsSessionListener listener : getListeners()) {
-            ((ImageTransferSessionListener) listener).handleSharingError(contact,
-                    new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
+            if (isImageTransfered()) {
+                return;
+            }
+            for (ImsSessionListener listener : getListeners()) {
+                ((ImageTransferSessionListener) listener).handleSharingError(contact,
+                        new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
+            }
+        } catch (SipPayloadException e) {
+            sLogger.error(
+                    new StringBuilder("Failed to handle msrp error").append(error)
+                            .append(" for message ").append(msgId).toString(), e);
+        } catch (SipNetworkException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
+        } catch (RuntimeException e) {
+            /*
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
+             */
+            sLogger.error(
+                    new StringBuilder("Failed to handle msrp error").append(error)
+                            .append(" for message ").append(msgId).toString(), e);
         }
     }
 

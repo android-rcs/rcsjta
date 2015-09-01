@@ -19,6 +19,8 @@ package com.gsma.rcs.provider.messaging;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.CursorUtil;
@@ -158,6 +160,19 @@ public class FileTransferDequeueTask extends DequeueTask {
                                             .append(id).append("' on chat '").append(chatId)
                                             .append("' due to: ").append(e.getMessage()).toString());
                                 }
+                            } catch (SipPayloadException e) {
+                                mLogger.error(
+                                        new StringBuilder(
+                                                "Failed to dequeue file transfer with fileTransferId '")
+                                                .append(id).append("' on chat '").append(chatId)
+                                                .toString(), e);
+                            } catch (SipNetworkException e) {
+                                if (logActivated) {
+                                    mLogger.debug(new StringBuilder(
+                                            "Failed to dequeue file transfer with fileTransferId '")
+                                            .append(id).append("' on chat '").append(chatId)
+                                            .append("' due to: ").append(e.getMessage()).toString());
+                                }
                             }
                             break;
                         case STARTED:
@@ -197,6 +212,19 @@ public class FileTransferDequeueTask extends DequeueTask {
                                             oneToOneFileTransfer);
                                 }
                             } catch (MsrpException e) {
+                                if (logActivated) {
+                                    mLogger.debug(new StringBuilder(
+                                            "Failed to dequeue file transfer with fileTransferId '")
+                                            .append(id).append("' on chat '").append(chatId)
+                                            .append("' due to: ").append(e.getMessage()).toString());
+                                }
+                            } catch (SipPayloadException e) {
+                                mLogger.error(
+                                        new StringBuilder(
+                                                "Failed to dequeue file transfer with fileTransferId '")
+                                                .append(id).append("' on chat '").append(chatId)
+                                                .toString(), e);
+                            } catch (SipNetworkException e) {
                                 if (logActivated) {
                                     mLogger.debug(new StringBuilder(
                                             "Failed to dequeue file transfer with fileTransferId '")

@@ -16,11 +16,14 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.provider.DeleteTask;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.service.api.ChatServiceImpl;
+import com.gsma.rcs.utils.logger.Logger;
 
 import java.util.Set;
 
@@ -28,6 +31,8 @@ import java.util.Set;
  * Deletion task for group chats.
  */
 public class GroupChatDeleteTask extends DeleteTask.NotGrouped {
+
+    private static final Logger sLogger = Logger.getLogger(GroupChatDeleteTask.class.getName());
 
     private static final String SELECTION_GROUPDELIVERY_BY_CHATID = new StringBuilder(
             GroupDeliveryInfoData.KEY_CHAT_ID).append("=?").toString();
@@ -69,7 +74,7 @@ public class GroupChatDeleteTask extends DeleteTask.NotGrouped {
     }
 
     @Override
-    protected void onRowDelete(String chatId) {
+    protected void onRowDelete(String chatId) throws SipPayloadException {
         GroupChatSession session = mImService.getGroupChatSession(chatId);
         if (session == null) {
             mLocalContentResolver.delete(GroupDeliveryInfoData.CONTENT_URI,
@@ -79,7 +84,18 @@ public class GroupChatDeleteTask extends DeleteTask.NotGrouped {
             return;
 
         }
-        session.deleteSession();
+        try {
+            session.deleteSession();
+        } catch (SipNetworkException e) {
+            /*
+             * If network is lost during a delete operation the remaining part of the delete
+             * operation (delete from persistent storage) can succeed to 100% anyway since delete
+             * can be executed anyway while no network connectivity is present and still succeed.
+             */
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
+        }
         mLocalContentResolver.delete(GroupDeliveryInfoData.CONTENT_URI,
                 SELECTION_GROUPDELIVERY_BY_CHATID, new String[] {
                     chatId

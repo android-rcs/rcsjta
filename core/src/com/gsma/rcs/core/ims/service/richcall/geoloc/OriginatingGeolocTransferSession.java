@@ -41,6 +41,7 @@ import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Geoloc;
@@ -51,6 +52,7 @@ import android.net.Uri;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
 
 import javax2.sip.InvalidArgumentException;
 
@@ -69,7 +71,8 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
     /**
      * The logger
      */
-    private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(OriginatingGeolocTransferSession.class
+            .getName());
 
     /**
      * Constructor
@@ -99,14 +102,14 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
      */
     public void run() {
         try {
-            if (mLogger.isActivated()) {
-                mLogger.info("Initiate a new sharing session as originating");
+            if (sLogger.isActivated()) {
+                sLogger.info("Initiate a new sharing session as originating");
             }
 
             // Set setup mode
             String localSetup = createMobileToMobileSetupOffer();
-            if (mLogger.isActivated()) {
-                mLogger.debug("Local setup attribute is " + localSetup);
+            if (sLogger.isActivated()) {
+                sLogger.debug("Local setup attribute is " + localSetup);
             }
 
             // Set local port
@@ -145,8 +148,8 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
             getDialogPath().setLocalContent(sdp);
 
             // Create an INVITE request
-            if (mLogger.isActivated()) {
-                mLogger.info("Send INVITE");
+            if (sLogger.isActivated()) {
+                sLogger.info("Send INVITE");
             }
             SipRequest invite = createInvite();
 
@@ -158,28 +161,31 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
 
             // Send INVITE request
             sendInvite(invite);
+        } catch (InvalidArgumentException e) {
+            sLogger.error("Failed initiate a new sharing session as originating!", e);
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (ParseException e) {
+            sLogger.error("Failed initiate a new sharing session as originating!", e);
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         } catch (SipPayloadException e) {
-            mLogger.error("Failed initiate a new sharing session as originating!", e);
+            sLogger.error("Failed initiate a new sharing session as originating!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         } catch (SipNetworkException e) {
-            if (mLogger.isActivated()) {
-                mLogger.debug(e.getMessage());
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
             }
-            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
-        } catch (InvalidArgumentException e) {
-            mLogger.error("Failed initiate a new sharing session as originating!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         } catch (RuntimeException e) {
             /**
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
-            mLogger.error("Failed initiate a new sharing session as originating!", e);
+            sLogger.error("Failed initiate a new sharing session as originating!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         }
 
-        if (mLogger.isActivated()) {
-            mLogger.debug("End of thread");
+        if (sLogger.isActivated()) {
+            sLogger.debug("End of thread");
         }
     }
 
@@ -232,8 +238,8 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
         if (msrpMgr != null) {
             msrpMgr.closeSession();
         }
-        if (mLogger.isActivated()) {
-            mLogger.debug("MSRP session has been closed");
+        if (sLogger.isActivated()) {
+            sLogger.debug("MSRP session has been closed");
         }
     }
 
@@ -243,27 +249,35 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
      * @param msgId Message ID
      */
     public void msrpDataTransfered(String msgId) {
-        if (mLogger.isActivated()) {
-            mLogger.info("Data transfered");
-        }
-
-        // Geoloc has been transfered
-        geolocTransfered();
-
-        // Close the media session
-        closeMediaSession();
-
-        closeSession(TerminationReason.TERMINATION_BY_USER);
-
-        // Remove the current session
-        removeSession();
-
-        ContactId contact = getRemoteContact();
-        Geoloc geoloc = getGeoloc();
-        boolean initiatedByRemote = isInitiatedByRemote();
-        for (ImsSessionListener listener : getListeners()) {
-            ((GeolocTransferSessionListener) listener).handleContentTransfered(contact, geoloc,
-                    initiatedByRemote);
+        try {
+            if (sLogger.isActivated()) {
+                sLogger.info("Data transfered");
+            }
+            geolocTransfered();
+            closeMediaSession();
+            closeSession(TerminationReason.TERMINATION_BY_USER);
+            removeSession();
+            ContactId contact = getRemoteContact();
+            Geoloc geoloc = getGeoloc();
+            boolean initiatedByRemote = isInitiatedByRemote();
+            for (ImsSessionListener listener : getListeners()) {
+                ((GeolocTransferSessionListener) listener).handleContentTransfered(contact, geoloc,
+                        initiatedByRemote);
+            }
+        } catch (SipPayloadException e) {
+            sLogger.error("Failed to notify msrp data transfered for msgId : ".concat(msgId), e);
+        } catch (SipNetworkException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
+        } catch (RuntimeException e) {
+            /*
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
+             */
+            sLogger.error("Failed to notify msrp data transfered for msgId : ".concat(msgId), e);
         }
     }
 
@@ -305,8 +319,8 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
      * Data transfer has been aborted
      */
     public void msrpTransferAborted() {
-        if (mLogger.isActivated()) {
-            mLogger.info("Data transfer aborted");
+        if (sLogger.isActivated()) {
+            sLogger.info("Data transfer aborted");
         }
     }
 
@@ -318,30 +332,41 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
      * @param typeMsrpChunk Type of MSRP chunk
      */
     public void msrpTransferError(String msgId, String error, TypeMsrpChunk typeMsrpChunk) {
-        if (isSessionInterrupted()) {
-            return;
-        }
-
-        if (mLogger.isActivated()) {
-            mLogger.info("Data transfer error " + error);
-        }
-
-        // Close the media session
-        closeMediaSession();
-
-        closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
-
-        ContactId contact = getRemoteContact();
-
-        // Request capabilities to the remote
-        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(contact);
-
-        // Remove the current session
-        removeSession();
-
-        for (ImsSessionListener listener : getListeners()) {
-            ((GeolocTransferSessionListener) listener).handleSharingError(contact,
-                    new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
+        try {
+            if (isSessionInterrupted()) {
+                return;
+            }
+            if (sLogger.isActivated()) {
+                sLogger.info("Data transfer error " + error);
+            }
+            closeMediaSession();
+            closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
+            ContactId contact = getRemoteContact();
+            getImsService().getImsModule().getCapabilityService()
+                    .requestContactCapabilities(contact);
+            removeSession();
+            for (ImsSessionListener listener : getListeners()) {
+                ((GeolocTransferSessionListener) listener).handleSharingError(contact,
+                        new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
+            }
+        } catch (SipPayloadException e) {
+            sLogger.error(
+                    new StringBuilder("Failed to handle msrp error").append(error)
+                            .append(" for message ").append(msgId).toString(), e);
+        } catch (SipNetworkException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
+        } catch (RuntimeException e) {
+            /*
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
+             */
+            sLogger.error(
+                    new StringBuilder("Failed to handle msrp error").append(error)
+                            .append(" for message ").append(msgId).toString(), e);
         }
     }
 
@@ -352,8 +377,8 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
 
     @Override
     public void handle180Ringing(SipResponse response) {
-        if (mLogger.isActivated()) {
-            mLogger.debug("handle180Ringing");
+        if (sLogger.isActivated()) {
+            sLogger.debug("handle180Ringing");
         }
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {

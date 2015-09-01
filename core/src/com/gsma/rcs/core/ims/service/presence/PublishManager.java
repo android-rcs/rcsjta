@@ -37,6 +37,7 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PeriodicRefresher;
 import com.gsma.rcs.utils.logger.Logger;
 
+import java.text.ParseException;
 import java.util.Vector;
 
 import javax2.sip.InvalidArgumentException;
@@ -241,6 +242,9 @@ public class PublishManager extends PeriodicRefresher {
             }
         } catch (InvalidArgumentException e) {
             throw new SipPayloadException("Publish has failed!", e);
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Publish has failed!", e);
         }
     }
 
@@ -326,6 +330,9 @@ public class PublishManager extends PeriodicRefresher {
             // Send PUBLISH request
             sendPublish(publish);
         } catch (InvalidArgumentException e) {
+            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
+
+        } catch (ParseException e) {
             throw new SipPayloadException("Failed to handle 407 authentication response!", e);
         }
     }

@@ -37,6 +37,8 @@ import com.gsma.rcs.service.ipcalldraft.IIPCallRenderer;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
+import java.text.ParseException;
+
 import javax2.sip.InvalidArgumentException;
 
 /**
@@ -115,6 +117,12 @@ public class OriginatingIPCallSession extends IPCallSession {
                 sLogger.debug(e.getMessage());
             }
             handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        } catch (InvalidArgumentException e) {
+            sLogger.error("Session initiation has failed!", e);
+            handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        } catch (ParseException e) {
+            sLogger.error("Session initiation has failed!", e);
+            handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
         } catch (SipPayloadException e) {
             sLogger.error("Session initiation has failed!", e);
             handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
@@ -122,9 +130,6 @@ public class OriginatingIPCallSession extends IPCallSession {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
-            handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
-        } catch (InvalidArgumentException e) {
-            sLogger.error("Session initiation has failed!", e);
             handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
         } catch (RuntimeException e) {
             /*

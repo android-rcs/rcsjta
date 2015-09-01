@@ -23,6 +23,8 @@
 package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.InvitationStatus;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.sip.SipService;
@@ -42,7 +44,7 @@ import android.os.RemoteException;
 
 /**
  * Multimedia messaging session
- *
+ * 
  * @author Jean-Marc AUFFRET
  */
 public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.Stub implements
@@ -64,7 +66,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Constructor
-     *
+     * 
      * @param sessionId Session ID
      * @param broadcaster IMultimediaMessagingSessionEventBroadcaster
      * @param sipService SipService
@@ -109,7 +111,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Returns the session ID of the multimedia session
-     *
+     * 
      * @return Session ID
      */
     public String getSessionId() {
@@ -118,7 +120,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Returns the remote contact ID
-     *
+     * 
      * @return ContactId
      * @throws RemoteException
      */
@@ -144,7 +146,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Returns the state of the session
-     *
+     * 
      * @return State
      * @throws RemoteException
      */
@@ -180,7 +182,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Returns the reason code of the state of the multimedia messaging session
-     *
+     * 
      * @return ReasonCode
      * @throws RemoteException
      */
@@ -206,7 +208,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Returns the direction of the session (incoming or outgoing)
-     *
+     * 
      * @return Direction
      * @throws RemoteException
      * @see Direction
@@ -236,7 +238,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Returns the service ID
-     *
+     * 
      * @return Service ID
      * @throws RemoteException
      */
@@ -262,7 +264,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Accepts session invitation
-     *
+     * 
      * @throws RemoteException
      */
     public void acceptInvitation() throws RemoteException {
@@ -291,7 +293,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Rejects session invitation
-     *
+     * 
      * @throws RemoteException
      */
     public void rejectInvitation() throws RemoteException {
@@ -321,7 +323,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Aborts the session
-     *
+     * 
      * @throws RemoteException
      */
     public void abortSession() throws RemoteException {
@@ -337,7 +339,29 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
             ServerApiUtils.testApiExtensionPermission(session.getServiceId());
             new Thread() {
                 public void run() {
-                    session.terminateSession(TerminationReason.TERMINATION_BY_USER);
+                    // @FIXME:Terminate Session should not run on a new thread
+                    try {
+                        session.terminateSession(TerminationReason.TERMINATION_BY_USER);
+                    } catch (SipPayloadException e) {
+                        mLogger.error(
+                                "Failed to terminate session with session ID : ".concat(mSessionId),
+                                e);
+                    } catch (SipNetworkException e) {
+                        if (mLogger.isActivated()) {
+                            mLogger.debug(e.getMessage());
+                        }
+                    } catch (RuntimeException e) {
+                        /*
+                         * Normally we are not allowed to catch runtime exceptions as these are
+                         * genuine bugs which should be handled/fixed within the code. However the
+                         * cases when we are executing operations on a thread unhandling such
+                         * exceptions will eventually lead to exit the system and thus can bring the
+                         * whole system down, which is not intended.
+                         */
+                        mLogger.error(
+                                "Failed to terminate session with session ID : ".concat(mSessionId),
+                                e);
+                    }
                 }
             }.start();
 
@@ -355,7 +379,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Sends a message in real time
-     *
+     * 
      * @param content Message content
      * @throws RemoteException
      */
@@ -404,7 +428,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Session has been aborted
-     *
+     * 
      * @param reason Termination reason
      */
     public void handleSessionAborted(ContactId contact, TerminationReason reason) {
@@ -439,7 +463,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Session error
-     *
+     * 
      * @param contact Remote contact
      * @param error Error
      */
@@ -469,7 +493,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     /**
      * Receive data
-     *
+     * 
      * @param data Data
      * @param contact
      */

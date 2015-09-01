@@ -23,6 +23,8 @@
 package com.gsma.rcs.core.ims.service.im.chat;
 
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
@@ -88,6 +90,8 @@ public interface GroupChatSessionListener extends ChatSessionListener {
      * Handle IM error
      * 
      * @param error Error
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void handleImError(ChatError error);
+    public void handleImError(ChatError error) throws SipPayloadException, SipNetworkException;
 }

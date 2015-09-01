@@ -26,6 +26,8 @@ import com.gsma.rcs.core.content.AudioContent;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.ImsError;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
@@ -425,15 +427,21 @@ public interface CoreListener {
      * Handle rejoin group chat as part of send operation
      * 
      * @param chatId
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void handleRejoinGroupChatAsPartOfSendOperation(String chatId);
+    public void handleRejoinGroupChatAsPartOfSendOperation(String chatId)
+            throws SipPayloadException, SipNetworkException;
 
     /**
      * Handle auto rejoin group chat
      * 
      * @param chatId
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void handleRejoinGroupChat(String chatId);
+    public void handleRejoinGroupChat(String chatId) throws SipPayloadException,
+            SipNetworkException;
 
     /**
      * Try to start ImService tasks once the IMS connection is re-established and the ImsServices

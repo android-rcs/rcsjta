@@ -17,6 +17,8 @@
 package com.gsma.rcs.core.ims.service.im.chat;
 
 import com.gsma.rcs.core.Core;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -39,6 +41,13 @@ public class GroupChatAutoRejoinTask implements Runnable {
             try {
                 mCore.getListener().handleRejoinGroupChat(chatId);
 
+            } catch (SipPayloadException e) {
+                sLogger.error(new StringBuilder("Could not auto-rejoin group chat with chatID '")
+                        .append(chatId).append("' due to: ").append(e.getMessage()).toString(), e);
+            } catch (SipNetworkException e) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(e.getMessage());
+                }
             } catch (RuntimeException e) {
                 /*
                  * Intentionally catch runtime exceptions as else it will abruptly end the thread

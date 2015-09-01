@@ -42,8 +42,10 @@ import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.text.ParseException;
 
 import javax.xml.parsers.ParserConfigurationException;
+
 import javax2.sip.header.SubscriptionStateHeader;
 
 /**
@@ -87,16 +89,15 @@ public class WatcherInfoSubscribeManager extends SubscribeManager {
     @Override
     public SipRequest createSubscribe(SipDialogPath dialog, long expirePeriod)
             throws SipPayloadException {
-        // Create SUBSCRIBE message
-        SipRequest subscribe = SipMessageFactory.createSubscribe(dialog, expirePeriod);
+        try {
+            SipRequest subscribe = SipMessageFactory.createSubscribe(dialog, expirePeriod);
+            subscribe.addHeader("Event", "presence.winfo");
+            subscribe.addHeader("Accept", "application/watcherinfo+xml");
+            return subscribe;
 
-        // Set the Event header
-        subscribe.addHeader("Event", "presence.winfo");
-
-        // Set the Accept header
-        subscribe.addHeader("Accept", "application/watcherinfo+xml");
-
-        return subscribe;
+        } catch (ParseException e) {
+            throw new SipPayloadException("Failed to create subscribe request!", e);
+        }
     }
 
     /**

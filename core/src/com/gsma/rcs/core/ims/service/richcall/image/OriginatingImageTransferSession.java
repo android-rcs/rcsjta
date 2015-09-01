@@ -55,6 +55,7 @@ import android.net.Uri;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
 
 import javax2.sip.InvalidArgumentException;
 import javax2.sip.header.ContentDispositionHeader;
@@ -222,21 +223,24 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
 
             // Send INVITE request
             sendInvite(invite);
-        } catch (SipPayloadException e) {
+        } catch (InvalidArgumentException e) {
             mLogger.error("Failed to send invite!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
-        } catch (SipNetworkException e) {
-            if (mLogger.isActivated()) {
-                mLogger.debug(e.getMessage());
-            }
-            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
-        } catch (InvalidArgumentException e) {
+        } catch (ParseException e) {
             mLogger.error("Failed to send invite!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         } catch (IOException e) {
             if (mLogger.isActivated()) {
                 mLogger.debug("Failed to initiate a new image transfer session with sharingId "
                         .concat(getFileTransferId()));
+            }
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (SipPayloadException e) {
+            mLogger.error("Failed to send invite!", e);
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (SipNetworkException e) {
+            if (mLogger.isActivated()) {
+                mLogger.debug(e.getMessage());
             }
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         } catch (RuntimeException e) {
@@ -315,25 +319,33 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
      * @param msgId Message ID
      */
     public void msrpDataTransfered(String msgId) {
-        if (mLogger.isActivated()) {
-            mLogger.info("Data transfered");
-        }
-
-        // Image has been transfered
-        imageTransfered();
-
-        // Close the media session
-        closeMediaSession();
-
-        closeSession(TerminationReason.TERMINATION_BY_USER);
-
-        // Remove the current session
-        removeSession();
-
-        ContactId contact = getRemoteContact();
-        Uri image = getContent().getUri();
-        for (ImsSessionListener listener : getListeners()) {
-            ((ImageTransferSessionListener) listener).handleContentTransfered(contact, image);
+        try {
+            if (mLogger.isActivated()) {
+                mLogger.info("Data transfered");
+            }
+            imageTransfered();
+            closeMediaSession();
+            closeSession(TerminationReason.TERMINATION_BY_USER);
+            removeSession();
+            ContactId contact = getRemoteContact();
+            Uri image = getContent().getUri();
+            for (ImsSessionListener listener : getListeners()) {
+                ((ImageTransferSessionListener) listener).handleContentTransfered(contact, image);
+            }
+        } catch (SipPayloadException e) {
+            mLogger.error("Failed to notify msrp data transfered for msgId : ".concat(msgId), e);
+        } catch (SipNetworkException e) {
+            if (mLogger.isActivated()) {
+                mLogger.debug(e.getMessage());
+            }
+        } catch (RuntimeException e) {
+            /*
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
+             */
+            mLogger.error("Failed to notify msrp data transfered for msgId : ".concat(msgId), e);
         }
     }
 
@@ -392,29 +404,41 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
      * @param typeMsrpChunk Type of MSRP chunk
      */
     public void msrpTransferError(String msgId, String error, TypeMsrpChunk typeMsrpChunk) {
-        if (isSessionInterrupted() || isInterrupted() || getDialogPath().isSessionTerminated()) {
-            return;
-        }
-
-        if (mLogger.isActivated()) {
-            mLogger.info("Data transfer error " + error);
-        }
-
-        closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
-
-        // Close the media session
-        closeMediaSession();
-
-        ContactId contact = getRemoteContact();
-        // Request capabilities to the remote
-        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(contact);
-
-        // Remove the current session
-        removeSession();
-
-        for (ImsSessionListener listener : getListeners()) {
-            ((ImageTransferSessionListener) listener).handleSharingError(contact,
-                    new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
+        try {
+            if (isSessionInterrupted() || isInterrupted() || getDialogPath().isSessionTerminated()) {
+                return;
+            }
+            if (mLogger.isActivated()) {
+                mLogger.info("Data transfer error " + error);
+            }
+            closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
+            closeMediaSession();
+            ContactId contact = getRemoteContact();
+            getImsService().getImsModule().getCapabilityService()
+                    .requestContactCapabilities(contact);
+            removeSession();
+            for (ImsSessionListener listener : getListeners()) {
+                ((ImageTransferSessionListener) listener).handleSharingError(contact,
+                        new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
+            }
+        } catch (SipPayloadException e) {
+            mLogger.error(
+                    new StringBuilder("Failed to handle msrp error").append(error)
+                            .append(" for message ").append(msgId).toString(), e);
+        } catch (SipNetworkException e) {
+            if (mLogger.isActivated()) {
+                mLogger.debug(e.getMessage());
+            }
+        } catch (RuntimeException e) {
+            /*
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
+             */
+            mLogger.error(
+                    new StringBuilder("Failed to handle msrp error").append(error)
+                            .append(" for message ").append(msgId).toString(), e);
         }
     }
 

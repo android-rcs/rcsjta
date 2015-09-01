@@ -293,7 +293,25 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
         mIPCallService.getImsModule().getCore().scheduleForBackgroundExecution(new Runnable() {
             @Override
             public void run() {
-                session.terminateSession(TerminationReason.TERMINATION_BY_USER);
+                // @FIXME:Terminate Session should not run on a new thread
+                try {
+                    session.terminateSession(TerminationReason.TERMINATION_BY_USER);
+                } catch (SipPayloadException e) {
+                    sLogger.error("Failed to terminate session with call ID : ".concat(mCallId), e);
+                } catch (SipNetworkException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(e.getMessage());
+                    }
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error("Failed to terminate session with call ID : ".concat(mCallId), e);
+                }
             }
         });
     }

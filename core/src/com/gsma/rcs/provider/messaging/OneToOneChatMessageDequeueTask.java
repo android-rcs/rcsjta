@@ -18,6 +18,8 @@ package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.provider.contact.ContactManager;
@@ -111,6 +113,17 @@ public class OneToOneChatMessageDequeueTask extends DequeueTask {
                     try {
                         oneToOneChat.dequeueOneToOneChatMessage(msg);
                     } catch (MsrpException e) {
+                        if (logActivated) {
+                            mLogger.debug(new StringBuilder(
+                                    "Failed to dequeue one-one chat message '").append(id)
+                                    .append("' message for contact '").append(mContact)
+                                    .append("' due to: ").append(e.getMessage()).toString());
+                        }
+                    } catch (SipPayloadException e) {
+                        mLogger.error(new StringBuilder("Failed to dequeue one-one chat message '")
+                                .append(id).append("' message for contact '").append(mContact)
+                                .toString(), e);
+                    } catch (SipNetworkException e) {
                         if (logActivated) {
                             mLogger.debug(new StringBuilder(
                                     "Failed to dequeue one-one chat message '").append(id)

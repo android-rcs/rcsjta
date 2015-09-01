@@ -264,4 +264,10 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
         return true;
     }
 
+    /**
+     * Session inactivity event
+     */
+    public void handleInactivityEvent() {
+        /* Not need in this class */
+    }
 }

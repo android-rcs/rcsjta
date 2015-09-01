@@ -32,6 +32,8 @@ import com.gsma.rcs.core.ims.service.ImsServiceSession.InvitationStatus;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 
+import java.text.ParseException;
+
 import javax2.sip.Dialog;
 import javax2.sip.InvalidArgumentException;
 import javax2.sip.message.Response;
@@ -115,7 +117,10 @@ public class UpdateSessionManager {
             return reInvite;
 
         } catch (InvalidArgumentException e) {
-            throw new SipPayloadException("Unable to create authorization header!", e);
+            throw new SipPayloadException("Unable to create re-invite request!", e);
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Unable to create re-invite request!", e);
         }
 
     }

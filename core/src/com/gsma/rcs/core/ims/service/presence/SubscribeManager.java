@@ -36,6 +36,7 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PeriodicRefresher;
 import com.gsma.rcs.utils.logger.Logger;
 
+import java.text.ParseException;
 import java.util.Vector;
 
 import javax2.sip.InvalidArgumentException;
@@ -395,7 +396,10 @@ public abstract class SubscribeManager extends PeriodicRefresher {
             }
             handleError(new PresenceError(PresenceError.SUBSCRIBE_FAILED));
         } catch (InvalidArgumentException e) {
-            throw new SipNetworkException("Can't send sip subscribe!", e);
+            throw new SipPayloadException("Can't send sip subscribe!", e);
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Can't send sip subscribe!", e);
         }
     }
 
@@ -468,6 +472,9 @@ public abstract class SubscribeManager extends PeriodicRefresher {
             sendSubscribe(subscribe);
         } catch (InvalidArgumentException e) {
             throw new SipPayloadException("Failed to handle 407 authentication response!", e);
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
         }
     }
 
@@ -502,6 +509,9 @@ public abstract class SubscribeManager extends PeriodicRefresher {
             mAuthenticationAgent.setProxyAuthorizationHeader(subscribe);
             sendSubscribe(subscribe);
         } catch (InvalidArgumentException e) {
+            throw new SipPayloadException("Failed to handle 423 interval too brief response!", e);
+
+        } catch (ParseException e) {
             throw new SipPayloadException("Failed to handle 423 interval too brief response!", e);
         }
     }

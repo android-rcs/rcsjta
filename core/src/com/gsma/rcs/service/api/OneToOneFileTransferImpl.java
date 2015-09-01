@@ -26,6 +26,8 @@ import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.InvitationStatus;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -724,7 +726,27 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             }
             new Thread() {
                 public void run() {
-                    session.terminateSession(TerminationReason.TERMINATION_BY_USER);
+                    // @FIXME:Terminate Session should not run on a new thread
+                    try {
+                        session.terminateSession(TerminationReason.TERMINATION_BY_USER);
+                    } catch (SipPayloadException e) {
+                        sLogger.error("Failed to terminate session with fileTransferId : "
+                                .concat(mFileTransferId), e);
+                    } catch (SipNetworkException e) {
+                        if (sLogger.isActivated()) {
+                            sLogger.debug(e.getMessage());
+                        }
+                    } catch (RuntimeException e) {
+                        /*
+                         * Normally we are not allowed to catch runtime exceptions as these are
+                         * genuine bugs which should be handled/fixed within the code. However the
+                         * cases when we are executing operations on a thread unhandling such
+                         * exceptions will eventually lead to exit the system and thus can bring the
+                         * whole system down, which is not intended.
+                         */
+                        sLogger.error("Failed to terminate session with fileTransferId : "
+                                .concat(mFileTransferId), e);
+                    }
                 }
             }.start();
 
@@ -989,8 +1011,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             ReasonCode rcsReasonCode = mPersistentStorage.getReasonCode();
             /*
              * According to Blackbird PDD v3.0, "When a File Transfer is interrupted by sender
-             * interaction (or fails), then ‘resend button’ shall be offered to allow the user
-             * to re-send the file without selecting a new receiver or selecting the file again."
+             * interaction (or fails), then ‘resend button’ shall be offered to allow the user to
+             * re-send the file without selecting a new receiver or selecting the file again."
              */
             switch (rcsState) {
                 case FAILED:

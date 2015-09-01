@@ -39,6 +39,8 @@ import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
+import java.text.ParseException;
+
 import javax2.sip.InvalidArgumentException;
 
 /**
@@ -163,6 +165,9 @@ public class OriginatingOneToOneChatSession extends OneToOneChatSession {
             // Send INVITE request
             sendInvite(invite);
         } catch (InvalidArgumentException e) {
+            mLogger.error("Unable to set authorization header for chat invite!", e);
+            handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
+        } catch (ParseException e) {
             mLogger.error("Unable to set authorization header for chat invite!", e);
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
         } catch (SipPayloadException e) {

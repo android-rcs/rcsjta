@@ -16,15 +16,21 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
 import com.gsma.rcs.provider.DeleteTask;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.service.api.ChatServiceImpl;
+import com.gsma.rcs.utils.logger.Logger;
 
 import java.util.Set;
 
 public class GroupChatMessageDeleteTask extends DeleteTask.GroupedByChatId {
+
+    private static final Logger sLogger = Logger.getLogger(GroupChatMessageDeleteTask.class
+            .getName());
 
     private static final String SELECTION_GROUP_CHATMESSAGES = new StringBuilder(
             MessageData.KEY_CHAT_ID).append("<>").append(MessageData.KEY_CONTACT).append(" OR ")
@@ -91,7 +97,7 @@ public class GroupChatMessageDeleteTask extends DeleteTask.GroupedByChatId {
     }
 
     @Override
-    protected void onRowDelete(String chatId, String msgId) {
+    protected void onRowDelete(String chatId, String msgId) throws SipPayloadException {
         if (isSingleRowDelete()) {
             return;
 
@@ -102,7 +108,18 @@ public class GroupChatMessageDeleteTask extends DeleteTask.GroupedByChatId {
             return;
 
         }
-        session.deleteSession();
+        try {
+            session.deleteSession();
+        } catch (SipNetworkException e) {
+            /*
+             * If network is lost during a delete operation the remaining part of the delete
+             * operation (delete from persistent storage) can succeed to 100% anyway since delete
+             * can be executed anyway while no network connectivity is present and still succeed.
+             */
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
+        }
         mChatService.removeGroupChat(chatId);
     }
 

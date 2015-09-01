@@ -26,6 +26,8 @@ import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
@@ -880,9 +882,11 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param fileIcon
      * @param chatId
      * @param fileTransferId
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
     private IFileTransfer sendGroupFile(MmContent content, MmContent fileIcon, String chatId,
-            String fileTransferId, long timestamp) {
+            String fileTransferId, long timestamp) throws SipPayloadException, SipNetworkException {
         long fileSize = content.getSize();
         /* For outgoing file transfer, timestampSent = timestamp */
         long timestampSent = timestamp;
@@ -952,9 +956,11 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param fileIcon
      * @param chatId
      * @throws MsrpException
+     * @throws SipPayloadException
+     * @throws SipNetworkException
      */
     public void dequeueGroupFileTransfer(String chatId, String fileTransferId, MmContent content,
-            MmContent fileIcon) throws MsrpException {
+            MmContent fileIcon) throws MsrpException, SipPayloadException, SipNetworkException {
         GroupChatSession groupChatSession = mImService.getGroupChatSession(chatId);
         if (groupChatSession == null) {
             mCore.getListener().handleRejoinGroupChatAsPartOfSendOperation(chatId);

@@ -1036,12 +1036,14 @@ public class RcsCoreService extends Service implements CoreListener {
     }
 
     @Override
-    public void handleRejoinGroupChatAsPartOfSendOperation(String chatId) {
+    public void handleRejoinGroupChatAsPartOfSendOperation(String chatId)
+            throws SipPayloadException, SipNetworkException {
         mChatApi.handleRejoinGroupChatAsPartOfSendOperation(chatId);
     }
 
     @Override
-    public void handleRejoinGroupChat(String chatId) {
+    public void handleRejoinGroupChat(String chatId) throws SipPayloadException,
+            SipNetworkException {
         mChatApi.handleRejoinGroupChat(chatId);
     }
 

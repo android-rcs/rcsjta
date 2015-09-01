@@ -451,9 +451,12 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 
     /**
      * Session inactivity event
+     * 
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
     @Override
-    public void handleInactivityEvent() {
+    public void handleInactivityEvent() throws SipPayloadException, SipNetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug("Session inactivity event");
         }

@@ -16,6 +16,7 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
@@ -32,6 +33,7 @@ import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
 import android.database.Cursor;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
@@ -228,12 +230,13 @@ public class GroupChatPersistedStorageAccessor {
         mMessagingLog.addGroupChatEvent(mChatId, contact, status, timestamp);
     }
 
-    public void addIncomingGroupChatMessage(ChatMessage msg, boolean imdnDisplayedRequested) {
+    public void addIncomingGroupChatMessage(ChatMessage msg, boolean imdnDisplayedRequested)
+            throws SipPayloadException, IOException {
         mMessagingLog.addIncomingGroupChatMessage(mChatId, msg, imdnDisplayedRequested);
     }
 
     public void addOutgoingGroupChatMessage(ChatMessage msg, Set<ContactId> recipients,
-            Status status, Content.ReasonCode reasonCode) {
+            Status status, Content.ReasonCode reasonCode) throws SipPayloadException, IOException {
         mMessagingLog.addOutgoingGroupChatMessage(mChatId, msg, recipients, status, reasonCode);
     }
 

@@ -222,9 +222,12 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
 
     /**
      * Session inactivity event
+     * 
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
     @Override
-    public void handleInactivityEvent() {
+    public void handleInactivityEvent() throws SipPayloadException, SipNetworkException {
         if (logger.isActivated()) {
             logger.debug("Session inactivity event");
         }

@@ -22,6 +22,8 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.provider.CursorUtil;
@@ -43,6 +45,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -118,7 +121,8 @@ public class MessageLog implements IMessageLog {
         mRcsSettings = rcsSettings;
     }
 
-    private void addIncomingOneToOneMessage(ChatMessage msg, Status status, ReasonCode reasonCode) {
+    private void addIncomingOneToOneMessage(ChatMessage msg, Status status, ReasonCode reasonCode)
+            throws SipPayloadException, IOException {
         ContactId contact = msg.getRemoteContact();
         String msgId = msg.getMessageId();
         if (sLogger.isActivated()) {
@@ -156,10 +160,12 @@ public class MessageLog implements IMessageLog {
      * @param status Status
      * @param reasonCode Reason code
      * @param deliveryExpiration
+     * @throws IOException
+     * @throws SipPayloadException
      */
     @Override
     public void addOutgoingOneToOneChatMessage(ChatMessage msg, Status status,
-            ReasonCode reasonCode, long deliveryExpiration) {
+            ReasonCode reasonCode, long deliveryExpiration) throws SipPayloadException, IOException {
         ContactId contact = msg.getRemoteContact();
         String msgId = msg.getMessageId();
         if (sLogger.isActivated()) {
@@ -189,7 +195,7 @@ public class MessageLog implements IMessageLog {
     }
 
     @Override
-    public void addOneToOneSpamMessage(ChatMessage msg) {
+    public void addOneToOneSpamMessage(ChatMessage msg) throws SipPayloadException, IOException {
         addIncomingOneToOneMessage(msg, Status.REJECTED, ReasonCode.REJECTED_SPAM);
     }
 
@@ -198,9 +204,12 @@ public class MessageLog implements IMessageLog {
      * 
      * @param msg Chat message
      * @param imdnDisplayedRequested Indicates whether IMDN display was requested
+     * @throws IOException
+     * @throws SipPayloadException
      */
     @Override
-    public void addIncomingOneToOneChatMessage(ChatMessage msg, boolean imdnDisplayedRequested) {
+    public void addIncomingOneToOneChatMessage(ChatMessage msg, boolean imdnDisplayedRequested)
+            throws SipPayloadException, IOException {
         if (imdnDisplayedRequested) {
             addIncomingOneToOneMessage(msg, Status.DISPLAY_REPORT_REQUESTED, ReasonCode.UNSPECIFIED);
 
@@ -215,10 +224,12 @@ public class MessageLog implements IMessageLog {
      * @param chatId Chat ID
      * @param msg Chat message
      * @param imdnDisplayedRequested Indicates whether IMDN display was requested
+     * @throws IOException
+     * @throws SipPayloadException
      */
     @Override
     public void addIncomingGroupChatMessage(String chatId, ChatMessage msg,
-            boolean imdnDisplayedRequested) {
+            boolean imdnDisplayedRequested) throws SipPayloadException, IOException {
         Status chatMessageStatus = imdnDisplayedRequested ? Status.DISPLAY_REPORT_REQUESTED
                 : Status.RECEIVED;
         addGroupChatMessage(chatId, msg, Direction.INCOMING, null, chatMessageStatus,
@@ -232,10 +243,13 @@ public class MessageLog implements IMessageLog {
      * @param msg Chat message
      * @param status Status
      * @param reasonCode Reason code
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
     @Override
     public void addOutgoingGroupChatMessage(String chatId, ChatMessage msg,
-            Set<ContactId> recipients, Status status, ReasonCode reasonCode) {
+            Set<ContactId> recipients, Status status, ReasonCode reasonCode)
+            throws SipPayloadException, IOException {
         addGroupChatMessage(chatId, msg, Direction.OUTGOING, recipients, status, reasonCode);
     }
 
@@ -247,9 +261,12 @@ public class MessageLog implements IMessageLog {
      * @param direction Direction
      * @param status Status
      * @param reasonCode Reason code
+     * @throws SipPayloadException
+     * @throws IOException
      */
     private void addGroupChatMessage(String chatId, ChatMessage msg, Direction direction,
-            Set<ContactId> recipients, Status status, ReasonCode reasonCode) {
+            Set<ContactId> recipients, Status status, ReasonCode reasonCode)
+            throws SipPayloadException, IOException {
         String msgId = msg.getMessageId();
         ContactId contact = msg.getRemoteContact();
         if (sLogger.isActivated()) {

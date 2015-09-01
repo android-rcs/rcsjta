@@ -40,6 +40,7 @@ import com.gsma.services.rcs.contact.ContactId;
 import android.net.Uri;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -320,8 +321,11 @@ public abstract class ImsServiceSession extends Thread {
 
     /**
      * Start the session in background
+     * 
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public abstract void startSession();
+    public abstract void startSession() throws SipPayloadException, SipNetworkException;
 
     /**
      * Removes the session
@@ -524,8 +528,11 @@ public abstract class ImsServiceSession extends Thread {
      * closeSession(TerminationReason).
      * 
      * @param reason Termination reason
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void terminateSession(TerminationReason reason) {
+    public void terminateSession(TerminationReason reason) throws SipPayloadException,
+            SipNetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Terminate the session ".concat(reason.toString()));
         }
@@ -558,8 +565,11 @@ public abstract class ImsServiceSession extends Thread {
 
     /**
      * Force terminate and remove the session
+     * 
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void deleteSession() {
+    public void deleteSession() throws SipPayloadException, SipNetworkException {
         mInvitationStatus = InvitationStatus.INVITATION_DELETED;
         interruptSession();
         closeSession(TerminationReason.TERMINATION_BY_USER);
@@ -573,53 +583,41 @@ public abstract class ImsServiceSession extends Thread {
      * terminateSession(TerminationReason).
      * 
      * @param reason Reason
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void closeSession(TerminationReason reason) {
+    public void closeSession(TerminationReason reason) throws SipPayloadException,
+            SipNetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug(new StringBuilder("Close the session (reason ").append(reason)
                     .append(")").toString());
         }
-
         if ((mDialogPath == null) || mDialogPath.isSessionTerminated()) {
-            // Already terminated
             return;
         }
-
-        // Stop session timer
         mSessionTimer.stop();
-
-        // Update dialog path
         if (TerminationReason.TERMINATION_BY_USER == reason) {
-            mDialogPath.setSessionTerminated(200, "Call completed");
+            mDialogPath.setSessionTerminated(Response.OK, "Call completed");
         } else {
             mDialogPath.setSessionTerminated();
         }
-
-        // Unblock semaphore (used for terminating side only)
+        /* Unblock semaphore (used for terminating side only) */
         synchronized (mWaitUserAnswer) {
             mWaitUserAnswer.notifyAll();
         }
+        /* Close the session */
+        if (mDialogPath.isSigEstablished()) {
+            getDialogPath().incrementCseq();
 
-        try {
-            /* Close the session */
-            if (mDialogPath.isSigEstablished()) {
-                // Increment the Cseq number of the dialog path
-                getDialogPath().incrementCseq();
-
-                // Send BYE without waiting a response
-                getImsService().getImsModule().getSipManager().sendSipBye(getDialogPath());
-            } else {
-                // Send CANCEL without waiting a response
-                getImsService().getImsModule().getSipManager().sendSipCancel(getDialogPath());
-            }
-
-            if (sLogger.isActivated()) {
-                sLogger.debug("SIP session has been closed");
-            }
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Session close action has failed", e);
-            }
+            // @FIXME:Inject SipManager instead
+            /* Send BYE without waiting a response */
+            getImsService().getImsModule().getSipManager().sendSipBye(getDialogPath());
+        } else {
+            /* Send CANCEL without waiting a response */
+            getImsService().getImsModule().getSipManager().sendSipCancel(getDialogPath());
+        }
+        if (sLogger.isActivated()) {
+            sLogger.debug("SIP session has been closed");
         }
     }
 
@@ -627,8 +625,10 @@ public abstract class ImsServiceSession extends Thread {
      * Receive BYE request
      * 
      * @param bye BYE request
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public void receiveBye(SipRequest bye) {
+    public void receiveBye(SipRequest bye) throws SipPayloadException, SipNetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Receive a BYE message from the remote");
         }
@@ -713,8 +713,11 @@ public abstract class ImsServiceSession extends Thread {
      * Prepare media session
      * 
      * @throws IOException
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public abstract void prepareMediaSession() throws IOException;
+    public abstract void prepareMediaSession() throws IOException, SipPayloadException,
+            SipNetworkException;
 
     /**
      * Open media session
@@ -728,8 +731,11 @@ public abstract class ImsServiceSession extends Thread {
      * Start media transfer
      * 
      * @throws IOException
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public abstract void startMediaTransfer() throws IOException;
+    public abstract void startMediaTransfer() throws IOException, SipPayloadException,
+            SipNetworkException;
 
     /**
      * Close media session
@@ -1092,8 +1098,11 @@ public abstract class ImsServiceSession extends Thread {
 
     /**
      * Session inactivity event
+     * 
+     * @throws SipNetworkException
+     * @throws SipPayloadException
      */
-    public abstract void handleInactivityEvent();
+    public abstract void handleInactivityEvent() throws SipPayloadException, SipNetworkException;
 
     /**
      * Handle default error
@@ -1160,7 +1169,10 @@ public abstract class ImsServiceSession extends Thread {
             // Send INVITE request
             sendInvite(invite);
         } catch (InvalidArgumentException e) {
-            throw new SipPayloadException("Unable to fetch Authorization header!", e);
+            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
         }
 
     }
@@ -1216,7 +1228,10 @@ public abstract class ImsServiceSession extends Thread {
             // Send INVITE request
             sendInvite(invite);
         } catch (InvalidArgumentException e) {
-            throw new SipPayloadException("Unable to fetch Authorization header!", e);
+            throw new SipPayloadException("Unable to handle session too small response!", e);
+
+        } catch (ParseException e) {
+            throw new SipPayloadException("Unable to handle session too small response!", e);
         }
     }
 

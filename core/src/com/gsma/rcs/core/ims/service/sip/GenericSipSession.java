@@ -97,13 +97,6 @@ public abstract class GenericSipSession extends ImsServiceSession {
     }
 
     /**
-     * Session inactivity event
-     */
-    public void handleInactivityEvent() {
-        /* Not need in this class */
-    }
-
-    /**
      * Create an INVITE request
      * 
      * @return Request
@@ -193,7 +186,7 @@ public abstract class GenericSipSession extends ImsServiceSession {
     }
 
     @Override
-    public void receiveBye(SipRequest bye) {
+    public void receiveBye(SipRequest bye) throws SipPayloadException, SipNetworkException {
         super.receiveBye(bye);
         ContactId remote = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
