@@ -18,15 +18,15 @@
 
 package com.gsma.rcs.chat;
 
-import java.util.Vector;
-
-import android.test.AndroidTestCase;
-
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.utils.logger.Logger;
+
+import android.test.AndroidTestCase;
+
+import java.util.Vector;
 
 public class ChatSdpUtilsTest extends AndroidTestCase {
 
@@ -105,7 +105,7 @@ public class ChatSdpUtilsTest extends AndroidTestCase {
         assertEquals(mediaDesc.getMediaAttribute("accept-types").getValue(), acceptedTypes);
         assertEquals(mediaDesc.getMediaAttribute("accept-wrapped-types").getValue(), wrappedTypes);
         assertEquals(mediaDesc.getMediaAttribute("path").getValue(), localMsrpPath);
-        assertEquals(mediaDesc.port, localMsrpPort);
-        assertEquals(mediaDesc.protocol, localSocketProtocol);
+        assertEquals(mediaDesc.mPort, localMsrpPort);
+        assertEquals(mediaDesc.mProtocol, localSocketProtocol);
     }
 }

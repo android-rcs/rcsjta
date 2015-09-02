@@ -18,11 +18,6 @@
 
 package com.gsma.rcs.richcall;
 
-import java.util.Vector;
-
-//import android.media.MediaCodec;
-import android.test.AndroidTestCase;
-
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264.profiles.H264Profile1_2;
@@ -31,9 +26,14 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.service.richcall.video.VideoCodecManager;
 import com.gsma.rcs.core.ims.service.richcall.video.VideoSdpBuilder;
+import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.services.rcs.sharing.video.VideoCodec;
-import com.gsma.rcs.provider.LocalContentResolver;
+
+//import android.media.MediaCodec;
+import android.test.AndroidTestCase;
+
+import java.util.Vector;
 
 public class VideoSdpTest extends AndroidTestCase {
     private static int RTP_PORT = 12345;
@@ -148,7 +148,7 @@ public class VideoSdpTest extends AndroidTestCase {
 
         // Test port
         MediaDescription mediaVideo = parser.getMediaDescription("video");
-        int port = mediaVideo.port;
+        int port = mediaVideo.mPort;
         assertEquals(port, RTP_PORT);
 
         // Test codecs

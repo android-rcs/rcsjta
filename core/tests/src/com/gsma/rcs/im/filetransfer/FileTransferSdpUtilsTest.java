@@ -18,8 +18,6 @@
 
 package com.gsma.rcs.im.filetransfer;
 
-import java.util.Vector;
-
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
@@ -28,6 +26,8 @@ import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
 import junit.framework.TestCase;
+
+import java.util.Vector;
 
 public class FileTransferSdpUtilsTest extends TestCase {
 
@@ -105,7 +105,7 @@ public class FileTransferSdpUtilsTest extends TestCase {
         MediaDescription mediaDesc = media.elementAt(0);
         for (MediaDescription mediaDescription : media) {
             logger.info(media.toString());
-            for (MediaAttribute attribute : mediaDescription.mediaAttributes) {
+            for (MediaAttribute attribute : mediaDescription.mMediaAttributes) {
                 logger.info("attribute: (name=" + attribute.getName() + ") (value="
                         + attribute.getValue() + ")");
             }
@@ -118,8 +118,8 @@ public class FileTransferSdpUtilsTest extends TestCase {
         assertEquals(mediaDesc.getMediaAttribute("accept-types").getValue(), acceptedTypes);
         assertEquals(mediaDesc.getMediaAttribute("path").getValue(), localMsrpPath);
         assertEquals(mediaDesc.getMediaAttribute("file-selector").getValue(), fileSelector);
-        assertEquals(mediaDesc.port, localMsrpPort);
-        assertEquals(mediaDesc.protocol, localSocketProtocol);
+        assertEquals(mediaDesc.mPort, localMsrpPort);
+        assertEquals(mediaDesc.mProtocol, localSocketProtocol);
     }
 
 }
