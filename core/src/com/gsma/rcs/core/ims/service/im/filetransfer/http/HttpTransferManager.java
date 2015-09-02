@@ -94,7 +94,7 @@ public abstract class HttpTransferManager {
      * @param rcsSettings
      */
     public HttpTransferManager(HttpTransferEventListener listener, RcsSettings rcsSettings) {
-        this(listener, Uri.parse(rcsSettings.getFtHttpServer()), rcsSettings);
+        this(listener, rcsSettings.getFtHttpServer(), rcsSettings);
     }
 
     /**

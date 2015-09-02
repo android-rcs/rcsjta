@@ -72,7 +72,7 @@ public class UserProfile {
     /**
      * XDM server address
      */
-    private String mXdmServerAddr;
+    private Uri mXdmServerAddr;
 
     /**
      * XDM server login
@@ -116,7 +116,7 @@ public class UserProfile {
      * @param rcsSettings
      */
     public UserProfile(ContactId contact, String homeDomain, String privateID, String password,
-            String realm, String xdmServerAddr, String xdmServerLogin, String xdmServerPassword,
+            String realm, Uri xdmServerAddr, String xdmServerLogin, String xdmServerPassword,
             Uri imConference, RcsSettings rcsSettings) {
         mContact = contact;
         mHomeDomain = homeDomain;
@@ -289,7 +289,7 @@ public class UserProfile {
      * 
      * @param addr Server address
      */
-    public void setXdmServerAddr(String addr) {
+    public void setXdmServerAddr(Uri addr) {
         mXdmServerAddr = addr;
     }
 
@@ -298,7 +298,7 @@ public class UserProfile {
      * 
      * @return Server address
      */
-    public String getXdmServerAddr() {
+    public Uri getXdmServerAddr() {
         return mXdmServerAddr;
     }
 

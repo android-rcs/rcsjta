@@ -186,7 +186,7 @@ public class RcsSettings {
      */
     public String readString(String key) {
         String value = (String) mCache.get(key);
-        if (value == null) {
+        if (value == null && !mCache.containsKey(key)) {
             value = readParameter(key);
             mCache.put(key, value);
         }
@@ -237,8 +237,12 @@ public class RcsSettings {
      */
     public Uri readUri(String key) {
         Uri value = (Uri) mCache.get(key);
-        if (value == null) {
-            value = Uri.parse((readParameter(key)));
+        if (value == null && !mCache.containsKey(key)) {
+            String dbValue = readParameter(key);
+            if (dbValue == null) {
+                return null;
+            }
+            value = Uri.parse(dbValue);
             mCache.put(key, value);
         }
         return value;
@@ -558,8 +562,8 @@ public class RcsSettings {
      * 
      * @return Address as <host>:<port>/<root>
      */
-    public String getXdmServer() {
-        return readString(RcsSettingsData.XDM_SERVER);
+    public Uri getXdmServer() {
+        return readUri(RcsSettingsData.XDM_SERVER);
     }
 
     /**
@@ -567,8 +571,8 @@ public class RcsSettings {
      * 
      * @param addr Address as <host>:<port>/<root>
      */
-    public void setXdmServer(String addr) {
-        writeString(RcsSettingsData.XDM_SERVER, addr);
+    public void setXdmServer(Uri addr) {
+        writeUri(RcsSettingsData.XDM_SERVER, addr);
     }
 
     /**
@@ -612,8 +616,8 @@ public class RcsSettings {
      * 
      * @return Address
      */
-    public String getFtHttpServer() {
-        return readString(RcsSettingsData.FT_HTTP_SERVER);
+    public Uri getFtHttpServer() {
+        return readUri(RcsSettingsData.FT_HTTP_SERVER);
     }
 
     /**
@@ -621,8 +625,8 @@ public class RcsSettings {
      * 
      * @param addr Address
      */
-    public void setFtHttpServer(String addr) {
-        writeString(RcsSettingsData.FT_HTTP_SERVER, addr);
+    public void setFtHttpServer(Uri addr) {
+        writeUri(RcsSettingsData.FT_HTTP_SERVER, addr);
     }
 
     /**
@@ -1397,7 +1401,7 @@ public class RcsSettings {
      * @return Boolean
      */
     public boolean isPresenceDiscoverySupported() {
-        if (getXdmServer().length() > 0) {
+        if (getXdmServer() != null) {
             return readBoolean(RcsSettingsData.CAPABILITY_PRESENCE_DISCOVERY);
         }
         return false;
@@ -1409,7 +1413,7 @@ public class RcsSettings {
      * @return Boolean
      */
     public boolean isSocialPresenceSupported() {
-        if (getXdmServer().length() > 0) {
+        if (getXdmServer() != null) {
             return readBoolean(RcsSettingsData.CAPABILITY_SOCIAL_PRESENCE);
         }
         return false;
@@ -1744,17 +1748,17 @@ public class RcsSettings {
      */
     public void resetUserProfile() {
         setUserProfileImsUserName(null);
-        setUserProfileImsDomain("");
-        setUserProfileImsPassword("");
-        setImsProxyAddrForMobile("");
-        setImsProxyAddrForWifi("");
-        setUserProfileImsDisplayName("");
-        setUserProfileImsPrivateId("");
-        setXdmLogin("");
-        setXdmPassword("");
-        setXdmServer("");
+        setUserProfileImsDomain(RcsSettingsData.DEFAULT_USERPROFILE_IMS_HOME_DOMAIN);
+        setUserProfileImsPassword(RcsSettingsData.DEFAULT_USERPROFILE_IMS_PASSWORD);
+        setImsProxyAddrForMobile(RcsSettingsData.DEFAULT_IMS_PROXY_ADDR_MOBILE);
+        setImsProxyAddrForWifi(RcsSettingsData.DEFAULT_IMS_PROXY_ADDR_WIFI);
+        setUserProfileImsDisplayName(RcsSettingsData.DEFAULT_USERPROFILE_IMS_DISPLAY_NAME);
+        setUserProfileImsPrivateId(RcsSettingsData.DEFAULT_USERPROFILE_IMS_PRIVATE_ID);
+        setXdmLogin(RcsSettingsData.DEFAULT_XDM_LOGIN);
+        setXdmPassword(RcsSettingsData.DEFAULT_XDM_PASSWORD);
+        setXdmServer(null);
         setProvisioningVersion(ProvisioningInfo.Version.RESETED.toInt());
-        setProvisioningToken("");
+        setProvisioningToken(RcsSettingsData.DEFAULT_PROVISIONING_TOKEN);
     }
 
     /**

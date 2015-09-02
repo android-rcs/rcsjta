@@ -652,7 +652,7 @@ public class ProvisioningParser {
 
                 if (xcapRootURI == null) {
                     if ((xcapRootURI = getValueByParamName("XCAPRootURI", childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.setXdmServer(xcapRootURI);
+                        mRcsSettings.setXdmServer(Uri.parse(xcapRootURI));
                         continue;
                     }
                 }
@@ -995,13 +995,14 @@ public class ProvisioningParser {
                          * password, the action should take place over a secure connection and/or
                          * via HTTPS explicitly.
                          */
-                        if (!ftHttpCsUri.startsWith(PROTOCOL_HTTPS)) {
+                        Uri ftHttpServAddr = Uri.parse(ftHttpCsUri);
+                        if (!PROTOCOL_HTTPS.equals(ftHttpServAddr.getScheme())) {
                             sLogger.error(new StringBuilder(ftHttpCsUri)
                                     .append(" is not a secure protocol, hence disabling ftHttp capability.")
                                     .toString());
                             continue;
                         }
-                        mRcsSettings.setFtHttpServer(ftHttpCsUri);
+                        mRcsSettings.setFtHttpServer(ftHttpServAddr);
                         continue;
                     }
                 }

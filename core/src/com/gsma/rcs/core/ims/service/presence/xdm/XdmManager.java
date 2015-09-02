@@ -110,7 +110,7 @@ public class XdmManager {
     /**
      * XDM server address
      */
-    private String xdmServerAddr;
+    private Uri xdmServerAddr;
 
     /**
      * XDM server login
@@ -218,7 +218,7 @@ public class XdmManager {
         InputStream is = null;
         OutputStream os = null;
         try {
-            URL url = new URL(xdmServerAddr);
+            URL url = new URL(xdmServerAddr.toString());
             StringBuilder serviceRoot = new StringBuilder();
             final String path = url.getPath();
             if (!TextUtils.isEmpty(path)) {
@@ -367,7 +367,7 @@ public class XdmManager {
 
         } catch (MalformedURLException e) {
             throw new SipPayloadException(
-                    "Failed to send http request, malformed uri: ".concat(xdmServerAddr), e);
+                    "Failed to send http request, malformed uri: ".concat(xdmServerAddr.toString()), e);
 
         } catch (IOException e) {
             throw new SipNetworkException("Failed to send http request!", e);

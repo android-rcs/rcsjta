@@ -647,7 +647,7 @@ public class RcsSettingsData {
      * IMS display name
      */
     public static final String USERPROFILE_IMS_DISPLAY_NAME = "MyDisplayName";
-    /* package private */static final String DEFAULT_USERPROFILE_IMS_DISPLAY_NAME = "";
+    /* package private */static final String DEFAULT_USERPROFILE_IMS_DISPLAY_NAME = null;
 
     /**
      * IMS home domain
@@ -701,7 +701,7 @@ public class RcsSettingsData {
      * XDM server address & port
      */
     public static final String XDM_SERVER = "XdmServerAddr";
-    /* package private */static final String DEFAULT_XDM_SERVER = "";
+    /* package private */static final String DEFAULT_XDM_SERVER = null;
 
     /**
      * XDM server login (for HTTP Digest only)
@@ -719,19 +719,19 @@ public class RcsSettingsData {
      * File transfer HTTP server address & port
      */
     public static final String FT_HTTP_SERVER = "FtHttpServerAddr";
-    /* package private */static final String DEFAULT_FT_HTTP_SERVER = "";
+    /* package private */static final String DEFAULT_FT_HTTP_SERVER = null;
 
     /**
      * File transfer HTTP server login
      */
     public static final String FT_HTTP_LOGIN = "FtHttpServerLogin";
-    /* package private */static final String DEFAULT_FT_HTTP_LOGIN = "";
+    /* package private */static final String DEFAULT_FT_HTTP_LOGIN = null;
 
     /**
      * File transfer HTTP server password
      */
     public static final String FT_HTTP_PASSWORD = "FtHttpServerPassword";
-    /* package private */static final String DEFAULT_FT_HTTP_PASSWORD = "";
+    /* package private */static final String DEFAULT_FT_HTTP_PASSWORD = null;
 
     /**
      * File transfer default protocol
@@ -749,7 +749,7 @@ public class RcsSettingsData {
      * End user confirmation request URI for terms and conditions
      */
     public static final String ENDUSER_CONFIRMATION_URI = "EndUserConfReqUri";
-    /* package private */static final String DEFAULT_ENDUSER_CONFIRMATION_URI = "";
+    /* package private */static final String DEFAULT_ENDUSER_CONFIRMATION_URI = null;
 
     /**
      * UUID value for populating SIP instance
@@ -1144,13 +1144,13 @@ public class RcsSettingsData {
      * RCS APN
      */
     public static final String RCS_APN = "RcsApn";
-    /* package private */static final String DEFAULT_RCS_APN = "";
+    /* package private */static final String DEFAULT_RCS_APN = null;
 
     /**
      * RCS operator
      */
     public static final String RCS_OPERATOR = "RcsOperator";
-    /* package private */static final String DEFAULT_RCS_OPERATOR = "";
+    /* package private */static final String DEFAULT_RCS_OPERATOR = null;
 
     /**
      * GRUU support

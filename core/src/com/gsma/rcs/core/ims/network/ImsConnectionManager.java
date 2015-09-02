@@ -452,7 +452,7 @@ public class ImsConnectionManager implements Runnable {
                 TelephonyManager tm = (TelephonyManager) AndroidFactory.getApplicationContext()
                         .getSystemService(Context.TELEPHONY_SERVICE);
                 String currentOpe = tm.getSimOperatorName();
-                if ((mOperator.length() > 0) && !currentOpe.equalsIgnoreCase(mOperator)) {
+                if (mOperator != null && !currentOpe.equalsIgnoreCase(mOperator)) {
                     if (sLogger.isActivated()) {
                         sLogger.warn("Operator not authorized");
                     }

@@ -189,10 +189,10 @@ public class ProfileProvisioning extends Activity {
                 RcsSettingsData.IMS_PROXY_ADDR_WIFI, helper);
         setIntegerEditTextParam(R.id.ImsOutboundProxyPortForWifi,
                 RcsSettingsData.IMS_PROXY_PORT_WIFI, helper);
-        setStringEditTextParam(R.id.XdmServerAddr, RcsSettingsData.XDM_SERVER, helper);
+        setUriEditTextParam(R.id.XdmServerAddr, RcsSettingsData.XDM_SERVER, helper);
         setStringEditTextParam(R.id.XdmServerLogin, RcsSettingsData.XDM_LOGIN, helper);
         setStringEditTextParam(R.id.XdmServerPassword, RcsSettingsData.XDM_PASSWORD, helper);
-        setStringEditTextParam(R.id.FtHttpServerAddr, RcsSettingsData.FT_HTTP_SERVER, helper);
+        setUriEditTextParam(R.id.FtHttpServerAddr, RcsSettingsData.FT_HTTP_SERVER, helper);
         setStringEditTextParam(R.id.FtHttpServerLogin, RcsSettingsData.FT_HTTP_LOGIN, helper);
         setStringEditTextParam(R.id.FtHttpServerPassword, RcsSettingsData.FT_HTTP_PASSWORD, helper);
         setUriEditTextParam(R.id.ImConferenceUri, RcsSettingsData.IM_CONF_URI, helper);
@@ -287,17 +287,17 @@ public class ProfileProvisioning extends Activity {
                 RcsSettingsData.IMS_PROXY_ADDR_WIFI, helper);
         saveIntegerEditTextParam(R.id.ImsOutboundProxyPortForWifi,
                 RcsSettingsData.IMS_PROXY_PORT_WIFI, helper);
-        saveStringEditTextParam(R.id.XdmServerAddr, RcsSettingsData.XDM_SERVER, helper);
+        saveUriEditTextParam(R.id.XdmServerAddr, RcsSettingsData.XDM_SERVER, helper);
         saveStringEditTextParam(R.id.XdmServerLogin, RcsSettingsData.XDM_LOGIN, helper);
         saveStringEditTextParam(R.id.XdmServerPassword, RcsSettingsData.XDM_PASSWORD, helper);
-        saveStringEditTextParam(R.id.FtHttpServerAddr, RcsSettingsData.FT_HTTP_SERVER, helper);
+        saveUriEditTextParam(R.id.FtHttpServerAddr, RcsSettingsData.FT_HTTP_SERVER, helper);
         saveStringEditTextParam(R.id.FtHttpServerLogin, RcsSettingsData.FT_HTTP_LOGIN, helper);
         saveStringEditTextParam(R.id.FtHttpServerPassword, RcsSettingsData.FT_HTTP_PASSWORD, helper);
 
         if (bundle == null) {
-            mRcsSettings.setFileTransferHttpSupported(mRcsSettings.getFtHttpServer().length() > 0
-                    && mRcsSettings.getFtHttpLogin().length() > 0
-                    && mRcsSettings.getFtHttpPassword().length() > 0);
+            mRcsSettings.setFileTransferHttpSupported(mRcsSettings.getFtHttpServer() != null
+                    && mRcsSettings.getFtHttpLogin() != null
+                    && mRcsSettings.getFtHttpPassword() != null);
         }
 
         saveUriEditTextParam(R.id.ImConferenceUri, RcsSettingsData.IM_CONF_URI, helper);
@@ -472,10 +472,9 @@ public class ProfileProvisioning extends Activity {
                 parser.parse(release, messagingMode, true);
                 /* Customize display name with user phone number */
                 mRcsSettings.setUserProfileImsDisplayName(phoneNumber);
-                mRcsSettings
-                        .setFileTransferHttpSupported(mRcsSettings.getFtHttpServer().length() > 0
-                                && mRcsSettings.getFtHttpLogin().length() > 0
-                                && mRcsSettings.getFtHttpPassword().length() > 0);
+                mRcsSettings.setFileTransferHttpSupported(mRcsSettings.getFtHttpServer() != null
+                        && mRcsSettings.getFtHttpLogin() != null
+                        && mRcsSettings.getFtHttpPassword() != null);
                 return true;
             } catch (SAXException e) {
                 if (logger.isActivated()) {

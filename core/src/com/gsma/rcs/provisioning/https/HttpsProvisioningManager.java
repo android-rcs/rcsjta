@@ -735,10 +735,9 @@ public class HttpsProvisioningManager {
                 String token = info.getToken();
                 mRcsSettings.setProvisioningToken(token);
 
-                mRcsSettings
-                        .setFileTransferHttpSupported(mRcsSettings.getFtHttpServer().length() > 0
-                                && mRcsSettings.getFtHttpLogin().length() > 0
-                                && mRcsSettings.getFtHttpPassword().length() > 0);
+                mRcsSettings.setFileTransferHttpSupported(mRcsSettings.getFtHttpServer() != null
+                        && mRcsSettings.getFtHttpLogin() != null
+                        && mRcsSettings.getFtHttpPassword() != null);
 
                 // Reset retry alarm counter
                 mRetryCount = 0;

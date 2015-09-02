@@ -76,7 +76,7 @@ public class RcsSettingsProvider extends ContentProvider {
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 113;
+        private static final int DATABASE_VERSION = 114;
 
         /**
          * Add a parameter in the db
@@ -112,7 +112,7 @@ public class RcsSettingsProvider extends ContentProvider {
         public void onCreate(SQLiteDatabase db) {
             db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE).append('(')
                     .append(RcsSettingsData.KEY_KEY).append(" TEXT NOT NULL PRIMARY KEY,")
-                    .append(RcsSettingsData.KEY_VALUE).append(" TEXT NOT NULL)").toString());
+                    .append(RcsSettingsData.KEY_VALUE).append(" TEXT)").toString());
 
             /* Insert default values for parameters */
             addParameter(db, RcsSettingsData.SERVICE_ACTIVATED,
