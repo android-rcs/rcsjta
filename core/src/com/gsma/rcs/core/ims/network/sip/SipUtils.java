@@ -59,8 +59,6 @@ public class SipUtils {
      */
     private static final long SECONDS_TO_MILLISECONDS_CONVERSION_RATE = 1000;
 
-    private final static char WHITESPACE = ' ';
-
     private final static String UA_HEADER_OMA_SIMPLE_IM = "IM-client/OMA1.0 ";
 
     private final static String UA_HEADER_EXT_TO_EXT_CLIENT = "ExttoExt-client/Ext1.0 ";
@@ -70,6 +68,8 @@ public class SipUtils {
      * CRLF constant
      */
     public final static String CRLF = "\r\n";
+
+    public final static char WHITESPACE = ' ';
 
     /**
      * Header factory

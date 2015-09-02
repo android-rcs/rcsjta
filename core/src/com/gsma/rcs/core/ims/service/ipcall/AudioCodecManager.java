@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.ipcall;
@@ -30,6 +34,8 @@ import com.gsma.rcs.service.ipcalldraft.AudioCodec;
  * @author opob7414
  */
 public class AudioCodecManager {
+
+    private static final int DEFAULT_AMR_WB_SAMPLE_RATE = 16000;
 
     /**
      * Audio codec negotiation
@@ -72,57 +78,36 @@ public class AudioCodecManager {
      * @return Audio codec
      */
     public static AudioCodec createAudioCodecFromSdp(MediaDescription media) {
-        try {
-            String rtpmap = media.getMediaAttribute("rtpmap").getValue();
-
-            // Extract encoding name
-            String encoding = rtpmap.substring(
-                    rtpmap.indexOf(media.mPayload) + media.mPayload.length() + 1).trim();
-            String codecName = encoding;
-
-            int index = encoding.indexOf("/");
-            if (index != -1) {
-                codecName = encoding.substring(0, index);
-            }
-
-            // Extract sample rate
-            MediaAttribute attr = media.getMediaAttribute("samplerate");
-            int sampleRate = 16000; // default value (AMR_WB)
-            if (attr != null) {
-                try {
-                    String value = attr.getValue();
-                    index = value.indexOf(media.mPayload);
-                    if ((index != -1) && (value.length() > media.mPayload.length())) {
-                        sampleRate = Integer.parseInt(value.substring(index
-                                + media.mPayload.length() + 1));
-                    } else {
-                        sampleRate = Integer.parseInt(value);
-                    }
-                } catch (NumberFormatException e) {
-                    // Use default value
-                }
-            }
-
-            // Extract the audio codec parameters.
-            MediaAttribute fmtp = media.getMediaAttribute("fmtp");
-            String codecParameters = "";
-            if (fmtp != null) {
-                String value = fmtp.getValue();
-                index = 0; // value.indexOf(media.payload);
-                if ((index != -1) && (value.length() > media.mPayload.length())) {
-                    codecParameters = value.substring(index + media.mPayload.length() + 1);
-                }
-            }
-
-            // Create an audio codec
-            AudioCodec audioCodec = new AudioCodec(codecName, Integer.parseInt(media.mPayload),
-                    sampleRate, codecParameters);
-            return audioCodec;
-        } catch (NullPointerException e) {
-            return null;
-        } catch (IndexOutOfBoundsException e) {
-            return null;
+        String rtpmap = media.getMediaAttribute("rtpmap").getValue();
+        String encoding = rtpmap.substring(
+                rtpmap.indexOf(media.mPayload) + media.mPayload.length() + 1).trim();
+        String codecName = encoding;
+        int index = encoding.indexOf("/");
+        if (index != -1) {
+            codecName = encoding.substring(0, index);
         }
+        MediaAttribute attr = media.getMediaAttribute("samplerate");
+        int sampleRate = DEFAULT_AMR_WB_SAMPLE_RATE;
+        if (attr != null) {
+            String value = attr.getValue();
+            index = value.indexOf(media.mPayload);
+            if ((index != -1) && (value.length() > media.mPayload.length())) {
+                sampleRate = Integer.parseInt(value.substring(index + media.mPayload.length() + 1));
+            } else {
+                sampleRate = Integer.parseInt(value);
+            }
+        }
+        MediaAttribute fmtp = media.getMediaAttribute("fmtp");
+        String codecParameters = "";
+        if (fmtp != null) {
+            String value = fmtp.getValue();
+            if (value.length() > media.mPayload.length()) {
+                codecParameters = value.substring(media.mPayload.length() + 1);
+            }
+        }
+        AudioCodec audioCodec = new AudioCodec(codecName, Integer.parseInt(media.mPayload),
+                sampleRate, codecParameters);
+        return audioCodec;
     }
 
     /**

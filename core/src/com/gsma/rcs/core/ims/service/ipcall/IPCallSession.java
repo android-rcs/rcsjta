@@ -506,8 +506,9 @@ public abstract class IPCallSession extends ImsServiceSession {
      * 
      * @throws SipNetworkException
      * @throws SipPayloadException
+     * @throws MediaException
      */
-    public void addVideo() throws SipPayloadException, SipNetworkException {
+    public void addVideo() throws SipPayloadException, SipNetworkException, MediaException {
         if (logger.isActivated()) {
             logger.info("Add video");
         }
@@ -534,23 +535,16 @@ public abstract class IPCallSession extends ImsServiceSession {
      * 
      * @throws SipNetworkException
      * @throws SipPayloadException
+     * @throws MediaException
      */
-    public void removeVideo() throws SipPayloadException, SipNetworkException {
+    public void removeVideo() throws SipPayloadException, SipNetworkException, MediaException {
         if (logger.isActivated()) {
             logger.info("Remove video");
         }
-
-        // Build SDP
         String sdp = buildRemoveVideoSdpProposal();
-
-        // Set the SDP proposal as local SDP content in the dialog path
         getDialogPath().setLocalContent(sdp);
-
-        // Create re-INVITE
         SipRequest reInvite = getUpdateSessionManager().createReInvite(
                 IPCallService.FEATURE_TAGS_IP_VOICE_CALL, sdp);
-
-        // Send re-INVITE
         getUpdateSessionManager().sendReInvite(reInvite, IPCallSession.REMOVE_VIDEO);
     }
 
@@ -595,16 +589,7 @@ public abstract class IPCallSession extends ImsServiceSession {
                     for (ImsSessionListener listener : getListeners()) {
                         ((IPCallStreamingSessionListener) listener).handleAddVideoAccepted(contact);
                     }
-
-                    try {
-                        // TODO startVideoSession(true) ;
-                    } catch (Exception e) {
-                        if (logger.isActivated()) {
-                            logger.error("Start Video session has failed", e);
-                        }
-                        handleError(new ImsSessionBasedServiceError(
-                                ImsSessionBasedServiceError.UNEXPECTED_EXCEPTION, e.getMessage()));
-                    }
+                    // TODO startVideoSession(true) ;
                     break;
                 case INVITATION_REJECTED:
                 case INVITATION_TIMEOUT:
@@ -750,15 +735,7 @@ public abstract class IPCallSession extends ImsServiceSession {
                 // case Add video
                 ContactId contact = getRemoteContact();
                 if (IPCallSession.ADD_VIDEO == requestType) {
-                    try {
-                        // TODO startVideoSession(false);
-                    } catch (Exception e) {
-                        if (logger.isActivated()) {
-                            logger.error("Start Video session has failed", e);
-                        }
-                        handleError(new ImsSessionBasedServiceError(
-                                ImsSessionBasedServiceError.UNEXPECTED_EXCEPTION, e.getMessage()));
-                    }
+                    // TODO startVideoSession(false);
 
                     // Notify listeners
                     for (ImsSessionListener listener : getListeners()) {
@@ -916,8 +893,9 @@ public abstract class IPCallSession extends ImsServiceSession {
      * Build SDP proposal for audio+ video session (call init or addVideo)
      * 
      * @return SDP content or null in case of error
+     * @throws MediaException
      */
-    protected String buildAudioVideoSdpProposal() {
+    protected String buildAudioVideoSdpProposal() throws MediaException {
         if (logger.isActivated()) {
             logger.debug("Build SDP proposal to add video stream in the session");
         }
@@ -944,13 +922,7 @@ public abstract class IPCallSession extends ImsServiceSession {
             return sdp;
 
         } catch (RemoteException e) {
-            if (logger.isActivated()) {
-                logger.error("Add video has failed", e);
-            }
-
-            // Unexpected error
-            handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
-            return null;
+            throw new MediaException("Failed to build sdp for audio+video content!", e);
         }
     }
 
@@ -958,31 +930,27 @@ public abstract class IPCallSession extends ImsServiceSession {
      * Build SDP proposal to remove video stream from the session
      * 
      * @return SDP content or null in case of error
+     * @throws MediaException
      */
-    private String buildRemoveVideoSdpProposal() {
+    private String buildRemoveVideoSdpProposal() throws MediaException {
         if (logger.isActivated()) {
             logger.debug("Build SDP proposal to remove video stream from the session");
         }
-
         try {
-            // Build SDP part
             String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
-            String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
+            String ipAddress = SdpUtils.formatAddressType(getDialogPath().getSipStack()
+                    .getLocalIpAddress());
             String audioSdp = AudioSdpBuilder.buildSdpOffer(getPlayer().getSupportedAudioCodecs(),
                     getPlayer().getLocalAudioRtpPort());
+            return new StringBuilder("v=0").append(SipUtils.CRLF).append("o=- ").append(ntpTime)
+                    .append(SipUtils.WHITESPACE).append(ntpTime).append(SipUtils.WHITESPACE)
+                    .append(ipAddress).append(SipUtils.CRLF).append("s=-").append(SipUtils.CRLF)
+                    .append("c=").append(ipAddress).append(SipUtils.CRLF).append("t=0 0")
+                    .append(SipUtils.CRLF).append(audioSdp).append("a=sendrcv")
+                    .append(SipUtils.CRLF).toString();
 
-            return "v=0" + SipUtils.CRLF + "o=- " + ntpTime + " " + ntpTime + " "
-                    + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF + "s=-" + SipUtils.CRLF
-                    + "c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF + "t=0 0"
-                    + SipUtils.CRLF + audioSdp + "a=sendrcv" + SipUtils.CRLF;
         } catch (RemoteException e) {
-            if (logger.isActivated()) {
-                logger.error("Remove video has failed", e);
-            }
-
-            // Unexpected error
-            handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
-            return null;
+            throw new MediaException("Failed to build sdp for video content!", e);
         }
     }
 
@@ -1079,12 +1047,7 @@ public abstract class IPCallSession extends ImsServiceSession {
                 }
             }
         } catch (RemoteException e) {
-            if (logger.isActivated()) {
-                logger.error("Add Video has failed", e);
-            }
-
-            // Unexpected error
-            handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
+            throw new SipNetworkException("Failed to build sdp for add video content!", e);
         }
 
         return sdp.toString();

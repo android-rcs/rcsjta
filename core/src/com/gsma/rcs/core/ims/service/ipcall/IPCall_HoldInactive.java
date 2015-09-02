@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +15,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.ipcall;
 
 import android.os.RemoteException;
 
+import java.io.IOException;
+
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
@@ -34,67 +41,67 @@ public class IPCall_HoldInactive extends CallHoldManager {
 
     @Override
     public void setCallHold(boolean callHoldAction) throws SipPayloadException, SipNetworkException {
-        // Build SDP
-        String sdp = buildCallHoldSdpProposal(callHoldAction);
+        try {
+            // Build SDP
+            String sdp = buildCallHoldSdpProposal(callHoldAction);
 
-        // Set SDP proposal as the local SDP part in the dialog path
-        session.getDialogPath().setLocalContent(sdp);
+            // Set SDP proposal as the local SDP part in the dialog path
+            session.getDialogPath().setLocalContent(sdp);
 
-        // get feature tags
-        String[] featureTags = new String[] {};
-        if (session.isTagPresent(sdp, "m=video")) { // audio+ video
-            featureTags = IPCallService.FEATURE_TAGS_IP_VIDEO_CALL;
-        } else { // audio only
-            featureTags = IPCallService.FEATURE_TAGS_IP_VOICE_CALL;
+            // get feature tags
+            String[] featureTags = new String[] {};
+            if (session.isTagPresent(sdp, "m=video")) { // audio+ video
+                featureTags = IPCallService.FEATURE_TAGS_IP_VIDEO_CALL;
+            } else { // audio only
+                featureTags = IPCallService.FEATURE_TAGS_IP_VOICE_CALL;
+            }
+
+            // Create re-INVITE
+            SipRequest reInvite = session.getUpdateSessionManager()
+                    .createReInvite(featureTags, sdp);
+
+            // Send re-INVITE
+            int requestType = (callHoldAction) ? IPCallSession.SET_ON_HOLD
+                    : IPCallSession.SET_ON_RESUME;
+            session.getUpdateSessionManager().sendReInvite(reInvite, requestType);
+        } catch (MediaException e) {
+            throw new SipNetworkException("Failed to set call on hold!", e);
         }
-
-        // Create re-INVITE
-        SipRequest reInvite = session.getUpdateSessionManager().createReInvite(featureTags, sdp);
-
-        // Send re-INVITE
-        int requestType = (callHoldAction) ? IPCallSession.SET_ON_HOLD
-                : IPCallSession.SET_ON_RESUME;
-        session.getUpdateSessionManager().sendReInvite(reInvite, requestType);
-
     }
 
-    private String buildCallHoldSdpProposal(boolean action) {
+    private String buildCallHoldSdpProposal(boolean action) throws MediaException {
         try {
-            // Build SDP part
-            String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
-            if (logger.isActivated()) {
-                logger.info("session =" + session);
-            }
-            String ipAddress = session.getDialogPath().getSipStack().getLocalIpAddress();
-            String aVar = (action) ? "a=inactive" : "a=sendrcv";
+            StringBuilder sdpBuilder = new StringBuilder("v=0").append(SipUtils.CRLF)
+                    .append("o=- ");
 
-            String audioSdp = AudioSdpBuilder.buildSdpOffer(session.getPlayer()
-                    .getSupportedAudioCodecs(), session.getPlayer().getLocalAudioRtpPort())
-                    + aVar + SipUtils.CRLF;
+            final String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
+            sdpBuilder.append(ntpTime).append(SipUtils.WHITESPACE).append(ntpTime)
+                    .append(SipUtils.WHITESPACE);
 
-            String videoSdp = "";
+            final String ipAddress = SdpUtils.formatAddressType(session.getDialogPath()
+                    .getSipStack().getLocalIpAddress());
+            sdpBuilder.append(ipAddress).append(SipUtils.CRLF).append("s=-").append(SipUtils.CRLF)
+                    .append("c=").append(ipAddress).append(SipUtils.CRLF).append("t=0 0")
+                    .append(SipUtils.CRLF);
+
+            final String aVar = (action) ? "a=inactive" : "a=sendrcv";
+            StringBuilder audioSdp = new StringBuilder(AudioSdpBuilder.buildSdpOffer(session
+                    .getPlayer().getSupportedAudioCodecs(), session.getPlayer()
+                    .getLocalAudioRtpPort())).append(aVar).append(SipUtils.CRLF);
+            sdpBuilder.append(audioSdp);
+
             if ((session.getVideoContent() != null) && (session.getPlayer() != null)
                     && (session.getRenderer() != null)) {
-                videoSdp = VideoSdpBuilder.buildSdpOfferWithOrientation(session.getPlayer()
-                        .getSupportedVideoCodecs(), session.getRenderer().getLocalVideoRtpPort())
-                        + aVar + SipUtils.CRLF;
+                /* video sdp */
+                sdpBuilder
+                        .append(VideoSdpBuilder.buildSdpOfferWithOrientation(session.getPlayer()
+                                .getSupportedVideoCodecs(), session.getRenderer()
+                                .getLocalVideoRtpPort())).append(aVar).append(SipUtils.CRLF);
             }
-
-            String sdp = "v=0" + SipUtils.CRLF + "o=- " + ntpTime + " " + ntpTime + " "
-                    + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF + "s=-" + SipUtils.CRLF
-                    + "c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF + "t=0 0"
-                    + SipUtils.CRLF + audioSdp + videoSdp;
-
-            return sdp;
+            return sdpBuilder.toString();
 
         } catch (RemoteException e) {
-            if (logger.isActivated()) {
-                logger.error("Add video has failed", e);
-            }
-
-            // Unexpected error
-            session.handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
-            return null;
+            throw new MediaException("Failed to build sdp for audio content!", e);
         }
     }
 

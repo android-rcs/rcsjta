@@ -44,7 +44,7 @@ public abstract class DeleteTask<T> implements Runnable {
 
     private final String[] mProjection;
 
-    private final Logger mLogger = Logger.getLogger(getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(DeleteTask.class.getName());
 
     private final String mColumnPrimaryKey;
 
@@ -314,11 +314,14 @@ public abstract class DeleteTask<T> implements Runnable {
                     }
                 }
             }
-        } catch (Exception e) {
-            // TODO CR037 handle exception
-            if (mLogger.isActivated()) {
-                mLogger.error("Exception occurred while deleting!", e);
-            }
+        } catch (RuntimeException e) {
+            /*
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
+             */
+            sLogger.error("Exception occurred while deleting!", e);
         } finally {
             if (deletedIds == null) {
                 return;

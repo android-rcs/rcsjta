@@ -16,6 +16,7 @@
 
 package com.gsma.rcs.provider.sharing;
 
+import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.service.api.ImageSharingServiceImpl;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.logger.Logger;
@@ -40,7 +41,8 @@ public class UpdateImageSharingStateAfterUngracefulTerminationTask implements Ru
 
     private final ImageSharingServiceImpl mImageService;
 
-    private final Logger mLogger = Logger.getLogger(getClass().getName());
+    private static final Logger sLogger = Logger
+            .getLogger(UpdateImageSharingStateAfterUngracefulTerminationTask.class.getName());
 
     public UpdateImageSharingStateAfterUngracefulTerminationTask(RichCallHistory rcHistory,
             ImageSharingServiceImpl imageService) {
@@ -80,19 +82,18 @@ public class UpdateImageSharingStateAfterUngracefulTerminationTask implements Ru
                         break;
                 }
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             /*
-             * Exception will be handled better in CR037.
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
              */
-            if (mLogger.isActivated()) {
-                mLogger.error(
-                        "Exception occured while trying to update image sharing state for interrupted geoloc sharing",
-                        e);
-            }
+            sLogger.error(
+                    "Exception occured while trying to update image sharing state for interrupted geoloc sharing",
+                    e);
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 }

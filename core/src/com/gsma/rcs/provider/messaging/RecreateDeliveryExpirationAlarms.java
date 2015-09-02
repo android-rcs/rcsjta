@@ -32,7 +32,8 @@ public class RecreateDeliveryExpirationAlarms implements Runnable {
 
     private final Object mLock;
 
-    private final Logger mLogger = Logger.getLogger(getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(RecreateDeliveryExpirationAlarms.class
+            .getName());
 
     public RecreateDeliveryExpirationAlarms(MessagingLog messagingLog,
             OneToOneUndeliveredImManager oneToOneUndeliveredImManager, Object lock) {
@@ -43,8 +44,8 @@ public class RecreateDeliveryExpirationAlarms implements Runnable {
 
     @Override
     public void run() {
-        if (mLogger.isActivated()) {
-            mLogger.debug("Execute task to recreate delivery expiration alarms.");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Execute task to recreate delivery expiration alarms.");
         }
         Cursor cursor = null;
         try {
@@ -93,11 +94,14 @@ public class RecreateDeliveryExpirationAlarms implements Runnable {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             /*
-             * Exceptions will be handled better in CR037.
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
              */
-            mLogger.error(
+            sLogger.error(
                     "Exception occured while recreating delivery expiration alarms for one-to-one chat message and one-to-one file transfer ",
                     e);
         } finally {

@@ -241,15 +241,7 @@ public class HttpDownloadManager extends HttpTransferManager {
             }
             FileFactory.getFactory().updateMediaStorage(mDownloadedFile.getEncodedPath());
         } finally {
-            if (mFileDownloadStream != null) {
-                try {
-                    mFileDownloadStream.flush();
-                    mFileDownloadStream.close();
-                } catch (IOException ignore) {
-                    /* Nothing to be handled here */
-                }
-                mFileDownloadStream = null;
-            }
+            CloseableUtils.tryToClose(mFileDownloadStream);
             if (urlConnection != null) {
                 urlConnection.disconnect();
             }
@@ -322,15 +314,7 @@ public class HttpDownloadManager extends HttpTransferManager {
             throw new IOException("Received '" + statusCode + "' from server");
 
         } finally {
-            /* Close streams */
-            if (bOutputStream != null) {
-                try {
-                    bOutputStream.flush();
-                    bOutputStream.close();
-                } catch (IOException ignore) {
-                    /* Nothing to do, ignore the exception */
-                }
-            }
+            CloseableUtils.tryToClose(bOutputStream);
             if (urlConnection != null) {
                 urlConnection.disconnect();
             }

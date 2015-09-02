@@ -151,21 +151,13 @@ public class AndroidSecureSocketConnection extends AndroidSocketConnection {
                                     + " is used while " + announcedFingerprintElements[1]
                                     + " is expected!");
                         }
-                        try {
-                            // close the socket as an attack is assumed
-                            s.close();
-                        } catch (IOException ex) {
-                            if (logger.isActivated()) {
-                                logger.error("Closing the socket failed: ", ex);
-                            }
-                        } finally {
-                            s = null;
-                        }
+                        /* Close the socket as an attack is assumed */
+                        CloseableUtils.tryToClose(s);
                     }
                 }
             }
         } catch (IOException e) {
-            s = null;
+            CloseableUtils.tryToClose(s);
             throw new IOException("SSL handshake failed!", e);
         }
         setSocket(s);

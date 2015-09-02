@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +15,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.provider;
 
+import com.gsma.rcs.addressbook.RcsAccountException;
 import com.gsma.rcs.utils.FileUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsServiceControl;
@@ -28,6 +33,7 @@ import android.text.TextUtils;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
+import java.io.IOException;
 
 /**
  * Backup and restore databases
@@ -115,51 +121,31 @@ public class BackupRestoreDb {
      * 
      * @param databasesDir the database directory
      * @param account the account
-     * @return true if save succeeded
+     * @throws IOException
+     * @throws RcsAccountException
      */
-    private static boolean saveAccountDatabases(final File databasesDir, final String account) {
+    private static void saveAccountDatabases(final File databasesDir, final String account)
+            throws IOException, RcsAccountException {
         if (sLogger.isActivated()) {
             sLogger.info("saveAccountDatabases account=".concat(account));
         }
         if (checkBackupRestoreArguments(databasesDir, account) == false) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Cannot save account ".concat(account));
-            }
-            return false;
-
+            throw new RcsAccountException("Cannot save account ".concat(account));
         }
-        // Put the names of all files ending with .db in a String array
         String[] listOfDbFiles = databasesDir.list(sFilenameDbFilter);
         if (listOfDbFiles == null || listOfDbFiles.length <= 0) {
-            if (sLogger.isActivated()) {
-                sLogger.error("No DB files to save for ".concat(account));
-            }
-            return false;
-
+            throw new RcsAccountException("No DB files to save for ".concat(account));
         }
         File dstDir = new File(databasesDir, account);
-        // Iterate over the array of database file names
         for (String dbFile : listOfDbFiles) {
-            // Create file to be saved
             File srcFile = new File(databasesDir, dbFile);
-            try {
-                // Copy database file under account directory
-                FileUtils.copyFileToDirectory(srcFile, dstDir, true);
-                if (sLogger.isActivated()) {
-                    sLogger.info(new StringBuilder("Save file '").append(srcFile).append("' to '")
-                            .append(dstDir).append("'").toString());
-                }
-            } catch (Exception e) {
-                if (sLogger.isActivated()) {
-                    sLogger.error("Failed to copy DB files", e);
-                }
-                return false;
-
+            FileUtils.copyFileToDirectory(srcFile, dstDir, true);
+            if (sLogger.isActivated()) {
+                sLogger.info(new StringBuilder("Save file '").append(srcFile).append("' to '")
+                        .append(dstDir).append("'").toString());
             }
         }
-        // update the saved account db directory date with the backup date
         dstDir.setLastModified(System.currentTimeMillis());
-        return true;
     }
 
     /**
@@ -167,39 +153,24 @@ public class BackupRestoreDb {
      * 
      * @param databasesDir the database directory
      * @param account the account
-     * @return true if restore succeeded
+     * @throws IOException
+     * @throws RcsAccountException
      */
-    private static boolean restoreAccountDatabases(final File databasesDir, final String account) {
+    private static void restoreAccountDatabases(final File databasesDir, final String account)
+            throws IOException, RcsAccountException {
         if (checkBackupRestoreArguments(databasesDir, account) == false) {
-            return false;
+            throw new RcsAccountException("Cannot save account ".concat(account));
 
         }
         File srcDir = new File(databasesDir, account);
-        // Put the names of all files ending with .db in a String array
         String[] listOfDbFiles = srcDir.list(sFilenameDbFilter);
         if (listOfDbFiles == null || listOfDbFiles.length <= 0) {
-            if (sLogger.isActivated()) {
-                sLogger.error("No DB files to restore for ".concat(account));
-            }
-            return false;
-
+            throw new RcsAccountException("No DB files to restore for ".concat(account));
         }
-        // Iterate over the array of database file names
         for (String dbFile : listOfDbFiles) {
-            // Create file to be restored
             File srcFile = new File(srcDir, dbFile);
-            try {
-                // Copy database file under database directory
-                FileUtils.copyFileToDirectory(srcFile, databasesDir, true);
-            } catch (Exception e) {
-                if (sLogger.isActivated()) {
-                    sLogger.error("Failed to restore account ".concat(account), e);
-                }
-                return false;
-
-            }
+            FileUtils.copyFileToDirectory(srcFile, databasesDir, true);
         }
-        return true;
     }
 
     /**
@@ -247,52 +218,32 @@ public class BackupRestoreDb {
      * @param currentUserAccount the current account must not be cleaned
      */
     public static void cleanBackups(String currentUserAccount) {
-        String accountDBs = new StringBuilder(Environment.getDataDirectory().toString()).append(
-                DATABASE_LOCATION).toString();
-        try {
-            File srcdir = new File(accountDBs);
-            cleanBackups(srcdir, currentUserAccount);
-        } catch (Exception e) {
-            if (sLogger.isActivated())
-                sLogger.error(e.getMessage(), e);
-        }
+        cleanBackups(
+                new File(new StringBuilder(Environment.getDataDirectory().toString()).append(
+                        DATABASE_LOCATION).toString()), currentUserAccount);
     }
 
     /**
      * Backup account
      * 
      * @param account the Account to backup
-     * @return true if backup is successful
+     * @throws IOException
+     * @throws RcsAccountException
      */
-    public static boolean backupAccount(String account) {
-        String accountDBs = new StringBuilder(Environment.getDataDirectory().toString()).append(
-                DATABASE_LOCATION).toString();
-        try {
-            File fdir = new File(accountDBs);
-            return saveAccountDatabases(fdir, account);
-        } catch (Exception e) {
-            if (sLogger.isActivated())
-                sLogger.error("Failed to backup account ".concat(account), e);
-        }
-        return false;
+    public static void backupAccount(String account) throws IOException, RcsAccountException {
+        saveAccountDatabases(new File(new StringBuilder(Environment.getDataDirectory().toString())
+                .append(DATABASE_LOCATION).toString()), account);
     }
 
     /**
      * Restore account
      * 
      * @param account Account
-     * @return true if restore is successful
+     * @throws IOException
+     * @throws RcsAccountException
      */
-    public static boolean restoreAccount(String account) {
-        String accountDBs = new StringBuilder(Environment.getDataDirectory().toString()).append(
-                DATABASE_LOCATION).toString();
-        try {
-            File fdir = new File(accountDBs);
-            return restoreAccountDatabases(fdir, account);
-        } catch (Exception e) {
-            if (sLogger.isActivated())
-                sLogger.error(e.getMessage(), e);
-        }
-        return false;
+    public static void restoreAccount(String account) throws IOException, RcsAccountException {
+        restoreAccountDatabases(new File(new StringBuilder(Environment.getDataDirectory()
+                .toString()).append(DATABASE_LOCATION).toString()), account);
     }
 }

@@ -63,9 +63,8 @@ public class DeviceUtils {
      * 
      * @param ctx Context
      * @return UUID
-     * @throws RcsServiceException
      */
-    public static UUID getDeviceUUID(Context ctx) throws RcsServiceException {
+    public static UUID getDeviceUUID(Context ctx) {
         if (sUuid == null) {
             String imei = getImei(ctx);
             if (imei == null) {
@@ -75,7 +74,6 @@ public class DeviceUtils {
                 sUuid = UUID.nameUUIDFromBytes(imei.getBytes(UTF8));
             }
         }
-
         return sUuid;
     }
 

@@ -73,18 +73,8 @@ public class ContributionIdGenerator {
      * Raw Key generator.
      */
     private static byte[] generateRawKey() {
-        try {
-            // Get device ID
-            final UUID uuid = DeviceUtils.getDeviceUUID(AndroidFactory.getApplicationContext());
-            return uuid.toString().getBytes(UTF8);
-        } catch (RcsServiceException e) {
-            if (logger.isActivated()) {
-                logger.error(new StringBuilder(
-                        "Exception caught in ContributionIdGenerator while generating Raw secret key; exception-msg=")
-                        .append(e.getMessage()).append("!").toString());
-            }
-            return String.valueOf(System.currentTimeMillis()).getBytes(UTF8);
-        }
+        return DeviceUtils.getDeviceUUID(AndroidFactory.getApplicationContext()).toString()
+                .getBytes(UTF8);
     }
 
     /**

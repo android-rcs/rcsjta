@@ -51,9 +51,8 @@ public class AndroidFileFactory extends FileFactory {
      * 
      * @param file URI of the file
      * @return File description
-     * @throws IOException
      */
-    public FileDescription getFileDescription(Uri file) throws IOException {
+    public FileDescription getFileDescription(Uri file) {
         Context context = AndroidFactory.getApplicationContext();
         String fileName = FileUtils.getFileName(context, file);
         long fileSize = FileUtils.getFileSize(context, file);

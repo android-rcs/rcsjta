@@ -24,6 +24,7 @@ package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.content.AudioContent;
 import com.gsma.rcs.core.content.VideoContent;
+import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
@@ -329,6 +330,12 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
             public void run() {
                 try {
                     session.addVideo();
+                } catch (MediaException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(e.getMessage());
+                    }
+                    session.handleError(new ImsServiceError(IPCallError.SESSION_INITIATION_FAILED,
+                            e));
                 } catch (SipPayloadException e) {
                     sLogger.error("Unable to add video for call ID : ".concat(mCallId), e);
                     session.handleError(new ImsServiceError(IPCallError.SESSION_INITIATION_FAILED,
@@ -373,6 +380,12 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
             public void run() {
                 try {
                     session.removeVideo();
+                } catch (MediaException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(e.getMessage());
+                    }
+                    session.handleError(new ImsServiceError(IPCallError.SESSION_INITIATION_FAILED,
+                            e));
                 } catch (SipPayloadException e) {
                     sLogger.error("Unable to remove video for call ID : ".concat(mCallId), e);
                     session.handleError(new ImsServiceError(IPCallError.SESSION_INITIATION_FAILED,

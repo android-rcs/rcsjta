@@ -60,6 +60,8 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 
+import java.io.IOException;
+
 /**
  * RCS start service.
  * 
@@ -227,6 +229,10 @@ public class StartService extends Service {
                         retryPollingTelephonyManagerPooling(config.mcc,
                                 mRcsSettings.getMobileNetworkCode());
                     }
+                } catch (IOException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(e.getMessage());
+                    }
                 } catch (RcsAccountException e) {
                     /**
                      * This is a non revocable use-case as the RCS account itself was not created,
@@ -245,6 +251,7 @@ public class StartService extends Service {
                      */
                     sLogger.error("Unable to handle connection event for intent action : "
                             .concat(intent.getAction()), e);
+                    stopSelf();
                 }
             }
         });
@@ -341,8 +348,11 @@ public class StartService extends Service {
      * Check account
      * 
      * @return true if an account is available
+     * @throws IOException
+     * @throws RcsAccountException
      */
-    private boolean checkAccount(LocalContentResolver localContentResolver) {
+    private boolean checkAccount(LocalContentResolver localContentResolver) throws IOException,
+            RcsAccountException {
         AndroidFactory.setApplicationContext(mContext, mRcsSettings);
 
         /* Read the current and last end user accounts */
@@ -621,6 +631,10 @@ public class StartService extends Service {
                                 retryPollingTelephonyManagerPooling(config.mcc,
                                         mRcsSettings.getMobileNetworkCode());
                             }
+                        } catch (IOException e) {
+                            if (sLogger.isActivated()) {
+                                sLogger.debug(e.getMessage());
+                            }
                         } catch (RcsAccountException e) {
                             /**
                              * This is a non revocable use-case as the RCS account itself was not
@@ -639,6 +653,7 @@ public class StartService extends Service {
                              */
                             sLogger.error("Unable to handle connection event for intent action : "
                                     .concat(intent.getAction()), e);
+                            stopSelf();
                         }
                     }
 

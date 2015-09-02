@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.platform;
@@ -24,6 +28,7 @@ import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.platform.network.NetworkFactory;
 import com.gsma.rcs.platform.registry.RegistryFactory;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.utils.logger.Logger;
 
 /**
  * Android platform
@@ -31,6 +36,9 @@ import com.gsma.rcs.provider.settings.RcsSettings;
  * @author jexa7410
  */
 public class AndroidFactory {
+
+    private static final Logger sLogger = Logger.getLogger(AndroidFactory.class.getName());
+
     /**
      * Android application context
      */
@@ -59,7 +67,7 @@ public class AndroidFactory {
             RegistryFactory.loadFactory("com.gsma.rcs.platform.registry.AndroidRegistryFactory");
             FileFactory.loadFactory("com.gsma.rcs.platform.file.AndroidFileFactory");
         } catch (FactoryException e) {
-            e.printStackTrace();
+            throw new IllegalStateException("Failed to load factory instance!", e);
         }
     }
 }

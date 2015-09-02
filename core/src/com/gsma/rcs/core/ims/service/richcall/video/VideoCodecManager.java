@@ -2,7 +2,8 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- *
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.richcall.video;
@@ -117,80 +121,75 @@ public class VideoCodecManager {
      * @return Video codec
      */
     public static VideoCodec createVideoCodecFromSdp(MediaDescription media) {
-        try {
-            String rtpmap = media.getMediaAttribute("rtpmap").getValue();
+        String rtpmap = media.getMediaAttribute("rtpmap").getValue();
 
-            // Extract encoding name
-            String encoding = rtpmap.substring(
-                    rtpmap.indexOf(media.mPayload) + media.mPayload.length() + 1).trim();
-            String codecName = encoding;
+        // Extract encoding name
+        String encoding = rtpmap.substring(
+                rtpmap.indexOf(media.mPayload) + media.mPayload.length() + 1).trim();
+        String codecName = encoding;
 
-            // Extract clock rate
-            int clockRate = 0;
-            int index = encoding.indexOf("/");
-            if (index != -1) {
-                codecName = encoding.substring(0, index);
-                clockRate = Integer.parseInt(encoding.substring(index + 1));
-            }
-
-            // Extract video size
-            MediaAttribute frameSize = media.getMediaAttribute("framesize");
-            int videoWidth = 0;
-            int videoHeight = 0;
-            if (frameSize != null) {
-                try {
-                    String value = frameSize.getValue();
-                    index = value.indexOf(media.mPayload);
-                    int separator = value.indexOf('-');
-                    if ((index != -1) && (separator != -1)) {
-                        videoWidth = Integer.parseInt(value.substring(
-                                index + media.mPayload.length() + 1, separator));
-                        videoHeight = Integer.parseInt(value.substring(separator + 1));
-                    }
-                } catch (NumberFormatException e) {
-                    // Use default value
-                }
-            }
-
-            // Extract frame rate
-            MediaAttribute attr = media.getMediaAttribute("framerate");
-            int frameRate = H264Config.FRAME_RATE; // default value
-            if (attr != null) {
-                try {
-                    String value = attr.getValue();
-                    index = value.indexOf(media.mPayload);
-                    if ((index != -1) && (value.length() > media.mPayload.length())) {
-                        frameRate = Integer.parseInt(value.substring(index + media.mPayload.length()
-                                + 1));
-                    } else {
-                        frameRate = Integer.parseInt(value);
-                    }
-                } catch (NumberFormatException e) {
-                    // Use default value
-                }
-            }
-
-            // Extract the video codec parameters.
-            MediaAttribute fmtp = media.getMediaAttribute("fmtp");
-            String codecParameters = "";
-            if (fmtp != null) {
-                String value = fmtp.getValue();
-                index = 0; // value.indexOf(media.payload);
-                if ((index != -1) && (value.length() > media.mPayload.length())) {
-                    codecParameters = value.substring(index + media.mPayload.length() + 1);
-                }
-            }
-
-            // Create a video codec
-            VideoCodec videoCodec = new VideoCodec(codecName, Integer.parseInt(media.mPayload),
-                    clockRate, frameRate, 0, videoWidth, videoHeight, codecParameters);
-
-            return videoCodec;
-        } catch (NullPointerException e) {
-            return null;
-        } catch (IndexOutOfBoundsException e) {
-            return null;
+        // Extract clock rate
+        int clockRate = 0;
+        int index = encoding.indexOf("/");
+        if (index != -1) {
+            codecName = encoding.substring(0, index);
+            clockRate = Integer.parseInt(encoding.substring(index + 1));
         }
+
+        // Extract video size
+        MediaAttribute frameSize = media.getMediaAttribute("framesize");
+        int videoWidth = 0;
+        int videoHeight = 0;
+        if (frameSize != null) {
+            try {
+                String value = frameSize.getValue();
+                index = value.indexOf(media.mPayload);
+                int separator = value.indexOf('-');
+                if ((index != -1) && (separator != -1)) {
+                    videoWidth = Integer.parseInt(value.substring(index + media.mPayload.length()
+                            + 1, separator));
+                    videoHeight = Integer.parseInt(value.substring(separator + 1));
+                }
+            } catch (NumberFormatException e) {
+                // Use default value
+            }
+        }
+
+        // Extract frame rate
+        MediaAttribute attr = media.getMediaAttribute("framerate");
+        int frameRate = 0;
+        if (attr != null) {
+            try {
+                String value = attr.getValue();
+                index = value.indexOf(media.mPayload);
+                if ((index != -1) && (value.length() > media.mPayload.length())) {
+                    frameRate = Integer.parseInt(value.substring(index + media.mPayload.length()
+                            + 1));
+                } else {
+                    frameRate = Integer.parseInt(value);
+                }
+            } catch (NumberFormatException e) {
+                // Use default value
+                frameRate = H264Config.FRAME_RATE;
+            }
+        }
+
+        // Extract the video codec parameters.
+        MediaAttribute fmtp = media.getMediaAttribute("fmtp");
+        String codecParameters = "";
+        if (fmtp != null) {
+            String value = fmtp.getValue();
+            index = 0; // value.indexOf(media.payload);
+            if ((index != -1) && (value.length() > media.mPayload.length())) {
+                codecParameters = value.substring(index + media.mPayload.length() + 1);
+            }
+        }
+
+        // Create a video codec
+        VideoCodec videoCodec = new VideoCodec(codecName, Integer.parseInt(media.mPayload),
+                clockRate, frameRate, 0, videoWidth, videoHeight, codecParameters);
+
+        return videoCodec;
     }
 
     /**

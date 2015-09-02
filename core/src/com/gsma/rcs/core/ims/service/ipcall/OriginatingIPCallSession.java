@@ -25,6 +25,7 @@ package com.gsma.rcs.core.ims.service.ipcall;
 import com.gsma.rcs.core.content.AudioContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
+import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
@@ -109,6 +110,11 @@ public class OriginatingIPCallSession extends IPCallSession {
             getAuthenticationAgent().setAuthorizationHeader(invite);
             getDialogPath().setInvite(invite);
             sendInvite(invite);
+        } catch (MediaException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
+            handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
         } catch (SipPayloadException e) {
             sLogger.error("Session initiation has failed!", e);
             handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));

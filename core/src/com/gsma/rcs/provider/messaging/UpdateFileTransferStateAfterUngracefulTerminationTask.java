@@ -16,6 +16,7 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.logger.Logger;
@@ -31,7 +32,8 @@ public class UpdateFileTransferStateAfterUngracefulTerminationTask implements Ru
 
     private final FileTransferServiceImpl mFileTransferService;
 
-    private final Logger mLogger = Logger.getLogger(getClass().getName());
+    private static final Logger sLogger = Logger
+            .getLogger(UpdateFileTransferStateAfterUngracefulTerminationTask.class.getName());
 
     public UpdateFileTransferStateAfterUngracefulTerminationTask(MessagingLog messagingLog,
             FileTransferServiceImpl fileTransferService) {
@@ -170,19 +172,18 @@ public class UpdateFileTransferStateAfterUngracefulTerminationTask implements Ru
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             /*
-             * Exception will be handled better in CR037.
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
              */
-            if (mLogger.isActivated()) {
-                mLogger.error(
-                        "Exception occured while trying to update file transfer state for interrupted file transfers",
-                        e);
-            }
+            sLogger.error(
+                    "Exception occured while trying to update file transfer state for interrupted file transfers",
+                    e);
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 }

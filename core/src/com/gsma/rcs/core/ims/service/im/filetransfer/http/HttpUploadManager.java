@@ -397,15 +397,7 @@ public class HttpUploadManager extends HttpTransferManager {
                 return null;
             }
         } finally {
-            /* Close streams */
-            if (outputStream != null) {
-                try {
-                    outputStream.flush();
-                    outputStream.close();
-                } catch (IOException ignore) {
-                    /* Nothing to do, ignore the exception */
-                }
-            }
+            CloseableUtils.tryToClose(outputStream);
             if (connection != null) {
                 connection.disconnect();
             }
@@ -703,15 +695,7 @@ public class HttpUploadManager extends HttpTransferManager {
             getListener().httpTransferNotAllowedToSend();
             return null;
         } finally {
-            /* Close streams */
-            if (outputStream != null) {
-                try {
-                    outputStream.flush();
-                    outputStream.close();
-                } catch (IOException ignore) {
-                    /* Nothing to do, ignore the exception */
-                }
-            }
+            CloseableUtils.tryToClose(outputStream);
             if (connection != null) {
                 connection.disconnect();
             }

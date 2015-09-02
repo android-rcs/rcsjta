@@ -53,7 +53,7 @@ import java.security.KeyStoreException;
 
 /**
  * Core (singleton pattern)
- *
+ * 
  * @author JM. Auffret
  */
 public class Core {
@@ -157,16 +157,8 @@ public class Core {
         }
         mListener = listener;
         mRcsSettings = rcsSettings;
-        // Get UUID
         if (logActivated) {
-            try {
-                sLogger.info("My device UUID is ".concat(String.valueOf(DeviceUtils
-                        .getDeviceUUID(ctx))));
-            } catch (RcsServiceException e) {
-                sLogger.error(new StringBuilder(
-                        "Exception caught while logging for device UUID; exception-msg=")
-                        .append(e.getMessage()).append("!").toString());
-            }
+            sLogger.info("My device UUID is ".concat(String.valueOf(DeviceUtils.getDeviceUUID(ctx))));
         }
 
         // Initialize the phone utils

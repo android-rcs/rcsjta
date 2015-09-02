@@ -280,18 +280,8 @@ public class FileTransferUtils {
      * @return Content instance
      */
     public static MmContent createMmContent(Uri uri) {
-        if (uri == null) {
-            return null;
-        }
-        try {
-            FileDescription desc = FileFactory.getFactory().getFileDescription(uri);
-            return ContentManager.createMmContent(uri, desc.getSize(), desc.getName());
-        } catch (IOException e) {
-            if (logger.isActivated()) {
-                logger.error(e.getMessage(), e);
-            }
-            return null;
-        }
+        final FileDescription desc = FileFactory.getFactory().getFileDescription(uri);
+        return ContentManager.createMmContent(uri, desc.getSize(), desc.getName());
     }
 
     private static String getInfo(String fileType, Uri downloadUri, String name, String mimeType,

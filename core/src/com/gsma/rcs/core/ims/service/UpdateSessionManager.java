@@ -340,7 +340,8 @@ public class UpdateSessionManager {
                 mWaitUserAnswer.wait(mRingingPeriod / 2);
             }
         } catch (InterruptedException e) {
-
+            /* Nothing to be handled here */
+            sLogger.warn("Wait for timeout has been interrupted!", e);
         }
 
         return mReInviteStatus;

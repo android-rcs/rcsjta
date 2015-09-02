@@ -41,7 +41,8 @@ public class GroupChatTerminalExceptionTask implements Runnable {
 
     private final Object mLock;
 
-    private final Logger mLogger = Logger.getLogger(getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(GroupChatTerminalExceptionTask.class
+            .getName());
 
     /* package private */public GroupChatTerminalExceptionTask(String chatId,
             ChatServiceImpl chatService, FileTransferServiceImpl fileTransferService,
@@ -54,9 +55,9 @@ public class GroupChatTerminalExceptionTask implements Runnable {
     }
 
     public void run() {
-        boolean logActivated = mLogger.isActivated();
+        boolean logActivated = sLogger.isActivated();
         if (logActivated) {
-            mLogger.debug("Execute task to mark all queued group chat messages and group file transfers as failed with chatId "
+            sLogger.debug("Execute task to mark all queued group chat messages and group file transfers as failed with chatId "
                     .concat(mChatId));
         }
         Cursor cursor = null;
@@ -89,15 +90,16 @@ public class GroupChatTerminalExceptionTask implements Runnable {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             /*
-             * Exception will be handled better in CR037.
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
              */
-            if (logActivated) {
-                mLogger.error(
+            sLogger.error(
                         "Exception occured while trying to mark queued group chat messages and group file transfers as failed with chatId "
-                                .concat(mChatId), e);
-            }
+                            .concat(mChatId), e);
         } finally {
             if (cursor != null) {
                 cursor.close();

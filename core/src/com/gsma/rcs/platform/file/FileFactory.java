@@ -77,9 +77,8 @@ public abstract class FileFactory {
      * 
      * @param file URI of the file
      * @return File description
-     * @throws IOException
      */
-    public abstract FileDescription getFileDescription(Uri file) throws IOException;
+    public abstract FileDescription getFileDescription(Uri file);
 
     /**
      * Update the media storage
