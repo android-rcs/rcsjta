@@ -950,7 +950,7 @@ public class InstantMessagingService extends ImsService {
              * server unless they carry a Disposition-Notification header that at least includes
              * "positivedelivery".
              */
-            if (firstMsg == null) {
+            if (firstMsg == null && mRcsSettings.isFirstMessageInInvite()) {
                 sLogger.error("First message in the invite is empty or doesn't exist, "
                         + "automatically reject the chat invitation.");
                 sendErrorResponse(invite, Response.BUSY_HERE);
@@ -1377,7 +1377,7 @@ public class InstantMessagingService extends ImsService {
          * CPIM/IMDN wrapper shall be rejected by the server unless they carry a
          * Disposition-Notification header that at least includes "positive-delivery".
          */
-        if (firstMsg == null) {
+        if (firstMsg == null && mRcsSettings.isFirstMessageInInvite()) {
             sLogger.error("First message in the invite is empty or doesn't exist, "
                     + "automatically reject the chat invitation.");
             sendErrorResponse(invite, Response.BUSY_HERE);
