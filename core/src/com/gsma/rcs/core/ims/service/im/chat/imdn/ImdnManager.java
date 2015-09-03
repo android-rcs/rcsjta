@@ -52,23 +52,14 @@ import javax2.sip.message.Response;
  * @author jexa7410
  */
 public class ImdnManager extends Thread {
-    /**
-     * IMS service
-     */
-    private ImsService mImsService;
+    private final ImsService mImsService;
 
     private final Core mCore;
 
-    /**
-     * Buffer
-     */
     private FifoBuffer mBuffer = new FifoBuffer();
 
     private final RcsSettings mRcsSettings;
 
-    /**
-     * The logger
-     */
     private final static Logger sLogger = Logger.getLogger(ImdnManager.class.getSimpleName());
 
     /**

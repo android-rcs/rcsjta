@@ -30,7 +30,6 @@ import com.gsma.rcs.core.ims.service.richcall.image.ImageTransferSession;
 import com.gsma.rcs.platform.file.FileDescription;
 import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.sharing.ImageSharingDeleteTask;
 import com.gsma.rcs.provider.sharing.ImageSharingPersistedStorageAccessor;
@@ -101,15 +100,13 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * @param richcallService RichcallService
      * @param richCallLog RichCallHistory
      * @param rcsSettings RcsSettings
-     * @param contactManager ContactManager
      * @param localContentResolver LocalContentResolver
      * @param imOperationExecutor IM ExecutorService
-     * @param imsLock ims lock object
+     * @param imsLock IMS lock object
      */
     public ImageSharingServiceImpl(RichcallService richcallService, RichCallHistory richCallLog,
-            RcsSettings rcsSettings, ContactManager contactManager,
-            LocalContentResolver localContentResolver, ExecutorService imOperationExecutor,
-            Object imsLock) {
+            RcsSettings rcsSettings, LocalContentResolver localContentResolver,
+            ExecutorService imOperationExecutor, Object imsLock) {
         if (sLogger.isActivated()) {
             sLogger.info("Image sharing service API is loaded");
         }
@@ -246,7 +243,6 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
             sLogger.info("Receive image sharing invitation from " + session.getRemoteContact()
                     + " displayName=" + session.getRemoteDisplayName());
         }
-        ContactId contact = session.getRemoteContact();
         String sharingId = session.getSessionID();
         ImageSharingPersistedStorageAccessor storageAccessor = new ImageSharingPersistedStorageAccessor(
                 sharingId, mRichCallLog);

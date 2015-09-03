@@ -56,8 +56,6 @@ public class FtHttpResumeUpload extends FtHttpResume {
             long timestampSent) {
         super(Direction.OUTGOING, file.getUri(), file.getName(), file.getSize(), fileIcon, contact,
                 chatId, fileTransferId, isGroup, timestamp, timestampSent);
-        if (tId == null)
-            throw new IllegalArgumentException("Null tId");
         mTId = tId;
     }
 

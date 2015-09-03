@@ -59,9 +59,7 @@ import javax2.sip.message.Response;
  * @author jexa7410
  */
 public class ImsServiceDispatcher extends Thread {
-    /**
-     * IMS module
-     */
+
     private ImsModule mImsModule;
 
     /**
@@ -69,14 +67,8 @@ public class ImsServiceDispatcher extends Thread {
      */
     private FifoBuffer mBuffer = new FifoBuffer();
 
-    /**
-     * SIP intent manager
-     */
     private SipIntentManager mIntentMgr = new SipIntentManager();
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(ImsServiceDispatcher.class.getName());
 
     private final RcsSettings mRcsSettings;
@@ -89,7 +81,6 @@ public class ImsServiceDispatcher extends Thread {
      */
     public ImsServiceDispatcher(ImsModule imsModule, RcsSettings rcsSettings) {
         super("SipDispatcher");
-
         mImsModule = imsModule;
         mRcsSettings = rcsSettings;
     }
@@ -600,9 +591,8 @@ public class ImsServiceDispatcher extends Thread {
     private boolean isTagPresent(String message, String tag) {
         if ((message != null) && (tag != null) && (message.toLowerCase().indexOf(tag) != -1)) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**

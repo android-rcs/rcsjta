@@ -49,10 +49,6 @@ public class OneToOneChatDequeueTask extends DequeueTask {
 
     private final HistoryLog mHistoryLog;
 
-    private final boolean mDisplayedReportEnabled;
-
-    private final boolean mDeliveryReportEnabled;
-
     public OneToOneChatDequeueTask(Object lock, Context ctx, Core core,
             ChatServiceImpl chatService, FileTransferServiceImpl fileTransferService,
             HistoryLog historyLog, MessagingLog messagingLog, ContactManager contactManager,
@@ -60,9 +56,6 @@ public class OneToOneChatDequeueTask extends DequeueTask {
         super(lock, ctx, core, contactManager, messagingLog, rcsSettings, chatService,
                 fileTransferService);
         mHistoryLog = historyLog;
-        final ImdnManager imdnManager = mImService.getImdnManager();
-        mDisplayedReportEnabled = imdnManager.isRequestGroupDeliveryDisplayedReportsEnabled();
-        mDeliveryReportEnabled = imdnManager.isDeliveryDeliveredReportsEnabled();
     }
 
     public void run() {
@@ -75,6 +68,10 @@ public class OneToOneChatDequeueTask extends DequeueTask {
         ContactId contact = null;
         String mimeType = null;
         Cursor cursor = null;
+        ImdnManager imdnManager = mImService.getImdnManager();
+        boolean displayedReportEnabled = imdnManager
+                .isRequestGroupDeliveryDisplayedReportsEnabled();
+        boolean deliveryReportEnabled = imdnManager.isDeliveryDeliveredReportsEnabled();
         try {
             synchronized (mLock) {
                 if (!isImsConnected()) {
@@ -184,7 +181,7 @@ public class OneToOneChatDequeueTask extends DequeueTask {
                                                 .createHttpFileTransferXml(mMessagingLog
                                                         .getGroupFileDownloadInfo(id));
                                         oneToOneChat.dequeueOneToOneFileInfo(id, fileInfo,
-                                                mDisplayedReportEnabled, mDeliveryReportEnabled,
+                                                displayedReportEnabled, deliveryReportEnabled,
                                                 oneToOneFileTransfer);
                                     } catch (MsrpException e) {
                                         if (logActivated) {

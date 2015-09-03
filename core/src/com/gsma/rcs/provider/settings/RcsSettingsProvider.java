@@ -76,7 +76,7 @@ public class RcsSettingsProvider extends ContentProvider {
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 113;
+        private static final int DATABASE_VERSION = 114;
 
         /**
          * Add a parameter in the db
@@ -396,6 +396,8 @@ public class RcsSettingsProvider extends ContentProvider {
                     RcsSettingsData.DEFAULT_PROV_ACCEPT_BUTTON);
             addParameter(db, RcsSettingsData.PROV_REJECT_BUTTON,
                     RcsSettingsData.DEFAULT_PROV_REJECT_BUTTON);
+            addParameter(db, RcsSettingsData.LOCAL_DISPLAY_LANGUAGE,
+                    RcsSettingsData.DEFAULT_LOCAL_DISPLAY_LANGUAGE);
         }
 
         @Override
@@ -494,6 +496,7 @@ public class RcsSettingsProvider extends ContentProvider {
                     selection = getSelectionWithKey(selection);
                     selectionArgs = getSelectionArgsWithKey(selectionArgs, key);
                     /* Intentional fall through */
+                    //$FALL-THROUGH$
                 case UriType.SETTINGS:
                     SQLiteDatabase database = mOpenHelper.getReadableDatabase();
                     cursor = database.query(TABLE, projection, selection, selectionArgs, null,
@@ -527,6 +530,7 @@ public class RcsSettingsProvider extends ContentProvider {
                 selection = getSelectionWithKey(selection);
                 selectionArgs = getSelectionArgsWithKey(selectionArgs, key);
                 /* Intentional fall through */
+                //$FALL-THROUGH$
             case UriType.SETTINGS:
                 SQLiteDatabase database = mOpenHelper.getWritableDatabase();
                 int count = database.update(TABLE, values, selection, selectionArgs);

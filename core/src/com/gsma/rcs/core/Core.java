@@ -23,6 +23,7 @@
 package com.gsma.rcs.core;
 
 import com.gsma.rcs.addressbook.AddressBookManager;
+import com.gsma.rcs.addressbook.LocaleManager;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
@@ -34,7 +35,6 @@ import com.gsma.rcs.core.ims.service.presence.PresenceService;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.terms.TermsConditionsService;
-import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -43,6 +43,7 @@ import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsServiceException;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -52,41 +53,23 @@ import java.security.KeyStoreException;
 
 /**
  * Core (singleton pattern)
- * 
+ *
  * @author JM. Auffret
  */
 public class Core {
 
     private static final String BACKGROUND_THREAD_NAME = Core.class.getSimpleName();
 
-    /**
-     * Singleton instance
-     */
     private static volatile Core sInstance;
 
-    /**
-     * Core listener
-     */
     private CoreListener mListener;
 
-    /**
-     * Core status
-     */
     private boolean mStarted = false;
 
-    /**
-     * IMS module
-     */
     private ImsModule mImsModule;
 
-    /**
-     * Address book manager
-     */
     private AddressBookManager mAddressBookManager;
 
-    /**
-     * The logger
-     */
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
     private final RcsSettings mRcsSettings;
@@ -101,6 +84,8 @@ public class Core {
      */
     private boolean mStopping = false;
 
+    private final LocaleManager mLocaleManager;
+
     /**
      * Returns the singleton instance
      * 
@@ -113,24 +98,27 @@ public class Core {
     /**
      * Instantiate the core
      * 
+     * @param context The application context
      * @param listener Listener
      * @param rcsSettings RcsSettings instance
-     * @param messagingLog
+     * @param contentResolver
      * @param contactsManager
+     * @param messagingLog
      * @return Core instance
      * @throws IOException
      * @throws KeyStoreException
      */
-    public static Core createCore(CoreListener listener, RcsSettings rcsSettings,
-            ContactManager contactsManager, MessagingLog messagingLog) throws IOException,
-            KeyStoreException {
+    public static Core createCore(Context context, CoreListener listener, RcsSettings rcsSettings,
+            ContentResolver contentResolver, ContactManager contactsManager,
+            MessagingLog messagingLog) throws IOException, KeyStoreException {
         if (sInstance != null) {
             return sInstance;
         }
         synchronized (Core.class) {
             if (sInstance == null) {
                 KeyStoreManager.loadKeyStore(rcsSettings);
-                sInstance = new Core(listener, rcsSettings, contactsManager, messagingLog);
+                sInstance = new Core(context, listener, rcsSettings, contentResolver,
+                        contactsManager, messagingLog);
             }
         }
         return sInstance;
@@ -154,21 +142,20 @@ public class Core {
      * Constructor
      * 
      * @param listener Listener
+     * @param rcsSettings
+     * @param contentResolver
+     * @param contactManager
      * @param messagingLog
-     * @param contactsManager
      */
-    private Core(CoreListener listener, RcsSettings rcsSettings, ContactManager contactsManager,
+    private Core(Context context, CoreListener listener, RcsSettings rcsSettings,
+            ContentResolver contentResolver, ContactManager contactManager,
             MessagingLog messagingLog) {
         boolean logActivated = logger.isActivated();
         if (logActivated) {
             logger.info("Terminal core initialization");
         }
-
-        // Set core event listener
         mListener = listener;
         mRcsSettings = rcsSettings;
-
-        Context context = AndroidFactory.getApplicationContext();
         // Get UUID
         if (logActivated) {
             try {
@@ -185,7 +172,8 @@ public class Core {
         PhoneUtils.initialize(context, mRcsSettings);
 
         // Create the address book manager
-        mAddressBookManager = new AddressBookManager(contactsManager);
+        mAddressBookManager = new AddressBookManager(contentResolver, contactManager);
+        mLocaleManager = new LocaleManager(context, this, rcsSettings, contactManager);
 
         final HandlerThread backgroundThread = new HandlerThread(BACKGROUND_THREAD_NAME);
         backgroundThread.start();
@@ -193,11 +181,19 @@ public class Core {
         mBackgroundHandler = new Handler(backgroundThread.getLooper());
 
         /* Create the IMS module */
-        mImsModule = new ImsModule(this, context, mRcsSettings, contactsManager, messagingLog);
+        mImsModule = new ImsModule(this, context, mRcsSettings, contactManager, messagingLog,
+                mAddressBookManager);
 
         if (logActivated) {
             logger.info("Terminal core is created with success");
         }
+    }
+
+    /**
+     * Initializes Core
+     */
+    public void initialize() {
+        mImsModule.initialize();
     }
 
     /**
@@ -248,17 +244,12 @@ public class Core {
      */
     public synchronized void startCore() {
         if (mStarted) {
-            // Already started
             return;
         }
-
-        // Start the IMS module
         mImsModule.start();
-
-        // Start the address book monitoring
         mAddressBookManager.startAddressBookMonitoring();
-
-        // Notify event listener
+        mLocaleManager.start();
+        /* Notify event listener */
         mListener.handleCoreLayerStarted();
 
         mStarted = true;
@@ -275,20 +266,15 @@ public class Core {
      */
     private void stopCore() throws SipPayloadException, SipNetworkException {
         if (!mStarted) {
-            // Already stopped
             return;
         }
-
         mStopping = true;
         boolean logActivated = logger.isActivated();
         if (logActivated) {
             logger.info("Stop the RCS core service");
         }
-
-        // Stop the address book monitoring
+        mLocaleManager.stop();
         mAddressBookManager.stopAddressBookMonitoring();
-
-        // Stop the IMS module
         mImsModule.stop();
 
         mStopping = false;
@@ -297,7 +283,7 @@ public class Core {
             logger.info("RCS core service has been stopped with success");
         }
         sInstance = null;
-        // Notify event listener
+        /* Notify event listener */
         mListener.handleCoreLayerStopped();
     }
 

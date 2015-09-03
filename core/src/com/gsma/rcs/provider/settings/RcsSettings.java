@@ -2355,4 +2355,21 @@ public class RcsSettings {
         return readBoolean(RcsSettingsData.PROV_REJECT_BUTTON);
     }
 
+    /**
+     * Sets the display language
+     * 
+     * @param language the display language
+     */
+    public void setDisplayLanguage(String language) {
+        writeString(RcsSettingsData.LOCAL_DISPLAY_LANGUAGE, language);
+    }
+
+    /**
+     * Gets the display language
+     * 
+     * @return the display language
+     */
+    public String getDisplayLanguage() {
+        return readString(RcsSettingsData.LOCAL_DISPLAY_LANGUAGE);
+    }
 }

@@ -27,7 +27,6 @@ import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.CoreListener;
 import com.gsma.rcs.core.TerminalInfo;
 import com.gsma.rcs.core.content.AudioContent;
-import com.gsma.rcs.core.content.GeolocContent;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.ImsError;
@@ -151,71 +150,32 @@ public class RcsCoreService extends Service implements CoreListener {
 
     private OneToOneUndeliveredImManager mOneToOneUndeliveredImManager;
 
-    /**
-     * CPU manager
-     */
     private CpuManager mCpuManager;
 
-    /**
-     * Account changed broadcast receiver
-     */
     private AccountChangedReceiver mAccountChangedReceiver;
 
     // --------------------- RCSJTA API -------------------------
 
-    /**
-     * Contacts API
-     */
     private ContactServiceImpl mContactApi;
 
-    /**
-     * Capability API
-     */
     private CapabilityServiceImpl mCapabilityApi;
 
-    /**
-     * Chat API
-     */
     private ChatServiceImpl mChatApi;
 
-    /**
-     * File transfer API
-     */
     private FileTransferServiceImpl mFtApi;
 
-    /**
-     * Video sharing API
-     */
     private VideoSharingServiceImpl mVshApi;
 
-    /**
-     * Image sharing API
-     */
     private ImageSharingServiceImpl mIshApi;
 
-    /**
-     * Geoloc sharing API
-     */
     private GeolocSharingServiceImpl mGshApi;
 
-    /**
-     * History Service API
-     */
     private HistoryServiceImpl mHistoryApi;
 
-    /**
-     * IP call API
-     */
     private IPCallServiceImpl mIpcallApi;
 
-    /**
-     * Multimedia session API
-     */
     private MultimediaSessionServiceImpl mSessionApi;
 
-    /**
-     * File upload API
-     */
     private FileUploadServiceImpl mUploadApi;
 
     /**
@@ -246,9 +206,6 @@ public class RcsCoreService extends Service implements CoreListener {
      */
     private Handler mBackgroundHandler;
 
-    /**
-     * The logger
-     */
     private final static Logger sLogger = Logger.getLogger(RcsCoreService.class.getSimpleName());
 
     @Override
@@ -382,11 +339,11 @@ public class RcsCoreService extends Service implements CoreListener {
 
             mHistoryLog = HistoryLog.createInstance(mLocalContentResolver);
 
-            Core.createCore(this, mRcsSettings, mContactManager, mMessagingLog);
+            core = Core.createCore(mCtx, this, mRcsSettings, mContentResolver, mContactManager,
+                    mMessagingLog);
 
             mContactApi = new ContactServiceImpl(mContactManager, mRcsSettings);
             mCapabilityApi = new CapabilityServiceImpl(mContactManager, mRcsSettings);
-            core = Core.getInstance();
             InstantMessagingService imService = core.getImService();
             RichcallService richCallService = core.getRichcallService();
             IPCallService ipCallService = core.getIPCallService();
@@ -400,14 +357,12 @@ public class RcsCoreService extends Service implements CoreListener {
                     mContactManager, core, mLocalContentResolver, mImOperationExecutor,
                     mOperationLock, mOneToOneUndeliveredImManager);
             mVshApi = new VideoSharingServiceImpl(richCallService, mRichCallHistory, mRcsSettings,
-                    mContactManager, core, mLocalContentResolver, mRcOperationExecutor,
-                    mOperationLock);
+                    mLocalContentResolver, mRcOperationExecutor, mOperationLock);
             mIshApi = new ImageSharingServiceImpl(richCallService, mRichCallHistory, mRcsSettings,
-                    mContactManager, mLocalContentResolver, mRcOperationExecutor, mOperationLock);
-            mGshApi = new GeolocSharingServiceImpl(richCallService, mContactManager,
-                    mRichCallHistory, mRcsSettings, mLocalContentResolver, mRcOperationExecutor,
-                    mOperationLock);
-            mHistoryApi = new HistoryServiceImpl(getApplicationContext());
+                    mLocalContentResolver, mRcOperationExecutor, mOperationLock);
+            mGshApi = new GeolocSharingServiceImpl(richCallService, mRichCallHistory, mRcsSettings,
+                    mLocalContentResolver, mRcOperationExecutor, mOperationLock);
+            mHistoryApi = new HistoryServiceImpl(mCtx);
             mIpcallApi = new IPCallServiceImpl(ipCallService,
                     IPCallHistory.createInstance(mLocalContentResolver), mContactManager,
                     mRcsSettings);
@@ -421,6 +376,8 @@ public class RcsCoreService extends Service implements CoreListener {
             if (logActivated) {
                 sLogger.info("RCS stack release is ".concat(TerminalInfo.getProductVersion(mCtx)));
             }
+
+            core.initialize();
 
             core.startCore();
 
@@ -1063,8 +1020,8 @@ public class RcsCoreService extends Service implements CoreListener {
 
     @Override
     public void handleGeolocSharingInvitationRejected(ContactId remoteContact,
-            GeolocContent content, GeolocSharing.ReasonCode reasonCode, long timestamp) {
-        mGshApi.addGeolocSharingInvitationRejected(remoteContact, content, reasonCode, timestamp);
+            GeolocSharing.ReasonCode reasonCode, long timestamp) {
+        mGshApi.addGeolocSharingInvitationRejected(remoteContact, reasonCode, timestamp);
     }
 
     @Override

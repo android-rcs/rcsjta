@@ -108,8 +108,6 @@ public class FileTransferLog implements IFileTransferLog {
 
     private final LocalContentResolver mLocalContentResolver;
 
-    private final GroupChatLog mGroupChatLog;
-
     private final GroupDeliveryInfoLog mGroupChatDeliveryInfoLog;
 
     private final RcsSettings mRcsSettings;
@@ -120,15 +118,12 @@ public class FileTransferLog implements IFileTransferLog {
      * Constructor
      * 
      * @param localContentResolver Local content resolver
-     * @param groupChatLog Group chat log
      * @param groupChatDeliveryInfoLog Group chat delivery info log
      * @param rcsSettings RcsSettings
      */
     /* package private */FileTransferLog(LocalContentResolver localContentResolver,
-            GroupChatLog groupChatLog, GroupDeliveryInfoLog groupChatDeliveryInfoLog,
-            RcsSettings rcsSettings) {
+            GroupDeliveryInfoLog groupChatDeliveryInfoLog, RcsSettings rcsSettings) {
         mLocalContentResolver = localContentResolver;
-        mGroupChatLog = groupChatLog;
         mGroupChatDeliveryInfoLog = groupChatDeliveryInfoLog;
         mRcsSettings = rcsSettings;
     }

@@ -24,7 +24,6 @@ package com.gsma.rcs.addressbook;
 
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
-import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.utils.logger.Logger;
@@ -95,13 +94,14 @@ public class AddressBookManager {
     /**
      * Constructor
      * 
+     * @param contentResolver The content resolver
      * @param contactManager Contact manager accessor
      */
-    public AddressBookManager(ContactManager contactManager) {
+    public AddressBookManager(ContentResolver contentResolver, ContactManager contactManager) {
         if (sLogger.isActivated()) {
             sLogger.info("Address book manager is created");
         }
-        mContentResolver = AndroidFactory.getApplicationContext().getContentResolver();
+        mContentResolver = contentResolver;
         mContactManager = contactManager;
     }
 
@@ -113,11 +113,11 @@ public class AddressBookManager {
             sLogger.info("Start address book monitoring");
         }
 
-        // Instanciate background executor
+        /* Instantiate background executor */
         mCleanupExecutor = Executors.newSingleThreadExecutor();
 
         if (!mObserverIsRegistered) {
-            // Instanciate content observer
+            /* Instantiate content observer */
             mContactsContractObserver = new ContactsContractObserver(new Handler());
 
             // Query contactContracts phone database
@@ -202,7 +202,7 @@ public class AddressBookManager {
                 }
             }
         }
-    };
+    }
 
     /**
      * Handler used to avoid too many checks

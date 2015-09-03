@@ -32,7 +32,6 @@ import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.sharing.GeolocSharingDeleteTask;
 import com.gsma.rcs.provider.sharing.GeolocSharingPersistedStorageAccessor;
@@ -102,13 +101,12 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * 
      * @param richcallService RichcallService
      * @param rcsSettings RcsSettings
-     * @param contactManager ContactManager
      * @param richCallHistory
      * @param localContentResolver LocalContentResolver
      * @param imOperationExecutor IM ExecutorService
      * @param imsLock ims lock object
      */
-    public GeolocSharingServiceImpl(RichcallService richcallService, ContactManager contactManager,
+    public GeolocSharingServiceImpl(RichcallService richcallService,
             RichCallHistory richCallHistory, RcsSettings rcsSettings,
             LocalContentResolver localContentResolver, ExecutorService imOperationExecutor,
             Object imsLock) {
@@ -434,12 +432,11 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * Adds and broadcast that a geoloc sharing invitation was rejected
      * 
      * @param contact Contact ID
-     * @param content Geolocation content
      * @param reasonCode Reason code
      * @param timestamp Local timestamp when got invitation
      */
-    public void addGeolocSharingInvitationRejected(ContactId contact, GeolocContent content,
-            ReasonCode reasonCode, long timestamp) {
+    public void addGeolocSharingInvitationRejected(ContactId contact, ReasonCode reasonCode,
+            long timestamp) {
         String sharingId = SessionIdGenerator.getNewId();
         mRichcallLog.addIncomingGeolocSharing(contact, sharingId, GeolocSharing.State.REJECTED,
                 reasonCode, timestamp);

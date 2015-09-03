@@ -493,9 +493,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         if (ftMsrpSupportedforSelf && ftMsrpSupportedforRemote) {
             if (ftHttpSupportedforSelf && ftHttpSupportedforRemote) {
                 return mRcsSettings.getFtProtocol();
-            } else {
-                return FileTransferProtocol.MSRP;
             }
+            return FileTransferProtocol.MSRP;
         } else if (ftHttpSupportedforSelf && ftHttpSupportedforRemote) {
             return FileTransferProtocol.HTTP;
         } else {

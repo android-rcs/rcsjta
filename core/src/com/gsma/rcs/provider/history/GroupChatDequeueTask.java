@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2015 Sony Mobile Communications Inc.
- *
+ * Copyright (C) 2010 France Telecom S.A.
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -41,17 +42,13 @@ import android.net.Uri;
 
 /**
  * GroupChatDequeueTask tries to dequeue all group chat messages that are QUEUED and all file
- * transfers that are either QUEUED or UPLOADED but not trasnferred for a specific group chat.
+ * transfers that are either QUEUED or UPLOADED but not transferred for a specific group chat.
  */
 public class GroupChatDequeueTask extends DequeueTask {
 
     private final String mChatId;
 
     private final HistoryLog mHistoryLog;
-
-    private final boolean mDisplayedReportEnabled;
-
-    private final boolean mDeliveryReportEnabled;
 
     public GroupChatDequeueTask(Object lock, Context ctx, Core core, String chatId,
             MessagingLog messagingLog, ChatServiceImpl chatService,
@@ -61,9 +58,6 @@ public class GroupChatDequeueTask extends DequeueTask {
                 fileTransferService);
         mChatId = chatId;
         mHistoryLog = historyLog;
-        final ImdnManager imdnManager = mImService.getImdnManager();
-        mDisplayedReportEnabled = imdnManager.isRequestGroupDeliveryDisplayedReportsEnabled();
-        mDeliveryReportEnabled = imdnManager.isDeliveryDeliveredReportsEnabled();
     }
 
     public void run() {
@@ -72,6 +66,10 @@ public class GroupChatDequeueTask extends DequeueTask {
             mLogger.debug("Execute task to dequeue group chat messages and group file transfers for chatId "
                     .concat(mChatId));
         }
+        ImdnManager imdnManager = mImService.getImdnManager();
+        boolean displayedReportEnabled = imdnManager
+                .isRequestGroupDeliveryDisplayedReportsEnabled();
+        boolean deliveryReportEnabled = imdnManager.isDeliveryDeliveredReportsEnabled();
         int providerId = -1;
         String id = null;
         String mimeType = null;
@@ -191,7 +189,7 @@ public class GroupChatDequeueTask extends DequeueTask {
                                                 .createHttpFileTransferXml(mMessagingLog
                                                         .getGroupFileDownloadInfo(id));
                                         groupChat.dequeueGroupFileInfo(id, fileInfo,
-                                                mDisplayedReportEnabled, mDeliveryReportEnabled,
+                                                displayedReportEnabled, deliveryReportEnabled,
                                                 groupFileTransfer);
 
                                     } catch (MsrpException e) {

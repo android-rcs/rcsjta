@@ -84,7 +84,7 @@ public class CallManager {
 
     private final TelephonyManager mPhonyManager;
 
-    private final BroadcastReceiver mOutgoingCallReceiver;
+    private BroadcastReceiver mOutgoingCallReceiver;
 
     private final Context mContext;
 
@@ -99,9 +99,16 @@ public class CallManager {
     public CallManager(ImsModule parent, Context context) {
         mImsModule = parent;
         mContext = context;
-
         mPhonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+    }
 
+    /**
+     * Start call monitoring
+     */
+    public void start() {
+        if (sLogger.isActivated()) {
+            sLogger.info("Start call monitoring");
+        }
         mOutgoingCallReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -112,15 +119,6 @@ public class CallManager {
                 }
             }
         };
-    }
-
-    /**
-     * Start call monitoring
-     */
-    public void startCallMonitoring() {
-        if (sLogger.isActivated()) {
-            sLogger.info("Start call monitoring");
-        }
         /* Monitor phone state */
         mPhonyManager.listen(listener, PhoneStateListener.LISTEN_CALL_STATE);
 
@@ -131,14 +129,15 @@ public class CallManager {
     /**
      * Stop call monitoring
      */
-    public void stopCallMonitoring() {
+    public void stop() {
         if (sLogger.isActivated()) {
             sLogger.info("Stop call monitoring");
         }
-
-        mContext.unregisterReceiver(mOutgoingCallReceiver);
-
-        // Unmonitor phone state
+        if (mOutgoingCallReceiver != null) {
+            mContext.unregisterReceiver(mOutgoingCallReceiver);
+            mOutgoingCallReceiver = null;
+        }
+        /* Stop monitoring phone state */
         mPhonyManager.listen(listener, PhoneStateListener.LISTEN_NONE);
     }
 
