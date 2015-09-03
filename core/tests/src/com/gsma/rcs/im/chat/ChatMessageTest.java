@@ -70,8 +70,8 @@ public class ChatMessageTest extends AndroidTestCase {
         ContactUtil contactUtils = ContactUtil.getInstance(new ContactUtilMockContext(mContext));
         mContact = contactUtils.formatContact("+339000000");
         ImsModule.IMS_USER_PROFILE = new UserProfile(mContact, "homeDomain", "privateID",
-                "password", "realm", "xdmServerAddr", "xdmServerLogin", "xdmServerPassword",
-                formatSipUri("imConferenceUri"), mRcsSettings);
+                "password", "realm", Uri.parse("xdmServerAddr"), "xdmServerLogin",
+                "xdmServerPassword", formatSipUri("imConferenceUri"), mRcsSettings);
         mTimestamp = mRandom.nextLong();
         mTimestampSent = mRandom.nextLong();
         mText = Long.toString(mRandom.nextLong());
