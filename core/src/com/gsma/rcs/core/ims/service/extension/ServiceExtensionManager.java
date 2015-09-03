@@ -19,19 +19,20 @@
 package com.gsma.rcs.core.ims.service.extension;
 
 import com.gsma.rcs.core.Core;
+import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.service.capability.ExternalCapabilityMonitoring;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.capability.CapabilityService;
 
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.os.Bundle;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.text.TextUtils;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Service extension manager which adds supported extension after having verified some authorization
@@ -42,40 +43,75 @@ import java.util.Set;
  */
 public class ServiceExtensionManager {
 
-    /**
-     * Singleton of ServiceExtensionManager
-     */
-    private static volatile ServiceExtensionManager sInstance;
-
     private static final String EXTENSION_SEPARATOR = ";";
 
     private final static Logger sLogger = Logger.getLogger(ServiceExtensionManager.class
             .getSimpleName());
 
-    private RcsSettings mRcsSettings;
+    private final RcsSettings mRcsSettings;
 
-    /**
-     * Empty constructor : prevent caller from creating multiple instances
-     * 
-     * @param rcsSettings
-     */
-    private ServiceExtensionManager(RcsSettings rcsSettings) {
+    private final Context mContext;
+
+    private final Core mCore;
+
+    private final ImsModule mImsModule;
+
+    private ExternalCapabilityMonitoring mExternalCapabilityMonitoring;
+
+    private final ExecutorService mUpdateExecutor;
+
+    private final SupportedExtensionUpdater mSupportedExtensionUpdater;
+
+    public ServiceExtensionManager(ImsModule imsModule, Context context, Core core,
+            RcsSettings rcsSettings) {
+        mImsModule = imsModule;
+        mContext = context;
+        mCore = core;
         mRcsSettings = rcsSettings;
+        mSupportedExtensionUpdater = new SupportedExtensionUpdater(mContext, mImsModule,
+                mRcsSettings, this);
+        mUpdateExecutor = Executors.newSingleThreadExecutor();
     }
 
     /**
-     * Get an instance of ServiceExtensionManager.
-     * 
-     * @param rcsSettings
-     * @return the singleton instance.
+     * Starts extension manager
      */
-    public static ServiceExtensionManager getInstance(RcsSettings rcsSettings) {
-        synchronized (ServiceExtensionManager.class) {
-            if (sInstance == null) {
-                sInstance = new ServiceExtensionManager(rcsSettings);
+    public void start() {
+        updateSupportedExtensions();
+        mUpdateExecutor.execute(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
+                    filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+                    filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+                    filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+                    filter.addDataScheme("package");
+                    mExternalCapabilityMonitoring = new ExternalCapabilityMonitoring(mCore,
+                            ServiceExtensionManager.this);
+                    mContext.registerReceiver(mExternalCapabilityMonitoring, filter);
+                } catch (RuntimeException e) {
+                    /*
+                     * Intentionally catch runtime exceptions as else it will abruptly end the
+                     * thread and eventually bring the whole system down, which is not intended.
+                     */
+                    sLogger.error("Failed to listen to package change!", e);
+                }
             }
-            return sInstance;
+        });
+
+    }
+
+    /**
+     * Stops extension manager
+     */
+    public void stop() {
+        if (mExternalCapabilityMonitoring != null) {
+            mContext.unregisterReceiver(mExternalCapabilityMonitoring);
+            mExternalCapabilityMonitoring = null;
         }
+        mUpdateExecutor.shutdownNow();
     }
 
     /**
@@ -83,87 +119,13 @@ public class ServiceExtensionManager {
      * 
      * @param supportedExts List of supported extensions
      */
-    private void saveSupportedExtensions(Set<String> supportedExts) {
-        // Update supported extensions in database
+    public void saveSupportedExtensions(Set<String> supportedExts) {
+        /* Update supported extensions in database */
         mRcsSettings.setSupportedRcsExtensions(supportedExts);
     }
 
-    /**
-     * Check if the extensions are valid. Each valid extension is saved in the cache.
-     * 
-     * @param context Context
-     * @param supportedExts Set of supported extensions
-     * @param newExts Set of new extensions to be checked
-     */
-    private void checkExtensions(Context context, Set<String> supportedExts, Set<String> newExts) {
-        // Check each new extension
-        for (String extension : newExts) {
-            if (isExtensionAuthorized(context, extension)) {
-                if (supportedExts.contains(extension)) {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("Extension " + extension + " is already in the list");
-                    }
-                } else {
-                    // Add the extension in the supported list if authorized and not yet in the list
-                    supportedExts.add(extension);
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("Extension " + extension + " is added to the list");
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Update supported extensions at boot or upon install/remove of client application
-     * 
-     * @param context Context
-     */
-    public void updateSupportedExtensions(Context context) {
-        boolean logActivated = sLogger.isActivated();
-        if (context == null) {
-            return;
-        }
-        if (logActivated) {
-            sLogger.debug("Update supported extensions");
-        }
-        try {
-            Set<String> newSupportedExts = new HashSet<String>();
-            Set<String> oldSupportedExts = mRcsSettings.getSupportedRcsExtensions();
-            // Intent query on current installed activities
-            PackageManager pm = context.getPackageManager();
-            List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-            for (ApplicationInfo appInfo : apps) {
-                Bundle appMeta = appInfo.metaData;
-                if (appMeta != null) {
-                    String exts = appMeta.getString(CapabilityService.INTENT_EXTENSIONS);
-                    if (!TextUtils.isEmpty(exts)) {
-                        if (logActivated) {
-                            sLogger.debug("Update supported extensions ".concat(exts));
-                        }
-                        checkExtensions(context, newSupportedExts, getExtensions(exts));
-                    }
-                }
-            }
-            if (oldSupportedExts.equals(newSupportedExts)) {
-                return;
-            }
-            // Update supported extensions in database
-            saveSupportedExtensions(newSupportedExts);
-            Core core = Core.getInstance();
-            if (core == null || !core.isStarted()) {
-                /* Stack is not started, don't process this event */
-                return;
-            }
-            core.getImsModule().getSipManager().getNetworkInterface().getRegistrationManager()
-                    .restart();
-        } catch (RuntimeException e) {
-            /*
-             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
-             * eventually bring the whole system down, which is not intended.
-             */
-            sLogger.error("Failed to update supported extensions!", e);
-        }
+    private void updateSupportedExtensions() {
+        mUpdateExecutor.execute(mSupportedExtensionUpdater);
     }
 
     /**
@@ -173,7 +135,7 @@ public class ServiceExtensionManager {
      * @param ext Extension ID
      * @return Boolean
      */
-    public boolean isExtensionAuthorized(Context context, String ext) {
+    public boolean isExtensionAuthorized(String ext) {
         if (!mRcsSettings.isExtensionsAllowed()) {
             if (sLogger.isActivated()) {
                 sLogger.debug("Extensions are not allowed");
@@ -181,7 +143,7 @@ public class ServiceExtensionManager {
             return false;
         }
         if (sLogger.isActivated()) {
-            sLogger.debug("No control on extensions");
+            sLogger.debug("No control on extension: ".concat(ext));
         }
         return true;
     }
@@ -191,8 +153,8 @@ public class ServiceExtensionManager {
      * 
      * @param context Context
      */
-    public void removeSupportedExtensions(Context context) {
-        updateSupportedExtensions(context);
+    public void removeSupportedExtensions() {
+        updateSupportedExtensions();
     }
 
     /**
@@ -200,8 +162,8 @@ public class ServiceExtensionManager {
      * 
      * @param context Context
      */
-    public void addNewSupportedExtensions(Context context) {
-        updateSupportedExtensions(context);
+    public void addNewSupportedExtensions() {
+        updateSupportedExtensions();
     }
 
     /**
@@ -214,7 +176,6 @@ public class ServiceExtensionManager {
         Set<String> result = new HashSet<String>();
         if (TextUtils.isEmpty(extensions)) {
             return result;
-
         }
         String[] extensionList = extensions.split(ServiceExtensionManager.EXTENSION_SEPARATOR);
         for (String extension : extensionList) {

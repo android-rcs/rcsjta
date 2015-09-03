@@ -23,7 +23,6 @@
 package com.gsma.rcs.core.ims.service.im;
 
 import com.gsma.rcs.core.Core;
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.CoreListener;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
@@ -180,19 +179,10 @@ public class InstantMessagingService extends ImsService {
         FeatureTags.FEATURE_OMA_IM
     };
 
-    /**
-     * IMDN manager
-     */
     private final ImdnManager mImdnManager;
 
-    /**
-     * Store & Forward manager
-     */
     private final StoreAndForwardManager mStoreAndFwdMgr;
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(InstantMessagingService.class.getName());
 
     private static final String sSizeExceededMsg = "133 Size exceeded";
@@ -216,6 +206,12 @@ public class InstantMessagingService extends ImsService {
         mStoreAndFwdMgr = new StoreAndForwardManager(this, mRcsSettings, mContactManager,
                 mMessagingLog);
         mImdnManager = new ImdnManager(this, mCore, mRcsSettings);
+    }
+
+    /**
+     * Initializes instant messaging service
+     */
+    public void initialize() {
         mImdnManager.start();
     }
 
@@ -606,7 +602,7 @@ public class InstantMessagingService extends ImsService {
         }
     }
 
-    public void assertAvailableFileTransferSession(String errorMessage) throws CoreException {
+    public void assertAvailableFileTransferSession(String errorMessage) {
         if (!isFileTransferSessionAvailable()) {
             throw new ServerApiMaxAllowedSessionLimitReachedException(errorMessage);
         }
@@ -892,6 +888,7 @@ public class InstantMessagingService extends ImsService {
                             sendErrorResponse(invite, Response.DECLINE);
                             return;
                         }
+                        break;
                     case SIMPLE_IM:
                         if (logActivated) {
                             sLogger.error("Currently in SIMPLE_IM mode, Reject 1-1 chat invition due to it doesn't"
@@ -989,8 +986,7 @@ public class InstantMessagingService extends ImsService {
             }
 
             TerminatingOneToOneChatSession session = new TerminatingOneToOneChatSession(this,
-                    invite, remote, mRcsSettings, mMessagingLog, firstMsg.getTimestamp(),
-                    mContactManager);
+                    invite, remote, mRcsSettings, mMessagingLog, timestamp, mContactManager);
 
             mCore.getListener().handleOneOneChatSessionInvitation(session);
 
@@ -1607,7 +1603,7 @@ public class InstantMessagingService extends ImsService {
 
     private void handleHttpFileTransferInvitationRejected(String fileTransferId,
             FileTransferHttpInfoDocument ftinfo, ContactId contact, FileTransfer.ReasonCode reason,
-            long timestamp, long timestampSent) throws SipPayloadException {
+            long timestamp, long timestampSent) {
         MmContent fileContent = ftinfo.getLocalMmContent();
         FileTransferHttpThumbnail thumbnail = ftinfo.getFileThumbnail();
         MmContent fileIconContent = thumbnail == null ? null : thumbnail

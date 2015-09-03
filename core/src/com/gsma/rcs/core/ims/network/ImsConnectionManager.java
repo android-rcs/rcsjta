@@ -25,10 +25,10 @@ package com.gsma.rcs.core.ims.network;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.ImsNetworkInterface.DnsResolvedFields;
+import com.gsma.rcs.core.ims.protocol.rtp.core.RtpSource;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
-import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.platform.network.NetworkFactory;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.NetworkAccessType;
@@ -61,54 +61,24 @@ public class ImsConnectionManager implements Runnable {
 
     private static final long DEFAULT_RETRY_PERIOD = 5000;
 
-    /**
-     * Core
-     */
     private final Core mCore;
 
-    /**
-     * IMS module
-     */
-    private ImsModule mImsModule;
+    private final ImsModule mImsModule;
 
-    /**
-     * Network interfaces
-     */
     private ImsNetworkInterface[] mNetworkInterfaces = new ImsNetworkInterface[2];
 
-    /**
-     * IMS network interface
-     */
     private ImsNetworkInterface mCurrentNetworkInterface;
 
-    /**
-     * IMS polling thread
-     */
     private Thread mImsPollingThread;
 
-    /**
-     * IMS polling thread Id
-     */
     private long mImsPollingThreadId = -1;
 
-    /**
-     * Connectivity manager
-     */
     private ConnectivityManager mCnxManager;
 
-    /**
-     * Network access type
-     */
     private NetworkAccessType mNetwork;
 
-    /**
-     * Operator
-     */
     private String mOperator;
 
-    /**
-     * DNS resolved fields
-     */
     private DnsResolvedFields mDnsResolvedFields;
 
     /**
@@ -116,59 +86,64 @@ public class ImsConnectionManager implements Runnable {
      */
     private boolean mDisconnectedByBattery = false;
 
-    /**
-     * IMS services already started
-     */
     private boolean mImsServicesStarted = false;
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(ImsConnectionManager.class.getName());
 
     private final RcsSettings mRcsSettings;
 
+    private final Context mContext;
+
+    private NetworkStateListener mNetworkStateListener;
+
+    private BatteryLevelListener mBatteryLevelListener;
+
     /**
      * Constructor
      * 
-     * @param core Core
+     * @param imsModule The IMS module instance
+     * @param context The application context
+     * @param core The Core instance
      * @param rcsSettings RcsSettings instance
      */
-    public ImsConnectionManager(ImsModule imsModule, RcsSettings rcsSettings) {
+    public ImsConnectionManager(ImsModule imsModule, Context context, Core core,
+            RcsSettings rcsSettings) {
         mImsModule = imsModule;
-        mCore = imsModule.getCore();
-
+        mCore = core;
         mRcsSettings = rcsSettings;
+        mContext = context;
+    }
 
-        // Get network access parameters
-        mNetwork = rcsSettings.getNetworkAccess();
+    /**
+     * Initializes IMS connection
+     */
+    public void initialize() {
+        mCnxManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        mNetwork = mRcsSettings.getNetworkAccess();
+        mOperator = mRcsSettings.getNetworkOperator();
 
-        // Get network operator parameters
-        mOperator = rcsSettings.getNetworkOperator();
+        /* Instantiates the IMS network interfaces */
+        mNetworkInterfaces[0] = new MobileNetworkInterface(mImsModule, mRcsSettings);
+        mNetworkInterfaces[1] = new WifiNetworkInterface(mImsModule, mRcsSettings);
 
-        Context appContext = AndroidFactory.getApplicationContext();
-        // Set the connectivity manager
-        mCnxManager = (ConnectivityManager) appContext
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        // Instantiates the IMS network interfaces
-        mNetworkInterfaces[0] = new MobileNetworkInterface(imsModule, rcsSettings);
-        mNetworkInterfaces[1] = new WifiNetworkInterface(imsModule, rcsSettings);
-
-        // Set the mobile network interface by default
+        /* Set the mobile network interface by default */
         mCurrentNetworkInterface = getMobileNetworkInterface();
 
-        // Load the user profile
         loadUserProfile();
 
-        // Register network state listener
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        appContext.registerReceiver(mNetworkStateListener, intentFilter);
+        if (mNetworkStateListener == null) {
+            /* Register network state listener */
+            mNetworkStateListener = new NetworkStateListener();
+            mContext.registerReceiver(mNetworkStateListener, new IntentFilter(
+                    ConnectivityManager.CONNECTIVITY_ACTION));
+        }
 
-        // Battery management
-        appContext.registerReceiver(mBatteryLevelListener, new IntentFilter(
-                Intent.ACTION_BATTERY_CHANGED));
+        if (mBatteryLevelListener == null) {
+            /* Register changes about battery: charging state, level, etc... */
+            mBatteryLevelListener = new BatteryLevelListener();
+            mContext.registerReceiver(mBatteryLevelListener, new IntentFilter(
+                    Intent.ACTION_BATTERY_CHANGED));
+        }
     }
 
     /**
@@ -230,6 +205,7 @@ public class ImsConnectionManager implements Runnable {
      */
     private void loadUserProfile() {
         ImsModule.IMS_USER_PROFILE = mCurrentNetworkInterface.getUserProfile();
+        RtpSource.CNAME = ImsModule.IMS_USER_PROFILE.getPublicUri();
         if (sLogger.isActivated()) {
             sLogger.debug("User profile has been reloaded");
         }
@@ -245,13 +221,12 @@ public class ImsConnectionManager implements Runnable {
         if (sLogger.isActivated()) {
             sLogger.info("Terminate the IMS connection manager");
         }
-        final Context ctx = AndroidFactory.getApplicationContext();
         if (mBatteryLevelListener != null) {
-            ctx.unregisterReceiver(mBatteryLevelListener);
+            mContext.unregisterReceiver(mBatteryLevelListener);
             mBatteryLevelListener = null;
         }
         if (mNetworkStateListener != null) {
-            ctx.unregisterReceiver(mNetworkStateListener);
+            mContext.unregisterReceiver(mNetworkStateListener);
             mNetworkStateListener = null;
         }
         stopImsConnection(TerminationReason.TERMINATION_BY_SYSTEM);
@@ -264,7 +239,7 @@ public class ImsConnectionManager implements Runnable {
     /**
      * Network state listener
      */
-    private BroadcastReceiver mNetworkStateListener = new BroadcastReceiver() {
+    private class NetworkStateListener extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, final Intent intent) {
             mCore.scheduleForBackgroundExecution(new Runnable() {
@@ -297,7 +272,7 @@ public class ImsConnectionManager implements Runnable {
                 }
             });
         }
-    };
+    }
 
     /**
      * Connection event
@@ -338,10 +313,8 @@ public class ImsConnectionManager implements Runnable {
                 return;
             }
             if (networkInfo.getType() == ConnectivityManager.TYPE_MOBILE) {
-                String lastUserAccount = LauncherUtils.getLastUserAccount(AndroidFactory
-                        .getApplicationContext());
-                String currentUserAccount = LauncherUtils.getCurrentUserAccount(AndroidFactory
-                        .getApplicationContext());
+                String lastUserAccount = LauncherUtils.getLastUserAccount(mContext);
+                String currentUserAccount = LauncherUtils.getCurrentUserAccount(mContext);
                 if (lastUserAccount != null) {
                     if ((currentUserAccount == null)
                             || !currentUserAccount.equalsIgnoreCase(lastUserAccount)) {
@@ -449,7 +422,7 @@ public class ImsConnectionManager implements Runnable {
                     return;
                 }
 
-                TelephonyManager tm = (TelephonyManager) AndroidFactory.getApplicationContext()
+                TelephonyManager tm = (TelephonyManager) mContext
                         .getSystemService(Context.TELEPHONY_SERVICE);
                 String currentOpe = tm.getSimOperatorName();
                 if ((mOperator.length() > 0) && !currentOpe.equalsIgnoreCase(mOperator)) {
@@ -555,9 +528,7 @@ public class ImsConnectionManager implements Runnable {
         }
     }
 
-    /**
-     * Background processing
-     */
+    @Override
     // @FIXME: This run method needs to be refactored as the current logic of polling is bit too
     // complex and can be made much more simpler.
     public void run() {
@@ -595,19 +566,17 @@ public class ImsConnectionManager implements Runnable {
                                 sLogger.debug("IMS connection polling thread race condition");
                             }
                             break;
-                        } else {
-                            if (sLogger.isActivated()) {
-                                sLogger.debug("Registered to the IMS with success: start IMS services");
-                            }
-                            if (mImsModule.isInitializationFinished() && !mImsServicesStarted) {
-                                mImsModule.startImsServices();
-                                mImsServicesStarted = true;
-                            }
-
-                            // Reset number of failures
-                            nbFailures = 0;
+                        }
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("Registered to the IMS with success: start IMS services");
+                        }
+                        if (mImsModule.isInitializationFinished() && !mImsServicesStarted) {
+                            mImsModule.startImsServices();
+                            mImsServicesStarted = true;
                         }
 
+                        // Reset number of failures
+                        nbFailures = 0;
                     } else {
                         if (mImsModule.isInitializationFinished()) {
                             if (!mImsServicesStarted) {
@@ -708,9 +677,9 @@ public class ImsConnectionManager implements Runnable {
     }
 
     /**
-     * Battery level listener
+     * Battery level listener class
      */
-    private BroadcastReceiver mBatteryLevelListener = new BroadcastReceiver() {
+    private class BatteryLevelListener extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, final Intent intent) {
             mCore.scheduleForBackgroundExecution(new Runnable() {
@@ -768,14 +737,15 @@ public class ImsConnectionManager implements Runnable {
                 }
             });
         }
-    };
+    }
 
     /**
      * @return true is device is in roaming
      */
     public boolean isInRoaming() {
-        if (mCnxManager != null && mCnxManager.getActiveNetworkInfo() != null) {
-            return mCnxManager.getActiveNetworkInfo().isRoaming();
+        NetworkInfo networkInfo = mCnxManager.getActiveNetworkInfo();
+        if (networkInfo != null) {
+            return networkInfo.isRoaming();
         }
         return false;
     }

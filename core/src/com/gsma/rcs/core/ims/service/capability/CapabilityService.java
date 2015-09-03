@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.capability;
 
 import com.gsma.rcs.addressbook.AddressBookEventListener;
 import com.gsma.rcs.addressbook.AddressBookManager;
+import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
@@ -70,22 +71,27 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
 
     private static final int MAX_CONTACTS_TO_DISPLAY = 10;
 
+    private final Core mCore;
+
     /**
      * Constructor
      * 
      * @param parent IMS module
+     * @param core The core instance
      * @param rcsSettings RCS settings accessor
      * @param contactsManager Contact manager accessor
+     * @param addressBookManager The address book manager instance
      */
-    public CapabilityService(ImsModule parent, RcsSettings rcsSettings,
-            ContactManager contactsManager) {
+    public CapabilityService(ImsModule parent, Core core, RcsSettings rcsSettings,
+            ContactManager contactsManager, AddressBookManager addressBookManager) {
         super(parent, true);
+        mCore = core;
         mRcsSettings = rcsSettings;
         mContactManager = contactsManager;
         mPollingManager = new PollingManager(this, mRcsSettings, mContactManager);
         mOptionsManager = new OptionsManager(parent, mRcsSettings, mContactManager);
         mAnonymousFetchManager = new AnonymousFetchManager(parent, mRcsSettings, mContactManager);
-        mAddressBookManager = getImsModule().getCore().getAddressBookManager();
+        mAddressBookManager = addressBookManager;
         mISyncContactTaskListener = new ISyncContactTaskListener() {
 
             @Override
@@ -265,8 +271,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
             capabilities = capaBuilder.build();
             mContactManager.setContactCapabilities(contact, capabilities);
 
-            getImsModule().getCore().getListener()
-                    .handleCapabilitiesNotification(contact, capabilities);
+            mCore.getListener().handleCapabilitiesNotification(contact, capabilities);
 
         } catch (ContactManagerException e) {
             throw new SipPayloadException(

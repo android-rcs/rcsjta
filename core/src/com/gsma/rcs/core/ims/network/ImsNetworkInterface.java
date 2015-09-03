@@ -151,7 +151,7 @@ public abstract class ImsNetworkInterface {
     /**
      * SIP manager
      */
-    private SipManager mSip;
+    private final SipManager mSip;
 
     /**
      * IMS authentication mode associated to the network interface
@@ -178,14 +178,8 @@ public abstract class ImsNetworkInterface {
      */
     protected RegistrationProcedure mRegistrationProcedure;
 
-    /**
-     * Registration manager
-     */
     private RegistrationManager mRegistration;
 
-    /**
-     * NAT traversal
-     */
     private boolean mNatTraversal = false;
 
     /**
@@ -213,9 +207,6 @@ public abstract class ImsNetworkInterface {
      */
     private long mRetryDuration = 0;
 
-    /**
-     * The logger
-     */
     private static Logger sLogger = Logger.getLogger(ImsNetworkInterface.class.getName());
 
     /**
@@ -244,13 +235,10 @@ public abstract class ImsNetworkInterface {
         if (proxyProtocol.equalsIgnoreCase(ListeningPoint.UDP))
             mTcpFallback = mRcsSettings.isTcpFallback();
 
-        // Instantiates the SIP manager
         mSip = new SipManager(this, mRcsSettings);
 
-        // Load the registration procedure
         loadRegistrationProcedure();
 
-        // Instantiates the registration manager
         mRegistration = new RegistrationManager(this, mRegistrationProcedure, mRcsSettings);
     }
 
@@ -369,6 +357,7 @@ public abstract class ImsNetworkInterface {
                 mRegistrationProcedure = new GibaRegistrationProcedure();
                 break;
             case DIGEST:
+            default:
                 if (sLogger.isActivated()) {
                     sLogger.debug("Load HTTP Digest authentication procedure");
                 }
@@ -545,10 +534,9 @@ public abstract class ImsNetworkInterface {
         if (DNS_SIP_TLS_SERVICE.equalsIgnoreCase(sipService)) {
             return new StringBuilder(DNS_SIPS_PREFIX).append(TCP_PROTOCOL).append(DOT)
                     .append(mImsProxyAddr).toString();
-        } else {
-            return new StringBuilder(DNS_SIP_PREFIX).append(mImsProxyProtocol.toLowerCase())
-                    .append(DOT).append(mImsProxyAddr).toString();
         }
+        return new StringBuilder(DNS_SIP_PREFIX).append(mImsProxyProtocol.toLowerCase())
+                .append(DOT).append(mImsProxyAddr).toString();
     }
 
     // Changed by Deutsche Telekom

@@ -22,15 +22,14 @@
 
 package com.gsma.rcs.core.ims;
 
+import com.gsma.rcs.addressbook.AddressBookManager;
 import com.gsma.rcs.core.Core;
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.CoreListener;
 import com.gsma.rcs.core.ims.network.ImsConnectionManager;
 import com.gsma.rcs.core.ims.network.ImsNetworkInterface;
 import com.gsma.rcs.core.ims.network.gsm.CallManager;
 import com.gsma.rcs.core.ims.network.sip.SipManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpConnection;
-import com.gsma.rcs.core.ims.protocol.rtp.core.RtpSource;
 import com.gsma.rcs.core.ims.protocol.sip.SipEventListener;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
@@ -66,9 +65,6 @@ import java.util.Map;
  * @author JM. Auffret
  */
 public class ImsModule implements SipEventListener {
-    /**
-     * Core
-     */
     private Core mCore;
 
     /**
@@ -76,34 +72,23 @@ public class ImsModule implements SipEventListener {
      */
     public static UserProfile IMS_USER_PROFILE;
 
-    /**
-     * IMS connection manager
-     */
     private ImsConnectionManager mCnxManager;
 
-    /**
-     * Map of IMS services
-     */
     private Map<ImsServiceType, ImsService> mServices;
 
-    /**
-     * Service dispatcher
-     */
     private ImsServiceDispatcher mServiceDispatcher;
 
-    /**
-     * Call manager
-     */
-    private CallManager mCallManager;
+    private final CallManager mCallManager;
+
+    private final ServiceExtensionManager mExtensionManager;
 
     /**
      * flag to indicate whether instantiation is finished
      */
     private boolean mInitializationFinished = false;
 
-    /**
-     * The logger
-     */
+    private final RcsSettings mRcsSettings;
+
     private static final Logger sLogger = Logger.getLogger(ImsModule.class.getName());
 
     /**
@@ -114,45 +99,54 @@ public class ImsModule implements SipEventListener {
      * @param rcsSettings RCSsettings instance
      * @param contactManager Contact manager accessor
      * @param messagingLog Messaging log accessor
-     * @throws CoreException Exception thrown if IMS module failed to be initialized
+     * @param addressBookManager The address book manager instance
      */
     public ImsModule(Core core, Context ctx, RcsSettings rcsSettings,
-            ContactManager contactManager, MessagingLog messagingLog) {
+            ContactManager contactManager, MessagingLog messagingLog,
+            AddressBookManager addressBookManager) {
         mCore = core;
+        mRcsSettings = rcsSettings;
 
-        if (sLogger.isActivated()) {
-            sLogger.info("IMS module initialization");
-        }
-        ServiceExtensionManager.getInstance(rcsSettings).updateSupportedExtensions(ctx);
-        mCnxManager = new ImsConnectionManager(this, rcsSettings);
-
-        SipManager.TIMEOUT = rcsSettings.getSipTransactionTimeout();
-        RtpSource.CNAME = ImsModule.IMS_USER_PROFILE.getPublicUri();
-        MsrpConnection.MSRP_TRACE_ENABLED = rcsSettings.isMediaTraceActivated();
-        HttpTransferManager.HTTP_TRACE_ENABLED = rcsSettings.isMediaTraceActivated();
+        mExtensionManager = new ServiceExtensionManager(this, ctx, mCore, rcsSettings);
+        mCnxManager = new ImsConnectionManager(this, ctx, mCore, rcsSettings);
+        mCallManager = new CallManager(this, ctx);
 
         mServices = new HashMap<ImsServiceType, ImsService>();
         mServices.put(ImsServiceType.TERMS_CONDITIONS,
                 new TermsConditionsService(this, rcsSettings));
-        mServices.put(ImsServiceType.CAPABILITY, new CapabilityService(this, rcsSettings,
-                contactManager));
+        mServices.put(ImsServiceType.CAPABILITY, new CapabilityService(this, core, rcsSettings,
+                contactManager, addressBookManager));
         mServices.put(ImsServiceType.INSTANT_MESSAGING, new InstantMessagingService(this, core,
                 rcsSettings, contactManager, messagingLog));
-        mServices.put(ImsServiceType.IPCALL, new IPCallService(this, rcsSettings, contactManager));
+        mServices.put(ImsServiceType.IPCALL, new IPCallService(this, core, rcsSettings,
+                contactManager));
         mServices.put(ImsServiceType.RICHCALL, new RichcallService(this, core, contactManager,
-                rcsSettings));
+                rcsSettings, mCallManager, getIPCallService()));
         mServices.put(ImsServiceType.PRESENCE, new PresenceService(this, ctx, rcsSettings,
                 contactManager));
         mServices.put(ImsServiceType.SIP, new SipService(this, contactManager, rcsSettings));
 
         mServiceDispatcher = new ImsServiceDispatcher(this, rcsSettings);
 
-        mCallManager = new CallManager(this, ctx);
+        if (sLogger.isActivated()) {
+            sLogger.info("IMS module creation");
+        }
+    }
+
+    /**
+     * Initializes IMS module
+     */
+    public void initialize() {
+        SipManager.TIMEOUT = mRcsSettings.getSipTransactionTimeout();
+        MsrpConnection.MSRP_TRACE_ENABLED = mRcsSettings.isMediaTraceActivated();
+        HttpTransferManager.HTTP_TRACE_ENABLED = mRcsSettings.isMediaTraceActivated();
+
+        mCnxManager.initialize();
+        getInstantMessagingService().initialize();
 
         mInitializationFinished = true;
-
         if (sLogger.isActivated()) {
-            sLogger.info("IMS module has been created");
+            sLogger.info("IMS module initialization");
         }
     }
 
@@ -208,13 +202,9 @@ public class ImsModule implements SipEventListener {
         if (sLogger.isActivated()) {
             sLogger.info("Start the IMS module");
         }
-
-        // Start the service dispatcher
+        mExtensionManager.start();
         mServiceDispatcher.start();
-
-        // Start call monitoring
-        mCallManager.startCallMonitoring();
-
+        mCallManager.start();
         if (sLogger.isActivated()) {
             sLogger.info("IMS module is started");
         }
@@ -230,16 +220,10 @@ public class ImsModule implements SipEventListener {
         if (sLogger.isActivated()) {
             sLogger.info("Stop the IMS module");
         }
-
-        // Stop call monitoring
-        mCallManager.stopCallMonitoring();
-
-        // Terminate the connection manager
+        mCallManager.stop();
         mCnxManager.terminate();
-
-        // Terminate the service dispatcher
         mServiceDispatcher.terminate();
-
+        mExtensionManager.stop();
         if (sLogger.isActivated()) {
             sLogger.info("IMS module has been stopped");
         }

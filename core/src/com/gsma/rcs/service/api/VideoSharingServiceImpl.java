@@ -22,13 +22,11 @@
 
 package com.gsma.rcs.service.api;
 
-import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.service.SessionIdGenerator;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.sharing.RichCallHistory;
 import com.gsma.rcs.provider.sharing.VideoSharingDeleteTask;
@@ -106,9 +104,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @param imsLock ims lock object
      */
     public VideoSharingServiceImpl(RichcallService richcallService, RichCallHistory richCallLog,
-            RcsSettings rcsSettings, ContactManager contactManager, Core core,
-            LocalContentResolver localContentResolver, ExecutorService imOperationExecutor,
-            Object imsLock) {
+            RcsSettings rcsSettings, LocalContentResolver localContentResolver,
+            ExecutorService imOperationExecutor, Object imsLock) {
         if (sLogger.isActivated()) {
             sLogger.info("Video sharing API is loaded");
         }

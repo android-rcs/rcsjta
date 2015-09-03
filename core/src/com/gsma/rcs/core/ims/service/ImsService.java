@@ -74,16 +74,10 @@ public abstract class ImsService {
          * SIP service
          */
         SIP
-    };
+    }
 
-    /**
-     * Activation flag
-     */
     private boolean mActivated = true;
 
-    /**
-     * Service state
-     */
     private boolean mStarted = false;
 
     private ImsModule mImsModule;
@@ -244,15 +238,19 @@ public abstract class ImsService {
      */
     public void terminateAllSessions(TerminationReason reason) {
         synchronized (getImsServiceSessionOperationLock()) {
-            /* Iterate over a copy of the session set to allow removal in the cache
-               map while iterating. */
+            /*
+             * Iterate over a copy of the session set to allow removal in the cache map while
+             * iterating.
+             */
             for (ImsServiceSession session : new HashSet<ImsServiceSession>(
                     mImsServiceSessionCache.values())) {
                 session.terminateSession(reason);
             }
 
-            /* Iterate over a copy of the session set to allow removal in the cache
-               map while iterating. */
+            /*
+             * Iterate over a copy of the session set to allow removal in the cache map while
+             * iterating.
+             */
             for (ImsServiceSession session : new HashSet<ImsServiceSession>(
                     mImsServiceSessionWithoutDialogPathCache.values())) {
                 session.terminateSession(reason);

@@ -58,21 +58,12 @@ public class SipManager {
      */
     public static long TIMEOUT = 30000;
 
-    /**
-     * IMS network interface
-     */
-    private ImsNetworkInterface mNetworkInterface;
+    private final ImsNetworkInterface mNetworkInterface;
 
-    /**
-     * SIP stack
-     */
     private SipInterface sipstack;
 
     private final RcsSettings mRcsSettings;
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(SipManager.class.getSimpleName());
 
     /**
@@ -84,7 +75,6 @@ public class SipManager {
     public SipManager(ImsNetworkInterface parent, RcsSettings rcsSettings) {
         mNetworkInterface = parent;
         mRcsSettings = rcsSettings;
-
         if (sLogger.isActivated()) {
             sLogger.info("SIP manager started");
         }
@@ -175,19 +165,6 @@ public class SipManager {
     }
 
     /**
-     * Send a SIP message and create a context to wait a response
-     * 
-     * @param message SIP message
-     * @return Transaction context
-     * @throws SipPayloadException
-     * @throws SipNetworkException
-     */
-    public SipTransactionContext sendSipMessage(SipMessage message) throws SipPayloadException,
-            SipNetworkException {
-        return sendSipMessage(message, SipManager.TIMEOUT);
-    }
-
-    /**
      * Send a SIP message and wait a response
      * 
      * @param message SIP message
@@ -205,14 +182,13 @@ public class SipManager {
      * Send a SIP message and create a context to wait a response
      * 
      * @param message SIP message
-     * @param timeout SIP timeout in milliseconds
      * @return Transaction context
      * @throws SipPayloadException
      * @throws SipNetworkException
      */
-    public SipTransactionContext sendSipMessage(SipMessage message, long timeout)
-            throws SipPayloadException, SipNetworkException {
-        return sendSipMessage(message, timeout, null);
+    public SipTransactionContext sendSipMessage(SipMessage message) throws SipPayloadException,
+            SipNetworkException {
+        return sendSipMessage(message, null);
     }
 
     /**
@@ -295,13 +271,12 @@ public class SipManager {
      * Send a SIP message and create a context to wait a response
      * 
      * @param message
-     * @param timeout in milliseconds
      * @param callback callback to handle provisional response
      * @return SIP transaction context
      * @throws SipPayloadException
      * @throws SipNetworkException
      */
-    public SipTransactionContext sendSipMessage(SipMessage message, long timeout,
+    public SipTransactionContext sendSipMessage(SipMessage message,
             SipTransactionContext.INotifySipProvisionalResponse callback)
             throws SipNetworkException, SipPayloadException {
         SipTransactionContext ctx = sipstack.sendSipMessageAndWait(message, callback);
