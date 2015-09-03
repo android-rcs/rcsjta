@@ -67,37 +67,19 @@ public class PresenceService extends ImsService implements AddressBookEventListe
     /**
      * Permanent state feature
      */
-    public boolean permanentState;
+    public boolean mPermanentState;
 
-    /**
-     * Presence info
-     */
-    private PresenceInfo presenceInfo = new PresenceInfo();
+    private PresenceInfo mPresenceInfo = new PresenceInfo();
 
-    /**
-     * Publish manager
-     */
-    private PublishManager publisher;
+    private PublishManager mPublisher;
 
-    /**
-     * XDM manager
-     */
-    private XdmManager xdm;
+    private XdmManager mXdm;
 
-    /**
-     * Watcher info subscribe manager
-     */
-    private SubscribeManager watcherInfoSubscriber;
+    private SubscribeManager mWatcherInfoSubscriber;
 
-    /**
-     * Presence subscribe manager
-     */
-    private SubscribeManager presenceSubscriber;
+    private SubscribeManager mPresenceSubscriber;
 
-    /**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private Logger sLogger = Logger.getLogger(PresenceService.class.getSimpleName());
 
     /**
      * Constructor
@@ -113,19 +95,19 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         mRcsSettings = rcsSettings;
         mContactManager = contactsManager;
         // Set presence service options
-        this.permanentState = mRcsSettings.isPermanentStateModeActivated();
+        mPermanentState = mRcsSettings.isPermanentStateModeActivated();
 
         // Instantiate the XDM manager
-        xdm = new XdmManager(parent, ctx);
+        mXdm = new XdmManager(ctx);
 
         // Instantiate the publish manager
-        publisher = new PublishManager(parent, mRcsSettings);
+        mPublisher = new PublishManager(parent, mRcsSettings);
 
         // Instantiate the subscribe manager for watcher info
-        watcherInfoSubscriber = new WatcherInfoSubscribeManager(parent, mRcsSettings);
+        mWatcherInfoSubscriber = new WatcherInfoSubscribeManager(parent, mRcsSettings);
 
         // Instantiate the subscribe manager for presence
-        presenceSubscriber = new PresenceSubscribeManager(parent, mRcsSettings);
+        mPresenceSubscriber = new PresenceSubscribeManager(parent, mRcsSettings);
     }
 
     /**
@@ -141,72 +123,76 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         }
         setServiceStarted(true);
 
+        mPublisher.initialize();
+        mWatcherInfoSubscriber.initialize();
+        mPresenceSubscriber.initialize();
+
         // Listen to address book changes
         getImsModule().getCore().getAddressBookManager().addAddressBookListener(this);
 
         // Restore the last presence info from the contacts database
-        presenceInfo = mContactManager.getMyPresenceInfo();
-        if (logger.isActivated()) {
-            logger.debug("Last presence info:\n" + presenceInfo.toString());
+        mPresenceInfo = mContactManager.getMyPresenceInfo();
+        if (sLogger.isActivated()) {
+            sLogger.debug("Last presence info:\n" + mPresenceInfo.toString());
         }
 
         // Initialize the XDM interface
-        xdm.initialize();
+        mXdm.initialize();
 
         // Add me in the granted set if necessary
-        Set<ContactId> grantedContacts = xdm.getGrantedContacts();
+        Set<ContactId> grantedContacts = mXdm.getGrantedContacts();
 
         ContactId me = ImsModule.IMS_USER_PROFILE.getUsername();
 
         if (!grantedContacts.contains(me)) {
-            if (logger.isActivated()) {
-                logger.debug("The enduser is not in the granted set: add it now");
+            if (sLogger.isActivated()) {
+                sLogger.debug("The enduser is not in the granted set: add it now");
             }
-            xdm.addContactToGrantedList(me);
+            mXdm.addContactToGrantedList(me);
         }
 
         // It may be necessary to initiate the address book first launch or account check procedure
         if (StartService.getNewUserAccount(AndroidFactory.getApplicationContext())) {
-            Set<ContactId> blockedContacts = xdm.getBlockedContacts();
+            Set<ContactId> blockedContacts = mXdm.getBlockedContacts();
             firstLaunchOrAccountChangedCheck(grantedContacts, blockedContacts);
         }
 
         // Subscribe to watcher-info events
-        if (watcherInfoSubscriber.subscribe()) {
-            if (logger.isActivated()) {
-                logger.debug("Subscribe manager is started with success for watcher-info");
+        if (mWatcherInfoSubscriber.subscribe()) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Subscribe manager is started with success for watcher-info");
             }
         } else {
-            if (logger.isActivated()) {
-                logger.debug("Subscribe manager can't be started for watcher-info");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Subscribe manager can't be started for watcher-info");
             }
         }
 
         // Subscribe to presence events
-        if (presenceSubscriber.subscribe()) {
-            if (logger.isActivated()) {
-                logger.debug("Subscribe manager is started with success for presence");
+        if (mPresenceSubscriber.subscribe()) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Subscribe manager is started with success for presence");
             }
         } else {
-            if (logger.isActivated()) {
-                logger.debug("Subscribe manager can't be started for presence");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Subscribe manager can't be started for presence");
             }
         }
 
         // Publish initial presence info
         String xml;
-        if (permanentState) {
-            xml = buildPartialPresenceInfoDocument(presenceInfo);
+        if (mPermanentState) {
+            xml = buildPartialPresenceInfoDocument(mPresenceInfo);
         } else {
-            xml = buildPresenceInfoDocument(presenceInfo);
+            xml = buildPresenceInfoDocument(mPresenceInfo);
         }
-        if (publisher.publish(xml)) {
-            if (logger.isActivated()) {
-                logger.debug("Publish manager is started with success");
+        if (mPublisher.publish(xml)) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Publish manager is started with success");
             }
         } else {
-            if (logger.isActivated()) {
-                logger.debug("Publish manager can't be started");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Publish manager can't be started");
             }
         }
 
@@ -230,16 +216,16 @@ public class PresenceService extends ImsService implements AddressBookEventListe
             Set<ContactId> blockedContacts) throws SipPayloadException, SipNetworkException {
         final String publicUri = ImsModule.IMS_USER_PROFILE.getPublicUri();
         try {
-            boolean logActivated = logger.isActivated();
+            boolean logActivated = sLogger.isActivated();
             if (logActivated) {
-                logger.debug("First launch or account change check procedure");
+                sLogger.debug("First launch or account change check procedure");
             }
             mContactManager.flushRcsContactProvider();
             ContactId me = null;
             PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(publicUri);
             if (number == null) {
                 if (logActivated) {
-                    logger.error("Cannot parse user contact ".concat(publicUri));
+                    sLogger.error("Cannot parse user contact ".concat(publicUri));
                 }
             } else {
                 me = ContactUtil.createContactIdFromValidatedData(number);
@@ -249,7 +235,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                 if (me != null && !contact.equals(me)) {
                     if (!PresenceUtils.isNumberInAddressBook(contact)) {
                         if (logActivated) {
-                            logger.debug(new StringBuilder("The RCS number ").append(contact)
+                            sLogger.debug(new StringBuilder("The RCS number ").append(contact)
                                     .append(" was not found in the address book: add it")
                                     .toString());
                         }
@@ -264,7 +250,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
             for (ContactId contact : blockedContacts) {
                 if (!PresenceUtils.isNumberInAddressBook(contact)) {
                     if (logActivated) {
-                        logger.debug(new StringBuilder("The RCS number ").append(contact)
+                        sLogger.debug(new StringBuilder("The RCS number ").append(contact)
                                 .append(" was not found in the address book: add it").toString());
                     }
                     PresenceUtils.createRcsContactIfNeeded(AndroidFactory.getApplicationContext(),
@@ -303,63 +289,63 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         // Stop listening to address book changes
         getImsModule().getCore().getAddressBookManager().removeAddressBookListener(this);
 
-        if (!permanentState) {
+        if (!mPermanentState) {
             // If not permanent state mode: publish a last presence info before
             // to quit
             if ((getImsModule().getCurrentNetworkInterface() != null)
                     && getImsModule().getCurrentNetworkInterface().isRegistered()
-                    && publisher.isPublished()) {
-                String xml = buildPresenceInfoDocument(presenceInfo);
-                publisher.publish(xml);
+                    && mPublisher.isPublished()) {
+                String xml = buildPresenceInfoDocument(mPresenceInfo);
+                mPublisher.publish(xml);
             }
         }
 
         // Stop publish
-        publisher.terminate();
+        mPublisher.terminate();
 
         // Stop subscriptions
-        watcherInfoSubscriber.terminate();
-        presenceSubscriber.terminate();
+        mWatcherInfoSubscriber.terminate();
+        mPresenceSubscriber.terminate();
     }
 
     /**
      * Check the IMS service
      */
     public void check() {
-        if (logger.isActivated()) {
-            logger.debug("Check presence service");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Check presence service");
         }
 
         // Check subscribe manager status for watcher-info events
-        if (!watcherInfoSubscriber.isSubscribed()) {
-            if (logger.isActivated()) {
-                logger.debug("Subscribe manager not yet started for watcher-info");
+        if (!mWatcherInfoSubscriber.isSubscribed()) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Subscribe manager not yet started for watcher-info");
             }
 
-            if (watcherInfoSubscriber.subscribe()) {
-                if (logger.isActivated()) {
-                    logger.debug("Subscribe manager is started with success for watcher-info");
+            if (mWatcherInfoSubscriber.subscribe()) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Subscribe manager is started with success for watcher-info");
                 }
             } else {
-                if (logger.isActivated()) {
-                    logger.debug("Subscribe manager can't be started for watcher-info");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Subscribe manager can't be started for watcher-info");
                 }
             }
         }
 
         // Check subscribe manager status for presence events
-        if (!presenceSubscriber.isSubscribed()) {
-            if (logger.isActivated()) {
-                logger.debug("Subscribe manager not yet started for presence");
+        if (!mPresenceSubscriber.isSubscribed()) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Subscribe manager not yet started for presence");
             }
 
-            if (presenceSubscriber.subscribe()) {
-                if (logger.isActivated()) {
-                    logger.debug("Subscribe manager is started with success for presence");
+            if (mPresenceSubscriber.subscribe()) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Subscribe manager is started with success for presence");
                 }
             } else {
-                if (logger.isActivated()) {
-                    logger.debug("Subscribe manager can't be started for presence");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Subscribe manager can't be started for presence");
                 }
             }
         }
@@ -371,7 +357,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * @return Boolean
      */
     public boolean isPermanentState() {
-        return permanentState;
+        return mPermanentState;
     }
 
     /**
@@ -380,7 +366,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * @param info Presence info
      */
     public void setPresenceInfo(PresenceInfo info) {
-        presenceInfo = info;
+        mPresenceInfo = info;
     }
 
     /**
@@ -389,7 +375,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * @return Presence info
      */
     public PresenceInfo getPresenceInfo() {
-        return presenceInfo;
+        return mPresenceInfo;
     }
 
     /**
@@ -398,7 +384,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * @return Publish manager
      */
     public PublishManager getPublishManager() {
-        return publisher;
+        return mPublisher;
     }
 
     /**
@@ -407,7 +393,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * @return Subscribe manager
      */
     public SubscribeManager getWatcherInfoSubscriber() {
-        return watcherInfoSubscriber;
+        return mWatcherInfoSubscriber;
     }
 
     /**
@@ -416,7 +402,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * @return Subscribe manager
      */
     public SubscribeManager getPresenceSubscriber() {
-        return presenceSubscriber;
+        return mPresenceSubscriber;
     }
 
     /**
@@ -425,7 +411,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * @return XDM manager
      */
     public XdmManager getXdmManager() {
-        return xdm;
+        return mXdm;
     }
 
     /**
@@ -564,7 +550,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                     .append("\" opd:fsize=\"").append(photoIcon.getSize())
                     .append("\" opd:contenttype=\"").append(photoIcon.getType())
                     .append("\" opd:resolution=\"").append(photoIcon.getResolution()).append("\">")
-                    .append(xdm.getEndUserPhotoIconUrl()).append("</rpid:status-icon>")
+                    .append(mXdm.getEndUserPhotoIconUrl()).append("</rpid:status-icon>")
                     .append(SipUtils.CRLF);
         }
 
@@ -697,26 +683,26 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         boolean result = false;
 
         // Photo-icon management
-        PhotoIcon currentPhoto = presenceInfo.getPhotoIcon();
+        PhotoIcon currentPhoto = mPresenceInfo.getPhotoIcon();
         if ((photoIcon != null) && (photoIcon.getEtag() == null)) {
             // Test photo icon size
             long maxSize = mRcsSettings.getMaxPhotoIconSize();
             if ((maxSize != 0) && (photoIcon.getSize() > maxSize)) {
-                if (logger.isActivated()) {
-                    logger.debug("Max photo size achieved");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Max photo size achieved");
                 }
                 return false;
             }
 
             // Upload the new photo-icon
-            if (logger.isActivated()) {
-                logger.info("Upload the photo-icon");
+            if (sLogger.isActivated()) {
+                sLogger.info("Upload the photo-icon");
             }
             result = uploadPhotoIcon(photoIcon);
         } else if ((photoIcon == null) && (currentPhoto != null)) {
             // Delete the current photo-icon
-            if (logger.isActivated()) {
-                logger.info("Delete the photo-icon");
+            if (sLogger.isActivated()) {
+                sLogger.info("Delete the photo-icon");
             }
             result = deletePhotoIcon();
         } else {
@@ -750,13 +736,13 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         info.resetTimestamp();
 
         // Publish presence info
-        if (permanentState) {
+        if (mPermanentState) {
             // Permanent state procedure: publish the new presence info via XCAP
-            if (logger.isActivated()) {
-                logger.info("Publish presence info via XDM request (permanent state)");
+            if (sLogger.isActivated()) {
+                sLogger.info("Publish presence info via XDM request (permanent state)");
             }
             String xml = buildPermanentPresenceInfoDocument(info);
-            HttpResponse response = xdm.setPresenceInfo(xml);
+            HttpResponse response = mXdm.setPresenceInfo(xml);
             if ((response != null) && response.isSuccessfullResponse()) {
                 result = true;
             } else {
@@ -764,16 +750,16 @@ public class PresenceService extends ImsService implements AddressBookEventListe
             }
         } else {
             // SIP procedure: publish the new presence info via SIP
-            if (logger.isActivated()) {
-                logger.info("Publish presence info via SIP request");
+            if (sLogger.isActivated()) {
+                sLogger.info("Publish presence info via SIP request");
             }
             String xml = buildPresenceInfoDocument(info);
-            result = publisher.publish(xml);
+            result = mPublisher.publish(xml);
         }
 
         // If server updated with success then update contact info cache
         if (result) {
-            presenceInfo = info;
+            mPresenceInfo = info;
         }
 
         return result;
@@ -789,7 +775,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      */
     public boolean uploadPhotoIcon(PhotoIcon photo) throws SipPayloadException, SipNetworkException {
         // Upload the photo to the XDM server
-        HttpResponse response = xdm.uploadEndUserPhoto(photo);
+        HttpResponse response = mXdm.uploadEndUserPhoto(photo);
         if ((response != null) && response.isSuccessfullResponse()) {
             // Extract the Etag value in the 200 OK response
             String etag = response.getHeader("Etag");
@@ -818,7 +804,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      */
     public boolean deletePhotoIcon() throws SipPayloadException, SipNetworkException {
         // Delete the photo from the XDM server
-        HttpResponse response = xdm.deleteEndUserPhoto();
+        HttpResponse response = mXdm.deleteEndUserPhoto();
         if ((response != null)
                 && (response.isSuccessfullResponse() || response.isNotFoundResponse())) {
             return true;
@@ -838,13 +824,13 @@ public class PresenceService extends ImsService implements AddressBookEventListe
     public boolean inviteContactToSharePresence(ContactId contact) throws SipPayloadException,
             SipNetworkException {
         // Remove contact from the blocked contacts list
-        xdm.removeContactFromBlockedList(contact);
+        mXdm.removeContactFromBlockedList(contact);
 
         // Remove contact from the revoked contacts list
-        xdm.removeContactFromRevokedList(contact);
+        mXdm.removeContactFromRevokedList(contact);
 
         // Add contact in the granted contacts list
-        HttpResponse response = xdm.addContactToGrantedList(contact);
+        HttpResponse response = mXdm.addContactToGrantedList(contact);
         if ((response != null) && response.isSuccessfullResponse()) {
             return true;
         } else {
@@ -863,13 +849,13 @@ public class PresenceService extends ImsService implements AddressBookEventListe
     public boolean revokeSharedContact(ContactId contact) throws SipPayloadException,
             SipNetworkException {
         // Add contact in the revoked contacts list
-        HttpResponse response = xdm.addContactToRevokedList(contact);
+        HttpResponse response = mXdm.addContactToRevokedList(contact);
         if ((response == null) || (!response.isSuccessfullResponse())) {
             return false;
         }
 
         // Remove contact from the granted contacts list
-        response = xdm.removeContactFromGrantedList(contact);
+        response = mXdm.removeContactFromGrantedList(contact);
         if ((response != null)
                 && (response.isSuccessfullResponse() || response.isNotFoundResponse())) {
             return true;
@@ -889,7 +875,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
     public boolean removeRevokedContact(ContactId contact) throws SipPayloadException,
             SipNetworkException {
         // Remove contact from the revoked contacts list
-        HttpResponse response = xdm.removeContactFromRevokedList(contact);
+        HttpResponse response = mXdm.removeContactFromRevokedList(contact);
         if ((response != null)
                 && (response.isSuccessfullResponse() || response.isNotFoundResponse())) {
             return true;
@@ -909,7 +895,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
     public boolean removeBlockedContact(ContactId contact) throws SipPayloadException,
             SipNetworkException {
         // Remove contact from the blocked contacts list
-        HttpResponse response = xdm.removeContactFromBlockedList(contact);
+        HttpResponse response = mXdm.removeContactFromBlockedList(contact);
         if ((response != null)
                 && (response.isSuccessfullResponse() || response.isNotFoundResponse())) {
             return true;
@@ -934,17 +920,17 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         for (ContactId contact : rcsNumbers) {
             if (!PresenceUtils.isNumberInAddressBook(contact)) {
                 // If it is not present in the address book
-                if (logger.isActivated()) {
-                    logger.debug("The RCS number " + contact
+                if (sLogger.isActivated()) {
+                    sLogger.debug("The RCS number " + contact
                             + " was not found in the address book any more.");
                 }
 
                 if (mContactManager.isNumberShared(contact)
                         || mContactManager.isNumberInvited(contact)) {
                     // Active or Invited
-                    if (logger.isActivated()) {
-                        logger.debug(contact + " is either active or invited");
-                        logger.debug("We remove it from the buddy list");
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(contact + " is either active or invited");
+                        sLogger.debug("We remove it from the buddy list");
                     }
                     // We revoke it
                     boolean result = revokeSharedContact(contact);
@@ -958,16 +944,16 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                             mContactManager.updateRcsStatusOrCreateNewContact(contact,
                                     RcsStatus.RCS_CAPABLE);
                         } else {
-                            if (logger.isActivated()) {
-                                logger.error("Something went wrong when revoking shared contact");
+                            if (sLogger.isActivated()) {
+                                sLogger.error("Something went wrong when revoking shared contact");
                             }
                         }
                     }
                 } else if (mContactManager.isNumberBlocked(contact)) {
                     // Blocked
-                    if (logger.isActivated()) {
-                        logger.debug(contact + " is blocked");
-                        logger.debug("We remove it from the blocked list");
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(contact + " is blocked");
+                        sLogger.debug("We remove it from the blocked list");
                     }
                     // We unblock it
                     boolean result = removeBlockedContact(contact);
@@ -976,23 +962,23 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                         mContactManager.updateRcsStatusOrCreateNewContact(contact,
                                 RcsStatus.RCS_CAPABLE);
                     } else {
-                        if (logger.isActivated()) {
-                            logger.error("Something went wrong when removing blocked contact");
+                        if (sLogger.isActivated()) {
+                            sLogger.error("Something went wrong when removing blocked contact");
                         }
                     }
                 } else {
                     if (mContactManager.isNumberWilling(contact)) {
                         // Willing
-                        if (logger.isActivated()) {
-                            logger.debug(contact + " is willing");
-                            logger.debug("Nothing to do");
+                        if (sLogger.isActivated()) {
+                            sLogger.debug(contact + " is willing");
+                            sLogger.debug("Nothing to do");
                         }
                     } else {
                         if (mContactManager.isNumberCancelled(contact)) {
                             // Cancelled
-                            if (logger.isActivated()) {
-                                logger.debug(contact + " is cancelled");
-                                logger.debug("We remove it from rich address book provider");
+                            if (sLogger.isActivated()) {
+                                sLogger.debug(contact + " is cancelled");
+                                sLogger.debug("We remove it from rich address book provider");
                             }
                             // Remove entry from rich address book provider
                             mContactManager.updateRcsStatusOrCreateNewContact(contact,

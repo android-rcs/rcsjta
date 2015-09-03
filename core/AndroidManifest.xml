@@ -185,24 +185,6 @@
             </intent-filter>
         </receiver>
 
-        <!-- Changing locale -->
-
-        <receiver android:name="com.gsma.rcs.addressbook.LocaleChangedReceiver" >
-            <intent-filter>
-                <action android:name="android.intent.action.LOCALE_CHANGED" />
-            </intent-filter>
-        </receiver>
-
-        <!-- External capability monitoring -->
-        <receiver android:name="com.gsma.rcs.core.ims.service.capability.ExternalCapabilityMonitoring" >
-            <intent-filter>
-                <action android:name="android.intent.action.PACKAGE_ADDED" />
-                <action android:name="android.intent.action.PACKAGE_REMOVED" />
-
-                <data android:scheme="package" />
-            </intent-filter>
-        </receiver>
-
         <!-- SMS for Provisioning -->
         <receiver android:name="com.gsma.rcs.provisioning.https.HttpsProvisioningSMS" >
         </receiver>

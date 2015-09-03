@@ -22,9 +22,6 @@
 
 package com.gsma.rcs.core.ims.userprofile;
 
-import java.util.ListIterator;
-import java.util.Vector;
-
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtil;
@@ -34,6 +31,8 @@ import com.gsma.services.rcs.contact.ContactId;
 
 import android.net.Uri;
 import android.text.TextUtils;
+
+import java.util.ListIterator;
 
 import javax2.sip.header.ExtensionHeader;
 import javax2.sip.header.Header;
@@ -88,11 +87,6 @@ public class UserProfile {
      * IM conference URI
      */
     private Uri mImConference;
-
-    /**
-     * Associated URIs
-     */
-    private Vector<String> mAssociatedUriList = new Vector<String>();
 
     /**
      * Preferred URI
@@ -167,9 +161,8 @@ public class UserProfile {
     public String getPublicUri() {
         if (mPreferred == null) {
             return PhoneUtils.formatContactIdToUri(mContact).toString();
-        } else {
-            return mPreferred.toString();
         }
+        return mPreferred.toString();
     }
 
     private String formatAddressWithDisplayName(String displayName, String address) {
@@ -221,7 +214,6 @@ public class UserProfile {
             ExtensionHeader header = (ExtensionHeader) uris.next();
             String value = header.getValue();
             value = SipUtils.extractUriFromAddress(value);
-            mAssociatedUriList.addElement(value);
 
             if (value.startsWith(PhoneUtils.SIP_URI_HEADER)) {
                 sipUri = value;

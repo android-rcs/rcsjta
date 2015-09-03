@@ -44,18 +44,12 @@ import android.net.Uri;
  */
 public class FileTransferDequeueTask extends DequeueTask {
 
-    private final boolean mDisplayedReportEnabled;
-
-    private final boolean mDeliveryReportEnabled;
-
     public FileTransferDequeueTask(Object lock, Context ctx, Core core, MessagingLog messagingLog,
             ChatServiceImpl chatService, FileTransferServiceImpl fileTransferService,
             ContactManager contactManager, RcsSettings rcsSettings) {
         super(lock, ctx, core, contactManager, messagingLog, rcsSettings, chatService,
                 fileTransferService);
-        final ImdnManager imdnManager = mImService.getImdnManager();
-        mDisplayedReportEnabled = imdnManager.isRequestGroupDeliveryDisplayedReportsEnabled();
-        mDeliveryReportEnabled = imdnManager.isDeliveryDeliveredReportsEnabled();
+
     }
 
     public void run() {
@@ -68,6 +62,10 @@ public class FileTransferDequeueTask extends DequeueTask {
         String chatId = null;
         boolean isGroupFileTransfer = false;
         Cursor cursor = null;
+        ImdnManager imdnManager = mImService.getImdnManager();
+        boolean displayedReportEnabled = imdnManager
+                .isRequestGroupDeliveryDisplayedReportsEnabled();
+        boolean deliveryReportEnabled = imdnManager.isDeliveryDeliveredReportsEnabled();
         try {
             synchronized (mLock) {
                 if (!isImsConnected()) {
@@ -186,7 +184,7 @@ public class FileTransferDequeueTask extends DequeueTask {
                                     GroupFileTransferImpl groupFileTransfer = mFileTransferService
                                             .getOrCreateGroupFileTransfer(chatId, id);
                                     groupChat.dequeueGroupFileInfo(id, fileInfo,
-                                            mDisplayedReportEnabled, mDeliveryReportEnabled,
+                                            displayedReportEnabled, deliveryReportEnabled,
                                             groupFileTransfer);
                                 } else {
                                     OneToOneChatImpl oneToOneChat = mChatService
@@ -194,7 +192,7 @@ public class FileTransferDequeueTask extends DequeueTask {
                                     OneToOneFileTransferImpl oneToOneFileTransfer = mFileTransferService
                                             .getOrCreateOneToOneFileTransfer(contact, id);
                                     oneToOneChat.dequeueOneToOneFileInfo(id, fileInfo,
-                                            mDisplayedReportEnabled, mDeliveryReportEnabled,
+                                            displayedReportEnabled, deliveryReportEnabled,
                                             oneToOneFileTransfer);
                                 }
                             } catch (MsrpException e) {

@@ -27,10 +27,10 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.content.ContentManager;
-import com.gsma.rcs.core.content.GeolocContent;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.gsm.CallManager;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
@@ -38,6 +38,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
+import com.gsma.rcs.core.ims.service.ipcall.IPCallService;
 import com.gsma.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.gsma.rcs.core.ims.service.richcall.geoloc.OriginatingGeolocTransferSession;
 import com.gsma.rcs.core.ims.service.richcall.geoloc.TerminatingGeolocTransferSession;
@@ -94,9 +95,6 @@ public class RichcallService extends ImsService {
             FeatureTags.FEATURE_3GPP_VIDEO_SHARE, FeatureTags.FEATURE_3GPP_LOCATION_SHARE
     };
 
-    /**
-     * The logger
-     */
     private final static Logger sLogger = Logger.getLogger(RichcallService.class.getSimpleName());
 
     /**
@@ -118,25 +116,37 @@ public class RichcallService extends ImsService {
 
     private final RcsSettings mRcsSettings;
 
+    private final Core mCore;
+
+    private final CallManager mCallManager;
+
+    private final IPCallService mIpCallService;
+
     /**
      * Constructor
      * 
      * @param parent IMS module
+     * @param core The Core instance
      * @param contactsManager ContactManager
      * @param rcsSettings
+     * @param callManager
+     * @param ipCallService
      */
     public RichcallService(ImsModule parent, Core core, ContactManager contactsManager,
-            RcsSettings rcsSettings) {
+            RcsSettings rcsSettings, CallManager callManager, IPCallService ipCallService) {
         super(parent, true);
+        mCore = core;
         mContactManager = contactsManager;
         mRcsSettings = rcsSettings;
+        mCallManager = callManager;
+        mIpCallService = ipCallService;
     }
 
     private void handleImageSharingInvitationRejected(SipRequest invite, ContactId contact,
             ImageSharing.ReasonCode reasonCode, long timestamp) throws SipPayloadException {
         MmContent content = ContentManager.createMmContentFromSdp(invite, mRcsSettings);
-        getImsModule().getCore().getListener()
-                .handleImageSharingInvitationRejected(contact, content, reasonCode, timestamp);
+        mCore.getListener().handleImageSharingInvitationRejected(contact, content, reasonCode,
+                timestamp);
     }
 
     private void handleVideoSharingInvitationRejected(SipRequest invite, ContactId contact,
@@ -145,16 +155,13 @@ public class RichcallService extends ImsService {
         SipUtils.assertContentIsNotNull(remoteSdp, invite);
         VideoContent content = ContentManager.createLiveVideoContentFromSdp(remoteSdp
                 .getBytes(UTF8));
-        getImsModule().getCore().getListener()
-                .handleVideoSharingInvitationRejected(contact, content, reasonCode, timestamp);
+        mCore.getListener().handleVideoSharingInvitationRejected(contact, content, reasonCode,
+                timestamp);
     }
 
-    private void handleGeolocSharingInvitationRejected(SipRequest invite, ContactId contact,
-            ReasonCode reasonCode, long timestamp) throws SipPayloadException {
-        GeolocContent content = (GeolocContent) ContentManager.createMmContentFromSdp(invite,
-                mRcsSettings);
-        getImsModule().getCore().getListener()
-                .handleGeolocSharingInvitationRejected(contact, content, reasonCode, timestamp);
+    private void handleGeolocSharingInvitationRejected(ContactId contact, ReasonCode reasonCode,
+            long timestamp) {
+        mCore.getListener().handleGeolocSharingInvitationRejected(contact, reasonCode, timestamp);
     }
 
     /**
@@ -281,10 +288,10 @@ public class RichcallService extends ImsService {
             sLogger.debug(new StringBuilder("Remove ImageTransferSession with sessionId '")
                     .append(sessionId).append("'").toString());
         }
-                synchronized (getImsServiceSessionOperationLock()) {
-                    mImageTransferSessionCache.remove(sessionId);
-                    removeImsServiceSession(session);
-                }
+        synchronized (getImsServiceSessionOperationLock()) {
+            mImageTransferSessionCache.remove(sessionId);
+            removeImsServiceSession(session);
+        }
     }
 
     public ImageTransferSession getImageTransferSession(String sessionId) {
@@ -315,10 +322,10 @@ public class RichcallService extends ImsService {
             sLogger.debug(new StringBuilder("Remove VideoStreamingSession with sessionId '")
                     .append(sessionId).append("'").toString());
         }
-                synchronized (getImsServiceSessionOperationLock()) {
-                    mVideoStremaingSessionCache.remove(sessionId);
-                    removeImsServiceSession(session);
-                }
+        synchronized (getImsServiceSessionOperationLock()) {
+            mVideoStremaingSessionCache.remove(sessionId);
+            removeImsServiceSession(session);
+        }
     }
 
     public VideoStreamingSession getVideoSharingSession(String sessionId) {
@@ -349,10 +356,10 @@ public class RichcallService extends ImsService {
             sLogger.debug(new StringBuilder("Remove GeolocTransferSession with sessionId '")
                     .append(sessionId).append("'").toString());
         }
-                synchronized (getImsServiceSessionOperationLock()) {
-                    mGeolocTransferSessionCache.remove(sessionId);
-                    removeImsServiceSession(session);
-                }
+        synchronized (getImsServiceSessionOperationLock()) {
+            mGeolocTransferSessionCache.remove(sessionId);
+            removeImsServiceSession(session);
+        }
     }
 
     public GeolocTransferSession getGeolocTransferSession(String sessionId) {
@@ -372,10 +379,8 @@ public class RichcallService extends ImsService {
      * @return Boolean
      */
     public boolean isCallConnectedWith(ContactId contact) {
-        boolean csCall = (getImsModule() != null) && (getImsModule().getCallManager() != null)
-                && getImsModule().getCallManager().isCallConnectedWith(contact);
-        boolean ipCall = (getImsModule() != null) && (getImsModule().getIPCallService() != null)
-                && getImsModule().getIPCallService().isCallConnectedWith(contact);
+        boolean csCall = mCallManager.isCallConnectedWith(contact);
+        boolean ipCall = mIpCallService.isCallConnectedWith(contact);
         return (csCall || ipCall);
     }
 
@@ -566,7 +571,7 @@ public class RichcallService extends ImsService {
         ImageTransferSession session = new TerminatingImageTransferSession(this, invite, contact,
                 mRcsSettings, timestamp, mContactManager);
 
-        getImsModule().getCore().getListener().handleContentSharingTransferInvitation(session);
+        mCore.getListener().handleContentSharingTransferInvitation(session);
 
         session.startSession();
     }
@@ -735,7 +740,7 @@ public class RichcallService extends ImsService {
         VideoStreamingSession session = new TerminatingVideoStreamingSession(this, invite, contact,
                 mRcsSettings, timestamp, mContactManager);
 
-        getImsModule().getCore().getListener().handleContentSharingStreamingInvitation(session);
+        mCore.getListener().handleContentSharingStreamingInvitation(session);
 
         session.startSession();
     }
@@ -819,8 +824,8 @@ public class RichcallService extends ImsService {
                 sLogger.debug("Contact " + contact
                         + " is blocked: automatically reject the sharing invitation");
             }
-            handleGeolocSharingInvitationRejected(invite, contact,
-                    GeolocSharing.ReasonCode.REJECTED_SPAM, timestamp);
+            handleGeolocSharingInvitationRejected(contact, GeolocSharing.ReasonCode.REJECTED_SPAM,
+                    timestamp);
             // Send a 603 Decline response
             sendErrorResponse(invite, Response.DECLINE);
             return;
@@ -833,7 +838,7 @@ public class RichcallService extends ImsService {
             if (logActivated) {
                 sLogger.debug("Max sessions reached");
             }
-            handleGeolocSharingInvitationRejected(invite, contact,
+            handleGeolocSharingInvitationRejected(contact,
                     GeolocSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS, timestamp);
             rejectInvitation = true;
         } else if (isCurrentlyGeolocSharingUniDirectional()) {
@@ -843,7 +848,7 @@ public class RichcallService extends ImsService {
                 if (logActivated) {
                     sLogger.debug("Max terminating sessions reached");
                 }
-                handleGeolocSharingInvitationRejected(invite, contact,
+                handleGeolocSharingInvitationRejected(contact,
                         GeolocSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS, timestamp);
                 rejectInvitation = true;
             } else if (contact == null || !contact.equals(currentSession.getRemoteContact())) {
@@ -851,7 +856,7 @@ public class RichcallService extends ImsService {
                 if (logActivated) {
                     sLogger.debug("Only bidirectional session with same contact authorized");
                 }
-                handleGeolocSharingInvitationRejected(invite, contact,
+                handleGeolocSharingInvitationRejected(contact,
                         GeolocSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS, timestamp);
                 rejectInvitation = true;
             }
@@ -868,7 +873,7 @@ public class RichcallService extends ImsService {
         GeolocTransferSession session = new TerminatingGeolocTransferSession(this, invite, contact,
                 mRcsSettings, timestamp, mContactManager);
 
-        getImsModule().getCore().getListener().handleContentSharingTransferInvitation(session);
+        mCore.getListener().handleContentSharingTransferInvitation(session);
 
         session.startSession();
     }

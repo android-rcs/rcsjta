@@ -70,39 +70,18 @@ public class PublishManager extends PeriodicRefresher {
      */
     private static final String REGISTRY_SIP_ETAG_EXPIRATION = "SipETagExpiration";
 
-    /**
-     * IMS module
-     */
     private ImsModule mImsModule;
 
-    /**
-     * Expire period in milliseconds
-     */
     private long mExpirePeriod;
 
-    /**
-     * Dialog path
-     */
     private SipDialogPath mDialogPath;
 
-    /**
-     * Entity tag
-     */
     private String mEntityTag;
 
-    /**
-     * Published flag
-     */
     private boolean mPublished = false;
 
-    /**
-     * Authentication agent
-     */
     private SessionAuthenticationAgent mAuthenticationAgent;
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(PublishManager.class.getName());
 
     private final RcsSettings mRcsSettings;
@@ -115,10 +94,12 @@ public class PublishManager extends PeriodicRefresher {
      */
     public PublishManager(ImsModule parent, RcsSettings rcsSettings) {
         mImsModule = parent;
-        mAuthenticationAgent = new SessionAuthenticationAgent(mImsModule);
         mRcsSettings = rcsSettings;
+    }
 
-        long defaultExpirePeriod = rcsSettings.getPublishExpirePeriod();
+    public void initialize() {
+        mAuthenticationAgent = new SessionAuthenticationAgent(mImsModule);
+        long defaultExpirePeriod = mRcsSettings.getPublishExpirePeriod();
         long minExpireValue = RegistryFactory.getFactory().readLong(REGISTRY_MIN_EXPIRE_PERIOD, -1);
         if ((minExpireValue != -1) && (defaultExpirePeriod < minExpireValue)) {
             mExpirePeriod = minExpireValue;

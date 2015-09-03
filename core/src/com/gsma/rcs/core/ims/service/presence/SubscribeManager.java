@@ -98,7 +98,6 @@ public abstract class SubscribeManager extends PeriodicRefresher {
      */
     public SubscribeManager(ImsModule parent, RcsSettings rcsSettings) {
         mImsModule = parent;
-        mAuthenticationAgent = new SessionAuthenticationAgent(mImsModule);
         mRcsSettings = rcsSettings;
 
         long defaultExpirePeriod = rcsSettings.getSubscribeExpirePeriod();
@@ -108,6 +107,10 @@ public abstract class SubscribeManager extends PeriodicRefresher {
         } else {
             mExpirePeriod = defaultExpirePeriod;
         }
+    }
+
+    public void initialize() {
+        mAuthenticationAgent = new SessionAuthenticationAgent(mImsModule);
     }
 
     /**

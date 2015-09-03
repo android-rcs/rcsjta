@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.ipcall;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.content.AudioContent;
 import com.gsma.rcs.core.content.ContentManager;
@@ -75,9 +76,6 @@ public class IPCallService extends ImsService {
 
     private final RcsSettings mRcsSettings;
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(IPCallService.class.getSimpleName());
 
     /**
@@ -85,20 +83,22 @@ public class IPCallService extends ImsService {
      */
     private Map<String, IPCallSession> mIPCallSessionCache = new HashMap<String, IPCallSession>();
 
-    /**
-     * Contacts manager
-     */
     private final ContactManager mContactManager;
+
+    private final Core mCore;
 
     /**
      * Constructor
      * 
      * @param parent IMS module
+     * @param core The Core instance
      * @param rcsSettings RcsSettings
      * @param contactsManager ContactManager
      */
-    public IPCallService(ImsModule parent, RcsSettings rcsSettings, ContactManager contactsManager) {
+    public IPCallService(ImsModule parent, Core core, RcsSettings rcsSettings,
+            ContactManager contactsManager) {
         super(parent, true);
+        mCore = core;
         mRcsSettings = rcsSettings;
         mContactManager = contactsManager;
     }
@@ -112,11 +112,8 @@ public class IPCallService extends ImsService {
                 .createLiveAudioContentFromSdp(sessionDescriptionProtocol);
         VideoContent videoContent = ContentManager
                 .createLiveVideoContentFromSdp(sessionDescriptionProtocol);
-        getImsModule()
-                .getCore()
-                .getListener()
-                .handleIPCallInvitationRejected(contact, audioContent, videoContent, reasonCode,
-                        timestamp);
+        mCore.getListener().handleIPCallInvitationRejected(contact, audioContent, videoContent,
+                reasonCode, timestamp);
     }
 
     /**
@@ -165,10 +162,10 @@ public class IPCallService extends ImsService {
             sLogger.debug(new StringBuilder("Remove IPCallSession with call ID '").append(callId)
                     .append("'").toString());
         }
-                synchronized (getImsServiceSessionOperationLock()) {
-                    mIPCallSessionCache.remove(callId);
-                    removeImsServiceSession(session);
-                }
+        synchronized (getImsServiceSessionOperationLock()) {
+            mIPCallSessionCache.remove(callId);
+            removeImsServiceSession(session);
+        }
     }
 
     public IPCallSession getIPCallSession(String sessionId) {
@@ -291,7 +288,7 @@ public class IPCallService extends ImsService {
         IPCallSession session = new TerminatingIPCallSession(this, invite, contact, mRcsSettings,
                 timestamp, mContactManager);
 
-        getImsModule().getCore().getListener().handleIPCallInvitation(session);
+        mCore.getListener().handleIPCallInvitation(session);
 
         session.startSession();
     }

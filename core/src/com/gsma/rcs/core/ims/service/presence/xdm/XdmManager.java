@@ -107,19 +107,10 @@ public class XdmManager {
 
     private static final int DEFAULT_HTTP_PORT = 80;
 
-    /**
-     * XDM server address
-     */
     private Uri xdmServerAddr;
 
-    /**
-     * XDM server login
-     */
     private String xdmServerLogin;
 
-    /**
-     * XDM server password
-     */
     private String xdmServerPwd;
 
     /**
@@ -129,9 +120,6 @@ public class XdmManager {
 
     private Context mCtx;
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(XdmManager.class.getName());
 
     /**
@@ -140,10 +128,7 @@ public class XdmManager {
      * @param parent IMS module
      * @param ctx Context
      */
-    public XdmManager(ImsModule parent, Context ctx) {
-        xdmServerAddr = ImsModule.IMS_USER_PROFILE.getXdmServerAddr();
-        xdmServerLogin = ImsModule.IMS_USER_PROFILE.getXdmServerLogin();
-        xdmServerPwd = ImsModule.IMS_USER_PROFILE.getXdmServerPassword();
+    public XdmManager(Context ctx) {
         mCtx = ctx;
     }
 
@@ -387,6 +372,10 @@ public class XdmManager {
      */
     public void initialize() throws SipPayloadException, SipNetworkException {
         try {
+            xdmServerAddr = ImsModule.IMS_USER_PROFILE.getXdmServerAddr();
+            xdmServerLogin = ImsModule.IMS_USER_PROFILE.getXdmServerLogin();
+            xdmServerPwd = ImsModule.IMS_USER_PROFILE.getXdmServerPassword();
+
             HttpResponse response = getXcapDocuments();
             if (!response.isSuccessfullResponse()) {
                 throw new SipNetworkException(

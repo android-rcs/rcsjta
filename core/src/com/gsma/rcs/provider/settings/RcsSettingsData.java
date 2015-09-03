@@ -83,7 +83,7 @@ public class RcsSettingsData {
          * Digest authentication
          */
         DIGEST
-    };
+    }
 
     /**
      * Option for what ux-operation to react on when handling manual acceptance of one2one and group
@@ -271,7 +271,7 @@ public class RcsSettingsData {
                     .append(NetworkAccessType.class.getName()).append(".").append(value).toString());
         }
 
-    };
+    }
 
     /**
      * EnableRcseSwitch describes whether or not to show the RCS enabled/disabled switch permanently
@@ -323,7 +323,7 @@ public class RcsSettingsData {
                     .append(EnableRcseSwitch.class.getName()).append(".").append(value).toString());
         }
 
-    };
+    }
 
     /**
      * The configuration mode enumerated type.
@@ -370,7 +370,7 @@ public class RcsSettingsData {
             throw new IllegalArgumentException(new StringBuilder("No enum const class ")
                     .append(ConfigurationMode.class.getName()).append(".").append(value).toString());
         }
-    };
+    }
 
     /**
      * The File Transfer protocol enumerated type.
@@ -384,7 +384,7 @@ public class RcsSettingsData {
          * HTTP protocol
          */
         HTTP
-    };
+    }
 
     /**
      * The GSMA release enumerated type.
@@ -1377,4 +1377,7 @@ public class RcsSettingsData {
 
     /* package private */static final String PROV_REJECT_BUTTON = "Reject_btn";
     /* package private */static final Boolean DEFAULT_PROV_REJECT_BUTTON = false;
+
+    /* package private */static final String LOCAL_DISPLAY_LANGUAGE = "language";
+    /* package private */static final String DEFAULT_LOCAL_DISPLAY_LANGUAGE = "";
 }

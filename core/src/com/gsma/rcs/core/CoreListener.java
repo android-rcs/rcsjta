@@ -23,7 +23,6 @@
 package com.gsma.rcs.core;
 
 import com.gsma.rcs.core.content.AudioContent;
-import com.gsma.rcs.core.content.GeolocContent;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.ImsError;
@@ -397,12 +396,11 @@ public interface CoreListener {
      * Handle the case of rejected geoloc sharing
      * 
      * @param remoteContact Remote contact
-     * @param content Geoloc content
      * @param reasonCode Rejected reason code
      * @param timestamp Local timestamp when got geoloc sharing invitation
      */
     public void handleGeolocSharingInvitationRejected(ContactId remoteContact,
-            GeolocContent content, GeolocSharing.ReasonCode reasonCode, long timestamp);
+            GeolocSharing.ReasonCode reasonCode, long timestamp);
 
     /**
      * Handle the case of rejected ip call
