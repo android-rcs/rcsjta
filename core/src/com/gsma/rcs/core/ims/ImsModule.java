@@ -123,7 +123,7 @@ public class ImsModule implements SipEventListener {
         mServices.put(ImsServiceType.RICHCALL, new RichcallService(this, core, contactManager,
                 rcsSettings, mCallManager, getIPCallService()));
         mServices.put(ImsServiceType.PRESENCE, new PresenceService(this, ctx, rcsSettings,
-                contactManager));
+                contactManager, addressBookManager));
         mServices.put(ImsServiceType.SIP, new SipService(this, contactManager, rcsSettings));
 
         mServiceDispatcher = new ImsServiceDispatcher(this, rcsSettings);
@@ -143,6 +143,7 @@ public class ImsModule implements SipEventListener {
 
         mCnxManager.initialize();
         getInstantMessagingService().initialize();
+        getPresenceService().initialize();
 
         mInitializationFinished = true;
         if (sLogger.isActivated()) {

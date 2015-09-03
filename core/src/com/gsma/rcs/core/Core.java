@@ -70,7 +70,7 @@ public class Core {
 
     private AddressBookManager mAddressBookManager;
 
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(Core.class.getSimpleName());
 
     private final RcsSettings mRcsSettings;
 
@@ -98,7 +98,7 @@ public class Core {
     /**
      * Instantiate the core
      * 
-     * @param context The application context
+     * @param ctx The application context
      * @param listener Listener
      * @param rcsSettings RcsSettings instance
      * @param contentResolver
@@ -108,7 +108,7 @@ public class Core {
      * @throws IOException
      * @throws KeyStoreException
      */
-    public static Core createCore(Context context, CoreListener listener, RcsSettings rcsSettings,
+    public static Core createCore(Context ctx, CoreListener listener, RcsSettings rcsSettings,
             ContentResolver contentResolver, ContactManager contactsManager,
             MessagingLog messagingLog) throws IOException, KeyStoreException {
         if (sInstance != null) {
@@ -117,8 +117,8 @@ public class Core {
         synchronized (Core.class) {
             if (sInstance == null) {
                 KeyStoreManager.loadKeyStore(rcsSettings);
-                sInstance = new Core(context, listener, rcsSettings, contentResolver,
-                        contactsManager, messagingLog);
+                sInstance = new Core(ctx, listener, rcsSettings, contentResolver, contactsManager,
+                        messagingLog);
             }
         }
         return sInstance;
@@ -141,39 +141,40 @@ public class Core {
     /**
      * Constructor
      * 
+     * @param ctx The application context
      * @param listener Listener
-     * @param rcsSettings
-     * @param contentResolver
-     * @param contactManager
-     * @param messagingLog
+     * @param rcsSettings The RCS settings accessor
+     * @param contentResolver The content resolver
+     * @param contactManager The contact manager
+     * @param messagingLog The messaging log accessor
      */
-    private Core(Context context, CoreListener listener, RcsSettings rcsSettings,
+    private Core(Context ctx, CoreListener listener, RcsSettings rcsSettings,
             ContentResolver contentResolver, ContactManager contactManager,
             MessagingLog messagingLog) {
-        boolean logActivated = logger.isActivated();
+        boolean logActivated = sLogger.isActivated();
         if (logActivated) {
-            logger.info("Terminal core initialization");
+            sLogger.info("Terminal core initialization");
         }
         mListener = listener;
         mRcsSettings = rcsSettings;
         // Get UUID
         if (logActivated) {
             try {
-                logger.info("My device UUID is ".concat(String.valueOf(DeviceUtils
-                        .getDeviceUUID(context))));
+                sLogger.info("My device UUID is ".concat(String.valueOf(DeviceUtils
+                        .getDeviceUUID(ctx))));
             } catch (RcsServiceException e) {
-                logger.error(new StringBuilder(
+                sLogger.error(new StringBuilder(
                         "Exception caught while logging for device UUID; exception-msg=")
                         .append(e.getMessage()).append("!").toString());
             }
         }
 
         // Initialize the phone utils
-        PhoneUtils.initialize(context, mRcsSettings);
+        PhoneUtils.initialize(ctx, mRcsSettings);
 
         // Create the address book manager
         mAddressBookManager = new AddressBookManager(contentResolver, contactManager);
-        mLocaleManager = new LocaleManager(context, this, rcsSettings, contactManager);
+        mLocaleManager = new LocaleManager(ctx, this, rcsSettings, contactManager);
 
         final HandlerThread backgroundThread = new HandlerThread(BACKGROUND_THREAD_NAME);
         backgroundThread.start();
@@ -181,11 +182,11 @@ public class Core {
         mBackgroundHandler = new Handler(backgroundThread.getLooper());
 
         /* Create the IMS module */
-        mImsModule = new ImsModule(this, context, mRcsSettings, contactManager, messagingLog,
+        mImsModule = new ImsModule(this, ctx, mRcsSettings, contactManager, messagingLog,
                 mAddressBookManager);
 
         if (logActivated) {
-            logger.info("Terminal core is created with success");
+            sLogger.info("Terminal core is created with success");
         }
     }
 
@@ -247,14 +248,14 @@ public class Core {
             return;
         }
         mImsModule.start();
-        mAddressBookManager.startAddressBookMonitoring();
+        mAddressBookManager.start();
         mLocaleManager.start();
         /* Notify event listener */
         mListener.handleCoreLayerStarted();
 
         mStarted = true;
-        if (logger.isActivated()) {
-            logger.info("RCS core service has been started with success");
+        if (sLogger.isActivated()) {
+            sLogger.info("RCS core service has been started with success");
         }
     }
 
@@ -269,18 +270,18 @@ public class Core {
             return;
         }
         mStopping = true;
-        boolean logActivated = logger.isActivated();
+        boolean logActivated = sLogger.isActivated();
         if (logActivated) {
-            logger.info("Stop the RCS core service");
+            sLogger.info("Stop the RCS core service");
         }
         mLocaleManager.stop();
-        mAddressBookManager.stopAddressBookMonitoring();
+        mAddressBookManager.stop();
         mImsModule.stop();
 
         mStopping = false;
         mStarted = false;
         if (logActivated) {
-            logger.info("RCS core service has been stopped with success");
+            sLogger.info("RCS core service has been stopped with success");
         }
         sInstance = null;
         /* Notify event listener */

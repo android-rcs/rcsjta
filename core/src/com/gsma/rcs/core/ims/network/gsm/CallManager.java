@@ -86,7 +86,7 @@ public class CallManager {
 
     private BroadcastReceiver mOutgoingCallReceiver;
 
-    private final Context mContext;
+    private final Context mCtx;
 
     private static final Logger sLogger = Logger.getLogger(CallManager.class.getSimpleName());
 
@@ -94,12 +94,12 @@ public class CallManager {
      * Constructor
      * 
      * @param parent The ImsModule this manager is part of
-     * @param context The Context this manager is part of
+     * @param ctx The Context this manager is part of
      */
-    public CallManager(ImsModule parent, Context context) {
+    public CallManager(ImsModule parent, Context ctx) {
         mImsModule = parent;
-        mContext = context;
-        mPhonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        mCtx = ctx;
+        mPhonyManager = (TelephonyManager) ctx.getSystemService(Context.TELEPHONY_SERVICE);
     }
 
     /**
@@ -122,7 +122,7 @@ public class CallManager {
         /* Monitor phone state */
         mPhonyManager.listen(listener, PhoneStateListener.LISTEN_CALL_STATE);
 
-        mContext.registerReceiver(mOutgoingCallReceiver, new IntentFilter(
+        mCtx.registerReceiver(mOutgoingCallReceiver, new IntentFilter(
                 Intent.ACTION_NEW_OUTGOING_CALL));
     }
 
@@ -134,7 +134,7 @@ public class CallManager {
             sLogger.info("Stop call monitoring");
         }
         if (mOutgoingCallReceiver != null) {
-            mContext.unregisterReceiver(mOutgoingCallReceiver);
+            mCtx.unregisterReceiver(mOutgoingCallReceiver);
             mOutgoingCallReceiver = null;
         }
         /* Stop monitoring phone state */

@@ -92,7 +92,7 @@ public class ImsConnectionManager implements Runnable {
 
     private final RcsSettings mRcsSettings;
 
-    private final Context mContext;
+    private final Context mCtx;
 
     private NetworkStateListener mNetworkStateListener;
 
@@ -102,23 +102,22 @@ public class ImsConnectionManager implements Runnable {
      * Constructor
      * 
      * @param imsModule The IMS module instance
-     * @param context The application context
+     * @param ctx The application context
      * @param core The Core instance
      * @param rcsSettings RcsSettings instance
      */
-    public ImsConnectionManager(ImsModule imsModule, Context context, Core core,
-            RcsSettings rcsSettings) {
+    public ImsConnectionManager(ImsModule imsModule, Context ctx, Core core, RcsSettings rcsSettings) {
         mImsModule = imsModule;
         mCore = core;
         mRcsSettings = rcsSettings;
-        mContext = context;
+        mCtx = ctx;
     }
 
     /**
      * Initializes IMS connection
      */
     public void initialize() {
-        mCnxManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        mCnxManager = (ConnectivityManager) mCtx.getSystemService(Context.CONNECTIVITY_SERVICE);
         mNetwork = mRcsSettings.getNetworkAccess();
         mOperator = mRcsSettings.getNetworkOperator();
 
@@ -134,14 +133,14 @@ public class ImsConnectionManager implements Runnable {
         if (mNetworkStateListener == null) {
             /* Register network state listener */
             mNetworkStateListener = new NetworkStateListener();
-            mContext.registerReceiver(mNetworkStateListener, new IntentFilter(
+            mCtx.registerReceiver(mNetworkStateListener, new IntentFilter(
                     ConnectivityManager.CONNECTIVITY_ACTION));
         }
 
         if (mBatteryLevelListener == null) {
             /* Register changes about battery: charging state, level, etc... */
             mBatteryLevelListener = new BatteryLevelListener();
-            mContext.registerReceiver(mBatteryLevelListener, new IntentFilter(
+            mCtx.registerReceiver(mBatteryLevelListener, new IntentFilter(
                     Intent.ACTION_BATTERY_CHANGED));
         }
     }
@@ -222,11 +221,11 @@ public class ImsConnectionManager implements Runnable {
             sLogger.info("Terminate the IMS connection manager");
         }
         if (mBatteryLevelListener != null) {
-            mContext.unregisterReceiver(mBatteryLevelListener);
+            mCtx.unregisterReceiver(mBatteryLevelListener);
             mBatteryLevelListener = null;
         }
         if (mNetworkStateListener != null) {
-            mContext.unregisterReceiver(mNetworkStateListener);
+            mCtx.unregisterReceiver(mNetworkStateListener);
             mNetworkStateListener = null;
         }
         stopImsConnection(TerminationReason.TERMINATION_BY_SYSTEM);
@@ -313,8 +312,8 @@ public class ImsConnectionManager implements Runnable {
                 return;
             }
             if (networkInfo.getType() == ConnectivityManager.TYPE_MOBILE) {
-                String lastUserAccount = LauncherUtils.getLastUserAccount(mContext);
-                String currentUserAccount = LauncherUtils.getCurrentUserAccount(mContext);
+                String lastUserAccount = LauncherUtils.getLastUserAccount(mCtx);
+                String currentUserAccount = LauncherUtils.getCurrentUserAccount(mCtx);
                 if (lastUserAccount != null) {
                     if ((currentUserAccount == null)
                             || !currentUserAccount.equalsIgnoreCase(lastUserAccount)) {
@@ -422,7 +421,7 @@ public class ImsConnectionManager implements Runnable {
                     return;
                 }
 
-                TelephonyManager tm = (TelephonyManager) mContext
+                TelephonyManager tm = (TelephonyManager) mCtx
                         .getSystemService(Context.TELEPHONY_SERVICE);
                 String currentOpe = tm.getSimOperatorName();
                 if ((mOperator.length() > 0) && !currentOpe.equalsIgnoreCase(mOperator)) {

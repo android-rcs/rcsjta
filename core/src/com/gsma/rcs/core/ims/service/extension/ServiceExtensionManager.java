@@ -50,7 +50,7 @@ public class ServiceExtensionManager {
 
     private final RcsSettings mRcsSettings;
 
-    private final Context mContext;
+    private final Context mCtx;
 
     private final Core mCore;
 
@@ -58,49 +58,43 @@ public class ServiceExtensionManager {
 
     private ExternalCapabilityMonitoring mExternalCapabilityMonitoring;
 
-    private final ExecutorService mUpdateExecutor;
+    private ExecutorService mUpdateExecutor;
 
     private final SupportedExtensionUpdater mSupportedExtensionUpdater;
 
-    public ServiceExtensionManager(ImsModule imsModule, Context context, Core core,
+    /**
+     * Monitor the application package changes to update RCS supported extensions
+     * 
+     * @param imsModule The IMS module
+     * @param ctx The app context
+     * @param core The core instance
+     * @param rcsSettings The RCS settigns accessor
+     */
+    public ServiceExtensionManager(ImsModule imsModule, Context ctx, Core core,
             RcsSettings rcsSettings) {
         mImsModule = imsModule;
-        mContext = context;
+        mCtx = ctx;
         mCore = core;
         mRcsSettings = rcsSettings;
-        mSupportedExtensionUpdater = new SupportedExtensionUpdater(mContext, mImsModule,
-                mRcsSettings, this);
-        mUpdateExecutor = Executors.newSingleThreadExecutor();
+        mSupportedExtensionUpdater = new SupportedExtensionUpdater(mCtx, mImsModule, mRcsSettings,
+                this);
     }
 
     /**
      * Starts extension manager
      */
     public void start() {
+        mUpdateExecutor = Executors.newSingleThreadExecutor();
         updateSupportedExtensions();
-        mUpdateExecutor.execute(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
-                    filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
-                    filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
-                    filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-                    filter.addDataScheme("package");
-                    mExternalCapabilityMonitoring = new ExternalCapabilityMonitoring(mCore,
-                            ServiceExtensionManager.this);
-                    mContext.registerReceiver(mExternalCapabilityMonitoring, filter);
-                } catch (RuntimeException e) {
-                    /*
-                     * Intentionally catch runtime exceptions as else it will abruptly end the
-                     * thread and eventually bring the whole system down, which is not intended.
-                     */
-                    sLogger.error("Failed to listen to package change!", e);
-                }
-            }
-        });
-
+        if (mExternalCapabilityMonitoring == null) {
+            IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
+            filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+            filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+            filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+            filter.addDataScheme("package");
+            mExternalCapabilityMonitoring = new ExternalCapabilityMonitoring(mCore, this);
+            mCtx.registerReceiver(mExternalCapabilityMonitoring, filter);
+        }
     }
 
     /**
@@ -108,7 +102,7 @@ public class ServiceExtensionManager {
      */
     public void stop() {
         if (mExternalCapabilityMonitoring != null) {
-            mContext.unregisterReceiver(mExternalCapabilityMonitoring);
+            mCtx.unregisterReceiver(mExternalCapabilityMonitoring);
             mExternalCapabilityMonitoring = null;
         }
         mUpdateExecutor.shutdownNow();
@@ -131,7 +125,6 @@ public class ServiceExtensionManager {
     /**
      * Is extension authorized
      * 
-     * @param context Context
      * @param ext Extension ID
      * @return Boolean
      */
@@ -150,8 +143,6 @@ public class ServiceExtensionManager {
 
     /**
      * Remove supported extensions
-     * 
-     * @param context Context
      */
     public void removeSupportedExtensions() {
         updateSupportedExtensions();
@@ -159,8 +150,6 @@ public class ServiceExtensionManager {
 
     /**
      * Add supported extensions
-     * 
-     * @param context Context
      */
     public void addNewSupportedExtensions() {
         updateSupportedExtensions();
