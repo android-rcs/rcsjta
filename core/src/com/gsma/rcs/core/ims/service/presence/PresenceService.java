@@ -25,6 +25,7 @@ package com.gsma.rcs.core.ims.service.presence;
 import static com.gsma.rcs.utils.StringUtils.UTF8_STR;
 
 import com.gsma.rcs.addressbook.AddressBookEventListener;
+import com.gsma.rcs.addressbook.AddressBookManager;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.http.HttpResponse;
@@ -34,7 +35,6 @@ import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.presence.xdm.XdmManager;
-import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -64,36 +64,41 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
     private final ContactManager mContactManager;
 
-    /**
-     * Permanent state feature
-     */
-    public boolean mPermanentState;
+    public final boolean mPermanentState;
 
     private PresenceInfo mPresenceInfo = new PresenceInfo();
 
-    private PublishManager mPublisher;
+    private final PublishManager mPublisher;
 
-    private XdmManager mXdm;
+    private final XdmManager mXdm;
 
-    private SubscribeManager mWatcherInfoSubscriber;
+    private final SubscribeManager mWatcherInfoSubscriber;
 
-    private SubscribeManager mPresenceSubscriber;
+    private final SubscribeManager mPresenceSubscriber;
 
-    private Logger sLogger = Logger.getLogger(PresenceService.class.getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(PresenceService.class.getSimpleName());
+
+    private final AddressBookManager mAddressBookManager;
+
+    private final Context mCtx;
 
     /**
      * Constructor
      * 
      * @param parent IMS module
-     * @param rcsSettings RcsSettings
      * @param ctx Context
+     * @param rcsSettings RcsSettings
+     * @param addressBookManager The address book manager
      * @param contactsManager ContactManager
      */
     public PresenceService(ImsModule parent, Context ctx, RcsSettings rcsSettings,
-            ContactManager contactsManager) {
+            ContactManager contactsManager, AddressBookManager addressBookManager) {
         super(parent, rcsSettings.isSocialPresenceSupported());
+        mCtx = ctx;
         mRcsSettings = rcsSettings;
         mContactManager = contactsManager;
+        mAddressBookManager = addressBookManager;
+
         // Set presence service options
         mPermanentState = mRcsSettings.isPermanentStateModeActivated();
 
@@ -108,6 +113,13 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
         // Instantiate the subscribe manager for presence
         mPresenceSubscriber = new PresenceSubscribeManager(parent, mRcsSettings);
+
+    }
+
+    public void initialize() {
+        mPublisher.initialize();
+        mWatcherInfoSubscriber.initialize();
+        mPresenceSubscriber.initialize();
     }
 
     /**
@@ -123,12 +135,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         }
         setServiceStarted(true);
 
-        mPublisher.initialize();
-        mWatcherInfoSubscriber.initialize();
-        mPresenceSubscriber.initialize();
-
-        // Listen to address book changes
-        getImsModule().getCore().getAddressBookManager().addAddressBookListener(this);
+        mAddressBookManager.addAddressBookListener(this);
 
         // Restore the last presence info from the contacts database
         mPresenceInfo = mContactManager.getMyPresenceInfo();
@@ -152,7 +159,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         }
 
         // It may be necessary to initiate the address book first launch or account check procedure
-        if (StartService.getNewUserAccount(AndroidFactory.getApplicationContext())) {
+        if (StartService.getNewUserAccount(mCtx)) {
             Set<ContactId> blockedContacts = mXdm.getBlockedContacts();
             firstLaunchOrAccountChangedCheck(grantedContacts, blockedContacts);
         }
@@ -239,8 +246,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                                     .append(" was not found in the address book: add it")
                                     .toString());
                         }
-                        PresenceUtils.createRcsContactIfNeeded(
-                                AndroidFactory.getApplicationContext(), contact);
+                        PresenceUtils.createRcsContactIfNeeded(mCtx, contact);
                     }
                     mContactManager.updateRcsStatusOrCreateNewContact(contact,
                             RcsStatus.PENDING_OUT);
@@ -253,8 +259,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                         sLogger.debug(new StringBuilder("The RCS number ").append(contact)
                                 .append(" was not found in the address book: add it").toString());
                     }
-                    PresenceUtils.createRcsContactIfNeeded(AndroidFactory.getApplicationContext(),
-                            contact);
+                    PresenceUtils.createRcsContactIfNeeded(mCtx, contact);
                     mContactManager.blockContact(contact);
                     mContactManager.updateRcsStatusOrCreateNewContact(contact, RcsStatus.BLOCKED);
                 }
@@ -286,8 +291,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         }
         setServiceStarted(false);
 
-        // Stop listening to address book changes
-        getImsModule().getCore().getAddressBookManager().removeAddressBookListener(this);
+        mAddressBookManager.removeAddressBookListener(this);
 
         if (!mPermanentState) {
             // If not permanent state mode: publish a last presence info before
@@ -423,9 +427,8 @@ public class PresenceService extends ImsService implements AddressBookEventListe
     private String buildBooleanStatus(boolean state) {
         if (state) {
             return "open";
-        } else {
-            return "closed";
         }
+        return "closed";
     }
 
     /**
@@ -544,8 +547,8 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         }
 
         PhotoIcon photoIcon = info.getPhotoIcon();
-        String eTag = photoIcon.getEtag();
-        if ((photoIcon != null) && (eTag != null)) {
+        String eTag = (photoIcon != null) ? photoIcon.getEtag() : null;
+        if (photoIcon != null && eTag != null) {
             document.append("  <rpid:status-icon opd:etag=\"").append(eTag)
                     .append("\" opd:fsize=\"").append(photoIcon.getSize())
                     .append("\" opd:contenttype=\"").append(photoIcon.getType())
@@ -790,9 +793,8 @@ public class PresenceService extends ImsService implements AddressBookEventListe
             photo.setEtag(etag);
 
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -808,9 +810,8 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         if ((response != null)
                 && (response.isSuccessfullResponse() || response.isNotFoundResponse())) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -833,9 +834,8 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         HttpResponse response = mXdm.addContactToGrantedList(contact);
         if ((response != null) && response.isSuccessfullResponse()) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -859,9 +859,8 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         if ((response != null)
                 && (response.isSuccessfullResponse() || response.isNotFoundResponse())) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -879,9 +878,8 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         if ((response != null)
                 && (response.isSuccessfullResponse() || response.isNotFoundResponse())) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -899,9 +897,8 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         if ((response != null)
                 && (response.isSuccessfullResponse() || response.isNotFoundResponse())) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**

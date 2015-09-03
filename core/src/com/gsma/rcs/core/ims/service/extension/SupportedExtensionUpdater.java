@@ -45,7 +45,7 @@ public class SupportedExtensionUpdater implements Runnable {
     private final static Logger sLogger = Logger.getLogger(SupportedExtensionUpdater.class
             .getSimpleName());
 
-    private final Context mContext;
+    private final Context mCtx;
 
     private final ServiceExtensionManager mExtensionManager;
 
@@ -56,15 +56,15 @@ public class SupportedExtensionUpdater implements Runnable {
     /**
      * Constructor
      * 
-     * @param context
+     * @param ctx
      * @param imsModule
      * @param rcsSettings
      * @param extensionManager
      * @param capabilityMonitoring
      */
-    public SupportedExtensionUpdater(Context context, ImsModule imsModule, RcsSettings rcsSettings,
+    public SupportedExtensionUpdater(Context ctx, ImsModule imsModule, RcsSettings rcsSettings,
             ServiceExtensionManager extensionManager) {
-        mContext = context;
+        mCtx = ctx;
         mImsModule = imsModule;
         mRcsSettings = rcsSettings;
         mExtensionManager = extensionManager;
@@ -80,19 +80,21 @@ public class SupportedExtensionUpdater implements Runnable {
             Set<String> supportedExts = new HashSet<String>();
             Set<String> oldSupportedExts = mRcsSettings.getSupportedRcsExtensions();
             /* Intent query on current installed activities */
-            PackageManager pm = mContext.getPackageManager();
+            PackageManager pm = mCtx.getPackageManager();
             List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
             for (ApplicationInfo appInfo : apps) {
                 Bundle appMeta = appInfo.metaData;
-                if (appMeta != null) {
-                    String exts = appMeta.getString(CapabilityService.INTENT_EXTENSIONS);
-                    if (!TextUtils.isEmpty(exts)) {
-                        Set<String> extensions = ServiceExtensionManager.getExtensions(exts);
-                        for (String extension : extensions) {
-                            if (mExtensionManager.isExtensionAuthorized(extension)) {
-                                supportedExts.add(extension);
-                            }
-                        }
+                if (appMeta == null) {
+                    continue;
+                }
+                String exts = appMeta.getString(CapabilityService.INTENT_EXTENSIONS);
+                if (TextUtils.isEmpty(exts)) {
+                    continue;
+                }
+                Set<String> extensions = ServiceExtensionManager.getExtensions(exts);
+                for (String extension : extensions) {
+                    if (mExtensionManager.isExtensionAuthorized(extension)) {
+                        supportedExts.add(extension);
                     }
                 }
             }

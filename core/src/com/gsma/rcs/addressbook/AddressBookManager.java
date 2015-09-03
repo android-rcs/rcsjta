@@ -108,11 +108,10 @@ public class AddressBookManager {
     /**
      * Start address book monitoring
      */
-    public void startAddressBookMonitoring() {
+    public void start() {
         if (sLogger.isActivated()) {
             sLogger.info("Start address book monitoring");
         }
-
         /* Instantiate background executor */
         mCleanupExecutor = Executors.newSingleThreadExecutor();
 
@@ -120,12 +119,10 @@ public class AddressBookManager {
             /* Instantiate content observer */
             mContactsContractObserver = new ContactsContractObserver(new Handler());
 
-            // Query contactContracts phone database
             mContactsContractCursor = mContentResolver.query(Phone.CONTENT_URI, null, null, null,
                     null);
             /* TODO: Handle mContactsContractCursor when null. */
 
-            // Register content observer
             mContactsContractCursor.registerContentObserver(mContactsContractObserver);
             mObserverIsRegistered = true;
         }
@@ -134,23 +131,20 @@ public class AddressBookManager {
     /**
      * Stop address book monitoring
      */
-    public void stopAddressBookMonitoring() {
+    public void stop() {
         if (sLogger.isActivated()) {
             sLogger.info("Stop address book monitoring");
         }
-
-        // Remove the messages that may still be scheduled
+        /* Remove the messages that may still be scheduled */
         mCheckHandler.removeMessages(CHECK_MESSAGE);
 
-        // Unregister content observer
+        /* Unregister content observer */
         if (mObserverIsRegistered) {
             mContactsContractCursor.unregisterContentObserver(mContactsContractObserver);
             mObserverIsRegistered = false;
-            // Close cursor
             mContactsContractCursor.close();
         }
 
-        // Shutdown background executor
         mCleanupExecutor.shutdownNow();
     }
 

@@ -245,7 +245,7 @@ public class XdmManager {
                     .append(CRLF);
 
             /* Set the If-match header */
-            Folder folder = (Folder) documents.get(request.getAUID());
+            Folder folder = documents.get(request.getAUID());
             if ((folder != null) && (folder.getEntry() != null)
                     && (folder.getEntry().getEtag() != null)) {
                 httpRequest.append("If-match: \"").append(folder.getEntry().getEtag()).append("\"")
@@ -387,7 +387,7 @@ public class XdmManager {
             documents = parser.getDocuments();
 
             // Check RCS list document
-            Folder folder = (Folder) documents.get("rls-services");
+            Folder folder = documents.get("rls-services");
             if ((folder == null) || (folder.getEntry() == null)) {
                 if (sLogger.isActivated()) {
                     sLogger.debug("The rls-services document does not exist");
@@ -402,7 +402,7 @@ public class XdmManager {
             }
 
             // Check resource list document
-            folder = (Folder) documents.get("resource-lists");
+            folder = documents.get("resource-lists");
             if ((folder == null) || (folder.getEntry() == null)) {
                 if (sLogger.isActivated()) {
                     sLogger.debug("The resource-lists document does not exist");
@@ -417,7 +417,7 @@ public class XdmManager {
             }
 
             // Check presence rules document
-            folder = (Folder) documents.get("org.openmobilealliance.pres-rules");
+            folder = documents.get("org.openmobilealliance.pres-rules");
             if ((folder == null) || (folder.getEntry() == null)) {
                 if (sLogger.isActivated()) {
                     sLogger.debug("The org.openmobilealliance.pres-rules document does not exist");

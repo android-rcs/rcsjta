@@ -55,7 +55,7 @@ public class ExternalCapabilityMonitoring extends BroadcastReceiver {
     }
 
     @Override
-    public void onReceive(final Context context, final Intent intent) {
+    public void onReceive(final Context ctx, final Intent intent) {
         mCore.scheduleForBackgroundExecution(new Runnable() {
             @Override
             public void run() {
@@ -68,7 +68,7 @@ public class ExternalCapabilityMonitoring extends BroadcastReceiver {
                     if (Intent.ACTION_PACKAGE_ADDED.equals(action)
                             || Intent.ACTION_PACKAGE_REPLACED.equals(action)
                             || Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
-                        PackageManager pm = context.getPackageManager();
+                        PackageManager pm = ctx.getPackageManager();
                         String packageName = intent.getData().getSchemeSpecificPart();
                         ApplicationInfo appInfo = pm.getApplicationInfo(packageName,
                                 PackageManager.GET_META_DATA);

@@ -44,7 +44,7 @@ public class LocaleManager {
     private final static Logger sLogger = Logger.getLogger(LocaleManager.class.getSimpleName());
 
     private ExecutorService mUpdateExecutor;
-    private final Context mContext;
+    private final Context mCtx;
     private final RcsSettings mRcsSettings;
     private final ContactManager mContactManager;
     private final LocaleUpdater mLocaleUpdater;
@@ -54,14 +54,14 @@ public class LocaleManager {
     /**
      * Constructor
      * 
-     * @param context The app context
+     * @param ctx The app context
      * @param core The Core instance
      * @param rcsSettings The RCS settings accessor
      * @param contactManager The contact manager
      */
-    public LocaleManager(Context context, Core core, RcsSettings rcsSettings,
+    public LocaleManager(Context ctx, Core core, RcsSettings rcsSettings,
             ContactManager contactManager) {
-        mContext = context;
+        mCtx = ctx;
         mCore = core;
         mRcsSettings = rcsSettings;
         mContactManager = contactManager;
@@ -84,7 +84,7 @@ public class LocaleManager {
                 try {
                     IntentFilter filter = new IntentFilter(Intent.ACTION_LOCALE_CHANGED);
                     mLocaleChangedReceiver = new LocaleChangedReceiver();
-                    mContext.registerReceiver(mLocaleChangedReceiver, filter);
+                    mCtx.registerReceiver(mLocaleChangedReceiver, filter);
                 } catch (RuntimeException e) {
                     /*
                      * Intentionally catch runtime exceptions as else it will abruptly end the
@@ -103,7 +103,7 @@ public class LocaleManager {
      */
     public void stop() {
         if (mLocaleChangedReceiver != null) {
-            mContext.unregisterReceiver(mLocaleChangedReceiver);
+            mCtx.unregisterReceiver(mLocaleChangedReceiver);
             mLocaleChangedReceiver = null;
         }
         mUpdateExecutor.shutdownNow();
@@ -135,7 +135,7 @@ public class LocaleManager {
     private class LocaleChangedReceiver extends BroadcastReceiver {
 
         @Override
-        public void onReceive(final Context context, final Intent intent) {
+        public void onReceive(final Context ctx, final Intent intent) {
             mCore.scheduleForBackgroundExecution(new Runnable() {
                 @Override
                 public void run() {
