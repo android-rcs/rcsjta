@@ -190,7 +190,7 @@ public class OptionsRequestTask implements Runnable {
                         break;
                     default:
                         handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED,
-                                new StringBuilder(statusCode).append(' ')
+                                new StringBuilder(String.valueOf(statusCode)).append(' ')
                                         .append(ctx.getReasonPhrase()).toString()));
                         break;
                 }
@@ -200,7 +200,8 @@ public class OptionsRequestTask implements Runnable {
                 }
                 /* No response received: timeout */
                 handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, new StringBuilder(
-                        statusCode).append(' ').append(ctx.getReasonPhrase()).toString()));
+                        String.valueOf(statusCode)).append(' ').append(ctx.getReasonPhrase())
+                        .toString()));
             }
         } catch (ContactManagerException e) {
             throw new SipPayloadException("Failed to send OPTIONS!", e);
