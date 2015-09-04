@@ -408,15 +408,6 @@ public abstract class ImsServiceSession extends Thread {
     }
 
     /**
-     * Set the dialog path of the session
-     * 
-     * @param dialog Dialog path
-     */
-    public void setDialogPath(SipDialogPath dialog) {
-        mDialogPath = dialog;
-    }
-
-    /**
      * Returns the authentication agent
      * 
      * @return Authentication agent

@@ -99,9 +99,6 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
         mTimestampSent = timestampSent;
 
         setRemoteDisplayName(displayName);
-        // Build a new dialogPath with this of chatSession and an empty CallId
-        setDialogPath(new SipDialogPath(chatSession.getDialogPath()));
-        getDialogPath().setCallId("");
 
         if (fileTransferInfo.getFileThumbnail() != null) {
             mIconRemoteUri = fileTransferInfo.getFileThumbnail().getUri();
