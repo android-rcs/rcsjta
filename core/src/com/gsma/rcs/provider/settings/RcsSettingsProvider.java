@@ -86,10 +86,10 @@ public class RcsSettingsProvider extends ContentProvider {
          * @param value Value
          */
         private void addParameter(SQLiteDatabase db, String key, String value) {
-            db.execSQL(new StringBuilder("INSERT INTO ").append(TABLE).append('(')
-                    .append(RcsSettingsData.KEY_KEY).append(',').append(RcsSettingsData.KEY_VALUE)
-                    .append(") VALUES ('").append(key).append("','").append(value).append("')")
-                    .toString());
+            ContentValues values = new ContentValues();
+            values.put(RcsSettingsData.KEY_KEY, key);
+            values.put(RcsSettingsData.KEY_VALUE, value);
+            db.insertOrThrow(TABLE, null, values);
         }
 
         private void addParameter(SQLiteDatabase db, String key, boolean value) {

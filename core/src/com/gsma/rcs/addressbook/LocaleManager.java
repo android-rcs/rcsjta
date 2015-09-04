@@ -73,29 +73,14 @@ public class LocaleManager {
      */
     public void start() {
         mUpdateExecutor = Executors.newSingleThreadExecutor();
+        IntentFilter filter = new IntentFilter(Intent.ACTION_LOCALE_CHANGED);
+        mLocaleChangedReceiver = new LocaleChangedReceiver();
+        mCtx.registerReceiver(mLocaleChangedReceiver, filter);
         String displayLanguage = mRcsSettings.getDisplayLanguage();
-        if (!displayLanguage.equals(Locale.getDefault().getDisplayLanguage())) {
+        if (displayLanguage == null
+                || !displayLanguage.equals(Locale.getDefault().getDisplayLanguage())) {
             mUpdateExecutor.execute(mLocaleUpdater);
         }
-        mUpdateExecutor.execute(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    IntentFilter filter = new IntentFilter(Intent.ACTION_LOCALE_CHANGED);
-                    mLocaleChangedReceiver = new LocaleChangedReceiver();
-                    mCtx.registerReceiver(mLocaleChangedReceiver, filter);
-                } catch (RuntimeException e) {
-                    /*
-                     * Intentionally catch runtime exceptions as else it will abruptly end the
-                     * thread and eventually bring the whole system down, which is not intended.
-                     */
-                    sLogger.error("Failed to listen to locale change!", e);
-                }
-            }
-
-        });
-
     }
 
     /**

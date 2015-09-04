@@ -32,6 +32,7 @@ import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.settings.RcsSettingsData;
 import com.gsma.rcs.provider.settings.RcsSettingsData.GsmaRelease;
 import com.gsma.rcs.provider.settings.RcsSettingsData.TermsAndConditionsResponse;
 import com.gsma.rcs.provisioning.ProvisioningFailureReasons;
@@ -352,8 +353,7 @@ public class HttpsProvisioningManager {
              * Format first HTTPS request with extra parameters (IMSI and IMEI if available plus
              * SMS_port and token).
              */
-            String token = (!TextUtils.isEmpty(mRcsSettings.getProvisioningToken()) ? mRcsSettings
-                    .getProvisioningToken() : "");
+            String token = mRcsSettings.getProvisioningToken();
             String args = getHttpsRequestArguments(smsPortForOTP, token, msisdn);
 
             /* Execute first HTTPS request with extra parameters */
@@ -874,7 +874,7 @@ public class HttpsProvisioningManager {
                 sLogger.debug("Provisioning authentication required");
             }
             // Reset provisioning token
-            mRcsSettings.setProvisioningToken("");
+            mRcsSettings.setProvisioningToken(null);
             // Retry after reseting provisioning token
             if (!retryAfter511Error()) {
                 // Reason: Provisioning authentication required

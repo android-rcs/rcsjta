@@ -32,6 +32,8 @@ import android.net.Uri;
 import android.os.Environment;
 import android.util.SparseArray;
 
+import java.util.Locale;
+
 import javax2.sip.ListeningPoint;
 
 /**
@@ -790,13 +792,13 @@ public class RcsSettingsData {
      * TLS Certificate root
      */
     public static final String TLS_CERTIFICATE_ROOT = "TlsCertificateRoot";
-    /* package private */static final String DEFAULT_TLS_CERTIFICATE_ROOT = "";
+    /* package private */static final String DEFAULT_TLS_CERTIFICATE_ROOT = null;
 
     /**
      * TLS Certificate intermediate
      */
     public static final String TLS_CERTIFICATE_INTERMEDIATE = "TlsCertificateIntermediate";
-    /* package private */static final String DEFAULT_TLS_CERTIFICATE_INTERMEDIATE = "";
+    /* package private */static final String DEFAULT_TLS_CERTIFICATE_INTERMEDIATE = null;
 
     /**
      * SIP transaction timeout used to wait a SIP response in milliseconds
@@ -1193,7 +1195,7 @@ public class RcsSettingsData {
      * Provisioning version
      */
     public static final String PROVISIONING_TOKEN = "ProvisioningToken";
-    /* package private */static final String DEFAULT_PROVISIONING_TOKEN = "";
+    /* package private */static final String DEFAULT_PROVISIONING_TOKEN = null;
 
     /**
      * Secondary provisioning address
@@ -1379,5 +1381,5 @@ public class RcsSettingsData {
     /* package private */static final Boolean DEFAULT_PROV_REJECT_BUTTON = false;
 
     /* package private */static final String LOCAL_DISPLAY_LANGUAGE = "language";
-    /* package private */static final String DEFAULT_LOCAL_DISPLAY_LANGUAGE = "";
+    /* package private */static final String DEFAULT_LOCAL_DISPLAY_LANGUAGE = null;
 }

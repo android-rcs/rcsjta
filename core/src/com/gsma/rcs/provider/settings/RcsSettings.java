@@ -255,7 +255,7 @@ public class RcsSettings {
      * @param value the long value
      */
     public void writeUri(String key, Uri value) {
-        if (writeParameter(key, value.toString()) != 0) {
+        if (writeParameter(key, value == null ? null : value.toString()) != 0) {
             mCache.put(key, value);
         }
     }

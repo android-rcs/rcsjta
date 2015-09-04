@@ -80,7 +80,7 @@ public class Provisioning extends TabActivity {
             parameter = helper.getRcsSettings().readString((settingsKey));
         }
         EditText editText = (EditText) helper.getActivity().findViewById(viewID);
-        editText.setText(parameter);
+        editText.setText(parameter == null ? "" : parameter);
     }
 
     /**
@@ -137,7 +137,8 @@ public class Provisioning extends TabActivity {
         if (bundle != null && bundle.containsKey(settingsKey)) {
             parameter = bundle.getString(settingsKey);
         } else {
-            parameter = helper.getRcsSettings().readUri((settingsKey)).toString();
+            Uri dbValue = helper.getRcsSettings().readUri(settingsKey);
+            parameter = (dbValue == null ? "" : dbValue.toString());
         }
         EditText editText = (EditText) helper.getActivity().findViewById(viewID);
         editText.setText(parameter);
@@ -205,7 +206,8 @@ public class Provisioning extends TabActivity {
         if (bundle != null) {
             bundle.putString(settingsKey, txt.getText().toString());
         } else {
-            helper.getRcsSettings().writeString(settingsKey, txt.getText().toString());
+            String text = txt.getText().toString();
+            helper.getRcsSettings().writeString(settingsKey, "".equals(text) ? null : text);
         }
     }
 
@@ -261,7 +263,8 @@ public class Provisioning extends TabActivity {
         if (bundle != null) {
             bundle.putString(settingsKey, txt.getText().toString());
         } else {
-            helper.getRcsSettings().writeUri(settingsKey, Uri.parse(txt.getText().toString()));
+            String text = txt.getText().toString();
+            helper.getRcsSettings().writeUri(settingsKey, "".equals(text) ? null : Uri.parse(text));
         }
     }
 

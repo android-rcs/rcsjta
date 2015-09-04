@@ -214,9 +214,9 @@ public class StackProvisioning extends Activity {
         spinner = (Spinner) findViewById(R.id.TlsCertificateRoot);
         if (spinner.getSelectedItemPosition() == 0) {
             if (bundle != null) {
-                bundle.putString(RcsSettingsData.TLS_CERTIFICATE_ROOT, "");
+                bundle.putString(RcsSettingsData.TLS_CERTIFICATE_ROOT, null);
             } else {
-                mRcsSettings.writeString(RcsSettingsData.TLS_CERTIFICATE_ROOT, "");
+                mRcsSettings.writeString(RcsSettingsData.TLS_CERTIFICATE_ROOT, null);
             }
         } else {
             String path = CERTIFICATE_FOLDER_PATH + File.separator
@@ -231,9 +231,9 @@ public class StackProvisioning extends Activity {
         spinner = (Spinner) findViewById(R.id.TlsCertificateIntermediate);
         if (spinner.getSelectedItemPosition() == 0) {
             if (bundle != null) {
-                bundle.putString(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE, "");
+                bundle.putString(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE, null);
             } else {
-                mRcsSettings.writeString(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE, "");
+                mRcsSettings.writeString(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE, null);
             }
         } else {
             String path = CERTIFICATE_FOLDER_PATH + File.separator
@@ -466,7 +466,7 @@ public class StackProvisioning extends Activity {
             certRoot = mRcsSettings.getTlsCertificateRoot();
         }
         for (int i = 0; i < certificates.length; i++) {
-            if (certRoot.contains(certificates[i])) {
+            if (certRoot != null && certRoot.contains(certificates[i])) {
                 spinner.setSelection(i);
                 found = true;
             }
@@ -489,7 +489,7 @@ public class StackProvisioning extends Activity {
             certInt = mRcsSettings.getTlsCertificateIntermediate();
         }
         for (int i = 0; i < certificates.length; i++) {
-            if (certInt.contains(certificates[i])) {
+            if (certInt != null && certInt.contains(certificates[i])) {
                 spinner.setSelection(i);
                 found = true;
             }

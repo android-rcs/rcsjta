@@ -652,7 +652,8 @@ public class ProvisioningParser {
 
                 if (xcapRootURI == null) {
                     if ((xcapRootURI = getValueByParamName("XCAPRootURI", childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.setXdmServer(Uri.parse(xcapRootURI));
+                        mRcsSettings.setXdmServer("".equals(xcapRootURI) ? null : Uri
+                                .parse(xcapRootURI));
                         continue;
                     }
                 }
@@ -995,8 +996,9 @@ public class ProvisioningParser {
                          * password, the action should take place over a secure connection and/or
                          * via HTTPS explicitly.
                          */
-                        Uri ftHttpServAddr = Uri.parse(ftHttpCsUri);
-                        if (!PROTOCOL_HTTPS.equals(ftHttpServAddr.getScheme())) {
+                        Uri ftHttpServAddr = "".equals(ftHttpCsUri) ? null : Uri.parse(ftHttpCsUri);
+                        if (ftHttpServAddr != null
+                                && !PROTOCOL_HTTPS.equals(ftHttpServAddr.getScheme())) {
                             sLogger.error(new StringBuilder(ftHttpCsUri)
                                     .append(" is not a secure protocol, hence disabling ftHttp capability.")
                                     .toString());
@@ -1009,14 +1011,14 @@ public class ProvisioningParser {
 
                 if (ftHttpCsUser == null) {
                     if ((ftHttpCsUser = getValueByParamName("ftHTTPCSUser", childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.setFtHttpLogin(ftHttpCsUser);
+                        mRcsSettings.setFtHttpLogin("".equals(ftHttpCsUser) ? null : ftHttpCsUser);
                         continue;
                     }
                 }
 
                 if (ftHttpCsPwd == null) {
                     if ((ftHttpCsPwd = getValueByParamName("ftHTTPCSPwd", childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.setFtHttpPassword(ftHttpCsPwd);
+                        mRcsSettings.setFtHttpPassword("".equals(ftHttpCsPwd) ? null : ftHttpCsPwd);
                         continue;
                     }
                 }
@@ -1138,7 +1140,8 @@ public class ProvisioningParser {
 
                 if (confFctyUri == null) {
                     if ((confFctyUri = getValueByParamName("conf-fcty-uri", childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.setImConferenceUri(formatSipUri(confFctyUri.trim()));
+                        mRcsSettings.setImConferenceUri("".equals(confFctyUri) ? null
+                                : formatSipUri(confFctyUri.trim()));
                         continue;
                     }
                 }
@@ -1391,8 +1394,9 @@ public class ProvisioningParser {
                 if (endUserConfReqId == null) {
                     if ((endUserConfReqId = getValueByParamName("endUserConfReqId", childnode,
                             TYPE_TXT)) != null) {
-                        mRcsSettings.setEndUserConfirmationRequestUri(formatSipUri(endUserConfReqId
-                                .trim()));
+                        mRcsSettings
+                                .setEndUserConfirmationRequestUri("".equals(endUserConfReqId) ? null
+                                        : formatSipUri(endUserConfReqId.trim()));
                         continue;
                     }
                 }
@@ -1498,7 +1502,8 @@ public class ProvisioningParser {
             do {
                 if (conRef == null) {
                     if ((conRef = getValueByParamName("ConRef", childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.writeString(RcsSettingsData.RCS_APN, conRef);
+                        mRcsSettings.writeString(RcsSettingsData.RCS_APN, "".equals(conRef) ? null
+                                : conRef);
                         continue;
                     }
                 }
