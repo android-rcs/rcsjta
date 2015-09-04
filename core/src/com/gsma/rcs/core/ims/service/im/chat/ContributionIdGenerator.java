@@ -26,12 +26,9 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.utils.DeviceUtils;
-import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsServiceException;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.UUID;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -44,11 +41,6 @@ import javax.crypto.spec.SecretKeySpec;
 public class ContributionIdGenerator {
 
     private static final String ALOGIRITHM_HMACSHA1 = "HmacSHA1";
-
-    /**
-     * The logger
-     */
-    private static Logger logger = Logger.getLogger(ContributionIdGenerator.class.getName());
 
     /**
      * Secret Key generator.

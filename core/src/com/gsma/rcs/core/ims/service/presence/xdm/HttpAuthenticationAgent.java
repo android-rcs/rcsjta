@@ -24,7 +24,6 @@ package com.gsma.rcs.core.ims.service.presence.xdm;
 
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.security.HttpDigestMd5Authentication;
-import com.gsma.rcs.utils.logger.Logger;
 
 import javax2.sip.InvalidArgumentException;
 
@@ -34,11 +33,6 @@ import javax2.sip.InvalidArgumentException;
  * @author JM. Auffret
  */
 public class HttpAuthenticationAgent {
-
-    /**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
 
     /**
      * HTTP Digest MD5 agent

@@ -41,7 +41,6 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.DeviceUtils;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsServiceException;
 
 import android.content.ContentResolver;
 import android.content.Context;

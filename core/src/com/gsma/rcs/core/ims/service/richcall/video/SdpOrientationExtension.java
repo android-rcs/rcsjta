@@ -24,7 +24,6 @@ package com.gsma.rcs.core.ims.service.richcall.video;
 
 import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
-import com.gsma.rcs.utils.logger.Logger;
 
 /**
  * Represents the SDP orientation extension
@@ -57,11 +56,6 @@ public class SdpOrientationExtension {
      * ExtensionHeader URI
      */
     private String uri;
-
-    /**
-     * Logger
-     */
-    private static Logger logger = Logger.getLogger(SdpOrientationExtension.class.getName());
 
     /**
      * Constructor

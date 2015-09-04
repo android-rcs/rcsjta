@@ -364,7 +364,7 @@ public class StackProvisioning extends Activity {
         final String[] vendorArray = new String[] {
             Build.MANUFACTURER
         };
-        ArrayAdapter<CharSequence> adapterVendor = new ArrayAdapter(this,
+        ArrayAdapter<CharSequence> adapterVendor = new ArrayAdapter<CharSequence>(this,
                 android.R.layout.simple_spinner_item, vendorArray);
         adapterVendor.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapterVendor);

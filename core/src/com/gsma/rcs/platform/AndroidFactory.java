@@ -28,7 +28,6 @@ import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.platform.network.NetworkFactory;
 import com.gsma.rcs.platform.registry.RegistryFactory;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.logger.Logger;
 
 /**
  * Android platform
@@ -36,8 +35,6 @@ import com.gsma.rcs.utils.logger.Logger;
  * @author jexa7410
  */
 public class AndroidFactory {
-
-    private static final Logger sLogger = Logger.getLogger(AndroidFactory.class.getName());
 
     /**
      * Android application context

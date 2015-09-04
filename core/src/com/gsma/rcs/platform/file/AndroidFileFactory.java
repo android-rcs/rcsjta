@@ -23,7 +23,6 @@
 package com.gsma.rcs.platform.file;
 
 import java.io.File;
-import java.io.IOException;
 
 import android.content.Context;
 import android.media.MediaScannerConnection;

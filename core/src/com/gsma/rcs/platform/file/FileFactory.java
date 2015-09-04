@@ -27,7 +27,6 @@ import com.gsma.rcs.platform.FactoryException;
 import android.net.Uri;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * File factory

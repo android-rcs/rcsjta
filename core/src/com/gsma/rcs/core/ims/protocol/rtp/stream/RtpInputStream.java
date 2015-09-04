@@ -34,7 +34,6 @@ import com.gsma.rcs.core.ims.protocol.rtp.format.video.VideoOrientation;
 import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.rtp.util.Buffer;
 import com.gsma.rcs.utils.CloseableUtils;
-import com.gsma.rcs.utils.logger.Logger;
 
 import java.io.IOException;
 import java.util.Comparator;

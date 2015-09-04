@@ -100,8 +100,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
         mLocalContentResolver = localContentResolver;
         mGroupChatLog = new GroupChatLog(localContentResolver);
         mGroupChatDeliveryInfoLog = new GroupDeliveryInfoLog(localContentResolver);
-        mMessageLog = new MessageLog(mLocalContentResolver, mGroupChatLog,
-                mGroupChatDeliveryInfoLog, rcsSettings);
+        mMessageLog = new MessageLog(mLocalContentResolver, mGroupChatDeliveryInfoLog, rcsSettings);
         mFileTransferLog = new FileTransferLog(localContentResolver, mGroupChatDeliveryInfoLog,
                 rcsSettings);
     }

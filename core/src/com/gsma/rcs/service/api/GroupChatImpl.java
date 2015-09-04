@@ -1027,7 +1027,6 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * @throws MsrpException
      */
     public void dequeueGroupChatMessage(ChatMessage msg) throws MsrpException {
-        String msgId = msg.getMessageId();
         final GroupChatSession session = mImService.getGroupChatSession(mChatId);
         if (session == null) {
             mCore.getListener().handleRejoinGroupChatAsPartOfSendOperation(mChatId);

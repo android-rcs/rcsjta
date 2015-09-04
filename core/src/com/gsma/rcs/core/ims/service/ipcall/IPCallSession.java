@@ -40,7 +40,6 @@ import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsServiceSession;
-import com.gsma.rcs.core.ims.service.ImsSessionBasedServiceError;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.richcall.video.SdpOrientationExtension;
 import com.gsma.rcs.provider.contact.ContactManager;
@@ -302,7 +301,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 
             // Open the player
             if (getPlayer() != null) {
-                getPlayer().addEventListener(new PlayerEventListener(this));
+                getPlayer().addEventListener(new PlayerEventListener());
                 getPlayer().open(selectedAudioCodec, selectedVideoCodec, remoteHost,
                         audioRemotePort, videoRemotePort);
                 if (logger.isActivated()) {
@@ -1142,18 +1141,13 @@ public abstract class IPCallSession extends ImsServiceSession {
      * Player event listener
      */
     protected class PlayerEventListener extends IIPCallPlayerListener.Stub {
-        /**
-         * Streaming session
-         */
-        private IPCallSession session;
 
         /**
          * Constructor
          * 
          * @param session Streaming session
          */
-        public PlayerEventListener(IPCallSession session) {
-            this.session = session;
+        public PlayerEventListener() {
         }
 
         /**

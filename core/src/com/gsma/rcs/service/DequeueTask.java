@@ -40,7 +40,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Process;
-import android.text.TextUtils;
 
 public abstract class DequeueTask implements Runnable {
 

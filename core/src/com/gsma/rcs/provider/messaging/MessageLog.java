@@ -56,8 +56,6 @@ public class MessageLog implements IMessageLog {
 
     private LocalContentResolver mLocalContentResolver;
 
-    private GroupChatLog mGroupChatLog;
-
     private GroupDeliveryInfoLog mGroupChatDeliveryInfoLog;
 
     private final RcsSettings mRcsSettings;
@@ -114,11 +112,9 @@ public class MessageLog implements IMessageLog {
      * @param groupChatDeliveryInfoLog
      * @param rcsSettings
      */
-    /* package private */MessageLog(LocalContentResolver localContentResolver,
-            GroupChatLog groupChatLog, GroupDeliveryInfoLog groupChatDeliveryInfoLog,
+    /* package private */MessageLog(LocalContentResolver localContentResolver, GroupDeliveryInfoLog groupChatDeliveryInfoLog,
             RcsSettings rcsSettings) {
         mLocalContentResolver = localContentResolver;
-        mGroupChatLog = groupChatLog;
         mGroupChatDeliveryInfoLog = groupChatDeliveryInfoLog;
         mRcsSettings = rcsSettings;
     }

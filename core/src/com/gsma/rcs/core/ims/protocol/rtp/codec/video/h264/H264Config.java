@@ -20,7 +20,6 @@ package com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 /**
  * Default H264 Settings

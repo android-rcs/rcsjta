@@ -25,7 +25,6 @@ package com.gsma.rcs.utils;
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.services.rcs.RcsServiceException;
 
 import android.content.Context;
 import android.os.Build;

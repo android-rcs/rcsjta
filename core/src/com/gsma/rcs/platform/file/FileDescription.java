@@ -30,42 +30,20 @@ import android.net.Uri;
  * @author jexa7410
  */
 public class FileDescription {
-    /**
-     * Name
-     */
-    private String name;
 
-    /**
-     * file URI
-     */
-    private Uri file;
+    private final Uri mFile;
 
-    /**
-     * Size
-     */
-    private long size = -1;
+    private final String mName;
 
-    /**
-     * Directory
-     */
-    private boolean directory = false;
+    private final long mSize;
 
     /**
      * Constructor
      */
     public FileDescription(Uri file, String name, long size) {
-        this.name = name;
-        this.file = file;
-        this.size = size;
-    }
-
-    /**
-     * Constructor
-     */
-    public FileDescription(String name, long size, boolean directory) {
-        this.name = name;
-        this.size = size;
-        this.directory = directory;
+        mFile = file;
+        mName = name;
+        mSize = size;
     }
 
     /**
@@ -73,8 +51,8 @@ public class FileDescription {
      * 
      * @return File size
      */
-    public long getSize() {
-        return size;
+    public Uri getFile() {
+        return mFile;
     }
 
     /**
@@ -83,15 +61,16 @@ public class FileDescription {
      * @return File name
      */
     public String getName() {
-        return name;
+        return mName;
     }
 
     /**
-     * Is a directory
+     * Returns the size of the file
      * 
-     * @return Boolean
+     * @return File size
      */
-    public boolean isDirectory() {
-        return directory;
+    public long getSize() {
+        return mSize;
     }
+
 }

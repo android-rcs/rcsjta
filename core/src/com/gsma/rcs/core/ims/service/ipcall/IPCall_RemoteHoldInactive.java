@@ -24,8 +24,6 @@ package com.gsma.rcs.core.ims.service.ipcall;
 
 import android.os.RemoteException;
 
-import java.io.IOException;
-
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;

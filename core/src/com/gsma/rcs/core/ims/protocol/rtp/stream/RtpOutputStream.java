@@ -32,7 +32,6 @@ import com.gsma.rcs.core.ims.protocol.rtp.event.RtcpEventListener;
 import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.rtp.util.Buffer;
 import com.gsma.rcs.utils.CloseableUtils;
-import com.gsma.rcs.utils.logger.Logger;
 
 import java.io.IOException;
 

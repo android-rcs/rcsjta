@@ -55,11 +55,6 @@ public class RtpPacketReceiver extends Thread implements Closeable {
     private RtcpSession mRtcpSession;
 
     /**
-     * Signals that connection is closed
-     */
-    private boolean mClosed;
-
-    /**
      * Fifo buffer for received packet
      */
     private FifoBuffer mBuffer = new FifoBuffer();
@@ -133,7 +128,6 @@ public class RtpPacketReceiver extends Thread implements Closeable {
     public void close() {
         mInterrupted = true;
         interrupt();
-        mClosed = true;
         CloseableUtils.tryToClose(mDatagramConnection);
     }
 

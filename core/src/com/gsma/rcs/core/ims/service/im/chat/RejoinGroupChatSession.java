@@ -34,7 +34,6 @@ import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 
-import android.net.Uri;
 import android.text.TextUtils;
 
 import javax2.sip.InvalidArgumentException;

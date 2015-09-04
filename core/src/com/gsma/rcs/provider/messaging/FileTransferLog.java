@@ -921,8 +921,6 @@ public class FileTransferLog implements IFileTransferLog {
                     .getColumnIndexOrThrow(FileTransferData.KEY_FILE_EXPIRATION));
             long fileIconExpiration = cursor.getLong(cursor
                     .getColumnIndexOrThrow(FileTransferData.KEY_FILEICON_EXPIRATION));
-            String chatId = cursor.getString(cursor
-                    .getColumnIndexOrThrow(FileTransferData.KEY_CHAT_ID));
             String file = cursor.getString(cursor
                     .getColumnIndexOrThrow(FileTransferData.KEY_DOWNLOAD_URI));
             String fileIcon = cursor.getString(cursor
