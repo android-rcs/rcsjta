@@ -18,6 +18,7 @@
 
 package com.gsma.rcs.br;
 
+import com.gsma.rcs.addressbook.RcsAccountException;
 import com.gsma.rcs.provider.BackupRestoreDb;
 import com.gsma.rcs.utils.FileUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -27,6 +28,7 @@ import android.test.AndroidTestCase;
 import android.text.TextUtils;
 
 import java.io.File;
+import java.io.IOException;
 
 public class DbBackupRestoreTest extends AndroidTestCase {
 
@@ -39,7 +41,7 @@ public class DbBackupRestoreTest extends AndroidTestCase {
 
     private File srcdir = new File(DB_PATH);
 
-    File[] savedAccounts = null;
+    File[] savedAccounts;
 
     protected void setUp() throws Exception {
         super.setUp();
@@ -61,15 +63,21 @@ public class DbBackupRestoreTest extends AndroidTestCase {
     }
 
     public void testBackupAccount() throws InterruptedException {
-        assertTrue(BackupRestoreDb.backupAccount("1111"));
-        // A timer greater than 1 second is set because some emulator have only an accuracy of 1
-        // second.
-        Thread.sleep(1010);
-        assertTrue(BackupRestoreDb.backupAccount("2222"));
-        Thread.sleep(1010);
-        assertTrue(BackupRestoreDb.backupAccount("3333"));
-        Thread.sleep(1010);
-        assertTrue(BackupRestoreDb.backupAccount("4444"));
+        try {
+            BackupRestoreDb.backupAccount("1111");
+            /*
+             * A timer greater than 1 second is set because some emulator have only an accuracy of 1
+             * second.
+             */
+            Thread.sleep(1010);
+            BackupRestoreDb.backupAccount("2222");
+            Thread.sleep(1010);
+            BackupRestoreDb.backupAccount("3333");
+            Thread.sleep(1010);
+            BackupRestoreDb.backupAccount("4444");
+        } catch (IOException | RcsAccountException e) {
+            fail(e.getMessage());
+        }
         try {
             savedAccounts = BackupRestoreDb.listOfSavedAccounts(srcdir);
             for (File file : savedAccounts) {
@@ -89,17 +97,22 @@ public class DbBackupRestoreTest extends AndroidTestCase {
     }
 
     public void testCleanBackups() throws InterruptedException {
-        // This cleanBackups removes the oldest directory (if MAX_SAVED_ACCOUNT
-        // is reached)
-        assertTrue(BackupRestoreDb.backupAccount("1111"));
-        // A timer greater than 1 second is set because some emulator have only an accuracy of 1
-        // second.
-        Thread.sleep(1010);
-        assertTrue(BackupRestoreDb.backupAccount("2222"));
-        Thread.sleep(1010);
-        assertTrue(BackupRestoreDb.backupAccount("3333"));
-        Thread.sleep(1010);
-        assertTrue(BackupRestoreDb.backupAccount("4444"));
+        try {
+            /* This cleanBackups removes the oldest directory (if MAX_SAVED_ACCOUNT is reached) */
+            BackupRestoreDb.backupAccount("1111");
+            /*
+             * A timer greater than 1 second is set because some emulator have only an accuracy of 1
+             * second.
+             */
+            Thread.sleep(1010);
+            BackupRestoreDb.backupAccount("2222");
+            Thread.sleep(1010);
+            BackupRestoreDb.backupAccount("3333");
+            Thread.sleep(1010);
+            BackupRestoreDb.backupAccount("4444");
+        } catch (IOException | RcsAccountException e) {
+            fail(e.getMessage());
+        }
         BackupRestoreDb.cleanBackups("3333");
         savedAccounts = null;
         try {
@@ -123,8 +136,12 @@ public class DbBackupRestoreTest extends AndroidTestCase {
     }
 
     public void testRestoreDb() {
-        assertTrue(BackupRestoreDb.backupAccount("2222"));
-        assertTrue("restoreAccountProviders failed", BackupRestoreDb.restoreAccount("2222"));
+        try {
+            BackupRestoreDb.backupAccount("2222");
+            BackupRestoreDb.restoreAccount("2222");
+        } catch (IOException | RcsAccountException e) {
+            fail(e.getMessage());
+        }
     }
 
 }
