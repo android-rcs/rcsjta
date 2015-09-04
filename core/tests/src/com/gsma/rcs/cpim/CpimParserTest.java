@@ -1,10 +1,10 @@
 
 package com.gsma.rcs.cpim;
 
-import android.test.AndroidTestCase;
-
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimParser;
+
+import android.test.AndroidTestCase;
 
 /*******************************************************************************
  * Software Name : RCS IMS Stack Copyright (C) 2010 France Telecom S.A. Licensed under the Apache
@@ -58,22 +58,14 @@ public class CpimParserTest extends AndroidTestCase {
         sb.append(DOUBLE_CRLF);
         sb.append("Here is the text of my message.");
         String text = sb.toString();
-        CpimMessage msg = null;
-        try {
-            msg = (new CpimParser(text)).getCpimMessage();
-        } catch (Exception e) {
-            fail("no message parsed");
-            e.printStackTrace();
-        }
-        if (msg != null) {
-            assertEquals(msg.getHeader("From"), "MR SANDERS <im:piglet@100akerwood.com>");
-            assertEquals(msg.getHeader("To"), "Depressed Donkey <im:eeyore@100akerwood.com>");
-            assertEquals(msg.getHeader("DateTime"), "2000-12-13T13:40:00-08:00");
-            assertEquals(msg.getHeader("Subject"), "the weather will be fine today");
-            assertEquals(msg.getContentHeader("Content-ID"), "<1234567890@foo.com>");
-            assertEquals(msg.getContentType(), "text/plain");
-            assertEquals(msg.getMessageContent(), "Here is the text of my message.");
-        }
+        CpimMessage msg = (new CpimParser(text)).getCpimMessage();
+        assertEquals(msg.getHeader("From"), "MR SANDERS <im:piglet@100akerwood.com>");
+        assertEquals(msg.getHeader("To"), "Depressed Donkey <im:eeyore@100akerwood.com>");
+        assertEquals(msg.getHeader("DateTime"), "2000-12-13T13:40:00-08:00");
+        assertEquals(msg.getHeader("Subject"), "the weather will be fine today");
+        assertEquals(msg.getContentHeader("Content-ID"), "<1234567890@foo.com>");
+        assertEquals(msg.getContentType(), "text/plain");
+        assertEquals(msg.getMessageContent(), "Here is the text of my message.");
     }
 
 }

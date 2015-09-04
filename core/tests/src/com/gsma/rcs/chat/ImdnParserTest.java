@@ -18,15 +18,19 @@
 
 package com.gsma.rcs.chat;
 
-import java.io.ByteArrayInputStream;
-
-import org.xml.sax.InputSource;
-
-import android.test.AndroidTestCase;
-
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnParser;
 import com.gsma.rcs.utils.logger.Logger;
+
+import android.test.AndroidTestCase;
+
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 public class ImdnParserTest extends AndroidTestCase {
     private Logger logger = Logger.getLogger(this.getClass().getName());
@@ -50,7 +54,8 @@ public class ImdnParserTest extends AndroidTestCase {
         super.tearDown();
     }
 
-    public void testGetImdnDocument() {
+    public void testGetImdnDocument() throws SAXException, ParserConfigurationException,
+            IOException {
         /**
          * Parse a delivery report
          * 
@@ -73,18 +78,14 @@ public class ImdnParserTest extends AndroidTestCase {
         sb.append(CRLF);
         sb.append("</imdn>");
         String xml = sb.toString();
-        try {
-            InputSource inputso = new InputSource(new ByteArrayInputStream(xml.getBytes()));
-            ImdnParser parser = new ImdnParser(inputso);
-            ImdnDocument imdnDoc = parser.getImdnDocument();
-            if (logger.isActivated()) {
-                logger.info("MsgId=" + imdnDoc.getMsgId() + "  status=" + imdnDoc.getStatus());
-            }
-            assertEquals(imdnDoc.getMsgId(), "34jk324j");
-            assertEquals(imdnDoc.getStatus(), "displayed");
-        } catch (Exception e) {
-            fail("no Imdn source parsed");
-            e.printStackTrace();
+
+        InputSource inputso = new InputSource(new ByteArrayInputStream(xml.getBytes()));
+        ImdnParser parser = new ImdnParser(inputso);
+        ImdnDocument imdnDoc = parser.getImdnDocument();
+        if (logger.isActivated()) {
+            logger.info("MsgId=" + imdnDoc.getMsgId() + "  status=" + imdnDoc.getStatus());
         }
+        assertEquals(imdnDoc.getMsgId(), "34jk324j");
+        assertEquals(imdnDoc.getStatus(), "displayed");
     }
 }

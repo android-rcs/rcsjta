@@ -18,15 +18,19 @@
 
 package com.gsma.rcs.chat;
 
-import java.io.ByteArrayInputStream;
-
-import org.xml.sax.InputSource;
-
-import android.test.AndroidTestCase;
-
 import com.gsma.rcs.core.ims.service.im.chat.event.ConferenceInfoDocument;
 import com.gsma.rcs.core.ims.service.im.chat.event.ConferenceInfoParser;
 import com.gsma.rcs.utils.logger.Logger;
+
+import android.test.AndroidTestCase;
+
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 public class ConferenceInfoParserTest extends AndroidTestCase {
     private Logger logger = Logger.getLogger(this.getClass().getName());
@@ -68,7 +72,8 @@ public class ConferenceInfoParserTest extends AndroidTestCase {
      */
     // @formatter:on
 
-    public void testGetConferenceInfo() {
+    public void testGetConferenceInfo() throws ParserConfigurationException, SAXException,
+            IOException {
         StringBuffer sb = new StringBuffer("<?xml version=\"1.08\" encoding=\"UTF-8\"?>");
         sb.append(CRLF);
         sb.append("<conference-info xmlns=\"urn:ietf:params:xml:ns:conference-info\" entity=\"sips:conf233@example.com\" state=\"full\" version=\"1\">");
@@ -106,22 +111,19 @@ public class ConferenceInfoParserTest extends AndroidTestCase {
         sb.append("<status>sendrecv</status> </media> </endpoint> </user> ");
         sb.append("</users> </conference-info> ");
         String xml = sb.toString();
-        try {
-            InputSource inputso = new InputSource(new ByteArrayInputStream(xml.getBytes()));
-            ConferenceInfoParser parser = new ConferenceInfoParser(inputso);
-            ConferenceInfoDocument confInfoDoc = parser.getConferenceInfo();
-            if (logger.isActivated()) {
-                logger.info("conference info URI = " + confInfoDoc.getEntity());
-                logger.info("conference info state = " + confInfoDoc.getState());
-                logger.info("conference info users = " + confInfoDoc.getUserCount());
-            }
-            assertEquals(confInfoDoc.getEntity(), "sips:conf233@example.com");
-            assertEquals(confInfoDoc.getState(), "full");
-            assertEquals(confInfoDoc.getMaxUserCount(), 50);
-            assertEquals(confInfoDoc.getUserCount(), 33);
-        } catch (Exception e) {
-            fail("no Conference info source parsed");
-            e.printStackTrace();
+
+        InputSource inputso = new InputSource(new ByteArrayInputStream(xml.getBytes()));
+        ConferenceInfoParser parser = new ConferenceInfoParser(inputso);
+        ConferenceInfoDocument confInfoDoc = parser.getConferenceInfo();
+        if (logger.isActivated()) {
+            logger.info("conference info URI = " + confInfoDoc.getEntity());
+            logger.info("conference info state = " + confInfoDoc.getState());
+            logger.info("conference info users = " + confInfoDoc.getUserCount());
         }
+        assertEquals(confInfoDoc.getEntity(), "sips:conf233@example.com");
+        assertEquals(confInfoDoc.getState(), "full");
+        assertEquals(confInfoDoc.getMaxUserCount(), 50);
+        assertEquals(confInfoDoc.getUserCount(), 33);
+
     }
 }

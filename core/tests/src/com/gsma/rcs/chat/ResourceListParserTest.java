@@ -18,15 +18,19 @@
 
 package com.gsma.rcs.chat;
 
-import java.io.ByteArrayInputStream;
-
-import org.xml.sax.InputSource;
-
-import android.test.AndroidTestCase;
-
 import com.gsma.rcs.core.ims.service.im.chat.resourcelist.ResourceListDocument;
 import com.gsma.rcs.core.ims.service.im.chat.resourcelist.ResourceListParser;
 import com.gsma.rcs.utils.logger.Logger;
+
+import android.test.AndroidTestCase;
+
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 public class ResourceListParserTest extends AndroidTestCase {
     private static final String CRLF = "\r\n";
@@ -41,7 +45,8 @@ public class ResourceListParserTest extends AndroidTestCase {
         super.tearDown();
     }
 
-    public void testGetResourceListDocument() {
+    public void testGetResourceListDocument() throws ParserConfigurationException, SAXException,
+            IOException {
         // @formatter:off
         /*
          * Resource-List SAMPLE: <?xml version="1.0" encoding="UTF-8"?> <resource-lists
@@ -68,23 +73,20 @@ public class ResourceListParserTest extends AndroidTestCase {
         sb.append("</resource-lists>");
         sb.append(CRLF);
         String xml = sb.toString();
-        try {
-            InputSource inputso = new InputSource(new ByteArrayInputStream(xml.getBytes()));
-            ResourceListParser parser = new ResourceListParser(inputso);
-            ResourceListDocument rlistDoc = parser.getResourceList();
-            if (logger.isActivated()) {
-                if (rlistDoc.getEntries() != null) {
-                    logger.info("resources number = " + rlistDoc.getEntries().size());
-                } else {
-                    logger.info("resources list is null");
-                }
+
+        InputSource inputso = new InputSource(new ByteArrayInputStream(xml.getBytes()));
+        ResourceListParser parser = new ResourceListParser(inputso);
+        ResourceListDocument rlistDoc = parser.getResourceList();
+        if (logger.isActivated()) {
+            if (rlistDoc.getEntries() != null) {
+                logger.info("resources number = " + rlistDoc.getEntries().size());
+            } else {
+                logger.info("resources list is null");
             }
-            assertTrue(rlistDoc.getEntries().contains("sip:bill@example.com"));
-            assertTrue(rlistDoc.getEntries().contains("sip:joe@example.org"));
-            assertTrue(rlistDoc.getEntries().contains("sip:ted@example.net"));
-        } catch (Exception e) {
-            fail("no resourceslist");
-            e.printStackTrace();
         }
+        assertTrue(rlistDoc.getEntries().contains("sip:bill@example.com"));
+        assertTrue(rlistDoc.getEntries().contains("sip:joe@example.org"));
+        assertTrue(rlistDoc.getEntries().contains("sip:ted@example.net"));
+
     }
 }

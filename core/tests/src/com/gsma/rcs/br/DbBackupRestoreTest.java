@@ -18,6 +18,7 @@
 
 package com.gsma.rcs.br;
 
+import com.gsma.rcs.addressbook.RcsAccountException;
 import com.gsma.rcs.provider.BackupRestoreDb;
 import com.gsma.rcs.utils.FileUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -27,31 +28,33 @@ import android.test.AndroidTestCase;
 import android.text.TextUtils;
 
 import java.io.File;
+import java.io.IOException;
 
 public class DbBackupRestoreTest extends AndroidTestCase {
 
     private static final int MAX_SAVED_ACCOUNT = 3;
 
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(DbBackupRestoreTest.class
+            .getSimpleName());
 
     private static final String DB_PATH = new StringBuilder(Environment.getDataDirectory()
             .toString()).append(BackupRestoreDb.DATABASE_LOCATION).toString();
 
-    private File srcdir = new File(DB_PATH);
+    private File mSrcdir = new File(DB_PATH);
 
-    File[] savedAccounts;
+    File[] mSavedAccounts;
 
     protected void setUp() throws Exception {
         super.setUp();
-        if (!srcdir.exists()) {
-            srcdir.mkdir();
+        if (!mSrcdir.exists()) {
+            mSrcdir.mkdir();
         }
         // Clean up all saved configurations
-        savedAccounts = BackupRestoreDb.listOfSavedAccounts(srcdir);
-        if (savedAccounts == null) {
+        mSavedAccounts = BackupRestoreDb.listOfSavedAccounts(mSrcdir);
+        if (mSavedAccounts == null) {
             return;
         }
-        for (File savedAccount : savedAccounts) {
+        for (File savedAccount : mSavedAccounts) {
             FileUtils.deleteDirectory(savedAccount);
         }
     }
@@ -60,33 +63,27 @@ public class DbBackupRestoreTest extends AndroidTestCase {
         super.tearDown();
     }
 
-    public void testBackupAccount() throws InterruptedException {
-        try {
-            BackupRestoreDb.backupAccount("1111");
-            /*
-             * A timer greater than 1 second is set because some emulator have only an accuracy of 1
-             * second.
-             */
-            Thread.sleep(1010);
-            BackupRestoreDb.backupAccount("2222");
-            Thread.sleep(1010);
-            BackupRestoreDb.backupAccount("3333");
-            Thread.sleep(1010);
-            BackupRestoreDb.backupAccount("4444");
-        } catch (Exception e) {
-            fail(e.getMessage());
+    public void testBackupAccount() throws InterruptedException, IOException, RcsAccountException {
+        BackupRestoreDb.backupAccount("1111");
+        /*
+         * A timer greater than 1 second is set because some emulator have only an accuracy of 1
+         * second.
+         */
+        Thread.sleep(1010);
+        BackupRestoreDb.backupAccount("2222");
+        Thread.sleep(1010);
+        BackupRestoreDb.backupAccount("3333");
+        Thread.sleep(1010);
+        BackupRestoreDb.backupAccount("4444");
+
+        mSavedAccounts = BackupRestoreDb.listOfSavedAccounts(mSrcdir);
+        for (File file : mSavedAccounts) {
+            sLogger.info(new StringBuilder("Account ").append(file.getName())
+                    .append(" last modified=").append(file.lastModified()).toString());
         }
-        try {
-            savedAccounts = BackupRestoreDb.listOfSavedAccounts(srcdir);
-            for (File file : savedAccounts) {
-                logger.info(new StringBuilder("Account ").append(file.getName())
-                        .append(" last modified=").append(file.lastModified()).toString());
-            }
-        } catch (IllegalArgumentException e) {
-            fail(e.getMessage());
-        }
-        assertTrue("listOfSavedAccounts failed", savedAccounts != null && savedAccounts.length == 4);
-        String oldestFile = FileUtils.getOldestFile(savedAccounts).getName();
+        assertTrue("listOfSavedAccounts failed", mSavedAccounts.length == 4);
+
+        String oldestFile = FileUtils.getOldestFile(mSavedAccounts).getName();
         if (TextUtils.isEmpty(oldestFile)) {
             fail("testBackupAccount failed : oldestFile is null or empty");
         } else if (!oldestFile.equals("1111")) {
@@ -94,38 +91,30 @@ public class DbBackupRestoreTest extends AndroidTestCase {
         }
     }
 
-    public void testCleanBackups() throws InterruptedException {
-        try {
-            /* This cleanBackups removes the oldest directory (if MAX_SAVED_ACCOUNT is reached) */
-            BackupRestoreDb.backupAccount("1111");
-            /*
-             * A timer greater than 1 second is set because some emulator have only an accuracy of 1
-             * second.
-             */
-            Thread.sleep(1010);
-            BackupRestoreDb.backupAccount("2222");
-            Thread.sleep(1010);
-            BackupRestoreDb.backupAccount("3333");
-            Thread.sleep(1010);
-            BackupRestoreDb.backupAccount("4444");
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
-        BackupRestoreDb.cleanBackups("3333");
-        savedAccounts = null;
-        try {
-            savedAccounts = BackupRestoreDb.listOfSavedAccounts(srcdir);
-            for (File file : savedAccounts) {
-                logger.info(new StringBuilder("Account ").append(file.getName())
-                        .append(" last modified=").append(file.lastModified()).toString());
-            }
-        } catch (IllegalArgumentException e) {
-            fail(e.getMessage());
-        }
-        assertTrue("listOfSavedAccounts MAX_SAVED_ACCOUNT failed", savedAccounts != null
-                && savedAccounts.length == MAX_SAVED_ACCOUNT);
+    public void testCleanBackups() throws InterruptedException, IOException, RcsAccountException {
+        /* This cleanBackups removes the oldest directory (if MAX_SAVED_ACCOUNT is reached) */
+        BackupRestoreDb.backupAccount("1111");
+        /*
+         * A timer greater than 1 second is set because some emulator have only an accuracy of 1
+         * second.
+         */
+        Thread.sleep(1010);
+        BackupRestoreDb.backupAccount("2222");
+        Thread.sleep(1010);
+        BackupRestoreDb.backupAccount("3333");
+        Thread.sleep(1010);
+        BackupRestoreDb.backupAccount("4444");
 
-        String oldestFile = FileUtils.getOldestFile(savedAccounts).getName();
+        BackupRestoreDb.cleanBackups("3333");
+        mSavedAccounts = BackupRestoreDb.listOfSavedAccounts(mSrcdir);
+        for (File file : mSavedAccounts) {
+            sLogger.info(new StringBuilder("Account ").append(file.getName())
+                    .append(" last modified=").append(file.lastModified()).toString());
+        }
+        assertTrue("listOfSavedAccounts MAX_SAVED_ACCOUNT failed",
+                mSavedAccounts.length == MAX_SAVED_ACCOUNT);
+
+        String oldestFile = FileUtils.getOldestFile(mSavedAccounts).getName();
         if (TextUtils.isEmpty(oldestFile)) {
             fail("testCleanBackups failed: oldestFile is null or empty");
         } else if (!oldestFile.equals("2222")) {
@@ -133,13 +122,9 @@ public class DbBackupRestoreTest extends AndroidTestCase {
         }
     }
 
-    public void testRestoreDb() {
-        try {
-            BackupRestoreDb.backupAccount("2222");
-            BackupRestoreDb.restoreAccount("2222");
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
+    public void testRestoreDb() throws IOException, RcsAccountException {
+        BackupRestoreDb.backupAccount("2222");
+        BackupRestoreDb.restoreAccount("2222");
     }
 
 }

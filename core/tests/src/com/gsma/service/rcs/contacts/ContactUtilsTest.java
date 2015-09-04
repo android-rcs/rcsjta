@@ -50,201 +50,119 @@ public class ContactUtilsTest extends AndroidTestCase {
         }
     }
 
-    public void testIsValidContactInvalidLength() {
-        try {
-            assertFalse(mContactUtils.isValidContact("+"));
-        } catch (RcsPermissionDeniedException e) {
-            fail(e.getMessage());
-        }
+    public void testIsValidContactInvalidLength() throws RcsPermissionDeniedException {
+        assertFalse(mContactUtils.isValidContact("+"));
     }
 
-    public void testIsValidContactInvalidLength_min() {
-        try {
-            assertFalse(mContactUtils.isValidContact(""));
-        } catch (RcsPermissionDeniedException e) {
-            fail(e.getMessage());
-        }
+    public void testIsValidContactInvalidLength_min() throws RcsPermissionDeniedException {
+        assertFalse(mContactUtils.isValidContact(""));
     }
 
-    public void testIsValidContactInvalidLength_max() {
-        try {
-            assertFalse(mContactUtils.isValidContact("0123456789012345"));
-        } catch (RcsPermissionDeniedException e) {
-            fail(e.getMessage());
-        }
+    public void testIsValidContactInvalidLength_max() throws RcsPermissionDeniedException {
+        assertFalse(mContactUtils.isValidContact("0123456789012345"));
     }
 
-    public void testIsValidContactInvalidCharacter() {
-        try {
-            assertFalse(mContactUtils.isValidContact("012345a"));
-        } catch (RcsPermissionDeniedException e) {
-            fail(e.getMessage());
-        }
+    public void testIsValidContactInvalidCharacter() throws RcsPermissionDeniedException {
+        assertFalse(mContactUtils.isValidContact("012345a"));
     }
 
-    public void testIsValidContactWrongAreaCode() {
-        try {
-            assertFalse(mContactUtils.isValidContact(mNextCountryAreaCode.concat("123456789")));
-        } catch (RcsPermissionDeniedException e) {
-            fail(e.getMessage());
-        }
+    public void testIsValidContactWrongAreaCode() throws RcsPermissionDeniedException {
+        assertFalse(mContactUtils.isValidContact(mNextCountryAreaCode.concat("123456789")));
     }
 
-    public void testIsValidContactNormalCase_1() {
-        try {
-            assertTrue(mContactUtils.isValidContact(ContactUtilMockContext.COUNTRY_AREA_CODE
-                    .concat("123456789")));
-        } catch (RcsPermissionDeniedException e) {
-            fail(e.getMessage());
-        }
+    public void testIsValidContactNormalCase_1() throws RcsPermissionDeniedException {
+        assertTrue(mContactUtils.isValidContact(ContactUtilMockContext.COUNTRY_AREA_CODE
+                .concat("123456789")));
     }
 
-    public void testIsValidContactNormalCase_2() {
-        try {
-            assertTrue(mContactUtils.isValidContact("+123456789"));
-        } catch (RcsPermissionDeniedException e) {
-            fail(e.getMessage());
-        }
+    public void testIsValidContactNormalCase_2() throws RcsPermissionDeniedException {
+        assertTrue(mContactUtils.isValidContact("+123456789"));
     }
 
-    public void testIsValidContactNormalCase_3() {
-        try {
-            assertTrue(mContactUtils.isValidContact("+012345678901234"));
-        } catch (RcsPermissionDeniedException e) {
-            fail(e.getMessage());
-        }
+    public void testIsValidContactNormalCase_3() throws RcsPermissionDeniedException {
+        assertTrue(mContactUtils.isValidContact("+012345678901234"));
     }
 
-    public void testIsValidContactNormalCase_4() {
-        try {
-            assertTrue(mContactUtils.isValidContact(ContactUtilMockContext.COUNTRY_AREA_CODE
-                    .concat("12345678901234")));
-        } catch (RcsPermissionDeniedException e) {
-            fail(e.getMessage());
-        }
+    public void testIsValidContactNormalCase_4() throws RcsPermissionDeniedException {
+        assertTrue(mContactUtils.isValidContact(ContactUtilMockContext.COUNTRY_AREA_CODE
+                .concat("12345678901234")));
     }
 
-    public void testIsValidContactNormalCase_5() {
-        try {
-            assertTrue(mContactUtils.isValidContact(ContactUtilMockContext.COUNTRY_AREA_CODE
-                    .concat("1 2 3 4 5 6 7 8 9 0 1 2 3 4")));
-        } catch (RcsPermissionDeniedException e) {
-            fail(e.getMessage());
-        }
+    public void testIsValidContactNormalCase_5() throws RcsPermissionDeniedException {
+        assertTrue(mContactUtils.isValidContact(ContactUtilMockContext.COUNTRY_AREA_CODE
+                .concat("1 2 3 4 5 6 7 8 9 0 1 2 3 4")));
     }
 
-    public void testIsValidContactNormalCase_6() {
-        try {
-            assertTrue(mContactUtils.isValidContact(ContactUtilMockContext.COUNTRY_AREA_CODE
-                    .concat("-1-2-3-4-5-6-7-8-9-0-1-2-3-4")));
-        } catch (RcsPermissionDeniedException e) {
-            fail(e.getMessage());
-        }
+    public void testIsValidContactNormalCase_6() throws RcsPermissionDeniedException {
+        assertTrue(mContactUtils.isValidContact(ContactUtilMockContext.COUNTRY_AREA_CODE
+                .concat("-1-2-3-4-5-6-7-8-9-0-1-2-3-4")));
     }
 
-    public void testIsValidContactNormalCase_7() {
-        try {
-            assertTrue(mContactUtils.isValidContact(new StringBuilder(" ")
-                    .append(ContactUtilMockContext.COUNTRY_AREA_CODE)
-                    .append("-1 2-3 4-5 6-7 8-9 0-1 2-3 4 ").toString()));
-        } catch (RcsPermissionDeniedException e) {
-            fail(e.getMessage());
-        }
+    public void testIsValidContactNormalCase_7() throws RcsPermissionDeniedException {
+        assertTrue(mContactUtils.isValidContact(new StringBuilder(" ")
+                .append(ContactUtilMockContext.COUNTRY_AREA_CODE)
+                .append("-1 2-3 4-5 6-7 8-9 0-1 2-3 4 ").toString()));
     }
 
-    public void testIsValidContactNormalCase_8() {
-        try {
-            assertTrue(mContactUtils.isValidContact(ContactUtilMockContext.COUNTRY_AREA_CODE
-                    .concat("    1--------2-3 4-5 6-7 8-9 0-1 2-3 4 ")));
-        } catch (RcsPermissionDeniedException e) {
-            fail(e.getMessage());
-        }
+    public void testIsValidContactNormalCase_8() throws RcsPermissionDeniedException {
+        assertTrue(mContactUtils.isValidContact(ContactUtilMockContext.COUNTRY_AREA_CODE
+                .concat("    1--------2-3 4-5 6-7 8-9 0-1 2-3 4 ")));
     }
 
-    public void testFormatContactIdNull() {
+    public void testFormatContactIdNull() throws RcsPermissionDeniedException {
         try {
             mContactUtils.formatContact(null);
             fail("Expected IllegalArgumentException to be thrown");
         } catch (IllegalArgumentException e) {
             assertTrue(e instanceof IllegalArgumentException);
-        } catch (RcsPermissionDeniedException e) {
-            fail(e.getMessage());
         }
     }
 
-    public void testFormatContactIdWithInternationalNumbering() {
+    public void testFormatContactIdWithInternationalNumbering() throws RcsPermissionDeniedException {
+        ContactId cid = mContactUtils.formatContact("+33612345678");
+        assertEquals("+33612345678", cid.toString());
+        cid = mContactUtils.formatContact("+34612345678");
+        assertEquals("+34612345678", cid.toString());
+    }
+
+    public void testFormatContactIdWithLocalNumbering() throws RcsPermissionDeniedException {
+        String cac = mContactUtils.getMyCountryAreaCode();
+        if (TextUtils.isEmpty(cac))
+            return;
+        String cc = mContactUtils.getMyCountryCode();
+        ContactId cid = mContactUtils.formatContact(cac + "612345678");
+        assertEquals(cc + "612345678", cid.toString());
+    }
+
+    public void testFormatContactIdWithLocalNumberingButDifferentCountryAreaCode()
+            throws RcsPermissionDeniedException {
+        String cac = mContactUtils.getMyCountryAreaCode();
+        if (TextUtils.isEmpty(cac))
+            return;
         try {
-            ContactId cid = mContactUtils.formatContact("+33612345678");
-            assertEquals("+33612345678", cid.toString());
-            cid = mContactUtils.formatContact("+34612345678");
-            assertEquals("+34612345678", cid.toString());
-        } catch (RcsPermissionDeniedException e) {
-            fail(e.getMessage());
+            int cacInteger = Integer.parseInt(cac);
+            mContactUtils.formatContact((++cacInteger) + "612345678");
+            fail("IllegalArgumentException expected");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
         }
     }
 
-    public void testFormatContactIdWithLocalNumbering() {
-        try {
-            String cac = mContactUtils.getMyCountryAreaCode();
-            if (TextUtils.isEmpty(cac))
-                return;
-            String cc = mContactUtils.getMyCountryCode();
-            ContactId cid = mContactUtils.formatContact(cac + "612345678");
-            assertEquals(cc + "612345678", cid.toString());
-        } catch (RcsPermissionDeniedException e) {
-            fail(e.getMessage());
-        }
+    public void testFormatContactIdWithPrefixedInternationalNumbering()
+            throws RcsPermissionDeniedException {
+        String cc = mContactUtils.getMyCountryCode();
+        ContactId cid = mContactUtils.formatContact("00" + cc.substring(1) + "612345678");
+        assertEquals(cc + "612345678", cid.toString());
+        int ccInteger = Integer.parseInt(cc.substring(1)) + 1;
+        cid = mContactUtils.formatContact("00" + ccInteger + "612345678");
+        assertEquals("+" + ccInteger + "612345678", cid.toString());
     }
 
-    public void testFormatContactIdWithLocalNumberingButDifferentCountryAreaCode() {
-        try {
-            String cac = mContactUtils.getMyCountryAreaCode();
-
-            if (TextUtils.isEmpty(cac))
-                return;
-            try {
-                int cacInteger = Integer.parseInt(cac);
-                mContactUtils.formatContact((++cacInteger) + "612345678");
-                fail("IllegalArgumentException expected");
-            } catch (Exception e) {
-                assertTrue(e instanceof IllegalArgumentException);
-            }
-        } catch (RcsPermissionDeniedException e) {
-            fail(e.getMessage());
-        }
+    public void testGetMyCountryAreaCode() throws RcsPermissionDeniedException {
+        assertEquals(ContactUtilMockContext.COUNTRY_AREA_CODE, mContactUtils.getMyCountryAreaCode());
     }
 
-    public void testFormatContactIdWithPrefixedInternationalNumbering() {
-        try {
-            String cc = mContactUtils.getMyCountryCode();
-            try {
-                ContactId cid = mContactUtils.formatContact("00" + cc.substring(1) + "612345678");
-                assertEquals(cc + "612345678", cid.toString());
-                int ccInteger = Integer.parseInt(cc.substring(1)) + 1;
-                cid = mContactUtils.formatContact("00" + ccInteger + "612345678");
-                assertEquals("+" + ccInteger + "612345678", cid.toString());
-            } catch (IllegalArgumentException e) {
-                fail("IllegalArgumentException thrown");
-            }
-        } catch (RcsPermissionDeniedException e) {
-            fail(e.getMessage());
-        }
-    }
-
-    public void testGetMyCountryAreaCode() {
-        try {
-            assertEquals(ContactUtilMockContext.COUNTRY_AREA_CODE,
-                    mContactUtils.getMyCountryAreaCode());
-        } catch (RcsPermissionDeniedException e) {
-            fail(e.getMessage());
-        }
-    }
-
-    public void testGetMyCountryCode() {
-        try {
-            assertEquals(ContactUtilMockContext.COUNTRY_CODE, mContactUtils.getMyCountryCode());
-        } catch (RcsPermissionDeniedException e) {
-            fail(e.getMessage());
-        }
+    public void testGetMyCountryCode() throws RcsPermissionDeniedException {
+        assertEquals(ContactUtilMockContext.COUNTRY_CODE, mContactUtils.getMyCountryCode());
     }
 }

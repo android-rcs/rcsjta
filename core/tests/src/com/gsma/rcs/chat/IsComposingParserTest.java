@@ -18,15 +18,19 @@
 
 package com.gsma.rcs.chat;
 
-import java.io.ByteArrayInputStream;
-
-import org.xml.sax.InputSource;
-
-import android.test.AndroidTestCase;
-
 import com.gsma.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
 import com.gsma.rcs.core.ims.service.im.chat.iscomposing.IsComposingParser;
 import com.gsma.rcs.utils.logger.Logger;
+
+import android.test.AndroidTestCase;
+
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 public class IsComposingParserTest extends AndroidTestCase {
 
@@ -49,7 +53,8 @@ public class IsComposingParserTest extends AndroidTestCase {
         super.tearDown();
     }
 
-    public void testIsComposingParser() {
+    public void testIsComposingParser() throws ParserConfigurationException, SAXException,
+            IOException {
         StringBuffer sb = new StringBuffer("<?xml version=\"1.08\" encoding=\"UTF-8\"?>");
         sb.append("<isComposing xmlns=\"urn:ietf:params:xml:ns:im-isComposing\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ");
         sb.append("xsi:schemaLocation=\"urn:ietf:params:xml:ns:im-composing iscomposing.xsd\">");
@@ -57,18 +62,15 @@ public class IsComposingParserTest extends AndroidTestCase {
         sb.append("<lastactive>2008-12-13T13:40:00Z</lastactive>");
         sb.append("<contenttype>audio</contenttype> </isComposing>");
         String xml = sb.toString();
-        try {
-            InputSource inputso = new InputSource(new ByteArrayInputStream(xml.getBytes()));
-            IsComposingParser parser = new IsComposingParser(inputso);
-            IsComposingInfo isInfo = parser.getIsComposingInfo();
-            assertEquals(isInfo.getContentType(), "audio");
-            assertEquals(isInfo.isStateActive(), false);
-            if (logger.isActivated()) {
-                logger.info("isComposing lastActiveDate = " + isInfo.getLastActiveDate());
-            }
-        } catch (Exception e) {
-            fail("IsComposing source parsed");
-            e.printStackTrace();
+
+        InputSource inputso = new InputSource(new ByteArrayInputStream(xml.getBytes()));
+        IsComposingParser parser = new IsComposingParser(inputso);
+        IsComposingInfo isInfo = parser.getIsComposingInfo();
+        assertEquals(isInfo.getContentType(), "audio");
+        assertEquals(isInfo.isStateActive(), false);
+        if (logger.isActivated()) {
+            logger.info("isComposing lastActiveDate = " + isInfo.getLastActiveDate());
         }
+
     }
 }

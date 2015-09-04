@@ -37,6 +37,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.test.AndroidTestCase;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.Set;
@@ -72,22 +73,17 @@ public class ContactManagerTest extends AndroidTestCase {
         super.tearDown();
     }
 
-    public void testCreateMyContact() {
-        try {
-            long myraw = mContactManager.createMyContact();
-            if (sLogger.isActivated()) {
-                sLogger.debug("my rawId = ".concat(Long.toString(myraw)));
-            }
-            if (mRcsSettings.isSocialPresenceSupported()) {
-                assertTrue(ContactManager.INVALID_ID != myraw);
-            }
-        } catch (ContactManagerException e) {
-            fail(e.getMessage());
+    public void testCreateMyContact() throws ContactManagerException {
+        long myraw = mContactManager.createMyContact();
+        if (sLogger.isActivated()) {
+            sLogger.debug("my rawId = ".concat(Long.toString(myraw)));
         }
-
+        if (mRcsSettings.isSocialPresenceSupported()) {
+            assertTrue(ContactManager.INVALID_ID != myraw);
+        }
     }
 
-    public void testGetRcsContactInfo() {
+    public void testGetRcsContactInfo() throws ContactManagerException, IOException {
         CapabilitiesBuilder expectedCapa = createRcsContact();
         ContactInfo getInfo = mContactManager.getContactInfo(mContact);
         assertNotNull(getInfo);
@@ -116,7 +112,7 @@ public class ContactManagerTest extends AndroidTestCase {
         assertEquals(RegistrationState.ONLINE, getInfo.getRegistrationState());
     }
 
-    public void testGetContactCapabilities() {
+    public void testGetContactCapabilities() throws ContactManagerException, IOException {
         CapabilitiesBuilder expectedCapa = createRcsContact();
         Capabilities getCapa = mContactManager.getContactCapabilities(mContact);
         assertNotNull(getCapa);
@@ -139,14 +135,15 @@ public class ContactManagerTest extends AndroidTestCase {
         assertTrue(extensions.contains("MyRcsExtensionTag2"));
     }
 
-    public void testDisplayName() {
+    public void testDisplayName() throws ContactManagerException, IOException {
         createRcsContact();
         String displayName = UUID.randomUUID().toString();
         mContactManager.setContactDisplayName(mContact, displayName);
         assertEquals(displayName, mContactManager.getContactDisplayName(mContact));
     }
 
-    public void testUpdateCapabilitiesTimeLastRequest() throws InterruptedException {
+    public void testUpdateCapabilitiesTimeLastRequest() throws InterruptedException,
+            ContactManagerException, IOException {
         createRcsContact();
         Capabilities oldCapa = mContactManager.getContactCapabilities(mContact);
         /*
@@ -159,7 +156,8 @@ public class ContactManagerTest extends AndroidTestCase {
         assertTrue(newCapa.getTimestampOfLastRequest() > oldCapa.getTimestampOfLastRequest());
     }
 
-    public void testUpdateCapabilitiesTimeLastResponse() throws InterruptedException {
+    public void testUpdateCapabilitiesTimeLastResponse() throws InterruptedException,
+            ContactManagerException, IOException {
         createRcsContact();
         Capabilities oldCapa = mContactManager.getContactCapabilities(mContact);
         /*
@@ -172,17 +170,13 @@ public class ContactManagerTest extends AndroidTestCase {
         assertTrue(newCapa.getTimestampOfLastResponse() > oldCapa.getTimestampOfLastResponse());
     }
 
-    public void testBlockedContact() {
+    public void testBlockedContact() throws ContactManagerException, IOException {
         createRcsContact();
-        try {
-            mContactManager.setBlockingState(mContact, BlockingState.BLOCKED);
-            assertTrue(mContactManager.isBlockedForContact(mContact));
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
+        mContactManager.setBlockingState(mContact, BlockingState.BLOCKED);
+        assertTrue(mContactManager.isBlockedForContact(mContact));
     }
 
-    public CapabilitiesBuilder createRcsContact() {
+    public CapabilitiesBuilder createRcsContact() throws ContactManagerException, IOException {
         long now = System.currentTimeMillis();
         CapabilitiesBuilder capaBuilder = new CapabilitiesBuilder();
         /*
@@ -208,16 +202,12 @@ public class ContactManagerTest extends AndroidTestCase {
         capaBuilder.setSipAutomata(mRandom.nextBoolean());
         capaBuilder.setTimestampOfLastResponse(now);
         /* This will create a RCS contact with default presence information */
-        try {
-            mContactManager.setContactCapabilities(mContact, capaBuilder.build(),
-                    RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
+        mContactManager.setContactCapabilities(mContact, capaBuilder.build(),
+                RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE);
         return capaBuilder;
     }
 
-    public void testDeleteRCSEntries() {
+    public void testDeleteRCSEntries() throws ContactManagerException, IOException {
         createRcsContact();
         Set<ContactId> contacts = mContactManager.getAllContactsFromRcsContactProvider();
         assertTrue(!contacts.isEmpty());

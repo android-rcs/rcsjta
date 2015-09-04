@@ -21,19 +21,19 @@
 
 package com.gsma.rcs.im.chat;
 
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.Map;
-
-import android.content.Context;
-import android.test.AndroidTestCase;
-
 import com.gsma.rcs.utils.ContactUtilMockContext;
 import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
+
+import android.content.Context;
+import android.test.AndroidTestCase;
+
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ChatLogTest extends AndroidTestCase {
 
@@ -52,31 +52,27 @@ public class ChatLogTest extends AndroidTestCase {
         super.tearDown();
     }
 
-    public void testGetParticipants() {
+    public void testGetParticipants() throws RcsPermissionDeniedException {
         Map<ContactId, ParticipantStatus> participants;
-        try {
-            participants = ChatLog.GroupChat.getParticipants(mContext, "+330123=3,+330124=5");
-            assertNotNull(participants);
-            assertEquals(2, participants.size());
+        participants = ChatLog.GroupChat.getParticipants(mContext, "+330123=3,+330124=5");
+        assertNotNull(participants);
+        assertEquals(2, participants.size());
 
-            ContactId contact1 = mContactUtils.formatContact("+330123");
-            AbstractMap.SimpleEntry<ContactId, ParticipantStatus> formatContactParticipant1 = new HashMap.SimpleEntry<ContactId, ParticipantStatus>(
-                    contact1, ParticipantStatus.CONNECTED);
-            AbstractMap.SimpleEntry<ContactId, ParticipantStatus> participantsParticipant1 = new HashMap.SimpleEntry<ContactId, ParticipantStatus>(
-                    contact1, participants.get(contact1));
+        ContactId contact1 = mContactUtils.formatContact("+330123");
+        AbstractMap.SimpleEntry<ContactId, ParticipantStatus> formatContactParticipant1 = new HashMap.SimpleEntry<ContactId, ParticipantStatus>(
+                contact1, ParticipantStatus.CONNECTED);
+        AbstractMap.SimpleEntry<ContactId, ParticipantStatus> participantsParticipant1 = new HashMap.SimpleEntry<ContactId, ParticipantStatus>(
+                contact1, participants.get(contact1));
 
-            assertTrue(formatContactParticipant1.equals(participantsParticipant1));
+        assertTrue(formatContactParticipant1.equals(participantsParticipant1));
 
-            ContactId contact2 = mContactUtils.formatContact("+330124");
-            AbstractMap.SimpleEntry<ContactId, ParticipantStatus> formatContactParticipant2 = new HashMap.SimpleEntry<ContactId, ParticipantStatus>(
-                    contact2, ParticipantStatus.DEPARTED);
-            AbstractMap.SimpleEntry<ContactId, ParticipantStatus> participantsParticipant2 = new HashMap.SimpleEntry<ContactId, ParticipantStatus>(
-                    contact2, participants.get(contact2));
+        ContactId contact2 = mContactUtils.formatContact("+330124");
+        AbstractMap.SimpleEntry<ContactId, ParticipantStatus> formatContactParticipant2 = new HashMap.SimpleEntry<ContactId, ParticipantStatus>(
+                contact2, ParticipantStatus.DEPARTED);
+        AbstractMap.SimpleEntry<ContactId, ParticipantStatus> participantsParticipant2 = new HashMap.SimpleEntry<ContactId, ParticipantStatus>(
+                contact2, participants.get(contact2));
 
-            assertTrue(formatContactParticipant2.equals(participantsParticipant2));
-        } catch (RcsPermissionDeniedException e) {
-            fail(e.getMessage());
-        }
+        assertTrue(formatContactParticipant2.equals(participantsParticipant2));
     }
 
 }
