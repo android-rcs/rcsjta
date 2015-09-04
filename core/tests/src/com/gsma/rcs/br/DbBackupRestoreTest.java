@@ -18,7 +18,6 @@
 
 package com.gsma.rcs.br;
 
-import com.gsma.rcs.addressbook.RcsAccountException;
 import com.gsma.rcs.provider.BackupRestoreDb;
 import com.gsma.rcs.utils.FileUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -28,7 +27,6 @@ import android.test.AndroidTestCase;
 import android.text.TextUtils;
 
 import java.io.File;
-import java.io.IOException;
 
 public class DbBackupRestoreTest extends AndroidTestCase {
 
@@ -75,7 +73,7 @@ public class DbBackupRestoreTest extends AndroidTestCase {
             BackupRestoreDb.backupAccount("3333");
             Thread.sleep(1010);
             BackupRestoreDb.backupAccount("4444");
-        } catch (IOException | RcsAccountException e) {
+        } catch (Exception e) {
             fail(e.getMessage());
         }
         try {
@@ -110,7 +108,7 @@ public class DbBackupRestoreTest extends AndroidTestCase {
             BackupRestoreDb.backupAccount("3333");
             Thread.sleep(1010);
             BackupRestoreDb.backupAccount("4444");
-        } catch (IOException | RcsAccountException e) {
+        } catch (Exception e) {
             fail(e.getMessage());
         }
         BackupRestoreDb.cleanBackups("3333");
@@ -139,7 +137,7 @@ public class DbBackupRestoreTest extends AndroidTestCase {
         try {
             BackupRestoreDb.backupAccount("2222");
             BackupRestoreDb.restoreAccount("2222");
-        } catch (IOException | RcsAccountException e) {
+        } catch (Exception e) {
             fail(e.getMessage());
         }
     }
