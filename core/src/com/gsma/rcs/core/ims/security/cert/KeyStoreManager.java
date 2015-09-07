@@ -34,7 +34,6 @@ import com.telekom.bouncycastle.wrapper.SimpleContentSignerBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import local.org.bouncycastle.asn1.ASN1Encodable;
 import local.org.bouncycastle.asn1.x500.X500Name;
 import local.org.bouncycastle.asn1.x509.BasicConstraints;
 import local.org.bouncycastle.asn1.x509.ExtendedKeyUsage;
@@ -306,9 +305,9 @@ public class KeyStoreManager {
                     BigInteger.ONE, startDate, endDate, subjectName, pubKey);
             JcaX509ExtensionUtils x509ExtUtils = new JcaX509ExtensionUtils();
             certGen.addExtension(X509Extension.subjectKeyIdentifier, false,
-                    (ASN1Encodable) x509ExtUtils.createSubjectKeyIdentifier(pubKey));
+                    x509ExtUtils.createSubjectKeyIdentifier(pubKey));
             certGen.addExtension(X509Extension.authorityKeyIdentifier, false,
-                    (ASN1Encodable) x509ExtUtils.createAuthorityKeyIdentifier(pubKey));
+                    x509ExtUtils.createAuthorityKeyIdentifier(pubKey));
             certGen.addExtension(X509Extension.keyUsage, false, new KeyUsage(
                     KeyUsage.digitalSignature | KeyUsage.keyCertSign));
             certGen.addExtension(X509Extension.extendedKeyUsage, false, new ExtendedKeyUsage(
@@ -316,8 +315,8 @@ public class KeyStoreManager {
             certGen.addExtension(X509Extension.subjectAlternativeName, false, new GeneralNames(
                     new GeneralName[] {
                             new GeneralName(GeneralName.iPAddress, ipAddress),
-                            new GeneralName(GeneralName.uniformResourceIdentifier,
-                                    ImsModule.IMS_USER_PROFILE.getPublicUri())
+                            new GeneralName(GeneralName.uniformResourceIdentifier, ImsModule
+                                    .getImsUserProfile().getPublicUri())
                     }));
             certGen.addExtension(X509Extension.basicConstraints, false, new BasicConstraints(true));
 

@@ -26,7 +26,6 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
@@ -66,9 +65,7 @@ import java.util.Vector;
  * 
  * @author jexa7410
  */
-public class TerminatingAdhocGroupChatSession extends GroupChatSession implements MsrpEventListener {
-
-    private final MessagingLog mMessagingLog;
+public class TerminatingAdhocGroupChatSession extends GroupChatSession {
 
     private static final Logger sLogger = Logger.getLogger(TerminatingAdhocGroupChatSession.class
             .getName());
@@ -94,8 +91,6 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
             ContactManager contactManager) throws SipPayloadException, SipNetworkException {
         super(imService, contact, remoteContact, participantsFromInvite, rcsSettings, messagingLog,
                 timestamp, contactManager);
-
-        mMessagingLog = messagingLog;
 
         String subject = ChatUtils.getSubject(invite);
         setSubject(subject);

@@ -109,9 +109,8 @@ public class H264RtpHeaders {
         // Compose and copy NAL header
         if (hasFUHeader) {
             return (byte) (((getFUI_F() ? 1 : 0) << 7) | (FUI_NRI << 5) | (FUH_TYPE & 0x1F));
-        } else {
-            return (byte) (((getFUI_F() ? 1 : 0) << 7) | (FUI_NRI << 5) | (FUI_TYPE & 0x1F));
         }
+        return (byte) (((getFUI_F() ? 1 : 0) << 7) | (FUI_NRI << 5) | (FUI_TYPE & 0x1F));
     }
 
     /**

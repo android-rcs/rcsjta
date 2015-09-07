@@ -204,7 +204,7 @@ public class StartService extends Service {
                      * inserted : this is why it is persisted to be defined after first
                      * provisioning.
                      */
-                    boolean accountAvailable = checkAccount(mLocalContentResolver);
+                    boolean accountAvailable = checkAccount();
                     Configuration config = mContext.getResources().getConfiguration();
                     boolean mccAvailable = MCC_UNDEFINED != config.mcc;
 
@@ -351,7 +351,7 @@ public class StartService extends Service {
      * @throws IOException
      * @throws RcsAccountException
      */
-    private boolean checkAccount(LocalContentResolver localContentResolver) throws IOException,
+    private boolean checkAccount() throws IOException,
             RcsAccountException {
         AndroidFactory.setApplicationContext(mContext, mRcsSettings);
 
@@ -374,10 +374,9 @@ public class StartService extends Service {
                 // If it's a first launch the IMSI is necessary to initialize the service the first
                 // time
                 return false;
-            } else {
-                // Set the user account ID from the last used IMSI
-                mCurrentUserAccount = mLastUserAccount;
             }
+            // Set the user account ID from the last used IMSI
+            mCurrentUserAccount = mLastUserAccount;
         }
 
         // On the first launch and if SIM card has changed
@@ -602,7 +601,7 @@ public class StartService extends Service {
                     @Override
                     public void run() {
                         try {
-                            boolean rcsAccountAvailable = checkAccount(mLocalContentResolver);
+                            boolean rcsAccountAvailable = checkAccount();
                             Configuration config = context.getResources().getConfiguration();
                             boolean mccAvailable = MCC_UNDEFINED != config.mcc;
 

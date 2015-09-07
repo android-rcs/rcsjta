@@ -117,31 +117,30 @@ public class CodecChain {
                 }
                 return Codec.BUFFER_PROCESSED_FAILED;
             }
-        } else {
-            Codec codec = codecs[codecNo];
-            int returnVal;
-            do {
-                returnVal = codec.process(input, buffers[codecNo]);
-
-                if (Codec.BUFFER_PROCESSED_FAILED == returnVal) {
-                    if (logger.isActivated()) {
-                        logger.error("Codec processing error " + returnVal);
-                    }
-                    return Codec.BUFFER_PROCESSED_FAILED;
-                }
-
-                if ((returnVal & Codec.OUTPUT_BUFFER_NOT_FILLED) == 0) {
-                    if (!(buffers[codecNo].isDiscard() || buffers[codecNo].isEOM())) {
-                        doProcess(codecNo + 1, buffers[codecNo]);
-                    }
-                    buffers[codecNo].setOffset(0);
-                    buffers[codecNo].setLength(0);
-                    buffers[codecNo].setFlags(0);
-                    buffers[codecNo].setFragments(null);
-                }
-            } while ((returnVal & Codec.INPUT_BUFFER_NOT_CONSUMED) != 0);
-
-            return returnVal;
         }
+        Codec codec = codecs[codecNo];
+        int returnVal;
+        do {
+            returnVal = codec.process(input, buffers[codecNo]);
+
+            if (Codec.BUFFER_PROCESSED_FAILED == returnVal) {
+                if (logger.isActivated()) {
+                    logger.error("Codec processing error " + returnVal);
+                }
+                return Codec.BUFFER_PROCESSED_FAILED;
+            }
+
+            if ((returnVal & Codec.OUTPUT_BUFFER_NOT_FILLED) == 0) {
+                if (!(buffers[codecNo].isDiscard() || buffers[codecNo].isEOM())) {
+                    doProcess(codecNo + 1, buffers[codecNo]);
+                }
+                buffers[codecNo].setOffset(0);
+                buffers[codecNo].setLength(0);
+                buffers[codecNo].setFlags(0);
+                buffers[codecNo].setFragments(null);
+            }
+        } while ((returnVal & Codec.INPUT_BUFFER_NOT_CONSUMED) != 0);
+
+        return returnVal;
     }
 }

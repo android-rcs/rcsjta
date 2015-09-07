@@ -144,9 +144,9 @@ public class OptionsRequestTask implements Runnable {
         // @FIXME: This should be an URI instead of String
         String contactUri = PhoneUtils.formatContactIdToUri(mContact).toString();
         mDialogPath = new SipDialogPath(mImsModule.getSipManager().getSipStack(), mImsModule
-                .getSipManager().getSipStack().generateCallId(), 1, contactUri,
-                ImsModule.IMS_USER_PROFILE.getPublicUri(), contactUri, mImsModule.getSipManager()
-                        .getSipStack().getServiceRoutePath(), mRcsSettings);
+                .getSipManager().getSipStack().generateCallId(), 1, contactUri, ImsModule
+                .getImsUserProfile().getPublicUri(), contactUri, mImsModule.getSipManager()
+                .getSipStack().getServiceRoutePath(), mRcsSettings);
 
         if (sLogger.isActivated()) {
             sLogger.debug("Send first OPTIONS");

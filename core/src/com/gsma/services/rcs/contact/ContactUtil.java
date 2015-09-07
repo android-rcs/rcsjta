@@ -339,7 +339,7 @@ public class ContactUtil {
                 put( 748 , new String[] {"598" , "0" }); // Uruguay (Eastern Republic of)
                 put( 750 , new String[] {"500" }); // Falkland Islands (Malvinas)
             }
-        };
+        }
     };
 
     // @formatter:on

@@ -272,9 +272,9 @@ public class ImdnManager extends Thread {
             // Create a dialog path
             SipDialogPath dialogPath = new SipDialogPath(mImsService.getImsModule().getSipManager()
                     .getSipStack(), mImsService.getImsModule().getSipManager().getSipStack()
-                    .generateCallId(), 1, toUri, ImsModule.IMS_USER_PROFILE.getPublicUri(), toUri,
-                    mImsService.getImsModule().getSipManager().getSipStack().getServiceRoutePath(),
-                    mRcsSettings);
+                    .generateCallId(), 1, toUri, ImsModule.getImsUserProfile().getPublicUri(),
+                    toUri, mImsService.getImsModule().getSipManager().getSipStack()
+                            .getServiceRoutePath(), mRcsSettings);
             dialogPath.setRemoteSipInstance(remoteInstanceId);
 
             // Create MESSAGE request

@@ -1,9 +1,9 @@
 
 package com.gsma.rcs.utils;
 
-import java.util.Date;
-
 import android.test.AndroidTestCase;
+
+import java.util.Date;
 
 public class DateUtilsTest extends AndroidTestCase {
 
@@ -15,6 +15,7 @@ public class DateUtilsTest extends AndroidTestCase {
         super.tearDown();
     }
 
+    @SuppressWarnings("deprecation")
     public void testEncodeDecode() {
         long t = System.currentTimeMillis();
         String encoded = DateUtils.encodeDate(t);

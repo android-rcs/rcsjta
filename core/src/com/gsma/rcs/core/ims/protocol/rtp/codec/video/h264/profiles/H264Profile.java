@@ -18,7 +18,7 @@
 
 package com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264.profiles;
 
-import com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264.profiles.H264TypeLevel.*;
+import com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264.profiles.H264TypeLevel.H264ConstraintSetFlagType;
 import com.gsma.rcs.utils.HexadecimalUtils;
 
 /**
@@ -198,9 +198,8 @@ public abstract class H264Profile {
         byte[] arrProfileId = HexadecimalUtils.hexStringToByteArray(profileLevelId);
         if (arrProfileId == null || arrProfileId.length != 3 || what < 0 || what > 2) {
             return null;
-        } else {
-            return arrProfileId[what];
         }
+        return arrProfileId[what];
     }
 
     /**

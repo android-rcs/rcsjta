@@ -214,6 +214,7 @@ public class ImageSharingProvider extends ContentProvider {
                     selection = getSelectionWithSharingId(selection);
                     selectionArgs = getSelectionArgsWithSharingId(selectionArgs, sharingId);
                     /* Intentional fall through */
+                    //$FALL-THROUGH$
                 case UriType.ImageSharing.IMAGE_SHARING:
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db
@@ -249,6 +250,7 @@ public class ImageSharingProvider extends ContentProvider {
                 selectionArgs = getSelectionArgsWithSharingId(selectionArgs, sharingId);
                 notificationUri = Uri.withAppendedPath(notificationUri, sharingId);
                 /* Intentional fall through */
+                //$FALL-THROUGH$
             case UriType.InternalImageSharing.IMAGE_SHARING:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.update(TABLE, values, selection, selectionArgs);
@@ -310,6 +312,7 @@ public class ImageSharingProvider extends ContentProvider {
                 selectionArgs = getSelectionArgsWithSharingId(selectionArgs, sharingId);
                 notificationUri = Uri.withAppendedPath(notificationUri, sharingId);
                 /* Intentional fall through */
+                //$FALL-THROUGH$
             case UriType.InternalImageSharing.IMAGE_SHARING:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.delete(TABLE, selection, selectionArgs);

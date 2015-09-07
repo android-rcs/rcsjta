@@ -27,6 +27,7 @@ import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
+import com.gsma.rcs.core.ims.userprofile.UserProfile;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
@@ -137,11 +138,11 @@ public class GibaRegistrationProcedure extends RegistrationProcedure {
                     "Can't read a SIP-URI from the P-Associated-URI header: invalid user '")
                     .append(user).append("'").toString());
         }
-        ImsModule.IMS_USER_PROFILE
-                .setUsername(ContactUtil.createContactIdFromValidatedData(number));
-        ImsModule.IMS_USER_PROFILE.setHomeDomain(sipUri.getHost());
-        ImsModule.IMS_USER_PROFILE.setXdmServerLogin(PhoneUtils.SIP_URI_HEADER + sipUri.getUser()
-                + "@" + sipUri.getHost());
+        UserProfile profile = ImsModule.getImsUserProfile();
+        profile.setUsername(ContactUtil.createContactIdFromValidatedData(number));
+        profile.setHomeDomain(sipUri.getHost());
+        profile.setXdmServerLogin(PhoneUtils.SIP_URI_HEADER + sipUri.getUser() + "@"
+                + sipUri.getHost());
     }
 
     /**

@@ -754,12 +754,12 @@ public class FileTransferLog implements IFileTransferLog {
                 return new FtHttpResumeDownload(Uri.parse(downloadUri), file, fileIconUri, content,
                         contact, chatId, fileTransferId, isGroup, timestamp, timestampSent,
                         fileExpiration, iconExpiration, accepted, remoteSipId);
-            } else {
-                String tId = cursor.getString(cursor
-                        .getColumnIndexOrThrow(FileTransferData.KEY_UPLOAD_TID));
-                return new FtHttpResumeUpload(content, fileIconUri, tId, contact, chatId,
-                        fileTransferId, isGroup, timestamp, timestampSent);
             }
+            String tId = cursor.getString(cursor
+                    .getColumnIndexOrThrow(FileTransferData.KEY_UPLOAD_TID));
+            return new FtHttpResumeUpload(content, fileIconUri, tId, contact, chatId,
+                    fileTransferId, isGroup, timestamp, timestampSent);
+
         } finally {
             CursorUtil.close(cursor);
         }

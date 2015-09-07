@@ -27,30 +27,27 @@ import java.io.IOException;
  * @author jexa7410
  */
 public class RtcpAppPacket extends RtcpPacket {
-    public int ssrc;
-    public int name;
-    public int subtype;
+    public int mSsrc;
+    public int mName;
+    public int mSubtype;
 
     public RtcpAppPacket(RtcpPacket parent) {
         super(parent);
-
-        super.mType = 204;
+        mType = 204;
     }
 
     public RtcpAppPacket(int ssrc, int name, int subtype, byte data[]) {
-        this.ssrc = ssrc;
-        this.name = name;
-        this.subtype = subtype;
-        this.mData = data;
-        super.mType = 204;
+        mSsrc = ssrc;
+        mName = name;
+        mSubtype = subtype;
+        mData = data;
+        mType = 204;
 
         if ((data.length & 3) != 0) {
             throw new IllegalArgumentException("Bad data length");
         }
         if (subtype < 0 || subtype > 31) {
             throw new IllegalArgumentException("Bad subtype");
-        } else {
-            return;
         }
     }
 
@@ -59,11 +56,11 @@ public class RtcpAppPacket extends RtcpPacket {
     }
 
     public void assemble(DataOutputStream out) throws IOException {
-        out.writeByte(128 + subtype);
+        out.writeByte(128 + mSubtype);
         out.writeByte(204);
         out.writeShort(2 + (mData.length >> 2));
-        out.writeInt(ssrc);
-        out.writeInt(name);
+        out.writeInt(mSsrc);
+        out.writeInt(mName);
         out.write(mData);
     }
 }

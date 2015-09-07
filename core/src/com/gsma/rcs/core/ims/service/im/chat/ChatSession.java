@@ -338,9 +338,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     public String getImSessionIdentity() {
         if (getDialogPath() != null) {
             return getDialogPath().getTarget();
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**
@@ -881,9 +880,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         if (this instanceof TerminatingStoreAndForwardOneToOneChatMessageSession
                 || this instanceof TerminatingStoreAndForwardOneToOneChatNotificationSession) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**

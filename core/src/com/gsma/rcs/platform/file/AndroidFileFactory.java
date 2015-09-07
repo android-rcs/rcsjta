@@ -22,17 +22,16 @@
 
 package com.gsma.rcs.platform.file;
 
-import java.io.File;
+import com.gsma.rcs.platform.AndroidFactory;
+import com.gsma.rcs.utils.FileUtils;
+import com.gsma.rcs.utils.logger.Logger;
 
 import android.content.Context;
 import android.media.MediaScannerConnection;
 import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 import android.net.Uri;
 
-import com.gsma.rcs.platform.AndroidFactory;
-import com.gsma.rcs.platform.file.FileDescription;
-import com.gsma.rcs.utils.FileUtils;
-import com.gsma.rcs.utils.logger.Logger;
+import java.io.File;
 
 /**
  * Android file factory
@@ -40,10 +39,9 @@ import com.gsma.rcs.utils.logger.Logger;
  * @author jexa7410
  */
 public class AndroidFileFactory extends FileFactory {
-    /**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+
+    private static final Logger sLogger = Logger
+            .getLogger(AndroidFileFactory.class.getSimpleName());
 
     /**
      * Returns the description of a file
@@ -55,7 +53,7 @@ public class AndroidFileFactory extends FileFactory {
         Context context = AndroidFactory.getApplicationContext();
         String fileName = FileUtils.getFileName(context, file);
         long fileSize = FileUtils.getFileSize(context, file);
-        return new FileDescription(file, fileName, fileSize);
+        return new FileDescription(fileName, fileSize);
     }
 
     /**
@@ -75,8 +73,8 @@ public class AndroidFileFactory extends FileFactory {
      * @param url New URL to be added
      */
     public void updateMediaStorage(String url) {
-        if (logger.isActivated()) {
-            logger.debug("Updating media storage with URL " + url);
+        if (sLogger.isActivated()) {
+            sLogger.debug("Updating media storage with URL " + url);
         }
         MyMediaScannerClient scanner = new MyMediaScannerClient(url);
         scanner.scan();
@@ -96,15 +94,15 @@ public class AndroidFileFactory extends FileFactory {
         }
 
         public void onMediaScannerConnected() {
-            if (logger.isActivated()) {
-                logger.debug("Scanning file " + filename);
+            if (sLogger.isActivated()) {
+                sLogger.debug("Scanning file " + filename);
             }
             scanner.scanFile(filename, null);
         }
 
         public void onScanCompleted(String path, Uri uri) {
-            if (logger.isActivated()) {
-                logger.debug("Scan completed for uri " + uri + " with path " + path);
+            if (sLogger.isActivated()) {
+                sLogger.debug("Scan completed for uri " + uri + " with path " + path);
             }
             if (path.equals(filename)) {
                 scanner.disconnect();

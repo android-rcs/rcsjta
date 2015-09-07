@@ -47,34 +47,26 @@ import java.util.Vector;
  * @author jexa7410
  */
 public class RtcpPacketReceiver extends Thread implements Closeable {
-    /**
-     * Datagram connection
-     */
-    public DatagramConnection datagramConnection = null;
+
+    private DatagramConnection mDatagramConnection;
 
     /**
      * Statistics
      */
-    private RtcpStatisticsReceiver stats = new RtcpStatisticsReceiver();
+    private RtcpStatisticsReceiver mStats = new RtcpStatisticsReceiver();
 
     /**
      * RTCP event listeners
      */
-    private Vector<RtcpEventListener> listeners = new Vector<RtcpEventListener>();
+    private Vector<RtcpEventListener> mListeners = new Vector<RtcpEventListener>();
 
-    /**
-     * RTCP Session
-     */
-    private RtcpSession rtcpSession = null;
+    private RtcpSession mRtcpSession;
 
     /**
      * Signals that thread is interrupted
      */
-    private boolean isInterrupted = false;
+    private boolean mIsInterrupted = false;
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(RtcpPacketReceiver.class.getName());
 
     /**
@@ -89,11 +81,11 @@ public class RtcpPacketReceiver extends Thread implements Closeable {
             throws IOException {
         super();
 
-        this.rtcpSession = rtcpSession;
+        mRtcpSession = rtcpSession;
 
         // Create the UDP server
-        datagramConnection = NetworkFactory.getFactory().createDatagramConnection(socketTimeout);
-        datagramConnection.open(port);
+        mDatagramConnection = NetworkFactory.getFactory().createDatagramConnection(socketTimeout);
+        mDatagramConnection.open(port);
 
         if (sLogger.isActivated()) {
             sLogger.debug("RTCP receiver created at port " + port);
@@ -117,12 +109,12 @@ public class RtcpPacketReceiver extends Thread implements Closeable {
      * @throws IOException
      */
     public void close() throws IOException {
-        isInterrupted = true;
+        mIsInterrupted = true;
         interrupt();
 
-        if (datagramConnection != null) {
-            datagramConnection.close();
-            datagramConnection = null;
+        if (mDatagramConnection != null) {
+            mDatagramConnection.close();
+            mDatagramConnection = null;
         }
     }
 
@@ -131,9 +123,9 @@ public class RtcpPacketReceiver extends Thread implements Closeable {
      */
     public void run() {
         try {
-            while (datagramConnection != null) {
+            while (mDatagramConnection != null) {
                 // Wait a packet
-                byte[] data = datagramConnection.receive();
+                byte[] data = mDatagramConnection.receive();
 
                 // Create a packet object
                 Packet packet = new Packet();
@@ -144,31 +136,44 @@ public class RtcpPacketReceiver extends Thread implements Closeable {
 
                 // Process the received packet
                 /* Update statistics */
-                stats.numRtcpPkts++;
-                stats.numRtcpBytes += packet.mLength;
+                mStats.numRtcpPkts++;
+                mStats.numRtcpBytes += packet.mLength;
                 parseRtcpPacket(packet);
             }
         } catch (SocketTimeoutException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
-            stats.numBadRtcpPkts++;
+            mStats.numBadRtcpPkts++;
             notifyRtcpListenersOfTimeout();
         } catch (IOException e) {
-            if (!isInterrupted) {
+            if (!mIsInterrupted) {
                 if (sLogger.isActivated()) {
                     sLogger.debug(e.getMessage());
                 }
             }
-            stats.numBadRtcpPkts++;
+            mStats.numBadRtcpPkts++;
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
             sLogger.error("Failed to establish datagramConnection!", e);
-            stats.numBadRtcpPkts++;
+            mStats.numBadRtcpPkts++;
         }
+    }
+
+    private RtcpReport getRtcpReport(DataInputStream in) throws IOException {
+        int ssrc = in.readInt();
+        long val = in.readInt();
+        val &= 0xffffffffL;
+        int fractionLost = (int) (val >> 24);
+        int packetsLost = (int) (val & 0xffffffL);
+        long lastSeq = in.readInt() & 0xffffffffL;
+        int jitter = in.readInt();
+        long lsr = in.readInt() & 0xffffffffL;
+        long dlsr = in.readInt() & 0xffffffffL;
+        return new RtcpReport(ssrc, fractionLost, packetsLost, lastSeq, jitter, lsr, dlsr);
     }
 
     /**
@@ -183,7 +188,7 @@ public class RtcpPacketReceiver extends Thread implements Closeable {
         Vector<RtcpPacket> subpackets = new Vector<RtcpPacket>();
         DataInputStream in = new DataInputStream(new ByteArrayInputStream(compoundPacket.mData,
                 compoundPacket.mOffset, compoundPacket.mLength));
-        rtcpSession.updateavgrtcpsize(compoundPacket.mLength);
+        mRtcpSession.updateavgrtcpsize(compoundPacket.mLength);
         int length = 0;
         for (int offset = 0; offset < compoundPacket.mLength; offset += length) {
             int firstbyte = in.readUnsignedByte();
@@ -205,7 +210,8 @@ public class RtcpPacketReceiver extends Thread implements Closeable {
             }
             if (offset + length == compoundPacket.mLength) {
                 if ((firstbyte & 0x20) != 0) {
-                    padlen = compoundPacket.mData[compoundPacket.mOffset + compoundPacket.mLength - 1] & 0xff;
+                    padlen = compoundPacket.mData[compoundPacket.mOffset + compoundPacket.mLength
+                            - 1] & 0xff;
                     if (padlen == 0) {
                         if (sLogger.isActivated()) {
                             sLogger.error("Bad RTCP packet format");
@@ -223,38 +229,28 @@ public class RtcpPacketReceiver extends Thread implements Closeable {
             RtcpPacket subpacket;
             switch (type) {
                 case RtcpPacket.RTCP_SR:
-                    stats.numSrPkts++;
+                    mStats.numSrPkts++;
                     if (inlength != 28 + 24 * firstbyte) {
-                        stats.numMalformedRtcpPkts++;
+                        mStats.numMalformedRtcpPkts++;
                         throw new IOException("Bad RTCP SR packet format");
                     }
                     RtcpSenderReportPacket srp = new RtcpSenderReportPacket(compoundPacket);
                     subpacket = srp;
                     srp.ssrc = in.readInt();
-                    srp.ntptimestampmsw = (long) in.readInt() & 0xffffffffL;
-                    srp.ntptimestamplsw = (long) in.readInt() & 0xffffffffL;
-                    srp.rtptimestamp = (long) in.readInt() & 0xffffffffL;
-                    srp.packetcount = (long) in.readInt() & 0xffffffffL;
-                    srp.octetcount = (long) in.readInt() & 0xffffffffL;
+                    srp.ntptimestampmsw = in.readInt() & 0xffffffffL;
+                    srp.ntptimestamplsw = in.readInt() & 0xffffffffL;
+                    srp.rtptimestamp = in.readInt() & 0xffffffffL;
+                    srp.packetcount = in.readInt() & 0xffffffffL;
+                    srp.octetcount = in.readInt() & 0xffffffffL;
                     srp.reports = new RtcpReport[firstbyte];
 
-                    RtpSource sourceSR = rtcpSession.getMySource();
+                    RtpSource sourceSR = mRtcpSession.getMySource();
                     if (sourceSR != null) {
                         sourceSR.receivedSenderReport(srp);
                     }
 
                     for (int i = 0; i < srp.reports.length; i++) {
-                        RtcpReport report = new RtcpReport();
-                        srp.reports[i] = report;
-                        report.ssrc = in.readInt();
-                        long val = in.readInt();
-                        val &= 0xffffffffL;
-                        report.fractionlost = (int) (val >> 24);
-                        report.packetslost = (int) (val & 0xffffffL);
-                        report.lastseq = (long) in.readInt() & 0xffffffffL;
-                        report.jitter = in.readInt();
-                        report.lsr = (long) in.readInt() & 0xffffffffL;
-                        report.dlsr = (long) in.readInt() & 0xffffffffL;
+                        srp.reports[i] = getRtcpReport(in);
                     }
 
                     notifyRtcpListeners(new RtcpSenderReportEvent(srp));
@@ -262,7 +258,7 @@ public class RtcpPacketReceiver extends Thread implements Closeable {
 
                 case RtcpPacket.RTCP_RR:
                     if (inlength != 8 + 24 * firstbyte) {
-                        stats.numMalformedRtcpPkts++;
+                        mStats.numMalformedRtcpPkts++;
                         throw new IOException("Bad RTCP RR packet format");
                     }
                     RtcpReceiverReportPacket rrp = new RtcpReceiverReportPacket(compoundPacket);
@@ -271,17 +267,7 @@ public class RtcpPacketReceiver extends Thread implements Closeable {
                     rrp.reports = new RtcpReport[firstbyte];
 
                     for (int i = 0; i < rrp.reports.length; i++) {
-                        RtcpReport report = new RtcpReport();
-                        rrp.reports[i] = report;
-                        report.ssrc = in.readInt();
-                        long val = in.readInt();
-                        val &= 0xffffffffL;
-                        report.fractionlost = (int) (val >> 24);
-                        report.packetslost = (int) (val & 0xffffffL);
-                        report.lastseq = (long) in.readInt() & 0xffffffffL;
-                        report.jitter = in.readInt();
-                        report.lsr = (long) in.readInt() & 0xffffffffL;
-                        report.dlsr = (long) in.readInt() & 0xffffffffL;
+                        rrp.reports[i] = getRtcpReport(in);
                     }
 
                     notifyRtcpListeners(new RtcpReceiverReportEvent(rrp));
@@ -302,7 +288,7 @@ public class RtcpPacketReceiver extends Thread implements Closeable {
                         int j;
                         while ((j = in.readUnsignedByte()) != 0) {
                             if (j < 1 || j > 8) {
-                                stats.numMalformedRtcpPkts++;
+                                mStats.numMalformedRtcpPkts++;
                                 throw new IOException("Bad RTCP SDES packet format");
                             }
                             if (j == 1) {
@@ -317,7 +303,7 @@ public class RtcpPacketReceiver extends Thread implements Closeable {
                             sdesoff += 2 + sdeslen;
                         }
                         if (!gotcname) {
-                            stats.numMalformedRtcpPkts++;
+                            mStats.numMalformedRtcpPkts++;
                             throw new IOException("Bad RTCP SDES packet format");
                         }
                         chunk.items = new RtcpSdesItem[items.size()];
@@ -331,7 +317,7 @@ public class RtcpPacketReceiver extends Thread implements Closeable {
                     }
 
                     if (inlength != sdesoff) {
-                        stats.numMalformedRtcpPkts++;
+                        mStats.numMalformedRtcpPkts++;
                         throw new IOException("Bad RTCP SDES packet format");
                     }
 
@@ -341,27 +327,27 @@ public class RtcpPacketReceiver extends Thread implements Closeable {
                 case RtcpPacket.RTCP_BYE:
                     RtcpByePacket byep = new RtcpByePacket(compoundPacket);
                     subpacket = byep;
-                    byep.ssrc = new int[firstbyte];
-                    for (int i = 0; i < byep.ssrc.length; i++) {
-                        byep.ssrc[i] = in.readInt();
+                    byep.mSsrc = new int[firstbyte];
+                    for (int i = 0; i < byep.mSsrc.length; i++) {
+                        byep.mSsrc[i] = in.readInt();
                     }
 
                     int reasonlen;
                     if (inlength > 4 + 4 * firstbyte) {
                         reasonlen = in.readUnsignedByte();
-                        byep.reason = new byte[reasonlen];
+                        byep.mReason = new byte[reasonlen];
                         reasonlen++;
                     } else {
                         reasonlen = 0;
-                        byep.reason = new byte[0];
+                        byep.mReason = new byte[0];
                     }
                     reasonlen = reasonlen + 3 & -4;
                     if (inlength != 4 + 4 * firstbyte + reasonlen) {
-                        stats.numMalformedRtcpPkts++;
+                        mStats.numMalformedRtcpPkts++;
                         throw new IOException("Bad RTCP BYE packet format");
                     }
-                    in.readFully(byep.reason);
-                    int skipBye = reasonlen - byep.reason.length;
+                    in.readFully(byep.mReason);
+                    int skipBye = reasonlen - byep.mReason.length;
                     if (in.skip(skipBye) != skipBye) {
                         throw new IOException("Bad RTCP BYE packet format");
                     }
@@ -375,9 +361,9 @@ public class RtcpPacketReceiver extends Thread implements Closeable {
                     }
                     RtcpAppPacket appp = new RtcpAppPacket(compoundPacket);
                     subpacket = appp;
-                    appp.ssrc = in.readInt();
-                    appp.name = in.readInt();
-                    appp.subtype = firstbyte;
+                    appp.mSsrc = in.readInt();
+                    appp.mName = in.readInt();
+                    appp.mSubtype = firstbyte;
                     appp.mData = new byte[inlength - 12];
                     in.readFully(appp.mData);
                     int skipApp = inlength - 12 - appp.mData.length;
@@ -389,7 +375,7 @@ public class RtcpPacketReceiver extends Thread implements Closeable {
                     break;
 
                 default:
-                    stats.numUnknownTypes++;
+                    mStats.numUnknownTypes++;
                     throw new IOException("Bad RTCP packet format");
             }
             subpacket.mOffset = offset;
@@ -413,7 +399,7 @@ public class RtcpPacketReceiver extends Thread implements Closeable {
         if (sLogger.isActivated()) {
             sLogger.debug("Add a RTCP event listener");
         }
-        listeners.addElement(listener);
+        mListeners.addElement(listener);
     }
 
     /**
@@ -425,7 +411,7 @@ public class RtcpPacketReceiver extends Thread implements Closeable {
         if (sLogger.isActivated()) {
             sLogger.debug("Remove a RTCP event listener");
         }
-        listeners.removeElement(listener);
+        mListeners.removeElement(listener);
     }
 
     /**
@@ -434,8 +420,8 @@ public class RtcpPacketReceiver extends Thread implements Closeable {
      * @param event RTCP event
      */
     public void notifyRtcpListeners(RtcpEvent event) {
-        for (int i = 0; i < listeners.size(); i++) {
-            RtcpEventListener listener = (RtcpEventListener) listeners.elementAt(i);
+        for (int i = 0; i < mListeners.size(); i++) {
+            RtcpEventListener listener = mListeners.elementAt(i);
             listener.receiveRtcpEvent(event);
         }
     }
@@ -444,7 +430,7 @@ public class RtcpPacketReceiver extends Thread implements Closeable {
      * Notify timeout on RTCP listener
      */
     private void notifyRtcpListenersOfTimeout() {
-        for (RtcpEventListener listener : listeners) {
+        for (RtcpEventListener listener : mListeners) {
             if (sLogger.isActivated()) {
                 sLogger.debug("RTCP connection timeout");
             }
@@ -458,7 +444,7 @@ public class RtcpPacketReceiver extends Thread implements Closeable {
      * @return Statistics
      */
     public RtcpStatisticsReceiver getRtcpReceptionStats() {
-        return stats;
+        return mStats;
     }
 
     /**
@@ -467,6 +453,6 @@ public class RtcpPacketReceiver extends Thread implements Closeable {
      * @return DatagramConnection
      */
     public DatagramConnection getConnection() {
-        return datagramConnection;
+        return mDatagramConnection;
     }
 }

@@ -35,7 +35,7 @@ public class OneToOneChatListenerImpl extends IOneToOneChatListener.Stub {
 
     private final OneToOneChatListener mListener;
 
-    private final static String LOG_TAG = OneToOneChatListenerImpl.class.getName().toString();;
+    private final static String LOG_TAG = OneToOneChatListenerImpl.class.getSimpleName();
 
     OneToOneChatListenerImpl(OneToOneChatListener listener) {
         mListener = listener;

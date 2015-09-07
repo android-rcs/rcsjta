@@ -343,7 +343,8 @@ public class RcsCoreService extends Service implements CoreListener {
                     mMessagingLog);
 
             mContactApi = new ContactServiceImpl(mContactManager, mRcsSettings);
-            mCapabilityApi = new CapabilityServiceImpl(mContactManager, mRcsSettings);
+            mCapabilityApi = new CapabilityServiceImpl(mContactManager, mRcsSettings,
+                    core.getCapabilityService());
             InstantMessagingService imService = core.getImService();
             RichcallService richCallService = core.getRichcallService();
             IPCallService ipCallService = core.getIPCallService();
@@ -352,7 +353,7 @@ public class RcsCoreService extends Service implements CoreListener {
             mOneToOneUndeliveredImManager = new OneToOneUndeliveredImManager(mCtx, mMessagingLog,
                     imService);
             mChatApi = new ChatServiceImpl(imService, mMessagingLog, mHistoryLog, mRcsSettings,
-                    mContactManager, core, mLocalContentResolver, mOneToOneUndeliveredImManager);
+                    mContactManager, core, mOneToOneUndeliveredImManager);
             mFtApi = new FileTransferServiceImpl(imService, mChatApi, mMessagingLog, mRcsSettings,
                     mContactManager, core, mLocalContentResolver, mImOperationExecutor,
                     mOperationLock, mOneToOneUndeliveredImManager);
@@ -364,8 +365,7 @@ public class RcsCoreService extends Service implements CoreListener {
                     mLocalContentResolver, mRcOperationExecutor, mOperationLock);
             mHistoryApi = new HistoryServiceImpl(mCtx);
             mIpcallApi = new IPCallServiceImpl(ipCallService,
-                    IPCallHistory.createInstance(mLocalContentResolver), mContactManager,
-                    mRcsSettings);
+                    IPCallHistory.createInstance(mLocalContentResolver), mRcsSettings);
             mSessionApi = new MultimediaSessionServiceImpl(sipService, mRcsSettings,
                     mContactManager);
             mUploadApi = new FileUploadServiceImpl(imService, mRcsSettings);

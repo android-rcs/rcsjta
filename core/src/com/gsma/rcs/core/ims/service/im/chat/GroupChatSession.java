@@ -378,7 +378,7 @@ public abstract class GroupChatSession extends ChatSession {
      */
     @Override
     public void sendChatMessage(ChatMessage msg) throws MsrpException {
-        String from = ImsModule.IMS_USER_PROFILE.getPublicAddress();
+        String from = ImsModule.getImsUserProfile().getPublicAddress();
         String to = ChatUtils.ANONYMOUS_URI;
         String msgId = msg.getMessageId();
         String networkContent;
@@ -416,7 +416,7 @@ public abstract class GroupChatSession extends ChatSession {
      */
     @Override
     public void sendIsComposingStatus(boolean status) throws MsrpException {
-        String from = ImsModule.IMS_USER_PROFILE.getPublicUri();
+        String from = ImsModule.getImsUserProfile().getPublicUri();
         String to = ChatUtils.ANONYMOUS_URI;
         String msgId = IdGenerator.generateMessageID();
         String content = ChatUtils.buildCpimMessage(from, to,
@@ -428,8 +428,8 @@ public abstract class GroupChatSession extends ChatSession {
     @Override
     public void sendMsrpMessageDeliveryStatus(ContactId remote, String msgId, String status,
             long timestamp) throws MsrpException {
-        sendMsrpMessageDeliveryStatus(ImsModule.IMS_USER_PROFILE.getPublicUri(), remote.toString(),
-                msgId, status, timestamp);
+        sendMsrpMessageDeliveryStatus(ImsModule.getImsUserProfile().getPublicUri(),
+                remote.toString(), msgId, status, timestamp);
     }
 
     @Override
@@ -477,7 +477,7 @@ public abstract class GroupChatSession extends ChatSession {
     public void sendFileInfo(GroupFileTransferImpl fileTransfer, String fileTransferId,
             String fileInfo, boolean displayedReportEnabled, boolean deliveredReportEnabled)
             throws MsrpException {
-        String from = ImsModule.IMS_USER_PROFILE.getPublicAddress();
+        String from = ImsModule.getImsUserProfile().getPublicAddress();
         String networkContent;
         long timestamp = System.currentTimeMillis();
         /* For outgoing file transfer, timestampSent = timestamp */
@@ -807,7 +807,7 @@ public abstract class GroupChatSession extends ChatSession {
                     } else {
                         if (ChatUtils.isMessageImdnType(contentType)) {
                             // Delivery report
-                            String publicUri = ImsModule.IMS_USER_PROFILE.getPublicUri();
+                            String publicUri = ImsModule.getImsUserProfile().getPublicUri();
                             PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(publicUri);
                             if (number == null) {
                                 if (logActivated) {

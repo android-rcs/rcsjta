@@ -110,9 +110,8 @@ public class SipTransactionContext {
     public boolean isSipResponse() {
         if (recvMsg != null) {
             return (recvMsg instanceof SipResponse);
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -145,12 +144,10 @@ public class SipTransactionContext {
             SipRequest req = (SipRequest) recvMsg;
             if (req.getMethod().equals("ACK")) {
                 return true;
-            } else {
-                return false;
             }
-        } else {
             return false;
         }
+        return false;
     }
 
     /**
@@ -161,9 +158,8 @@ public class SipTransactionContext {
     public SipResponse getSipResponse() {
         if (isSipResponse()) {
             return (SipResponse) recvMsg;
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**

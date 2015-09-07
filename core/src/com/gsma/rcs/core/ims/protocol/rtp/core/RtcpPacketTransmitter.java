@@ -37,49 +37,35 @@ import java.util.Vector;
  * @author jexa7410
  */
 public class RtcpPacketTransmitter extends Thread implements Closeable {
-    /**
-     * Remote address
-     */
-    private String remoteAddress;
 
-    /**
-     * Remote port
-     */
-    private int remotePort;
+    private String mRemoteAddress;
+
+    private int mRemotePort;
 
     /**
      * Statistics
      */
-    private RtcpStatisticsTransmitter stats = new RtcpStatisticsTransmitter();
+    private RtcpStatisticsTransmitter mStats = new RtcpStatisticsTransmitter();
 
-    /**
-     * Datagram connection
-     */
-    public DatagramConnection datagramConnection = null;
+    private DatagramConnection mDatagramConnection;
 
-    /**
-     * RTCP Session
-     */
-    private RtcpSession rtcpSession = null;
+    private RtcpSession mRtcpSession;
 
     /**
      * Flag used to determine when to terminate after sending a BYE
      */
-    private boolean waitingForByeBackoff = false;
+    private boolean mWaitingForByeBackoff = false;
 
     /**
      * Flag used to properly close
      */
-    private boolean closed = false;
+    private boolean mClosed = false;
 
     /**
      * Random value
      */
-    private Random rand = new Random();
+    private Random mRand = new Random();
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(RtcpPacketTransmitter.class.getName());
 
     /**
@@ -94,16 +80,16 @@ public class RtcpPacketTransmitter extends Thread implements Closeable {
             throws IOException {
         super();
 
-        this.remoteAddress = address;
-        this.remotePort = port;
-        this.rtcpSession = rtcpSession;
+        mRemoteAddress = address;
+        mRemotePort = port;
+        mRtcpSession = rtcpSession;
 
         // Open the connection
-        datagramConnection = NetworkFactory.getFactory().createDatagramConnection();
-        datagramConnection.open();
+        mDatagramConnection = NetworkFactory.getFactory().createDatagramConnection();
+        mDatagramConnection.open();
 
         if (sLogger.isActivated()) {
-            sLogger.debug("RTCP transmitter connected to " + remoteAddress + ":" + remotePort);
+            sLogger.debug("RTCP transmitter connected to " + mRemoteAddress + ":" + mRemotePort);
         }
     }
 
@@ -120,20 +106,20 @@ public class RtcpPacketTransmitter extends Thread implements Closeable {
             DatagramConnection connection) throws IOException {
         super();
 
-        this.remoteAddress = address;
-        this.remotePort = port;
-        this.rtcpSession = rtcpSession;
+        mRemoteAddress = address;
+        mRemotePort = port;
+        mRtcpSession = rtcpSession;
 
         // Open the connection
         if (connection != null) {
-            this.datagramConnection = connection;
+            mDatagramConnection = connection;
         } else {
-            this.datagramConnection = NetworkFactory.getFactory().createDatagramConnection();
-            this.datagramConnection.open();
+            mDatagramConnection = NetworkFactory.getFactory().createDatagramConnection();
+            mDatagramConnection.open();
         }
 
         if (sLogger.isActivated()) {
-            sLogger.debug("RTCP transmitter connected to " + remoteAddress + ":" + remotePort);
+            sLogger.debug("RTCP transmitter connected to " + mRemoteAddress + ":" + mRemotePort);
         }
     }
 
@@ -143,16 +129,16 @@ public class RtcpPacketTransmitter extends Thread implements Closeable {
      * @throws IOException
      */
     public void close() throws IOException {
-        if (closed) {
+        if (mClosed) {
             return;
         }
 
-        rtcpSession.isByeRequested = true;
-        closed = true;
+        mRtcpSession.isByeRequested = true;
+        mClosed = true;
 
         // Close the datagram connection
-        if (datagramConnection != null) {
-            datagramConnection.close();
+        if (mDatagramConnection != null) {
+            mDatagramConnection.close();
         }
         if (sLogger.isActivated()) {
             sLogger.debug("RTCP transmitter closed");
@@ -160,8 +146,8 @@ public class RtcpPacketTransmitter extends Thread implements Closeable {
         // If the method start() was never invoked this Thread will be on NEW
         // state and the resources won't be freed. We need to force the start()
         // to allow it to die gracefully
-        if (this.getState() == State.NEW) {
-            this.start();
+        if (getState() == State.NEW) {
+            start();
         }
 
     }
@@ -170,7 +156,7 @@ public class RtcpPacketTransmitter extends Thread implements Closeable {
      * Background processing
      */
     public void run() {
-        if (closed) {
+        if (mClosed) {
             return;
         }
 
@@ -182,32 +168,32 @@ public class RtcpPacketTransmitter extends Thread implements Closeable {
             while (!terminate) {
                 try {
                     // Wait the RTCP report interval.
-                    Thread.sleep((long) rtcpSession.getReportInterval());
+                    Thread.sleep((long) mRtcpSession.getReportInterval());
 
                     // Right time to send a RTCP packet or reschedule ?
-                    if ((rtcpSession.timeOfLastRTCPSent + rtcpSession.T) <= rtcpSession
+                    if ((mRtcpSession.timeOfLastRTCPSent + mRtcpSession.T) <= mRtcpSession
                             .currentTime()) {
                         // We know that it is time to send a RTCP packet, is it
                         // a BYE packet
-                        if ((rtcpSession.isByeRequested && waitingForByeBackoff)) {
+                        if ((mRtcpSession.isByeRequested && mWaitingForByeBackoff)) {
                             // If it is bye then did we ever sent anything
-                            if (rtcpSession.timeOfLastRTCPSent > 0
-                                    && rtcpSession.timeOfLastRTPSent > 0) {
-                                rtcpSession.getMySource().activeSender = false;
-                                rtcpSession.timeOfLastRTCPSent = rtcpSession.currentTime();
+                            if (mRtcpSession.timeOfLastRTCPSent > 0
+                                    && mRtcpSession.timeOfLastRTPSent > 0) {
+                                mRtcpSession.getMySource().activeSender = false;
+                                mRtcpSession.timeOfLastRTCPSent = mRtcpSession.currentTime();
                             } else {
                                 // We never sent anything and we have to quit :(
                                 // do not send BYE
                                 terminate = true;
                             }
                         } else {
-                            if (!closed) {
+                            if (!mClosed) {
                                 transmit(assembleRtcpPacket());
-                                if (rtcpSession.isByeRequested && !waitingForByeBackoff) {
+                                if (mRtcpSession.isByeRequested && !mWaitingForByeBackoff) {
                                     // We have sent a BYE packet, so terminate
                                     terminate = true;
                                 } else {
-                                    rtcpSession.timeOfLastRTCPSent = rtcpSession.currentTime();
+                                    mRtcpSession.timeOfLastRTCPSent = mRtcpSession.currentTime();
                                 }
                             } else {
                                 terminate = true;
@@ -215,11 +201,11 @@ public class RtcpPacketTransmitter extends Thread implements Closeable {
 
                         }
                     }
-                    waitingForByeBackoff = false;
+                    mWaitingForByeBackoff = false;
 
                 } catch (InterruptedException e) {
-                    waitingForByeBackoff = true;
-                    rtcpSession.isByeRequested = true;
+                    mWaitingForByeBackoff = true;
+                    mRtcpSession.isByeRequested = true;
                 }
             }
         } catch (IOException e) {
@@ -243,8 +229,8 @@ public class RtcpPacketTransmitter extends Thread implements Closeable {
         byte data[] = new byte[0];
 
         // Sender or receiver packet
-        RtpSource s = rtcpSession.getMySource();
-        if ((s.activeSender) && (rtcpSession.timeOfLastRTCPSent < rtcpSession.timeOfLastRTPSent)) {
+        RtpSource s = mRtcpSession.getMySource();
+        if ((s.activeSender) && (mRtcpSession.timeOfLastRTCPSent < mRtcpSession.timeOfLastRTPSent)) {
             data = RtcpPacketUtils.append(data, assembleSenderReportPacket());
         } else {
             data = RtcpPacketUtils.append(data, assembleReceiverReportPacket());
@@ -259,9 +245,9 @@ public class RtcpPacketTransmitter extends Thread implements Closeable {
 
         // BYE packet
         RtcpByePacket byepacket = null;
-        if (rtcpSession.isByeRequested) {
+        if (mRtcpSession.isByeRequested) {
             int ssrc[] = {
-                rtcpSession.SSRC
+                mRtcpSession.SSRC
             };
             byepacket = new RtcpByePacket(ssrc, null);
             data = RtcpPacketUtils.append(data, byepacket.mData);
@@ -278,13 +264,14 @@ public class RtcpPacketTransmitter extends Thread implements Closeable {
     private byte[] assembleSenderReportPacket() {
         final int FIXED_HEADER_SIZE = 4;
         byte V_P_RC = (byte) ((RtcpPacket.VERSION << 6) | (RtcpPacket.PADDING << 5) | (0x00));
-        byte ss[] = RtcpPacketUtils.longToBytes(rtcpSession.SSRC, 4);
-        byte PT[] = RtcpPacketUtils.longToBytes((long) RtcpPacket.RTCP_SR, 1);
-        byte NTP_Timestamp[] = RtcpPacketUtils.longToBytes(rtcpSession.currentTime(), 8);
-        short randomOffset = (short) Math.abs(rand.nextInt() & 0x000000FF);
-        byte RTP_Timestamp[] = RtcpPacketUtils.longToBytes((long) rtcpSession.tc + randomOffset, 4);
-        byte SenderPacketCount[] = RtcpPacketUtils.longToBytes(rtcpSession.packetCount, 4);
-        byte SenderOctetCount[] = RtcpPacketUtils.longToBytes(rtcpSession.octetCount, 4);
+        byte ss[] = RtcpPacketUtils.longToBytes(mRtcpSession.SSRC, 4);
+        byte PT[] = RtcpPacketUtils.longToBytes(RtcpPacket.RTCP_SR, 1);
+        byte NTP_Timestamp[] = RtcpPacketUtils.longToBytes(mRtcpSession.currentTime(), 8);
+        short randomOffset = (short) Math.abs(mRand.nextInt() & 0x000000FF);
+        byte RTP_Timestamp[] = RtcpPacketUtils
+                .longToBytes((long) mRtcpSession.tc + randomOffset, 4);
+        byte SenderPacketCount[] = RtcpPacketUtils.longToBytes(mRtcpSession.packetCount, 4);
+        byte SenderOctetCount[] = RtcpPacketUtils.longToBytes(mRtcpSession.octetCount, 4);
 
         // report block
         byte receptionReportBlocks[] = new byte[0];
@@ -321,8 +308,8 @@ public class RtcpPacketTransmitter extends Thread implements Closeable {
     private byte[] assembleReceiverReportPacket() {
         final int FIXED_HEADER_SIZE = 4;
         byte V_P_RC = (byte) ((RtcpPacket.VERSION << 6) | (RtcpPacket.PADDING << 5) | (0x00));
-        byte ss[] = RtcpPacketUtils.longToBytes(rtcpSession.SSRC, 4);
-        byte PT[] = RtcpPacketUtils.longToBytes((long) RtcpPacket.RTCP_RR, 1);
+        byte ss[] = RtcpPacketUtils.longToBytes(mRtcpSession.SSRC, 4);
+        byte PT[] = RtcpPacketUtils.longToBytes(RtcpPacket.RTCP_RR, 1);
 
         // report block
         byte receptionReportBlocks[] = new byte[0];
@@ -351,18 +338,17 @@ public class RtcpPacketTransmitter extends Thread implements Closeable {
      */
     private byte[] assembleRTCPReceptionReport() {
         byte reportBlock[] = new byte[0];
-        RtpSource source = rtcpSession.getMySource();
+        RtpSource source = mRtcpSession.getMySource();
 
         ReceptionReport rr = source.generateReceptionReport();
-        byte SSRC[] = RtcpPacketUtils.longToBytes((long) rr.getSsrc(), 4);
+        byte SSRC[] = RtcpPacketUtils.longToBytes(rr.getSsrc(), 4);
         byte fraction_lost[] = RtcpPacketUtils.longToBytes((long) rr.getFractionLost(), 1);
-        byte pkts_lost[] = RtcpPacketUtils.longToBytes(
-                (long) rr.getCumulativeNumberOfPacketsLost(), 3);
+        byte pkts_lost[] = RtcpPacketUtils.longToBytes(rr.getCumulativeNumberOfPacketsLost(), 3);
         byte last_seq[] = RtcpPacketUtils.longToBytes(
-                (long) rr.getExtendedHighestSequenceNumberReceived(), 4);
-        byte jitter[] = RtcpPacketUtils.longToBytes((long) rr.getInterarrivalJitter(), 4);
-        byte lst[] = RtcpPacketUtils.longToBytes((long) rr.getLastSenderReport(), 4);
-        byte dlsr[] = RtcpPacketUtils.longToBytes((long) rr.getDelaySinceLastSenderReport(), 4);
+                rr.getExtendedHighestSequenceNumberReceived(), 4);
+        byte jitter[] = RtcpPacketUtils.longToBytes(rr.getInterarrivalJitter(), 4);
+        byte lst[] = RtcpPacketUtils.longToBytes(rr.getLastSenderReport(), 4);
+        byte dlsr[] = RtcpPacketUtils.longToBytes(rr.getDelaySinceLastSenderReport(), 4);
 
         reportBlock = RtcpPacketUtils.append(reportBlock, SSRC);
         reportBlock = RtcpPacketUtils.append(reportBlock, fraction_lost);
@@ -385,10 +371,10 @@ public class RtcpPacketTransmitter extends Thread implements Closeable {
 
         RtcpSdesPacket rtcpsdespacket = new RtcpSdesPacket(new RtcpSdesBlock[1]);
         rtcpsdespacket.sdes[0] = new RtcpSdesBlock();
-        rtcpsdespacket.sdes[0].ssrc = rtcpSession.SSRC;
+        rtcpsdespacket.sdes[0].ssrc = mRtcpSession.SSRC;
 
         Vector<RtcpSdesItem> vector = new Vector<RtcpSdesItem>();
-        vector.addElement(new RtcpSdesItem(1, RtpSource.CNAME));
+        vector.addElement(new RtcpSdesItem(1, RtpSource.getCname()));
         rtcpsdespacket.sdes[0].items = new RtcpSdesItem[vector.size()];
         vector.copyInto(rtcpsdespacket.sdes[0].items);
 
@@ -406,16 +392,17 @@ public class RtcpPacketTransmitter extends Thread implements Closeable {
         // Prepare data to be sent
         byte[] data = packet.mData;
         if (packet.mOffset > 0) {
-            System.arraycopy(data, packet.mOffset, data = new byte[packet.mLength], 0, packet.mLength);
+            System.arraycopy(data, packet.mOffset, data = new byte[packet.mLength], 0,
+                    packet.mLength);
         }
 
         // Update statistics
-        stats.numBytes += packet.mLength;
-        stats.numPackets++;
-        rtcpSession.updateavgrtcpsize(packet.mLength);
-        rtcpSession.timeOfLastRTCPSent = rtcpSession.currentTime();
+        mStats.numBytes += packet.mLength;
+        mStats.numPackets++;
+        mRtcpSession.updateavgrtcpsize(packet.mLength);
+        mRtcpSession.timeOfLastRTCPSent = mRtcpSession.currentTime();
         // Send data over UDP
-        datagramConnection.send(remoteAddress, remotePort, data);
+        mDatagramConnection.send(mRemoteAddress, mRemotePort, data);
     }
 
     /**
@@ -425,12 +412,12 @@ public class RtcpPacketTransmitter extends Thread implements Closeable {
      * @throws IOException
      */
     private void transmit(byte packet[]) throws IOException {
-        stats.numBytes += packet.length;
-        stats.numPackets++;
-        rtcpSession.updateavgrtcpsize(packet.length);
-        rtcpSession.timeOfLastRTCPSent = rtcpSession.currentTime();
+        mStats.numBytes += packet.length;
+        mStats.numPackets++;
+        mRtcpSession.updateavgrtcpsize(packet.length);
+        mRtcpSession.timeOfLastRTCPSent = mRtcpSession.currentTime();
         /* Send data over UDP */
-        datagramConnection.send(remoteAddress, remotePort, packet);
+        mDatagramConnection.send(mRemoteAddress, mRemotePort, packet);
     }
 
     /**
@@ -439,7 +426,7 @@ public class RtcpPacketTransmitter extends Thread implements Closeable {
      * @return Statistics
      */
     public RtcpStatisticsTransmitter getStatistics() {
-        return stats;
+        return mStats;
     }
 
     /**

@@ -232,9 +232,9 @@ public final class FileUploadService extends RcsService {
             if (uploadIntf != null) {
                 return new FileUpload(uploadIntf);
 
-            } else {
-                return null;
             }
+            return null;
+
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             RcsMaxAllowedSessionLimitReachedException.assertException(e);
@@ -286,9 +286,9 @@ public final class FileUploadService extends RcsService {
             if (uploadIntf != null) {
                 return new FileUpload(uploadIntf);
 
-            } else {
-                return null;
             }
+            return null;
+
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             throw new RcsGenericException(e);

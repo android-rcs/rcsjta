@@ -97,6 +97,7 @@ public class ChunkReceiver extends Thread {
      */
     public void run() {
         try {
+            boolean msrpTraceEnabled = MsrpConnection.isMsrpTraceEnabled();
             // Background processing
             while (!mTerminated) {
                 StringBuilder trace = new StringBuilder();
@@ -105,13 +106,13 @@ public class ChunkReceiver extends Thread {
                 StringBuilder line = readLine();
 
                 if (line.length() == 0) {
-                    if (MsrpConnection.MSRP_TRACE_ENABLED) {
+                    if (msrpTraceEnabled) {
                         System.out.println("<<< End of stream");
                     }
                     return;
                 }
 
-                if (MsrpConnection.MSRP_TRACE_ENABLED) {
+                if (msrpTraceEnabled) {
                     trace.append(line);
                     trace.append(MsrpConstants.NEW_LINE);
                 }
@@ -119,7 +120,7 @@ public class ChunkReceiver extends Thread {
                 String[] firstLineTags = line.toString().split(" ");
                 if ((firstLineTags.length < 3)
                         || !firstLineTags[0].equals(MsrpConstants.MSRP_HEADER)) {
-                    if (MsrpConnection.MSRP_TRACE_ENABLED) {
+                    if (msrpTraceEnabled) {
                         System.out.println("<<< Not a MSRP message");
                     }
                     return;
@@ -147,7 +148,7 @@ public class ChunkReceiver extends Thread {
                 int totalSize = 0;
                 while (continuationFlag == '\0' && !mTerminated) {
                     line = readLine();
-                    if (MsrpConnection.MSRP_TRACE_ENABLED) {
+                    if (msrpTraceEnabled) {
                         trace.append(line);
                         trace.append(MsrpConstants.NEW_LINE);
                     }
@@ -182,7 +183,7 @@ public class ChunkReceiver extends Thread {
                                 continuationFlag = (char) buffer[buffer.length - 1];
                             }
 
-                            if (MsrpConnection.MSRP_TRACE_ENABLED) {
+                            if (msrpTraceEnabled) {
                                 trace.append(new String(data, UTF8));
                                 trace.append(MsrpConstants.NEW_LINE);
                             }
@@ -207,7 +208,7 @@ public class ChunkReceiver extends Thread {
                             data = buffer.toString().getBytes(UTF8);
                             totalSize = data.length;
 
-                            if (MsrpConnection.MSRP_TRACE_ENABLED) {
+                            if (msrpTraceEnabled) {
                                 trace.append(new String(data, UTF8));
                                 trace.append(MsrpConstants.NEW_LINE);
                                 trace.append(end);
@@ -231,27 +232,27 @@ public class ChunkReceiver extends Thread {
                 // Process the received MSRP message
                 if (responseCode != -1) {
                     // Process MSRP response
-                    if (MsrpConnection.MSRP_TRACE_ENABLED) {
+                    if (msrpTraceEnabled) {
                         System.out.println("<<< Receive MSRP response:\n" + trace);
                     }
                     session.receiveMsrpResponse(responseCode, txId, headers);
                 } else {
                     // Process MSRP request
-                    if (method.toString().equals(MsrpConstants.METHOD_SEND)) {
+                    if (MsrpConstants.METHOD_SEND.equals(method)) {
                         // Process a SEND request
-                        if (MsrpConnection.MSRP_TRACE_ENABLED) {
+                        if (msrpTraceEnabled) {
                             System.out.println("<<< Receive MSRP SEND request:\n" + trace);
                         }
                         session.receiveMsrpSend(txId, headers, continuationFlag, data, totalSize);
-                    } else if (method.toString().equals(MsrpConstants.METHOD_REPORT)) {
+                    } else if (MsrpConstants.METHOD_REPORT.equals(method)) {
                         // Process a REPORT request
-                        if (MsrpConnection.MSRP_TRACE_ENABLED) {
+                        if (msrpTraceEnabled) {
                             System.out.println("<<< Receive MSRP REPORT request:\n" + trace);
                         }
                         session.receiveMsrpReport(txId, headers);
                     } else {
                         // Unknown request
-                        if (MsrpConnection.MSRP_TRACE_ENABLED) {
+                        if (msrpTraceEnabled) {
                             System.out.println("<<< Unknown request received:\n" + trace);
                         }
                         // Remove transaction info from list
@@ -379,7 +380,7 @@ public class ChunkReceiver extends Thread {
                 // MSRP end tag in reverse order
                 int[] match = new int[tagLength];
                 for (int i = 0; i < tagLength; i++) {
-                    match[i] = (int) endTag.charAt(tagLength - i - 1);
+                    match[i] = endTag.charAt(tagLength - i - 1);
                 }
 
                 // Read stream byte by byte

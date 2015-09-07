@@ -23,13 +23,13 @@
 package com.gsma.rcs.provisioning.local;
 
 import static com.gsma.rcs.provisioning.local.Provisioning.saveCheckBoxParam;
-import static com.gsma.rcs.provisioning.local.Provisioning.saveStringEditTextParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.saveIntegerEditTextParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.saveLongEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.saveStringEditTextParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.setCheckBoxParam;
-import static com.gsma.rcs.provisioning.local.Provisioning.setStringEditTextParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.setIntegerEditTextParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.setLongEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.setStringEditTextParam;
 
 import com.gsma.rcs.R;
 import com.gsma.rcs.provider.LocalContentResolver;
@@ -156,6 +156,7 @@ public class StackProvisioning extends Activity {
                 }
                 break;
             case 1:
+            default:
                 if (bundle != null) {
                     bundle.putInt(RcsSettingsData.CONFIG_MODE, ConfigurationMode.AUTO.toInt());
                 } else {
@@ -414,6 +415,7 @@ public class StackProvisioning extends Activity {
                 spinner.setSelection(2);
                 break;
             case ANY:
+            default:
                 spinner.setSelection(0);
         }
 
@@ -612,15 +614,14 @@ public class StackProvisioning extends Activity {
             return new String[] {
                 getString(R.string.label_no_certificate)
             };
-        } else {
-            // Add certificates in the list
-            String[] temp = new String[files.length + 1];
-            temp[0] = getString(R.string.label_no_certificate);
-            if (files.length > 0) {
-                System.arraycopy(files, 0, temp, 1, files.length);
-            }
-            return temp;
         }
+        // Add certificates in the list
+        String[] temp = new String[files.length + 1];
+        temp[0] = getString(R.string.label_no_certificate);
+        if (files.length > 0) {
+            System.arraycopy(files, 0, temp, 1, files.length);
+        }
+        return temp;
     }
 
 }

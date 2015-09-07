@@ -317,9 +317,8 @@ public class SipUtils {
             }
             if (end == -1) {
                 return input.substring(begin);
-            } else {
-                return input.substring(begin, end);
             }
+            return input.substring(begin, end);
         }
         return defaultValue;
     }

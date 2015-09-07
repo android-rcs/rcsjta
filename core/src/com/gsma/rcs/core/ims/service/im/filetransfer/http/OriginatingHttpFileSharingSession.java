@@ -397,6 +397,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                     return;
                 }
                 /* Intentional fall through */
+                //$FALL-THROUGH$
             default:
                 if (State.ESTABLISHED == state) {
                     for (ImsSessionListener listener : getListeners()) {
@@ -407,7 +408,6 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                         listener.handleSessionRejected(contact, reason);
                     }
                 }
-                ;
                 break;
         }
     }

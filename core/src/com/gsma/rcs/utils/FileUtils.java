@@ -165,9 +165,9 @@ public class FileUtils {
                     String displayName = cursor.getString(cursor
                             .getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME));
                     return displayName;
-                } else {
-                    throw new IllegalArgumentException("Error in retrieving file name from the URI");
                 }
+                throw new IllegalArgumentException("Error in retrieving file name from the URI");
+
             } else if (ContentResolver.SCHEME_FILE.equals(file.getScheme())) {
                 return file.getLastPathSegment();
             } else {
@@ -196,9 +196,9 @@ public class FileUtils {
                     return Long.valueOf(
                             cursor.getString(cursor.getColumnIndexOrThrow(OpenableColumns.SIZE)))
                             .longValue();
-                } else {
-                    throw new IllegalArgumentException("Error in retrieving file size form the URI");
                 }
+                throw new IllegalArgumentException("Error in retrieving file size form the URI");
+
             } else if (ContentResolver.SCHEME_FILE.equals(file.getScheme())) {
                 return (new File(file.getPath())).length();
             } else {

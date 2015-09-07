@@ -26,7 +26,6 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
@@ -64,11 +63,8 @@ import java.util.Vector;
  * 
  * @author jexa7410
  */
-public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToOneChatSession
-        implements MsrpEventListener {
-    /**
-     * The logger
-     */
+public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToOneChatSession {
+
     private static final Logger sLogger = Logger
             .getLogger(TerminatingStoreAndForwardOneToOneChatMessageSession.class.getName());
 

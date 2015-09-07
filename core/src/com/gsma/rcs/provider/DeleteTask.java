@@ -266,9 +266,8 @@ public abstract class DeleteTask<T> implements Runnable {
     protected Uri getAppendedPathUri(String itemKey) {
         if (mPathAppended) {
             return mContentUri;
-        } else {
-            return mContentUri.buildUpon().appendPath(itemKey).build();
         }
+        return mContentUri.buildUpon().appendPath(itemKey).build();
     }
 
     protected abstract T getGroupAsKey(String groupIdfromDatabase);

@@ -118,9 +118,8 @@ import java.util.Map;
             String[] selectionArgs, String selection) {
         if (selectionArgs == null) {
             return generateParamlessUnionQuery(historyLogMembers, selection);
-        } else {
-            return generateUnionQuery(historyLogMembers);
         }
+        return generateUnionQuery(historyLogMembers);
     }
 
     /* package private */void clearProvider(int providerId) {

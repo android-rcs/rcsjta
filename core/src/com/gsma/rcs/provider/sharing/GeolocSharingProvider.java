@@ -201,6 +201,7 @@ public class GeolocSharingProvider extends ContentProvider {
                     selection = getSelectionWithSharingId(selection);
                     selectionArgs = getSelectionArgsWithSharingId(selectionArgs, sharingId);
                     /* Intentional fall through */
+                    //$FALL-THROUGH$
                 case UriType.GeolocSharing.BASE:
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db
@@ -236,6 +237,7 @@ public class GeolocSharingProvider extends ContentProvider {
                 selectionArgs = getSelectionArgsWithSharingId(selectionArgs, sharingId);
                 notificationUri = Uri.withAppendedPath(notificationUri, sharingId);
                 /* Intentional fall through */
+                //$FALL-THROUGH$
             case UriType.InternalGeolocSharing.BASE:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.update(TABLE, values, selection, selectionArgs);
@@ -298,6 +300,7 @@ public class GeolocSharingProvider extends ContentProvider {
                 selectionArgs = getSelectionArgsWithSharingId(selectionArgs, sharingId);
                 notificationUri = Uri.withAppendedPath(notificationUri, sharingId);
                 /* Intentional fall through */
+                //$FALL-THROUGH$
             case UriType.InternalGeolocSharing.BASE:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.delete(TABLE, selection, selectionArgs);

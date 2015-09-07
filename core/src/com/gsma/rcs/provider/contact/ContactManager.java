@@ -265,7 +265,7 @@ public final class ContactManager {
             throw new IllegalArgumentException(new StringBuilder("No enum const class ")
                     .append(MimeType.class.getName()).append(".").append(value).toString());
         }
-    };
+    }
 
     /**
      * ONLINE available status

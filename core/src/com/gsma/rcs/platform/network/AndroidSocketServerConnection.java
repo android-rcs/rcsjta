@@ -18,11 +18,11 @@
 
 package com.gsma.rcs.platform.network;
 
+import com.gsma.rcs.utils.logger.Logger;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-
-import com.gsma.rcs.utils.logger.Logger;
 
 /**
  * Android socket connection
@@ -33,12 +33,10 @@ public class AndroidSocketServerConnection implements SocketServerConnection {
     /**
      * Socket server connection
      */
-    private ServerSocket acceptSocket = null;
+    private ServerSocket mAcceptSocket;
 
-    /**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(AndroidSocketServerConnection.class
+            .getSimpleName());
 
     /**
      * Constructor
@@ -53,7 +51,7 @@ public class AndroidSocketServerConnection implements SocketServerConnection {
      * @throws IOException
      */
     public void open(int port) throws IOException {
-        acceptSocket = new ServerSocket(port);
+        mAcceptSocket = new ServerSocket(port);
     }
 
     /**
@@ -62,9 +60,9 @@ public class AndroidSocketServerConnection implements SocketServerConnection {
      * @throws IOException
      */
     public void close() throws IOException {
-        if (acceptSocket != null) {
-            acceptSocket.close();
-            acceptSocket = null;
+        if (mAcceptSocket != null) {
+            mAcceptSocket.close();
+            mAcceptSocket = null;
         }
     }
 
@@ -75,14 +73,13 @@ public class AndroidSocketServerConnection implements SocketServerConnection {
      * @throws IOException
      */
     public SocketConnection acceptConnection() throws IOException {
-        if (acceptSocket != null) {
-            if (logger.isActivated()) {
-                logger.debug("Socket serverSocket is waiting for incoming connection");
+        if (mAcceptSocket != null) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Socket serverSocket is waiting for incoming connection");
             }
-            Socket socket = acceptSocket.accept();
+            Socket socket = mAcceptSocket.accept();
             return new AndroidSocketConnection(socket);
-        } else {
-            throw new IOException("Connection not opened");
         }
+        throw new IOException("Connection not opened");
     }
 }

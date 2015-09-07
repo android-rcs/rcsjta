@@ -187,9 +187,8 @@ public class MimeManager {
     public static String getFileExtension(String url) {
         if ((url != null) && (url.indexOf('.') != -1)) {
             return url.substring(url.lastIndexOf('.') + 1);
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**
@@ -215,9 +214,8 @@ public class MimeManager {
     public static boolean isImageType(String mime) {
         if (mime.toLowerCase().startsWith("image/")) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -229,9 +227,8 @@ public class MimeManager {
     public static boolean isVideoType(String mime) {
         if (mime.toLowerCase().startsWith("video/")) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -243,9 +240,8 @@ public class MimeManager {
     public static boolean isAudioType(String mime) {
         if (mime.toLowerCase().startsWith("audio/")) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -257,9 +253,8 @@ public class MimeManager {
     public static boolean isTextType(String mime) {
         if (mime.toLowerCase().startsWith("text/")) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -271,9 +266,8 @@ public class MimeManager {
     public static boolean isApplicationType(String mime) {
         if (mime.toLowerCase().startsWith("application/")) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -285,9 +279,8 @@ public class MimeManager {
     public static boolean isVCardType(String mime) {
         if (mime.toLowerCase().equalsIgnoreCase("text/vcard")) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -299,8 +292,7 @@ public class MimeManager {
     public static boolean isGeolocType(String mime) {
         if (mime.toLowerCase().equalsIgnoreCase("application/vnd.gsma.rcspushlocation+xml")) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 }

@@ -96,14 +96,14 @@ public class ProvisioningParser {
      */
     private enum RootNodeType {
         VERS, TOKEN, MSG, APPLICATION, IMS, PRESENCE, XDMS, IM, CAPDISCOVERY, APN, OTHER, SERVICES, SUPL, SERVICEPROVIDEREXT, UX
-    };
+    }
 
     /**
      * Enumerated type for the IMS server version
      */
     enum ImsServerVersion {
         JOYN, NON_JOYN
-    };
+    }
 
     /**
      * Constructor
@@ -1343,9 +1343,9 @@ public class ProvisioningParser {
 
                 if (wifiRtMedia == null) {
                     if ((wifiRtMedia = getValueByParamName("wifiRTMedia", childnode, TYPE_TXT)) != null) {
-                        if (wifiMedia.equals("RTP")) {
+                        if ("RTP".equals(wifiMedia)) {
                             mRcsSettings.writeBoolean(RcsSettingsData.SECURE_RTP_OVER_WIFI, false);
-                        } else if (wifiMedia.equals("SRTP")) {
+                        } else if ("SRTP".equals(wifiMedia)) {
                             mRcsSettings.writeBoolean(RcsSettingsData.SECURE_RTP_OVER_WIFI, true);
                         }
                         continue;
@@ -1949,7 +1949,7 @@ public class ProvisioningParser {
             return null;
         }
 
-        if ((node != null) && (node.getAttributes().getLength() > 0)) {
+        if (node.getAttributes().getLength() > 0) {
             nameNode = node.getAttributes().getNamedItem("name");
             if (nameNode == null) {
                 return null;
@@ -1973,9 +1973,8 @@ public class ProvisioningParser {
                 }
 
                 return value;
-            } else {
-                return null;
             }
+            return null;
         }
         return null;
     }
@@ -1993,9 +1992,8 @@ public class ProvisioningParser {
             return uri.substring(indexOfSipHeader + PhoneUtils.SIP_URI_HEADER.length(),
                     startIndexOfUriAddress);
 
-        } else {
-            return uri;
         }
+        return uri;
     }
 
     /**

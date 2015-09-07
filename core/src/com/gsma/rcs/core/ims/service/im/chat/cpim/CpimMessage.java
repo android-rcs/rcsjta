@@ -122,9 +122,8 @@ public class CpimMessage {
         String type = contentHeaders.get(CpimMessage.HEADER_CONTENT_TYPE);
         if (type == null) {
             return contentHeaders.get(CpimMessage.HEADER_CONTENT_TYPE2);
-        } else {
-            return type;
         }
+        return type;
     }
 
     /**
@@ -165,8 +164,7 @@ public class CpimMessage {
         String header = getHeader(CpimMessage.HEADER_DATETIME);
         if (header != null) {
             return DateUtils.decodeDate(header);
-        } else {
-            return 0;
         }
+        return 0;
     }
 }

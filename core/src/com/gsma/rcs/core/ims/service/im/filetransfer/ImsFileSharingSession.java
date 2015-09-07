@@ -114,9 +114,8 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
         Uri file = getContent().getUri();
         if ((file != null) && file.getScheme().startsWith("http")) {
             return file;
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**

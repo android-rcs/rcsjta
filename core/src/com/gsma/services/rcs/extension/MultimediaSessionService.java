@@ -196,9 +196,9 @@ public final class MultimediaSessionService extends RcsService {
             if (sessionIntf != null) {
                 return new MultimediaMessagingSession(sessionIntf);
 
-            } else {
-                return null;
             }
+            return null;
+
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             RcsServiceNotRegisteredException.assertException(e);
@@ -254,9 +254,9 @@ public final class MultimediaSessionService extends RcsService {
             if (sessionIntf != null) {
                 return new MultimediaMessagingSession(sessionIntf);
 
-            } else {
-                return null;
             }
+            return null;
+
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             throw new RcsGenericException(e);
@@ -290,9 +290,9 @@ public final class MultimediaSessionService extends RcsService {
             if (sessionIntf != null) {
                 return new MultimediaStreamingSession(sessionIntf);
 
-            } else {
-                return null;
             }
+            return null;
+
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             RcsServiceNotRegisteredException.assertException(e);
@@ -348,9 +348,9 @@ public final class MultimediaSessionService extends RcsService {
             if (sessionIntf != null) {
                 return new MultimediaStreamingSession(sessionIntf);
 
-            } else {
-                return null;
             }
+            return null;
+
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             throw new RcsGenericException(e);

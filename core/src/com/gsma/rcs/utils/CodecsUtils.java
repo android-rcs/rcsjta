@@ -138,6 +138,6 @@ public class CodecsUtils {
                 H264Config.CLOCK_RATE, 15, 96000, H264Config.QCIF_WIDTH, H264Config.QCIF_HEIGHT,
                 PARAM_1_b));
 
-        return (VideoCodec[]) videoCodes.toArray(new VideoCodec[videoCodes.size()]);
+        return videoCodes.toArray(new VideoCodec[videoCodes.size()]);
     }
 }

@@ -78,7 +78,7 @@ public class RcsServiceException extends Exception {
      * @param clazz Class
      * @return true if exception getMessage() starts with clazz getName()
      */
-    protected static boolean isIntendedException(Exception e, Class clazz) {
+    protected static boolean isIntendedException(Exception e, Class<?> clazz) {
         final String message = e.getMessage();
         return (!TextUtils.isEmpty(message) && message.startsWith(clazz.getName()));
     }

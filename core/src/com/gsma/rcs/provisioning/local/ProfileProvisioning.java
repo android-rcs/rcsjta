@@ -530,8 +530,7 @@ public class ProfileProvisioning extends Activity {
             return new String[] {
                 getString(R.string.label_no_xml_file)
             };
-        } else {
-            return files;
         }
+        return files;
     }
 }

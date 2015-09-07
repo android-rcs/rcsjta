@@ -46,7 +46,7 @@ public class RtpSource {
     /**
      * CNAME value
      */
-    public static String CNAME = "anonymous@127.0.0.1";
+    private static String sCname = "anonymous@127.0.0.1";
 
     /**
      * Source is not valid until MIN_SEQUENTIAL packets with sequential sequence numbers have been
@@ -300,5 +300,23 @@ public class RtpSource {
      */
     private int getExtendedSequenceNumber() {
         return generateExtendedSequenceNumber(maxSeq);
+    }
+
+    /**
+     * Gets Cname
+     * 
+     * @return Cname
+     */
+    public static String getCname() {
+        return sCname;
+    }
+
+    /**
+     * Sets Cname
+     * 
+     * @param cname
+     */
+    public static void setCname(String cname) {
+        sCname = cname;
     }
 }

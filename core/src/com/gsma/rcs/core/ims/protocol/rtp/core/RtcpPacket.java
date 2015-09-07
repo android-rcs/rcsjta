@@ -81,7 +81,7 @@ public abstract class RtcpPacket extends Packet {
     }
 
     public RtcpPacket(RtcpPacket rtcppacket) {
-        super((Packet) rtcppacket);
+        super(rtcppacket);
 
         mBase = rtcppacket.mBase;
     }

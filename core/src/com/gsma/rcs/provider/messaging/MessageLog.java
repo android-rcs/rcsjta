@@ -108,7 +108,6 @@ public class MessageLog implements IMessageLog {
      * Constructor
      * 
      * @param localContentResolver Local content resolver
-     * @param groupChatLog
      * @param groupChatDeliveryInfoLog
      * @param rcsSettings
      */
@@ -670,15 +669,13 @@ public class MessageLog implements IMessageLog {
                     .append(", timestampDisplayed=").append(timestampDisplayed).toString());
         }
 
-
         ContentValues values = new ContentValues();
         values.put(MessageData.KEY_STATUS, Status.DISPLAYED.toInt());
         values.put(MessageData.KEY_REASON_CODE, ReasonCode.UNSPECIFIED.toInt());
         values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, timestampDisplayed);
         values.put(MessageData.KEY_EXPIRED_DELIVERY, 0);
-        return mLocalContentResolver.update(
-                Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), values,
-                null, null) > 0;
+        return mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
+                values, null, null) > 0;
     }
 
     @Override

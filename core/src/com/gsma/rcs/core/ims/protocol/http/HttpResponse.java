@@ -122,9 +122,8 @@ public class HttpResponse {
         int code = getResponseCode();
         if ((code >= 200) && (code < 300)) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -136,9 +135,8 @@ public class HttpResponse {
         int code = getResponseCode();
         if (code == 404) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**

@@ -23,7 +23,8 @@ import java.util.Map;
 
 public class DatabaseUtils {
 
-    private static final Map<String, Integer> sModeBits = new HashMap<String, Integer>();;
+    private static final Map<String, Integer> sModeBits = new HashMap<String, Integer>();
+
     static {
         sModeBits.put("r", ParcelFileDescriptor.MODE_READ_ONLY);
         sModeBits.put("w", ParcelFileDescriptor.MODE_WRITE_ONLY | ParcelFileDescriptor.MODE_CREATE

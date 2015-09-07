@@ -18,16 +18,16 @@
 
 package com.gsma.rcs.core.ims.protocol.rtp;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
 import com.gsma.rcs.core.ims.protocol.rtp.codec.Codec;
 import com.gsma.rcs.core.ims.protocol.rtp.format.Format;
 import com.gsma.rcs.core.ims.protocol.rtp.format.audio.AmrWbAudioFormat;
 import com.gsma.rcs.core.ims.protocol.rtp.format.audio.AudioFormat;
 import com.gsma.rcs.core.ims.protocol.rtp.format.video.H264VideoFormat;
 import com.gsma.rcs.core.ims.protocol.rtp.format.video.VideoFormat;
+
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  * Media registry that handles the supported codecs
@@ -39,10 +39,10 @@ public class MediaRegistry {
     /**
      * Supported codecs
      */
-    private static Hashtable<String, Format> SUPPORTED_CODECS = new Hashtable<String, Format>();
+    private static Hashtable<String, Format> sSupportedCodexs = new Hashtable<String, Format>();
     static {
-        SUPPORTED_CODECS.put(H264VideoFormat.ENCODING.toLowerCase(), new H264VideoFormat());
-        SUPPORTED_CODECS.put(AmrWbAudioFormat.ENCODING.toLowerCase(), new AmrWbAudioFormat());
+        sSupportedCodexs.put(H264VideoFormat.ENCODING.toLowerCase(), new H264VideoFormat());
+        sSupportedCodexs.put(AmrWbAudioFormat.ENCODING.toLowerCase(), new AmrWbAudioFormat());
     }
 
     /**
@@ -52,8 +52,8 @@ public class MediaRegistry {
      */
     public static Vector<VideoFormat> getSupportedVideoFormats() {
         Vector<VideoFormat> list = new Vector<VideoFormat>();
-        for (Enumeration<Format> e = SUPPORTED_CODECS.elements(); e.hasMoreElements();) {
-            Format fmt = (Format) e.nextElement();
+        for (Enumeration<Format> e = sSupportedCodexs.elements(); e.hasMoreElements();) {
+            Format fmt = e.nextElement();
             if (fmt instanceof VideoFormat) {
                 list.addElement((VideoFormat) fmt);
             }
@@ -68,8 +68,8 @@ public class MediaRegistry {
      */
     public static Vector<AudioFormat> getSupportedAudioFormats() {
         Vector<AudioFormat> list = new Vector<AudioFormat>();
-        for (Enumeration<Format> e = SUPPORTED_CODECS.elements(); e.hasMoreElements();) {
-            Format fmt = (Format) e.nextElement();
+        for (Enumeration<Format> e = sSupportedCodexs.elements(); e.hasMoreElements();) {
+            Format fmt = e.nextElement();
             if (fmt instanceof AudioFormat) {
                 list.addElement((AudioFormat) fmt);
             }
@@ -84,7 +84,7 @@ public class MediaRegistry {
      * @return Format
      */
     public static Format generateFormat(String codec) {
-        return (Format) SUPPORTED_CODECS.get(codec.toLowerCase());
+        return sSupportedCodexs.get(codec.toLowerCase());
     }
 
     /**
@@ -94,7 +94,7 @@ public class MediaRegistry {
      * @return Boolean
      */
     public static boolean isCodecSupported(String codec) {
-        Format format = (Format) SUPPORTED_CODECS.get(codec.toLowerCase());
+        Format format = sSupportedCodexs.get(codec.toLowerCase());
         return (format != null);
     }
 
@@ -111,10 +111,9 @@ public class MediaRegistry {
                 new com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264.JavaPacketizer()
             };
             return chain;
-        } else {
-            // Codec implemented in the native part
-            return new Codec[0];
         }
+        // Codec implemented in the native part
+        return new Codec[0];
     }
 
     /**
@@ -130,9 +129,8 @@ public class MediaRegistry {
                 new com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264.JavaDepacketizer()
             };
             return chain;
-        } else {
-            // Codec implemented in the native part
-            return new Codec[0];
         }
+        // Codec implemented in the native part
+        return new Codec[0];
     }
 }

@@ -50,12 +50,12 @@ public class SdpOrientationExtension {
     /**
      * Extension header ID
      */
-    private int extensionId;
+    private int mExtensionId;
 
     /**
      * ExtensionHeader URI
      */
-    private String uri;
+    private String mUri;
 
     /**
      * Constructor
@@ -64,8 +64,8 @@ public class SdpOrientationExtension {
      * @param uri ExtensionHeader URI
      */
     private SdpOrientationExtension(int extensionId, String uri) {
-        this.extensionId = extensionId;
-        this.uri = uri;
+        mExtensionId = extensionId;
+        mUri = uri;
     }
 
     /**
@@ -74,7 +74,7 @@ public class SdpOrientationExtension {
      * @return Extension header id
      */
     public int getExtensionId() {
-        return this.extensionId;
+        return mExtensionId;
     }
 
     /**
@@ -83,8 +83,8 @@ public class SdpOrientationExtension {
      * @return <code>True</code> if is a valid header, <code>false</code> otherwise.
      */
     public boolean isValid() {
-        return (extensionId >= MIN_ID_VALUE && extensionId <= MAX_ID_VALUE)
-                && VIDEO_ORIENTATION_URI.equalsIgnoreCase(uri);
+        return (mExtensionId >= MIN_ID_VALUE && mExtensionId <= MAX_ID_VALUE)
+                && VIDEO_ORIENTATION_URI.equalsIgnoreCase(mUri);
     }
 
     /**

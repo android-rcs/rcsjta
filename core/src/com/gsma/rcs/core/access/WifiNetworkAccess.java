@@ -39,25 +39,20 @@ import java.security.cert.CertificateException;
  * @author jexa7410
  */
 public class WifiNetworkAccess extends NetworkAccess {
-    /**
-     * Wi-Fi manager
-     */
-    private WifiManager wifiManager;
 
-    /**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private WifiManager mWifiManager;
+
+    private static final Logger sLogger = Logger.getLogger(WifiNetworkAccess.class.getSimpleName());
 
     /**
      * Constructor
      */
     public WifiNetworkAccess() {
         super();
-        wifiManager = (WifiManager) AndroidFactory.getApplicationContext().getSystemService(
+        mWifiManager = (WifiManager) AndroidFactory.getApplicationContext().getSystemService(
                 Context.WIFI_SERVICE);
-        if (logger.isActivated()) {
-            logger.info(new StringBuilder("Wi-Fi access has been created (interface ")
+        if (sLogger.isActivated()) {
+            sLogger.info(new StringBuilder("Wi-Fi access has been created (interface ")
                     .append(getType()).append(")").toString());
         }
     }
@@ -70,10 +65,10 @@ public class WifiNetworkAccess extends NetworkAccess {
      * @throws IOException
      */
     public void connect(String ipAddress) throws CertificateException, IOException {
-        if (logger.isActivated()) {
-            logger.info("Network access connected (" + ipAddress + ")");
+        if (sLogger.isActivated()) {
+            sLogger.info("Network access connected (" + ipAddress + ")");
         }
-        this.ipAddress = ipAddress;
+        mIpAddress = ipAddress;
 
         // Changed by Deutsche Telekom
         KeyStoreManager.updateClientCertificate(ipAddress);
@@ -83,10 +78,10 @@ public class WifiNetworkAccess extends NetworkAccess {
      * Disconnect from the network access
      */
     public void disconnect() {
-        if (logger.isActivated()) {
-            logger.info("Network access disconnected");
+        if (sLogger.isActivated()) {
+            sLogger.info("Network access disconnected");
         }
-        ipAddress = null;
+        mIpAddress = null;
     }
 
     /**
@@ -95,12 +90,11 @@ public class WifiNetworkAccess extends NetworkAccess {
      * @return Type
      */
     public String getType() {
-        WifiInfo info = wifiManager.getConnectionInfo();
+        WifiInfo info = mWifiManager.getConnectionInfo();
         if (info.getLinkSpeed() <= 11) {
             return "IEEE-802.11b";
-        } else {
-            return "IEEE-802.11a";
         }
+        return "IEEE-802.11a";
     }
 
     /**
@@ -110,13 +104,13 @@ public class WifiNetworkAccess extends NetworkAccess {
      */
     public String getNetworkName() {
         String name = "Wi-Fi ";
-        WifiInfo info = wifiManager.getConnectionInfo();
+        WifiInfo info = mWifiManager.getConnectionInfo();
         if (info.getLinkSpeed() <= 11) {
             name += "802.11b";
         } else {
             name += "802.11a";
         }
-        name += ", SSID=" + wifiManager.getConnectionInfo().getSSID();
+        name += ", SSID=" + mWifiManager.getConnectionInfo().getSSID();
         return name;
     }
 }

@@ -565,8 +565,7 @@ public class SipDialogPath {
     public Dialog getStackDialog() {
         if (mInvite != null) {
             return mInvite.getStackTransaction().getDialog();
-        } else {
-            return null;
         }
+        return null;
     }
 }

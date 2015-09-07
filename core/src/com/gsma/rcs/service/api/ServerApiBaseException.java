@@ -67,7 +67,7 @@ public abstract class ServerApiBaseException extends IllegalStateException {
      * @param clazz <i>Class.class</i> of the SubClasses
      * @param message Error message obtained either from a constant string or through e.getMessage()
      */
-    protected ServerApiBaseException(Class clazz, String message) {
+    protected ServerApiBaseException(Class<?> clazz, String message) {
         super(new StringBuilder(clazz.getName()).append(DELIMITER_PIPE)
                 .append(validateExceptionMessage(message)).toString());
 
@@ -82,7 +82,7 @@ public abstract class ServerApiBaseException extends IllegalStateException {
      *            method). (A null value is permitted, and indicates that the cause is nonexistent
      *            or unknown.)
      */
-    protected ServerApiBaseException(Class clazz, String message, Throwable cause) {
+    protected ServerApiBaseException(Class<?> clazz, String message, Throwable cause) {
         super(new StringBuilder(clazz.getName()).append(DELIMITER_PIPE)
                 .append(validateExceptionMessage(message)).toString(), cause);
     }

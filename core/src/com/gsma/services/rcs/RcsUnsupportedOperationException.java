@@ -81,7 +81,7 @@ public class RcsUnsupportedOperationException extends UnsupportedOperationExcept
      * @param clazz Class
      * @return true if exception getMessage() starts with clazz getName()
      */
-    private static boolean isIntendedException(Exception e, Class clazz) {
+    private static boolean isIntendedException(Exception e, Class<?> clazz) {
         final String message = e.getMessage();
         return (!TextUtils.isEmpty(message) && message.startsWith(clazz.getName()));
     }

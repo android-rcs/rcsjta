@@ -27,7 +27,6 @@ import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.service.SessionIdGenerator;
 import com.gsma.rcs.core.ims.service.ipcall.IPCallService;
 import com.gsma.rcs.core.ims.service.ipcall.IPCallSession;
-import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.ipcall.IPCallHistory;
 import com.gsma.rcs.provider.ipcall.IPCallPersistedStorageAccessor;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -90,11 +89,10 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * 
      * @param ipCallService IPCallService
      * @param ipCallLog IPCallHistory
-     * @param contactManager ContactManager
      * @param rcsSettings RcsSettings
      */
     public IPCallServiceImpl(IPCallService ipCallService, IPCallHistory ipCallLog,
-            ContactManager contactManager, RcsSettings rcsSettings) {
+            RcsSettings rcsSettings) {
         if (sLogger.isActivated()) {
             sLogger.info("IP call service API is loaded");
         }
@@ -286,14 +284,12 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
             }
             mIPCallLog.addCall(SessionIdGenerator.getNewId(), contact, Direction.OUTGOING, null,
                     null, IPCall.State.FAILED, ReasonCode.FAILED_INITIATION, timestamp);
-            ;
             throw e;
 
         } catch (Exception e) {
             sLogger.error(ExceptionUtil.getFullStackTrace(e));
             mIPCallLog.addCall(SessionIdGenerator.getNewId(), contact, Direction.OUTGOING, null,
                     null, IPCall.State.FAILED, ReasonCode.FAILED_INITIATION, timestamp);
-            ;
             throw new ServerApiGenericException(e);
         }
     }

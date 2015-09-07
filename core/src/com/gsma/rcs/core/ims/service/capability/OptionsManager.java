@@ -147,7 +147,7 @@ public class OptionsManager implements DiscoveryManager {
      */
     public void requestCapabilities(ContactId contact) {
         boolean logActivated = sLogger.isActivated();
-        if (contact == null || contact.equals(ImsModule.IMS_USER_PROFILE.getUsername())) {
+        if (contact == null || contact.equals(ImsModule.getImsUserProfile().getUsername())) {
             return;
         }
         Capabilities capabilities = mContactManager.getContactCapabilities(contact);

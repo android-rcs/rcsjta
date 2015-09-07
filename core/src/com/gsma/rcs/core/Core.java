@@ -69,7 +69,7 @@ public class Core {
 
     private AddressBookManager mAddressBookManager;
 
-    private static final Logger sLogger = Logger.getLogger(Core.class.getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(BACKGROUND_THREAD_NAME);
 
     private final RcsSettings mRcsSettings;
 
@@ -161,7 +161,7 @@ public class Core {
         }
 
         // Initialize the phone utils
-        PhoneUtils.initialize(ctx, mRcsSettings);
+        PhoneUtils.initialize(mRcsSettings);
 
         // Create the address book manager
         mAddressBookManager = new AddressBookManager(contentResolver, contactManager);

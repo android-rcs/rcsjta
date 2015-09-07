@@ -314,13 +314,7 @@ public class SipMessageFactory {
                 message.addHeader(routeHeader);
             }
 
-            // Set the P-Preferred-Identity header
-            if (ImsModule.IMS_USER_PROFILE.getPreferredUri() != null) {
-                Header prefHeader = SipUtils.HEADER_FACTORY.createHeader(
-                        SipUtils.HEADER_P_PREFERRED_IDENTITY, ImsModule.IMS_USER_PROFILE
-                                .getPreferredUri().toString());
-                message.addHeader(prefHeader);
-            }
+            setPPreferedIdentityHeader(message);
 
             // Set Contact header
             message.addHeader(dialog.getSipStack().getContact());
@@ -608,13 +602,7 @@ public class SipMessageFactory {
                 invite.addHeader(routeHeader);
             }
 
-            // Set the P-Preferred-Identity header
-            if (ImsModule.IMS_USER_PROFILE.getPreferredUri() != null) {
-                Header prefHeader = SipUtils.HEADER_FACTORY.createHeader(
-                        SipUtils.HEADER_P_PREFERRED_IDENTITY, ImsModule.IMS_USER_PROFILE
-                                .getPreferredUri().toString());
-                invite.addHeader(prefHeader);
-            }
+            setPPreferedIdentityHeader(invite);
 
             // Set User-Agent header
             invite.addHeader(SipUtils.buildUserAgentHeader());
@@ -684,8 +672,8 @@ public class SipMessageFactory {
             String[] acceptContactTags, String sdp) throws SipPayloadException {
         try {
             // Create the response
-            Response response = SipUtils.MSG_FACTORY.createResponse(200, (Request) dialog
-                    .getInvite().getStackMessage());
+            Response response = SipUtils.MSG_FACTORY.createResponse(200, dialog.getInvite()
+                    .getStackMessage());
 
             // Set the local tag
             ToHeader to = (ToHeader) response.getHeader(ToHeader.NAME);
@@ -824,8 +812,8 @@ public class SipMessageFactory {
             throws SipPayloadException {
         try {
             // Create the response
-            Response response = SipUtils.MSG_FACTORY.createResponse(code,
-                    (Request) request.getStackMessage());
+            Response response = SipUtils.MSG_FACTORY
+                    .createResponse(code, request.getStackMessage());
             SipResponse resp = new SipResponse(response);
             resp.setStackTransaction(request.getStackTransaction());
             return resp;
@@ -860,8 +848,8 @@ public class SipMessageFactory {
             String warning) throws SipPayloadException {
         try {
             // Create the response
-            Response response = SipUtils.MSG_FACTORY.createResponse(code,
-                    (Request) request.getStackMessage());
+            Response response = SipUtils.MSG_FACTORY
+                    .createResponse(code, request.getStackMessage());
 
             // Set the local tag
             if (localTag != null) {
@@ -1021,13 +1009,7 @@ public class SipMessageFactory {
                 options.addHeader(routeHeader);
             }
 
-            // Set the P-Preferred-Identity header
-            if (ImsModule.IMS_USER_PROFILE.getPreferredUri() != null) {
-                Header prefHeader = SipUtils.HEADER_FACTORY.createHeader(
-                        SipUtils.HEADER_P_PREFERRED_IDENTITY, ImsModule.IMS_USER_PROFILE
-                                .getPreferredUri().toString());
-                options.addHeader(prefHeader);
-            }
+            setPPreferedIdentityHeader(options);
 
             // Set User-Agent header
             options.addHeader(SipUtils.buildUserAgentHeader());
@@ -1060,8 +1042,7 @@ public class SipMessageFactory {
             String[] featureTags, String sdp) throws SipPayloadException {
         try {
             // Create the response
-            Response response = SipUtils.MSG_FACTORY.createResponse(200,
-                    (Request) options.getStackMessage());
+            Response response = SipUtils.MSG_FACTORY.createResponse(200, options.getStackMessage());
 
             // Set the local tag
             ToHeader to = (ToHeader) response.getHeader(ToHeader.NAME);
@@ -1136,13 +1117,7 @@ public class SipMessageFactory {
                     "false");
             refer.addHeader(referSub);
 
-            // Set the P-Preferred-Identity header
-            if (ImsModule.IMS_USER_PROFILE.getPreferredUri() != null) {
-                Header prefHeader = SipUtils.HEADER_FACTORY.createHeader(
-                        SipUtils.HEADER_P_PREFERRED_IDENTITY, ImsModule.IMS_USER_PROFILE
-                                .getPreferredUri().toString());
-                refer.addHeader(prefHeader);
-            }
+            setPPreferedIdentityHeader(refer);
 
             // Set Subject header
             if (subject != null) {
@@ -1215,8 +1190,9 @@ public class SipMessageFactory {
             refer.addHeader(require);
 
             // Set Refer-To header
+            String homeDomain = ImsModule.getImsUserProfile().getHomeDomain();
             Header referTo = SipUtils.HEADER_FACTORY.createHeader(ReferToHeader.NAME, "<cid:"
-                    + listID + "@" + ImsModule.IMS_USER_PROFILE.getHomeDomain() + ">");
+                    + listID + "@" + homeDomain + ">");
             refer.addHeader(referTo);
 
             // Set Refer-Sub header
@@ -1224,13 +1200,7 @@ public class SipMessageFactory {
                     "false");
             refer.addHeader(referSub);
 
-            // Set the P-Preferred-Identity header
-            if (ImsModule.IMS_USER_PROFILE.getPreferredUri() != null) {
-                Header prefHeader = SipUtils.HEADER_FACTORY.createHeader(
-                        SipUtils.HEADER_P_PREFERRED_IDENTITY, ImsModule.IMS_USER_PROFILE
-                                .getPreferredUri().toString());
-                refer.addHeader(prefHeader);
-            }
+            setPPreferedIdentityHeader(refer);
 
             // Set Subject header
             Header s = SipUtils.HEADER_FACTORY.createHeader(Subject.NAME, subject);
@@ -1246,8 +1216,7 @@ public class SipMessageFactory {
 
             // Set the Content-ID header
             Header contentIdHeader = SipUtils.HEADER_FACTORY.createHeader(
-                    SipUtils.HEADER_CONTENT_ID,
-                    "<" + listID + "@" + ImsModule.IMS_USER_PROFILE.getHomeDomain() + ">");
+                    SipUtils.HEADER_CONTENT_ID, "<" + listID + "@" + homeDomain + ">");
             refer.addHeader(contentIdHeader);
 
             // Generate the resource list for given participants
@@ -1402,11 +1371,8 @@ public class SipMessageFactory {
             // Set the P-Preferred-Identity header
             if (firstInvite.getHeader(SipUtils.HEADER_P_PREFERRED_IDENTITY) != null) {
                 reInvite.addHeader(firstInvite.getHeader(SipUtils.HEADER_P_PREFERRED_IDENTITY));
-            } else if (ImsModule.IMS_USER_PROFILE.getPreferredUri() != null) {
-                Header prefHeader = SipUtils.HEADER_FACTORY.createHeader(
-                        SipUtils.HEADER_P_PREFERRED_IDENTITY, ImsModule.IMS_USER_PROFILE
-                                .getPreferredUri().toString());
-                reInvite.addHeader(prefHeader);
+            } else {
+                setPPreferedIdentityHeader(reInvite);
             }
 
             // Set User-Agent header
@@ -1463,8 +1429,7 @@ public class SipMessageFactory {
             throws SipPayloadException {
         try {
             // Create the response
-            Response response = SipUtils.MSG_FACTORY.createResponse(200,
-                    (Request) request.getStackMessage());
+            Response response = SipUtils.MSG_FACTORY.createResponse(200, request.getStackMessage());
 
             // Set Contact header
             response.addHeader(dialog.getSipStack().getContact());
@@ -1506,8 +1471,7 @@ public class SipMessageFactory {
             String[] featureTags, String content) throws SipPayloadException {
         try {
             // Create the response
-            Response response = SipUtils.MSG_FACTORY.createResponse(200,
-                    (Request) request.getStackMessage());
+            Response response = SipUtils.MSG_FACTORY.createResponse(200, request.getStackMessage());
 
             // Set the local tag
             ToHeader to = (ToHeader) response.getHeader(ToHeader.NAME);
@@ -1611,8 +1575,7 @@ public class SipMessageFactory {
             throws SipPayloadException {
         try {
             // Create the response
-            Response response = SipUtils.MSG_FACTORY.createResponse(200,
-                    (Request) request.getStackMessage());
+            Response response = SipUtils.MSG_FACTORY.createResponse(200, request.getStackMessage());
 
             // Set Contact header
             response.addHeader(dialog.getSipStack().getContact());
@@ -1639,4 +1602,14 @@ public class SipMessageFactory {
             throw new SipPayloadException("Can't create SIP message!", e);
         }
     }
+
+    private static void setPPreferedIdentityHeader(Request request) throws ParseException {
+        Uri preferedUri = ImsModule.getImsUserProfile().getPreferredUri();
+        if (preferedUri != null) {
+            Header prefHeader = SipUtils.HEADER_FACTORY.createHeader(
+                    SipUtils.HEADER_P_PREFERRED_IDENTITY, preferedUri.toString());
+            request.addHeader(prefHeader);
+        }
+    }
+
 }

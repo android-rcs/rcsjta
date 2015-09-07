@@ -187,7 +187,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
      * @throws MsrpException
      */
     private void sendFileTransferInfo() throws MsrpException {
-        String from = ImsModule.IMS_USER_PROFILE.getPublicAddress();
+        String from = ImsModule.getImsUserProfile().getPublicAddress();
         String networkContent;
         String msgId = getFileTransferId();
 
@@ -394,6 +394,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                     return;
                 }
                 /* Intentional fall through */
+                //$FALL-THROUGH$
             default:
                 if (State.ESTABLISHED == state) {
                     for (ImsSessionListener listener : getListeners()) {

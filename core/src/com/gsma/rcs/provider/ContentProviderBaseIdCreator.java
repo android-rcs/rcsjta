@@ -73,7 +73,9 @@ public class ContentProviderBaseIdCreator {
                     nextId.set(cursor.getLong(0));
                 }
             } finally {
-                cursor.close();
+                if (cursor != null) {
+                    cursor.close();
+                }
             }
 
             sNextIds.put(providerUri, nextId);

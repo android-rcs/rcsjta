@@ -32,7 +32,6 @@ import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
-import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.history.HistoryLog;
 import com.gsma.rcs.provider.messaging.ChatMessagePersistedStorageAccessor;
@@ -123,7 +122,6 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param rcsSettings RcsSettings
      * @param contactManager ContactManager
      * @param core Core
-     * @param localContentResolver LocalContentResolver
      * @param imOperationExecutor im operation ExecutorService
      * @param imsLock ims operations lock
      * @param fileTransferService FileTransferServiceImpl
@@ -131,8 +129,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      */
     public ChatServiceImpl(InstantMessagingService imService, MessagingLog messagingLog,
             HistoryLog historyLog, RcsSettings rcsSettings, ContactManager contactManager,
-            Core core, LocalContentResolver localContentResolver,
-            OneToOneUndeliveredImManager oneToOneUndeliveredImManager) {
+            Core core, OneToOneUndeliveredImManager oneToOneUndeliveredImManager) {
         if (sLogger.isActivated()) {
             sLogger.info("Chat service API is loaded");
         }

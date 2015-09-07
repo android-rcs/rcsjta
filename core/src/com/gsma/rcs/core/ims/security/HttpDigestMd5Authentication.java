@@ -268,7 +268,7 @@ public class HttpDigestMd5Authentication {
             if (!mQop.startsWith("auth")) {
                 throw new IllegalArgumentException("Invalid qop: ".concat(mQop));
             }
-            
+
             if (mQop.equals("auth-int")) {
                 a2.append(COLON).append(H(body));
             }
@@ -276,10 +276,9 @@ public class HttpDigestMd5Authentication {
             return H(new StringBuilder(H(a1)).append(COLON).append(mNonce).append(COLON).append(nc)
                     .append(COLON).append(mCnonce).append(COLON).append(mQop).append(COLON)
                     .append(H(a2.toString())).toString());
-        } else {
-            return H(new StringBuilder(H(a1)).append(COLON).append(mNonce).append(COLON)
-                    .append(H(a2.toString())).toString());
         }
+        return H(new StringBuilder(H(a1)).append(COLON).append(mNonce).append(COLON)
+                .append(H(a2.toString())).toString());
     }
 
     /**

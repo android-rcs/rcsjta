@@ -47,24 +47,12 @@ public abstract class HttpTransferManager {
      */
     public static final int CHUNK_MAX_SIZE = 10 * 1024;
 
-    /**
-     * HTTP traces enabled
-     */
-    public static boolean HTTP_TRACE_ENABLED = false;
+    private static boolean sHttpTraceEnabled = false;
 
-    /**
-     * HTTP server address
-     */
     private final Uri mServerAddr;
 
-    /**
-     * HTTP server login
-     */
     private final String mServerLogin;
 
-    /**
-     * HTTP server password
-     */
     private final String mServerPwd;
 
     /**
@@ -225,5 +213,23 @@ public abstract class HttpTransferManager {
         }
         cnx.setRequestProperty("User-Agent", SipUtils.userAgentString());
         return cnx;
+    }
+
+    /**
+     * Checks if HTTP trace is enabled
+     * 
+     * @return True if HTTP trace is enabled
+     */
+    public static boolean isHttpTraceEnabled() {
+        return sHttpTraceEnabled;
+    }
+
+    /**
+     * Sets HTTP trace enabled
+     * 
+     * @param enabled True if HTTP trace is enabled
+     */
+    public static void setHttpTraceEnabled(boolean enabled) {
+        sHttpTraceEnabled = enabled;
     }
 }

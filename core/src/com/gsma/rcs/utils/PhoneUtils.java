@@ -22,7 +22,6 @@ import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.services.rcs.contact.ContactId;
 
-import android.content.Context;
 import android.net.Uri;
 
 import java.util.regex.Matcher;
@@ -37,7 +36,7 @@ public class PhoneUtils {
     /**
      * Tel-URI format
      */
-    private static boolean TEL_URI_SUPPORTED = true;
+    private static boolean sTelUriSupported = true;
 
     /**
      * Regular expression of the SIP header
@@ -70,13 +69,12 @@ public class PhoneUtils {
     public static final String URI_END_DELIMITER = ">";
 
     /**
-     * Set the country code
+     * Initializes
      * 
-     * @param context Context
      * @param mRcsSettings
      */
-    public static synchronized void initialize(Context context, RcsSettings mRcsSettings) {
-        TEL_URI_SUPPORTED = mRcsSettings.isTelUriFormatUsed();
+    public static synchronized void initialize(RcsSettings mRcsSettings) {
+        sTelUriSupported = mRcsSettings.isTelUriFormatUsed();
     }
 
     /**
@@ -91,14 +89,14 @@ public class PhoneUtils {
         }
         // @FIXME: Should make use of android.net.sip.SipProfile.Builder for creating SIP URI
         // instead of doing it with Strings.
-        if (TEL_URI_SUPPORTED) {
+        if (sTelUriSupported) {
             /* Tel-URI format */
             return Uri.parse(TEL_URI_HEADER.concat(contactId.toString()));
 
         }
         /* SIP-URI format */
         return Uri.parse(new StringBuilder(SIP_URI_HEADER).append(contactId).append("@")
-                .append(ImsModule.IMS_USER_PROFILE.getHomeDomain()).append(";user=phone")
+                .append(ImsModule.getImsUserProfile().getHomeDomain()).append(";user=phone")
                 .toString());
     }
 

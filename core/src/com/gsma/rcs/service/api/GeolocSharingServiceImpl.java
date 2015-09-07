@@ -290,8 +290,8 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
         try {
             String msgId = IdGenerator.generateMessageID();
             long timestamp = System.currentTimeMillis();
-            String geolocDoc = ChatUtils.buildGeolocDocument(geoloc,
-                    ImsModule.IMS_USER_PROFILE.getPublicUri(), msgId, timestamp);
+            String geolocDoc = ChatUtils.buildGeolocDocument(geoloc, ImsModule.getImsUserProfile()
+                    .getPublicUri(), msgId, timestamp);
             byte[] data = geolocDoc.getBytes(UTF8);
             MmContent content = new GeolocContent("geoloc.xml", data.length, data);
 

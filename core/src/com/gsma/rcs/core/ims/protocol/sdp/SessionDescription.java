@@ -58,7 +58,7 @@ public class SessionDescription {
         MediaAttribute attribute = null;
         if (sessionAttributes != null) {
             for (int i = 0; i < sessionAttributes.size(); i++) {
-                MediaAttribute entry = (MediaAttribute) sessionAttributes.elementAt(i);
+                MediaAttribute entry = sessionAttributes.elementAt(i);
                 if (entry.getName().equals(name)) {
                     attribute = entry;
                     break;

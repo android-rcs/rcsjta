@@ -32,7 +32,6 @@ import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.provider.settings.RcsSettingsData;
 import com.gsma.rcs.provider.settings.RcsSettingsData.GsmaRelease;
 import com.gsma.rcs.provider.settings.RcsSettingsData.TermsAndConditionsResponse;
 import com.gsma.rcs.provisioning.ProvisioningFailureReasons;
@@ -340,10 +339,9 @@ public class HttpsProvisioningManager {
                     }
                     result.code = HttpsProvisioningResult.UNKNOWN_MSISDN_CODE;
                     return result;
-                } else {
-                    if (logActivated) {
-                        sLogger.debug("MSISDN set by end user=".concat(msisdn.toString()));
-                    }
+                }
+                if (logActivated) {
+                    sLogger.debug("MSISDN set by end user=".concat(msisdn.toString()));
                 }
             }
 
@@ -395,6 +393,7 @@ public class HttpsProvisioningManager {
                 case HttpURLConnection.HTTP_UNAVAILABLE:
                     result.retryAfter = getRetryAfter(urlConnection);
                     /* Intentional fall through */
+                    //$FALL-THROUGH$
                 default:
                     if (logActivated) {
                         sLogger.debug("Request to get OTP failed: code=" + result.code);
@@ -533,6 +532,7 @@ public class HttpsProvisioningManager {
                 case HttpURLConnection.HTTP_UNAVAILABLE:
                     result.retryAfter = getRetryAfter(urlConnection);
                     /* Intentional fall through */
+                    //$FALL-THROUGH$
                 default:
                     if (logActivated) {
                         sLogger.debug("First HTTPS request failed with code " + result.code);
@@ -559,6 +559,7 @@ public class HttpsProvisioningManager {
                 case HttpURLConnection.HTTP_UNAVAILABLE:
                     result.retryAfter = getRetryAfter(urlConnection);
                     /* Intentional fall through */
+                    //$FALL-THROUGH$
                 default:
                     if (logActivated) {
                         sLogger.debug("Second HTTPS request failed with code " + result.code);
@@ -638,6 +639,7 @@ public class HttpsProvisioningManager {
                 case HttpURLConnection.HTTP_UNAVAILABLE:
                     result.retryAfter = getRetryAfter(urlConnection);
                     /* Intentional fall through */
+                    //$FALL-THROUGH$
                 default:
                     if (logActivated) {
                         sLogger.debug("Request with OTP failed code=" + result.code);

@@ -281,7 +281,7 @@ public class TermsConditionsService extends ImsService {
         final SipInterface sipStack = sipManager.getSipStack();
         final String remoteServer = eucr.getPath();
         SipDialogPath dialogPath = new SipDialogPath(sipStack, sipStack.generateCallId(), 1,
-                remoteServer, ImsModule.IMS_USER_PROFILE.getPublicUri(), remoteServer,
+                remoteServer, ImsModule.getImsUserProfile().getPublicUri(), remoteServer,
                 sipStack.getServiceRoutePath(), mRcsSettings);
 
         if (sLogger.isActivated()) {

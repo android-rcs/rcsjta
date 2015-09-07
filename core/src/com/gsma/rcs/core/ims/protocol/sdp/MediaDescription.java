@@ -115,7 +115,7 @@ public class MediaDescription {
         MediaAttribute attribute = null;
         if (mMediaAttributes != null) {
             for (int i = 0; i < mMediaAttributes.size(); i++) {
-                MediaAttribute entry = (MediaAttribute) mMediaAttributes.elementAt(i);
+                MediaAttribute entry = mMediaAttributes.elementAt(i);
                 if (entry.getName().equals(name)) {
                     attribute = entry;
                     break;

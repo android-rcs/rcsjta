@@ -242,13 +242,12 @@ public abstract class FileSharingSession extends ImsServiceSession {
                 sLogger.warn("File is too big, reject the file transfer");
             }
             return new FileSharingError(FileSharingError.MEDIA_SIZE_TOO_BIG);
-        } else {
-            if (storageIsTooSmall) {
-                if (sLogger.isActivated()) {
-                    sLogger.warn("Not enough storage capacity, reject the file transfer");
-                }
-                return new FileSharingError(FileSharingError.NOT_ENOUGH_STORAGE_SPACE);
+        }
+        if (storageIsTooSmall) {
+            if (sLogger.isActivated()) {
+                sLogger.warn("Not enough storage capacity, reject the file transfer");
             }
+            return new FileSharingError(FileSharingError.NOT_ENOUGH_STORAGE_SPACE);
         }
         return null;
     }

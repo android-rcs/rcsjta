@@ -489,13 +489,13 @@ public class PublishManager extends PeriodicRefresher {
         String callId = mImsModule.getSipManager().getSipStack().generateCallId();
 
         // Set target
-        String target = ImsModule.IMS_USER_PROFILE.getPublicUri();
+        String target = ImsModule.getImsUserProfile().getPublicUri();
 
         // Set local party
-        String localParty = ImsModule.IMS_USER_PROFILE.getPublicUri();
+        String localParty = target;
 
         // Set remote party
-        String remoteParty = ImsModule.IMS_USER_PROFILE.getPublicUri();
+        String remoteParty = target;
 
         // Set the route path
         Vector<String> route = mImsModule.getSipManager().getSipStack().getServiceRoutePath();

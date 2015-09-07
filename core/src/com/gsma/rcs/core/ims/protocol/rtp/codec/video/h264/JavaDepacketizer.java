@@ -188,11 +188,10 @@ public class JavaDepacketizer extends VideoCodec {
             output.setFlags(input.getFlags());
 
             return INPUT_BUFFER_NOT_CONSUMED;
-        } else {
-            // Not a correct packet
-            aggregationPositon = 1;
-            return BUFFER_PROCESSED_FAILED;
         }
+        // Not a correct packet
+        aggregationPositon = 1;
+        return BUFFER_PROCESSED_FAILED;
     }
 
     /**
@@ -207,14 +206,12 @@ public class JavaDepacketizer extends VideoCodec {
                 assemblersCollection.getLastActiveAssembler().copyToBuffer(output);
                 assemblersCollection.removeOldestThan(input.getTimestamp());
                 return BUFFER_PROCESSED_OK;
-            } else {
-                output.setDiscard(true);
-                return OUTPUT_BUFFER_NOT_FILLED;
             }
-        } else {
             output.setDiscard(true);
             return OUTPUT_BUFFER_NOT_FILLED;
         }
+        output.setDiscard(true);
+        return OUTPUT_BUFFER_NOT_FILLED;
     }
 
     /**

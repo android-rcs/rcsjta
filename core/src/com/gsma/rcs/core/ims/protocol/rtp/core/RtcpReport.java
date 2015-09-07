@@ -24,40 +24,51 @@ package com.gsma.rcs.core.ims.protocol.rtp.core;
  * @author jexa7410
  */
 public class RtcpReport {
-    public int ssrc;
-    public int fractionlost;
-    public int packetslost;
-    public long lastseq;
-    public int jitter;
-    public long lsr;
-    public long dlsr;
-    public long receiptTime;
+    private final int mSsrc;
+    private final int mFractionLost;
+    private final int mPacketsLost;
+    private final long mLastSeq;
+    private final int mJitter;
+    private final long mLsr;
+    private final long mDlsr;
 
-    public long getDLSR() {
-        return dlsr;
+    public RtcpReport(int ssrc, int fractionLost, int packetsLost, long lastSeq, int jitter,
+            long lsr, long dlsr) {
+        mSsrc = ssrc;
+        mFractionLost = fractionLost;
+        mPacketsLost = packetsLost;
+        mLastSeq = lastSeq;
+        mJitter = jitter;
+        mLsr = lsr;
+        mDlsr = dlsr;
+    }
+
+    public long getDlsr() {
+        return mDlsr;
     }
 
     public int getFractionLost() {
-        return fractionlost;
+        return mFractionLost;
     }
 
-    public long getJitter() {
-        return (long) jitter;
+    public int getJitter() {
+        return mJitter;
     }
 
-    public long getLSR() {
-        return lsr;
+    public long getLsr() {
+        return mLsr;
     }
 
-    public long getNumLost() {
-        return (long) packetslost;
+    public int getPacketsLost() {
+        return mPacketsLost;
     }
 
-    public long getSSRC() {
-        return (long) ssrc;
+    public int getSsrc() {
+        return mSsrc;
     }
 
-    public long getXtndSeqNum() {
-        return lastseq;
+    public long getLastSeq() {
+        return mLastSeq;
     }
+
 }

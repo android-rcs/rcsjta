@@ -69,7 +69,7 @@ public class AndroidNetworkFactory extends NetworkFactory {
                 : true;
         for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); (en != null)
                 && en.hasMoreElements();) {
-            NetworkInterface netIntf = (NetworkInterface) en.nextElement();
+            NetworkInterface netIntf = en.nextElement();
             for (Enumeration<InetAddress> addr = netIntf.getInetAddresses(); addr.hasMoreElements();) {
                 InetAddress inetAddress = addr.nextElement();
                 String ipAddress = IpAddressUtils.extractHostAddress(inetAddress.getHostAddress());

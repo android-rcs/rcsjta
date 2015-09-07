@@ -273,6 +273,7 @@ public class FileTransferProvider extends ContentProvider {
                     selection = getSelectionWithFtId(selection);
                     selectionArgs = getSelectionArgsWithFtId(selectionArgs, ftId);
                     /* Intentional fall through */
+                    //$FALL-THROUGH$
                 case UriType.FileTransfer.FILE_TRANSFER:
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db.query(TABLE,
@@ -310,6 +311,7 @@ public class FileTransferProvider extends ContentProvider {
                 selectionArgs = getSelectionArgsWithFtId(selectionArgs, ftId);
                 notificationUri = Uri.withAppendedPath(notificationUri, ftId);
                 /* Intentional fall through */
+                //$FALL-THROUGH$
             case UriType.InternalFileTransfer.FILE_TRANSFER:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.update(TABLE, values, selection, selectionArgs);
@@ -371,6 +373,7 @@ public class FileTransferProvider extends ContentProvider {
                 selectionArgs = getSelectionArgsWithFtId(selectionArgs, ftId);
                 notificationUri = Uri.withAppendedPath(notificationUri, ftId);
                 /* Intentional fall through */
+                //$FALL-THROUGH$
             case UriType.InternalFileTransfer.FILE_TRANSFER:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.delete(TABLE, selection, selectionArgs);

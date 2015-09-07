@@ -421,7 +421,7 @@ public class RegistrationManager extends PeriodicRefresher {
 
         // Set the associated URIs
         ListIterator<Header> associatedHeader = resp.getHeaders(SipUtils.HEADER_P_ASSOCIATED_URI);
-        ImsModule.IMS_USER_PROFILE.setAssociatedUri(associatedHeader);
+        ImsModule.getImsUserProfile().setAssociatedUri(associatedHeader);
 
         // Set the GRUU
         SipInterface sipInterface = mNetworkInterface.getSipManager().getSipStack();

@@ -137,7 +137,7 @@ public class HttpDownloadManager extends HttpTransferManager {
             mFileDownloadStream = openStreamForFile(mFile);
         }
         /* Send GET request */
-        if (HTTP_TRACE_ENABLED) {
+        if (isHttpTraceEnabled()) {
             System.out.println(">>> Send HTTP request:\nGET " + getHttpServerAddr());
         }
 
@@ -195,7 +195,7 @@ public class HttpDownloadManager extends HttpTransferManager {
             if (sLogger.isActivated()) {
                 sLogger.debug("HTTP get file response: " + statusCode + " (" + message + ")");
             }
-            if (HTTP_TRACE_ENABLED) {
+            if (isHttpTraceEnabled()) {
                 System.out.println("<<< Receive HTTP response: \n" + statusCode + " " + statusCode);
             }
             int receivedBytes = 0;
@@ -259,7 +259,7 @@ public class HttpDownloadManager extends HttpTransferManager {
         if (sLogger.isActivated()) {
             sLogger.debug("Download file icon from ".concat(getHttpServerAddr().toString()));
         }
-        if (HTTP_TRACE_ENABLED) {
+        if (isHttpTraceEnabled()) {
             System.out.println(">>> Send HTTP request:\nGET " + iconUri);
         }
         ByteArrayOutputStream baos;
@@ -295,7 +295,7 @@ public class HttpDownloadManager extends HttpTransferManager {
             if (sLogger.isActivated()) {
                 sLogger.debug("HTTP get thumbnail response: " + statusCode + " (" + message + ")");
             }
-            if (HTTP_TRACE_ENABLED) {
+            if (isHttpTraceEnabled()) {
                 System.out.println("<<< Receive HTTP response:\n" + statusCode + " " + statusCode);
             }
             if (HttpURLConnection.HTTP_OK == statusCode) {
@@ -344,7 +344,7 @@ public class HttpDownloadManager extends HttpTransferManager {
         long completeSize = mContent.getSize();
         Map<String, String> properties = new HashMap<String, String>();
         properties.put("Range", "bytes=" + downloadedLength + "-" + completeSize);
-        if (HTTP_TRACE_ENABLED) {
+        if (isHttpTraceEnabled()) {
             System.out.println(">>> Send HTTP request:\n GET " + serverAddress);
         }
 

@@ -144,12 +144,10 @@ public class OriginatingIPCallSession extends IPCallSession {
             // Voice call
             return SipMessageFactory.createInvite(getDialogPath(),
                     IPCallService.FEATURE_TAGS_IP_VOICE_CALL, getDialogPath().getLocalContent());
-        } else {
-            // Visio call
-            return SipMessageFactory.createInvite(getDialogPath(),
-                    IPCallService.FEATURE_TAGS_IP_VIDEO_CALL, getDialogPath().getLocalContent());
         }
-
+        // Visio call
+        return SipMessageFactory.createInvite(getDialogPath(),
+                IPCallService.FEATURE_TAGS_IP_VIDEO_CALL, getDialogPath().getLocalContent());
     }
 
     @Override

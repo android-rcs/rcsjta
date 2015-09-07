@@ -184,6 +184,7 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
                     selection = getSelectionWithAppendedId(selection);
                     selectionArgs = getSelectionArgsWithAppendedId(selectionArgs, appendedId);
                     /* Intentional fall through */
+                    //$FALL-THROUGH$
                 case UriType.GroupDeliveryInfo.DELIVERY:
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db.query(DATABASE_TABLE, projection, selection, selectionArgs, null,
@@ -252,6 +253,7 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
                 selectionArgs = getSelectionArgsWithAppendedId(selectionArgs, appendedId);
                 notificationUri = Uri.withAppendedPath(notificationUri, appendedId);
                 /* Intentional fall through */
+                //$FALL-THROUGH$
             case UriType.InternalGroupDeliveryInfo.DELIVERY:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.update(DATABASE_TABLE, values, selection, selectionArgs);
@@ -282,6 +284,7 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
                 selectionArgs = getSelectionArgsWithAppendedId(selectionArgs, appendedId);
                 notificationUri = Uri.withAppendedPath(notificationUri, appendedId);
                 /* Intentional fall through */
+                //$FALL-THROUGH$
             case UriType.InternalGroupDeliveryInfo.DELIVERY:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.delete(DATABASE_TABLE, selection, selectionArgs);

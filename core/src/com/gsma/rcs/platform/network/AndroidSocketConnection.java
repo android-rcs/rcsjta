@@ -106,9 +106,8 @@ public class AndroidSocketConnection implements SocketConnection {
     public InputStream getInputStream() throws IOException {
         if (socket != null) {
             return socket.getInputStream();
-        } else {
-            throw new IOException("Connection not opened");
         }
+        throw new IOException("Connection not opened");
     }
 
     /**
@@ -120,9 +119,8 @@ public class AndroidSocketConnection implements SocketConnection {
     public OutputStream getOutputStream() throws IOException {
         if (socket != null) {
             return socket.getOutputStream();
-        } else {
-            throw new IOException("Connection not opened");
         }
+        throw new IOException("Connection not opened");
     }
 
     /**
@@ -134,9 +132,8 @@ public class AndroidSocketConnection implements SocketConnection {
     public String getRemoteAddress() throws IOException {
         if (socket != null) {
             return socket.getInetAddress().getHostAddress();
-        } else {
-            throw new IOException("Connection not opened");
         }
+        throw new IOException("Connection not opened");
     }
 
     /**
@@ -148,9 +145,8 @@ public class AndroidSocketConnection implements SocketConnection {
     public int getRemotePort() throws IOException {
         if (socket != null) {
             return socket.getPort();
-        } else {
-            throw new IOException("Connection not opened");
         }
+        throw new IOException("Connection not opened");
     }
 
     /**
@@ -162,9 +158,8 @@ public class AndroidSocketConnection implements SocketConnection {
     public String getLocalAddress() throws IOException {
         if (socket != null) {
             return socket.getLocalAddress().getHostAddress();
-        } else {
-            throw new IOException("Connection not opened");
         }
+        throw new IOException("Connection not opened");
     }
 
     /**
@@ -176,9 +171,8 @@ public class AndroidSocketConnection implements SocketConnection {
     public int getLocalPort() throws IOException {
         if (socket != null) {
             return socket.getLocalPort();
-        } else {
-            throw new IOException("Connection not opened");
         }
+        throw new IOException("Connection not opened");
     }
 
     /**
@@ -191,9 +185,8 @@ public class AndroidSocketConnection implements SocketConnection {
     public int getSoTimeout() throws IOException {
         if (socket != null) {
             return socket.getSoTimeout();
-        } else {
-            throw new IOException("Connection not opened");
         }
+        throw new IOException("Connection not opened");
     }
 
     /**

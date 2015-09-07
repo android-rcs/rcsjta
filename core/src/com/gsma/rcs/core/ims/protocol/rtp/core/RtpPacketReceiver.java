@@ -22,16 +22,16 @@
 
 package com.gsma.rcs.core.ims.protocol.rtp.core;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.net.SocketTimeoutException;
-import java.util.concurrent.TimeoutException;
-
 import com.gsma.rcs.platform.network.DatagramConnection;
 import com.gsma.rcs.platform.network.NetworkFactory;
 import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.FifoBuffer;
 import com.gsma.rcs.utils.logger.Logger;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.net.SocketTimeoutException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * RTP packet receiver
@@ -211,9 +211,8 @@ public class RtpPacketReceiver extends Thread implements Closeable {
             pkt.seqnum = s.generateExtendedSequenceNumber(pkt.seqnum);
 
             return pkt;
-        } else {
-            return readRtpPacket();
         }
+        return readRtpPacket();
     }
 
     /**

@@ -25,7 +25,6 @@ package com.gsma.rcs.core.ims.service.im.chat.standfw;
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
@@ -63,16 +62,10 @@ import java.util.Vector;
  * 
  * @author jexa7410
  */
-public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends OneToOneChatSession
-        implements MsrpEventListener {
-    /**
-     * MSRP manager
-     */
+public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends OneToOneChatSession {
+
     private MsrpManager mMsrpMgr;
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger
             .getLogger(TerminatingStoreAndForwardOneToOneChatNotificationSession.class.getName());
 

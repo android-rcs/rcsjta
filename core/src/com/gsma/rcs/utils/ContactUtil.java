@@ -59,7 +59,7 @@ public class ContactUtil {
         public String getNumber() {
             return mNumber;
         }
-    };
+    }
 
     /**
      * Gets a valid phone number from a URI

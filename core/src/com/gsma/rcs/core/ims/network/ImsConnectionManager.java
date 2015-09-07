@@ -203,8 +203,8 @@ public class ImsConnectionManager implements Runnable {
      * Load the user profile associated to the network interface
      */
     private void loadUserProfile() {
-        ImsModule.IMS_USER_PROFILE = mCurrentNetworkInterface.getUserProfile();
-        RtpSource.CNAME = ImsModule.IMS_USER_PROFILE.getPublicUri();
+        ImsModule.setImsUserProfile(mCurrentNetworkInterface.getUserProfile());
+        RtpSource.setCname(ImsModule.getImsUserProfile().getPublicUri());
         if (sLogger.isActivated()) {
             sLogger.debug("User profile has been reloaded");
         }
@@ -426,7 +426,8 @@ public class ImsConnectionManager implements Runnable {
                 String currentOpe = tm.getSimOperatorName();
                 if (mOperator != null && !currentOpe.equalsIgnoreCase(mOperator)) {
                     if (sLogger.isActivated()) {
-                        sLogger.warn("Operator not authorized");
+                        sLogger.warn("Operator not authorized current=" + currentOpe
+                                + " authorized=" + mOperator);
                     }
                     return;
                 }

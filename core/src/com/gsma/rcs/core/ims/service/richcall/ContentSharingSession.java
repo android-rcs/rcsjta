@@ -103,9 +103,8 @@ public abstract class ContentSharingSession extends ImsServiceSession {
         Uri file = mContent.getUri();
         if ((file != null) && file.getScheme().startsWith("http")) {
             return file;
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**

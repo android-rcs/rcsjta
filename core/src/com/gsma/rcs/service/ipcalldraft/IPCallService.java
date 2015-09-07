@@ -193,9 +193,9 @@ public final class IPCallService extends RcsService {
             if (callIntf != null) {
                 return new IPCall(callIntf);
 
-            } else {
-                return null;
             }
+            return null;
+
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             RcsServiceNotRegisteredException.assertException(e);
@@ -229,9 +229,9 @@ public final class IPCallService extends RcsService {
             if (callIntf != null) {
                 return new IPCall(callIntf);
 
-            } else {
-                return null;
             }
+            return null;
+
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             RcsServiceNotRegisteredException.assertException(e);

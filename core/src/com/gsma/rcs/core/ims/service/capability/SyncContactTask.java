@@ -197,7 +197,7 @@ public class SyncContactTask implements Runnable {
          * Remove my contact since already created in native address book and no need to query for
          * capabilities.
          */
-        nativeContacts.remove(ImsModule.IMS_USER_PROFILE.getUsername());
+        nativeContacts.remove(ImsModule.getImsUserProfile().getUsername());
 
         Set<ContactId> rcsContacts = mContactManager.getAllContactsFromRcsContactProvider();
 

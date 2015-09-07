@@ -217,9 +217,9 @@ public final class ImageSharingService extends RcsService {
             if (sharingIntf != null) {
                 return new ImageSharing(sharingIntf);
 
-            } else {
-                return null;
             }
+            return null;
+
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             RcsServiceNotRegisteredException.assertException(e);

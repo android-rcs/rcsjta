@@ -706,7 +706,7 @@ public class InstantMessagingService extends ImsService {
         }
 
         FileSharingSession session = new OriginatingHttpGroupFileSharingSession(fileTransferId,
-                this, content, fileIcon, ImsModule.IMS_USER_PROFILE.getImConferenceUri(),
+                this, content, fileIcon, ImsModule.getImsUserProfile().getImConferenceUri(),
                 groupChatSessionId, groupChatId, UUID.randomUUID().toString(), mCore, mRcsSettings,
                 mMessagingLog, timestamp, timestampSent, mContactManager);
 
@@ -1019,7 +1019,7 @@ public class InstantMessagingService extends ImsService {
                 ParticipantStatus.INVITING);
 
         OriginatingAdhocGroupChatSession session = new OriginatingAdhocGroupChatSession(this,
-                ImsModule.IMS_USER_PROFILE.getImConferenceUri(), subject, participants,
+                ImsModule.getImsUserProfile().getImConferenceUri(), subject, participants,
                 mRcsSettings, mMessagingLog, timestamp, mContactManager);
 
         return session;
@@ -1199,9 +1199,9 @@ public class InstantMessagingService extends ImsService {
                     "No connected group chat participants found in database");
         }
         long timestamp = groupChat.getTimestamp();
-        return new RestartGroupChatSession(this, ImsModule.IMS_USER_PROFILE.getImConferenceUri(),
-                groupChat.getSubject(), chatId, storedParticipants, mRcsSettings, mMessagingLog,
-                timestamp, mContactManager);
+        return new RestartGroupChatSession(this,
+                ImsModule.getImsUserProfile().getImConferenceUri(), groupChat.getSubject(), chatId,
+                storedParticipants, mRcsSettings, mMessagingLog, timestamp, mContactManager);
     }
 
     /**

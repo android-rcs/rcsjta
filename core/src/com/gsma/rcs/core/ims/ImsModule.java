@@ -65,12 +65,10 @@ import java.util.Map;
  * @author JM. Auffret
  */
 public class ImsModule implements SipEventListener {
+
     private Core mCore;
 
-    /**
-     * IMS user profile
-     */
-    public static UserProfile IMS_USER_PROFILE;
+    private static UserProfile sImsUserProfile;
 
     private ImsConnectionManager mCnxManager;
 
@@ -137,9 +135,9 @@ public class ImsModule implements SipEventListener {
      * Initializes IMS module
      */
     public void initialize() {
-        SipManager.TIMEOUT = mRcsSettings.getSipTransactionTimeout();
-        MsrpConnection.MSRP_TRACE_ENABLED = mRcsSettings.isMediaTraceActivated();
-        HttpTransferManager.HTTP_TRACE_ENABLED = mRcsSettings.isMediaTraceActivated();
+        SipManager.setTimeout(mRcsSettings.getSipTransactionTimeout());
+        MsrpConnection.setMsrpTraceEnabled(mRcsSettings.isMediaTraceActivated());
+        HttpTransferManager.setHttpTraceEnabled(mRcsSettings.isMediaTraceActivated());
 
         mCnxManager.initialize();
         getInstantMessagingService().initialize();
@@ -434,5 +432,23 @@ public class ImsModule implements SipEventListener {
      */
     public boolean isInRoaming() {
         return mCnxManager.isInRoaming();
+    }
+
+    /**
+     * Gets IMS user profile
+     * 
+     * @return
+     */
+    public static UserProfile getImsUserProfile() {
+        return sImsUserProfile;
+    }
+
+    /**
+     * Sets IMS user profile
+     * 
+     * @param profile
+     */
+    public static void setImsUserProfile(UserProfile profile) {
+        sImsUserProfile = profile;
     }
 }

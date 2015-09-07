@@ -85,7 +85,7 @@ public class ContactInfo {
             }
             return UNKNOWN;
         }
-    };
+    }
 
     /**
      * User blocking state
@@ -138,7 +138,7 @@ public class ContactInfo {
             }
             return NOT_BLOCKED;
         }
-    };
+    }
 
     /**
      * RCS status
@@ -221,7 +221,7 @@ public class ContactInfo {
             }
             return NO_INFO;
         }
-    };
+    }
 
     /**
      * Capabilities

@@ -204,6 +204,7 @@ public class IPCallProvider extends ContentProvider {
                     selection = getSelectionWithCallId(selection);
                     selectionArgs = getSelectionArgsWithCallId(selectionArgs, callId);
                     /* Intentional fall through */
+                    //$FALL-THROUGH$
                 case UriType.IPCall.IPCALL:
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db
@@ -239,6 +240,7 @@ public class IPCallProvider extends ContentProvider {
                 selectionArgs = getSelectionArgsWithCallId(selectionArgs, callId);
                 notificationUri = Uri.withAppendedPath(notificationUri, callId);
                 /* Intentional fall through */
+                //$FALL-THROUGH$
             case UriType.InternalIPCall.IPCALL:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.update(TABLE, values, selection, selectionArgs);
@@ -300,6 +302,7 @@ public class IPCallProvider extends ContentProvider {
                 selectionArgs = getSelectionArgsWithCallId(selectionArgs, callId);
                 notificationUri = Uri.withAppendedPath(notificationUri, callId);
                 /* Intentional fall through */
+                //$FALL-THROUGH$
             case UriType.InternalIPCall.IPCALL:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.delete(TABLE, selection, selectionArgs);

@@ -58,13 +58,13 @@ public class RtcpSenderReportPacket extends RtcpPacket {
         dataoutputstream.writeInt((int) packetcount);
         dataoutputstream.writeInt((int) octetcount);
         for (int i = 0; i < reports.length; i++) {
-            dataoutputstream.writeInt(reports[i].ssrc);
-            dataoutputstream.writeInt((reports[i].packetslost & 0xffffff)
-                    + (reports[i].fractionlost << 24));
-            dataoutputstream.writeInt((int) reports[i].lastseq);
-            dataoutputstream.writeInt(reports[i].jitter);
-            dataoutputstream.writeInt((int) reports[i].lsr);
-            dataoutputstream.writeInt((int) reports[i].dlsr);
+            dataoutputstream.writeInt(reports[i].getSsrc());
+            dataoutputstream.writeInt((reports[i].getPacketsLost())
+                    + (reports[i].getFractionLost() << 24));
+            dataoutputstream.writeInt((int) reports[i].getLastSeq());
+            dataoutputstream.writeInt(reports[i].getJitter());
+            dataoutputstream.writeInt((int) reports[i].getLsr());
+            dataoutputstream.writeInt((int) reports[i].getDlsr());
         }
     }
 

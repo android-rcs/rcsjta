@@ -256,10 +256,10 @@ public abstract class RcsService {
             if (param != null) {
                 Method m = c.getDeclaredMethod(method, paramClass);
                 return m.invoke(mApi, param);
-            } else {
-                Method m = c.getDeclaredMethod(method, (Class[]) null);
-                return m.invoke(mApi);
             }
+            Method m = c.getDeclaredMethod(method, (Class[]) null);
+            return m.invoke(mApi);
+
         } catch (Exception e) {
             throw new RcsGenericException(e);
         }

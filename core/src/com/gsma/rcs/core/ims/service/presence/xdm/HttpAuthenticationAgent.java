@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.presence.xdm;
 
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.security.HttpDigestMd5Authentication;
+import com.gsma.rcs.core.ims.userprofile.UserProfile;
 
 import javax2.sip.InvalidArgumentException;
 
@@ -57,8 +58,9 @@ public class HttpAuthenticationAgent {
     private String generateAuthorizationHeader(String method, String requestUri, String body)
             throws InvalidArgumentException {
         digest.updateNonceParameters();
-        String user = ImsModule.IMS_USER_PROFILE.getXdmServerLogin();
-        String password = ImsModule.IMS_USER_PROFILE.getXdmServerPassword();
+        UserProfile profile = ImsModule.getImsUserProfile();
+        String user = profile.getXdmServerLogin();
+        String password = profile.getXdmServerPassword();
         String response = digest.calculateResponse(user, password, method, requestUri,
                 digest.buildNonceCounter(), body);
         StringBuilder auth = new StringBuilder("Authorization: Digest username=\"").append(user)

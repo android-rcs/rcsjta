@@ -256,10 +256,9 @@ public class JavaPacketizer extends VideoCodec {
             // <<<<<<<<<<<< create packet <<<<<<<<<<<<
 
             return BUFFER_PROCESSED_OK;
-        } else {
-            output.setDiscard(true);
-            return OUTPUT_BUFFER_NOT_FILLED;
         }
+        output.setDiscard(true);
+        return OUTPUT_BUFFER_NOT_FILLED;
     }
 
     /**
@@ -277,7 +276,7 @@ public class JavaPacketizer extends VideoCodec {
             return true;
         }
 
-        if ((frameOrientation != null && previousOrientation != null && h264Header != null && previousOrientation
+        if ((frameOrientation != null && previousOrientation != null && previousOrientation
                 .getOrientation() != frameOrientation.getOrientation())
                 && h264Header.isNonIDRSlice()) {
             return true;

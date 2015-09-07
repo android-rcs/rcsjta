@@ -406,7 +406,7 @@ public class SipInterface implements SipListener {
             mListeners.removeAllElements();
 
             for (int i = 0; i < mSipProviders.size(); i++) {
-                SipProvider sipProvider = (SipProvider) mSipProviders.elementAt(i);
+                SipProvider sipProvider = mSipProviders.elementAt(i);
                 sipProvider.removeSipListener(this);
                 sipProvider.removeListeningPoints();
                 try {
@@ -652,7 +652,7 @@ public class SipInterface implements SipListener {
     public ContactHeader getLocalContact() throws SipPayloadException {
         try {
             // Set the contact with the terminal IP address, port and transport
-            SipURI contactURI = (SipURI) SipUtils.ADDR_FACTORY.createSipURI(null, mLocalIpAddress);
+            SipURI contactURI = SipUtils.ADDR_FACTORY.createSipURI(null, mLocalIpAddress);
 
             contactURI.setPort(mListeningPort);
 
@@ -687,7 +687,7 @@ public class SipInterface implements SipListener {
             ContactHeader contactHeader;
             if (mPublicGruu != null) {
                 // Create a contact with GRUU
-                SipURI contactURI = (SipURI) SipUtils.ADDR_FACTORY.createSipURI(mPublicGruu);
+                SipURI contactURI = SipUtils.ADDR_FACTORY.createSipURI(mPublicGruu);
                 // Changed by Deutsche Telekom
                 contactURI.setTransportParam(mDefaultProtocol);
                 Address contactAddress = SipUtils.ADDR_FACTORY.createAddress(contactURI);
@@ -805,7 +805,7 @@ public class SipInterface implements SipListener {
      * @param msg SIP message
      */
     private void notifyTransactionContext(String transactionId, SipMessage msg) {
-        SipTransactionContext ctx = (SipTransactionContext) mTransactions.get(transactionId);
+        SipTransactionContext ctx = mTransactions.get(transactionId);
         if (ctx != null) {
             if (sLogger.isActivated()) {
                 sLogger.debug("Callback object found for transaction " + transactionId);
@@ -855,31 +855,31 @@ public class SipInterface implements SipListener {
                 transaction.sendRequest();
                 return ctx;
 
-            } else {
-                SipResponse resp = (SipResponse) message;
-                ServerTransaction transaction = (ServerTransaction) resp.getStackTransaction();
-                if (transaction == null) {
-                    throw new SipNetworkException(new StringBuilder("No transaction exist for ")
-                            .append(resp.getCallId()).append(": the response can't be sent!")
-                            .toString());
-                }
-                SipTransactionContext ctx = new SipTransactionContext(transaction);
-                String id = SipTransactionContext.getTransactionContextId(resp);
-                mTransactions.put(id, ctx);
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Create a transaction context ".concat(id));
-                }
-                if (sLogger.isActivated()) {
-                    sLogger.debug(new StringBuilder(">>> Send SIP ").append(resp.getStatusCode())
-                            .append(" response").toString());
-                }
-                if (mSipTraceEnabled) {
-                    System.out.println(">>> " + resp.getStackMessage().toString());
-                    System.out.println(TRACE_SEPARATOR);
-                }
-                transaction.sendResponse(resp.getStackMessage());
-                return ctx;
             }
+            SipResponse resp = (SipResponse) message;
+            ServerTransaction transaction = (ServerTransaction) resp.getStackTransaction();
+            if (transaction == null) {
+                throw new SipNetworkException(new StringBuilder("No transaction exist for ")
+                        .append(resp.getCallId()).append(": the response can't be sent!")
+                        .toString());
+            }
+            SipTransactionContext ctx = new SipTransactionContext(transaction);
+            String id = SipTransactionContext.getTransactionContextId(resp);
+            mTransactions.put(id, ctx);
+            if (sLogger.isActivated()) {
+                sLogger.debug("Create a transaction context ".concat(id));
+            }
+            if (sLogger.isActivated()) {
+                sLogger.debug(new StringBuilder(">>> Send SIP ").append(resp.getStatusCode())
+                        .append(" response").toString());
+            }
+            if (mSipTraceEnabled) {
+                System.out.println(">>> " + resp.getStackMessage().toString());
+                System.out.println(TRACE_SEPARATOR);
+            }
+            transaction.sendResponse(resp.getStackMessage());
+            return ctx;
+
         } catch (ParseException e) {
             throw new SipPayloadException("Unable to instantiate SIP transaction!", e);
 
@@ -1264,7 +1264,7 @@ public class SipInterface implements SipListener {
             return;
         }
 
-        ClientTransaction transaction = (ClientTransaction) timeoutEvent.getClientTransaction();
+        ClientTransaction transaction = timeoutEvent.getClientTransaction();
         if (transaction == null) {
             if (loggerActivated) {
                 sLogger.debug("No transaction exist for this transaction: by-pass it");
@@ -1296,7 +1296,7 @@ public class SipInterface implements SipListener {
      * @param response
      */
     private void notifyProvisionalResponse(String transactionId, SipResponse response) {
-        SipTransactionContext ctx = (SipTransactionContext) mTransactions.get(transactionId);
+        SipTransactionContext ctx = mTransactions.get(transactionId);
         if (ctx == null) {
             return;
         }

@@ -85,7 +85,7 @@ public class PresenceSubscribeManager extends SubscribeManager {
      * @return Presentity
      */
     public String getPresentity() {
-        return ImsModule.IMS_USER_PROFILE.getPublicUri() + ";pres-list=rcs";
+        return ImsModule.getImsUserProfile().getPublicUri().concat(";pres-list=rcs");
     }
 
     /**

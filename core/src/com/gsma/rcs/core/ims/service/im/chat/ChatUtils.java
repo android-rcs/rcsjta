@@ -89,9 +89,6 @@ public class ChatUtils {
      */
     public static final String HEADER_CONTRIBUTION_ID = "Contribution-ID";
 
-    /**
-     * CRLF constant
-     */
     private static final String CRLF = "\r\n";
 
     private static final Logger sLogger = Logger.getLogger(ChatUtils.class.getName());
@@ -179,9 +176,8 @@ public class ChatUtils {
         ExtensionHeader contribHeader = (ExtensionHeader) request.getHeader(HEADER_CONTRIBUTION_ID);
         if (contribHeader != null) {
             return contribHeader.getValue();
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**
@@ -331,9 +327,8 @@ public class ChatUtils {
         if ((content != null) && (content.contains(ImdnDocument.IMDN_NAMESPACE))
                 && (contentType != null) && (contentType.equalsIgnoreCase(CpimMessage.MIME_TYPE))) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -745,8 +740,8 @@ public class ChatUtils {
     public static ChatMessage createGeolocMessage(ContactId remote, Geoloc geoloc, long timestamp,
             long timestampSent) {
         String msgId = IdGenerator.generateMessageID();
-        String geolocContent = buildGeolocDocument(geoloc,
-                ImsModule.IMS_USER_PROFILE.getPublicUri(), msgId, timestamp);
+        String geolocContent = buildGeolocDocument(geoloc, ImsModule.getImsUserProfile()
+                .getPublicUri(), msgId, timestamp);
         return new ChatMessage(msgId, remote, geolocContent, GeolocInfoDocument.MIME_TYPE,
                 timestamp, timestampSent, null);
     }
@@ -923,9 +918,8 @@ public class ChatUtils {
         if (message != null
                 && message.getContentType().startsWith(FileTransferHttpInfoDocument.MIME_TYPE)) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**

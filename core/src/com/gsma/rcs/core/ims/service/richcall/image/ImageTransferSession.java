@@ -126,10 +126,9 @@ public abstract class ImageTransferSession extends ContentSharingSession {
             return SipMessageFactory.createMultipartInvite(getDialogPath(),
                     RichcallService.FEATURE_TAGS_IMAGE_SHARE, getDialogPath().getLocalContent(),
                     BOUNDARY_TAG);
-        } else {
-            return SipMessageFactory.createInvite(getDialogPath(),
-                    RichcallService.FEATURE_TAGS_IMAGE_SHARE, getDialogPath().getLocalContent());
         }
+        return SipMessageFactory.createInvite(getDialogPath(),
+                RichcallService.FEATURE_TAGS_IMAGE_SHARE, getDialogPath().getLocalContent());
     }
 
     /**
@@ -187,13 +186,12 @@ public abstract class ImageTransferSession extends ContentSharingSession {
                 logger.warn("Image is too big, reject the image sharing");
             }
             return new ContentSharingError(ContentSharingError.MEDIA_SIZE_TOO_BIG);
-        } else {
-            if (storageIsTooSmall) {
-                if (logger.isActivated()) {
-                    logger.warn("Not enough storage capacity, reject the image sharing");
-                }
-                return new ContentSharingError(ContentSharingError.NOT_ENOUGH_STORAGE_SPACE);
+        }
+        if (storageIsTooSmall) {
+            if (logger.isActivated()) {
+                logger.warn("Not enough storage capacity, reject the image sharing");
             }
+            return new ContentSharingError(ContentSharingError.NOT_ENOUGH_STORAGE_SPACE);
         }
         return null;
     }

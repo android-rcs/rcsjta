@@ -128,9 +128,8 @@ public class PhotoIcon {
     public long getSize() {
         if (content != null) {
             return content.length;
-        } else {
-            return 0L;
         }
+        return 0L;
     }
 
     /**

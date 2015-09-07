@@ -135,7 +135,7 @@ public class AnonymousFetchRequestTask {
         String target = contactUri;
 
         /* Set local party */
-        String localParty = "sip:anonymous@" + ImsModule.IMS_USER_PROFILE.getHomeDomain();
+        String localParty = "sip:anonymous@" + ImsModule.getImsUserProfile().getHomeDomain();
 
         /* Set remote party */
         String remoteParty = contactUri;

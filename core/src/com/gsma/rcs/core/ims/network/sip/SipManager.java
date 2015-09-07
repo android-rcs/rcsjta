@@ -56,7 +56,7 @@ public class SipManager {
     /**
      * SIP timeout for SIP transaction (in milliseconds)
      */
-    public static long TIMEOUT = 30000;
+    private static long sTimeout = 30000;
 
     private final ImsNetworkInterface mNetworkInterface;
 
@@ -161,7 +161,7 @@ public class SipManager {
      */
     public SipTransactionContext sendSipMessageAndWait(SipMessage message)
             throws SipPayloadException, SipNetworkException {
-        return sendSipMessageAndWait(message, SipManager.TIMEOUT);
+        return sendSipMessageAndWait(message, SipManager.sTimeout);
     }
 
     /**
@@ -289,7 +289,7 @@ public class SipManager {
      * @param ctx SIP transaction context
      */
     public void waitResponse(SipTransactionContext ctx) {
-        ctx.waitResponse(SipManager.TIMEOUT);
+        ctx.waitResponse(SipManager.sTimeout);
     }
 
     /**
@@ -417,7 +417,7 @@ public class SipManager {
      */
     public SipTransactionContext sendSubsequentRequest(SipDialogPath dialog, SipRequest request)
             throws SipNetworkException, SipPayloadException {
-        return sendSubsequentRequest(dialog, request, SipManager.TIMEOUT);
+        return sendSubsequentRequest(dialog, request, SipManager.sTimeout);
     }
 
     /**
@@ -448,4 +448,23 @@ public class SipManager {
         }
         return ctx;
     }
+
+    /**
+     * Gets the timeout for SIP transaction (in milliseconds)
+     * 
+     * @return timeout for SIP transaction (in milliseconds)
+     */
+    public static long getTimeout() {
+        return sTimeout;
+    }
+
+    /**
+     * Sets the timeout for SIP transaction (in milliseconds)
+     * 
+     * @param timeout
+     */
+    public static void setTimeout(long timeout) {
+        sTimeout = timeout;
+    }
+
 }

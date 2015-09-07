@@ -443,6 +443,7 @@ public class ContactProvider extends ContentProvider {
                     selection = getSelectionWithContact(selection);
                     selectionArgs = getSelectionArgsWithContact(selectionArgs, contact);
                     /* Intentional fall through */
+                    //$FALL-THROUGH$
                 case UriType.Contacts.CONTACTS:
                     /* Limited access with exposed URI */
                     db = mOpenHelper.getReadableDatabase();
@@ -459,6 +460,7 @@ public class ContactProvider extends ContentProvider {
                     selectionArgs = getSelectionArgsWithAggregationId(selectionArgs,
                             aggregationDataid);
                     /* Intentional fall through */
+                    //$FALL-THROUGH$
                 case UriType.Aggregation.AGGREGATION:
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db.query(AGGREGATION_TABLE, projection, selection, selectionArgs,
@@ -518,6 +520,7 @@ public class ContactProvider extends ContentProvider {
                 selection = getSelectionWithAggregationDataId(selection);
                 selectionArgs = getSelectionArgsWithAggregationId(selectionArgs, aggregationDataid);
                 /* Intentional fall through */
+                //$FALL-THROUGH$
             case UriType.Aggregation.AGGREGATION:
                 db = mOpenHelper.getWritableDatabase();
                 count = db.update(AGGREGATION_TABLE, values, selection, selectionArgs);
@@ -567,6 +570,7 @@ public class ContactProvider extends ContentProvider {
                 selection = getSelectionWithAggregationDataId(selection);
                 selectionArgs = getSelectionArgsWithAggregationId(selectionArgs, aggregationDataId);
                 /* Intentional fall through */
+                //$FALL-THROUGH$
             case UriType.Aggregation.AGGREGATION:
                 db = mOpenHelper.getWritableDatabase();
                 count = db.delete(AGGREGATION_TABLE, selection, selectionArgs);

@@ -122,7 +122,7 @@ class Parser {
     private int readChar(ByteArrayInputStream input) {
         int ch;
         if (buffer.size() > 0) {
-            ch = ((Integer) buffer.elementAt(0)).intValue();
+            ch = (buffer.elementAt(0)).intValue();
             buffer.removeElementAt(0);
         } else {
             ch = input.read();

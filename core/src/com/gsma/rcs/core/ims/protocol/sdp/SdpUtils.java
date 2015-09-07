@@ -55,9 +55,8 @@ public class SdpUtils {
         String[] tokens = connectionInfo.split(" ");
         if (tokens.length > 2) {
             return tokens[2];
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**
@@ -152,9 +151,8 @@ public class SdpUtils {
     public static String formatAddressType(String address) {
         if (InetAddressUtils.isIPv6Address(address)) {
             return "IN IP6 ".concat(address);
-        } else {
-            return "IN IP4 ".concat(address);
         }
+        return "IN IP4 ".concat(address);
     }
 
     // Changed by Deutsche Telekom

@@ -215,7 +215,7 @@ public class RtcpSession {
         }
 
         // get interval
-        t = (double) avgrtcpsize * n / bandwidth;
+        t = avgrtcpsize * n / bandwidth;
         if (t < rtcp_min_time)
             t = rtcp_min_time;
 
@@ -232,7 +232,7 @@ public class RtcpSession {
      * @param size
      */
     public void updateavgrtcpsize(int size) {
-        avgrtcpsize = (int) (0.0625 * (double) size + 0.9375 * (double) avgrtcpsize);
+        avgrtcpsize = (int) (0.0625 * size + 0.9375 * avgrtcpsize);
     }
 
     /**

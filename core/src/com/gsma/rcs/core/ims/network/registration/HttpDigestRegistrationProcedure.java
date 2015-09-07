@@ -27,6 +27,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.security.HttpDigestMd5Authentication;
+import com.gsma.rcs.core.ims.userprofile.UserProfile;
 import com.gsma.rcs.utils.PhoneUtils;
 
 import javax2.sip.header.AuthenticationInfoHeader;
@@ -64,7 +65,7 @@ public class HttpDigestRegistrationProcedure extends RegistrationProcedure {
      * @return Domain name
      */
     public String getHomeDomain() {
-        return ImsModule.IMS_USER_PROFILE.getHomeDomain();
+        return ImsModule.getImsUserProfile().getHomeDomain();
     }
 
     /**
@@ -73,9 +74,9 @@ public class HttpDigestRegistrationProcedure extends RegistrationProcedure {
      * @return Public URI
      */
     public String getPublicUri() {
-        return new StringBuilder(PhoneUtils.SIP_URI_HEADER)
-                .append(ImsModule.IMS_USER_PROFILE.getUsername()).append("@")
-                .append(ImsModule.IMS_USER_PROFILE.getHomeDomain()).toString();
+        UserProfile profile = ImsModule.getImsUserProfile();
+        return new StringBuilder(PhoneUtils.SIP_URI_HEADER).append(profile.getUsername())
+                .append("@").append(profile.getHomeDomain()).toString();
     }
 
     /**
@@ -85,8 +86,9 @@ public class HttpDigestRegistrationProcedure extends RegistrationProcedure {
      */
     public void writeSecurityHeader(SipRequest request) {
         String realm = mDigest.getRealm();
+        UserProfile profile = ImsModule.getImsUserProfile();
         if (realm == null) {
-            realm = ImsModule.IMS_USER_PROFILE.getRealm();
+            realm = profile.getRealm();
         }
 
         String nonce = "";
@@ -95,10 +97,10 @@ public class HttpDigestRegistrationProcedure extends RegistrationProcedure {
             nonce = mDigest.getNonce();
         }
         String requestUri = request.getRequestURI();
-        String user = ImsModule.IMS_USER_PROFILE.getPrivateID();
+        String user = profile.getPrivateID();
         String response = "";
         if (nonce.length() > 0) {
-            String password = ImsModule.IMS_USER_PROFILE.getPassword();
+            String password = profile.getPassword();
             response = mDigest.calculateResponse(user, password, request.getMethod(), requestUri,
                     mDigest.buildNonceCounter(), request.getContent());
         }

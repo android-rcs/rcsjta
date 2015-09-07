@@ -52,10 +52,7 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class ParticipantInfoUtils {
 
-    /**
-     * The logger
-     */
-    private static final Logger logger = Logger.getLogger(ParticipantInfoUtils.class
+    private static final Logger sLogger = Logger.getLogger(ParticipantInfoUtils.class
             .getSimpleName());
 
     /**
@@ -81,10 +78,10 @@ public class ParticipantInfoUtils {
                         continue;
                     }
                     ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
-                    if (!contact.equals(ImsModule.IMS_USER_PROFILE.getUsername())) {
+                    if (!contact.equals(ImsModule.getImsUserProfile().getUsername())) {
                         participants.put(contact, status);
-                        if (logger.isActivated()) {
-                            logger.debug("Add participant " + contact + " to the list");
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("Add participant " + contact + " to the list");
                         }
                     }
                 }

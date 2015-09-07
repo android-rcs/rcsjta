@@ -99,7 +99,7 @@ public class ChunkSender extends Thread {
             byte chunk[] = null;
             while ((chunk = (byte[]) mBuffer.getMessage()) != null) {
                 // Write chunk to the output stream
-                if (MsrpConnection.MSRP_TRACE_ENABLED) {
+                if (MsrpConnection.isMsrpTraceEnabled()) {
                     System.out.println(">>> Send MSRP message:\n" + new String(chunk, UTF8));
                 }
                 writeData(chunk);
@@ -150,7 +150,7 @@ public class ChunkSender extends Thread {
      * @throws IOException
      */
     public void sendChunkImmediately(byte chunk[]) throws IOException {
-        if (MsrpConnection.MSRP_TRACE_ENABLED) {
+        if (MsrpConnection.isMsrpTraceEnabled()) {
             System.out.println(">>> Send MSRP message:\n" + new String(chunk, UTF8));
         }
         writeData(chunk);

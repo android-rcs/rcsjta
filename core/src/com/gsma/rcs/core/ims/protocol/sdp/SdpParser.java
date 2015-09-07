@@ -269,7 +269,7 @@ public class SdpParser extends Parser {
 
             // Copy in media descriptions
             for (int i = 0; i < descs.size(); i++) {
-                mediaDescriptions.addElement((MediaDescription) descs.elementAt(i));
+                mediaDescriptions.addElement(descs.elementAt(i));
             }
         }
     }
@@ -283,9 +283,8 @@ public class SdpParser extends Parser {
     public MediaAttribute getSessionAttribute(String name) {
         if (sessionDescription != null) {
             return sessionDescription.getSessionAttribute(name);
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**
@@ -298,7 +297,7 @@ public class SdpParser extends Parser {
         MediaDescription description = null;
         if (mediaDescriptions != null) {
             for (int i = 0; i < mediaDescriptions.size(); i++) {
-                MediaDescription entry = (MediaDescription) mediaDescriptions.elementAt(i);
+                MediaDescription entry = mediaDescriptions.elementAt(i);
                 if (entry.mName.equals(name)) {
                     description = entry;
                     break;
@@ -318,7 +317,7 @@ public class SdpParser extends Parser {
         Vector<MediaDescription> result = new Vector<MediaDescription>();
         if (mediaDescriptions != null) {
             for (int i = 0; i < mediaDescriptions.size(); i++) {
-                MediaDescription entry = (MediaDescription) mediaDescriptions.elementAt(i);
+                MediaDescription entry = mediaDescriptions.elementAt(i);
                 if (entry.mName.equals(name)) {
                     result.add(entry);
                 }

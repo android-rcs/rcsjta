@@ -140,6 +140,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
             case ABORTED:
             case FAILED:
                 duration = mStartTime > 0 ? System.currentTimeMillis() - mStartTime : 0;
+                //$FALL-THROUGH$
             default:
                 break;
         }
@@ -500,10 +501,10 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
                 VideoCodec codec = player.getCodec();
                 return new VideoDescriptor(codec.getWidth(), codec.getHeight());
 
-            } else {
-                VideoContent content = (VideoContent) session.getContent();
-                return new VideoDescriptor(content.getWidth(), content.getHeight());
             }
+            VideoContent content = (VideoContent) session.getContent();
+            return new VideoDescriptor(content.getWidth(), content.getHeight());
+
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
                 mLogger.error(ExceptionUtil.getFullStackTrace(e));

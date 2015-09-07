@@ -178,9 +178,8 @@ public abstract class MmContent {
         int index = mEncoding.indexOf("/");
         if (index != -1) {
             return mEncoding.substring(index + 1);
-        } else {
-            return mEncoding;
         }
+        return mEncoding;
     }
 
     /**
@@ -261,11 +260,8 @@ public abstract class MmContent {
                 Uri fileToDelete = getUri();
                 if (ContentResolver.SCHEME_FILE.equals(fileToDelete.getScheme())) {
                     File file = new File(fileToDelete.getPath());
-                    if (file != null) {
-                        if (!file.delete()) {
-                            throw new IOException("Unable to delete file: "
-                                    + file.getAbsolutePath());
-                        }
+                    if (!file.delete()) {
+                        throw new IOException("Unable to delete file: " + file.getAbsolutePath());
                     }
                 } else {
                     throw new IOException("Not possible to delete file: " + fileToDelete);

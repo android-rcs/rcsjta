@@ -34,25 +34,21 @@ import android.telephony.TelephonyManager;
  * @author jexa7410
  */
 public class MobileNetworkAccess extends NetworkAccess {
-    /**
-     * Telephony manager
-     */
-    private TelephonyManager telephonyManager;
 
-    /**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private TelephonyManager mTelephonyManager;
+
+    private static final Logger sLogger = Logger.getLogger(MobileNetworkAccess.class
+            .getSimpleName());
 
     /**
      * Constructor
      */
     public MobileNetworkAccess() {
         super();
-        telephonyManager = (TelephonyManager) AndroidFactory.getApplicationContext()
+        mTelephonyManager = (TelephonyManager) AndroidFactory.getApplicationContext()
                 .getSystemService(Context.TELEPHONY_SERVICE);
-        if (logger.isActivated()) {
-            logger.info(new StringBuilder("Mobile access has been created (interface ")
+        if (sLogger.isActivated()) {
+            sLogger.info(new StringBuilder("Mobile access has been created (interface ")
                     .append(getNetworkName()).append(")").toString());
         }
     }
@@ -63,20 +59,20 @@ public class MobileNetworkAccess extends NetworkAccess {
      * @param ipAddress Local IP address
      */
     public void connect(String ipAddress) {
-        if (logger.isActivated()) {
-            logger.info("Network access connected (" + ipAddress + ")");
+        if (sLogger.isActivated()) {
+            sLogger.info("Network access connected (" + ipAddress + ")");
         }
-        this.ipAddress = ipAddress;
+        mIpAddress = ipAddress;
     }
 
     /**
      * Disconnect from the network access
      */
     public void disconnect() {
-        if (logger.isActivated()) {
-            logger.info("Network access disconnected");
+        if (sLogger.isActivated()) {
+            sLogger.info("Network access disconnected");
         }
-        ipAddress = null;
+        mIpAddress = null;
     }
 
     /**
@@ -85,7 +81,7 @@ public class MobileNetworkAccess extends NetworkAccess {
      * @return Type
      */
     public String getType() {
-        int type = telephonyManager.getNetworkType();
+        int type = mTelephonyManager.getNetworkType();
         switch (type) {
             case TelephonyManager.NETWORK_TYPE_GPRS:
             case TelephonyManager.NETWORK_TYPE_EDGE:
@@ -106,7 +102,7 @@ public class MobileNetworkAccess extends NetworkAccess {
      * @return Name
      */
     public String getNetworkName() {
-        int type = telephonyManager.getNetworkType();
+        int type = mTelephonyManager.getNetworkType();
         switch (type) {
             case TelephonyManager.NETWORK_TYPE_GPRS:
                 return "GPRS";

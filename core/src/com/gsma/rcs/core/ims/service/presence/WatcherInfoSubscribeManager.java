@@ -73,7 +73,7 @@ public class WatcherInfoSubscribeManager extends SubscribeManager {
      * @return Presentity
      */
     public String getPresentity() {
-        return ImsModule.IMS_USER_PROFILE.getPublicUri();
+        return ImsModule.getImsUserProfile().getPublicUri();
     }
 
     /**

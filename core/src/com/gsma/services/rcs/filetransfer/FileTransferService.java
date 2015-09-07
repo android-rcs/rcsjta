@@ -245,10 +245,9 @@ public final class FileTransferService extends RcsService {
             IFileTransfer ftIntf = mApi.transferFile(contact, file, attachFileIcon);
             if (ftIntf != null) {
                 return new FileTransfer(ftIntf);
-
-            } else {
-                return null;
             }
+            return null;
+
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             RcsPersistentStorageException.assertException(e);
@@ -309,9 +308,9 @@ public final class FileTransferService extends RcsService {
             if (ftIntf != null) {
                 return new FileTransfer(ftIntf);
 
-            } else {
-                return null;
             }
+            return null;
+
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             RcsPermissionDeniedException.assertException(e);
@@ -362,9 +361,9 @@ public final class FileTransferService extends RcsService {
             if (ftIntf != null) {
                 return new FileTransfer(ftIntf);
 
-            } else {
-                return null;
             }
+            return null;
+
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             RcsPersistentStorageException.assertException(e);

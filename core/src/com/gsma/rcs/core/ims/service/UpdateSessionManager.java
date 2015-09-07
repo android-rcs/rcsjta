@@ -166,10 +166,9 @@ public class UpdateSessionManager {
                             ImsSessionBasedServiceError.SESSION_INITIATION_FAILED));
                     return;
             }
-        } else {
-            mSession.handleReInviteResponse(InvitationStatus.INVITATION_NOT_ANSWERED,
-                    ctx.getSipResponse(), serviceContext);
         }
+        mSession.handleReInviteResponse(InvitationStatus.INVITATION_NOT_ANSWERED,
+                ctx.getSipResponse(), serviceContext);
     }
 
     /**

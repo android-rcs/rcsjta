@@ -201,9 +201,8 @@ public abstract class ImsServiceSession extends Thread {
         // @FIXME: This method should take mRemoteId param as an URI instead of String
         // Create a dialog path
         mDialogPath = new SipDialogPath(getImsService().getImsModule().getSipManager()
-                .getSipStack(), callId, 1, mRemoteId.toString(),
-                ImsModule.IMS_USER_PROFILE.getPublicAddress(), mRemoteId.toString(), route,
-                mRcsSettings);
+                .getSipStack(), callId, 1, mRemoteId.toString(), ImsModule.getImsUserProfile()
+                .getPublicAddress(), mRemoteId.toString(), route, mRcsSettings);
 
         // Set the authentication agent in the dialog path
         mDialogPath.setAuthenticationAgent(getAuthenticationAgent());
@@ -478,9 +477,8 @@ public abstract class ImsServiceSession extends Thread {
                 mWaitUserAnswer.wait(waitTime);
                 if (System.currentTimeMillis() - startTime <= waitTime) {
                     return mInvitationStatus;
-                } else {
-                    return InvitationStatus.INVITATION_TIMEOUT;
                 }
+                return InvitationStatus.INVITATION_TIMEOUT;
             }
         } catch (InterruptedException e) {
             mSessionInterrupted = true;
@@ -876,13 +874,14 @@ public abstract class ImsServiceSession extends Thread {
      */
     public String createSetupOffer() {
         if (isBehindNat()) {
-            // Active mode by default if there is a NAT
+            /* Active mode by default if there is a NAT */
             return "active";
-        } else {
-            // Active/passive mode is exchanged in order to be compatible
-            // with UE not supporting COMEDIA
-            return "actpass";
         }
+        /*
+         * Active/passive mode is exchanged in order to be compatible with UE not supporting
+         * COMEDIA.
+         */
+        return "actpass";
     }
 
     /**
@@ -923,7 +922,7 @@ public abstract class ImsServiceSession extends Thread {
      * @return Timeout
      */
     public long getResponseTimeout() {
-        return mRingingPeriod + SipManager.TIMEOUT;
+        return mRingingPeriod + SipManager.getTimeout();
     }
 
     /**

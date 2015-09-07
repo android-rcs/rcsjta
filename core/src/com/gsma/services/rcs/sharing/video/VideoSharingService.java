@@ -192,9 +192,9 @@ public final class VideoSharingService extends RcsService {
             if (sharingIntf != null) {
                 return new VideoSharing(sharingIntf);
 
-            } else {
-                return null;
             }
+            return null;
+
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             RcsServiceNotRegisteredException.assertException(e);

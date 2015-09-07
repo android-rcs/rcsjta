@@ -39,8 +39,6 @@ public class RtcpSdesPacket extends RtcpPacket {
         this.sdes = sdes;
         if (sdes.length > 31) {
             throw new IllegalArgumentException("Too many SDESs");
-        } else {
-            return;
         }
     }
 

@@ -18,9 +18,9 @@
 
 package com.gsma.rcs.core.ims.service.presence.pidf;
 
-import java.util.Vector;
-
 import com.gsma.rcs.core.ims.service.presence.pidf.geoloc.Geopriv;
+
+import java.util.Vector;
 
 /**
  * PIDF presence document
@@ -55,7 +55,7 @@ public class PidfDocument {
         Tuple foundTuple = null;
         String newServiceId = newTuple.getService().getId();
         for (int i = 0; i < tuplesList.size(); i++) {
-            Tuple tuple = (Tuple) tuplesList.elementAt(i);
+            Tuple tuple = tuplesList.elementAt(i);
             String serviceId = tuple.getService().getId();
             if (serviceId.equalsIgnoreCase(newServiceId)) {
                 foundTuple = tuple;

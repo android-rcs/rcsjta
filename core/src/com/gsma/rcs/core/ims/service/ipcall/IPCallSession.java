@@ -597,6 +597,7 @@ public abstract class IPCallSession extends ImsServiceSession {
                         ((IPCallStreamingSessionListener) listener).handleAddVideoAborted(contact,
                                 TerminationReason.TERMINATION_BY_TIMEOUT);
                     }
+                    break;
                 default:
                     break;
             }
@@ -677,6 +678,7 @@ public abstract class IPCallSession extends ImsServiceSession {
                         ((IPCallStreamingSessionListener) listener)
                                 .handleCallResumeAborted(contact);
                     }
+                    break;
                 default:
                     break;
             }
@@ -883,9 +885,8 @@ public abstract class IPCallSession extends ImsServiceSession {
     public boolean isTagPresent(String sdp, String tag) {
         if ((sdp != null) && (sdp.toLowerCase().indexOf(tag) != -1)) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**

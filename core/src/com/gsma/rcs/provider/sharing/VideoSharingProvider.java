@@ -216,6 +216,7 @@ public class VideoSharingProvider extends ContentProvider {
                     selection = getSelectionWithSharingId(selection);
                     selectionArgs = getSelectionArgsWithSharingId(selectionArgs, sharingId);
                     /* Intentional fall through */
+                    //$FALL-THROUGH$
                 case UriType.VideoSharing.VIDEO_SHARING:
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db
@@ -250,6 +251,7 @@ public class VideoSharingProvider extends ContentProvider {
                 selectionArgs = getSelectionArgsWithSharingId(selectionArgs, sharingId);
                 notificationUri = Uri.withAppendedPath(notificationUri, sharingId);
                 /* Intentional fall through */
+                //$FALL-THROUGH$
             case UriType.InternalVideoSharing.VIDEO_SHARING:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.update(TABLE, values, selection, selectionArgs);
@@ -311,6 +313,7 @@ public class VideoSharingProvider extends ContentProvider {
                 selectionArgs = getSelectionArgsWithSharingId(selectionArgs, sharingId);
                 notificationUri = Uri.withAppendedPath(notificationUri, sharingId);
                 /* Intentional fall through */
+                //$FALL-THROUGH$
             case UriType.InternalVideoSharing.VIDEO_SHARING:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.delete(TABLE, selection, selectionArgs);

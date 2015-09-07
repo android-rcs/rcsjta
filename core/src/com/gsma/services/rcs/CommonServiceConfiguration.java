@@ -94,7 +94,7 @@ public class CommonServiceConfiguration {
 
         }
 
-    };
+    }
 
     /**
      * The messaging method
@@ -151,7 +151,7 @@ public class CommonServiceConfiguration {
 
         }
 
-    };
+    }
 
     /**
      * The minimum battery level
@@ -213,7 +213,7 @@ public class CommonServiceConfiguration {
 
         }
 
-    };
+    }
 
     /**
      * Constructor

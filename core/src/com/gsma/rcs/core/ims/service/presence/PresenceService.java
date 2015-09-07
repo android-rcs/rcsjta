@@ -149,7 +149,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         // Add me in the granted set if necessary
         Set<ContactId> grantedContacts = mXdm.getGrantedContacts();
 
-        ContactId me = ImsModule.IMS_USER_PROFILE.getUsername();
+        ContactId me = ImsModule.getImsUserProfile().getUsername();
 
         if (!grantedContacts.contains(me)) {
             if (sLogger.isActivated()) {
@@ -221,7 +221,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      */
     private void firstLaunchOrAccountChangedCheck(Set<ContactId> grantedContacts,
             Set<ContactId> blockedContacts) throws SipPayloadException, SipNetworkException {
-        final String publicUri = ImsModule.IMS_USER_PROFILE.getPublicUri();
+        final String publicUri = ImsModule.getImsUserProfile().getPublicUri();
         try {
             boolean logActivated = sLogger.isActivated();
             if (logActivated) {
@@ -439,6 +439,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * @return Document
      */
     private String buildCapabilities(String timestamp, Capabilities capabilities) {
+        String publicUri = ImsModule.getImsUserProfile().getPublicUri();
         return new StringBuilder("<tuple id=\"t1\">").append(SipUtils.CRLF)
                 .append("  <status><basic>")
                 .append(buildBooleanStatus(capabilities.isFileTransferMsrpSupported()))
@@ -448,11 +449,10 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                 .append("</op:service-id>").append(SipUtils.CRLF)
                 .append("    <op:version>1.0</op:version>").append(SipUtils.CRLF)
                 .append("  </op:service-description>").append(SipUtils.CRLF).append("  <contact>")
-                .append(ImsModule.IMS_USER_PROFILE.getPublicUri()).append("</contact>")
-                .append(SipUtils.CRLF).append("  <timestamp>").append(timestamp)
-                .append("</timestamp>").append(SipUtils.CRLF).append("</tuple>")
-                .append(SipUtils.CRLF).append("<tuple id=\"t2\">").append(SipUtils.CRLF)
-                .append("  <status><basic>")
+                .append(publicUri).append("</contact>").append(SipUtils.CRLF)
+                .append("  <timestamp>").append(timestamp).append("</timestamp>")
+                .append(SipUtils.CRLF).append("</tuple>").append(SipUtils.CRLF)
+                .append("<tuple id=\"t2\">").append(SipUtils.CRLF).append("  <status><basic>")
                 .append(buildBooleanStatus(capabilities.isImageSharingSupported()))
                 .append("</basic></status>").append(SipUtils.CRLF)
                 .append("  <op:service-description>").append(SipUtils.CRLF)
@@ -460,11 +460,10 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                 .append("</op:service-id>").append(SipUtils.CRLF)
                 .append("    <op:version>1.0</op:version>").append(SipUtils.CRLF)
                 .append("  </op:service-description>").append(SipUtils.CRLF).append("  <contact>")
-                .append(ImsModule.IMS_USER_PROFILE.getPublicUri()).append("</contact>")
-                .append(SipUtils.CRLF).append("  <timestamp>").append(timestamp)
-                .append("</timestamp>").append(SipUtils.CRLF).append("</tuple>")
-                .append(SipUtils.CRLF).append("<tuple id=\"t3\">").append(SipUtils.CRLF)
-                .append("  <status><basic>")
+                .append(publicUri).append("</contact>").append(SipUtils.CRLF)
+                .append("  <timestamp>").append(timestamp).append("</timestamp>")
+                .append(SipUtils.CRLF).append("</tuple>").append(SipUtils.CRLF)
+                .append("<tuple id=\"t3\">").append(SipUtils.CRLF).append("  <status><basic>")
                 .append(buildBooleanStatus(capabilities.isVideoSharingSupported()))
                 .append("</basic></status>").append(SipUtils.CRLF)
                 .append("  <op:service-description>").append(SipUtils.CRLF)
@@ -472,11 +471,10 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                 .append("</op:service-id>").append(SipUtils.CRLF)
                 .append("    <op:version>1.0</op:version>").append(SipUtils.CRLF)
                 .append("  </op:service-description>").append(SipUtils.CRLF).append("  <contact>")
-                .append(ImsModule.IMS_USER_PROFILE.getPublicUri()).append("</contact>")
-                .append(SipUtils.CRLF).append("  <timestamp>").append(timestamp)
-                .append("</timestamp>").append(SipUtils.CRLF).append("</tuple>")
-                .append(SipUtils.CRLF).append("<tuple id=\"t4\">").append(SipUtils.CRLF)
-                .append("  <status><basic>")
+                .append(publicUri).append("</contact>").append(SipUtils.CRLF)
+                .append("  <timestamp>").append(timestamp).append("</timestamp>")
+                .append(SipUtils.CRLF).append("</tuple>").append(SipUtils.CRLF)
+                .append("<tuple id=\"t4\">").append(SipUtils.CRLF).append("  <status><basic>")
                 .append(buildBooleanStatus(capabilities.isImSessionSupported()))
                 .append("</basic></status>").append(SipUtils.CRLF)
                 .append("  <op:service-description>").append(SipUtils.CRLF)
@@ -484,11 +482,10 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                 .append("</op:service-id>").append(SipUtils.CRLF)
                 .append("    <op:version>1.0</op:version>").append(SipUtils.CRLF)
                 .append("  </op:service-description>").append(SipUtils.CRLF).append("  <contact>")
-                .append(ImsModule.IMS_USER_PROFILE.getPublicUri()).append("</contact>")
-                .append(SipUtils.CRLF).append("  <timestamp>").append(timestamp)
-                .append("</timestamp>").append(SipUtils.CRLF).append("</tuple>")
-                .append(SipUtils.CRLF).append("<tuple id=\"t5\">").append(SipUtils.CRLF)
-                .append("  <status><basic>")
+                .append(publicUri).append("</contact>").append(SipUtils.CRLF)
+                .append("  <timestamp>").append(timestamp).append("</timestamp>")
+                .append(SipUtils.CRLF).append("</tuple>").append(SipUtils.CRLF)
+                .append("<tuple id=\"t5\">").append(SipUtils.CRLF).append("  <status><basic>")
                 .append(buildBooleanStatus(capabilities.isCsVideoSupported()))
                 .append("</basic></status>").append(SipUtils.CRLF)
                 .append("  <op:service-description>").append(SipUtils.CRLF)
@@ -496,10 +493,9 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                 .append("</op:service-id>").append(SipUtils.CRLF)
                 .append("    <op:version>1.0</op:version>").append(SipUtils.CRLF)
                 .append("  </op:service-description>").append(SipUtils.CRLF).append("  <contact>")
-                .append(ImsModule.IMS_USER_PROFILE.getPublicUri()).append("</contact>")
-                .append(SipUtils.CRLF).append("  <timestamp>").append(timestamp)
-                .append("</timestamp>").append(SipUtils.CRLF).append("</tuple>")
-                .append(SipUtils.CRLF).toString();
+                .append(publicUri).append("</contact>").append(SipUtils.CRLF)
+                .append("  <timestamp>").append(timestamp).append("</timestamp>")
+                .append(SipUtils.CRLF).append("</tuple>").append(SipUtils.CRLF).toString();
     }
 
     /**
@@ -520,7 +516,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                     + "</gml:pos>" + SipUtils.CRLF + "        </gml:Point></gml:location>"
                     + SipUtils.CRLF + "    </gp:location-info>" + SipUtils.CRLF
                     + "    <gp:method>GPS</gp:method>" + SipUtils.CRLF + "   </gp:geopriv>"
-                    + SipUtils.CRLF + "  <contact>" + ImsModule.IMS_USER_PROFILE.getPublicUri()
+                    + SipUtils.CRLF + "  <contact>" + ImsModule.getImsUserProfile().getPublicUri()
                     + "</contact>" + SipUtils.CRLF + "  <timestamp>" + timestamp + "</timestamp>"
                     + SipUtils.CRLF + "</tuple>" + SipUtils.CRLF;
         }
@@ -583,7 +579,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                 .append(" xmlns:rpid=\"urn:ietf:params:xml:ns:pidf:rpid\"")
                 .append(" xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\"")
                 .append(" xmlns:gml=\"urn:opengis:specification:gml:schema-xsd:feature:v3.0\"")
-                .append(" entity=\"").append(ImsModule.IMS_USER_PROFILE.getPublicUri())
+                .append(" entity=\"").append(ImsModule.getImsUserProfile().getPublicUri())
                 .append("\">").append(SipUtils.CRLF).toString();
 
         // Encode timestamp
@@ -623,7 +619,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                 .append(" xmlns:rpid=\"urn:ietf:params:xml:ns:pidf:rpid\"")
                 .append(" xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\"")
                 .append(" xmlns:gml=\"urn:opengis:specification:gml:schema-xsd:feature:v3.0\"")
-                .append(" entity=\"").append(ImsModule.IMS_USER_PROFILE.getPublicUri())
+                .append(" entity=\"").append(ImsModule.getImsUserProfile().getPublicUri())
                 .append("\">").append(SipUtils.CRLF).toString();
 
         // Encode timestamp
@@ -656,7 +652,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                 .append(" xmlns:pdm=\"urn:ietf:params:xml:ns:pidf:data-model\"")
                 .append(" xmlns:ci=\"urn:ietf:params:xml:ns:pidf:cipid\"")
                 .append(" xmlns:rpid=\"urn:ietf:params:xml:ns:pidf:rpid\"").append(" entity=\"")
-                .append(ImsModule.IMS_USER_PROFILE.getPublicUri()).append("\">")
+                .append(ImsModule.getImsUserProfile().getPublicUri()).append("\">")
                 .append(SipUtils.CRLF).toString();
 
         // Encode timestamp

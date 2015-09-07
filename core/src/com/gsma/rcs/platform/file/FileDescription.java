@@ -22,8 +22,6 @@
 
 package com.gsma.rcs.platform.file;
 
-import android.net.Uri;
-
 /**
  * File description
  * 
@@ -31,19 +29,27 @@ import android.net.Uri;
  */
 public class FileDescription {
 
-    private final Uri mFile;
+    private String mName;
 
-    private final String mName;
+    private long mSize = -1;
 
-    private final long mSize;
+    private boolean mDirectory = false;
 
     /**
      * Constructor
      */
-    public FileDescription(Uri file, String name, long size) {
-        mFile = file;
+    public FileDescription(String name, long size) {
         mName = name;
         mSize = size;
+    }
+
+    /**
+     * Constructor
+     */
+    public FileDescription(String name, long size, boolean directory) {
+        mName = name;
+        mSize = size;
+        mDirectory = directory;
     }
 
     /**
@@ -51,8 +57,8 @@ public class FileDescription {
      * 
      * @return File size
      */
-    public Uri getFile() {
-        return mFile;
+    public long getSize() {
+        return mSize;
     }
 
     /**
@@ -69,8 +75,8 @@ public class FileDescription {
      * 
      * @return File size
      */
-    public long getSize() {
-        return mSize;
+    public boolean isDirectory() {
+        return mDirectory;
     }
 
 }

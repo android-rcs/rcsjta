@@ -141,10 +141,9 @@ public class ChatMessage {
                     .append(mDisplayName).append("', msg='").append(mContent).append("', msgId=")
                     .append(mMsgId).append("', mimeType='").append(mMimeType).append("']")
                     .append("]").toString();
-        } else {
-            return new StringBuilder("IM [from=").append(mRemote).append(", pseudo='")
-                    .append(mDisplayName).append("', msgId=").append(mMsgId)
-                    .append("', mimeType='").append(mMimeType).append("']").toString();
         }
+        return new StringBuilder("IM [from=").append(mRemote).append(", pseudo='")
+                .append(mDisplayName).append("', msgId=").append(mMsgId).append("', mimeType='")
+                .append(mMimeType).append("']").toString();
     }
 }

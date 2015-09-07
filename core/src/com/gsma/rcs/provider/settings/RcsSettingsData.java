@@ -32,8 +32,6 @@ import android.net.Uri;
 import android.os.Environment;
 import android.util.SparseArray;
 
-import java.util.Locale;
-
 import javax2.sip.ListeningPoint;
 
 /**

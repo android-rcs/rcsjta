@@ -251,7 +251,7 @@ public abstract class SubscribeManager extends PeriodicRefresher {
                 String target = getPresentity();
 
                 // Set local party
-                String localParty = ImsModule.IMS_USER_PROFILE.getPublicUri();
+                String localParty = ImsModule.getImsUserProfile().getPublicUri();
 
                 // Set remote party
                 String remoteParty = getPresentity();
@@ -389,12 +389,11 @@ public abstract class SubscribeManager extends PeriodicRefresher {
                                 ctx.getStatusCode() + " " + ctx.getReasonPhrase()));
                         return;
                 }
-            } else {
-                if (logger.isActivated()) {
-                    logger.debug("No response received for SUBSCRIBE");
-                }
-                handleError(new PresenceError(PresenceError.SUBSCRIBE_FAILED));
             }
+            if (logger.isActivated()) {
+                logger.debug("No response received for SUBSCRIBE");
+            }
+            handleError(new PresenceError(PresenceError.SUBSCRIBE_FAILED));
         } catch (InvalidArgumentException e) {
             throw new SipNetworkException("Can't send sip subscribe!", e);
         }

@@ -168,7 +168,7 @@ public class HttpUploadManager extends HttpTransferManager {
             urlConnection.setRequestMethod("POST");
             urlConnection.setReadTimeout(HTTP_READ_TIMEOUT);
             urlConnection.setChunkedStreamingMode(CHUNK_MAX_SIZE);
-            if (HTTP_TRACE_ENABLED) {
+            if (isHttpTraceEnabled()) {
                 System.out.println(">>> Send HTTP request:\nPOST " + url);
             }
             int statusCode = urlConnection.getResponseCode();
@@ -203,15 +203,14 @@ public class HttpUploadManager extends HttpTransferManager {
                         }
                     }
                     /* No break to do the retry */
+                    //$FALL-THROUGH$
                 default:
                     /* Retry procedure */
                     if (mRetryCount < RETRY_MAX) {
                         mRetryCount++;
                         return uploadFile();
-                    } else {
-                        throw new IOException("Unable to upload file URI " + mContent.getUri()
-                                + "!");
                     }
+                    throw new IOException("Unable to upload file URI " + mContent.getUri() + "!");
             }
 
             if (isCancelled()) {
@@ -239,6 +238,7 @@ public class HttpUploadManager extends HttpTransferManager {
      * @throws IOException
      */
     private byte[] sendMultipartPost(URL url) throws IOException {
+        boolean httpTraceEnabled = isHttpTraceEnabled();
         DataOutputStream outputStream = null;
         HttpURLConnection connection = null;
         Map<String, String> headers = new HashMap<String, String>();
@@ -260,7 +260,7 @@ public class HttpUploadManager extends HttpTransferManager {
                         body);
                 connection.setRequestProperty("Authorization", authValue);
             }
-            if (HTTP_TRACE_ENABLED) {
+            if (httpTraceEnabled) {
                 StringBuilder trace = new StringBuilder(">>> Send HTTP request:\nPOST ")
                         .append(url);
                 Map<String, List<String>> properties = connection.getRequestProperties();
@@ -301,7 +301,7 @@ public class HttpUploadManager extends HttpTransferManager {
                     byte[] result = null;
                     boolean success = false;
                     boolean retry = false;
-                    if (HTTP_TRACE_ENABLED) {
+                    if (httpTraceEnabled) {
                         String trace = "<<< Receive HTTP response:" + responseCode + " " + message;
                         System.out.println(trace);
                     }
@@ -310,7 +310,7 @@ public class HttpUploadManager extends HttpTransferManager {
                             success = true;
                             InputStream inputStream = connection.getInputStream();
                             result = convertStreamToString(inputStream);
-                            if (HTTP_TRACE_ENABLED) {
+                            if (httpTraceEnabled) {
                                 System.out.println("\n" + new String(result));
                             }
                             break;
@@ -343,37 +343,36 @@ public class HttpUploadManager extends HttpTransferManager {
                         }
                         return null;
                     }
-
-                } else {
-                    /* Check if user has paused transfer */
-                    if (isPaused()) {
+                }
+                /* Check if user has paused transfer */
+                if (isPaused()) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("File transfer paused by user (TID=" + mTId + ")");
+                    }
+                    try {
+                        /*
+                         * Sent data are bufferized. Must wait for response to enable sending to
+                         * server.
+                         */
+                        int responseCode = connection.getResponseCode();
+                        String message = connection.getResponseMessage();
                         if (sLogger.isActivated()) {
-                            sLogger.debug("File transfer paused by user (TID=" + mTId + ")");
+                            sLogger.debug("Second POST response " + responseCode + " " + "("
+                                    + message + ")");
                         }
-                        try {
-                            /*
-                             * Sent data are bufferized. Must wait for response to enable sending to
-                             * server.
-                             */
-                            int responseCode = connection.getResponseCode();
-                            String message = connection.getResponseMessage();
-                            if (sLogger.isActivated()) {
-                                sLogger.debug("Second POST response " + responseCode + " " + "("
-                                        + message + ")");
-                            }
-                        } catch (IOException e) {
-                            if (sLogger.isActivated()) {
-                                sLogger.warn(
-                                        "File Upload paused due to error! Waiting for resume...", e);
-                            }
-                        }
-                    } else {
+                    } catch (IOException e) {
                         if (sLogger.isActivated()) {
-                            sLogger.debug("File transfer cancelled by user");
+                            sLogger.warn("File Upload paused due to error! Waiting for resume...",
+                                    e);
                         }
                     }
-                    return null;
+                } else {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("File transfer cancelled by user");
+                    }
                 }
+                return null;
+
             } catch (IOException e) {
                 if (sLogger.isActivated()) {
                     sLogger.warn("File Upload paused due to error!", e);
@@ -477,8 +476,8 @@ public class HttpUploadManager extends HttpTransferManager {
         // Write file content
         InputStream fileInputStream = null;
         try {
-            fileInputStream = (FileInputStream) AndroidFactory.getApplicationContext()
-                    .getContentResolver().openInputStream(file);
+            fileInputStream = AndroidFactory.getApplicationContext().getContentResolver()
+                    .openInputStream(file);
             int bytesAvailable = fileInputStream.available();
             int bufferSize = Math.min(bytesAvailable, CHUNK_MAX_SIZE);
             byte[] buffer = new byte[bufferSize];
@@ -548,7 +547,7 @@ public class HttpUploadManager extends HttpTransferManager {
         }
 
         try {
-            if (HTTP_TRACE_ENABLED) {
+            if (isHttpTraceEnabled()) {
                 String trace = "Get Upload Info response:\n".concat(resp.toString());
                 System.out.println(trace);
             }
@@ -612,6 +611,7 @@ public class HttpUploadManager extends HttpTransferManager {
         }
         DataOutputStream outputStream = null;
         HttpURLConnection connection = null;
+        boolean httpTraceEnabled = isHttpTraceEnabled();
         try {
             connection = openHttpConnection(url, properties);
             connection.setDoInput(true);
@@ -622,7 +622,7 @@ public class HttpUploadManager extends HttpTransferManager {
             String body = "";
             // Update authentication agent from response
 
-            if (HTTP_TRACE_ENABLED) {
+            if (httpTraceEnabled) {
                 StringBuilder trace = new StringBuilder(">>> Send HTTP request:\nPUT ").append(url);
                 Map<String, List<String>> headers = connection.getRequestProperties();
                 for (Entry<String, List<String>> property : headers.entrySet()) {
@@ -654,7 +654,7 @@ public class HttpUploadManager extends HttpTransferManager {
                         success = true;
                         InputStream inputStream = connection.getInputStream();
                         result = convertStreamToString(inputStream);
-                        if (HTTP_TRACE_ENABLED) {
+                        if (httpTraceEnabled) {
                             System.out.println("\n" + new String(result));
                         }
                         break;
@@ -668,25 +668,24 @@ public class HttpUploadManager extends HttpTransferManager {
                 } else {
                     throw new IOException("Received " + responseCode + " from server");
                 }
-            } else {
-                if (isPaused()) {
-                    if (sLogger.isActivated()) {
-                        sLogger.warn("File transfer paused by user");
-                    }
-                    // Sent data are bufferized. Must wait for response to enable sending to
-                    // server.
-                    int responseCode = connection.getResponseCode();
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("PUT response " + responseCode + " "
-                                + connection.getResponseMessage());
-                    }
-                } else {
-                    if (sLogger.isActivated()) {
-                        sLogger.warn("File transfer cancelled by user");
-                    }
+            } else if (isPaused()) {
+                if (sLogger.isActivated()) {
+                    sLogger.warn("File transfer paused by user");
                 }
-                return null;
+                // Sent data are bufferized. Must wait for response to enable sending to
+                // server.
+                int responseCode = connection.getResponseCode();
+                if (sLogger.isActivated()) {
+                    sLogger.debug("PUT response " + responseCode + " "
+                            + connection.getResponseMessage());
+                }
+            } else {
+                if (sLogger.isActivated()) {
+                    sLogger.warn("File transfer cancelled by user");
+                }
             }
+            return null;
+
         } catch (SecurityException e) {
             /*
              * Note! This is needed since this can be called during dequeuing.
@@ -769,10 +768,11 @@ public class HttpUploadManager extends HttpTransferManager {
             properties.put("Authorization", authValue);
         }
         HttpURLConnection connection = null;
+        boolean httpTraceEnabled = isHttpTraceEnabled();
         try {
             connection = openHttpConnection(url, properties);
             connection.setReadTimeout(HTTP_READ_TIMEOUT);
-            if (HTTP_TRACE_ENABLED) {
+            if (httpTraceEnabled) {
                 StringBuilder trace = new StringBuilder(">>> Send HTTP request:\nGET ").append(url);
                 Map<String, List<String>> headers = connection.getHeaderFields();
                 for (Entry<String, List<String>> header : headers.entrySet()) {
@@ -787,7 +787,7 @@ public class HttpUploadManager extends HttpTransferManager {
                 sLogger.debug("Get info (" + suffix + ") Response: " + statusCode + "(" + message
                         + ")");
             }
-            if (HTTP_TRACE_ENABLED) {
+            if (httpTraceEnabled) {
                 StringBuilder trace = new StringBuilder("<<< Receive HTTP response: ")
                         .append(statusCode).append(" ").append(message);
                 Map<String, List<String>> headers = connection.getHeaderFields();

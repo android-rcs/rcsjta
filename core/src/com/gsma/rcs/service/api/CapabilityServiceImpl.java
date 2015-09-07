@@ -22,7 +22,6 @@
 
 package com.gsma.rcs.service.api;
 
-import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.service.capability.CapabilityService;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -59,16 +58,11 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
     /**
      * Lock used for synchronization
      */
-    private final Object lock = new Object();
+    private final Object mLock = new Object();
 
-    /**
-     * The logger
-     */
-    private final Logger logger = Logger.getLogger(getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(CapabilityServiceImpl.class
+            .getSimpleName());
 
-    /**
-     * Contacts manager
-     */
     private final ContactManager mContactManager;
 
     /**
@@ -77,15 +71,14 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      */
     private final Handler mOptionsExchangeRequestHandler;
 
+    private final CapabilityService mCapabilityService;
+
     private class CapabilitiesRequester implements Runnable {
 
         private final ContactId mContact;
 
-        private final CapabilityService mCapabilityService;
-
-        public CapabilitiesRequester(CapabilityService capabilityService, ContactId contact) {
+        public CapabilitiesRequester(ContactId contact) {
             mContact = contact;
-            mCapabilityService = capabilityService;
         }
 
         public void run() {
@@ -95,18 +88,9 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
     private class AllCapabilitiesRequester implements Runnable {
 
-        private final ContactManager mContactManager;
-
-        private final CapabilityService mCapabilityService;
-
-        public AllCapabilitiesRequester(ContactManager contactManager,
-                CapabilityService capabilityService) {
-            mContactManager = contactManager;
-            mCapabilityService = capabilityService;
-        }
-
         public void run() {
-            mCapabilityService.requestContactCapabilities(mContactManager.getAllContactsFromRcsContactProvider());
+            mCapabilityService.requestContactCapabilities(mContactManager
+                    .getAllContactsFromRcsContactProvider());
         }
     }
 
@@ -115,23 +99,26 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      * 
      * @param contactManager Contacts manager
      * @param rcsSettings
+     * @param capabilityService
      */
-    public CapabilityServiceImpl(ContactManager contactManager, RcsSettings rcsSettings) {
-        if (logger.isActivated()) {
-            logger.info("Capability service API is loaded");
+    public CapabilityServiceImpl(ContactManager contactManager, RcsSettings rcsSettings,
+            CapabilityService capabilityService) {
+        if (sLogger.isActivated()) {
+            sLogger.info("Capability service API is loaded");
         }
 
         mContactManager = contactManager;
         mOptionsExchangeRequestHandler = new Handler();
         mRcsSettings = rcsSettings;
+        mCapabilityService = capabilityService;
     }
 
     /**
      * Close API
      */
     public void close() {
-        if (logger.isActivated()) {
-            logger.info("Capability service API is closed");
+        if (sLogger.isActivated()) {
+            sLogger.info("Capability service API is closed");
         }
     }
 
@@ -159,10 +146,10 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      * @param listener Service registration listener
      */
     public void addEventListener(IRcsServiceRegistrationListener listener) {
-        if (logger.isActivated()) {
-            logger.info("Add a service listener");
+        if (sLogger.isActivated()) {
+            sLogger.info("Add a service listener");
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.addEventListener(listener);
         }
     }
@@ -173,10 +160,10 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      * @param listener Service registration listener
      */
     public void removeEventListener(IRcsServiceRegistrationListener listener) {
-        if (logger.isActivated()) {
-            logger.info("Remove a service listener");
+        if (sLogger.isActivated()) {
+            sLogger.info("Remove a service listener");
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.removeEventListener(listener);
         }
     }
@@ -186,7 +173,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      */
     public void notifyRegistration() {
         // Notify listeners
-        synchronized (lock) {
+        synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.broadcastServiceRegistered();
         }
     }
@@ -198,7 +185,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      */
     public void notifyUnRegistration(RcsServiceRegistration.ReasonCode reasonCode) {
         // Notify listeners
-        synchronized (lock) {
+        synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.broadcastServiceUnRegistered(reasonCode);
         }
     }
@@ -216,12 +203,12 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                logger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            logger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -240,8 +227,8 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
         if (contact == null) {
             throw new ServerApiIllegalArgumentException("contact must not be null!");
         }
-        if (logger.isActivated()) {
-            logger.info("Get capabilities for contact " + contact);
+        if (sLogger.isActivated()) {
+            sLogger.info("Get capabilities for contact " + contact);
         }
         try {
             com.gsma.rcs.core.ims.service.capability.Capabilities caps = mContactManager
@@ -258,12 +245,12 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                logger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            logger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -286,23 +273,22 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
         if (contact == null) {
             throw new ServerApiIllegalArgumentException("contact must not be null!");
         }
-        if (logger.isActivated()) {
-            logger.info("Request capabilities for contact " + contact);
+        if (sLogger.isActivated()) {
+            sLogger.info("Request capabilities for contact " + contact);
         }
 
         // Test IMS connection
         ServerApiUtils.testIms();
         try {
-            mOptionsExchangeRequestHandler.post(new CapabilitiesRequester(Core.getInstance()
-                    .getCapabilityService(), contact));
+            mOptionsExchangeRequestHandler.post(new CapabilitiesRequester(contact));
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                logger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            logger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -315,9 +301,9 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      */
     public void receiveCapabilities(ContactId contact,
             com.gsma.rcs.core.ims.service.capability.Capabilities capabilities) {
-        synchronized (lock) {
-            if (logger.isActivated()) {
-                logger.info("Receive capabilities for " + contact);
+        synchronized (mLock) {
+            if (sLogger.isActivated()) {
+                sLogger.info("Receive capabilities for " + contact);
             }
 
             // Create capabilities instance
@@ -350,23 +336,22 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      * @throws RemoteException
      */
     public void requestAllContactsCapabilities() throws RemoteException {
-        if (logger.isActivated()) {
-            logger.info("Request all contacts capabilities");
+        if (sLogger.isActivated()) {
+            sLogger.info("Request all contacts capabilities");
         }
         // Test IMS connection
         ServerApiUtils.testIms();
 
         try {
-            mOptionsExchangeRequestHandler.post(new AllCapabilitiesRequester(mContactManager, Core
-                    .getInstance().getCapabilityService()));
+            mOptionsExchangeRequestHandler.post(new AllCapabilitiesRequester());
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                logger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            logger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -378,24 +363,24 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      * @throws RemoteException
      */
     public void addCapabilitiesListener(ICapabilitiesListener listener) throws RemoteException {
-        if (logger.isActivated()) {
-            logger.info("Add a listener");
+        if (sLogger.isActivated()) {
+            sLogger.info("Add a listener");
         }
         if (listener == null) {
             throw new ServerApiIllegalArgumentException("listener must not be null!");
         }
         try {
-            synchronized (lock) {
+            synchronized (mLock) {
                 mCapabilitiesBroadcaster.addCapabilitiesListener(listener);
             }
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                logger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            logger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -410,21 +395,21 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
         if (listener == null) {
             throw new ServerApiIllegalArgumentException("listener must not be null!");
         }
-        if (logger.isActivated()) {
-            logger.info("Remove a listener");
+        if (sLogger.isActivated()) {
+            sLogger.info("Remove a listener");
         }
         try {
-            synchronized (lock) {
+            synchronized (mLock) {
                 mCapabilitiesBroadcaster.removeCapabilitiesListener(listener);
             }
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                logger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            logger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -444,21 +429,21 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
         if (listener == null) {
             throw new ServerApiIllegalArgumentException("listener must not be null!");
         }
-        if (logger.isActivated()) {
-            logger.info("Add a listener for contact " + contact);
+        if (sLogger.isActivated()) {
+            sLogger.info("Add a listener for contact " + contact);
         }
         try {
-            synchronized (lock) {
+            synchronized (mLock) {
                 mCapabilitiesBroadcaster.addContactCapabilitiesListener(contact, listener);
             }
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                logger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            logger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -478,21 +463,21 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
         if (listener == null) {
             throw new ServerApiIllegalArgumentException("listener must not be null!");
         }
-        if (logger.isActivated()) {
-            logger.info("Remove a listener for contact " + contact);
+        if (sLogger.isActivated()) {
+            sLogger.info("Remove a listener for contact " + contact);
         }
         try {
-            synchronized (lock) {
+            synchronized (mLock) {
                 mCapabilitiesBroadcaster.removeContactCapabilitiesListener(contact, listener);
             }
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                logger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            logger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }

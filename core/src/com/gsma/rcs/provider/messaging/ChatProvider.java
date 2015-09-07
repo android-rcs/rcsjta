@@ -376,6 +376,7 @@ public class ChatProvider extends ContentProvider {
                     selection = getSelectionWithChatId(selection);
                     selectionArgs = getSelectionArgsWithChatId(selectionArgs, chatId);
                     /* Intentional fall through */
+                    //$FALL-THROUGH$
                 case UriType.Chat.CHAT:
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db.query(TABLE_GROUP_CHAT,
@@ -412,6 +413,7 @@ public class ChatProvider extends ContentProvider {
                     selection = getSelectionWithMessageId(selection);
                     selectionArgs = getSelectionArgsWithMessageId(selectionArgs, msgId);
                     /* Intentional fall through */
+                    //$FALL-THROUGH$
                 case UriType.Message.MESSAGE:
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db.query(TABLE_MESSAGE,

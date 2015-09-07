@@ -28,44 +28,42 @@ import java.io.IOException;
  */
 public class RtcpByePacket extends RtcpPacket {
 
-    public int ssrc[];
-    public byte reason[];
+    public int mSsrc[];
+    public byte mReason[];
 
     public RtcpByePacket(RtcpPacket parent) {
         super(parent);
-        super.mType = 203;
+        mType = 203;
     }
 
     public RtcpByePacket(int ssrc[], byte reason[]) {
-        this.ssrc = ssrc;
+        this.mSsrc = ssrc;
         if (reason != null) {
-            this.reason = reason;
+            this.mReason = reason;
         } else {
-            this.reason = new byte[0];
+            this.mReason = new byte[0];
         }
         if (ssrc.length > 31) {
             throw new IllegalArgumentException("Too many SSRCs");
-        } else {
-            return;
         }
     }
 
     public int calcLength() {
-        return 4 + (ssrc.length << 2) + (reason.length <= 0 ? 0 : reason.length + 4 & -4);
+        return 4 + (mSsrc.length << 2) + (mReason.length <= 0 ? 0 : mReason.length + 4 & -4);
     }
 
     public void assemble(DataOutputStream out) throws IOException {
-        out.writeByte(128 + ssrc.length);
+        out.writeByte(128 + mSsrc.length);
         out.writeByte(203);
-        out.writeShort(ssrc.length + (reason.length <= 0 ? 0 : reason.length + 4 >> 2));
-        for (int i = 0; i < ssrc.length; i++) {
-            out.writeInt(ssrc[i]);
+        out.writeShort(mSsrc.length + (mReason.length <= 0 ? 0 : mReason.length + 4 >> 2));
+        for (int i = 0; i < mSsrc.length; i++) {
+            out.writeInt(mSsrc[i]);
         }
 
-        if (reason.length > 0) {
-            out.writeByte(reason.length);
-            out.write(reason);
-            for (int i = (reason.length + 4 & -4) - reason.length - 1; i > 0; i--) {
+        if (mReason.length > 0) {
+            out.writeByte(mReason.length);
+            out.write(mReason);
+            for (int i = (mReason.length + 4 & -4) - mReason.length - 1; i > 0; i--) {
                 out.writeByte(0);
             }
         }

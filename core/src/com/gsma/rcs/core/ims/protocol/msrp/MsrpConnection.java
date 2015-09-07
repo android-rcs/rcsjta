@@ -37,29 +37,15 @@ import java.io.OutputStream;
  * @author jexa7410
  */
 public abstract class MsrpConnection {
-    /**
-     * MSRP traces enabled
-     */
-    public static boolean MSRP_TRACE_ENABLED = false;
 
-    /**
-     * MSRP session
-     */
+    private static boolean sMsrpTraceEnabled = false;
+
     private MsrpSession mSession;
 
-    /**
-     * Socket connection
-     */
     private SocketConnection mSocket;
 
-    /**
-     * Socket output stream
-     */
     private OutputStream mOutputStream;
 
-    /**
-     * Socket input stream
-     */
     private InputStream mInputStream;
 
     /**
@@ -72,9 +58,6 @@ public abstract class MsrpConnection {
      */
     private ChunkSender mSender;
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(MsrpConnection.class.getName());
 
     /**
@@ -209,4 +192,22 @@ public abstract class MsrpConnection {
      * @throws SipPayloadException
      */
     public abstract SocketConnection getSocketConnection() throws IOException, SipPayloadException;
+
+    /**
+     * Checks if MSRP trace is enabled
+     * 
+     * @return True if MSRP trace is enabled
+     */
+    public static boolean isMsrpTraceEnabled() {
+        return sMsrpTraceEnabled;
+    }
+
+    /**
+     * Sets MSRP trace enabled
+     * 
+     * @param enable True if MSRP trace is enabled
+     */
+    public static void setMsrpTraceEnabled(boolean enable) {
+        sMsrpTraceEnabled = enable;
+    }
 }

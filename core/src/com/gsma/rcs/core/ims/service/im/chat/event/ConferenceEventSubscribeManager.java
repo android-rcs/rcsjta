@@ -62,7 +62,6 @@ import java.util.Map;
 import java.util.Vector;
 
 import javax.xml.parsers.ParserConfigurationException;
-
 import javax2.sip.InvalidArgumentException;
 import javax2.sip.header.ExpiresHeader;
 import javax2.sip.header.SubscriptionStateHeader;
@@ -221,7 +220,8 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
                             sLogger.debug("Conference info notification for " + contact);
                         }
 
-                        if (user.isMe() || contact.equals(ImsModule.IMS_USER_PROFILE.getUsername())) {
+                        if (user.isMe()
+                                || contact.equals(ImsModule.getImsUserProfile().getUsername())) {
                             // By-pass me
                             continue;
                         }
@@ -440,7 +440,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 
             String target = getIdentity();
 
-            String localParty = ImsModule.IMS_USER_PROFILE.getPublicUri();
+            String localParty = ImsModule.getImsUserProfile().getPublicUri();
 
             String remoteParty = getIdentity();
 
@@ -748,7 +748,8 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      */
     private static ParticipantStatus getStatus(User user) {
         String state = user.getState();
-        /* Manage "pending-out" and "pending-in" status like "pending" status. See RFC 4575
+        /*
+         * Manage "pending-out" and "pending-in" status like "pending" status. See RFC 4575
          * dialing-in: Endpoint is dialing into the conference, not yet in the roster (probably
          * being authenticated). dialing-out: Focus has dialed out to connect the endpoint to the
          * conference, but the endpoint is not yet in the roster (probably being authenticated).
@@ -760,7 +761,8 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
             return ParticipantStatus.INVITED;
 
         } else if (User.STATE_DISCONNECTED.equals(state)) {
-            /* For the disconnected state, override state with the more detailed
+            /*
+             * For the disconnected state, override state with the more detailed
              * disconnection-method field (if available).
              */
             String disconnectionMethod = user.getDisconnectionMethod();

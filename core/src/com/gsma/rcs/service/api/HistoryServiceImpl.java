@@ -32,7 +32,6 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.RemoteException;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -55,7 +54,7 @@ public class HistoryServiceImpl extends IHistoryService.Stub {
 
     private HistoryProvider mHistoryProvider;
 
-    public HistoryServiceImpl(Context ctx) throws IOException {
+    public HistoryServiceImpl(Context ctx) {
         if (sLogger.isActivated()) {
             sLogger.info("History service API is loaded.");
         }

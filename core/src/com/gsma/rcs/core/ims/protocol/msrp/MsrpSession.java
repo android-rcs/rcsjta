@@ -70,11 +70,11 @@ public class MsrpSession {
      * displayed status message
      */
     private class MsrpTransactionInfo {
-        public String transactionId = null;
-        public String msrpMsgId = null;
-        public String cpimMsgId = null;
-        public TypeMsrpChunk typeMsrpChunk = TypeMsrpChunk.Unknown;
-        private long timestamp = System.currentTimeMillis();
+        public String mTransactionId;
+        public String mMsrpMsgId;
+        public String mCpimMsgId;
+        public TypeMsrpChunk mTypeMsrpChunk = TypeMsrpChunk.Unknown;
+        private long mTimestamp = System.currentTimeMillis();
 
         /**
          * MSRP transaction info constructor
@@ -86,101 +86,68 @@ public class MsrpSession {
          */
         public MsrpTransactionInfo(String transactionId, String msrpMsgId, String cpimMsgId,
                 TypeMsrpChunk typeMsrpChunk) {
-            this.transactionId = transactionId;
-            this.msrpMsgId = msrpMsgId;
-            this.cpimMsgId = cpimMsgId;
-            this.typeMsrpChunk = typeMsrpChunk;
-            this.timestamp = System.currentTimeMillis();
+            mTransactionId = transactionId;
+            mMsrpMsgId = msrpMsgId;
+            mCpimMsgId = cpimMsgId;
+            mTypeMsrpChunk = typeMsrpChunk;
+            mTimestamp = System.currentTimeMillis();
         }
 
         @Override
         public String toString() {
             StringBuffer sb = new StringBuffer();
             sb.append("[MsrpTransactionInfo - ");
-            sb.append("transactionId = ").append(transactionId).append(", ");
-            sb.append("msrpMsgId = ").append(msrpMsgId).append(", ");
-            sb.append("cpimMsgId = ").append(cpimMsgId).append(", ");
-            sb.append("typeMsrpChunk = ").append(typeMsrpChunk).append(", ");
-            sb.append("timestamp = ").append(timestamp);
+            sb.append("transactionId = ").append(mTransactionId).append(", ");
+            sb.append("msrpMsgId = ").append(mMsrpMsgId).append(", ");
+            sb.append("cpimMsgId = ").append(mCpimMsgId).append(", ");
+            sb.append("typeMsrpChunk = ").append(mTypeMsrpChunk).append(", ");
+            sb.append("timestamp = ").append(mTimestamp);
             sb.append("]");
             return sb.toString();
         }
     }
 
-    /**
-     * Failure report option
-     */
-    private boolean failureReportOption = false;
+    private boolean mFailureReportOption = false;
 
-    /**
-     * Success report option
-     */
-    private boolean successReportOption = false;
+    private boolean mSuccessReportOption = false;
 
-    /**
-     * MSRP connection
-     */
     private MsrpConnection connection;
 
     /**
      * From path
      */
-    private String from;
+    private String mFrom;
 
     /**
      * To path
      */
-    private String to;
+    private String mTo;
 
-    /**
-     * Cancel transfer flag
-     */
-    private boolean cancelTransfer = false;
+    private boolean mCancelTransfer = false;
 
-    /**
-     * Request transaction
-     */
-    private RequestTransaction requestTransaction = null;
+    private RequestTransaction mRequestTransaction;
 
-    /**
-     * Received chunks
-     */
-    private DataChunks receivedChunks = new DataChunks();
+    private DataChunks mReceivedChunks = new DataChunks();
 
-    /**
-     * MSRP event listener
-     */
-    private MsrpEventListener msrpEventListener;
+    private MsrpEventListener mMsrpEventListener;
 
     /**
      * Random generator
      */
-    private static Random random = new Random(System.currentTimeMillis());
+    private static Random mRandom = new Random(System.currentTimeMillis());
 
-    /**
-     * Report transaction
-     */
-    private ReportTransaction reportTransaction;
+    private ReportTransaction mReportTransaction;
 
-    /**
-     * MSRP transaction
-     */
-    private MsrpTransaction msrpTransaction;
+    private MsrpTransaction mMsrpTransaction;
 
     /**
      * File transfer progress
      */
-    private Vector<Long> progress = new Vector<Long>();
+    private Vector<Long> mProgress = new Vector<Long>();
 
-    /**
-     * File transfer progress
-     */
-    private long totalSize;
+    private long mTotalSize;
 
-    /**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(MsrpSession.class.getSimpleName());
 
     // Changed by Deutsche Telekom
     /**
@@ -209,7 +176,7 @@ public class MsrpSession {
     /**
      * IsEstablished : set after media is successfully received
      */
-    private boolean isEstablished = false;
+    private boolean mIsEstablished = false;
 
     private final RcsSettings mRcsSettings;
 
@@ -241,7 +208,7 @@ public class MsrpSession {
      * @return ID
      */
     private static synchronized String generateTransactionId() {
-        return Long.toHexString(random.nextLong());
+        return Long.toHexString(mRandom.nextLong());
     }
 
     /**
@@ -250,7 +217,7 @@ public class MsrpSession {
      * @return Boolean
      */
     public boolean isFailureReportRequested() {
-        return failureReportOption;
+        return mFailureReportOption;
     }
 
     /**
@@ -259,7 +226,7 @@ public class MsrpSession {
      * @param failureReportOption Boolean flag
      */
     public void setFailureReportOption(boolean failureReportOption) {
-        this.failureReportOption = failureReportOption;
+        this.mFailureReportOption = failureReportOption;
     }
 
     /**
@@ -268,7 +235,7 @@ public class MsrpSession {
      * @return Boolean
      */
     public boolean isSuccessReportRequested() {
-        return successReportOption;
+        return mSuccessReportOption;
     }
 
     /**
@@ -277,7 +244,7 @@ public class MsrpSession {
      * @param successReportOption Boolean flag
      */
     public void setSuccessReportOption(boolean successReportOption) {
-        this.successReportOption = successReportOption;
+        this.mSuccessReportOption = successReportOption;
     }
 
     /**
@@ -304,7 +271,7 @@ public class MsrpSession {
      * @return Listener
      */
     public MsrpEventListener getMsrpEventListener() {
-        return msrpEventListener;
+        return mMsrpEventListener;
     }
 
     /**
@@ -313,7 +280,7 @@ public class MsrpSession {
      * @param listener Listener
      */
     public void addMsrpEventListener(MsrpEventListener listener) {
-        this.msrpEventListener = listener;
+        this.mMsrpEventListener = listener;
     }
 
     /**
@@ -322,7 +289,7 @@ public class MsrpSession {
      * @return From path
      */
     public String getFrom() {
-        return from;
+        return mFrom;
     }
 
     /**
@@ -331,7 +298,7 @@ public class MsrpSession {
      * @param from From path
      */
     public void setFrom(String from) {
-        this.from = from;
+        this.mFrom = from;
     }
 
     /**
@@ -340,7 +307,7 @@ public class MsrpSession {
      * @return To path
      */
     public String getTo() {
-        return to;
+        return mTo;
     }
 
     /**
@@ -349,19 +316,19 @@ public class MsrpSession {
      * @param to To path
      */
     public void setTo(String to) {
-        this.to = to;
+        this.mTo = to;
     }
 
     /**
      * Close the session
      */
     public void close() {
-        if (logger.isActivated()) {
-            logger.debug("Close session");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Close session");
         }
 
         // Cancel transfer
-        cancelTransfer = true;
+        mCancelTransfer = true;
 
         // Close the connection
         if (connection != null) {
@@ -369,18 +336,18 @@ public class MsrpSession {
         }
 
         // Unblock request transaction
-        if (requestTransaction != null) {
-            requestTransaction.terminate();
+        if (mRequestTransaction != null) {
+            mRequestTransaction.terminate();
         }
 
         // Unblock report transaction
-        if (reportTransaction != null) {
-            reportTransaction.terminate();
+        if (mReportTransaction != null) {
+            mReportTransaction.terminate();
         }
 
         // Unblock MSRP transaction
-        if (msrpTransaction != null) {
-            msrpTransaction.terminate();
+        if (mMsrpTransaction != null) {
+            mMsrpTransaction.terminate();
         }
     }
 
@@ -397,16 +364,16 @@ public class MsrpSession {
      */
     public void sendChunks(InputStream inputStream, String msgId, String contentType,
             final long totalSize, TypeMsrpChunk typeMsrpChunk) throws MsrpException {
-        if (logger.isActivated()) {
-            logger.info("Send content (" + contentType + " - MSRP chunk type: " + typeMsrpChunk
+        if (sLogger.isActivated()) {
+            sLogger.info("Send content (" + contentType + " - MSRP chunk type: " + typeMsrpChunk
                     + ")");
         }
 
-        if (from == null) {
+        if (mFrom == null) {
             throw new MsrpException("From not set");
         }
 
-        if (to == null) {
+        if (mTo == null) {
             throw new MsrpException("To not set");
         }
 
@@ -414,23 +381,23 @@ public class MsrpSession {
             throw new MsrpException("No connection set");
         }
 
-        this.totalSize = totalSize;
+        this.mTotalSize = totalSize;
 
         // Send content over MSRP
         try {
             byte data[] = new byte[MsrpConstants.CHUNK_MAX_SIZE];
             long firstByte = 1;
             long lastByte = 0;
-            cancelTransfer = false;
-            if (successReportOption) {
-                reportTransaction = new ReportTransaction();
+            mCancelTransfer = false;
+            if (mSuccessReportOption) {
+                mReportTransaction = new ReportTransaction();
             } else {
-                reportTransaction = null;
+                mReportTransaction = null;
             }
-            if (failureReportOption) {
-                msrpTransaction = new MsrpTransaction();
+            if (mFailureReportOption) {
+                mMsrpTransaction = new MsrpTransaction();
             } else {
-                msrpTransaction = null;
+                mMsrpTransaction = null;
             }
 
             // Changed by Deutsche Telekom
@@ -442,11 +409,11 @@ public class MsrpSession {
 
                 @Override
                 public void run() {
-                    if (msrpTransaction != null) {
-                        while ((totalChunks - msrpTransaction.getNumberReceivedOk()) > 0
-                                && !cancelTransfer) {
-                            msrpEventListener.msrpTransferProgress(
-                                    msrpTransaction.getNumberReceivedOk()
+                    if (mMsrpTransaction != null) {
+                        while ((totalChunks - mMsrpTransaction.getNumberReceivedOk()) > 0
+                                && !mCancelTransfer) {
+                            mMsrpEventListener.msrpTransferProgress(
+                                    mMsrpTransaction.getNumberReceivedOk()
                                             * MsrpConstants.CHUNK_MAX_SIZE, totalSize);
                             try {
                                 Thread.sleep(500);
@@ -472,7 +439,7 @@ public class MsrpSession {
             String msrpMsgId = IdGenerator.generateMessageID();
 
             // Send data chunk by chunk
-            for (int i = inputStream.read(data); (!cancelTransfer) & (i > -1); i = inputStream
+            for (int i = inputStream.read(data); (!mCancelTransfer) & (i > -1); i = inputStream
                     .read(data)) {
                 // Update upper byte range
                 lastByte += i;
@@ -483,71 +450,71 @@ public class MsrpSession {
 
                 // Send a chunk
                 // Changed by Deutsche Telekom
-                sendMsrpSendRequest(newTransactionId, to, from, msrpMsgId, contentType, i, data,
+                sendMsrpSendRequest(newTransactionId, mTo, mFrom, msrpMsgId, contentType, i, data,
                         firstByte, lastByte, totalSize);
 
                 // Update lower byte range
                 firstByte += i;
 
                 // Progress management
-                if (failureReportOption) {
+                if (mFailureReportOption) {
                     // Add value in progress vector
-                    progress.add(lastByte);
+                    mProgress.add(lastByte);
                 } else {
                     // Direct notification
-                    if (!cancelTransfer) {
-                        msrpEventListener.msrpTransferProgress(lastByte, totalSize);
+                    if (!mCancelTransfer) {
+                        mMsrpEventListener.msrpTransferProgress(lastByte, totalSize);
                     }
                 }
             }
 
-            if (cancelTransfer) {
+            if (mCancelTransfer) {
                 // Transfer has been aborted
                 return;
             }
 
             // Waiting msrpTransaction
-            if (msrpTransaction != null) {
+            if (mMsrpTransaction != null) {
                 // Wait until all data have been reported
-                msrpTransaction.waitAllResponses();
+                mMsrpTransaction.waitAllResponses();
 
                 // Notify event listener
-                if (msrpTransaction.isAllResponsesReceived()) {
-                    msrpEventListener.msrpDataTransfered(msgId);
+                if (mMsrpTransaction.isAllResponsesReceived()) {
+                    mMsrpEventListener.msrpDataTransfered(msgId);
                 } else {
-                    if (!msrpTransaction.isTerminated()) {
+                    if (!mMsrpTransaction.isTerminated()) {
                         // Changed by Deutsche Telekom
-                        msrpEventListener.msrpTransferError(msgId, "response timeout 408",
+                        mMsrpEventListener.msrpTransferError(msgId, "response timeout 408",
                                 typeMsrpChunk);
                     }
                 }
             }
 
             // Waiting reportTransaction
-            if (reportTransaction != null) {
+            if (mReportTransaction != null) {
                 // Wait until all data have been reported
-                while (!reportTransaction.isTransactionFinished(totalSize)) {
-                    reportTransaction.waitReport();
-                    if (reportTransaction.getStatusCode() != 200) {
+                while (!mReportTransaction.isTransactionFinished(totalSize)) {
+                    mReportTransaction.waitReport();
+                    if (mReportTransaction.getStatusCode() != 200) {
                         // Error
                         break;
                     }
                 }
 
                 // Notify event listener
-                if (reportTransaction.getStatusCode() == 200) {
-                    msrpEventListener.msrpDataTransfered(msgId);
+                if (mReportTransaction.getStatusCode() == 200) {
+                    mMsrpEventListener.msrpDataTransfered(msgId);
                 } else {
                     // Changed by Deutsche Telekom
-                    msrpEventListener.msrpTransferError(msgId,
-                            "error report " + reportTransaction.getStatusCode(), typeMsrpChunk);
+                    mMsrpEventListener.msrpTransferError(msgId, "error report "
+                            + mReportTransaction.getStatusCode(), typeMsrpChunk);
                 }
             }
 
             // No transaction
-            if (msrpTransaction == null && reportTransaction == null) {
+            if (mMsrpTransaction == null && mReportTransaction == null) {
                 // Notify event listener
-                msrpEventListener.msrpDataTransfered(msgId);
+                mMsrpEventListener.msrpDataTransfered(msgId);
             }
         } catch (IOException e) {
             throw new MsrpException("Send chunk failed for msgId : ".concat(msgId), e);
@@ -563,15 +530,15 @@ public class MsrpSession {
      * @throws MsrpException
      */
     public void sendEmptyChunk() throws MsrpException {
-        if (logger.isActivated()) {
-            logger.info("Send an empty chunk");
+        if (sLogger.isActivated()) {
+            sLogger.info("Send an empty chunk");
         }
 
-        if (from == null) {
+        if (mFrom == null) {
             throw new MsrpException("From not set");
         }
 
-        if (to == null) {
+        if (mTo == null) {
             throw new MsrpException("To not set");
         }
 
@@ -585,7 +552,7 @@ public class MsrpSession {
             String newTransactionId = generateTransactionId();
             String newMsgId = generateTransactionId();
             addMsrpTransactionInfo(newTransactionId, newMsgId, null, TypeMsrpChunk.EmptyChunk);
-            sendEmptyMsrpSendRequest(newTransactionId, to, from, newMsgId);
+            sendEmptyMsrpSendRequest(newTransactionId, mTo, mFrom, newMsgId);
         } catch (IOException e) {
             throw new MsrpException("Failed to send empty chunk!", e);
         }
@@ -640,12 +607,12 @@ public class MsrpSession {
             // Write optional headers
             // Changed by Deutsche Telekom
             // According with GSMA guidelines
-            if (failureReportOption) {
+            if (mFailureReportOption) {
                 String header = MsrpConstants.HEADER_FAILURE_REPORT + ": yes"
                         + MsrpConstants.NEW_LINE;
                 buffer.write(header.getBytes(UTF8));
             }
-            if (successReportOption) {
+            if (mSuccessReportOption) {
                 String header = MsrpConstants.HEADER_SUCCESS_REPORT + ": yes"
                         + MsrpConstants.NEW_LINE;
                 buffer.write(header.getBytes(UTF8));
@@ -678,26 +645,26 @@ public class MsrpSession {
             buffer.write(NEW_LINE);
 
             // Send chunk
-            if (failureReportOption) {
-                if (msrpTransaction != null) {
-                    msrpTransaction.handleRequest();
-                    requestTransaction = null;
+            if (mFailureReportOption) {
+                if (mMsrpTransaction != null) {
+                    mMsrpTransaction.handleRequest();
+                    mRequestTransaction = null;
                 } else {
-                    requestTransaction = new RequestTransaction(mRcsSettings);
+                    mRequestTransaction = new RequestTransaction(mRcsSettings);
                 }
                 connection.sendChunk(buffer.toByteArray());
                 buffer.close();
-                if (requestTransaction != null) {
-                    requestTransaction.waitResponse();
-                    if (!requestTransaction.isResponseReceived()) {
+                if (mRequestTransaction != null) {
+                    mRequestTransaction.waitResponse();
+                    if (!mRequestTransaction.isResponseReceived()) {
                         throw new MsrpException("timeout");
                     }
                 }
             } else {
                 connection.sendChunk(buffer.toByteArray());
                 buffer.close();
-                if (msrpTransaction != null) {
-                    msrpTransaction.handleRequest();
+                if (mMsrpTransaction != null) {
+                    mMsrpTransaction.handleRequest();
                 }
             }
         } catch (IOException e) {
@@ -747,11 +714,11 @@ public class MsrpSession {
             buffer.write(NEW_LINE);
 
             // Send chunk
-            requestTransaction = new RequestTransaction(mRcsSettings);
+            mRequestTransaction = new RequestTransaction(mRcsSettings);
             connection.sendChunkImmediately(buffer.toByteArray());
             buffer.close();
-            requestTransaction.waitResponse();
-            if (!requestTransaction.isResponseReceived()) {
+            mRequestTransaction.waitResponse();
+            if (!mRequestTransaction.isResponseReceived()) {
                 throw new MsrpException("timeout");
             }
         } catch (IOException e) {
@@ -860,7 +827,7 @@ public class MsrpSession {
             buffer.write(NEW_LINE);
 
             // Send request
-            requestTransaction = new RequestTransaction(mRcsSettings);
+            mRequestTransaction = new RequestTransaction(mRcsSettings);
             connection.sendChunk(buffer.toByteArray());
             buffer.close();
         } catch (IOException e) {
@@ -882,9 +849,9 @@ public class MsrpSession {
     public void receiveMsrpSend(String txId, Hashtable<String, String> headers, int flag,
             byte[] data, long totalSize) throws SipPayloadException, SipNetworkException {
         try {
-            isEstablished = true;
-            if (logger.isActivated()) {
-                logger.debug(new StringBuilder("SEND request received (flag=").append(flag)
+            mIsEstablished = true;
+            if (sLogger.isActivated()) {
+                sLogger.debug(new StringBuilder("SEND request received (flag=").append(flag)
                         .append(", transaction=").append(txId).append(", totalSize=")
                         .append(totalSize).append(")").toString());
             }
@@ -899,22 +866,22 @@ public class MsrpSession {
                 sendMsrpResponse(MsrpConstants.STATUS_200_OK, txId, headers);
             }
             if (data == null) {
-                if (logger.isActivated()) {
-                    logger.debug("Empty chunk");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Empty chunk");
                 }
                 return;
             }
-            receivedChunks.addChunk(data);
+            mReceivedChunks.addChunk(data);
 
             if (flag == MsrpConstants.FLAG_LAST_CHUNK) {
-                if (logger.isActivated()) {
-                    logger.info("Transfer terminated");
+                if (sLogger.isActivated()) {
+                    sLogger.info("Transfer terminated");
                 }
-                byte[] dataContent = receivedChunks.getReceivedData();
-                receivedChunks.resetCache();
+                byte[] dataContent = mReceivedChunks.getReceivedData();
+                mReceivedChunks.resetCache();
 
                 String contentTypeHeader = headers.get(MsrpConstants.HEADER_CONTENT_TYPE);
-                msrpEventListener.msrpDataReceived(msgId, dataContent, contentTypeHeader);
+                mMsrpEventListener.msrpDataReceived(msgId, dataContent, contentTypeHeader);
 
                 boolean successReportNeeded = false;
                 String reportHeader = headers.get(MsrpConstants.HEADER_SUCCESS_REPORT);
@@ -926,33 +893,33 @@ public class MsrpSession {
                     try {
                         sendMsrpReportRequest(txId, headers, dataContent.length, totalSize);
                     } catch (MsrpException e) {
-                        if (logger.isActivated()) {
-                            logger.error("Can't send report", e);
+                        if (sLogger.isActivated()) {
+                            sLogger.error("Can't send report", e);
                         }
                         // Changed by Deutsche Telekom
-                        msrpEventListener.msrpTransferError(msgId, e.getMessage(),
+                        mMsrpEventListener.msrpTransferError(msgId, e.getMessage(),
                                 TypeMsrpChunk.StatusReport);
                     }
                 }
             } else if (flag == MsrpConstants.FLAG_ABORT_CHUNK) {
-                if (logger.isActivated()) {
-                    logger.info("Transfer aborted");
+                if (sLogger.isActivated()) {
+                    sLogger.info("Transfer aborted");
                 }
-                msrpEventListener.msrpTransferAborted();
+                mMsrpEventListener.msrpTransferAborted();
             } else if (flag == MsrpConstants.FLAG_MORE_CHUNK) {
-                if (logger.isActivated()) {
-                    logger.debug("Transfer in progress...");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Transfer in progress...");
                 }
-                byte[] dataContent = receivedChunks.getReceivedData();
-                boolean resetCache = msrpEventListener.msrpTransferProgress(
-                        receivedChunks.getCurrentSize(), totalSize, dataContent);
+                byte[] dataContent = mReceivedChunks.getReceivedData();
+                boolean resetCache = mMsrpEventListener.msrpTransferProgress(
+                        mReceivedChunks.getCurrentSize(), totalSize, dataContent);
 
                 /*
                  * Data are only consumed chunk by chunk in file transfer & image share. In a chat
                  * session only the whole message is consumed after receiving the last chunk.
                  */
                 if (resetCache) {
-                    receivedChunks.resetCache();
+                    mReceivedChunks.resetCache();
                 }
             }
         } catch (IOException e) {
@@ -972,28 +939,28 @@ public class MsrpSession {
      */
     public void receiveMsrpResponse(int code, String txId, Hashtable<String, String> headers) {
         // Consider media is established when we received something
-        isEstablished = true;
+        mIsEstablished = true;
 
-        if (logger.isActivated()) {
-            logger.info("Response received (code=" + code + ", transaction=" + txId + ")");
+        if (sLogger.isActivated()) {
+            sLogger.info("Response received (code=" + code + ", transaction=" + txId + ")");
         }
 
-        if (failureReportOption) {
+        if (mFailureReportOption) {
             // Notify progress
-            if (!cancelTransfer && progress.size() > 0) {
-                msrpEventListener.msrpTransferProgress(progress.elementAt(0), totalSize);
-                progress.removeElementAt(0);
+            if (!mCancelTransfer && mProgress.size() > 0) {
+                mMsrpEventListener.msrpTransferProgress(mProgress.elementAt(0), mTotalSize);
+                mProgress.removeElementAt(0);
             }
         }
 
         // Notify request transaction
-        if (requestTransaction != null) {
-            requestTransaction.notifyResponse(code, headers);
+        if (mRequestTransaction != null) {
+            mRequestTransaction.notifyResponse(code, headers);
         }
 
         // Notify MSRP transaction
-        if (msrpTransaction != null) {
-            msrpTransaction.handleResponse();
+        if (mMsrpTransaction != null) {
+            mMsrpTransaction.handleResponse();
         }
 
         // Notify event listener
@@ -1003,10 +970,11 @@ public class MsrpSession {
             TypeMsrpChunk typeMsrpChunk = TypeMsrpChunk.Unknown;
             MsrpTransactionInfo msrpTransactionInfo = getMsrpTransactionInfo(txId);
             if (msrpTransactionInfo != null) {
-                cpimMsgId = msrpTransactionInfo.cpimMsgId;
-                typeMsrpChunk = msrpTransactionInfo.typeMsrpChunk;
+                cpimMsgId = msrpTransactionInfo.mCpimMsgId;
+                typeMsrpChunk = msrpTransactionInfo.mTypeMsrpChunk;
             }
-            msrpEventListener.msrpTransferError(cpimMsgId, "error response " + code, typeMsrpChunk);
+            mMsrpEventListener
+                    .msrpTransferError(cpimMsgId, "error response " + code, typeMsrpChunk);
 
             // Changed by Deutsche Telekom
             // If an error is received it couldn't get any better nor worse; transaction has reached
@@ -1061,8 +1029,8 @@ public class MsrpSession {
         // Byte-Range: 1-305/305
         // -------n02s00i2t0+1937$
 
-        if (logger.isActivated()) {
-            logger.info("REPORT request received (transaction=" + txId + ")");
+        if (sLogger.isActivated()) {
+            sLogger.info("REPORT request received (transaction=" + txId + ")");
         }
 
         // Changed by Deutsche Telekom
@@ -1073,11 +1041,11 @@ public class MsrpSession {
         TypeMsrpChunk typeMsrpChunk = TypeMsrpChunk.Unknown;
         MsrpTransactionInfo msrpTransactionInfo = getMsrpTransactionInfoByMessageId(msrpMsgId);
         if (msrpTransactionInfo != null) {
-            typeMsrpChunk = msrpTransactionInfo.typeMsrpChunk;
-            originalTransactionId = msrpTransactionInfo.transactionId;
-            cpimMsgId = msrpTransactionInfo.cpimMsgId;
-            if (logger.isActivated()) {
-                logger.debug("REPORT request details; originalTransactionId="
+            typeMsrpChunk = msrpTransactionInfo.mTypeMsrpChunk;
+            originalTransactionId = msrpTransactionInfo.mTransactionId;
+            cpimMsgId = msrpTransactionInfo.mCpimMsgId;
+            if (sLogger.isActivated()) {
+                sLogger.debug("REPORT request details; originalTransactionId="
                         + originalTransactionId + "; cpimMsgId=" + cpimMsgId + "; typeMsrpChunk="
                         + typeMsrpChunk);
             }
@@ -1100,13 +1068,13 @@ public class MsrpSession {
         int statusCode = ReportTransaction.parseStatusCode(headers);
         if (statusCode != 200) {
             // Changed by Deutsche Telekom
-            msrpEventListener.msrpTransferError(cpimMsgId, "error report " + statusCode,
+            mMsrpEventListener.msrpTransferError(cpimMsgId, "error report " + statusCode,
                     typeMsrpChunk);
         }
 
         // Notify report transaction
-        if (reportTransaction != null) {
-            reportTransaction.notifyReport(statusCode, headers);
+        if (mReportTransaction != null) {
+            mReportTransaction.notifyReport(statusCode, headers);
         }
 
         // Changed by Deutsche Telekom
@@ -1175,8 +1143,8 @@ public class MsrpSession {
             synchronized (mTransactionMsgIdMapLock) {
                 if (mMessageTransactionMap != null) {
                     MsrpTransactionInfo transactionInfo = getMsrpTransactionInfo(transactionId);
-                    if (transactionInfo != null && transactionInfo.msrpMsgId != null) {
-                        mMessageTransactionMap.remove(transactionInfo.msrpMsgId);
+                    if (transactionInfo != null && transactionInfo.mMsrpMsgId != null) {
+                        mMessageTransactionMap.remove(transactionInfo.mMsrpMsgId);
                     }
                 }
                 mTransactionInfoMap.remove(transactionId);
@@ -1234,16 +1202,16 @@ public class MsrpSession {
                                 mTransactionInfoMap.values());
                     }
                     for (MsrpTransactionInfo msrpTransactionInfo : msrpTransactionInfos) {
-                        long delta = System.currentTimeMillis() - msrpTransactionInfo.timestamp;
+                        long delta = System.currentTimeMillis() - msrpTransactionInfo.mTimestamp;
                         if ((delta >= TRANSACTION_INFO_EXPIRY_PERIOD) || (delta < 0)) {
-                            if (logger.isActivated()) {
-                                logger.debug("Transaction info have expired (transactionId: "
-                                        + msrpTransactionInfo.transactionId + ", msgId: "
-                                        + msrpTransactionInfo.msrpMsgId + ")");
+                            if (sLogger.isActivated()) {
+                                sLogger.debug("Transaction info have expired (transactionId: "
+                                        + msrpTransactionInfo.mTransactionId + ", msgId: "
+                                        + msrpTransactionInfo.mMsrpMsgId + ")");
                             }
-                            mTransactionInfoMap.remove(msrpTransactionInfo.transactionId);
+                            mTransactionInfoMap.remove(msrpTransactionInfo.mTransactionId);
                             if (mMessageTransactionMap != null) {
-                                mMessageTransactionMap.remove(msrpTransactionInfo.msrpMsgId);
+                                mMessageTransactionMap.remove(msrpTransactionInfo.mMsrpMsgId);
                             }
                         }
                     }
@@ -1262,7 +1230,7 @@ public class MsrpSession {
      * @return true If the empty packet was sent successfully
      */
     public boolean isEstablished() {
-        return isEstablished && !cancelTransfer;
+        return mIsEstablished && !mCancelTransfer;
     }
 
 }

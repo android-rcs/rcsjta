@@ -38,6 +38,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.presence.PhotoIcon;
 import com.gsma.rcs.core.ims.service.presence.directory.Folder;
 import com.gsma.rcs.core.ims.service.presence.directory.XcapDirectoryParser;
+import com.gsma.rcs.core.ims.userprofile.UserProfile;
 import com.gsma.rcs.platform.network.NetworkFactory;
 import com.gsma.rcs.platform.network.SocketConnection;
 import com.gsma.rcs.utils.Base64;
@@ -241,7 +242,7 @@ public class XdmManager {
             }
 
             httpRequest.append("X-3GPP-Intended-Identity: \"")
-                    .append(ImsModule.IMS_USER_PROFILE.getXdmServerLogin()).append("\"")
+                    .append(ImsModule.getImsUserProfile().getXdmServerLogin()).append("\"")
                     .append(CRLF);
 
             /* Set the If-match header */
@@ -352,7 +353,8 @@ public class XdmManager {
 
         } catch (MalformedURLException e) {
             throw new SipPayloadException(
-                    "Failed to send http request, malformed uri: ".concat(xdmServerAddr.toString()), e);
+                    "Failed to send http request, malformed uri: ".concat(xdmServerAddr.toString()),
+                    e);
 
         } catch (IOException e) {
             throw new SipNetworkException("Failed to send http request!", e);
@@ -372,9 +374,10 @@ public class XdmManager {
      */
     public void initialize() throws SipPayloadException, SipNetworkException {
         try {
-            xdmServerAddr = ImsModule.IMS_USER_PROFILE.getXdmServerAddr();
-            xdmServerLogin = ImsModule.IMS_USER_PROFILE.getXdmServerLogin();
-            xdmServerPwd = ImsModule.IMS_USER_PROFILE.getXdmServerPassword();
+            UserProfile profile = ImsModule.getImsUserProfile();
+            xdmServerAddr = profile.getXdmServerAddr();
+            xdmServerLogin = profile.getXdmServerLogin();
+            xdmServerPwd = profile.getXdmServerPassword();
 
             HttpResponse response = getXcapDocuments();
             if (!response.isSuccessfullResponse()) {
@@ -450,7 +453,8 @@ public class XdmManager {
      */
     private HttpResponse getXcapDocuments() throws SipPayloadException, SipNetworkException {
         return sendRequestToXDMS(new HttpGetRequest(new StringBuilder(XCAP_SCHEME)
-                .append(ImsModule.IMS_USER_PROFILE.getPublicUri()).append(XCAP_FRAGMENT).toString()));
+                .append(ImsModule.getImsUserProfile().getPublicUri()).append(XCAP_FRAGMENT)
+                .toString()));
     }
 
     /**
@@ -464,7 +468,7 @@ public class XdmManager {
         if (sLogger.isActivated()) {
             sLogger.info("Set RCS list");
         }
-        String user = ImsModule.IMS_USER_PROFILE.getPublicUri();
+        String user = ImsModule.getImsUserProfile().getPublicUri();
         String resList = xdmServerAddr + "/resource-lists/users/" + Uri.encode(user)
                 + "/index/~~/resource-lists/list%5B@name=%22rcs%22%5D";
         String content = new StringBuilder("<?xml version=\"1.0\" encoding=\"")
@@ -494,7 +498,7 @@ public class XdmManager {
         if (sLogger.isActivated()) {
             sLogger.info("Set resources list");
         }
-        String user = ImsModule.IMS_USER_PROFILE.getPublicUri();
+        String user = ImsModule.getImsUserProfile().getPublicUri();
         String resList = xdmServerAddr + "/resource-lists/users/" + Uri.encode(user)
                 + "/index/~~/resource-lists/list%5B";
         String content = new StringBuilder("<?xml version=\"1.0\" encoding=\"").append(UTF8_STR)
@@ -536,7 +540,7 @@ public class XdmManager {
         if (sLogger.isActivated()) {
             sLogger.info("Set presence rules");
         }
-        String user = ImsModule.IMS_USER_PROFILE.getPublicUri();
+        String user = ImsModule.getImsUserProfile().getPublicUri();
         String blockedList = xdmServerAddr + "/resource-lists/users/" + user
                 + "/index/~~/resource-lists/list%5B@name=%22oma_blockedcontacts%22%5D";
         String grantedList = xdmServerAddr + "/resource-lists/users/" + user
@@ -548,8 +552,8 @@ public class XdmManager {
                 .append("<cr:ruleset xmlns:ocp=\"urn:oma:xml:xdm:common-policy\" xmlns:pr=\"urn:ietf:params:xml:ns:pres-rules\" xmlns:cr=\"urn:ietf:params:xml:ns:common-policy\">")
                 .append(CRLF).append("<cr:rule id=\"wp_prs_allow_own\">").append(CRLF)
                 .append(" <cr:conditions>").append(CRLF).append("  <cr:identity><cr:one id=\"")
-                .append(ImsModule.IMS_USER_PROFILE.getPublicUri()).append("\"/></cr:identity>")
-                .append(CRLF).append(" </cr:conditions>").append(CRLF)
+                .append(user).append("\"/></cr:identity>").append(CRLF).append(" </cr:conditions>")
+                .append(CRLF)
                 .append(" <cr:actions><pr:sub-handling>allow</pr:sub-handling></cr:actions>")
                 .append(CRLF).append(" <cr:transformations>").append(CRLF)
                 .append("  <pr:provide-services><pr:all-services/></pr:provide-services>")
@@ -612,7 +616,7 @@ public class XdmManager {
 
         // URL
         String url = "/resource-lists/users/"
-                + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
+                + Uri.encode(ImsModule.getImsUserProfile().getPublicUri())
                 + "/index/~~/resource-lists/list%5B@name=%22rcs%22%5D/entry%5B@uri=%22"
                 + Uri.encode(PhoneUtils.formatContactIdToUri(contact).toString()) + "%22%5D";
 
@@ -653,7 +657,7 @@ public class XdmManager {
 
         // URL
         String url = "/resource-lists/users/"
-                + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
+                + Uri.encode(ImsModule.getImsUserProfile().getPublicUri())
                 + "/index/~~/resource-lists/list%5B@name=%22rcs%22%5D/entry%5B@uri=%22"
                 + Uri.encode(PhoneUtils.formatContactIdToUri(contact).toString()) + "%22%5D";
 
@@ -705,7 +709,7 @@ public class XdmManager {
                 sLogger.info("Get granted contacts list");
             }
             String url = "/resource-lists/users/"
-                    + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
+                    + Uri.encode(ImsModule.getImsUserProfile().getPublicUri())
                     + "/index/~~/resource-lists/list%5B@name=%22rcs%22%5D";
             HttpResponse response = sendRequestToXDMS(new HttpGetRequest(url));
             if (!response.isSuccessfullResponse()) {
@@ -745,7 +749,7 @@ public class XdmManager {
             sLogger.info("Remove " + contact + " from blocked list");
         }
         String url = "/resource-lists/users/"
-                + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
+                + Uri.encode(ImsModule.getImsUserProfile().getPublicUri())
                 + "/index/~~/resource-lists/list%5B@name=%22rcs_blockedcontacts%22%5D/entry%5B@uri=%22"
                 + Uri.encode(PhoneUtils.formatContactIdToUri(contact).toString()) + "%22%5D";
         return sendRequestToXDMS(new HttpDeleteRequest(url));
@@ -764,7 +768,7 @@ public class XdmManager {
                 sLogger.info("Get blocked contacts list");
             }
             String url = "/resource-lists/users/"
-                    + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
+                    + Uri.encode(ImsModule.getImsUserProfile().getPublicUri())
                     + "/index/~~/resource-lists/list%5B@name=%22rcs_blockedcontacts%22%5D";
             HttpResponse response = sendRequestToXDMS(new HttpGetRequest(url));
             if (!response.isSuccessfullResponse()) {
@@ -804,7 +808,7 @@ public class XdmManager {
             sLogger.info("Add " + contact + " to revoked list");
         }
         String url = "/resource-lists/users/"
-                + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
+                + Uri.encode(ImsModule.getImsUserProfile().getPublicUri())
                 + "/index/~~/resource-lists/list%5B@name=%22rcs_revokedcontacts%22%5D/entry%5B@uri=%22"
                 + Uri.encode(PhoneUtils.formatContactIdToUri(contact).toString()) + "%22%5D";
         String content = "<entry uri='" + contact + "'></entry>";
@@ -825,7 +829,7 @@ public class XdmManager {
             sLogger.info("Remove " + contact + " from revoked list");
         }
         String url = "/resource-lists/users/"
-                + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
+                + Uri.encode(ImsModule.getImsUserProfile().getPublicUri())
                 + "/index/~~/resource-lists/list%5B@name=%22rcs_revokedcontacts%22%5D/entry%5B@uri=%22"
                 + Uri.encode(PhoneUtils.formatContactIdToUri(contact).toString()) + "%22%5D";
         return sendRequestToXDMS(new HttpDeleteRequest(url));
@@ -838,7 +842,7 @@ public class XdmManager {
      */
     public String getEndUserPhotoIconUrl() {
         return xdmServerAddr + "/org.openmobilealliance.pres-content/users/"
-                + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
+                + Uri.encode(ImsModule.getImsUserProfile().getPublicUri())
                 + "/oma_status-icon/rcs_status_icon";
     }
 
@@ -863,7 +867,7 @@ public class XdmManager {
                 .append("<encoding>base64</encoding>").append(CRLF).append("<data>").append(data)
                 .append("</data>").append(CRLF).append("</content>").toString();
         String url = "/org.openmobilealliance.pres-content/users/"
-                + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
+                + Uri.encode(ImsModule.getImsUserProfile().getPublicUri())
                 + "/oma_status-icon/rcs_status_icon";
         return sendRequestToXDMS(new HttpPutRequest(url, content,
                 "application/vnd.oma.pres-content+xml"));
@@ -881,7 +885,7 @@ public class XdmManager {
             sLogger.info("Delete the end user photo");
         }
         String url = "/org.openmobilealliance.pres-content/users/"
-                + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri())
+                + Uri.encode(ImsModule.getImsUserProfile().getPublicUri())
                 + "/oma_status-icon/rcs_status_icon";
         return sendRequestToXDMS(new HttpDeleteRequest(url));
     }
@@ -900,7 +904,7 @@ public class XdmManager {
             sLogger.info("Update presence info");
         }
         String url = "/pidf-manipulation/users/"
-                + Uri.encode(ImsModule.IMS_USER_PROFILE.getPublicUri()) + "/perm-presence";
+                + Uri.encode(ImsModule.getImsUserProfile().getPublicUri()) + "/perm-presence";
         return sendRequestToXDMS(new HttpPutRequest(url, info, "application/pidf+xml"));
     }
 }

@@ -173,9 +173,9 @@ public final class GeolocSharingService extends RcsService {
             if (sharingIntf != null) {
                 return new GeolocSharing(sharingIntf);
 
-            } else {
-                return null;
             }
+            return null;
+
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             RcsServiceNotRegisteredException.assertException(e);

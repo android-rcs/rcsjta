@@ -106,9 +106,8 @@ public class MsrpManager {
     public String getLocalSocketProtocol() {
         if (mSecured) {
             return MsrpConstants.SOCKET_MSRP_SECURED_PROTOCOL;
-        } else {
-            return MsrpConstants.SOCKET_MSRP_PROTOCOL;
         }
+        return MsrpConstants.SOCKET_MSRP_PROTOCOL;
     }
 
     /**
@@ -120,10 +119,9 @@ public class MsrpManager {
         if (InetAddressUtils.isIPv6Address(mLocalMsrpAddress)) {
             return getMsrpProtocol() + "://[" + mLocalMsrpAddress + "]:" + mLocalMsrpPort + "/"
                     + mSessionId + ";tcp";
-        } else {
-            return getMsrpProtocol() + "://" + mLocalMsrpAddress + ":" + mLocalMsrpPort + "/"
-                    + mSessionId + ";tcp";
         }
+        return getMsrpProtocol() + "://" + mLocalMsrpAddress + ":" + mLocalMsrpPort + "/"
+                + mSessionId + ";tcp";
     }
 
     /**
@@ -134,9 +132,8 @@ public class MsrpManager {
     public String getMsrpProtocol() {
         if (mSecured) {
             return MsrpConstants.MSRP_SECURED_PROTOCOL;
-        } else {
-            return MsrpConstants.MSRP_PROTOCOL;
         }
+        return MsrpConstants.MSRP_PROTOCOL;
     }
 
     /**

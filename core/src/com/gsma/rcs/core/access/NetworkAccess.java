@@ -35,12 +35,12 @@ public abstract class NetworkAccess {
     /**
      * Local IP address given to the network access
      */
-    protected String ipAddress = null;
+    protected String mIpAddress;
 
     /**
      * Type of access
      */
-    protected String type = null;
+    protected String mType;
 
     /**
      * Constructor
@@ -54,7 +54,7 @@ public abstract class NetworkAccess {
      * @return IP address
      */
     public String getIpAddress() {
-        return ipAddress;
+        return mIpAddress;
     }
 
     /**

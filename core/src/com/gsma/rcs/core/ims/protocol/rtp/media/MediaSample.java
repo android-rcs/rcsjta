@@ -101,9 +101,8 @@ public class MediaSample {
     public int getLength() {
         if (data != null) {
             return data.length;
-        } else {
-            return 0;
         }
+        return 0;
     }
 
     /**

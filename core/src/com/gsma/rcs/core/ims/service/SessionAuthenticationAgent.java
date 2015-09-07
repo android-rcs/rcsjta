@@ -28,6 +28,7 @@ import com.gsma.rcs.core.ims.network.registration.RegistrationProcedure;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.security.HttpDigestMd5Authentication;
+import com.gsma.rcs.core.ims.userprofile.UserProfile;
 
 import javax2.sip.InvalidArgumentException;
 import javax2.sip.header.ProxyAuthenticateHeader;
@@ -76,8 +77,9 @@ public class SessionAuthenticationAgent {
             return;
         }
         mDigest.updateNonceParameters();
-        String user = ImsModule.IMS_USER_PROFILE.getPrivateID();
-        String password = ImsModule.IMS_USER_PROFILE.getPassword();
+        UserProfile profile = ImsModule.getImsUserProfile();
+        String user = profile.getPrivateID();
+        String password = profile.getPassword();
         String requestUri = request.getRequestURI();
         String nonceCounter = mDigest.buildNonceCounter();
         String response = mDigest.calculateResponse(user, password, request.getMethod(),
@@ -127,8 +129,9 @@ public class SessionAuthenticationAgent {
         mRegisterDigest.updateNonceParameters();
 
         /* Calculate response */
-        String user = ImsModule.IMS_USER_PROFILE.getPrivateID();
-        String password = ImsModule.IMS_USER_PROFILE.getPassword();
+        UserProfile profile = ImsModule.getImsUserProfile();
+        String user = profile.getPrivateID();
+        String password = profile.getPassword();
         String requestUri = request.getRequestURI();
         String nonCounter = mRegisterDigest.buildNonceCounter();
         String response = mRegisterDigest.calculateResponse(user, password, request.getMethod(),
