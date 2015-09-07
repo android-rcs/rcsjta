@@ -99,7 +99,7 @@
 		<ant dir="${prov_template.root}" target="debug" inheritAll="false" />
 	</target>
 
-	<target name="core-control-apk" depends="ri-apk">
+	<target name="core-control-apk" depends="core-apk">
 		<echo>Generates the RCS core control apk.</echo>
 		<ant dir="${core_control.root}" target="clean" inheritAll="false" />
 		<ant dir="${core_control.root}" antfile="build-local.xml" target="all"
