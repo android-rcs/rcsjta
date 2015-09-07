@@ -1,0 +1,27 @@
+//--------------------------------------------------------------------
+// Android library due to the dependecy
+//--------------------------------------------------------------------
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion rootProject.compileSdkVersion
+    buildToolsVersion rootProject.buildToolsVersion
+
+    //Required to support the old folder structure
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            resources.srcDirs = ['src']
+            aidl.srcDirs = ['src']
+            renderscript.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+        }
+        androidTest.setRoot('tests')
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+}

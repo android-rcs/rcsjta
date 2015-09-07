@@ -1,0 +1,18 @@
+apply plugin: 'java'
+
+//dnsjava-0.1.0.jar.
+jar {
+    baseName = 'dnsjava'
+    version =  '0.1.0'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+        resources {
+            srcDir 'src'
+        }
+    }
+}

@@ -1,0 +1,54 @@
+//--------------------------------------------------------------------
+// Open source style of build environment using local lib with a copy
+// of Android inside to solve the operating system dependecy.
+//--------------------------------------------------------------------
+//apply plugin: 'java'
+//
+////nist_sip-0.1.0.jar.
+//jar {
+//    baseName = 'nist_sip'
+//    version =  '0.1.0'
+//}
+//
+//sourceSets {
+//    main {
+//        java {
+//            srcDir 'src'
+//        }
+//        resources {
+//            srcDir 'src'
+//        }
+//    }
+//}
+//
+//dependencies {
+//    compile files('libs/android.jar')
+//}
+
+//--------------------------------------------------------------------
+// Android library due to the dependecy
+//--------------------------------------------------------------------
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion rootProject.compileSdkVersion
+    buildToolsVersion rootProject.buildToolsVersion
+
+    //Required to support the old folder structure
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifestLibrary.xml'
+            java.srcDirs = ['src']
+            resources.srcDirs = ['src']
+            aidl.srcDirs = ['src']
+            renderscript.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+        }
+        androidTest.setRoot('tests')
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+}

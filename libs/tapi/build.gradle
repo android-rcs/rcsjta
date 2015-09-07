@@ -1,0 +1,48 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion rootProject.compileSdkVersion
+    buildToolsVersion rootProject.buildToolsVersion
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifestLibrary.xml'
+
+//Did not find a way to filter aidl files,
+//use copy with filter instead for both java and aidl files.
+//            java {
+//              srcDirs './../../core/src'
+//              exclude 'com/telekom/**'
+//              exclude 'com/gsma/rcs/**'
+//            }
+//
+//            aidl {
+//                srcDirs './../../core/src'
+//            }
+            java.srcDirs         = ['src']
+            aidl.srcDirs         = ['src']
+            resources.srcDirs    = ['src']
+            renderscript.srcDirs = ['src']
+            res.srcDirs          = ['res']
+            assets.srcDirs       = ['assets']
+        }
+    }
+    lintOptions {
+        abortOnError false
+    }
+}
+
+task copyFiles(type:Copy) {
+    from('./../../core/src/') {
+              exclude 'com/telekom/**'
+              exclude 'com/gsma/rcs/**'
+    }
+    into 'src'
+    includeEmptyDirs = true
+}
+preBuild.dependsOn copyFiles
+
+task deleteFiles(type: Delete) {
+  delete 'src/com'
+}
+clean.dependsOn deleteFiles

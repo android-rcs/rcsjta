@@ -1,0 +1,19 @@
+include ':bouncycastle'
+include ':dnsjava'
+include ':nist_sip'
+include ':core'
+include ':com.gsma.services.rcs'
+include ':mediaplayer'
+include ':RI'
+include ':core_control'
+include ':ims_notification'
+include ':provisioning'
+
+// Project location (if not directly below root)
+project(':bouncycastle').projectDir=new File('libs/bouncycastle')
+project(':dnsjava').projectDir=new File('libs/dnsjava')
+project(':nist_sip').projectDir=new File('libs/nist_sip')
+project(':com.gsma.services.rcs').projectDir=new File('libs/tapi')
+project(':core_control').projectDir=new File('tools/core_control')
+project(':ims_notification').projectDir=new File('tools/ims_notification')
+project(':provisioning').projectDir=new File('tools/provisioning/prov_template')

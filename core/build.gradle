@@ -1,0 +1,41 @@
+apply plugin: 'com.android.application'
+
+android {
+
+    //Required to support the old folder structure
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            resources.srcDirs = ['src']
+            aidl.srcDirs = ['src']
+            renderscript.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+        }
+        androidTest.setRoot('tests')
+    }
+
+    //Required to support builds although lint errors exist
+    lintOptions {
+        abortOnError false
+    }
+
+    compileSdkVersion rootProject.compileSdkVersion
+    buildToolsVersion rootProject.buildToolsVersion
+
+    defaultConfig {
+        applicationId "com.gsma.rcs"
+        minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.targetSdkVersion
+        versionCode 1
+        versionName "3.1.1"
+        archivesBaseName = "RCS_Core"
+    }
+}
+
+dependencies {
+    compile project(':bouncycastle')
+    compile project(':dnsjava')
+    compile project(':nist_sip')
+}
