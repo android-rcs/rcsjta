@@ -278,11 +278,17 @@ public class GroupChatLog implements IGroupChatLog {
 
     @Override
     public Map<ContactId, ParticipantStatus> getParticipants(String chatId) {
-        Cursor cursor = getGroupChatData(GroupChatData.KEY_PARTICIPANTS, chatId);
-        if (cursor == null) {
-            return null;
+        Cursor cursor = null;
+        try {
+            cursor = getGroupChatData(GroupChatData.KEY_PARTICIPANTS, chatId);
+            if (cursor == null) {
+                return null;
+            }
+
+            return parseEncodedParticipantInfos(cursor.getString(FIRST_COLUMN_IDX));
+        } finally {
+            CursorUtil.close(cursor);
         }
-        return parseEncodedParticipantInfos(getDataAsString(cursor));
     }
 
     @Override
@@ -329,40 +335,30 @@ public class GroupChatLog implements IGroupChatLog {
         return cursor;
     }
 
-    private String getDataAsString(Cursor cursor) {
+    public State getGroupChatState(String chatId) {
+        Cursor cursor = null;
         try {
-            return cursor.getString(FIRST_COLUMN_IDX);
-        } finally {
-            CursorUtil.close(cursor);
-        }
-    }
-
-    private Integer getDataAsInteger(Cursor cursor) {
-        try {
-            if (cursor.isNull(FIRST_COLUMN_IDX)) {
+            cursor = getGroupChatData(GroupChatData.KEY_STATE, chatId);
+            if (cursor == null) {
                 return null;
             }
-            return cursor.getInt(FIRST_COLUMN_IDX);
-
+            return State.valueOf(cursor.getInt(FIRST_COLUMN_IDX));
         } finally {
             CursorUtil.close(cursor);
         }
-    }
-
-    public State getGroupChatState(String chatId) {
-        Cursor cursor = getGroupChatData(GroupChatData.KEY_STATE, chatId);
-        if (cursor == null) {
-            return null;
-        }
-        return State.valueOf(getDataAsInteger(cursor));
     }
 
     public ReasonCode getGroupChatReasonCode(String chatId) {
-        Cursor cursor = getGroupChatData(GroupChatData.KEY_REASON_CODE, chatId);
-        if (cursor == null) {
-            return null;
+        Cursor cursor = null;
+        try {
+            cursor = getGroupChatData(GroupChatData.KEY_REASON_CODE, chatId);
+            if (cursor == null) {
+                return null;
+            }
+            return ReasonCode.valueOf(cursor.getInt(FIRST_COLUMN_IDX));
+        } finally {
+            CursorUtil.close(cursor);
         }
-        return ReasonCode.valueOf(getDataAsInteger(cursor));
     }
 
     @Override
