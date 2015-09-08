@@ -227,9 +227,7 @@ public abstract class DeleteTask<T> implements Runnable {
             return result;
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 

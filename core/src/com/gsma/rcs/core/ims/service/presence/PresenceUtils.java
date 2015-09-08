@@ -23,6 +23,7 @@
 package com.gsma.rcs.core.ims.service.presence;
 
 import com.gsma.rcs.platform.AndroidFactory;
+import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.services.rcs.contact.ContactId;
@@ -38,10 +39,10 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.provider.ContactsContract;
-import android.provider.ContactsContract.Data;
-import android.provider.ContactsContract.RawContacts;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
+import android.provider.ContactsContract.Data;
+import android.provider.ContactsContract.RawContacts;
 
 import java.util.ArrayList;
 
@@ -135,9 +136,7 @@ public class PresenceUtils {
                 }
             } while (cursor.moveToNext());
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
         return INVALID_CONTACT_ID;
     }

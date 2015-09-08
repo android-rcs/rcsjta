@@ -111,8 +111,8 @@ public class MessageLog implements IMessageLog {
      * @param groupChatDeliveryInfoLog
      * @param rcsSettings
      */
-    /* package private */MessageLog(LocalContentResolver localContentResolver, GroupDeliveryInfoLog groupChatDeliveryInfoLog,
-            RcsSettings rcsSettings) {
+    /* package private */MessageLog(LocalContentResolver localContentResolver,
+            GroupDeliveryInfoLog groupChatDeliveryInfoLog, RcsSettings rcsSettings) {
         mLocalContentResolver = localContentResolver;
         mGroupChatDeliveryInfoLog = groupChatDeliveryInfoLog;
         mRcsSettings = rcsSettings;
@@ -407,6 +407,7 @@ public class MessageLog implements IMessageLog {
         Cursor cursor = mLocalContentResolver.query(contentUri, projection, null, null, null);
         CursorUtil.assertCursorIsNotNull(cursor, contentUri);
         if (!cursor.moveToNext()) {
+            CursorUtil.close(cursor);
             return null;
         }
         return cursor;

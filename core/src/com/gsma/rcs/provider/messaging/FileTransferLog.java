@@ -549,6 +549,7 @@ public class FileTransferLog implements IFileTransferLog {
         Cursor cursor = mLocalContentResolver.query(contentUri, projection, null, null, null);
         CursorUtil.assertCursorIsNotNull(cursor, contentUri);
         if (!cursor.moveToNext()) {
+            CursorUtil.close(cursor);
             return null;
         }
         return cursor;

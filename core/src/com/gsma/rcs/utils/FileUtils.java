@@ -22,6 +22,8 @@
 
 package com.gsma.rcs.utils;
 
+import com.gsma.rcs.provider.CursorUtil;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
@@ -174,9 +176,7 @@ public class FileUtils {
                 throw new IllegalArgumentException("Unsupported URI scheme");
             }
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -205,9 +205,7 @@ public class FileUtils {
                 throw new IllegalArgumentException("Unsupported URI scheme");
             }
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 

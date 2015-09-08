@@ -23,6 +23,7 @@
 package com.gsma.rcs.provider.contact;
 
 import com.gsma.rcs.provider.ContentProviderBaseIdCreator;
+import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.contact.ContactData.AggregationData;
 import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.DatabaseUtils;
@@ -309,9 +310,7 @@ public class ContactProvider extends ContentProvider {
             return ParcelFileDescriptor.open(new File(path), DatabaseUtils.parseMode(mode));
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 

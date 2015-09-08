@@ -18,6 +18,7 @@ package com.gsma.rcs.provider.ipcall;
 
 import com.gsma.rcs.core.content.AudioContent;
 import com.gsma.rcs.core.content.VideoContent;
+import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.service.ipcalldraft.IPCall.ReasonCode;
 import com.gsma.rcs.service.ipcalldraft.IPCall.State;
@@ -75,9 +76,7 @@ public class IPCallPersistedStorageAccessor {
                     .getColumnIndexOrThrow(IPCallData.KEY_DIRECTION)));
             mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(IPCallData.KEY_TIMESTAMP));
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 

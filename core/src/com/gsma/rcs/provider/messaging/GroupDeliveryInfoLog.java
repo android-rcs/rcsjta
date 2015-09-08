@@ -135,9 +135,7 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
             return !cursor.moveToFirst();
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
@@ -152,9 +150,7 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
             return !cursor.moveToFirst();
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 
