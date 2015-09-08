@@ -96,6 +96,9 @@ public class RcsSettings {
      * @return RcsSettings instance
      */
     public static RcsSettings createInstance(LocalContentResolver localContentResolver) {
+        if (sInstance != null) {
+            return sInstance;
+        }
         synchronized (RcsSettings.class) {
             if (sInstance == null) {
                 sInstance = new RcsSettings(localContentResolver);

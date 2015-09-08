@@ -48,7 +48,7 @@ public class RichCallHistory {
     /**
      * Current instance
      */
-    private static RichCallHistory sInstance;
+    private static volatile RichCallHistory sInstance;
 
     private final LocalContentResolver mLocalContentResolver;
 

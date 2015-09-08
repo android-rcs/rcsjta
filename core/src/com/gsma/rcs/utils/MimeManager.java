@@ -42,7 +42,7 @@ public class MimeManager {
      * Singleton instance to access Two-way map that maps MIME-types to file extensions and vice
      * versa.
      */
-    private static MimeManager sInstance;
+    private static volatile MimeManager sInstance;
 
     /**
      * Mime-Type to file extension mapping:
@@ -72,6 +72,9 @@ public class MimeManager {
      * @return The singleton instance of the MIME-type map.
      */
     public static MimeManager getInstance() {
+        if (sInstance != null) {
+            return sInstance;
+        }
         synchronized (MimeManager.class) {
             if (sInstance == null) {
                 sInstance = new MimeManager();

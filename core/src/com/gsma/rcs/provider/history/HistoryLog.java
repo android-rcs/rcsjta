@@ -32,7 +32,7 @@ import android.net.Uri;
 
 public class HistoryLog {
 
-    private static HistoryLog sInstance;
+    private static volatile HistoryLog sInstance;
 
     private final LocalContentResolver mLocalContentResolver;
 
@@ -93,6 +93,9 @@ public class HistoryLog {
      * @return HistoryLog instance
      */
     public static HistoryLog createInstance(LocalContentResolver localContentResolver) {
+        if (sInstance != null) {
+            return sInstance;
+        }
         synchronized (HistoryLog.class) {
             if (sInstance == null) {
                 sInstance = new HistoryLog(localContentResolver);

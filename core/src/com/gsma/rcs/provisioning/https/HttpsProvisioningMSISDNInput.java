@@ -62,6 +62,9 @@ public final class HttpsProvisioningMSISDNInput {
      * @return Instance of HttpsProvisioningMSISDNDialog
      */
     public final static HttpsProvisioningMSISDNInput getInstance() {
+        if (sInstance != null) {
+            return sInstance;
+        }
         synchronized (HttpsProvisioningMSISDNInput.class) {
             if (sInstance == null) {
                 sInstance = new HttpsProvisioningMSISDNInput();

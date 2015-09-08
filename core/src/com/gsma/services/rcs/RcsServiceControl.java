@@ -74,7 +74,6 @@ public class RcsServiceControl {
     public static RcsServiceControl getInstance(Context ctx) {
         if (sInstance != null) {
             return sInstance;
-
         }
         synchronized (RcsServiceControl.class) {
             if (sInstance == null) {

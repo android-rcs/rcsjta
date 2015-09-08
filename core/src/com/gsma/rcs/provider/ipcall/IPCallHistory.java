@@ -45,7 +45,7 @@ public class IPCallHistory {
     /**
      * Current instance
      */
-    private static IPCallHistory sInstance;
+    private static volatile IPCallHistory sInstance;
 
     private final LocalContentResolver mLocalContentResolver;
 
@@ -96,6 +96,9 @@ public class IPCallHistory {
      * @return IPCallHistory instance
      */
     public static IPCallHistory createInstance(LocalContentResolver localContentResolver) {
+        if (sInstance != null) {
+            return sInstance;
+        }
         synchronized (IPCallHistory.class) {
             if (sInstance == null) {
                 sInstance = new IPCallHistory(localContentResolver);

@@ -458,6 +458,9 @@ public final class ContactManager {
      */
     public static ContactManager createInstance(Context ctx, ContentResolver contentResolver,
             LocalContentResolver localContentResolver, RcsSettings rcsSettings) {
+        if (sInstance != null) {
+            return sInstance;
+        }
         synchronized (ContactManager.class) {
             if (sInstance == null) {
                 sInstance = new ContactManager(ctx, contentResolver, localContentResolver,
