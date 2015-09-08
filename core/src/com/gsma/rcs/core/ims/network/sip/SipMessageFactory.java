@@ -55,7 +55,6 @@ import javax2.sip.header.CSeqHeader;
 import javax2.sip.header.CallIdHeader;
 import javax2.sip.header.ContactHeader;
 import javax2.sip.header.ContentDispositionHeader;
-import javax2.sip.header.ContentLengthHeader;
 import javax2.sip.header.ContentTypeHeader;
 import javax2.sip.header.EventHeader;
 import javax2.sip.header.ExpiresHeader;
@@ -331,14 +330,12 @@ public class SipMessageFactory {
 
             // Set the message content
             String[] type = contentType.split("/");
-            ContentTypeHeader contentTypeHeader = SipUtils.HEADER_FACTORY.createContentTypeHeader(
-                    type[0], type[1]);
-            message.setContent(content, contentTypeHeader);
+            message.setContent(content,
+                    SipUtils.HEADER_FACTORY.createContentTypeHeader(type[0], type[1]));
 
             // Set the message content length
-            ContentLengthHeader contentLengthHeader = SipUtils.HEADER_FACTORY
-                    .createContentLengthHeader(content.length);
-            message.setContentLength(contentLengthHeader);
+            message.setContentLength(SipUtils.HEADER_FACTORY
+                    .createContentLengthHeader(content.length));
 
             // Set "rport" (RFC3581)
             ViaHeader viaHeader = (ViaHeader) message.getHeader(ViaHeader.NAME);
@@ -431,16 +428,13 @@ public class SipMessageFactory {
 
             // Set the message content
             if (sdp != null) {
-                ContentTypeHeader contentTypeHeader = SipUtils.HEADER_FACTORY
-                        .createContentTypeHeader("application", "pidf+xml");
-                publish.setContent(sdp, contentTypeHeader);
+                publish.setContent(sdp,
+                        SipUtils.HEADER_FACTORY.createContentTypeHeader("application", "pidf+xml"));
             }
 
             // Set the message content length
             int length = sdp == null ? 0 : sdp.getBytes(UTF8).length;
-            ContentLengthHeader contentLengthHeader = SipUtils.HEADER_FACTORY
-                    .createContentLengthHeader(length);
-            publish.setContentLength(contentLengthHeader);
+            publish.setContentLength(SipUtils.HEADER_FACTORY.createContentLengthHeader(length));
 
             // Set "rport" (RFC3581)
             ViaHeader viaHeader = (ViaHeader) publish.getHeader(ViaHeader.NAME);
@@ -624,9 +618,8 @@ public class SipMessageFactory {
             invite.setContent(content, contentType);
 
             // Set the content length
-            ContentLengthHeader contentLengthHeader = SipUtils.HEADER_FACTORY
-                    .createContentLengthHeader(content.getBytes(UTF8).length);
-            invite.setContentLength(contentLengthHeader);
+            invite.setContentLength(SipUtils.HEADER_FACTORY.createContentLengthHeader(content
+                    .getBytes(UTF8).length));
 
             // Set "rport" (RFC3581)
             ViaHeader viaHeader = (ViaHeader) invite.getHeader(ViaHeader.NAME);
@@ -708,14 +701,12 @@ public class SipMessageFactory {
             }
 
             // Set the message content
-            ContentTypeHeader contentTypeHeader = SipUtils.HEADER_FACTORY.createContentTypeHeader(
-                    "application", "sdp");
-            response.setContent(sdp, contentTypeHeader);
+            response.setContent(sdp,
+                    SipUtils.HEADER_FACTORY.createContentTypeHeader("application", "sdp"));
 
             // Set the message content length
-            ContentLengthHeader contentLengthHeader = SipUtils.HEADER_FACTORY
-                    .createContentLengthHeader(sdp.getBytes(UTF8).length);
-            response.setContentLength(contentLengthHeader);
+            response.setContentLength(SipUtils.HEADER_FACTORY.createContentLengthHeader(sdp
+                    .getBytes(UTF8).length));
 
             SipResponse resp = new SipResponse(response);
             resp.setStackTransaction(dialog.getInvite().getStackTransaction());
@@ -1063,14 +1054,12 @@ public class SipMessageFactory {
             // Set the content part if available
             if (sdp != null) {
                 // Set the content type header
-                ContentTypeHeader contentTypeHeader = SipUtils.HEADER_FACTORY
-                        .createContentTypeHeader("application", "sdp");
-                response.setContent(sdp, contentTypeHeader);
+                response.setContent(sdp,
+                        SipUtils.HEADER_FACTORY.createContentTypeHeader("application", "sdp"));
 
                 // Set the content length header
-                ContentLengthHeader contentLengthHeader = SipUtils.HEADER_FACTORY
-                        .createContentLengthHeader(sdp.getBytes(UTF8).length);
-                response.setContentLength(contentLengthHeader);
+                response.setContentLength(SipUtils.HEADER_FACTORY.createContentLengthHeader(sdp
+                        .getBytes(UTF8).length));
             }
 
             SipResponse resp = new SipResponse(response);
@@ -1108,14 +1097,12 @@ public class SipMessageFactory {
             SipUtils.setFeatureTags(refer, tags);
 
             // Set Refer-To header
-            Header referTo = SipUtils.HEADER_FACTORY.createHeader(ReferToHeader.NAME,
-                    toContact.toString());
-            refer.addHeader(referTo);
+            refer.addHeader(SipUtils.HEADER_FACTORY.createHeader(ReferToHeader.NAME,
+                    toContact.toString()));
 
             // Set Refer-Sub header
-            Header referSub = SipUtils.HEADER_FACTORY.createHeader(SipUtils.HEADER_REFER_SUB,
-                    "false");
-            refer.addHeader(referSub);
+            refer.addHeader(SipUtils.HEADER_FACTORY
+                    .createHeader(SipUtils.HEADER_REFER_SUB, "false"));
 
             setPPreferedIdentityHeader(refer);
 
@@ -1126,9 +1113,8 @@ public class SipMessageFactory {
             }
 
             // Set Contribution-ID header
-            Header cid = SipUtils.HEADER_FACTORY.createHeader(ChatUtils.HEADER_CONTRIBUTION_ID,
-                    contributionId);
-            refer.addHeader(cid);
+            refer.addHeader(SipUtils.HEADER_FACTORY.createHeader(ChatUtils.HEADER_CONTRIBUTION_ID,
+                    contributionId));
 
             // Set User-Agent header
             refer.addHeader(SipUtils.buildUserAgentHeader());
@@ -1183,54 +1169,49 @@ public class SipMessageFactory {
             SipUtils.setFeatureTags(refer, tags);
 
             // Set Require header
-            Header require = SipUtils.HEADER_FACTORY.createHeader(RequireHeader.NAME,
-                    "multiple-refer");
-            refer.addHeader(require);
-            require = SipUtils.HEADER_FACTORY.createHeader(RequireHeader.NAME, "norefersub");
-            refer.addHeader(require);
+            refer.addHeader(SipUtils.HEADER_FACTORY.createHeader(RequireHeader.NAME,
+                    "multiple-refer"));
+            refer.addHeader(SipUtils.HEADER_FACTORY.createHeader(RequireHeader.NAME, "norefersub"));
 
             // Set Refer-To header
             String homeDomain = ImsModule.getImsUserProfile().getHomeDomain();
-            Header referTo = SipUtils.HEADER_FACTORY.createHeader(ReferToHeader.NAME, "<cid:"
-                    + listID + "@" + homeDomain + ">");
-            refer.addHeader(referTo);
+            StringBuilder referToValue = new StringBuilder("<cid:").append(listID).append("@")
+                    .append(homeDomain).append(">");
+            refer.addHeader(SipUtils.HEADER_FACTORY.createHeader(ReferToHeader.NAME,
+                    referToValue.toString()));
 
             // Set Refer-Sub header
-            Header referSub = SipUtils.HEADER_FACTORY.createHeader(SipUtils.HEADER_REFER_SUB,
-                    "false");
-            refer.addHeader(referSub);
+            refer.addHeader(SipUtils.HEADER_FACTORY
+                    .createHeader(SipUtils.HEADER_REFER_SUB, "false"));
 
             setPPreferedIdentityHeader(refer);
 
             // Set Subject header
-            Header s = SipUtils.HEADER_FACTORY.createHeader(Subject.NAME, subject);
-            refer.addHeader(s);
+            refer.addHeader(SipUtils.HEADER_FACTORY.createHeader(Subject.NAME, subject));
 
             // Set Contribution-ID header
-            Header cid = SipUtils.HEADER_FACTORY.createHeader(ChatUtils.HEADER_CONTRIBUTION_ID,
-                    contributionId);
-            refer.addHeader(cid);
+            refer.addHeader(SipUtils.HEADER_FACTORY.createHeader(ChatUtils.HEADER_CONTRIBUTION_ID,
+                    contributionId));
 
             // Set User-Agent header
             refer.addHeader(SipUtils.buildUserAgentHeader());
 
             // Set the Content-ID header
-            Header contentIdHeader = SipUtils.HEADER_FACTORY.createHeader(
-                    SipUtils.HEADER_CONTENT_ID, "<" + listID + "@" + homeDomain + ">");
-            refer.addHeader(contentIdHeader);
+            StringBuilder contentIdHeadervalue = new StringBuilder("<").append(listID).append("@")
+                    .append(homeDomain).append(">");
+            refer.addHeader(SipUtils.HEADER_FACTORY.createHeader(SipUtils.HEADER_CONTENT_ID,
+                    contentIdHeadervalue.toString()));
 
             // Generate the resource list for given participants
             String resourceList = ChatUtils.generateChatResourceList(participants);
 
             // Set the message content
-            ContentTypeHeader contentTypeHeader = SipUtils.HEADER_FACTORY.createContentTypeHeader(
-                    "application", "resource-lists+xml");
-            refer.setContent(resourceList, contentTypeHeader);
+            refer.setContent(resourceList, SipUtils.HEADER_FACTORY.createContentTypeHeader(
+                    "application", "resource-lists+xml"));
 
             // Set the message content length
-            ContentLengthHeader contentLengthHeader = SipUtils.HEADER_FACTORY
-                    .createContentLengthHeader(resourceList.getBytes(UTF8).length);
-            refer.setContentLength(contentLengthHeader);
+            refer.setContentLength(SipUtils.HEADER_FACTORY.createContentLengthHeader(resourceList
+                    .getBytes(UTF8).length));
 
             // Set the Content-Disposition header
             Header contentDispoHeader = SipUtils.HEADER_FACTORY.createHeader(
@@ -1401,9 +1382,8 @@ public class SipMessageFactory {
             reInvite.setContent(content, contentType);
 
             // Set the content length
-            ContentLengthHeader contentLengthHeader = SipUtils.HEADER_FACTORY
-                    .createContentLengthHeader(content.getBytes(UTF8).length);
-            reInvite.setContentLength(contentLengthHeader);
+            reInvite.setContentLength(SipUtils.HEADER_FACTORY.createContentLengthHeader(content
+                    .getBytes(UTF8).length));
             return new SipRequest(reInvite);
 
         } catch (ParseException e) {
@@ -1504,14 +1484,12 @@ public class SipMessageFactory {
             }
 
             // Set the message content
-            ContentTypeHeader contentTypeHeader = SipUtils.HEADER_FACTORY.createContentTypeHeader(
-                    "application", "sdp");
-            response.setContent(content, contentTypeHeader);
+            response.setContent(content,
+                    SipUtils.HEADER_FACTORY.createContentTypeHeader("application", "sdp"));
 
             // Set the message content length
-            ContentLengthHeader contentLengthHeader = SipUtils.HEADER_FACTORY
-                    .createContentLengthHeader(content.getBytes(UTF8).length);
-            response.setContentLength(contentLengthHeader);
+            response.setContentLength(SipUtils.HEADER_FACTORY.createContentLengthHeader(content
+                    .getBytes(UTF8).length));
 
             SipResponse resp = new SipResponse(response);
             resp.setStackTransaction(request.getStackTransaction());

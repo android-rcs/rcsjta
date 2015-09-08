@@ -371,7 +371,7 @@ public class RcsSettings {
      */
     public ContactId getUserProfileImsUserName() {
         String phoneNumber = readString(RcsSettingsData.USERPROFILE_IMS_USERNAME);
-        if (RcsSettingsData.DEFAULT_USERPROFILE_IMS_USERNAME.equals(phoneNumber)) {
+        if (null == phoneNumber) {
             return null;
         }
         return ContactUtil.createContactIdFromTrustedData(phoneNumber);

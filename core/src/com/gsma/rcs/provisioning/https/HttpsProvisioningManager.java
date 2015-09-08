@@ -308,9 +308,13 @@ public class HttpsProvisioningManager {
         if (msisdn != null) {
             uriBuilder.appendQueryParameter(PARAM_MSISDN, msisdn.toString());
         }
-        if (token != null) {
-            uriBuilder.appendQueryParameter(PARAM_TOKEN, token);
-        }
+
+        /*
+         * According to the standard the token-parameter name should be part of the Uri even if the
+         * token is null here.
+         */
+        uriBuilder.appendQueryParameter(PARAM_TOKEN, token == null ? "" : token);
+
         return uriBuilder.toString();
     }
 
@@ -474,8 +478,9 @@ public class HttpsProvisioningManager {
         String secondaryUri = null;
         try {
             /* Get provisioning address */
-            if (mRcsSettings.isSecondaryProvisioningAddressOnly()) {
-                primaryUri = mRcsSettings.getSecondaryProvisioningAddress();
+            String secondaryAddress = mRcsSettings.getSecondaryProvisioningAddress();
+            if (secondaryAddress != null && mRcsSettings.isSecondaryProvisioningAddressOnly()) {
+                primaryUri = secondaryAddress;
             } else {
                 primaryUri = buildProvisioningAddress();
                 secondaryUri = mRcsSettings.getSecondaryProvisioningAddress();

@@ -641,7 +641,7 @@ public class RcsSettingsData {
      * IMS username or username part of the IMPU (for HTTP Digest only)
      */
     public static final String USERPROFILE_IMS_USERNAME = "MyContactId";
-    /* package private */static final String DEFAULT_USERPROFILE_IMS_USERNAME = "";
+    /* package private */static final String DEFAULT_USERPROFILE_IMS_USERNAME = null;
 
     /**
      * IMS display name
@@ -653,31 +653,31 @@ public class RcsSettingsData {
      * IMS home domain
      */
     public static final String USERPROFILE_IMS_HOME_DOMAIN = "ImsHomeDomain";
-    /* package private */static final String DEFAULT_USERPROFILE_IMS_HOME_DOMAIN = "";
+    /* package private */static final String DEFAULT_USERPROFILE_IMS_HOME_DOMAIN = null;
 
     /**
      * IMS private URI or IMPI (for HTTP Digest only)
      */
     public static final String USERPROFILE_IMS_PRIVATE_ID = "ImsPrivateId";
-    /* package private */static final String DEFAULT_USERPROFILE_IMS_PRIVATE_ID = "";
+    /* package private */static final String DEFAULT_USERPROFILE_IMS_PRIVATE_ID = null;
 
     /**
      * IMS password (for HTTP Digest only)
      */
     public static final String USERPROFILE_IMS_PASSWORD = "ImsPassword";
-    /* package private */static final String DEFAULT_USERPROFILE_IMS_PASSWORD = "";
+    /* package private */static final String DEFAULT_USERPROFILE_IMS_PASSWORD = null;
 
     /**
      * IMS realm (for HTTP Digest only)
      */
     public static final String USERPROFILE_IMS_REALM = "ImsRealm";
-    /* package private */static final String DEFAULT_USERPROFILE_IMS_REALM = "";
+    /* package private */static final String DEFAULT_USERPROFILE_IMS_REALM = null;
 
     /**
      * P-CSCF or outbound proxy address for mobile access
      */
     public static final String IMS_PROXY_ADDR_MOBILE = "ImsOutboundProxyAddrForMobile";
-    /* package private */static final String DEFAULT_IMS_PROXY_ADDR_MOBILE = "";
+    /* package private */static final String DEFAULT_IMS_PROXY_ADDR_MOBILE = null;
 
     /**
      * P-CSCF or outbound proxy port for mobile access
@@ -689,7 +689,7 @@ public class RcsSettingsData {
      * P-CSCF or outbound proxy address for Wi-Fi access
      */
     public static final String IMS_PROXY_ADDR_WIFI = "ImsOutboundProxyAddrForWifi";
-    /* package private */static final String DEFAULT_IMS_PROXY_ADDR_WIFI = "";
+    /* package private */static final String DEFAULT_IMS_PROXY_ADDR_WIFI = null;
 
     /**
      * P-CSCF or outbound proxy port for Wi-Fi access
@@ -707,13 +707,13 @@ public class RcsSettingsData {
      * XDM server login (for HTTP Digest only)
      */
     public static final String XDM_LOGIN = "XdmServerLogin";
-    /* package private */static final String DEFAULT_XDM_LOGIN = "";
+    /* package private */static final String DEFAULT_XDM_LOGIN = null;
 
     /**
      * XDM server password (for HTTP Digest only)
      */
     public static final String XDM_PASSWORD = "XdmServerPassword";
-    /* package private */static final String DEFAULT_XDM_PASSWORD = "";
+    /* package private */static final String DEFAULT_XDM_PASSWORD = null;
 
     /**
      * File transfer HTTP server address & port
@@ -755,7 +755,7 @@ public class RcsSettingsData {
      * UUID value for populating SIP instance
      */
     public static final String UUID = "UUID";
-    /* package private */static final String DEFAULT_UUID = "";
+    /* package private */static final String DEFAULT_UUID = null;
 
     // ---------------------------------------------------------------------------
     // Stack settings
@@ -1045,7 +1045,7 @@ public class RcsSettingsData {
      * RCS extensions capability
      */
     public static final String CAPABILITY_RCS_EXTENSIONS = "CapabilityRcsExtensions";
-    /* package private */static final String DEFAULT_CAPABILITY_RCS_EXTENSIONS = "";
+    /* package private */static final String DEFAULT_CAPABILITY_RCS_EXTENSIONS = null;
 
     /**
      * Instant messaging is always on (Store & Forward server)
@@ -1199,7 +1199,7 @@ public class RcsSettingsData {
      * Secondary provisioning address
      */
     public static final String SECONDARY_PROVISIONING_ADDRESS = "SecondaryProvisioningAddress";
-    /* package private */static final String DEFAULT_SECONDARY_PROV_ADDR = "";
+    /* package private */static final String DEFAULT_SECONDARY_PROV_ADDR = null;
 
     /**
      * Use only the secondary provisioning address

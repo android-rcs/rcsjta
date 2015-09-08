@@ -41,6 +41,8 @@ import com.gsma.rcs.provider.settings.RcsSettingsData.AuthenticationProcedure;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsServiceRegistration;
 
+import android.text.TextUtils;
+
 import org.xbill.DNS.Cache;
 import org.xbill.DNS.ExtendedResolver;
 import org.xbill.DNS.Lookup;
@@ -232,7 +234,7 @@ public abstract class ImsNetworkInterface {
         mImsProxyProtocol = proxyProtocol;
         mImsAuthentMode = authentMode;
         mRcsSettings = rcsSettings;
-        if (proxyProtocol.equalsIgnoreCase(ListeningPoint.UDP))
+        if (mImsProxyProtocol.equals(ListeningPoint.UDP))
             mTcpFallback = mRcsSettings.isTcpFallback();
 
         mSip = new SipManager(this, mRcsSettings);
@@ -306,7 +308,7 @@ public abstract class ImsNetworkInterface {
      * @return Boolean
      */
     public boolean isInterfaceConfigured() {
-        return (mImsProxyAddr != null) && (mImsProxyAddr.length() > 0);
+        return !TextUtils.isEmpty(mImsProxyAddr);
     }
 
     /**
@@ -531,12 +533,14 @@ public abstract class ImsNetworkInterface {
      * @return constructed srv query
      */
     private String getSrvQuery(String sipService) {
+        StringBuilder query = new StringBuilder();
         if (DNS_SIP_TLS_SERVICE.equalsIgnoreCase(sipService)) {
-            return new StringBuilder(DNS_SIPS_PREFIX).append(TCP_PROTOCOL).append(DOT)
-                    .append(mImsProxyAddr).toString();
+            query.append(DNS_SIPS_PREFIX).append(TCP_PROTOCOL);
+        } else {
+            query.append(DNS_SIP_PREFIX).append(mImsProxyProtocol.toLowerCase());
         }
-        return new StringBuilder(DNS_SIP_PREFIX).append(mImsProxyProtocol.toLowerCase())
-                .append(DOT).append(mImsProxyAddr).toString();
+        query.append(DOT).append(mImsProxyAddr);
+        return query.toString();
     }
 
     // Changed by Deutsche Telekom
@@ -578,11 +582,11 @@ public abstract class ImsNetworkInterface {
 
                 /* DNS NAPTR lookup */
                 String service;
-                if (mImsProxyProtocol.equalsIgnoreCase(ListeningPoint.UDP)) {
+                if (mImsProxyProtocol.equals(ListeningPoint.UDP)) {
                     service = DNS_SIP_UDP_SERVICE;
-                } else if (mImsProxyProtocol.equalsIgnoreCase(ListeningPoint.TCP)) {
+                } else if (mImsProxyProtocol.equals(ListeningPoint.TCP)) {
                     service = DNS_SIP_TCP_SERVICE;
-                } else if (mImsProxyProtocol.equalsIgnoreCase(ListeningPoint.TLS)) {
+                } else if (mImsProxyProtocol.equals(ListeningPoint.TLS)) {
                     service = DNS_SIP_TLS_SERVICE;
                 } else {
                     throw new SipPayloadException(
@@ -714,7 +718,7 @@ public abstract class ImsNetworkInterface {
              * ListeningPoint.UDP, it should still send the keep-Alive (double CRLF).
              */
             if (mRcsSettings.isSipKeepAliveEnabled()
-                    && !ListeningPoint.UDP.equalsIgnoreCase(mImsProxyProtocol)) {
+                    && !ListeningPoint.UDP.equals(mImsProxyProtocol)) {
                 mSip.getSipStack().getKeepAliveManager().start();
             }
         } catch (UnknownHostException e) {

@@ -45,7 +45,6 @@ import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.RcsServiceRegistration.ReasonCode;
 
 import java.util.ListIterator;
-import java.util.Vector;
 
 import javax2.sip.header.ContactHeader;
 import javax2.sip.header.ExpiresHeader;
@@ -229,15 +228,12 @@ public class RegistrationManager extends PeriodicRefresher {
                 SipInterface sipInterface = mNetworkInterface.getSipManager().getSipStack();
                 String callId = sipInterface.generateCallId();
 
-                String target = PhoneUtils.SIP_URI_HEADER.concat(mRegistrationProcedure
-                        .getHomeDomain());
+                StringBuilder target = new StringBuilder(PhoneUtils.SIP_URI_HEADER)
+                        .append(mRegistrationProcedure.getHomeDomain());
 
                 String uri = mRegistrationProcedure.getPublicUri();
-
-                Vector<String> route = sipInterface.getDefaultRoutePath();
-
-                mDialogPath = new SipDialogPath(sipInterface, callId, 1, target, uri, uri, route,
-                        mRcsSettings);
+                mDialogPath = new SipDialogPath(sipInterface, callId, 1, target.toString(), uri,
+                        uri, sipInterface.getDefaultRoutePath(), mRcsSettings);
             } else {
                 mDialogPath.incrementCseq();
             }

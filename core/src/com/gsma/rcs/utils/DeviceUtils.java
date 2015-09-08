@@ -131,7 +131,7 @@ public class DeviceUtils {
         if (imei != null) {
             return new StringBuilder(URN_IMEI).append(imei).append(GREATER_THAN).toString();
         }
-        final String uuidValue = rcsSettings.getUUID();
-        return new StringBuilder(URN_UUID).append(uuidValue).append(GREATER_THAN).toString();
+        return new StringBuilder(URN_UUID).append(rcsSettings.getUUID()).append(GREATER_THAN)
+                .toString();
     }
 }

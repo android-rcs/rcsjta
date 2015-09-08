@@ -345,11 +345,12 @@ public class UserProfile {
      * @return String
      */
     public String toString() {
-        String result = "IMS username=" + mContact + ", " + "IMS private ID=" + mPrivateID + ", "
-                + "IMS password=" + mPassword + ", " + "IMS home domain=" + mHomeDomain + ", "
-                + "XDM server=" + mXdmServerAddr + ", " + "XDM login=" + mXdmServerLogin + ", "
-                + "XDM password=" + mXdmServerPassword + ", " + "IM Conference URI="
-                + mImConference;
-        return result;
+        return new StringBuilder("IMS username=").append(mContact).append(", ")
+                .append("IMS private ID=").append(mPrivateID).append(", ").append("IMS password=")
+                .append(mPassword).append(", ").append("IMS home domain=").append(mHomeDomain)
+                .append(", ").append("XDM server=").append(mXdmServerAddr).append(", ")
+                .append("XDM login=").append(mXdmServerLogin).append(", ").append("XDM password=")
+                .append(mXdmServerPassword).append(", ").append("IM Conference URI=")
+                .append(mImConference).toString();
     }
 }
