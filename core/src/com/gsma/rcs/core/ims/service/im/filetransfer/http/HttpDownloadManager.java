@@ -242,6 +242,7 @@ public class HttpDownloadManager extends HttpTransferManager {
             FileFactory.getFactory().updateMediaStorage(mDownloadedFile.getEncodedPath());
         } finally {
             CloseableUtils.tryToClose(mFileDownloadStream);
+            mFileDownloadStream = null;
             if (urlConnection != null) {
                 urlConnection.disconnect();
             }
