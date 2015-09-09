@@ -238,8 +238,14 @@ public class StartService extends Service {
                      * This is a non revocable use-case as the RCS account itself was not created,
                      * So we log this as error and stop the service itself.
                      */
-                    sLogger.error("Failed to start the service for intent action : ".concat(intent
-                            .getAction()), e);
+                    String action = intent.getAction();
+                    if (action != null) {
+                        sLogger.error(
+                                "Failed to start the service for intent action: ".concat(action), e);
+                    } else {
+                        sLogger.error("Failed to start the service for intent: ".concat(intent
+                                .toString()), e);
+                    }
                     stopSelf();
                 } catch (RuntimeException e) {
                     /*
@@ -249,8 +255,14 @@ public class StartService extends Service {
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error("Unable to handle connection event for intent action : "
-                            .concat(intent.getAction()), e);
+                    String action = intent.getAction();
+                    if (action != null) {
+                        sLogger.error("Unable to handle connection event for intent action: "
+                                .concat(action), e);
+                    } else {
+                        sLogger.error("Unable to handle connection event for intent: "
+                                .concat(intent.toString()), e);
+                    }
                     stopSelf();
                 }
             }
@@ -351,8 +363,7 @@ public class StartService extends Service {
      * @throws IOException
      * @throws RcsAccountException
      */
-    private boolean checkAccount() throws IOException,
-            RcsAccountException {
+    private boolean checkAccount() throws IOException, RcsAccountException {
         AndroidFactory.setApplicationContext(mContext, mRcsSettings);
 
         /* Read the current and last end user accounts */
