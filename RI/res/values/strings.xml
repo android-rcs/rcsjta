@@ -347,7 +347,6 @@
     <string name="label_upload_started">STARTED</string>
     <string name="label_upload_transferred">TRANSFERRED</string>
     <string name="label_open_upload_failed">Show uploaded file failed</string>
-    <string name="label_open_icon_upload_failed">Show uploaded thumbnail failed</string>
 
     <!-- Group delivery information menu -->
     <string name="title_group_delivery_info">Group delivery information</string>

@@ -17,6 +17,7 @@
 	<property name="samples" value="${terminal.root}/samples" />
 	<property name="prov_template.root" value="${tools}/provisioning/prov_template" />
 	<property name="core_control.root" value="${tools}/core_control" />
+	<property name="ims_notif.root" value="${tools}/ims_notification" />
 	<property name="extension.root" value="${samples}/extension" />
 	<property name="tts.root" value="${samples}/tts" />
 	<property name="javadoc.root" value="${terminal.root}/doclava" />
@@ -39,7 +40,7 @@
 	<!-- Generate RCS API SDK -->
 	<!-- ********************* -->
 	<target name="sdk"
-		depends="ri-apk,docs,prov-template-apk,core-control-apk,extension-apk,tts-apk">
+		depends="ri-apk,docs,prov-template-apk,core-control-apk,ims-notif-apk,extension-apk,tts-apk">
 		<echo>Generates RCS SDK for Android target ${android.target}</echo>
 		<mkdir dir="${generate.root}" />
 		<delete>
@@ -59,6 +60,8 @@
 				fullpath="tools/RCS_prov_template.apk" />
 			<zipfileset dir="${core_control.root}/bin" includes="*debug.apk"
 				fullpath="tools/RCS_core_control.apk" />
+			<zipfileset dir="${ims_notif.root}/bin" includes="*debug.apk"
+				fullpath="tools/RCS_notification.apk" />
 			<zipfileset dir="${stack.root}/bin" includes="*debug.apk"
 				fullpath="stack/RCS_core.apk" />
 			<zipfileset dir="${ri.root}/bin" includes="*debug.apk"
@@ -102,6 +105,14 @@
 		<ant dir="${core_control.root}" antfile="build-local.xml" target="all"
 			inheritAll="false" />
 		<ant dir="${core_control.root}" target="debug" inheritAll="false" />
+	</target>
+	
+	<target name="ims-notif-apk" depends="ri-apk">
+		<echo>Generates the RCS IMS notification apk.</echo>
+		<ant dir="${ims_notif.root}" target="clean" inheritAll="false" />
+		<ant dir="${ims_notif.root}" antfile="build-local.xml" target="all"
+			inheritAll="false" />
+		<ant dir="${ims_notif.root}" target="debug" inheritAll="false" />
 	</target>
 
 	<target name="extension-apk" depends="core-apk">
@@ -169,6 +180,7 @@
 		<echo> ri-apk: Generates the RI apk.</echo>
 		<echo> prov-template-apk: Generates the RCS provisioning template apk.</echo>
 		<echo> core-control-apk: Generates the RCS core control apk.</echo>
+		<echo> ims-notif-apk: Generates the RCS IMS notification apk.</echo>
 		<echo> extension-apk: Generates the sample extension apk.</echo>
 		<echo> tts-apk: Generates the sample tts apk.</echo>
 	</target>

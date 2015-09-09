@@ -1,5 +1,5 @@
 /**
- * This API exposes all infos related to rcs contacts.
+ * This API exposes all infos related to RCS contacts.
  * <p>
  */
 

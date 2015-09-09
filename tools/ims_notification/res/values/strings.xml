@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">RCS notification</string>
+    <string name="label_launch_service">Notification</string>
+    <string name="notification_title_rcs_service">RCS service</string>
+    <string name="ims_connected">Connected to RCS platform</string>
+    <string name="ims_disconnected">Disconnected from RCS platform</string>
+    <string name="ims_battery_disconnected">Disconnected from RCS platform (Battery low)</string>
+
+</resources>

@@ -16,20 +16,23 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.orangelabs.rcs.ri;
+package com.gsma.rcs.notif;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
+import android.os.Bundle;
 
 /**
- * On device boot starts the RCS service notification manager automatically
- * 
- * @author Jean-Marc AUFFRET
+ * An activity to launch the RCS notification service
  */
-public class DeviceBoot extends BroadcastReceiver {
+public class LaunchServiceActivity extends Activity {
+
     @Override
-    public void onReceive(Context context, Intent intent) {
-        context.startService(new Intent(context, RcsServiceNotifManager.class));
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        /* Starts the RCS service notification manager */
+        startService(new Intent(this, RcsServiceNotifManager.class));
+        finish();
     }
+
 }

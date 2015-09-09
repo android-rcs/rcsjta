@@ -16,7 +16,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.orangelabs.rcs.ri;
+package com.gsma.rcs.notif;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

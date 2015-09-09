@@ -16,8 +16,9 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.orangelabs.rcs.ri;
+package com.gsma.rcs.notif;
 
+import com.gsma.rcs.registry.R;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsServiceControl;
 import com.gsma.services.rcs.RcsServiceException;
@@ -25,8 +26,6 @@ import com.gsma.services.rcs.RcsServiceListener;
 import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.RcsServiceRegistrationListener;
 import com.gsma.services.rcs.capability.CapabilityService;
-
-import com.orangelabs.rcs.ri.utils.LogUtils;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -42,13 +41,19 @@ import android.util.Log;
 
 /**
  * Service manager that monitors the service availability and that displays the RCS status in the
- * notification bar
+ * notification bar.
  * 
  * @author Jean-Marc AUFFRET
  */
 public class RcsServiceNotifManager extends Service {
-    private static final String LOGTAG = LogUtils.getTag(RcsServiceNotifManager.class
-            .getSimpleName());
+
+    /**
+     * Flag to disable or enable log
+     */
+    private static final boolean isActive = true;
+
+    private static final String LOGTAG = new StringBuilder("[IMS]").append(
+            RcsServiceNotifManager.class.getSimpleName()).toString();
 
     private final static int NOTIF_ID = 1000;
 
@@ -56,11 +61,9 @@ public class RcsServiceNotifManager extends Service {
 
     private RcsService mServiceApi;
 
-    private static final String ACTION_VIEW_SETTINGS = "com.gsma.services.rcs.action.VIEW_SETTINGS";
-
     @Override
     public void onCreate() {
-        if (LogUtils.isActive) {
+        if (isActive) {
             Log.d(LOGTAG, "Service started");
         }
 
@@ -74,7 +77,7 @@ public class RcsServiceNotifManager extends Service {
 
     @Override
     public void onDestroy() {
-        if (LogUtils.isActive) {
+        if (isActive) {
             Log.d(LOGTAG, "Service stopped");
         }
 
@@ -87,12 +90,12 @@ public class RcsServiceNotifManager extends Service {
     }
 
     private void connectToService(Context ctx) {
-        if (LogUtils.isActive) {
+        if (isActive) {
             Log.d(LOGTAG, "Try to connect to service API");
         }
         try {
             if (!RcsServiceControl.getInstance(ctx).isServiceStarted()) {
-                if (LogUtils.isActive) {
+                if (isActive) {
                     Log.d(LOGTAG, "RCS service not yet started");
                 }
                 return;
@@ -100,7 +103,7 @@ public class RcsServiceNotifManager extends Service {
             mServiceApi = new CapabilityService(ctx, newRcsServiceListener());
             mServiceApi.connect();
         } catch (RcsServiceException e) {
-            if (LogUtils.isActive) {
+            if (isActive) {
                 Log.e(LOGTAG, "Cannot connect service API", e);
             }
         }
@@ -113,7 +116,7 @@ public class RcsServiceNotifManager extends Service {
                 return;
             }
 
-            if (LogUtils.isActive) {
+            if (isActive) {
                 Log.d(LOGTAG, "Service UP");
             }
             connectToService(context);
@@ -124,7 +127,7 @@ public class RcsServiceNotifManager extends Service {
         return new RcsServiceListener() {
             @Override
             public void onServiceDisconnected(ReasonCode error) {
-                if (LogUtils.isActive) {
+                if (isActive) {
                     Log.d(LOGTAG, "Service API disconnected");
                 }
                 notifyImsUnregistered(RcsServiceRegistration.ReasonCode.CONNECTION_LOST);
@@ -132,18 +135,18 @@ public class RcsServiceNotifManager extends Service {
 
             @Override
             public void onServiceConnected() {
-                if (LogUtils.isActive) {
+                if (isActive) {
                     Log.d(LOGTAG, "Service API connected");
                 }
                 try {
                     mServiceApi.addEventListener(mRcsRegistrationListener);
                     if (mServiceApi.isServiceRegistered()) {
-                        if (LogUtils.isActive) {
+                        if (isActive) {
                             Log.d(LOGTAG, "IMS is registered");
                         }
                         notifyImsRegistered();
                     } else {
-                        if (LogUtils.isActive) {
+                        if (isActive) {
                             Log.d(LOGTAG, "IMS is unregistered");
                         }
                         RcsServiceRegistration.ReasonCode reason = mServiceApi
@@ -151,7 +154,7 @@ public class RcsServiceNotifManager extends Service {
                         notifyImsUnregistered(reason);
                     }
                 } catch (RcsServiceException e) {
-                    if (LogUtils.isActive) {
+                    if (isActive) {
                         Log.w(LOGTAG, "Cannot add RCS Service Registration Listener", e);
                     }
                 }
@@ -162,7 +165,7 @@ public class RcsServiceNotifManager extends Service {
     private RcsServiceRegistrationListener mRcsRegistrationListener = new RcsServiceRegistrationListener() {
         @Override
         public void onServiceUnregistered(RcsServiceRegistration.ReasonCode reason) {
-            if (LogUtils.isActive) {
+            if (isActive) {
                 Log.d(LOGTAG, "IMS has been unregistered");
             }
             notifyImsUnregistered(reason);
@@ -170,7 +173,7 @@ public class RcsServiceNotifManager extends Service {
 
         @Override
         public void onServiceRegistered() {
-            if (LogUtils.isActive) {
+            if (isActive) {
                 Log.d(LOGTAG, "IMS has been registered");
             }
             notifyImsRegistered();
@@ -192,11 +195,8 @@ public class RcsServiceNotifManager extends Service {
     }
 
     private void addImsConnectionNotification(int iconId, String label) {
-        Intent intent = new Intent(ACTION_VIEW_SETTINGS);
-        PendingIntent contentIntent = PendingIntent.getBroadcast(getApplicationContext(), 0,
-                intent, 0);
         String title = this.getString(R.string.notification_title_rcs_service);
-        Notification notif = buildImsConnectionNotification(contentIntent, title, label, iconId);
+        Notification notif = buildImsConnectionNotification(null, title, label, iconId);
         notif.flags = Notification.FLAG_NO_CLEAR | Notification.FLAG_FOREGROUND_SERVICE;
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(NOTIF_ID, notif);

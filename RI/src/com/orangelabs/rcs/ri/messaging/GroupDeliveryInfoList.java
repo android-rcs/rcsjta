@@ -37,6 +37,8 @@ import android.widget.ListView;
 
 /**
  * A list view of group chat delivery information where the data comes from a cursor.
+ * 
+ * @author yplo6403
  */
 public class GroupDeliveryInfoList extends FragmentActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
