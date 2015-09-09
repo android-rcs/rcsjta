@@ -120,7 +120,7 @@ public class StreamingSessionView extends Activity {
                 Log.d(LOGTAG, "onMultimediaStreamingStateChanged contact=" + contact
                         + " sessionId=" + sessionId + " state=" + state + " reason=" + reasonCode);
             }
-            // Discard event if not for current sessionId
+            /* Discard event if not for current sessionId */
             if (mSessionId == null || !mSessionId.equals(sessionId)) {
                 return;
             }
@@ -130,16 +130,15 @@ public class StreamingSessionView extends Activity {
 
                     switch (state) {
                         case STARTED:
-                            // Session is established: hide progress dialog
+                            /* Session is established: hide progress dialog. */
                             hideProgressDialog();
-                            // Activate button
+                            /* Activate sen button. */
                             Button sendBtn = (Button) findViewById(R.id.send_btn);
                             sendBtn.setEnabled(true);
                             break;
 
                         case ABORTED:
-                            // Session is aborted: hide progress dialog then
-                            // exit
+                            /* Session is aborted: hide progress dialog then exit. */
                             hideProgressDialog();
                             Utils.showMessageAndExit(StreamingSessionView.this,
                                     getString(R.string.label_session_aborted, _reasonCode),
@@ -147,8 +146,7 @@ public class StreamingSessionView extends Activity {
                             break;
 
                         case REJECTED:
-                            // Session is rejected: hide progress dialog then
-                            // exit
+                            /* Session is rejected: hide progress dialog then exit. */
                             hideProgressDialog();
                             Utils.showMessageAndExit(StreamingSessionView.this,
                                     getString(R.string.label_session_rejected, _reasonCode),
@@ -156,7 +154,7 @@ public class StreamingSessionView extends Activity {
                             break;
 
                         case FAILED:
-                            // Session is failed: hide progress dialog then exit
+                            /* Session failed: hide progress dialog then exit. */
                             hideProgressDialog();
                             Utils.showMessageAndExit(StreamingSessionView.this,
                                     getString(R.string.label_session_failed, _reasonCode),
@@ -223,14 +221,10 @@ public class StreamingSessionView extends Activity {
         connectionManager.startMonitorServices(this, mExitOnce, RcsServiceName.MULTIMEDIA,
                 RcsServiceName.CONTACT);
         try {
-            // Add service listener
             connectionManager.getMultimediaSessionApi().addEventListener(mServiceListener);
             initialiseStreamingSession(getIntent());
         } catch (RcsServiceException e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "Failed to add listener", e);
-            }
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce);
+            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
         }
     }
 
@@ -239,13 +233,10 @@ public class StreamingSessionView extends Activity {
         super.onDestroy();
         connectionManager.stopMonitorServices(this);
         if (connectionManager.isServiceConnected(RcsServiceName.MULTIMEDIA)) {
-            // Remove listener
             try {
                 connectionManager.getMultimediaSessionApi().removeEventListener(mServiceListener);
             } catch (Exception e) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "Failed to remove listener", e);
-                }
+                Log.w(LOGTAG, "Failed to remove listener", e);
             }
         }
     }
@@ -255,7 +246,6 @@ public class StreamingSessionView extends Activity {
      */
     private void acceptInvitation() {
         try {
-            // Accept the invitation
             mSession.acceptInvitation();
         } catch (Exception e) {
             Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce,
@@ -268,10 +258,9 @@ public class StreamingSessionView extends Activity {
      */
     private void rejectInvitation() {
         try {
-            // Reject the invitation
             mSession.rejectInvitation();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(LOGTAG, "Failed to reject invitation!", e);
         }
     }
 
@@ -280,84 +269,65 @@ public class StreamingSessionView extends Activity {
         try {
             int mode = intent.getIntExtra(StreamingSessionView.EXTRA_MODE, -1);
             if (mode == StreamingSessionView.MODE_OUTGOING) {
-                // Outgoing session
-
-                // Check if the service is available
+                /* Outgoing session: Check if the service is available. */
                 if (!sessionApi.isServiceRegistered()) {
                     Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                             mExitOnce);
                     return;
                 }
-
-                // Get remote contact
                 mContact = intent.getParcelableExtra(StreamingSessionView.EXTRA_CONTACT);
-
-                // Initiate session
                 startSession();
-            } else {
-                if (mode == StreamingSessionView.MODE_OPEN) {
-                    // Open an existing session
 
-                    // Incoming session
-                    mSessionId = intent.getStringExtra(StreamingSessionView.EXTRA_SESSION_ID);
-
-                    // Get the session
-                    mSession = sessionApi.getStreamingSession(mSessionId);
-                    if (mSession == null) {
-                        // Session not found or expired
-                        Utils.showMessageAndExit(this,
-                                getString(R.string.label_session_has_expired), mExitOnce);
-                        return;
-                    }
-
-                    // Get remote contact
-                    mContact = mSession.getRemoteContact();
-                } else {
-                    // Incoming session from its Intent
-                    mSessionId = intent
-                            .getStringExtra(MultimediaStreamingSessionIntent.EXTRA_SESSION_ID);
-
-                    // Get the session
-                    mSession = sessionApi.getStreamingSession(mSessionId);
-                    if (mSession == null) {
-                        // Session not found or expired
-                        Utils.showMessageAndExit(this,
-                                getString(R.string.label_session_has_expired), mExitOnce);
-                        return;
-                    }
-
-                    // Get remote contact
-                    mContact = mSession.getRemoteContact();
-                    String from = RcsDisplayName.getInstance(this).getDisplayName(mContact);
-
-                    // Manual accept
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setTitle(R.string.title_streaming_session);
-                    builder.setMessage(getString(R.string.label_mm_from_id, from, mServiceId));
-                    builder.setCancelable(false);
-                    builder.setIcon(R.drawable.ri_notif_mm_session_icon);
-                    builder.setPositiveButton(getString(R.string.label_accept), acceptBtnListener);
-                    builder.setNegativeButton(getString(R.string.label_decline), declineBtnListener);
-                    builder.show();
+            } else if (mode == StreamingSessionView.MODE_OPEN) {
+                /* Open an existing session. */
+                mSessionId = intent.getStringExtra(StreamingSessionView.EXTRA_SESSION_ID);
+                mSession = sessionApi.getStreamingSession(mSessionId);
+                if (mSession == null) {
+                    Utils.showMessageAndExit(this, getString(R.string.label_session_has_expired),
+                            mExitOnce);
+                    return;
                 }
+                mContact = mSession.getRemoteContact();
+
+            } else {
+                /* Incoming session from its Intent. */
+                mSessionId = intent
+                        .getStringExtra(MultimediaStreamingSessionIntent.EXTRA_SESSION_ID);
+
+                mSession = sessionApi.getStreamingSession(mSessionId);
+                if (mSession == null) {
+                    Utils.showMessageAndExit(this, getString(R.string.label_session_has_expired),
+                            mExitOnce);
+                    return;
+                }
+                mContact = mSession.getRemoteContact();
+                String from = RcsDisplayName.getInstance(this).getDisplayName(mContact);
+
+                /* Manual accept */
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.title_streaming_session);
+                builder.setMessage(getString(R.string.label_mm_from_id, from, mServiceId));
+                builder.setCancelable(false);
+                builder.setIcon(R.drawable.ri_notif_mm_session_icon);
+                builder.setPositiveButton(getString(R.string.label_accept), acceptBtnListener);
+                builder.setNegativeButton(getString(R.string.label_decline), declineBtnListener);
+                builder.show();
             }
 
-            // Display session info
+            /* Display session info */
             TextView featureTagEdit = (TextView) findViewById(R.id.feature_tag);
             featureTagEdit.setText(mServiceId);
             TextView contactEdit = (TextView) findViewById(R.id.contact);
             String from = RcsDisplayName.getInstance(this).getDisplayName(mContact);
             contactEdit.setText(from);
             Button sendBtn = (Button) findViewById(R.id.send_btn);
-            if (mSession != null) {
+            if (mSession != null && MultimediaSession.State.STARTED == mSession.getState()) {
                 sendBtn.setEnabled(true);
             } else {
                 sendBtn.setEnabled(false);
             }
-
         } catch (RcsServiceException e) {
-            e.printStackTrace();
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce);
+            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
         }
     }
 
@@ -365,19 +335,17 @@ public class StreamingSessionView extends Activity {
      * Start session
      */
     private void startSession() {
-        // Initiate the chat session in background
         try {
-            // Initiate session
             mSession = connectionManager.getMultimediaSessionApi().initiateStreamingSession(
                     mServiceId, mContact);
             mSessionId = mSession.getSessionId();
+
         } catch (Exception e) {
             Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce,
                     e);
             return;
         }
-
-        // Display a progress dialog
+        /* Display a progress dialog */
         mProgressDialog = Utils.showProgressDialog(this,
                 getString(R.string.label_command_in_progress));
         mProgressDialog.setOnCancelListener(new OnCancelListener() {
@@ -404,7 +372,6 @@ public class StreamingSessionView extends Activity {
      */
     private OnClickListener acceptBtnListener = new OnClickListener() {
         public void onClick(DialogInterface dialog, int which) {
-            // Accept invitation
             acceptInvitation();
         }
     };
@@ -414,10 +381,8 @@ public class StreamingSessionView extends Activity {
      */
     private OnClickListener declineBtnListener = new OnClickListener() {
         public void onClick(DialogInterface dialog, int which) {
-            // Reject invitation
             rejectInvitation();
-
-            // Exit activity
+            /* Exit activity */
             finish();
         }
     };
@@ -426,17 +391,15 @@ public class StreamingSessionView extends Activity {
      * Quit the session
      */
     private void quitSession() {
-        // Stop session
         if (mSession != null) {
             try {
                 mSession.abortSession();
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e(LOGTAG, "Failed to abort session!", e);
             }
             mSession = null;
         }
-
-        // Exit activity
+        /* Exit activity */
         finish();
     }
 
@@ -450,7 +413,6 @@ public class StreamingSessionView extends Activity {
                     builder.setPositiveButton(getString(R.string.label_ok),
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
-                                    // Quit the session
                                     quitSession();
                                 }
                             });
@@ -464,7 +426,6 @@ public class StreamingSessionView extends Activity {
                     builder.setCancelable(true);
                     builder.show();
                 } else {
-                    // Exit activity
                     finish();
                 }
                 return true;
@@ -484,7 +445,6 @@ public class StreamingSessionView extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_close_session:
-                // Quit the session
                 quitSession();
                 break;
         }
@@ -499,10 +459,10 @@ public class StreamingSessionView extends Activity {
 
         public void onClick(View v) {
             try {
-                String data = "data" + i++;
+                String data = "data".concat(String.valueOf(i++));
                 mSession.sendPayload(data.getBytes());
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e(LOGTAG, "Failed to send message!", e);
             }
         }
     };
