@@ -88,6 +88,12 @@ public class RcsDisplayName {
                 mService = ConnectionManager.getInstance().getContactApi();
             }
             RcsContact rcsContact = mService.getRcsContact(contact);
+            if (rcsContact == null) {
+                /*
+                 * Contact exists but is not RCS: returns the phone number.
+                 */
+                return contact.toString();
+            }
             String displayName = rcsContact.getDisplayName();
             if (displayName == null) {
                 return contact.toString();
