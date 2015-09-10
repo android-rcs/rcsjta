@@ -247,6 +247,10 @@ public class MessagingSessionView extends Activity {
     private void acceptInvitation() {
         try {
             mSession.acceptInvitation();
+            /*
+             * Wait for the SIP-ACK to allow the user to send message once session is established.
+             */
+            showProgressDialog();
         } catch (Exception e) {
             Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce,
                     e);
@@ -282,6 +286,9 @@ public class MessagingSessionView extends Activity {
                 }
                 mContact = intent.getParcelableExtra(MessagingSessionView.EXTRA_CONTACT);
                 startSession();
+                if (mSession == null) {
+                    return;
+                }
 
             } else if (mode == MessagingSessionView.MODE_OPEN) {
                 /* Open existing session. */
@@ -324,10 +331,9 @@ public class MessagingSessionView extends Activity {
             TextView contactEdit = (TextView) findViewById(R.id.contact);
             contactEdit.setText(from);
             Button sendBtn = (Button) findViewById(R.id.send_btn);
-            if (mSession != null && MultimediaSession.State.STARTED == mSession.getState()) {
+
+            if (MultimediaSession.State.STARTED == mSession.getState()) {
                 sendBtn.setEnabled(true);
-            } else {
-                sendBtn.setEnabled(false);
             }
 
         } catch (RcsServiceException e) {
@@ -348,7 +354,10 @@ public class MessagingSessionView extends Activity {
                     e);
             return;
         }
-        /* Display a progress dialog. */
+        showProgressDialog();
+    }
+
+    private void showProgressDialog() {
         mProgressDialog = Utils.showProgressDialog(MessagingSessionView.this,
                 getString(R.string.label_command_in_progress));
         mProgressDialog.setOnCancelListener(new OnCancelListener() {
@@ -360,10 +369,7 @@ public class MessagingSessionView extends Activity {
         });
     }
 
-    /**
-     * Hide progress dialog
-     */
-    public void hideProgressDialog() {
+    private void hideProgressDialog() {
         if (mProgressDialog != null && mProgressDialog.isShowing()) {
             mProgressDialog.dismiss();
             mProgressDialog = null;
@@ -390,9 +396,6 @@ public class MessagingSessionView extends Activity {
         }
     };
 
-    /**
-     * Quit the session
-     */
     private void quitSession() {
         if (mSession != null) {
             try {

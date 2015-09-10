@@ -247,6 +247,10 @@ public class StreamingSessionView extends Activity {
     private void acceptInvitation() {
         try {
             mSession.acceptInvitation();
+            /*
+             * Wait for the SIP-ACK to allow the user to send message once session is established.
+             */
+            showProgressDialog();
         } catch (Exception e) {
             Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce,
                     e);
@@ -323,17 +327,12 @@ public class StreamingSessionView extends Activity {
             Button sendBtn = (Button) findViewById(R.id.send_btn);
             if (mSession != null && MultimediaSession.State.STARTED == mSession.getState()) {
                 sendBtn.setEnabled(true);
-            } else {
-                sendBtn.setEnabled(false);
             }
         } catch (RcsServiceException e) {
             Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
         }
     }
 
-    /**
-     * Start session
-     */
     private void startSession() {
         try {
             mSession = connectionManager.getMultimediaSessionApi().initiateStreamingSession(
@@ -345,6 +344,10 @@ public class StreamingSessionView extends Activity {
                     e);
             return;
         }
+        showProgressDialog();
+    }
+
+    private void showProgressDialog() {
         /* Display a progress dialog */
         mProgressDialog = Utils.showProgressDialog(this,
                 getString(R.string.label_command_in_progress));
@@ -357,10 +360,7 @@ public class StreamingSessionView extends Activity {
         });
     }
 
-    /**
-     * Hide progress dialog
-     */
-    public void hideProgressDialog() {
+    private void hideProgressDialog() {
         if (mProgressDialog != null && mProgressDialog.isShowing()) {
             mProgressDialog.dismiss();
             mProgressDialog = null;
@@ -387,9 +387,6 @@ public class StreamingSessionView extends Activity {
         }
     };
 
-    /**
-     * Quit the session
-     */
     private void quitSession() {
         if (mSession != null) {
             try {
