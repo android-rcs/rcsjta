@@ -113,7 +113,7 @@ public class HttpDigestRegistrationProcedure extends RegistrationProcedure {
             StringBuilder auth = new StringBuilder("Digest username=\"").append(user)
                     .append("\",uri=\"").append(requestUri).append("\",algorithm=MD5,realm=\"")
                     .append(realm).append("\",nonce=\"").append(nonce).append("\",response=\"")
-                    .append(response);
+                    .append(response).append("\"");
             String opaque = mDigest.getOpaque();
             if (opaque != null) {
                 auth.append(",opaque=\"").append(opaque).append("\"");
