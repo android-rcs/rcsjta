@@ -19,6 +19,7 @@
 package com.gsma.rcs.im.chat;
 
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.userprofile.UserProfile;
@@ -41,6 +42,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.test.AndroidTestCase;
 
+import java.io.IOException;
 import java.util.Random;
 
 public class ChatMessageTest extends AndroidTestCase {
@@ -81,7 +83,7 @@ public class ChatMessageTest extends AndroidTestCase {
         super.tearDown();
     }
 
-    public void testTextMessage() {
+    public void testTextMessage() throws SipPayloadException, IOException {
         String msgId = Long.toString(System.currentTimeMillis());
         ChatMessage msg = new ChatMessage(msgId, mContact, mText, MimeType.TEXT_MESSAGE,
                 mTimestamp, mTimestampSent, "display");
@@ -121,7 +123,7 @@ public class ChatMessageTest extends AndroidTestCase {
         assertFalse(mMessagingLog.isMessagePersisted(msgId));
     }
 
-    public void testGeolocMessage() {
+    public void testGeolocMessage() throws SipPayloadException, IOException {
         Geoloc geoloc = new Geoloc(mText, 10.0, 11.0, 2000, 2);
         ChatMessage chatMsg = ChatUtils.createGeolocMessage(mContact, geoloc, mTimestamp,
                 mTimestampSent);
