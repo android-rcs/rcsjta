@@ -31,7 +31,7 @@ import android.os.Bundle;
 import android.widget.TextView;
 
 /**
- * About the RI
+ * About the Core stack
  * 
  * @author Jean-Marc AUFFRET
  */
@@ -59,7 +59,6 @@ public class AboutSettings extends Activity {
         releaseView.setText(getString(R.string.label_about_release, versionName));
         TextView apiView = (TextView) findViewById(R.id.api);
         apiView.setText(getString(R.string.label_about_api, versionCode));
-
     }
 
     /**
@@ -69,7 +68,8 @@ public class AboutSettings extends Activity {
      */
     private String getBuildNumber(int versionCode) {
         return new StringBuilder(Build.API_CODENAME).append(" ")
-                .append(getGsmaVersion(versionCode)).toString();
+                .append(getGsmaVersion(Build.API_VERSION)).append('.')
+                .append(Build.API_INCREMENTAL).toString();
     }
 
     /**
