@@ -59,7 +59,7 @@
 			<zipfileset dir="${prov_template.root}/bin" includes="*debug.apk"
 				fullpath="tools/RCS_prov_template.apk" />
 			<zipfileset dir="${core_control.root}/bin" includes="*debug.apk"
-				fullpath="tools/RCS_core_control.apk" />
+				fullpath="tools/RCS_settings.apk" />
 			<zipfileset dir="${ims_notif.root}/bin" includes="*debug.apk"
 				fullpath="tools/RCS_notification.apk" />
 			<zipfileset dir="${stack.root}/bin" includes="*debug.apk"

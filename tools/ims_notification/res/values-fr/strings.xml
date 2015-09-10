@@ -3,7 +3,7 @@
 
     <string name="app_name">RCS notification</string>
     <string name="notification_title_rcs_service">Service RCS</string>
-    <string name="label_launch_service">Notification</string>
+    <string name="label_launch_service">RCS Notification</string>
     <string name="ims_connected">Connecté à la plateforme RCS</string>
     <string name="ims_disconnected">Déconnecté de la plateforme RCS</string>
     <string name="ims_battery_disconnected">Déconnecté de la plateforme RCS (Batterie faible)</string>

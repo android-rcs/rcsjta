@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="provisioning_app_name">Provisioning</string>
+    <string name="provisioning_app_name">RCS Provisioning</string>
     <string name="label_reboot_service">The RCS service should be restarted before to take into account the modifications</string>
     <string name="label_select_provisioning_file">Select XML provisioning from /sdcard:</string>
     <string name="label_generate_profile">Load profile</string>

@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">RCS Hinweis</string>
-    <string name="label_launch_service">Hinweis</string>
+    <string name="label_launch_service">RCS Hinweis</string>
     <string name="notification_title_rcs_service">RCS-Dienst</string>
     <string name="ims_connected">Verbunden mit RCS-Server</string>
     <string name="ims_disconnected">Nicht mit RCS-Server verbunden</string>
