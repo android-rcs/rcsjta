@@ -136,8 +136,7 @@ public class AnonymousFetchRequestTask {
         String target = contactUri;
 
         /* Set local party */
-        StringBuilder localParty = new StringBuilder("sip:anonymous@").append(ImsModule
-                .getImsUserProfile().getHomeDomain());
+        String localParty = "sip:anonymous@".concat(ImsModule.getImsUserProfile().getHomeDomain());
 
         /* Set remote party */
         String remoteParty = contactUri;
@@ -147,7 +146,7 @@ public class AnonymousFetchRequestTask {
 
         /* Create a dialog path */
         mDialogPath = new SipDialogPath(mImsModule.getSipManager().getSipStack(), callId, 1,
-                target, localParty.toString(), remoteParty, route, mRcsSettings);
+                target, localParty, remoteParty, route, mRcsSettings);
         sendSubscribe(createSubscribe());
     }
 

@@ -23,6 +23,7 @@
 package com.gsma.rcs.provider.settings;
 
 import com.gsma.rcs.utils.DatabaseUtils;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -76,7 +77,7 @@ public class RcsSettingsProvider extends ContentProvider {
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 114;
+        private static final int DATABASE_VERSION = 115;
 
         /**
          * Add a parameter in the db
@@ -102,6 +103,14 @@ public class RcsSettingsProvider extends ContentProvider {
 
         private void addParameter(SQLiteDatabase db, String key, long value) {
             addParameter(db, key, Long.toString(value));
+        }
+
+        private void addParameter(SQLiteDatabase db, String key, Uri value) {
+            addParameter(db, key, value == null ? null : value.toString());
+        }
+
+        private void addParameter(SQLiteDatabase db, String key, ContactId value) {
+            addParameter(db, key, value == null ? null : value.toString());
         }
 
         public DatabaseHelper(Context ctx) {
@@ -195,8 +204,7 @@ public class RcsSettingsProvider extends ContentProvider {
             addParameter(db, RcsSettingsData.FT_HTTP_PASSWORD,
                     RcsSettingsData.DEFAULT_FT_HTTP_PASSWORD);
             addParameter(db, RcsSettingsData.FT_PROTOCOL, RcsSettingsData.DEFAULT_FT_PROTOCOL);
-            addParameter(db, RcsSettingsData.IM_CONF_URI,
-                    RcsSettingsData.DEFAULT_IM_CONF_URI.toString());
+            addParameter(db, RcsSettingsData.IM_CONF_URI, RcsSettingsData.DEFAULT_IM_CONF_URI);
             addParameter(db, RcsSettingsData.ENDUSER_CONFIRMATION_URI,
                     RcsSettingsData.DEFAULT_ENDUSER_CONFIRMATION_URI);
             addParameter(db, RcsSettingsData.UUID, RcsSettingsData.DEFAULT_UUID);

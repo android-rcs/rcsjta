@@ -234,8 +234,9 @@ public abstract class ImsNetworkInterface {
         mImsProxyProtocol = proxyProtocol;
         mImsAuthentMode = authentMode;
         mRcsSettings = rcsSettings;
-        if (mImsProxyProtocol.equals(ListeningPoint.UDP))
+        if (ListeningPoint.UDP.equals(mImsProxyProtocol)) {
             mTcpFallback = mRcsSettings.isTcpFallback();
+        }
 
         mSip = new SipManager(this, mRcsSettings);
 
@@ -308,7 +309,7 @@ public abstract class ImsNetworkInterface {
      * @return Boolean
      */
     public boolean isInterfaceConfigured() {
-        return !TextUtils.isEmpty(mImsProxyAddr);
+        return mImsProxyAddr != null;
     }
 
     /**
@@ -582,11 +583,11 @@ public abstract class ImsNetworkInterface {
 
                 /* DNS NAPTR lookup */
                 String service;
-                if (mImsProxyProtocol.equals(ListeningPoint.UDP)) {
+                if (ListeningPoint.UDP.equals(mImsProxyProtocol)) {
                     service = DNS_SIP_UDP_SERVICE;
-                } else if (mImsProxyProtocol.equals(ListeningPoint.TCP)) {
+                } else if (ListeningPoint.TCP.equals(mImsProxyProtocol)) {
                     service = DNS_SIP_TCP_SERVICE;
-                } else if (mImsProxyProtocol.equals(ListeningPoint.TLS)) {
+                } else if (ListeningPoint.TLS.equals(mImsProxyProtocol)) {
                     service = DNS_SIP_TLS_SERVICE;
                 } else {
                     throw new SipPayloadException(

@@ -99,8 +99,12 @@ public class TermsAndConditionsRequest extends Activity {
         TextView titleText = (TextView) findViewById(R.id.title);
         TextView messageText = (TextView) findViewById(R.id.message);
 
-        titleText.setText(mTitle);
-        messageText.setText(mMessage);
+        if (titleText != null) {
+            titleText.setText(mTitle);
+        }
+        if (messageText != null) {
+            messageText.setText(mMessage);
+        }
 
         /*
          * If both accept and reject are enabled then creates alert dialog with two buttons else

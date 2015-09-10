@@ -323,14 +323,16 @@ public class ProvisioningParser {
             do {
                 if (title == null) {
                     if ((title = getValueByParamName("title", childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.setProvisioningUserMessageTitle(title);
+                        mRcsSettings.setProvisioningUserMessageTitle("".equals(title) ? null
+                                : title);
                         provisioningInfo.setTitle(title);
                         continue;
                     }
                 }
                 if (message == null) {
                     if ((message = getValueByParamName("message", childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.setProvisioningUserMessageContent(message);
+                        mRcsSettings.setProvisioningUserMessageContent("".equals(message) ? null
+                                : message);
                         provisioningInfo.setMessage(message);
                         continue;
                     }
@@ -661,7 +663,8 @@ public class ProvisioningParser {
                 if (xcapAuthenticationUsername == null) {
                     if ((xcapAuthenticationUsername = getValueByParamName(
                             "XCAPAuthenticationUserName", childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.setXdmLogin(xcapAuthenticationUsername);
+                        mRcsSettings.setXdmLogin("".equals(xcapAuthenticationUsername) ? null
+                                : xcapAuthenticationUsername);
                         continue;
                     }
                 }
@@ -669,7 +672,8 @@ public class ProvisioningParser {
                 if (xcapAuthenticationSecret == null) {
                     if ((xcapAuthenticationSecret = getValueByParamName("XCAPAuthenticationSecret",
                             childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.setXdmPassword(xcapAuthenticationSecret);
+                        mRcsSettings.setXdmPassword("".equals(xcapAuthenticationSecret) ? null
+                                : xcapAuthenticationSecret);
                         continue;
                     }
                 }
@@ -1411,7 +1415,8 @@ public class ProvisioningParser {
 
                 if (uuidValue == null) {
                     if ((uuidValue = getValueByParamName(UUID_VALUE, childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.writeString(RcsSettingsData.UUID, uuidValue);
+                        mRcsSettings.writeString(RcsSettingsData.UUID, "".equals(uuidValue) ? null
+                                : uuidValue);
                         continue;
                     }
                 }
@@ -1680,8 +1685,10 @@ public class ProvisioningParser {
                     if ((addr = getValueByParamName("Address", childnode, TYPE_TXT)) != null) {
                         String[] address = addr.split(":");
                         String proxyAddr = address[0];
-                        mRcsSettings.setImsProxyAddrForMobile(proxyAddr);
-                        mRcsSettings.setImsProxyAddrForWifi(proxyAddr);
+                        mRcsSettings.setImsProxyAddrForMobile("".equals(proxyAddr) ? null
+                                : proxyAddr);
+                        mRcsSettings
+                                .setImsProxyAddrForWifi("".equals(proxyAddr) ? null : proxyAddr);
                         if (address.length > 1) {
                             int port = Integer.valueOf(address[1]);
                             mRcsSettings.setImsProxyPortForMobile(port);
@@ -1739,21 +1746,22 @@ public class ProvisioningParser {
 
                 if (realm == null) {
                     if ((realm = getValueByParamName("Realm", childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.setUserProfileImsRealm(realm);
+                        mRcsSettings.setUserProfileImsRealm("".equals(realm) ? null : realm);
                         continue;
                     }
                 }
 
                 if (userName == null) {
                     if ((userName = getValueByParamName("UserName", childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.setUserProfileImsPrivateId(userName);
+                        mRcsSettings.setUserProfileImsPrivateId("".equals(userName) ? null
+                                : userName);
                         continue;
                     }
                 }
 
                 if (userPwd == null) {
                     if ((userPwd = getValueByParamName("UserPwd", childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.setUserProfileImsPassword(userPwd);
+                        mRcsSettings.setUserProfileImsPassword("".equals(userPwd) ? null : userPwd);
                         continue;
                     }
                 }
@@ -1881,7 +1889,9 @@ public class ProvisioningParser {
                 if (privateUserIdentity == null) {
                     if ((privateUserIdentity = getValueByParamName("Private_User_Identity",
                             childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.setUserProfileImsPrivateId(privateUserIdentity);
+                        mRcsSettings
+                                .setUserProfileImsPrivateId("".equals(privateUserIdentity) ? null
+                                        : privateUserIdentity);
                         continue;
                     }
                 }
@@ -1889,7 +1899,8 @@ public class ProvisioningParser {
                 if (homeDomain == null) {
                     if ((homeDomain = getValueByParamName("Home_network_domain_name", childnode,
                             TYPE_TXT)) != null) {
-                        mRcsSettings.setUserProfileImsDomain(homeDomain);
+                        mRcsSettings.setUserProfileImsDomain("".equals(homeDomain) ? null
+                                : homeDomain);
                         continue;
                     }
                 }

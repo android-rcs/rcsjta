@@ -25,6 +25,7 @@ package com.gsma.rcs.provider.settings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMethod;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration.ImageResizeOption;
 
 import android.net.ConnectivityManager;
@@ -641,7 +642,7 @@ public class RcsSettingsData {
      * IMS username or username part of the IMPU (for HTTP Digest only)
      */
     public static final String USERPROFILE_IMS_USERNAME = "MyContactId";
-    /* package private */static final String DEFAULT_USERPROFILE_IMS_USERNAME = null;
+    /* package private */static final ContactId DEFAULT_USERPROFILE_IMS_USERNAME = null;
 
     /**
      * IMS display name
@@ -701,7 +702,7 @@ public class RcsSettingsData {
      * XDM server address & port
      */
     public static final String XDM_SERVER = "XdmServerAddr";
-    /* package private */static final String DEFAULT_XDM_SERVER = null;
+    /* package private */static final Uri DEFAULT_XDM_SERVER = null;
 
     /**
      * XDM server login (for HTTP Digest only)
@@ -719,7 +720,7 @@ public class RcsSettingsData {
      * File transfer HTTP server address & port
      */
     public static final String FT_HTTP_SERVER = "FtHttpServerAddr";
-    /* package private */static final String DEFAULT_FT_HTTP_SERVER = null;
+    /* package private */static final Uri DEFAULT_FT_HTTP_SERVER = null;
 
     /**
      * File transfer HTTP server login
@@ -1351,14 +1352,14 @@ public class RcsSettingsData {
      * server response
      */
     /* package private */static final String PROV_USER_MSG_CONTENT = "message";
-    /* package private */static final String DEFAULT_PROV_USER_MSG_CONTENT = "";
+    /* package private */static final String DEFAULT_PROV_USER_MSG_CONTENT = null;
 
     /**
      * Provisioning optional user message title associated with the result of the configuration
      * server response
      */
     /* package private */static final String PROV_USER_MSG_TITLE = "title";
-    /* package private */static final String DEFAULT_PROV_USER_MSG_TITLE = "";
+    /* package private */static final String DEFAULT_PROV_USER_MSG_TITLE = null;
 
     /**
      * Mobile Country Code (0 if undefined)

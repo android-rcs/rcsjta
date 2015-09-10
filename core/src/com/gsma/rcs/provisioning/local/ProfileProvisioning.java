@@ -220,10 +220,15 @@ public class ProfileProvisioning extends Activity {
         TextView txt = (TextView) findViewById(R.id.release);
         txt.setText(mRcsSettings.getGsmaRelease().name());
         txt = (TextView) findViewById(R.id.user_msg_title);
-        txt.setText(mRcsSettings.getProvisioningUserMessageTitle());
+        String title = mRcsSettings.getProvisioningUserMessageTitle();
+        if (title != null) {
+            txt.setText(title);
+        }
         txt = (TextView) findViewById(R.id.user_msg_content);
-        txt.setText(mRcsSettings.getProvisioningUserMessageContent());
-
+        String content = mRcsSettings.getProvisioningUserMessageContent();
+        if (content != null) {
+            txt.setText(content);
+        }
     }
 
     /**

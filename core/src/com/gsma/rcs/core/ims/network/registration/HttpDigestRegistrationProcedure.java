@@ -111,10 +111,13 @@ public class HttpDigestRegistrationProcedure extends RegistrationProcedure {
 
             /* Build the Authorization header */
             StringBuilder auth = new StringBuilder("Digest username=\"").append(user)
-                .append("\",uri=\"").append(requestUri).append("\",algorithm=MD5,realm=\"")
-                .append(realm).append("\",nonce=\"").append(nonce).append("\",response=\"")
-                .append(response).append("\"").append(",opaque=\"").append(mDigest.getOpaque())
-                .append("\"");
+                    .append("\",uri=\"").append(requestUri).append("\",algorithm=MD5,realm=\"")
+                    .append(realm).append("\",nonce=\"").append(nonce).append("\",response=\"")
+                    .append(response);
+            String opaque = mDigest.getOpaque();
+            if (opaque != null) {
+                auth.append(",opaque=\"").append(opaque).append("\"");
+            }
             String qop = mDigest.getQop();
             if (qop != null && qop.startsWith("auth")) {
                 auth.append(",nc=").append(mDigest.buildNonceCounter()).append(",qop=").append(qop)

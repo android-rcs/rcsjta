@@ -228,12 +228,12 @@ public class RegistrationManager extends PeriodicRefresher {
                 SipInterface sipInterface = mNetworkInterface.getSipManager().getSipStack();
                 String callId = sipInterface.generateCallId();
 
-                StringBuilder target = new StringBuilder(PhoneUtils.SIP_URI_HEADER)
-                        .append(mRegistrationProcedure.getHomeDomain());
+                String target = PhoneUtils.SIP_URI_HEADER.concat(mRegistrationProcedure
+                        .getHomeDomain());
 
                 String uri = mRegistrationProcedure.getPublicUri();
-                mDialogPath = new SipDialogPath(sipInterface, callId, 1, target.toString(), uri,
-                        uri, sipInterface.getDefaultRoutePath(), mRcsSettings);
+                mDialogPath = new SipDialogPath(sipInterface, callId, 1, target, uri, uri,
+                        sipInterface.getDefaultRoutePath(), mRcsSettings);
             } else {
                 mDialogPath.incrementCseq();
             }

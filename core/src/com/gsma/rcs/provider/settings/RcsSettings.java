@@ -242,10 +242,9 @@ public class RcsSettings {
         Uri value = (Uri) mCache.get(key);
         if (value == null && !mCache.containsKey(key)) {
             String dbValue = readParameter(key);
-            if (dbValue == null) {
-                return null;
+            if (dbValue != null) {
+                value = Uri.parse(dbValue);
             }
-            value = Uri.parse(dbValue);
             mCache.put(key, value);
         }
         return value;
@@ -258,6 +257,36 @@ public class RcsSettings {
      * @param value the long value
      */
     public void writeUri(String key, Uri value) {
+        if (writeParameter(key, value == null ? null : value.toString()) != 0) {
+            mCache.put(key, value);
+        }
+    }
+
+    /**
+     * Read ContactId parameter
+     * 
+     * @param key the key field
+     * @return the value field or defaultValue (if read fails)
+     */
+    public ContactId readContactId(String key) {
+        ContactId value = (ContactId) mCache.get(key);
+        if (value == null && !mCache.containsKey(key)) {
+            String dbValue = readParameter(key);
+            if (dbValue != null) {
+                value = ContactUtil.createContactIdFromTrustedData(dbValue);
+            }
+            mCache.put(key, value);
+        }
+        return value;
+    }
+
+    /**
+     * Write ContactId parameter
+     * 
+     * @param key the key field
+     * @param value the long value
+     */
+    public void writeContactId(String key, ContactId value) {
         if (writeParameter(key, value == null ? null : value.toString()) != 0) {
             mCache.put(key, value);
         }
@@ -370,11 +399,7 @@ public class RcsSettings {
      * @return Username part of SIP-URI or null if not provisioned
      */
     public ContactId getUserProfileImsUserName() {
-        String phoneNumber = readString(RcsSettingsData.USERPROFILE_IMS_USERNAME);
-        if (null == phoneNumber) {
-            return null;
-        }
-        return ContactUtil.createContactIdFromTrustedData(phoneNumber);
+        return readContactId(RcsSettingsData.USERPROFILE_IMS_USERNAME);
     }
 
     /**
@@ -383,10 +408,7 @@ public class RcsSettings {
      * @param contact
      */
     public void setUserProfileImsUserName(ContactId contact) {
-        writeString(
-                RcsSettingsData.USERPROFILE_IMS_USERNAME,
-                (contact == null) ? RcsSettingsData.DEFAULT_USERPROFILE_IMS_USERNAME : contact
-                        .toString());
+        writeContactId(RcsSettingsData.USERPROFILE_IMS_USERNAME, contact);
     }
 
     /**
@@ -1750,7 +1772,7 @@ public class RcsSettings {
      * Reset user profile settings
      */
     public void resetUserProfile() {
-        setUserProfileImsUserName(null);
+        setUserProfileImsUserName(RcsSettingsData.DEFAULT_USERPROFILE_IMS_USERNAME);
         setUserProfileImsDomain(RcsSettingsData.DEFAULT_USERPROFILE_IMS_HOME_DOMAIN);
         setUserProfileImsPassword(RcsSettingsData.DEFAULT_USERPROFILE_IMS_PASSWORD);
         setImsProxyAddrForMobile(RcsSettingsData.DEFAULT_IMS_PROXY_ADDR_MOBILE);
@@ -1759,7 +1781,7 @@ public class RcsSettings {
         setUserProfileImsPrivateId(RcsSettingsData.DEFAULT_USERPROFILE_IMS_PRIVATE_ID);
         setXdmLogin(RcsSettingsData.DEFAULT_XDM_LOGIN);
         setXdmPassword(RcsSettingsData.DEFAULT_XDM_PASSWORD);
-        setXdmServer(null);
+        setXdmServer(RcsSettingsData.DEFAULT_XDM_SERVER);
         setProvisioningVersion(ProvisioningInfo.Version.RESETED.toInt());
         setProvisioningToken(RcsSettingsData.DEFAULT_PROVISIONING_TOKEN);
     }
@@ -2250,9 +2272,6 @@ public class RcsSettings {
      * @param message the user message content
      */
     public void setProvisioningUserMessageContent(String message) {
-        if (message == null) {
-            message = RcsSettingsData.DEFAULT_PROV_USER_MSG_CONTENT;
-        }
         writeString(RcsSettingsData.PROV_USER_MSG_CONTENT, message);
     }
 
@@ -2271,9 +2290,6 @@ public class RcsSettings {
      * @param title the user message title
      */
     public void setProvisioningUserMessageTitle(String title) {
-        if (title == null) {
-            title = RcsSettingsData.DEFAULT_PROV_USER_MSG_TITLE;
-        }
         writeString(RcsSettingsData.PROV_USER_MSG_TITLE, title);
     }
 
