@@ -25,6 +25,9 @@ package com.gsma.rcs.provisioning.local;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.app.TabActivity;
 import android.content.Intent;
@@ -145,6 +148,27 @@ public class Provisioning extends TabActivity {
     }
 
     /**
+     * Set edit text either from bundle or from RCS settings if bundle is null
+     * 
+     * @param viewID the view ID for the text edit
+     * @param settingsKey the key of the RCS parameter
+     * @param helper
+     */
+    /* package private */static void setContactIdEditTextParam(int viewID, String settingsKey,
+            ProvisioningHelper helper) {
+        String parameter = null;
+        Bundle bundle = helper.getBundle();
+        if (bundle != null && bundle.containsKey(settingsKey)) {
+            parameter = bundle.getString(settingsKey);
+        } else {
+            ContactId dbValue = helper.getRcsSettings().readContactId(settingsKey);
+            parameter = (dbValue == null ? "" : dbValue.toString());
+        }
+        EditText editText = (EditText) helper.getActivity().findViewById(viewID);
+        editText.setText(parameter);
+    }
+
+    /**
      * Set check box either from bundle or from RCS settings if bundle is null
      * 
      * @param viewID the view ID for the check box
@@ -208,6 +232,27 @@ public class Provisioning extends TabActivity {
         } else {
             String text = txt.getText().toString();
             helper.getRcsSettings().writeString(settingsKey, "".equals(text) ? null : text);
+        }
+    }
+
+    /**
+     * Save string either in bundle or in RCS settings if bundle is null
+     * 
+     * @param viewID the view ID
+     * @param settingsKey the key of the RCS parameter
+     * @param helper
+     */
+    /* package private */static void saveContactIdEditTextParam(int viewID, String settingsKey,
+            ProvisioningHelper helper) {
+        EditText txt = (EditText) helper.getActivity().findViewById(viewID);
+        Bundle bundle = helper.getBundle();
+        if (bundle != null) {
+            bundle.putString(settingsKey, txt.getText().toString());
+        } else {
+            String text = txt.getText().toString();
+            PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(text);
+            helper.getRcsSettings().writeContactId(settingsKey,
+                    "".equals(text) ? null : ContactUtil.createContactIdFromValidatedData(number));
         }
     }
 

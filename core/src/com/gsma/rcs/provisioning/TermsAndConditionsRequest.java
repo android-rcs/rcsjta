@@ -99,10 +99,10 @@ public class TermsAndConditionsRequest extends Activity {
         TextView titleText = (TextView) findViewById(R.id.title);
         TextView messageText = (TextView) findViewById(R.id.message);
 
-        if (titleText != null) {
+        if (mTitle != null) {
             titleText.setText(mTitle);
         }
-        if (messageText != null) {
+        if (mMessage != null) {
             messageText.setText(mMessage);
         }
 

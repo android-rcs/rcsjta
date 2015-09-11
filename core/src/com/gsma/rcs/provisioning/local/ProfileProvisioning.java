@@ -26,11 +26,13 @@ import static com.gsma.rcs.provisioning.local.Provisioning.saveCheckBoxParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.saveIntegerEditTextParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.saveStringEditTextParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.saveUriEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.saveContactIdEditTextParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.setCheckBoxParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.setIntegerEditTextParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.setSpinnerParameter;
 import static com.gsma.rcs.provisioning.local.Provisioning.setStringEditTextParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.setUriEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.setContactIdEditTextParam;
 
 import com.gsma.rcs.R;
 import com.gsma.rcs.provider.LocalContentResolver;
@@ -172,7 +174,7 @@ public class ProfileProvisioning extends Activity {
         spinner.setAdapter(adapter);
         spinner.setSelection(0);
 
-        setStringEditTextParam(R.id.ImsUsername, RcsSettingsData.USERPROFILE_IMS_USERNAME, helper);
+        setContactIdEditTextParam(R.id.ImsUsername, RcsSettingsData.USERPROFILE_IMS_USERNAME, helper);
         setStringEditTextParam(R.id.ImsDisplayName, RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME,
                 helper);
         setStringEditTextParam(R.id.ImsHomeDomain, RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN,
@@ -275,7 +277,7 @@ public class ProfileProvisioning extends Activity {
             mRcsSettings.setImsAuhtenticationProcedureForWifi(procedure);
         }
 
-        saveStringEditTextParam(R.id.ImsUsername, RcsSettingsData.USERPROFILE_IMS_USERNAME, helper);
+        saveContactIdEditTextParam(R.id.ImsUsername, RcsSettingsData.USERPROFILE_IMS_USERNAME, helper);
         saveStringEditTextParam(R.id.ImsDisplayName, RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME,
                 helper);
         saveStringEditTextParam(R.id.ImsHomeDomain, RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN,
