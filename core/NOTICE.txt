@@ -1,4 +1,4 @@
-NOTICE - RCS Java Terminal API - Android client
+NOTICE - RCS stack for Android with GSMA Terminal API 
 Release 1.5
 
 The RCS stack is under Apache 2 license (see LICENSE-2.0.txt) and uses the following open source libraries:
@@ -6,6 +6,8 @@ The RCS stack is under Apache 2 license (see LICENSE-2.0.txt) and uses the follo
  - DNS Java: see LICENSE-DNS.txt.
  - The Legion Of The Bouncy Castle: see LICENSE-BOUNCYCASTLE.txt.
 
+Installation:
+The RCS_core.apk must be first installed on the device. Client applications (like RCS_RI.apk, RCS_settings.apk, etc...) must be installed after otherwise permission to bind to the core service is denied.
 
    News:
 
