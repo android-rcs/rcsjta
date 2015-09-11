@@ -1062,12 +1062,21 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         }
     }
 
-    private void dequeueChatMessageAndBroadcastStatusChange(ChatMessage msg) {
+    /**
+     * Set chat message status and timestamp
+     * 
+     * @param ChatMessage
+     * @param state state of message
+     */
+    private void setChatMessageStatusAndTimestamp(ChatMessage msg, Status status) {
+        String msgId = msg.getMessageId();
         synchronized (mLock) {
-            mMessagingLog.dequeueChatMessage(msg);
-            mBroadcaster.broadcastMessageStatusChanged(mChatId,
-                    ChatUtils.networkMimeTypeToApiMimeType(msg), msg.getMessageId(),
-                    Status.SENDING, Content.ReasonCode.UNSPECIFIED);
+            if (mMessagingLog.setChatMessageStatusAndTimestamp(msgId, status,
+                    Content.ReasonCode.UNSPECIFIED, msg.getTimestamp(), msg.getTimestampSent())) {
+                String mimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
+                mBroadcaster.broadcastMessageStatusChanged(mChatId, mimeType, msg.getMessageId(),
+                        Status.SENDING, Content.ReasonCode.UNSPECIFIED);
+            }
         }
     }
 
@@ -1087,7 +1096,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             mCore.getListener().handleRejoinGroupChatAsPartOfSendOperation(mChatId);
             return;
         } else if (session.isMediaEstablished()) {
-            dequeueChatMessageAndBroadcastStatusChange(msg);
+            setChatMessageStatusAndTimestamp(msg, Status.SENDING);
             sendChatMessageWithinSession(session, msg);
         } else if (session.isInitiatedByRemote()) {
             if (sLogger.isActivated()) {

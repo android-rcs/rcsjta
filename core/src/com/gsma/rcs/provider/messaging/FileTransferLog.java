@@ -776,19 +776,6 @@ public class FileTransferLog implements IFileTransferLog {
     }
 
     @Override
-    public void dequeueFileTransfer(String fileTransferId, long timestamp, long timestampSent) {
-        ContentValues values = new ContentValues();
-        values.put(FileTransferData.KEY_STATE, State.INITIATING.toInt());
-        values.put(FileTransferData.KEY_REASON_CODE, ReasonCode.UNSPECIFIED.toInt());
-        /* Needs to reset the timestamp as this file was originally queued and is sent only now. */
-        values.put(FileTransferData.KEY_TIMESTAMP, timestamp);
-        values.put(FileTransferData.KEY_TIMESTAMP_SENT, timestampSent);
-        mLocalContentResolver.update(
-                Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
-                null);
-    }
-
-    @Override
     public Cursor getInterruptedFileTransfers() {
         Cursor cursor = mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
                 SELECTION_BY_INTERRUPTED_FILE_TRANSFERS, null, ORDER_BY_TIMESTAMP_ASC);
@@ -796,7 +783,8 @@ public class FileTransferLog implements IFileTransferLog {
         return cursor;
     }
 
-    public boolean setFileTransferStateAndTimestamps(String fileTransferId, State state,
+    @Override
+    public boolean setFileTransferStateAndTimestamp(String fileTransferId, State state,
             ReasonCode reasonCode, long timestamp, long timestampSent) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("updateFileTransfer: fileTransferId=")

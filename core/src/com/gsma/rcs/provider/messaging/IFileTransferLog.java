@@ -129,7 +129,7 @@ public interface IFileTransferLog {
      * @param timestampSent New timestamp sent in payload for the file transfer
      * @return True if an entry was updated, otherwise false
      */
-    public boolean setFileTransferStateAndTimestamps(String fileTransferId, State state,
+    public boolean setFileTransferStateAndTimestamp(String fileTransferId, State state,
             ReasonCode reasonCode, long timestamp, long timestampSent);
 
     /**
@@ -282,15 +282,6 @@ public interface IFileTransferLog {
      * @return Cursor
      */
     public Cursor getQueuedAndUploadedButNotTransferredFileTransfers();
-
-    /**
-     * Dequeue file transfer
-     * 
-     * @param fileTransferId
-     * @param timestamp
-     * @param timestampSent
-     */
-    public void dequeueFileTransfer(String fileTransferId, long timestamp, long timestampSent);
 
     /**
      * Get interrupted file transfers

@@ -566,6 +566,41 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     }
 
     /**
+     * Set one-one file transfer state and timestamps
+     * 
+     * @param fileTransferId
+     * @param contact
+     * @param state
+     * @param timestamp
+     * @param timestampSent
+     */
+    public void setOneToOneFileTransferStateAndTimestamp(String fileTransferId, ContactId contact,
+            State state, long timestamp, long timestampSent) {
+        if (mMessagingLog.setFileTransferStateAndTimestamp(fileTransferId, state,
+                ReasonCode.UNSPECIFIED, timestamp, timestampSent)) {
+            mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId, state,
+                    ReasonCode.UNSPECIFIED);
+        }
+    }
+
+    /**
+     * Set group file transfer state and timestamp
+     * 
+     * @param fileTransferId
+     * @param chatId
+     * @param state
+     * @param reasonCode
+     */
+    public void setGroupFileTransferStateAndTimestamp(String fileTransferId, String chatId,
+            State state, long timestamp, long timestampSent) {
+        if (mMessagingLog.setFileTransferStateAndTimestamp(fileTransferId, state,
+                ReasonCode.UNSPECIFIED, timestamp, timestampSent)) {
+            mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId, state,
+                    ReasonCode.UNSPECIFIED);
+        }
+    }
+
+    /**
      * Dequeue one-to-one file transfer
      * 
      * @param fileTransferId
@@ -586,9 +621,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                             "No valid file transfer protocol could be determined for dequeueing file with fileTransferId '")
                             .append(fileTransferId).append("'!").toString());
         }
-        mMessagingLog.dequeueFileTransfer(fileTransferId, timestamp, timestampSent);
-        mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
-                State.INITIATING, ReasonCode.UNSPECIFIED);
+        setOneToOneFileTransferStateAndTimestamp(fileTransferId, contact, State.INITIATING,
+                timestamp, timestampSent);
         final FileSharingSession session = mImService.initiateFileTransferSession(fileTransferId,
                 contact, file, fileIcon, timestamp, timestampSent, ftProtocol);
 
@@ -622,8 +656,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             /*
              * If the IMS is NOT connected at this time then re-queue transfer.
              */
-            setOneToOneFileTransferStateAndReasonCode(fileTransferId, contact, State.QUEUED,
-                    FileTransfer.ReasonCode.UNSPECIFIED);
+            setOneToOneFileTransferStateAndTimestamp(fileTransferId, contact, State.QUEUED,
+                    timestamp, timestampSent);
             return;
         }
         if (!mImService.isFileTransferSessionAvailable()
@@ -632,15 +666,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 sLogger.debug("The max number of file transfer sessions is achieved: re-queue the file transfer with fileTransferId "
                         .concat(fileTransferId));
             }
-            setOneToOneFileTransferStateAndReasonCode(fileTransferId, contact, State.QUEUED,
-                    FileTransfer.ReasonCode.UNSPECIFIED);
+            setOneToOneFileTransferStateAndTimestamp(fileTransferId, contact, State.QUEUED,
+                    timestamp, timestampSent);
             return;
         }
 
-        mMessagingLog.setFileTransferStateAndTimestamps(fileTransferId, State.INITIATING,
-                ReasonCode.UNSPECIFIED, timestamp, timestampSent);
-        mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
-                State.INITIATING, ReasonCode.UNSPECIFIED);
+        setOneToOneFileTransferStateAndTimestamp(fileTransferId, contact, State.INITIATING,
+                timestamp, timestampSent);
         FileTransferProtocol ftProtocol = getFileTransferProtocolForOneToOneFileTransfer(contact);
         if (ftProtocol == null) {
             /* Throw proper exception as part of CR037 */
@@ -968,9 +1000,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             long timestamp = System.currentTimeMillis();
             /* For outgoing file transfer, timestampSent = timestamp */
             long timestampSent = timestamp;
-            mMessagingLog.dequeueFileTransfer(fileTransferId, timestamp, timestampSent);
-            mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId,
-                    FileTransfer.State.INITIATING, FileTransfer.ReasonCode.UNSPECIFIED);
+            setGroupFileTransferStateAndTimestamp(fileTransferId, chatId, State.INITIATING,
+                    timestamp, timestampSent);
             final FileSharingSession session = mImService.initiateGroupFileTransferSession(
                     fileTransferId, content, fileIcon, chatId, groupChatSession.getSessionID(),
                     timestamp, timestampSent);
@@ -1636,7 +1667,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      */
     public void setResendFileTransferInvitationRejected(String fileTransferId, ContactId contact,
             ReasonCode reasonCode, long timestamp, long timestampSent) {
-        mMessagingLog.setFileTransferStateAndTimestamps(fileTransferId, State.REJECTED, reasonCode,
+        mMessagingLog.setFileTransferStateAndTimestamp(fileTransferId, State.REJECTED, reasonCode,
                 timestamp, timestampSent);
 
         mOneToOneFileTransferBroadcaster.broadcastInvitation(fileTransferId);

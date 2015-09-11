@@ -233,13 +233,6 @@ public interface IMessageLog {
     public Cursor getAllQueuedOneToOneChatMessages();
 
     /**
-     * Dequeue chat message
-     * 
-     * @param message
-     */
-    public void dequeueChatMessage(ChatMessage message);
-
-    /**
      * Gets group chat events per contacts for chat ID
      * 
      * @param chatId
@@ -315,16 +308,15 @@ public interface IMessageLog {
     public String getMessageChatId(String msgId);
 
     /**
-     * Update chat message status and timestamps during resend operation.
+     * Set chat message status and sent timestamp for outgoing messages
      * 
-     * @param msg Chat message
+     * @param msgId
+     * @param status
+     * @param reasonCode
+     * @param timestamp
+     * @param timestampSent
+     * @return boolean
      */
-    public void resendChatMessage(ChatMessage msg);
-
-    /**
-     * Update chat message status and timestamps during re-queueing operation.
-     * 
-     * @param msg Chat message
-     */
-    public void requeueChatMessage(ChatMessage msg);
+    public boolean setChatMessageStatusAndTimestamp(String msgId, Status status,
+            ReasonCode reasonCode, long timestamp, long timestampSent);
 }

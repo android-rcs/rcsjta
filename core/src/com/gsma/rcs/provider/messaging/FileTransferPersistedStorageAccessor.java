@@ -415,9 +415,9 @@ public class FileTransferPersistedStorageAccessor {
         return expiredDelivery;
     }
 
-    public boolean setStateAndTimestamps(State state, ReasonCode reasonCode, long timestamp,
+    public boolean setStateAndTimestamp(State state, ReasonCode reasonCode, long timestamp,
             long timestampSent) {
-        return mMessagingLog.setFileTransferStateAndTimestamps(mFileTransferId, state, reasonCode,
+        return mMessagingLog.setFileTransferStateAndTimestamp(mFileTransferId, state, reasonCode,
                 timestamp, timestampSent);
     }
 

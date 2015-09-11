@@ -23,7 +23,6 @@
 package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.core.content.MmContent;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
@@ -265,10 +264,10 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public boolean setFileTransferStateAndTimestamps(String fileTransferId,
+    public boolean setFileTransferStateAndTimestamp(String fileTransferId,
             FileTransfer.State state, FileTransfer.ReasonCode reasonCode, long timestamp,
             long timestampSent) {
-        return mFileTransferLog.setFileTransferStateAndTimestamps(fileTransferId, state,
+        return mFileTransferLog.setFileTransferStateAndTimestamp(fileTransferId, state,
                 reasonCode, timestamp, timestampSent);
     }
 
@@ -491,16 +490,6 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public void dequeueChatMessage(ChatMessage message) {
-        mMessageLog.dequeueChatMessage(message);
-    }
-
-    @Override
-    public void dequeueFileTransfer(String fileTransferId, long timestamp, long timestampSent) {
-        mFileTransferLog.dequeueFileTransfer(fileTransferId, timestamp, timestampSent);
-    }
-
-    @Override
     public Cursor getInterruptedFileTransfers() {
         return mFileTransferLog.getInterruptedFileTransfers();
     }
@@ -606,16 +595,6 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public void resendChatMessage(ChatMessage msg) {
-        mMessageLog.resendChatMessage(msg);
-    }
-
-    @Override
-    public void requeueChatMessage(ChatMessage msg) {
-        mMessageLog.requeueChatMessage(msg);
-    }
-
-    @Override
     public void setFileTransferDownloadInfo(String fileTransferId,
             FileTransferHttpInfoDocument ftHttpInfo) {
         mFileTransferLog.setFileTransferDownloadInfo(fileTransferId, ftHttpInfo);
@@ -633,6 +612,13 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 
     @Override
     public boolean setFileInfoDequeued(String fileTransferId, long deliveryExpiration) {
-        return setFileInfoDequeued(fileTransferId, deliveryExpiration);
+        return mFileTransferLog.setFileInfoDequeued(fileTransferId, deliveryExpiration);
+    }
+
+    @Override
+    public boolean setChatMessageStatusAndTimestamp(String msgId, Status status,
+            Content.ReasonCode reasonCode, long timestamp, long timestampSent) {
+        return mMessageLog.setChatMessageStatusAndTimestamp(msgId, status, reasonCode, timestamp,
+                timestampSent);
     }
 }

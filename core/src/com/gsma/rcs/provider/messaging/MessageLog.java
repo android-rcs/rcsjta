@@ -584,19 +584,6 @@ public class MessageLog implements IMessageLog {
     }
 
     @Override
-    public void dequeueChatMessage(ChatMessage message) {
-        ContentValues values = new ContentValues();
-        values.put(MessageData.KEY_STATUS, Status.SENDING.toInt());
-        values.put(MessageData.KEY_REASON_CODE, ReasonCode.UNSPECIFIED.toInt());
-        /* Reset the timestamp as this message was originally queued and is sent only now. */
-        values.put(MessageData.KEY_TIMESTAMP, message.getTimestamp());
-        values.put(MessageData.KEY_TIMESTAMP_SENT, message.getTimestampSent());
-        mLocalContentResolver.update(
-                Uri.withAppendedPath(MessageData.CONTENT_URI, message.getMessageId()), values,
-                null, null);
-    }
-
-    @Override
     public boolean setChatMessageTimestamp(String msgId, long timestamp, long timestampSent) {
         if (sLogger.isActivated()) {
             sLogger.debug(new StringBuilder("Set chat message timestamp msgId=").append(msgId)
@@ -724,40 +711,20 @@ public class MessageLog implements IMessageLog {
     }
 
     @Override
-    public void resendChatMessage(ChatMessage msg) {
-        String msgId = msg.getMessageId();
-        long timestamp = msg.getTimestamp();
-        long timestampSent = msg.getTimestampSent();
+    public boolean setChatMessageStatusAndTimestamp(String msgId, Status status,
+            ReasonCode reasonCode, long timestamp, long timestampSent) {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder(
-                    "Update chat message timestamp while resending message with msgId=")
-                    .append(msgId).append(", timestamp=").append(timestamp)
-                    .append(", timestampSent=").append(timestampSent).toString());
+            sLogger.debug(new StringBuilder("Update chat message: msgId=").append(msgId)
+                    .append(", status=").append(status).append(", reasonCode=").append(reasonCode)
+                    .append(", timestamp=").append(timestamp).append(", timestampSent=")
+                    .append(timestampSent).toString());
         }
         ContentValues values = new ContentValues();
-        values.put(MessageData.KEY_STATUS, Status.SENDING.toInt());
+        values.put(MessageData.KEY_STATUS, status.toInt());
+        values.put(MessageData.KEY_REASON_CODE, reasonCode.toInt());
         values.put(MessageData.KEY_TIMESTAMP, timestamp);
         values.put(MessageData.KEY_TIMESTAMP_SENT, timestampSent);
-        mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), values,
-                null, null);
-    }
-
-    @Override
-    public void requeueChatMessage(ChatMessage msg) {
-        String msgId = msg.getMessageId();
-        long timestamp = msg.getTimestamp();
-        long timestampSent = msg.getTimestampSent();
-        if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder(
-                    "Update chat message timestamp while re-queueing message with msgId=")
-                    .append(msgId).append(", timestamp=").append(timestamp)
-                    .append(", timestampSent=").append(timestampSent).toString());
-        }
-        ContentValues values = new ContentValues();
-        values.put(MessageData.KEY_STATUS, Status.QUEUED.toInt());
-        values.put(MessageData.KEY_TIMESTAMP, timestamp);
-        values.put(MessageData.KEY_TIMESTAMP_SENT, timestampSent);
-        mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), values,
-                null, null);
+        return mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
+                values, null, null) > 0;
     }
 }

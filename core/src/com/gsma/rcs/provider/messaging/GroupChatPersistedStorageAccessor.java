@@ -244,10 +244,6 @@ public class GroupChatPersistedStorageAccessor {
         return mMessagingLog.setRejectNextGroupChatNextInvitation(mChatId);
     }
 
-    public void dequeueChatMessage(ChatMessage message) {
-        mMessagingLog.dequeueChatMessage(message);
-    }
-
     public boolean setParticipantsStateAndReasonCode(
             Map<ContactId, ParticipantStatus> participants, State state, ReasonCode reasonCode) {
         return mMessagingLog.setGroupChatParticipantsStateAndReasonCode(mChatId, participants,
@@ -265,5 +261,4 @@ public class GroupChatPersistedStorageAccessor {
         return mMessagingLog.setGroupChatDeliveryInfoDisplayed(chatId, contact, msgId,
                 timestampDisplayed);
     }
-
 }
