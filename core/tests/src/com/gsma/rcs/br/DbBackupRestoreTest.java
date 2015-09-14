@@ -64,17 +64,17 @@ public class DbBackupRestoreTest extends AndroidTestCase {
     }
 
     public void testBackupAccount() throws InterruptedException, IOException, RcsAccountException {
-        BackupRestoreDb.backupAccount("1111");
+²        BackupRestoreDb.tryBackupAccount("1111");
         /*
          * A timer greater than 1 second is set because some emulator have only an accuracy of 1
          * second.
          */
         Thread.sleep(1010);
-        BackupRestoreDb.backupAccount("2222");
+        BackupRestoreDb.tryBackupAccount("2222");
         Thread.sleep(1010);
-        BackupRestoreDb.backupAccount("3333");
+        BackupRestoreDb.tryBackupAccount("3333");
         Thread.sleep(1010);
-        BackupRestoreDb.backupAccount("4444");
+        BackupRestoreDb.tryBackupAccount("4444");
 
         mSavedAccounts = BackupRestoreDb.listOfSavedAccounts(mSrcdir);
         for (File file : mSavedAccounts) {
@@ -91,19 +91,19 @@ public class DbBackupRestoreTest extends AndroidTestCase {
         }
     }
 
-    public void testCleanBackups() throws InterruptedException, IOException, RcsAccountException {
+    public void testCleanBackups() throws InterruptedException, IOException {
         /* This cleanBackups removes the oldest directory (if MAX_SAVED_ACCOUNT is reached) */
-        BackupRestoreDb.backupAccount("1111");
+        BackupRestoreDb.tryBackupAccount("1111");
         /*
          * A timer greater than 1 second is set because some emulator have only an accuracy of 1
          * second.
          */
         Thread.sleep(1010);
-        BackupRestoreDb.backupAccount("2222");
+        BackupRestoreDb.tryBackupAccount("2222");
         Thread.sleep(1010);
-        BackupRestoreDb.backupAccount("3333");
+        BackupRestoreDb.tryBackupAccount("3333");
         Thread.sleep(1010);
-        BackupRestoreDb.backupAccount("4444");
+        BackupRestoreDb.tryBackupAccount("4444");
 
         BackupRestoreDb.cleanBackups("3333");
         mSavedAccounts = BackupRestoreDb.listOfSavedAccounts(mSrcdir);
@@ -122,9 +122,9 @@ public class DbBackupRestoreTest extends AndroidTestCase {
         }
     }
 
-    public void testRestoreDb() throws IOException, RcsAccountException {
-        BackupRestoreDb.backupAccount("2222");
-        BackupRestoreDb.restoreAccount("2222");
+    public void testRestoreDb() throws IOException {
+        BackupRestoreDb.tryBackupAccount("2222");
+        BackupRestoreDb.tryRestoreAccount("2222");
     }
 
 }

@@ -28,7 +28,6 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsServiceControl;
 
 import android.os.Environment;
-import android.text.TextUtils;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -53,6 +52,8 @@ public class BackupRestoreDb {
      */
     private static final int MAX_SAVED_ACCOUNT = 3;
 
+    private static final String REG_EXP_DIR_ACCOUNT_NAME = "^\\d{3,}$";
+
     private static final Logger sLogger = Logger.getLogger(BackupRestoreDb.class.getSimpleName());
 
     /**
@@ -70,10 +71,8 @@ public class BackupRestoreDb {
      * 
      * @param databasesDir the database directory
      * @return the array of RCS saved accounts (may be empty) or null
-     * @throws InvalidArgumentException
      */
-    public static File[] listOfSavedAccounts(final File databasesDir)
-            throws IllegalArgumentException {
+    public static File[] listOfSavedAccounts(final File databasesDir) {
         if (!databasesDir.exists()) {
             throw new IllegalArgumentException(new StringBuilder("Argument '").append(databasesDir)
                     .append("' directory does not exist").toString());
@@ -86,8 +85,7 @@ public class BackupRestoreDb {
             @Override
             public boolean accept(File file) {
                 if (file.isDirectory()) {
-                    // There must be at least 3 digits
-                    return file.getName().matches("^\\d{3,}$");
+                    return isAccountNameValid(file.getName());
                 }
                 return false;
             }
@@ -96,24 +94,14 @@ public class BackupRestoreDb {
     }
 
     /**
-     * Check the arguments of backup or restore methods
+     * Check if the account name is valid
      * 
-     * @param databasesDir the database directory
      * @param account the account
-     * @return true is arguments are OK
+     * @return true if the account name is valid
      */
-    private static boolean checkBackupRestoreArguments(final File databasesDir, final String account) {
-        if (TextUtils.isEmpty(account)) {
-            return false;
-        }
-        // There must be at least 3 digits
-        if (account.matches("^\\d{3,}$") == false) {
-            return false;
-        }
-        if (databasesDir == null || databasesDir.isDirectory() == false) {
-            return false;
-        }
-        return true;
+    private static boolean isAccountNameValid(final String account) {
+        /* There must be at least 3 digits */
+        return account.matches(REG_EXP_DIR_ACCOUNT_NAME);
     }
 
     /**
@@ -129,8 +117,8 @@ public class BackupRestoreDb {
         if (sLogger.isActivated()) {
             sLogger.info("saveAccountDatabases account=".concat(account));
         }
-        if (checkBackupRestoreArguments(databasesDir, account) == false) {
-            throw new RcsAccountException("Cannot save account ".concat(account));
+        if (!isAccountNameValid(account)) {
+            throw new IllegalArgumentException("Invalid account name ".concat(account));
         }
         String[] listOfDbFiles = databasesDir.list(sFilenameDbFilter);
         if (listOfDbFiles == null || listOfDbFiles.length <= 0) {
@@ -158,9 +146,8 @@ public class BackupRestoreDb {
      */
     private static void restoreAccountDatabases(final File databasesDir, final String account)
             throws IOException, RcsAccountException {
-        if (checkBackupRestoreArguments(databasesDir, account) == false) {
-            throw new RcsAccountException("Cannot save account ".concat(account));
-
+        if (!isAccountNameValid(account)) {
+            throw new IllegalArgumentException("Invalid account name ".concat(account));
         }
         File srcDir = new File(databasesDir, account);
         String[] listOfDbFiles = srcDir.list(sFilenameDbFilter);
@@ -184,7 +171,7 @@ public class BackupRestoreDb {
             throws IllegalArgumentException {
         File[] files = listOfSavedAccounts(databasesDir);
         if (files == null || files.length <= MAX_SAVED_ACCOUNT) {
-            // No need to suppress oldest backup
+            /* No need to suppress oldest backup */
             return;
         }
 
@@ -197,7 +184,7 @@ public class BackupRestoreDb {
             return;
 
         }
-        // Do not clean current account
+        /* Do not clean current account */
         File[] filesWithoutCurrentAccount = new File[files.length - 1];
         int i = 0;
         for (File file2 : files) {
@@ -224,26 +211,36 @@ public class BackupRestoreDb {
     }
 
     /**
-     * Backup account
+     * Try to backup account
      * 
      * @param account the Account to backup
      * @throws IOException
-     * @throws RcsAccountException
      */
-    public static void backupAccount(String account) throws IOException, RcsAccountException {
-        saveAccountDatabases(new File(new StringBuilder(Environment.getDataDirectory().toString())
-                .append(DATABASE_LOCATION).toString()), account);
+    public static void tryBackupAccount(String account) throws IOException {
+        try {
+            saveAccountDatabases(new File(new StringBuilder(Environment.getDataDirectory()
+                    .toString()).append(DATABASE_LOCATION).toString()), account);
+        } catch (RcsAccountException e) {
+            if (sLogger.isActivated()) {
+                sLogger.warn("Fail to backup account ".concat(account), e);
+            }
+        }
     }
 
     /**
-     * Restore account
+     * Try to restore account
      * 
      * @param account Account
      * @throws IOException
-     * @throws RcsAccountException
      */
-    public static void restoreAccount(String account) throws IOException, RcsAccountException {
-        restoreAccountDatabases(new File(new StringBuilder(Environment.getDataDirectory()
-                .toString()).append(DATABASE_LOCATION).toString()), account);
+    public static void tryRestoreAccount(String account) throws IOException {
+        try {
+            restoreAccountDatabases(new File(new StringBuilder(Environment.getDataDirectory()
+                    .toString()).append(DATABASE_LOCATION).toString()), account);
+        } catch (RcsAccountException e) {
+            if (sLogger.isActivated()) {
+                sLogger.warn("Fail to restore account ".concat(account), e);
+            }
+        }
     }
 }

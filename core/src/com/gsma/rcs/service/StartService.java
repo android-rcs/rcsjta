@@ -402,7 +402,7 @@ public class StartService extends Service {
                 if (logActivated) {
                     sLogger.info("Backup ".concat(mLastUserAccount));
                 }
-                BackupRestoreDb.backupAccount(mLastUserAccount);
+                BackupRestoreDb.tryBackupAccount(mLastUserAccount);
             }
 
             /* Reset RCS account */
@@ -417,7 +417,8 @@ public class StartService extends Service {
             if (logActivated) {
                 sLogger.info("Restore ".concat(mCurrentUserAccount));
             }
-            BackupRestoreDb.restoreAccount(mCurrentUserAccount);
+            BackupRestoreDb.tryRestoreAccount(mCurrentUserAccount);
+
             /*
              * Send service provisioned intent as the configuration settings are now loaded by means
              * of restoring previous values that were backed up during SIM Swap.
