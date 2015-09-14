@@ -28,7 +28,7 @@ import com.gsma.rcs.addressbook.RcsAccountException;
 import com.gsma.rcs.addressbook.RcsAccountManager;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.platform.registry.AndroidRegistryFactory;
-import com.gsma.rcs.provider.UserProfilePersistedStorage;
+import com.gsma.rcs.provider.BackupRestoreDb;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
@@ -229,6 +229,10 @@ public class StartService extends Service {
                         retryPollingTelephonyManagerPooling(config.mcc,
                                 mRcsSettings.getMobileNetworkCode());
                     }
+                } catch (IOException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(e.getMessage());
+                    }
                 } catch (RcsAccountException e) {
                     /**
                      * This is a non revocable use-case as the RCS account itself was not created,
@@ -356,8 +360,10 @@ public class StartService extends Service {
      * Check account
      * 
      * @return true if an account is available
+     * @throws IOException
+     * @throws RcsAccountException
      */
-    private boolean checkAccount() {
+    private boolean checkAccount() throws IOException, RcsAccountException {
         AndroidFactory.setApplicationContext(mContext, mRcsSettings);
 
         /* Read the current and last end user accounts */
@@ -390,13 +396,13 @@ public class StartService extends Service {
             setNewUserAccount(true);
         } else if (hasChangedAccount()) {
             /* keep a maximum of saved accounts */
-            UserProfilePersistedStorage.cleanBackups(mCurrentUserAccount);
+            BackupRestoreDb.cleanBackups(mCurrentUserAccount);
             /* Backup last account settings */
             if (mLastUserAccount != null) {
                 if (logActivated) {
                     sLogger.info("Backup ".concat(mLastUserAccount));
                 }
-                UserProfilePersistedStorage.backupAccount(mLastUserAccount);
+                BackupRestoreDb.backupAccount(mLastUserAccount);
             }
 
             /* Reset RCS account */
@@ -411,7 +417,7 @@ public class StartService extends Service {
             if (logActivated) {
                 sLogger.info("Restore ".concat(mCurrentUserAccount));
             }
-            UserProfilePersistedStorage.restoreAccount(mCurrentUserAccount);
+            BackupRestoreDb.restoreAccount(mCurrentUserAccount);
             /*
              * Send service provisioned intent as the configuration settings are now loaded by means
              * of restoring previous values that were backed up during SIM Swap.
@@ -634,6 +640,10 @@ public class StartService extends Service {
                                  */
                                 retryPollingTelephonyManagerPooling(config.mcc,
                                         mRcsSettings.getMobileNetworkCode());
+                            }
+                        } catch (IOException e) {
+                            if (sLogger.isActivated()) {
+                                sLogger.debug(e.getMessage());
                             }
                         } catch (RcsAccountException e) {
                             /**
