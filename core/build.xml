@@ -115,18 +115,20 @@
 	
 	<target name="-pre-build">
 		<echo>Generate libraries</echo>
-		<ant antfile="build.xml" target="jar" dir="${terminal.root}/../libs/dnsjava"/>
-		<copy file="${terminal.root}/../libs/dnsjava/build/dnsjava.jar" todir="${terminal.root}/libs"/>
 		<ant antfile="build.xml" target="jar" dir="${terminal.root}/../libs/nist_sip"/>
 		<copy file="${terminal.root}/../libs/nist_sip/build/nist_sip.jar" todir="${terminal.root}/libs"/>
 		<ant antfile="build.xml" target="jar" dir="${terminal.root}/../libs/bouncycastle"/>
 		<copy file="${terminal.root}/../libs/bouncycastle/build/bouncycastle.jar" todir="${terminal.root}/libs"/>
 	</target>
 	
+	<target name="-pre-clean">
+		<echo>Clean libraries</echo>
+		<ant antfile="build.xml" target="clean" dir="${terminal.root}/../libs/nist_sip"/>
+		<ant antfile="build.xml" target="clean" dir="${terminal.root}/../libs/bouncycastle"/>
+	</target>
+	
 	<target name="libs">
 		<echo>Generate libraries</echo>
-		<ant antfile="build.xml" target="debug" dir="${terminal.root}/../libs/dnsjava"/>
-		<copy file="${terminal.root}/../libs/dnsjava/build/dnsjava.jar" todir="${terminal.root}/libs"/>
 		<ant antfile="build.xml" target="debug" dir="${terminal.root}/../libs/nist_sip"/>
 		<copy file="${terminal.root}/../libs/nist_sip/build/nist_sip.jar" todir="${terminal.root}/libs"/>
 		<ant antfile="build.xml" target="debug" dir="${terminal.root}/../libs/bouncycastle"/>

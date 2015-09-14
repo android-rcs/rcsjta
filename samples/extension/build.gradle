@@ -12,6 +12,7 @@ android {
             renderscript.srcDirs = ['src']
             res.srcDirs = ['res']
             assets.srcDirs = ['assets']
+            jniLibs.srcDirs = ['libs']
         }
         androidTest.setRoot('tests')
     }
@@ -25,17 +26,27 @@ android {
     buildToolsVersion rootProject.buildToolsVersion
 
     defaultConfig {
-        applicationId "com.gsma.rcs"
+        applicationId "com.gsma.rcs.registry"
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.targetSdkVersion
         versionCode 1
         versionName "3.1.1"
-        archivesBaseName = "RCS_Core"
+        archivesBaseName = "extension"
     }
 }
 
 dependencies {
-    compile project(':bouncycastle')
-    compile project(':nist_sip')
-	compile 'dnsjava:dnsjava:2.1.7'
+    compile project(':com.gsma.services.rcs')
+    compile 'com.android.support:support-v4:21.0.0'
+}
+
+//Below install dependecy was added to always install RCS service before
+//a RCS client to secure that Android handles RCS permissions correctly.
+task installServiceFirst(dependsOn: ':core:installDebug') << {
+    println 'RCS core service was installed first!'
+}
+tasks.whenTaskAdded { task ->
+    if (task.name == 'installDebug') {
+        task.dependsOn installServiceFirst
+    }
 }
