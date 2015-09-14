@@ -39,23 +39,6 @@ dependencies {
     compile project(':com.gsma.services.rcs')
 }
 
-//There is a dependecy on src belonging to RI
-task copyFiles(type:Copy) {
-    from('./../../RI/src/') {
-        include 'com/orangelabs/rcs/ri/ConnectionManager*'
-        include 'com/orangelabs/rcs/ri/utils/LockAccess*'
-        include 'com/orangelabs/rcs/ri/utils/LogUtils*'
-    }
-    into 'src'
-    includeEmptyDirs = true
-}
-preBuild.dependsOn copyFiles
-
-task deleteFiles(type: Delete) {
-  delete 'src/com/orangelabs/rcs/ri'
-}
-clean.dependsOn deleteFiles
-
 //Below install dependecy was added to always install RCS service before
 //a RCS client to secure that Android handles RCS permissions correctly.
 task installServiceFirst(dependsOn: ':core:installDebug') << {
