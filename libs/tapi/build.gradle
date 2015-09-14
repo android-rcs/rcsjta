@@ -44,5 +44,38 @@ preBuild.dependsOn copyFiles
 
 task deleteFiles(type: Delete) {
   delete 'src/com'
+  delete './../../doclava'
 }
 clean.dependsOn deleteFiles
+
+configurations {
+    jaxDoclet
+    classpaths
+}
+
+dependencies {
+    //Note that the local folder doclava-1.0.6 is not required when below dependecy is used
+    jaxDoclet("com.google.doclava:doclava:1.0.6")
+    classpaths files(new File(System.getenv('ANDROID_HOME') + '/platforms/rootProject.targetSdkVersion/android.jar'))
+}
+
+task javadoc(type: Javadoc, dependsOn: copyFiles) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    exclude {
+        it.file.path.contains('aidl')
+    }
+    title = null
+    options.docletpath = configurations.jaxDoclet.files.asType(List)
+    options.classpath = configurations.classpaths.files.asType(List)
+    options {
+        doclet "com.google.doclava.Doclava"
+        bootClasspath new File(System.getenv('JAVA_HOME') + "/jre/lib/rt.jar")
+        addStringOption "d", "./../../doclava"
+        addStringOption "hdf project.name", "RCS API"
+        addStringOption "hdf sdk.version", "3.2.3"
+        addStringOption "title", "TAPI 1.5.1"
+        //addStringOption "federate android", "http://developer.android.com/reference/"
+        addStringOption "federationxml android", "http://doclava.googlecode.com/svn/static/api/android-10.xml"
+    }
+}
