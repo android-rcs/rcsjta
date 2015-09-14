@@ -60,6 +60,20 @@ public class OneToOneChatDequeueTask extends DequeueTask {
         mHistoryLog = historyLog;
     }
 
+    private void handleDequeuingFailure(int providerId, ContactId contact, String id,
+            String mimeType) {
+        switch (providerId) {
+            case MessageData.HISTORYLOG_MEMBER_ID:
+                setOneToOneChatMessageAsFailed(contact, id, mimeType);
+                break;
+            case FileTransferData.HISTORYLOG_MEMBER_ID:
+                setOneToOneFileTransferAsFailed(contact, id);
+                break;
+            default:
+                break;
+        }
+    }
+
     public void run() {
         boolean logActivated = mLogger.isActivated();
         if (logActivated) {
@@ -89,7 +103,6 @@ public class OneToOneChatDequeueTask extends DequeueTask {
                     return;
                 }
                 cursor = mHistoryLog.getQueuedOneToOneChatMessagesAndOneToOneFileTransfers();
-                /* TODO: Handle cursor when null. */
                 int providerIdIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_PROVIDER_ID);
                 int idIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_ID);
                 int contactIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_CONTACT);
@@ -99,96 +112,77 @@ public class OneToOneChatDequeueTask extends DequeueTask {
                 int statusIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_STATUS);
                 int fileSizeIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_FILESIZE);
                 while (cursor.moveToNext()) {
-                    if (!isImsConnected()) {
-                        if (logActivated) {
-                            mLogger.debug("IMS not connected, exiting dequeue task to dequeue all one-to-one chat messages and one-to-one file transfers.");
-                        }
-                        return;
-                    }
-                    if (mCore.isStopping()) {
-                        if (logActivated) {
-                            mLogger.debug("Core service is stopped, exiting dequeue task to dequeue all one-to-one chat messages and one-to-one file transfers.");
-                        }
-                        return;
-                    }
-                    providerId = cursor.getInt(providerIdIdx);
-                    id = cursor.getString(idIdx);
-                    String phoneNumber = cursor.getString(contactIdx);
-                    contact = ContactUtil.createContactIdFromTrustedData(phoneNumber);
-                    OneToOneChatImpl oneToOneChat = mChatService.getOrCreateOneToOneChat(contact);
-                    mimeType = cursor.getString(mimeTypeIdx);
-                    switch (providerId) {
-                        case MessageData.HISTORYLOG_MEMBER_ID:
-                            if (!isPossibleToDequeueOneToOneChatMessage(contact)) {
-                                setOneToOneChatMessageAsFailed(contact, id, mimeType);
-                                continue;
+                    try {
+                        if (!isImsConnected()) {
+                            if (logActivated) {
+                                mLogger.debug("IMS not connected, exiting dequeue task to dequeue all one-to-one chat messages and one-to-one file transfers.");
                             }
-                            if (!isAllowedToDequeueOneToOneChatMessage(contact)) {
-                                continue;
+                            return;
+                        }
+                        if (mCore.isStopping()) {
+                            if (logActivated) {
+                                mLogger.debug("Core service is stopped, exiting dequeue task to dequeue all one-to-one chat messages and one-to-one file transfers.");
                             }
-                            String content = cursor.getString(contentIdx);
-                            long timestamp = System.currentTimeMillis();
-                            /* For outgoing message, timestampSent = timestamp */
-                            ChatMessage msg = ChatUtils.createChatMessage(id,
-                                    ChatUtils.apiMimeTypeToNetworkMimeType(mimeType), content,
-                                    contact, null, timestamp, timestamp);
-                            try {
+                            return;
+                        }
+                        providerId = cursor.getInt(providerIdIdx);
+                        id = cursor.getString(idIdx);
+                        String phoneNumber = cursor.getString(contactIdx);
+                        contact = ContactUtil.createContactIdFromTrustedData(phoneNumber);
+                        OneToOneChatImpl oneToOneChat = mChatService
+                                .getOrCreateOneToOneChat(contact);
+                        mimeType = cursor.getString(mimeTypeIdx);
+                        switch (providerId) {
+                            case MessageData.HISTORYLOG_MEMBER_ID:
+                                if (!isPossibleToDequeueOneToOneChatMessage(contact)) {
+                                    setOneToOneChatMessageAsFailed(contact, id, mimeType);
+                                    continue;
+                                }
+                                if (!isAllowedToDequeueOneToOneChatMessage(contact)) {
+                                    continue;
+                                }
+                                String content = cursor.getString(contentIdx);
+                                long timestamp = System.currentTimeMillis();
+                                /* For outgoing message, timestampSent = timestamp */
+                                ChatMessage msg = ChatUtils.createChatMessage(id,
+                                        ChatUtils.apiMimeTypeToNetworkMimeType(mimeType), content,
+                                        contact, null, timestamp, timestamp);
                                 oneToOneChat.dequeueOneToOneChatMessage(msg);
-                            } catch (MsrpException e) {
-                                if (logActivated) {
-                                    mLogger.debug(new StringBuilder(
-                                            "Failed to dequeue one-one chat message '").append(id)
-                                            .append("' message for contact '").append(contact)
-                                            .append("' due to: ").append(e.getMessage()).toString());
+                                break;
+                            case FileTransferData.HISTORYLOG_MEMBER_ID:
+                                Uri file = Uri.parse(cursor.getString(contentIdx));
+                                if (!isPossibleToDequeueOneToOneFileTransfer(contact, file,
+                                        cursor.getLong(fileSizeIdx))) {
+                                    setOneToOneFileTransferAsFailed(contact, id);
+                                    continue;
                                 }
-                            } catch (SipPayloadException e) {
-                                mLogger.error(new StringBuilder(
-                                        "Failed to dequeue one-one chat message '").append(id)
-                                        .append("' message for contact '").append(contact)
-                                        .toString(), e);
-                            } catch (SipNetworkException e) {
-                                if (logActivated) {
-                                    mLogger.debug(new StringBuilder(
-                                            "Failed to dequeue one-one chat message '").append(id)
-                                            .append("' message for contact '").append(contact)
-                                            .append("' due to: ").append(e.getMessage()).toString());
-                                }
-                            }
-                            break;
-                        case FileTransferData.HISTORYLOG_MEMBER_ID:
-                            Uri file = Uri.parse(cursor.getString(contentIdx));
-                            if (!isPossibleToDequeueOneToOneFileTransfer(contact, file,
-                                    cursor.getLong(fileSizeIdx))) {
-                                setOneToOneFileTransferAsFailed(contact, id);
-                                continue;
-                            }
-                            State state = State.valueOf(cursor.getInt(statusIdx));
-                            switch (state) {
-                                case QUEUED:
-                                    if (!isAllowedToDequeueOneToOneFileTransfer(contact,
-                                            mFileTransferService)) {
-                                        continue;
-                                    }
-                                    MmContent fileContent = FileTransferUtils.createMmContent(file);
-                                    MmContent fileIconContent = null;
-                                    String fileIcon = cursor.getString(fileIconIdx);
-                                    if (fileIcon != null) {
-                                        Uri fileIconUri = Uri.parse(fileIcon);
-                                        fileIconContent = FileTransferUtils
-                                                .createMmContent(fileIconUri);
-                                    }
-                                    mFileTransferService.dequeueOneToOneFileTransfer(id, contact,
-                                            fileContent, fileIconContent);
-                                    break;
-                                case STARTED:
-                                    if (!isPossibleToDequeueOneToOneChatMessage(contact)) {
-                                        setOneToOneFileTransferAsFailed(contact, id);
-                                        continue;
-                                    }
-                                    if (!isAllowedToDequeueOneToOneChatMessage(contact)) {
-                                        continue;
-                                    }
-                                    try {
+                                State state = State.valueOf(cursor.getInt(statusIdx));
+                                switch (state) {
+                                    case QUEUED:
+                                        if (!isAllowedToDequeueOneToOneFileTransfer(contact,
+                                                mFileTransferService)) {
+                                            continue;
+                                        }
+                                        MmContent fileContent = FileTransferUtils
+                                                .createMmContent(file);
+                                        MmContent fileIconContent = null;
+                                        String fileIcon = cursor.getString(fileIconIdx);
+                                        if (fileIcon != null) {
+                                            Uri fileIconUri = Uri.parse(fileIcon);
+                                            fileIconContent = FileTransferUtils
+                                                    .createMmContent(fileIconUri);
+                                        }
+                                        mFileTransferService.dequeueOneToOneFileTransfer(id,
+                                                contact, fileContent, fileIconContent);
+                                        break;
+                                    case STARTED:
+                                        if (!isPossibleToDequeueOneToOneChatMessage(contact)) {
+                                            setOneToOneFileTransferAsFailed(contact, id);
+                                            continue;
+                                        }
+                                        if (!isAllowedToDequeueOneToOneChatMessage(contact)) {
+                                            continue;
+                                        }
                                         OneToOneFileTransferImpl oneToOneFileTransfer = mFileTransferService
                                                 .getOrCreateOneToOneFileTransfer(contact, id);
                                         String fileInfo = FileTransferUtils
@@ -197,35 +191,46 @@ public class OneToOneChatDequeueTask extends DequeueTask {
                                         oneToOneChat.dequeueOneToOneFileInfo(id, fileInfo,
                                                 displayedReportEnabled, deliveryReportEnabled,
                                                 oneToOneFileTransfer);
-                                    } catch (MsrpException e) {
-                                        if (logActivated) {
-                                            mLogger.debug(new StringBuilder(
-                                                    "Failed to dequeue one-one file info '")
-                                                    .append(id).append("' message for contact '")
-                                                    .append(contact).append("' due to: ")
-                                                    .append(e.getMessage()).toString());
-                                        }
-                                    } catch (SipPayloadException e) {
-                                        mLogger.error(new StringBuilder(
-                                                "Failed to dequeue one-one file info '").append(id)
-                                                .append("' message for contact '").append(contact)
-                                                .toString(), e);
-                                    } catch (SipNetworkException e) {
-                                        if (logActivated) {
-                                            mLogger.debug(new StringBuilder(
-                                                    "Failed to dequeue one-one file info '")
-                                                    .append(id).append("' message for contact '")
-                                                    .append(contact).append("' due to: ")
-                                                    .append(e.getMessage()).toString());
-                                        }
-                                    }
-                                    break;
-                                default:
-                                    break;
-                            }
-                            break;
-                        default:
-                            break;
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                    } catch (MsrpException e) {
+                        if (logActivated) {
+                            mLogger.debug(new StringBuilder(
+                                    "Failed to dequeue one-one entry with id '").append(id)
+                                    .append("' for contact '").append(contact).append("' due to: ")
+                                    .append(e.getMessage()).toString());
+                        }
+                    } catch (SipNetworkException e) {
+                        if (logActivated) {
+                            mLogger.debug(new StringBuilder(
+                                    "Failed to dequeue one-one entry with id '").append(id)
+                                    .append("' for contact '").append(contact).append("' due to: ")
+                                    .append(e.getMessage()).toString());
+                        }
+                    } catch (SipPayloadException e) {
+                        mLogger.error(
+                                new StringBuilder("Failed to dequeue one-one entry with id '")
+                                        .append(id).append("' for contact '").append(contact)
+                                        .toString(), e);
+                        handleDequeuingFailure(providerId, contact, id, mimeType);
+                    } catch (RuntimeException e) {
+                        /*
+                         * Normally all the terminal and non-terminal cases should be handled above
+                         * so if we come here that means that there is a bug and so we output a
+                         * stack trace so the bug can then be properly tracked down and fixed. We
+                         * also mark the respective entry that failed to dequeue as FAILED.
+                         */
+                        mLogger.error(
+                                new StringBuilder("Failed to dequeue one-one entry with id '")
+                                        .append(id).append("' for contact '").append(contact)
+                                        .append("'!").toString(), e);
+                        handleDequeuingFailure(providerId, contact, id, mimeType);
                     }
                 }
             }
@@ -244,21 +249,11 @@ public class OneToOneChatDequeueTask extends DequeueTask {
             if (id == null) {
                 return;
             }
-            switch (providerId) {
-                case MessageData.HISTORYLOG_MEMBER_ID:
-                    setOneToOneChatMessageAsFailed(contact, id, mimeType);
-                    break;
-                case FileTransferData.HISTORYLOG_MEMBER_ID:
-                    setOneToOneFileTransferAsFailed(contact, id);
-                    break;
-                default:
-                    break;
-            }
+            handleDequeuingFailure(providerId, contact, id, mimeType);
         } finally {
             if (cursor != null) {
                 cursor.close();
             }
         }
-
     }
 }

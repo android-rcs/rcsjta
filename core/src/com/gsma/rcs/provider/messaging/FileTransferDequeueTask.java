@@ -52,7 +52,15 @@ public class FileTransferDequeueTask extends DequeueTask {
             ContactManager contactManager, RcsSettings rcsSettings) {
         super(lock, ctx, core, contactManager, messagingLog, rcsSettings, chatService,
                 fileTransferService);
+    }
 
+    private void handleDequeuingFailure(String id, boolean groupFile, ContactId contact,
+            String chatId) {
+        if (groupFile) {
+            setGroupFileTransferAsFailed(chatId, id);
+        } else {
+            setOneToOneFileTransferAsFailed(contact, id);
+        }
     }
 
     public void run() {
@@ -63,7 +71,7 @@ public class FileTransferDequeueTask extends DequeueTask {
         String id = null;
         ContactId contact = null;
         String chatId = null;
-        boolean isGroupFileTransfer = false;
+        boolean groupFile = false;
         Cursor cursor = null;
         ImdnManager imdnManager = mImService.getImdnManager();
         boolean displayedReportEnabled = imdnManager
@@ -84,7 +92,6 @@ public class FileTransferDequeueTask extends DequeueTask {
                     return;
                 }
                 cursor = mMessagingLog.getQueuedAndUploadedButNotTransferredFileTransfers();
-                /* TODO: Handle cursor when null. */
                 int fileTransferIdIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FT_ID);
                 int fileIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FILE);
                 int fileIconIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FILEICON);
@@ -93,42 +100,42 @@ public class FileTransferDequeueTask extends DequeueTask {
                 int stateIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_STATE);
                 int fileSizeIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FILESIZE);
                 while (cursor.moveToNext()) {
-                    if (!isImsConnected()) {
-                        if (logActivated) {
-                            mLogger.debug("IMS not connected, exiting dequeue task to dequeue one-to-one and group file transfers");
+                    try {
+                        if (!isImsConnected()) {
+                            if (logActivated) {
+                                mLogger.debug("IMS not connected, exiting dequeue task to dequeue one-to-one and group file transfers");
+                            }
+                            return;
                         }
-                        return;
-                    }
-                    if (mCore.isStopping()) {
-                        if (logActivated) {
-                            mLogger.debug("Core service is stopped, exiting dequeue task to dequeue one-to-one and group file transfers");
+                        if (mCore.isStopping()) {
+                            if (logActivated) {
+                                mLogger.debug("Core service is stopped, exiting dequeue task to dequeue one-to-one and group file transfers");
+                            }
+                            return;
                         }
-                        return;
-                    }
-                    id = cursor.getString(fileTransferIdIdx);
-                    String contactNumber = cursor.getString(contactIdx);
-                    contact = contactNumber != null ? ContactUtil
-                            .createContactIdFromTrustedData(contactNumber) : null;
-                    chatId = cursor.getString(chatIdIdx);
-                    isGroupFileTransfer = !chatId.equals(contactNumber);
-                    State state = State.valueOf(cursor.getInt(stateIdx));
-                    Uri file = Uri.parse(cursor.getString(fileIdx));
-                    long size = cursor.getLong(fileSizeIdx);
-                    if (isGroupFileTransfer) {
-                        if (!isPossibleToDequeueGroupFileTransfer(chatId, file, size)) {
-                            setGroupFileTransferAsFailed(chatId, id);
-                            continue;
+                        id = cursor.getString(fileTransferIdIdx);
+                        String contactNumber = cursor.getString(contactIdx);
+                        contact = contactNumber != null ? ContactUtil
+                                .createContactIdFromTrustedData(contactNumber) : null;
+                        chatId = cursor.getString(chatIdIdx);
+                        groupFile = !chatId.equals(contactNumber);
+                        State state = State.valueOf(cursor.getInt(stateIdx));
+                        Uri file = Uri.parse(cursor.getString(fileIdx));
+                        long size = cursor.getLong(fileSizeIdx);
+                        if (groupFile) {
+                            if (!isPossibleToDequeueGroupFileTransfer(chatId, file, size)) {
+                                setGroupFileTransferAsFailed(chatId, id);
+                                continue;
+                            }
+                        } else {
+                            if (!isPossibleToDequeueOneToOneFileTransfer(contact, file, size)) {
+                                setOneToOneFileTransferAsFailed(contact, id);
+                                continue;
+                            }
                         }
-                    } else {
-                        if (!isPossibleToDequeueOneToOneFileTransfer(contact, file, size)) {
-                            setOneToOneFileTransferAsFailed(contact, id);
-                            continue;
-                        }
-                    }
-                    switch (state) {
-                        case QUEUED:
-                            try {
-                                if (isGroupFileTransfer) {
+                        switch (state) {
+                            case QUEUED:
+                                if (groupFile) {
                                     if (!isAllowedToDequeueGroupFileTransfer()) {
                                         continue;
                                     }
@@ -146,55 +153,33 @@ public class FileTransferDequeueTask extends DequeueTask {
                                     fileIconContent = FileTransferUtils
                                             .createMmContent(fileIconUri);
                                 }
-                                if (isGroupFileTransfer) {
+                                if (groupFile) {
                                     mFileTransferService.dequeueGroupFileTransfer(chatId, id,
                                             content, fileIconContent);
                                 } else {
                                     mFileTransferService.dequeueOneToOneFileTransfer(id, contact,
                                             content, fileIconContent);
                                 }
-                            } catch (MsrpException e) {
-                                if (logActivated) {
-                                    mLogger.debug(new StringBuilder(
-                                            "Failed to dequeue file transfer with fileTransferId '")
-                                            .append(id).append("' on chat '").append(chatId)
-                                            .append("' due to: ").append(e.getMessage()).toString());
+                                break;
+                            case STARTED:
+                                if (groupFile) {
+                                    if (!isPossibleToDequeueGroupChatMessage(chatId)) {
+                                        setGroupFileTransferAsFailed(chatId, id);
+                                        continue;
+                                    }
+                                } else {
+                                    if (!isPossibleToDequeueOneToOneChatMessage(contact)) {
+                                        setOneToOneFileTransferAsFailed(contact, id);
+                                        continue;
+                                    }
+                                    if (!isAllowedToDequeueOneToOneChatMessage(contact)) {
+                                        continue;
+                                    }
                                 }
-                            } catch (SipPayloadException e) {
-                                mLogger.error(
-                                        new StringBuilder(
-                                                "Failed to dequeue file transfer with fileTransferId '")
-                                                .append(id).append("' on chat '").append(chatId)
-                                                .toString(), e);
-                            } catch (SipNetworkException e) {
-                                if (logActivated) {
-                                    mLogger.debug(new StringBuilder(
-                                            "Failed to dequeue file transfer with fileTransferId '")
-                                            .append(id).append("' on chat '").append(chatId)
-                                            .append("' due to: ").append(e.getMessage()).toString());
-                                }
-                            }
-                            break;
-                        case STARTED:
-                            if (isGroupFileTransfer) {
-                                if (!isPossibleToDequeueGroupChatMessage(chatId)) {
-                                    setGroupFileTransferAsFailed(chatId, id);
-                                    continue;
-                                }
-                            } else {
-                                if (!isPossibleToDequeueOneToOneChatMessage(contact)) {
-                                    setOneToOneFileTransferAsFailed(contact, id);
-                                    continue;
-                                }
-                                if (!isAllowedToDequeueOneToOneChatMessage(contact)) {
-                                    continue;
-                                }
-                            }
-                            try {
                                 String fileInfo = FileTransferUtils
                                         .createHttpFileTransferXml(mMessagingLog
                                                 .getGroupFileDownloadInfo(id));
-                                if (isGroupFileTransfer) {
+                                if (groupFile) {
                                     GroupChatImpl groupChat = mChatService
                                             .getOrCreateGroupChat(chatId);
                                     GroupFileTransferImpl groupFileTransfer = mFileTransferService
@@ -211,30 +196,40 @@ public class FileTransferDequeueTask extends DequeueTask {
                                             displayedReportEnabled, deliveryReportEnabled,
                                             oneToOneFileTransfer);
                                 }
-                            } catch (MsrpException e) {
-                                if (logActivated) {
-                                    mLogger.debug(new StringBuilder(
-                                            "Failed to dequeue file transfer with fileTransferId '")
-                                            .append(id).append("' on chat '").append(chatId)
-                                            .append("' due to: ").append(e.getMessage()).toString());
-                                }
-                            } catch (SipPayloadException e) {
-                                mLogger.error(
-                                        new StringBuilder(
-                                                "Failed to dequeue file transfer with fileTransferId '")
-                                                .append(id).append("' on chat '").append(chatId)
-                                                .toString(), e);
-                            } catch (SipNetworkException e) {
-                                if (logActivated) {
-                                    mLogger.debug(new StringBuilder(
-                                            "Failed to dequeue file transfer with fileTransferId '")
-                                            .append(id).append("' on chat '").append(chatId)
-                                            .append("' due to: ").append(e.getMessage()).toString());
-                                }
-                            }
-                            break;
-                        default:
-                            break;
+                                break;
+                            default:
+                                break;
+                        }
+                    } catch (MsrpException e) {
+                        if (logActivated) {
+                            mLogger.debug(new StringBuilder(
+                                    "Failed to dequeue file transfer with fileTransferId '")
+                                    .append(id).append("' on chat '").append(chatId)
+                                    .append("' due to: ").append(e.getMessage()).toString());
+                        }
+                    } catch (SipNetworkException e) {
+                        if (logActivated) {
+                            mLogger.debug(new StringBuilder(
+                                    "Failed to dequeue file transfer with fileTransferId '")
+                                    .append(id).append("' on chat '").append(chatId)
+                                    .append("' due to: ").append(e.getMessage()).toString());
+                        }
+                    } catch (SipPayloadException e) {
+                        mLogger.error(new StringBuilder(
+                                "Failed to dequeue file transfer with fileTransferId '").append(id)
+                                .append("' on chat '").append(chatId).toString(), e);
+                        handleDequeuingFailure(id, groupFile, contact, chatId);
+                    } catch (RuntimeException e) {
+                        /*
+                         * Normally all the terminal and non-terminal cases should be handled above
+                         * so if we come here that means that there is a bug and so we output a
+                         * stack trace so the bug can then be properly tracked down and fixed. We
+                         * also mark the respective entry that failed to dequeue as FAILED.
+                         */
+                        mLogger.error(new StringBuilder(
+                                "Failed to dequeue file transfer with fileTransferId '").append(id)
+                                .append("' and chatId '").append(chatId).append("'!").toString(), e);
+                        handleDequeuingFailure(id, groupFile, contact, chatId);
                     }
                 }
             }
@@ -251,11 +246,7 @@ public class FileTransferDequeueTask extends DequeueTask {
             if (id == null) {
                 return;
             }
-            if (isGroupFileTransfer) {
-                setGroupFileTransferAsFailed(chatId, id);
-            } else {
-                setOneToOneFileTransferAsFailed(contact, id);
-            }
+            handleDequeuingFailure(id, groupFile, contact, chatId);
         } finally {
             CursorUtil.close(cursor);
         }
