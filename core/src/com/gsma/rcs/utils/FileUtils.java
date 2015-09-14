@@ -130,24 +130,29 @@ public class FileUtils {
      * Delete a directory recursively
      * 
      * @param dir the directory
-     * @throws IllegalArgumentException
+     * @throws IOException
      */
-    public static void deleteDirectory(File dir) throws IllegalArgumentException {
-        if (dir == null) {
-            throw new IllegalArgumentException("Directory is null");
+    public static void deleteDirectory(File dir) throws IOException {
+        if (!dir.isDirectory()) {
+            throw new IllegalArgumentException(dir.getPath().concat(
+                    " should always be a directory!"));
         }
-        if (dir.isDirectory()) {
-            String[] children = dir.list();
-            for (String childname : children) {
-                File child = new File(dir, childname);
-                if (child.isDirectory()) {
-                    deleteDirectory(child);
-                    child.delete();
-                } else {
-                    child.delete();
+        String[] children = dir.list();
+        for (String childname : children) {
+            File child = new File(dir, childname);
+            if (child.isDirectory()) {
+                deleteDirectory(child);
+                if (!child.delete()) {
+                    throw new IOException("Failed to delete file : ".concat(child.getPath()));
+                }
+            } else {
+                if (!child.delete()) {
+                    throw new IOException("Failed to delete file : ".concat(child.getPath()));
                 }
             }
-            dir.delete();
+        }
+        if (!dir.delete()) {
+            throw new IOException("Failed to delete directory : ".concat(dir.getPath()));
         }
     }
 

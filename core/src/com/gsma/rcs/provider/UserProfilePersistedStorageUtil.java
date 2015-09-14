@@ -22,25 +22,32 @@
 
 package com.gsma.rcs.provider;
 
-import com.gsma.rcs.addressbook.RcsAccountException;
 import com.gsma.rcs.utils.FileUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsServiceControl;
 
 import android.os.Environment;
-import android.text.TextUtils;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 /**
- * Backup and restore databases
+ * Backup and restore of user profile information
  * 
  * @author YPLO6403
  */
-public class BackupRestoreDb {
+public class UserProfilePersistedStorageUtil {
+
+    private static final String DB_FILE_EXTENSION = ".db";
+
+    /**
+     * Pattern to check if rcs account have atleast 3 characters.
+     */
+    private static final Pattern RCS_ACCOUNT_MATCH_PATTERN = Pattern.compile("^\\d{3,}$");
 
     /**
      * The location of the database
@@ -53,7 +60,8 @@ public class BackupRestoreDb {
      */
     private static final int MAX_SAVED_ACCOUNT = 3;
 
-    private static final Logger sLogger = Logger.getLogger(BackupRestoreDb.class.getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(UserProfilePersistedStorageUtil.class
+            .getSimpleName());
 
     /**
      * Filter to get database files
@@ -61,7 +69,7 @@ public class BackupRestoreDb {
     private static final FilenameFilter sFilenameDbFilter = new FilenameFilter() {
         @Override
         public boolean accept(File dir, String filename) {
-            return (filename.endsWith(".db"));
+            return (filename.endsWith(DB_FILE_EXTENSION));
         }
     };
 
@@ -70,71 +78,44 @@ public class BackupRestoreDb {
      * 
      * @param databasesDir the database directory
      * @return the array of RCS saved accounts (may be empty) or null
-     * @throws InvalidArgumentException
      */
-    public static File[] listOfSavedAccounts(final File databasesDir)
-            throws IllegalArgumentException {
-        if (!databasesDir.exists()) {
-            throw new IllegalArgumentException(new StringBuilder("Argument '").append(databasesDir)
-                    .append("' directory does not exist").toString());
-        }
-        if (!databasesDir.isDirectory()) {
-            throw new IllegalArgumentException(new StringBuilder("Argument '").append(databasesDir)
-                    .append("' is not a directory").toString());
+    private static File[] listOfSavedAccounts(final File databasesDir) {
+        if (!databasesDir.exists() || !databasesDir.isDirectory()) {
+            /*
+             * As the database itself doesn't exist , So there won't be any accounts related to user
+             * profile saved, So return from here. This is a special case where we don't throw
+             * exception as backup and restore files and not always needed to be present and reading
+             * information from persisted cache is always optional
+             */
+            return null;
         }
         FileFilter directoryFilter = new FileFilter() {
             @Override
             public boolean accept(File file) {
-                if (file.isDirectory()) {
-                    // There must be at least 3 digits
-                    return file.getName().matches("^\\d{3,}$");
-                }
-                return false;
+                return file.isDirectory()
+                        && RCS_ACCOUNT_MATCH_PATTERN.matcher(file.getName()).matches();
             }
         };
         return databasesDir.listFiles(directoryFilter);
     }
 
     /**
-     * Check the arguments of backup or restore methods
-     * 
-     * @param databasesDir the database directory
-     * @param account the account
-     * @return true is arguments are OK
-     */
-    private static boolean checkBackupRestoreArguments(final File databasesDir, final String account) {
-        if (TextUtils.isEmpty(account)) {
-            return false;
-        }
-        // There must be at least 3 digits
-        if (account.matches("^\\d{3,}$") == false) {
-            return false;
-        }
-        if (databasesDir == null || databasesDir.isDirectory() == false) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Save databases under account directory
+     * Save user account profile
      * 
      * @param databasesDir the database directory
      * @param account the account
      * @throws IOException
-     * @throws RcsAccountException
      */
-    private static void saveAccountDatabases(final File databasesDir, final String account)
-            throws IOException, RcsAccountException {
+    private static void saveUserProfile(final File databasesDir, final String account)
+            throws IOException {
         if (sLogger.isActivated()) {
             sLogger.info("saveAccountDatabases account=".concat(account));
         }
-        if (checkBackupRestoreArguments(databasesDir, account) == false) {
-            throw new RcsAccountException("Cannot save account ".concat(account));
-        }
         String[] listOfDbFiles = databasesDir.list(sFilenameDbFilter);
-        if (listOfDbFiles == null || listOfDbFiles.length <= 0) {
-            throw new RcsAccountException("No DB files to save for ".concat(account));
+        if (listOfDbFiles == null) {
+            throw new FileNotFoundException(new StringBuilder("Failed to find ")
+                    .append(DB_FILE_EXTENSION).append(" files at : ")
+                    .append(databasesDir.getPath()).toString());
         }
         File dstDir = new File(databasesDir, account);
         for (String dbFile : listOfDbFiles) {
@@ -149,23 +130,20 @@ public class BackupRestoreDb {
     }
 
     /**
-     * Restore databases from account directory
+     * Restore user account profile
      * 
      * @param databasesDir the database directory
      * @param account the account
      * @throws IOException
-     * @throws RcsAccountException
      */
-    private static void restoreAccountDatabases(final File databasesDir, final String account)
-            throws IOException, RcsAccountException {
-        if (checkBackupRestoreArguments(databasesDir, account) == false) {
-            throw new RcsAccountException("Cannot save account ".concat(account));
-
-        }
+    private static void restoreUserProfile(final File databasesDir, final String account)
+            throws IOException {
         File srcDir = new File(databasesDir, account);
         String[] listOfDbFiles = srcDir.list(sFilenameDbFilter);
-        if (listOfDbFiles == null || listOfDbFiles.length <= 0) {
-            throw new RcsAccountException("No DB files to restore for ".concat(account));
+        if (listOfDbFiles == null) {
+            throw new FileNotFoundException(new StringBuilder("Failed to find ")
+                    .append(DB_FILE_EXTENSION).append(" files at : ")
+                    .append(databasesDir.getPath()).toString());
         }
         for (String dbFile : listOfDbFiles) {
             File srcFile = new File(srcDir, dbFile);
@@ -174,20 +152,19 @@ public class BackupRestoreDb {
     }
 
     /**
-     * Suppress oldest backup if more than MAX_SAVED_ACCOUNT
+     * Normalize file backup and manages old user files if not more then MAX_SAVED_ACCOUNT
      * 
      * @param databasesDir the database directory
      * @param currentUserAccount the account
-     * @throws IllegalArgumentException
+     * @throws IOException
      */
-    private static void cleanBackups(final File databasesDir, final String currentUserAccount)
-            throws IllegalArgumentException {
+    private static void normalizeFileBackup(final File databasesDir, final String currentUserAccount)
+            throws IOException {
         File[] files = listOfSavedAccounts(databasesDir);
         if (files == null || files.length <= MAX_SAVED_ACCOUNT) {
-            // No need to suppress oldest backup
+            /* No need to formalize backup files as we havn't reach max saved account limit yet */
             return;
         }
-
         File file = FileUtils.getOldestFile(files);
         if (!file.getName().equals(currentUserAccount)) {
             FileUtils.deleteDirectory(file);
@@ -195,13 +172,12 @@ public class BackupRestoreDb {
                 sLogger.debug("Clean oldest Backup : account=".concat(file.getName()));
             }
             return;
-
         }
-        // Do not clean current account
+        /* Do not clean current account */
         File[] filesWithoutCurrentAccount = new File[files.length - 1];
         int i = 0;
         for (File file2 : files) {
-            if (file2.getName().equals(currentUserAccount) == false) {
+            if (!file2.getName().equals(currentUserAccount)) {
                 filesWithoutCurrentAccount[i++] = file2;
             }
         }
@@ -213,37 +189,55 @@ public class BackupRestoreDb {
     }
 
     /**
-     * Suppress oldest backup
+     * Normalize file backup and manages old user files if not more then MAX_SAVED_ACCOUNT
      * 
-     * @param currentUserAccount the current account must not be cleaned
+     * @param databasesDir the database directory
+     * @param currentUserAccount the account
+     * @throws IOException
      */
-    public static void cleanBackups(String currentUserAccount) {
-        cleanBackups(
-                new File(new StringBuilder(Environment.getDataDirectory().toString()).append(
-                        DATABASE_LOCATION).toString()), currentUserAccount);
+    public static void normalizeFileBackup(String currentUserAccount) throws IOException {
+        normalizeFileBackup(new File(new StringBuilder(Environment.getDataDirectory().toString())
+                .append(DATABASE_LOCATION).toString()), currentUserAccount);
     }
 
     /**
-     * Backup account
+     * Try to backup user account.
+     * <p>
+     * As this method makes an attempt to backup user account any failure that may occur while
+     * backing up will not be propagated to the caller function.
+     * </p>
      * 
      * @param account the Account to backup
-     * @throws IOException
-     * @throws RcsAccountException
      */
-    public static void backupAccount(String account) throws IOException, RcsAccountException {
-        saveAccountDatabases(new File(new StringBuilder(Environment.getDataDirectory().toString())
-                .append(DATABASE_LOCATION).toString()), account);
+    public static void tryToBackupAccount(String account) {
+        try {
+            saveUserProfile(new File(new StringBuilder(Environment.getDataDirectory().toString())
+                    .append(DATABASE_LOCATION).toString()), account);
+        } catch (IOException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
+        }
     }
 
     /**
-     * Restore account
+     * Try to restore user account
+     * <p>
+     * As this method makes an attempt to restore user account any failure that may occur while
+     * restoring will not be propagated to the caller function.
+     * </p>
      * 
      * @param account Account
-     * @throws IOException
-     * @throws RcsAccountException
      */
-    public static void restoreAccount(String account) throws IOException, RcsAccountException {
-        restoreAccountDatabases(new File(new StringBuilder(Environment.getDataDirectory()
-                .toString()).append(DATABASE_LOCATION).toString()), account);
+    public static void tryToRestoreAccount(String account) {
+        try {
+            restoreUserProfile(
+                    new File(new StringBuilder(Environment.getDataDirectory().toString()).append(
+                            DATABASE_LOCATION).toString()), account);
+        } catch (IOException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
+        }
     }
 }
