@@ -210,12 +210,45 @@ public class UserProfilePersistedStorageUtil {
      * @param account the Account to backup
      */
     public static void tryToBackupAccount(String account) {
+        File userProfile = new File(new StringBuilder(Environment.getDataDirectory().toString())
+                .append(DATABASE_LOCATION).toString());
         try {
-            saveUserProfile(new File(new StringBuilder(Environment.getDataDirectory().toString())
-                    .append(DATABASE_LOCATION).toString()), account);
+            saveUserProfile(userProfile, account);
+        } catch (FileNotFoundException e) {
+            /*
+             * If the file that needs to be backed up does not exist then we can't proceed with this
+             * operation, so we log this incident and continue with the rest of the flow as backing
+             * up account is not a mandatory feature that needs full success.
+             */
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
+
         } catch (IOException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
+            }
+            /*
+             * Since we have failed to do full backup and there is a chance that we might have
+             * partial copy of original files, Hence we should remove those files and also the files
+             * under DATABASE_LOCATION , as anyway we don't have a chance to back those after sim
+             * swap happens.
+             */
+            /* Remove all directories and files those are restored so far */
+            try {
+                FileUtils.deleteDirectory(new File(userProfile, account));
+            } catch (IOException ex) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(ex.getMessage());
+                }
+            }
+            /* Remove directories and files under DATABASE_LOCATION */
+            try {
+                FileUtils.deleteDirectory(userProfile);
+            } catch (IOException ex) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(ex.getMessage());
+                }
             }
         }
     }
@@ -230,13 +263,45 @@ public class UserProfilePersistedStorageUtil {
      * @param account Account
      */
     public static void tryToRestoreAccount(String account) {
+        File userProfile = new File(new StringBuilder(Environment.getDataDirectory().toString())
+                .append(DATABASE_LOCATION).toString());
         try {
-            restoreUserProfile(
-                    new File(new StringBuilder(Environment.getDataDirectory().toString()).append(
-                            DATABASE_LOCATION).toString()), account);
+            restoreUserProfile(userProfile, account);
+        } catch (FileNotFoundException e) {
+            /*
+             * If the file that needs to be backed up does not exist then we can't proceed with this
+             * operation, so we log this incident and continue with the rest of the flow as backing
+             * up account is not a mandatory feature that needs full success.
+             */
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
+
         } catch (IOException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
+            }
+            /*
+             * Since we have failed to do full restore and there is a chance that we might have
+             * partial copy of original files, Hence we should remove those files and also the files
+             * under DATABASE_LOCATION , as anyway we don't have a chance to back those after sim
+             * swap happens.
+             */
+            /* Remove all directories and files those are restored so far */
+            try {
+                FileUtils.deleteDirectory(new File(userProfile, account));
+            } catch (IOException ex) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(ex.getMessage());
+                }
+            }
+            /* Remove directories and files under DATABASE_LOCATION */
+            try {
+                FileUtils.deleteDirectory(userProfile);
+            } catch (IOException ex) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(ex.getMessage());
+                }
             }
         }
     }
