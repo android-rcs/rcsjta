@@ -35,6 +35,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.BitmapFactory;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -207,6 +208,15 @@ public class RcsServiceNotifManager extends Service {
         NotificationCompat.Builder notif = new NotificationCompat.Builder(this);
         notif.setContentIntent(intent);
         notif.setSmallIcon(iconId);
+        // @FIXME:
+        // With Android 5.0 Lollipop it is no longer possible to use colored icons in the
+        // notification area.
+        // Only large icon supports colors but only small icon can be shown in notification bar.
+        // Large icon are displayed in the drawer in addition with small icon then.
+        // This is a temporary workaround waiting for small white icons to distinguish IMS
+        // connection from disconnection.
+        notif.setLargeIcon(BitmapFactory.decodeResource(getResources(), iconId));
+
         notif.setWhen(System.currentTimeMillis());
         notif.setAutoCancel(false);
         notif.setOnlyAlertOnce(true);
