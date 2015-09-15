@@ -26,7 +26,7 @@ android {
     buildToolsVersion rootProject.buildToolsVersion
 
     defaultConfig {
-        applicationId "com.gsma.rcs.registry"
+        applicationId "com.gsma.services.rcs.samples.extension"
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.targetSdkVersion
         versionCode 1
