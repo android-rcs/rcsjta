@@ -84,35 +84,6 @@
 		<pathelement path="${j2se.classpath};${android.root}/android.jar;${terminal.build}/classes;${terminal.root}/build/classes"/>
 	</path>
 
-	<!-- Generate RCS API JAR -->
-	<target name="api">
-		<echo>Generate ${terminal.api} file</echo>
-		<delete file="${terminal.api}"/>
-		<jar destfile="${terminal.api}" basedir="${terminal.root}/bin/classes"
-				includesfile="${terminal.root}/jarfiles.txt">
-		</jar>
-		<copy file="${terminal.api}" todir="${terminal.root}/../tests/multistack/libs"/>
-		<copy file="${terminal.api}" todir="${terminal.root}/../samples/session/libs"/>
-		<copy file="${terminal.api}" todir="${terminal.root}/../tests/cts/signature/libs"/>
-		<copy file="${terminal.api}" todir="${terminal.root}/../tests/cts/provider/libs"/>
-	</target>
-
-	<!-- TAPI javadoc -->
-	<target name="docs" description="Generate RCS API javadoc">
-		<echo>Generate Javadoc</echo>
-		<delete dir="${terminal.root}/../docs/javadoc"/>
-		<mkdir dir="${terminal.root}/../docs/javadoc"/>
-		<javadoc doctitle="GSMA RCS Terminal API"
-				verbose="on"
-				destdir="../docs/javadoc"
-				use="true"
-				access="public" 
-				classpath="${android_jar}:${project.all.jars.path}" 
-				sourcepath="${src.path}"
-				packagenames="com.gsma.services.rcs.*">
-		</javadoc>
-	</target>
-	
 	<target name="-pre-build">
 		<echo>Generate libraries</echo>
 		<ant antfile="build.xml" target="jar" dir="${terminal.root}/../libs/nist_sip"/>

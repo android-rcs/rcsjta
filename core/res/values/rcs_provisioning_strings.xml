@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools"
+		tools:ignore="MissingTranslation">
 
     <string name="provisioning_app_name">RCS Provisioning</string>
     <string name="label_reboot_service">The RCS service should be restarted before to take into account the modifications</string>

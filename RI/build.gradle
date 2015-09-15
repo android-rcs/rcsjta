@@ -38,7 +38,7 @@ android {
 }
 
 dependencies {
-    compile project(':com.gsma.services.rcs')
+    compile project(':ApiLib')
     compile project(':mediaplayer')
     compile 'com.android.support:support-v4:21.0.0'
     //Use offical version above instead of local version below

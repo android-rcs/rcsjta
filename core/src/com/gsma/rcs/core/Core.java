@@ -30,7 +30,6 @@ import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.security.cert.KeyStoreManager;
 import com.gsma.rcs.core.ims.service.capability.CapabilityService;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
-import com.gsma.rcs.core.ims.service.ipcall.IPCallService;
 import com.gsma.rcs.core.ims.service.presence.PresenceService;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.sip.SipService;
@@ -304,15 +303,6 @@ public class Core {
      */
     public CapabilityService getCapabilityService() {
         return getImsModule().getCapabilityService();
-    }
-
-    /**
-     * Returns the IP call service
-     * 
-     * @return Rich call service
-     */
-    public IPCallService getIPCallService() {
-        return getImsModule().getIPCallService();
     }
 
     /**

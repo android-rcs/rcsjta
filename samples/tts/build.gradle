@@ -36,7 +36,7 @@ android {
 }
 
 dependencies {
-    compile project(':com.gsma.services.rcs')
+    compile project(':ApiLib')
     compile 'com.android.support:support-v4:21.0.0'
 }
 

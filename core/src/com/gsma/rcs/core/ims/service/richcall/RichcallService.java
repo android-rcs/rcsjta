@@ -38,7 +38,6 @@ import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
-import com.gsma.rcs.core.ims.service.ipcall.IPCallService;
 import com.gsma.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.gsma.rcs.core.ims.service.richcall.geoloc.OriginatingGeolocTransferSession;
 import com.gsma.rcs.core.ims.service.richcall.geoloc.TerminatingGeolocTransferSession;
@@ -120,8 +119,6 @@ public class RichcallService extends ImsService {
 
     private final CallManager mCallManager;
 
-    private final IPCallService mIpCallService;
-
     /**
      * Constructor
      * 
@@ -133,13 +130,12 @@ public class RichcallService extends ImsService {
      * @param ipCallService
      */
     public RichcallService(ImsModule parent, Core core, ContactManager contactsManager,
-            RcsSettings rcsSettings, CallManager callManager, IPCallService ipCallService) {
+            RcsSettings rcsSettings, CallManager callManager) {
         super(parent, true);
         mCore = core;
         mContactManager = contactsManager;
         mRcsSettings = rcsSettings;
         mCallManager = callManager;
-        mIpCallService = ipCallService;
     }
 
     private void handleImageSharingInvitationRejected(SipRequest invite, ContactId contact,
@@ -380,8 +376,7 @@ public class RichcallService extends ImsService {
      */
     public boolean isCallConnectedWith(ContactId contact) {
         boolean csCall = mCallManager.isCallConnectedWith(contact);
-        boolean ipCall = mIpCallService.isCallConnectedWith(contact);
-        return (csCall || ipCall);
+        return (csCall);
     }
 
     /**

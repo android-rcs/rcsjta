@@ -22,7 +22,6 @@
 
 package com.gsma.rcs.core;
 
-import com.gsma.rcs.core.content.AudioContent;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.ImsError;
@@ -37,14 +36,12 @@ import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatMessageSession;
 import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatNotificationSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
-import com.gsma.rcs.core.ims.service.ipcall.IPCallSession;
 import com.gsma.rcs.core.ims.service.presence.pidf.PidfDocument;
 import com.gsma.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.gsma.rcs.core.ims.service.richcall.image.ImageTransferSession;
 import com.gsma.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.gsma.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
 import com.gsma.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
-import com.gsma.rcs.service.ipcalldraft.IPCall;
 import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
@@ -124,13 +121,6 @@ public interface CoreListener {
      * @param contact Contact identifier
      */
     public void handlePresenceSharingInvitation(ContactId contact);
-
-    /**
-     * A new IP call invitation has been received
-     * 
-     * @param session IP call session
-     */
-    public void handleIPCallInvitation(IPCallSession session);
 
     /**
      * A new content sharing transfer invitation has been received
@@ -403,18 +393,6 @@ public interface CoreListener {
      */
     public void handleGeolocSharingInvitationRejected(ContactId remoteContact,
             GeolocSharing.ReasonCode reasonCode, long timestamp);
-
-    /**
-     * Handle the case of rejected ip call
-     * 
-     * @param remoteContact Remote contact
-     * @param audioContent Audio content
-     * @param videoContent Video content
-     * @param reasonCode Rejected reason code
-     * @param timestamp Local timestamp when got IP call invitation
-     */
-    public void handleIPCallInvitationRejected(ContactId remoteContact, AudioContent audioContent,
-            VideoContent videoContent, IPCall.ReasonCode reasonCode, long timestamp);
 
     /**
      * Handle one-to-one chat session initiation

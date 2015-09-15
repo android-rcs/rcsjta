@@ -28,7 +28,6 @@ import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.platform.registry.AndroidRegistryFactory;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
-import com.gsma.rcs.provider.ipcall.IPCallHistory;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.TermsAndConditionsResponse;
@@ -174,9 +173,6 @@ public class LauncherUtils {
 
         /* Clear all entries in chat, message and file transfer tables */
         mMessagingLog.deleteAllEntries();
-
-        /* Clear all entries in IP call table */
-        IPCallHistory.createInstance(localContentResolver).deleteAllEntries();
 
         /* Clear all entries in Rich Call tables (image and video) */
         RichCallHistory.createInstance(localContentResolver);

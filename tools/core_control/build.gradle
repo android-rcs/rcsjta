@@ -36,7 +36,7 @@ android {
 }
 
 dependencies {
-    compile project(':com.gsma.services.rcs')
+    compile project(':ApiLib')
 }
 
 //Below install dependecy was added to always install RCS service before

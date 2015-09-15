@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools"
+		tools:ignore="MissingTranslation">
 
 	<style name="Theme.UserDialog" parent="android:style/Theme.Dialog">
 		<item name="android:windowIsTranslucent">false</item>

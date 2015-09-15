@@ -12,3 +12,4 @@ rcs_media.jar
 *.project
 build
 doclava
+local.properties

@@ -17,11 +17,10 @@
 package com.gsma.rcs.provider.history;
 
 import com.gsma.rcs.provider.contact.ContactProvider;
-import com.gsma.rcs.provider.ipcall.IPCallProvider;
-import com.gsma.rcs.provider.messaging.GroupChatData;
 import com.gsma.rcs.provider.messaging.ChatProvider;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.FileTransferProvider;
+import com.gsma.rcs.provider.messaging.GroupChatData;
 import com.gsma.rcs.provider.messaging.GroupDeliveryInfoProvider;
 import com.gsma.rcs.provider.messaging.MessageData;
 import com.gsma.rcs.provider.settings.RcsSettingsProvider;
@@ -68,7 +67,6 @@ import java.util.Set;
         protectedInternalDatabases.add(RcsSettingsProvider.DATABASE_NAME);
         protectedInternalDatabases.add(ContactProvider.DATABASE_NAME);
         protectedInternalDatabases.add(GroupDeliveryInfoProvider.DATABASE_NAME);
-        protectedInternalDatabases.add(IPCallProvider.DATABASE_NAME);
         return protectedInternalDatabases;
     }
 

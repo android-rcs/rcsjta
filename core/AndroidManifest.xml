@@ -149,12 +149,6 @@
             android:readPermission="com.gsma.services.permission.RCS"
             android:writePermission="com.gsma.services.permission.RCS_INTERNAL_ACCESS_ONLY" />
         <provider
-            android:name=".provider.ipcall.IPCallProvider"
-            android:authorities="com.gsma.rcs.ipcall;com.gsma.services.rcs.provider.ipcall"
-            android:exported="false"
-            android:readPermission="com.gsma.services.permission.RCS"
-            android:writePermission="com.gsma.services.permission.RCS_INTERNAL_ACCESS_ONLY" />
-        <provider
             android:name="com.gsma.rcs.provider.settings.RcsSettingsProvider"
             android:authorities="com.gsma.rcs.setting"
             android:exported="false"

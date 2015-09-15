@@ -37,5 +37,6 @@ android {
 dependencies {
     compile project(':bouncycastle')
     compile project(':nist_sip')
+    compile project(':ApiLib')
 	compile 'dnsjava:dnsjava:2.1.7'
 }

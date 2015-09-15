@@ -42,7 +42,6 @@ import com.gsma.rcs.core.ims.service.capability.CapabilityService;
 import com.gsma.rcs.core.ims.service.extension.ServiceExtensionManager;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpTransferManager;
-import com.gsma.rcs.core.ims.service.ipcall.IPCallService;
 import com.gsma.rcs.core.ims.service.presence.PresenceService;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.sip.SipService;
@@ -116,10 +115,8 @@ public class ImsModule implements SipEventListener {
                 contactManager, addressBookManager));
         mServices.put(ImsServiceType.INSTANT_MESSAGING, new InstantMessagingService(this, core,
                 rcsSettings, contactManager, messagingLog));
-        mServices.put(ImsServiceType.IPCALL, new IPCallService(this, core, rcsSettings,
-                contactManager));
         mServices.put(ImsServiceType.RICHCALL, new RichcallService(this, core, contactManager,
-                rcsSettings, mCallManager, getIPCallService()));
+                rcsSettings, mCallManager));
         mServices.put(ImsServiceType.PRESENCE, new PresenceService(this, ctx, rcsSettings,
                 contactManager, addressBookManager));
         mServices.put(ImsServiceType.SIP, new SipService(this, contactManager, rcsSettings));
@@ -328,15 +325,6 @@ public class ImsModule implements SipEventListener {
      */
     public CapabilityService getCapabilityService() {
         return (CapabilityService) mServices.get(ImsServiceType.CAPABILITY);
-    }
-
-    /**
-     * Returns the IP call service
-     * 
-     * @return IP call service
-     */
-    public IPCallService getIPCallService() {
-        return (IPCallService) mServices.get(ImsServiceType.IPCALL);
     }
 
     /**

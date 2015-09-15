@@ -26,7 +26,6 @@ import com.gsma.rcs.addressbook.AccountChangedReceiver;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.CoreListener;
 import com.gsma.rcs.core.TerminalInfo;
-import com.gsma.rcs.core.content.AudioContent;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.ImsError;
@@ -44,8 +43,6 @@ import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardO
 import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatNotificationSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FtHttpResumeManager;
-import com.gsma.rcs.core.ims.service.ipcall.IPCallService;
-import com.gsma.rcs.core.ims.service.ipcall.IPCallSession;
 import com.gsma.rcs.core.ims.service.presence.pidf.PidfDocument;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
@@ -62,7 +59,6 @@ import com.gsma.rcs.provider.history.GroupChatDequeueTask;
 import com.gsma.rcs.provider.history.GroupChatTerminalExceptionTask;
 import com.gsma.rcs.provider.history.HistoryLog;
 import com.gsma.rcs.provider.history.OneToOneChatDequeueTask;
-import com.gsma.rcs.provider.ipcall.IPCallHistory;
 import com.gsma.rcs.provider.messaging.DelayedDisplayNotificationDispatcher;
 import com.gsma.rcs.provider.messaging.FileTransferDequeueTask;
 import com.gsma.rcs.provider.messaging.GroupChatDeleteTask;
@@ -86,13 +82,10 @@ import com.gsma.rcs.service.api.FileTransferServiceImpl;
 import com.gsma.rcs.service.api.FileUploadServiceImpl;
 import com.gsma.rcs.service.api.GeolocSharingServiceImpl;
 import com.gsma.rcs.service.api.HistoryServiceImpl;
-import com.gsma.rcs.service.api.IPCallServiceImpl;
 import com.gsma.rcs.service.api.ImageSharingServiceImpl;
 import com.gsma.rcs.service.api.MultimediaSessionServiceImpl;
 import com.gsma.rcs.service.api.OneToOneUndeliveredImManager;
 import com.gsma.rcs.service.api.VideoSharingServiceImpl;
-import com.gsma.rcs.service.ipcalldraft.IIPCallService;
-import com.gsma.rcs.service.ipcalldraft.IPCall;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService;
@@ -171,8 +164,6 @@ public class RcsCoreService extends Service implements CoreListener {
     private GeolocSharingServiceImpl mGshApi;
 
     private HistoryServiceImpl mHistoryApi;
-
-    private IPCallServiceImpl mIpcallApi;
 
     private MultimediaSessionServiceImpl mSessionApi;
 
@@ -335,8 +326,6 @@ public class RcsCoreService extends Service implements CoreListener {
             return;
         }
         try {
-            IPCallHistory.createInstance(mLocalContentResolver);
-
             mHistoryLog = HistoryLog.createInstance(mLocalContentResolver);
 
             core = Core.createCore(mCtx, this, mRcsSettings, mContentResolver, mContactManager,
@@ -347,7 +336,6 @@ public class RcsCoreService extends Service implements CoreListener {
                     core.getCapabilityService());
             InstantMessagingService imService = core.getImService();
             RichcallService richCallService = core.getRichcallService();
-            IPCallService ipCallService = core.getIPCallService();
             SipService sipService = core.getSipService();
 
             mOneToOneUndeliveredImManager = new OneToOneUndeliveredImManager(mCtx, mMessagingLog,
@@ -364,8 +352,6 @@ public class RcsCoreService extends Service implements CoreListener {
             mGshApi = new GeolocSharingServiceImpl(richCallService, mRichCallHistory, mRcsSettings,
                     mLocalContentResolver, mRcOperationExecutor, mOperationLock);
             mHistoryApi = new HistoryServiceImpl(mCtx);
-            mIpcallApi = new IPCallServiceImpl(ipCallService,
-                    IPCallHistory.createInstance(mLocalContentResolver), mRcsSettings);
             mSessionApi = new MultimediaSessionServiceImpl(sipService, mRcsSettings,
                     mContactManager);
             mUploadApi = new FileUploadServiceImpl(imService, mRcsSettings);
@@ -463,10 +449,6 @@ public class RcsCoreService extends Service implements CoreListener {
             mGshApi.close();
             mGshApi = null;
         }
-        if (mIpcallApi != null) {
-            mIpcallApi.close();
-            mIpcallApi = null;
-        }
         if (mVshApi != null) {
             mVshApi.close();
             mVshApi = null;
@@ -535,11 +517,6 @@ public class RcsCoreService extends Service implements CoreListener {
                 sLogger.debug("History service API binding");
             }
             return mHistoryApi;
-        } else if (IIPCallService.class.getName().equals(intent.getAction())) {
-            if (sLogger.isActivated()) {
-                sLogger.debug("IP call service API binding");
-            }
-            return mIpcallApi;
         } else if (IMultimediaSessionService.class.getName().equals(intent.getAction())) {
             if (sLogger.isActivated()) {
                 sLogger.debug("Multimedia session API binding");
@@ -582,9 +559,6 @@ public class RcsCoreService extends Service implements CoreListener {
         if (mGshApi != null) {
             mGshApi.notifyRegistration();
         }
-        if (mIpcallApi != null) {
-            mIpcallApi.notifyRegistration();
-        }
         if (mSessionApi != null) {
             mSessionApi.notifyRegistration();
         }
@@ -616,9 +590,6 @@ public class RcsCoreService extends Service implements CoreListener {
         }
         if (mGshApi != null) {
             mGshApi.notifyUnRegistration(reason);
-        }
-        if (mIpcallApi != null) {
-            mIpcallApi.notifyUnRegistration(reason);
         }
         if (mSessionApi != null) {
             mSessionApi.notifyUnRegistration(reason);
@@ -973,16 +944,6 @@ public class RcsCoreService extends Service implements CoreListener {
     }
 
     @Override
-    public void handleIPCallInvitation(IPCallSession session) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Handle event IP call invitation");
-        }
-
-        // Broadcast the invitation
-        mIpcallApi.receiveIPCallInvitation(session);
-    }
-
-    @Override
     public void handleFileTransferInvitationRejected(ContactId remoteContact, MmContent content,
             MmContent fileicon, FileTransfer.ReasonCode reasonCode, long timestamp,
             long timestampSent) {
@@ -1022,13 +983,6 @@ public class RcsCoreService extends Service implements CoreListener {
     public void handleGeolocSharingInvitationRejected(ContactId remoteContact,
             GeolocSharing.ReasonCode reasonCode, long timestamp) {
         mGshApi.addGeolocSharingInvitationRejected(remoteContact, reasonCode, timestamp);
-    }
-
-    @Override
-    public void handleIPCallInvitationRejected(ContactId remoteContact, AudioContent audioContent,
-            VideoContent videoContent, IPCall.ReasonCode reasonCode, long timestamp) {
-        mIpcallApi.addIPCallInvitationRejected(remoteContact, audioContent, videoContent,
-                reasonCode, timestamp);
     }
 
     public void handleOneOneChatSessionInitiation(OneToOneChatSession session) {
