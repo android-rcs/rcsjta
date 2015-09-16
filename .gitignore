@@ -5,9 +5,7 @@ bin
 .idea
 .gradle
 *.iml
-rcs_api.jar
-rcs_cnx.jar
-rcs_media.jar
+*.jar
 *.classpath
 *.project
 build
