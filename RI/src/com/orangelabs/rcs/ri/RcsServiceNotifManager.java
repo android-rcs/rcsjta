@@ -36,6 +36,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -178,7 +180,7 @@ public class RcsServiceNotifManager extends Service {
     };
 
     private void notifyImsRegistered() {
-        addImsConnectionNotification(R.drawable.ri_notif_on_icon, getString(R.string.ims_connected));
+        addImsConnectionNotification(true, getString(R.string.ims_connected));
     }
 
     private void notifyImsUnregistered(RcsServiceRegistration.ReasonCode reason) {
@@ -188,25 +190,44 @@ public class RcsServiceNotifManager extends Service {
         } else {
             label = getString(R.string.ims_disconnected);
         }
-        addImsConnectionNotification(R.drawable.ri_notif_off_icon, label);
+        addImsConnectionNotification(false, label);
     }
 
-    private void addImsConnectionNotification(int iconId, String label) {
+    private void addImsConnectionNotification(boolean connected, String label) {
         Intent intent = new Intent(ACTION_VIEW_SETTINGS);
         PendingIntent contentIntent = PendingIntent.getBroadcast(getApplicationContext(), 0,
                 intent, 0);
         String title = this.getString(R.string.notification_title_rcs_service);
-        Notification notif = buildImsConnectionNotification(contentIntent, title, label, iconId);
+        Notification notif = buildImsConnectionNotification(contentIntent, title, label, connected);
         notif.flags = Notification.FLAG_NO_CLEAR | Notification.FLAG_FOREGROUND_SERVICE;
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(NOTIF_ID, notif);
     }
 
     private Notification buildImsConnectionNotification(PendingIntent intent, String title,
-            String message, int iconId) {
+            String message, boolean connected) {
         NotificationCompat.Builder notif = new NotificationCompat.Builder(this);
         notif.setContentIntent(intent);
-        notif.setSmallIcon(iconId);
+        // With Android 5.0 Lollipop it is no longer possible to use colored icons in the
+        // notification area.
+        // Only large icon supports colors but only small icon can be shown in notification bar.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (connected) {
+                notif.setLargeIcon(BitmapFactory.decodeResource(getResources(),
+                        R.drawable.ri_notif_on_icon_color));
+                notif.setSmallIcon(R.drawable.ri_notif_on_icon_white);
+            } else {
+                notif.setLargeIcon(BitmapFactory.decodeResource(getResources(),
+                        R.drawable.ri_notif_off_icon_color));
+                notif.setSmallIcon(R.drawable.ri_notif_off_icon_white);
+            }
+        } else {
+            if (connected) {
+                notif.setSmallIcon(R.drawable.ri_notif_on_icon_color);
+            } else {
+                notif.setSmallIcon(R.drawable.ri_notif_off_icon_color);
+            }
+        }
         notif.setWhen(System.currentTimeMillis());
         notif.setAutoCancel(false);
         notif.setOnlyAlertOnce(true);
