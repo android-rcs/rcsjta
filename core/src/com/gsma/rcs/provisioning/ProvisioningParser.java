@@ -586,8 +586,13 @@ public class ProvisioningParser {
 
                 if (presencePrfl == null) {
                     if ((presencePrfl = getValueByParamName("presencePrfl", childnode, TYPE_INT)) != null) {
-                        mRcsSettings.writeBoolean(RcsSettingsData.CAPABILITY_SOCIAL_PRESENCE,
-                                presencePrfl.equals("1"));
+                        if (presencePrfl.equals("1")) {
+                            sLogger.error(new String(
+                                    "Social presence is not supported in TAPI 1.5.1, ")
+                                    .concat("ignoring capability received through provisioning."));
+                        }
+                        mRcsSettings
+                                .writeBoolean(RcsSettingsData.CAPABILITY_SOCIAL_PRESENCE, false);
                         continue;
                     }
                 }
