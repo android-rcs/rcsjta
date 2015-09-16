@@ -14,6 +14,11 @@ android {
             assets.srcDirs = ['assets']
         }
         androidTest.setRoot('tests')
+        androidTest
+        {
+            //Defaults to core/tests/java
+            java.srcDirs = ['tests/src']
+        }
     }
 
     //Required to support builds although lint errors exist
