@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +15,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.utils;
 
-import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -33,10 +36,8 @@ import java.util.regex.Pattern;
  * @author jexa7410
  */
 public class PhoneUtils {
-    /**
-     * Tel-URI format
-     */
-    private static boolean sTelUriSupported = true;
+
+    private static RcsSettings sRcsSettings;
 
     /**
      * Regular expression of the SIP header
@@ -73,8 +74,8 @@ public class PhoneUtils {
      * 
      * @param mRcsSettings
      */
-    public static synchronized void initialize(RcsSettings mRcsSettings) {
-        sTelUriSupported = mRcsSettings.isTelUriFormatUsed();
+    public static synchronized void initialize(RcsSettings rcsSettings) {
+        sRcsSettings = rcsSettings;
     }
 
     /**
@@ -89,15 +90,14 @@ public class PhoneUtils {
         }
         // @FIXME: Should make use of android.net.sip.SipProfile.Builder for creating SIP URI
         // instead of doing it with Strings.
-        if (sTelUriSupported) {
+        if (sRcsSettings.isTelUriFormatUsed()) {
             /* Tel-URI format */
             return Uri.parse(TEL_URI_HEADER.concat(contactId.toString()));
 
         }
         /* SIP-URI format */
         return Uri.parse(new StringBuilder(SIP_URI_HEADER).append(contactId).append("@")
-                .append(ImsModule.getImsUserProfile().getHomeDomain()).append(";user=phone")
-                .toString());
+                .append(sRcsSettings.getUserProfileImsDomain()).append(";user=phone").toString());
     }
 
     /**
