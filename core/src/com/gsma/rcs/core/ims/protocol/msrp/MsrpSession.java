@@ -1190,37 +1190,27 @@ public class MsrpSession {
      */
     public void checkMsrpTransactionInfo() {
         if (mTransactionInfoMap != null) {
-            Thread checkThread = new Thread(new Runnable() {
-
-                @Override
-                public void run() {
-                    List<MsrpTransactionInfo> msrpTransactionInfos = null;
-                    synchronized (mTransactionMsgIdMapLock) {
-                        // Copy the transaction info items to accelerate the locking while doing
-                        // expiring process
-                        msrpTransactionInfos = new ArrayList<MsrpTransactionInfo>(
-                                mTransactionInfoMap.values());
+            List<MsrpTransactionInfo> msrpTransactionInfos = null;
+            synchronized (mTransactionMsgIdMapLock) {
+                // Copy the transaction info items to accelerate the locking while doing
+                // expiring process
+                msrpTransactionInfos = new ArrayList<MsrpTransactionInfo>(
+                        mTransactionInfoMap.values());
+            }
+            for (MsrpTransactionInfo msrpTransactionInfo : msrpTransactionInfos) {
+                long delta = System.currentTimeMillis() - msrpTransactionInfo.mTimestamp;
+                if ((delta >= TRANSACTION_INFO_EXPIRY_PERIOD) || (delta < 0)) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Transaction info have expired (transactionId: "
+                                + msrpTransactionInfo.mTransactionId + ", msgId: "
+                                + msrpTransactionInfo.mMsrpMsgId + ")");
                     }
-                    for (MsrpTransactionInfo msrpTransactionInfo : msrpTransactionInfos) {
-                        long delta = System.currentTimeMillis() - msrpTransactionInfo.mTimestamp;
-                        if ((delta >= TRANSACTION_INFO_EXPIRY_PERIOD) || (delta < 0)) {
-                            if (sLogger.isActivated()) {
-                                sLogger.debug("Transaction info have expired (transactionId: "
-                                        + msrpTransactionInfo.mTransactionId + ", msgId: "
-                                        + msrpTransactionInfo.mMsrpMsgId + ")");
-                            }
-                            mTransactionInfoMap.remove(msrpTransactionInfo.mTransactionId);
-                            if (mMessageTransactionMap != null) {
-                                mMessageTransactionMap.remove(msrpTransactionInfo.mMsrpMsgId);
-                            }
-                        }
+                    mTransactionInfoMap.remove(msrpTransactionInfo.mTransactionId);
+                    if (mMessageTransactionMap != null) {
+                        mMessageTransactionMap.remove(msrpTransactionInfo.mMsrpMsgId);
                     }
-
                 }
-
-            });
-            checkThread.start();
-
+            }
         }
     }
 
