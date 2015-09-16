@@ -16,10 +16,10 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.gsma.rcs.br;
+package com.gsma.rcs.provider;
 
 import com.gsma.rcs.addressbook.RcsAccountException;
-import com.gsma.rcs.provider.BackupRestoreDb;
+import com.gsma.rcs.provider.UserProfilePersistedStorageUtil;
 import com.gsma.rcs.utils.FileUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -28,21 +28,47 @@ import android.test.AndroidTestCase;
 import android.text.TextUtils;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
+import java.util.regex.Pattern;
 
-public class DbBackupRestoreTest extends AndroidTestCase {
+public class UserProfilePersistedStorageUtilTest extends AndroidTestCase {
 
     private static final int MAX_SAVED_ACCOUNT = 3;
 
-    private static final Logger sLogger = Logger.getLogger(DbBackupRestoreTest.class
+    private static final Logger sLogger = Logger.getLogger(UserProfilePersistedStorageUtilTest.class
             .getSimpleName());
 
     private static final String DB_PATH = new StringBuilder(Environment.getDataDirectory()
-            .toString()).append(BackupRestoreDb.DATABASE_LOCATION).toString();
+            .toString()).append(UserProfilePersistedStorageUtil.DATABASE_LOCATION).toString();
 
     private File mSrcdir = new File(DB_PATH);
 
     File[] mSavedAccounts;
+
+    /**
+     * Pattern to check if rcs account have atleast 3 characters.
+     */
+    private static final Pattern RCS_ACCOUNT_MATCH_PATTERN = Pattern.compile("^\\d{3,}$");
+
+    private static File[] listOfSavedAccounts(final File databasesDir) {
+        if (!databasesDir.exists() || !databasesDir.isDirectory()) {
+            /*
+             * As the database itself doesn't exist , So there won't be any accounts related to user
+             * profile saved, So return from here. This is a special case where we don't throw
+             * exception as backup and restore files and not always needed to be present and reading
+             * information from persisted cache is always optional
+             */
+            return null;
+        }
+        FileFilter directoryFilter = new FileFilter() {
+            public boolean accept(File file) {
+                return file.isDirectory()
+                        && RCS_ACCOUNT_MATCH_PATTERN.matcher(file.getName()).matches();
+            }
+        };
+        return databasesDir.listFiles(directoryFilter);
+    }
 
     protected void setUp() throws Exception {
         super.setUp();
@@ -50,7 +76,7 @@ public class DbBackupRestoreTest extends AndroidTestCase {
             mSrcdir.mkdir();
         }
         // Clean up all saved configurations
-        mSavedAccounts = BackupRestoreDb.listOfSavedAccounts(mSrcdir);
+        mSavedAccounts = listOfSavedAccounts(mSrcdir);
         if (mSavedAccounts == null) {
             return;
         }
@@ -64,19 +90,19 @@ public class DbBackupRestoreTest extends AndroidTestCase {
     }
 
     public void testBackupAccount() throws InterruptedException, IOException, RcsAccountException {
-        BackupRestoreDb.backupAccount("1111");
+        UserProfilePersistedStorageUtil.tryToBackupAccount("1111");
         /*
          * A timer greater than 1 second is set because some emulator have only an accuracy of 1
          * second.
          */
         Thread.sleep(1010);
-        BackupRestoreDb.backupAccount("2222");
+        UserProfilePersistedStorageUtil.tryToBackupAccount("2222");
         Thread.sleep(1010);
-        BackupRestoreDb.backupAccount("3333");
+        UserProfilePersistedStorageUtil.tryToBackupAccount("3333");
         Thread.sleep(1010);
-        BackupRestoreDb.backupAccount("4444");
+        UserProfilePersistedStorageUtil.tryToBackupAccount("4444");
 
-        mSavedAccounts = BackupRestoreDb.listOfSavedAccounts(mSrcdir);
+        mSavedAccounts = listOfSavedAccounts(mSrcdir);
         for (File file : mSavedAccounts) {
             sLogger.info(new StringBuilder("Account ").append(file.getName())
                     .append(" last modified=").append(file.lastModified()).toString());
@@ -93,20 +119,20 @@ public class DbBackupRestoreTest extends AndroidTestCase {
 
     public void testCleanBackups() throws InterruptedException, IOException, RcsAccountException {
         /* This cleanBackups removes the oldest directory (if MAX_SAVED_ACCOUNT is reached) */
-        BackupRestoreDb.backupAccount("1111");
+        UserProfilePersistedStorageUtil.tryToBackupAccount("1111");
         /*
          * A timer greater than 1 second is set because some emulator have only an accuracy of 1
          * second.
          */
         Thread.sleep(1010);
-        BackupRestoreDb.backupAccount("2222");
+        UserProfilePersistedStorageUtil.tryToBackupAccount("2222");
         Thread.sleep(1010);
-        BackupRestoreDb.backupAccount("3333");
+        UserProfilePersistedStorageUtil.tryToBackupAccount("3333");
         Thread.sleep(1010);
-        BackupRestoreDb.backupAccount("4444");
+        UserProfilePersistedStorageUtil.tryToBackupAccount("4444");
 
-        BackupRestoreDb.cleanBackups("3333");
-        mSavedAccounts = BackupRestoreDb.listOfSavedAccounts(mSrcdir);
+        UserProfilePersistedStorageUtil.normalizeFileBackup("3333");
+        mSavedAccounts = listOfSavedAccounts(mSrcdir);
         for (File file : mSavedAccounts) {
             sLogger.info(new StringBuilder("Account ").append(file.getName())
                     .append(" last modified=").append(file.lastModified()).toString());
@@ -123,8 +149,8 @@ public class DbBackupRestoreTest extends AndroidTestCase {
     }
 
     public void testRestoreDb() throws IOException, RcsAccountException {
-        BackupRestoreDb.backupAccount("2222");
-        BackupRestoreDb.restoreAccount("2222");
+        UserProfilePersistedStorageUtil.tryToBackupAccount("2222");
+        UserProfilePersistedStorageUtil.tryToRestoreAccount("2222");
     }
 
 }
