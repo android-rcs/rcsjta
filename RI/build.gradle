@@ -38,7 +38,8 @@ android {
 }
 
 dependencies {
-    compile project(':ApiLib')
+    compile project(':api')
+    compile project(':api_cnx')
     compile project(':mediaplayer')
     compile 'com.android.support:support-v4:21.0.0'
     //Use offical version above instead of local version below

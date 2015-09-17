@@ -23,7 +23,7 @@ import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChatIntent;
 import com.gsma.services.rcs.contact.ContactId;
 
-import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.chat.ChatMessageDAO;
 import com.orangelabs.rcs.ri.utils.LogUtils;

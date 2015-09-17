@@ -22,7 +22,7 @@ import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.capability.CapabilitiesLog;
 import com.gsma.services.rcs.chat.ChatService;
 
-import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.chat.group.GroupChatList;
 import com.orangelabs.rcs.ri.messaging.chat.group.GroupChatView;

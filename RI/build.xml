@@ -7,9 +7,11 @@
 	-->
 	<property name="terminal.root" value="." />
 	<property name="terminal.lib_dst" value="${terminal.root}/libs" />
-	<property name="terminal.lib_src2" value="${terminal.root}/../ApiLib/build/intermediates/bundles/release/classes.jar" />
+	<property name="terminal.lib_src2" value="${terminal.root}/../libs/api/build/intermediates/bundles/release/classes.jar" />
+	<property name="terminal.lib_src3" value="${terminal.root}/../libs/api_cnx/build/intermediates/bundles/release/classes.jar" />
 	<property name="terminal.lib_src1" value="${terminal.root}/../mediaplayer/build/intermediates/bundles/release/classes.jar" />
-	<property name="terminal.target2" value="api_lib.jar" />
+	<property name="terminal.target2" value="api.jar" />
+	<property name="terminal.target3" value="api_cnx.jar" />
 	<property name="terminal.target1" value="rcs_media.jar" />
 
 	<target name="libs">
@@ -17,12 +19,15 @@
 		<copy file="${terminal.lib_src1}" tofile="${terminal.lib_dst}/${terminal.target1}" />
 		<echo>Copy ${terminal.target2} file</echo>
 		<copy file="${terminal.lib_src2}" tofile="${terminal.lib_dst}/${terminal.target2}"/>
+		<echo>Copy ${terminal.target3} file</echo>
+		<copy file="${terminal.lib_src3}" tofile="${terminal.lib_dst}/${terminal.target3}"/>
 	</target>
 
 	<target name="clean">
 		<echo>Delete library files</echo>
 		<delete file="${terminal.lib_dst}/${terminal.target1}"/>
 		<delete file="${terminal.lib_dst}/${terminal.target2}"/>
+		<delete file="${terminal.lib_dst}/${terminal.target3}"/>
 	</target>
 
 	<target name="all" depends="clean,libs" />

@@ -12,7 +12,8 @@ Additional steps for Eclipse compatibility:
 <code>ant libs</code>
 
 This will create the following jar files under the "libs" folder:
-- api_lib.jar
+- api.jar
 - rcs_media.jar
+- api_cnx.jar
 
 Download the [android-support-v4.jar](https://developer.android.com/tools/support-library/setup.html) library and copy under the "libs" folder. 

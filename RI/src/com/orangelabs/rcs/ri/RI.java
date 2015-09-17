@@ -21,6 +21,7 @@ package com.orangelabs.rcs.ri;
 import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.contact.ContactUtil;
 
+import com.orangelabs.rcs.api.connection.utils.LockAccess;
 import com.orangelabs.rcs.ri.capabilities.TestCapabilitiesApi;
 import com.orangelabs.rcs.ri.contacts.TestContactsApi;
 import com.orangelabs.rcs.ri.extension.TestMultimediaSessionApi;
@@ -30,7 +31,6 @@ import com.orangelabs.rcs.ri.messaging.TestMessagingApi;
 import com.orangelabs.rcs.ri.service.TestServiceApi;
 import com.orangelabs.rcs.ri.sharing.TestSharingApi;
 import com.orangelabs.rcs.ri.upload.InitiateFileUpload;
-import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 

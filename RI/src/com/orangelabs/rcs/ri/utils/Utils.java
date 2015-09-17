@@ -18,6 +18,7 @@
 
 package com.orangelabs.rcs.ri.utils;
 
+import com.orangelabs.rcs.api.connection.utils.LockAccess;
 import com.orangelabs.rcs.ri.R;
 
 import android.app.Activity;

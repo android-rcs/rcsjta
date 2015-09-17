@@ -20,9 +20,9 @@ package com.orangelabs.rcs.ri.contacts;
 
 import com.gsma.services.rcs.contact.ContactUtil;
 
+import com.orangelabs.rcs.api.connection.utils.LockAccess;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.ContactListAdapter;
-import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.Activity;

@@ -7,10 +7,10 @@
 	-->
 	<property name="terminal.root" value="." />
 	<property name="terminal.lib_dst" value="${terminal.root}/libs" />
-	<property name="terminal.lib_src2" value="${terminal.root}/../ApiLib/build/intermediates/bundles/release/classes.jar" />
+	<property name="terminal.lib_src2" value="${terminal.root}/../libs/api/build/intermediates/bundles/release/classes.jar" />
 	<property name="terminal.lib_src1" value="${terminal.root}/../libs/nist_sip/build/intermediates/bundles/release/classes.jar" />
 	<property name="terminal.lib_src3" value="${terminal.root}/../libs/bouncycastle/build/libs/bouncycastle-0.1.0.jar" />
-	<property name="terminal.target2" value="api_lib.jar" />
+	<property name="terminal.target2" value="api.jar" />
 	<property name="terminal.target1" value="nist_sip.jar" />
 	<property name="terminal.target3" value="bouncycastle-0.1.0.jar" />
 

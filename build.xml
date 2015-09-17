@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="GSMA Terminal API" basedir="." default="help">
+	<tstamp>
+		<format property="TODAY_MY" pattern="yyyyMMdd-HHmmss" locale="en,UK" />
+	</tstamp>
+
+	<property environment="env" />
+	<property name="terminal.root" value="." />
+	<property name="ri.root" value="${terminal.root}/RI" />
+	<property name="api.root" value="${terminal.root}/libs/api" />
+	<property name="stack.root" value="${terminal.root}/core" />
+	<property name="stack.bin" value="${stack.root}/bin" />
+	<property name="tools" value="${terminal.root}/tools" />
+	<property name="samples" value="${terminal.root}/samples/api" />
+	<property name="template.root" value="${tools}/provisioning" />
+	<property name="settings.root" value="${tools}/settings" />
+	<property name="notification.root" value="${tools}/notification" />
+	<property name="extension.root" value="${samples}/extension" />
+	<property name="tts.root" value="${samples}/tts" />
+	<property name="javadoc.root" value="${api.root}/build/docs/javadoc" />
+	<property name="generate.root" value="${terminal.root}/gen" />
+	<property name="sdk.zip" value="${generate.root}/rcsjta_sdk_${TODAY_MY}.zip" />
+
+	<path id="j2se.lib">
+		<fileset dir="${env.JAVA_HOME}/lib/">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+	<property name="j2se.classpath" refid="j2se.lib" />
+
+	<!-- Generate RCS API SDK -->
+	<!-- ********************* -->
+	<target name="sdk">
+		<mkdir dir="${generate.root}" />
+		<delete>
+			<fileset dir="${generate.root}">
+				<include name="*" />
+			</fileset>
+		</delete>
+		<zip destfile="${sdk.zip}">
+			<fileset dir="${stack.root}" includes="LICENSE*.txt" />
+			<fileset dir="${stack.root}" includes="NOTICE.txt" />
+			<zipfileset dir="${api.root}/build/outputs/aar" includes="*debug.aar"
+				fullpath="api/rcs_api.aar" />
+			<zipfileset dir="${ri.root}/libs/armeabi"
+				includes="lib*.so" prefix="api/codecs" />
+			<zipfileset dir="${javadoc.root}" prefix="api/javadoc" />
+			<zipfileset dir="${template.root}/bin" includes="*debug.apk"
+				fullpath="tools/RCS_template.apk" />
+			<zipfileset dir="${settings.root}/build/outputs/apk" includes="*debug.apk"
+				fullpath="tools/RCS_settings.apk" />
+			<zipfileset dir="${notification.root}/build/outputs/apk" includes="*debug.apk"
+				fullpath="tools/RCS_notification.apk" />
+			<zipfileset dir="${stack.root}/build/outputs/apk" includes="*debug.apk"
+				fullpath="stack/RCS_core.apk" />
+			<zipfileset dir="${ri.root}/build/outputs/apk" includes="*debug.apk"
+				fullpath="tools/RCS_RI.apk" />
+			<zipfileset dir="${extension.root}/build/outputs/apk" includes="*debug.apk"
+				fullpath="samples/RCS_extension.apk" />
+			<zipfileset dir="${tts.root}/build/outputs/apk" includes="*debug.apk"
+				fullpath="samples/RCS_tts.apk" />
+		</zip>
+	</target>
+
+
+
+	<target name="help">
+		<echo>Available targets:</echo>
+		<echo> help: Displays this help.</echo>
+		<echo> sdk: Generates RCS SDK.</echo>
+	</target>
+</project>
+
