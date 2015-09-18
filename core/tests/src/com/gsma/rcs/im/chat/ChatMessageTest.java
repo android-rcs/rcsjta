@@ -68,6 +68,7 @@ public class ChatMessageTest extends AndroidTestCase {
         mContentResolver = mContext.getContentResolver();
         mLocalContentResolver = new LocalContentResolver(mContentResolver);
         mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
+        PhoneUtils.initialize(mRcsSettings);
         mMessagingLog = MessagingLog.createInstance(mLocalContentResolver, mRcsSettings);
         ContactUtil contactUtils = ContactUtil.getInstance(new ContactUtilMockContext(mContext));
         mContact = contactUtils.formatContact("+339000000");
