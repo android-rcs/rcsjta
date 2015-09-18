@@ -33,4 +33,9 @@ android {
         versionName "3.1.1"
         archivesBaseName = "RCSJTA_provisioning_template"
     }
+
+    //Apache HTTP Client is removed in SDK 23
+    if (rootProject.compileSdkVersion > 22) {
+        useLibrary 'org.apache.http.legacy'
+    }
 }
