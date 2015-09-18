@@ -45,7 +45,7 @@
 			<zipfileset dir="${ri.root}/libs/armeabi"
 				includes="lib*.so" prefix="api/codecs" />
 			<zipfileset dir="${javadoc.root}" prefix="api/javadoc" />
-			<zipfileset dir="${template.root}/bin" includes="*debug.apk"
+			<zipfileset dir="${template.root}/build/outputs/apk" includes="*debug.apk"
 				fullpath="tools/RCS_template.apk" />
 			<zipfileset dir="${settings.root}/build/outputs/apk" includes="*debug.apk"
 				fullpath="tools/RCS_settings.apk" />
