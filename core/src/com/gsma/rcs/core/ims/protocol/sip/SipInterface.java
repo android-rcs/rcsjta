@@ -258,9 +258,7 @@ public class SipInterface implements SipListener {
             Properties properties = new Properties();
             properties.setProperty("javax2.sip.STACK_NAME", localIpAddress);
             properties.setProperty("gov2.nist.javax2.sip.THREAD_POOL_SIZE", "1");
-            final String outboundProxy = new StringBuilder().append(mOutboundProxyAddr).append(':')
-                    .append(mOutboundProxyPort).append('/').append(defaultProtocol).toString();
-            properties.setProperty("javax2.sip.OUTBOUND_PROXY", outboundProxy);
+            properties.setProperty("javax2.sip.OUTBOUND_PROXY", getOutboundProxy());
             if (mSipTraceEnabled) {
                 /* Activate SIP stack traces */
                 boolean cleanLog = true;
@@ -393,6 +391,16 @@ public class SipInterface implements SipListener {
         if (sLogger.isActivated()) {
             sLogger.debug(new StringBuilder("SIP stack started at ").append(localIpAddress)
                     .append(":").append(mListeningPort).toString());
+        }
+    }
+
+    private String getOutboundProxy() {
+        if (InetAddressUtils.isIPv6Address(mOutboundProxyAddr)) {
+            return new StringBuilder("[").append(mOutboundProxyAddr).append("]").append(':')
+                    .append(mOutboundProxyPort).append('/').append(mDefaultProtocol).toString();
+        } else {
+            return new StringBuilder(mOutboundProxyAddr).append(':').append(mOutboundProxyPort)
+                    .append('/').append(mDefaultProtocol).toString();
         }
     }
 
