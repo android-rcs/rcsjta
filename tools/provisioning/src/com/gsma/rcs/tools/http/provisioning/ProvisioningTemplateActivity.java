@@ -33,8 +33,6 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import org.apache.http.HttpStatus;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -144,7 +142,7 @@ public class ProvisioningTemplateActivity extends Activity {
                 urlConnection = (HttpURLConnection) mUrl.openConnection();
                 int respCode = urlConnection.getResponseCode();
                 String message = urlConnection.getResponseMessage();
-                if (HttpStatus.SC_OK == respCode) {
+                if (HttpURLConnection.HTTP_OK == respCode) {
                     InputStream in = new BufferedInputStream(urlConnection.getInputStream());
                     mMsisdn = readStream(in).replace("MSISDN:", "");
                     mMsisdn = mMsisdn.replace("\n", "");
@@ -158,7 +156,7 @@ public class ProvisioningTemplateActivity extends Activity {
                     urlConnection = (HttpURLConnection) mUrl.openConnection();
                     respCode = urlConnection.getResponseCode();
                     message = urlConnection.getResponseMessage();
-                    if (HttpStatus.SC_OK == respCode) {
+                    if (HttpURLConnection.HTTP_OK == respCode) {
                         publishProgress(100);
                         in = new BufferedInputStream(urlConnection.getInputStream());
                         saveProvisioningTemplate(readStream(in));
