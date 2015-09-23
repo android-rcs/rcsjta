@@ -31,7 +31,7 @@ import com.orangelabs.rcs.api.connection.utils.LockAccess;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.ContactUtil;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.content.Context;
@@ -190,7 +190,7 @@ public class SingleChatList extends FragmentActivity implements
                     DateUtils.FORMAT_ABBREV_RELATIVE));
 
             String number = cursor.getString(holder.columnContact);
-            String displayName = RcsDisplayName.getInstance(context).getDisplayName(number);
+            String displayName = RcsContactUtil.getInstance(context).getDisplayName(number);
             holder.contactText.setText(getString(R.string.title_chat, displayName));
 
             String content = cursor.getString(holder.columnContent);

@@ -18,7 +18,7 @@ import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.extension.messaging.MessagingSessionView;
 import com.orangelabs.rcs.ri.extension.streaming.StreamingSessionView;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.IntentService;
@@ -145,7 +145,7 @@ public class MultiMediaSessionIntentService extends IntentService {
         PendingIntent contentIntent = PendingIntent.getActivity(this, uniqueId, invitation,
                 PendingIntent.FLAG_ONE_SHOT);
 
-        String displayName = RcsDisplayName.getInstance(this).getDisplayName(contact);
+        String displayName = RcsContactUtil.getInstance(this).getDisplayName(contact);
 
         /* Create notification */
         NotificationCompat.Builder notif = new NotificationCompat.Builder(this);

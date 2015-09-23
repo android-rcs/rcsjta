@@ -21,6 +21,7 @@ package com.orangelabs.rcs.ri.messaging.chat;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.capability.CapabilitiesLog;
 import com.gsma.services.rcs.chat.ChatService;
+import com.gsma.services.rcs.contact.ContactId;
 
 import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.ri.R;
@@ -29,7 +30,8 @@ import com.orangelabs.rcs.ri.messaging.chat.group.GroupChatView;
 import com.orangelabs.rcs.ri.messaging.chat.group.InitiateGroupChat;
 import com.orangelabs.rcs.ri.messaging.chat.single.InitiateSingleChat;
 import com.orangelabs.rcs.ri.messaging.chat.single.SingleChatList;
-import com.orangelabs.rcs.ri.messaging.geoloc.ShowUsInMap;
+import com.orangelabs.rcs.ri.messaging.geoloc.DisplayGeoloc;
+import com.orangelabs.rcs.ri.utils.ContactUtil;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -43,7 +45,8 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * CHAT API
@@ -115,7 +118,7 @@ public class TestChatApi extends ListActivity {
                 break;
 
             case 5:
-                ArrayList<String> list = new ArrayList<String>();
+                Set<ContactId> contacts = new HashSet<ContactId>();
                 Cursor cursor = null;
                 try {
                     cursor = getContentResolver().query(CapabilitiesLog.CONTENT_URI, PROJECTION,
@@ -123,9 +126,9 @@ public class TestChatApi extends ListActivity {
                     while (cursor.moveToNext()) {
                         String contact = cursor.getString(cursor
                                 .getColumnIndex(CapabilitiesLog.CONTACT));
-                        list.add(contact);
+                        contacts.add(ContactUtil.formatContact(contact));
                     }
-                    ShowUsInMap.startShowUsInMap(this, list);
+                    DisplayGeoloc.showContactsOnMap(this, contacts);
                 } catch (Exception e) {
                     // Skip intentionally
                 } finally {

@@ -27,7 +27,7 @@ import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.IntentService;
@@ -153,7 +153,7 @@ public class GeolocSharingIntentService extends IntentService {
         PendingIntent contentIntent = PendingIntent.getActivity(this, uniqueId, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
-        String displayName = RcsDisplayName.getInstance(this).getDisplayName(contact);
+        String displayName = RcsContactUtil.getInstance(this).getDisplayName(contact);
         String title = getString(R.string.title_recv_geoloc_sharing);
 
         /* Create notification */

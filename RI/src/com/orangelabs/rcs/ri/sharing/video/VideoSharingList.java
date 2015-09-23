@@ -32,7 +32,7 @@ import com.orangelabs.rcs.api.connection.utils.LockAccess;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.content.Context;
@@ -182,7 +182,7 @@ public class VideoSharingList extends FragmentActivity implements
         public void bindView(View view, Context context, Cursor cursor) {
             final VideoSharingItemCache holder = (VideoSharingItemCache) view.getTag();
             String number = cursor.getString(holder.columnNumber);
-            String displayName = RcsDisplayName.getInstance(context).getDisplayName(number);
+            String displayName = RcsContactUtil.getInstance(context).getDisplayName(number);
             holder.numberText.setText(getString(R.string.label_contact, displayName));
 
             Long duration = cursor.getLong(holder.columnDuration);

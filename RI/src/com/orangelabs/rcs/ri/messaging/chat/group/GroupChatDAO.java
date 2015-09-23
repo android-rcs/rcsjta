@@ -170,7 +170,7 @@ public class GroupChatDAO implements Parcelable {
     @Override
     public String toString() {
         return "GroupChatDAO [chatId=" + mChatId + ", direction=" + mDirection + ", state="
-                + mState + ", subject=" + mSubject + "]";
+                + mState + ", subject=" + mSubject + ", participants=" + mParticipants + "]";
     }
 
     /**

@@ -23,7 +23,7 @@ import com.gsma.services.rcs.sharing.video.VideoSharingIntent;
 
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.IntentService;
@@ -131,7 +131,7 @@ public class VideoSharingIntentService extends IntentService {
         PendingIntent contentIntent = PendingIntent.getActivity(this, uniqueId, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
-        String displayName = RcsDisplayName.getInstance(this).getDisplayName(vshDao.getContact());
+        String displayName = RcsContactUtil.getInstance(this).getDisplayName(vshDao.getContact());
         String notifTitle = getString(R.string.title_recv_video_sharing);
 
         /* Create notification */

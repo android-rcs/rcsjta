@@ -45,7 +45,6 @@ import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcelable;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -172,20 +171,14 @@ public class InitiateGeolocSharing extends Activity {
                             break;
 
                         case TRANSFERRED:
-                            // Hide progress dialog
                             hideProgressDialog();
-                            // Display transfer progress
+                            /* Display transfer progress */
                             statusView.setText(_state);
-                            // Make sure progress bar is at the end
+                            /* Make sure progress bar is at the end */
                             ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
                             progressBar.setProgress(progressBar.getMax());
 
-                            // Show the shared geoloc
-                            Intent intent = new Intent(InitiateGeolocSharing.this,
-                                    DisplayGeoloc.class);
-                            intent.putExtra(DisplayGeoloc.EXTRA_CONTACT, (Parcelable) contact);
-                            intent.putExtra(DisplayGeoloc.EXTRA_GEOLOC, (Parcelable) mGeoloc);
-                            startActivity(intent);
+                            DisplayGeoloc.showContactOnMap(InitiateGeolocSharing.this, contact, mGeoloc);
                             break;
 
                         default:

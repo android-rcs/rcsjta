@@ -31,7 +31,7 @@ import com.orangelabs.rcs.api.connection.utils.LockAccess;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.Activity;
@@ -251,7 +251,7 @@ public class ReceiveImageSharing extends Activity {
                 return;
             }
 
-            String from = RcsDisplayName.getInstance(this).getDisplayName(mIshDao.getContact());
+            String from = RcsContactUtil.getInstance(this).getDisplayName(mIshDao.getContact());
             // Display sharing infos
             TextView fromTextView = (TextView) findViewById(R.id.from);
             fromTextView.setText(getString(R.string.label_from_args, from));

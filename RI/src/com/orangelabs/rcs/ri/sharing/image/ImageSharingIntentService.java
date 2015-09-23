@@ -24,7 +24,7 @@ import com.gsma.services.rcs.sharing.image.ImageSharingIntent;
 
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.IntentService;
@@ -139,7 +139,7 @@ public class ImageSharingIntentService extends IntentService {
         PendingIntent contentIntent = PendingIntent.getActivity(this, uniqueId, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
-        String displayName = RcsDisplayName.getInstance(this).getDisplayName(contact);
+        String displayName = RcsContactUtil.getInstance(this).getDisplayName(contact);
         String title = getString(R.string.title_recv_image_sharing);
 
         /* Create notification */

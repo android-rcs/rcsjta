@@ -23,6 +23,7 @@ import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import com.gsma.services.rcs.RcsServiceNotRegisteredException;
 import com.gsma.services.rcs.capability.CapabilityService;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content;
@@ -37,8 +38,9 @@ import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.chat.ChatView;
 import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager;
 import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager.INotifyComposing;
+import com.orangelabs.rcs.ri.messaging.geoloc.DisplayGeoloc;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Smileys;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -237,10 +239,18 @@ public class SingleChatView extends ChatView {
                     getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
                 }
                 if (mCapabilityService == null) {
+
                     mCapabilityService = mCnxManager.getCapabilityApi();
+
                 }
-                /* Request options for this new contact */
-                mCapabilityService.requestContactCapabilities(mContact);
+                try {
+                    /* Request options for this new contact */
+                    mCapabilityService.requestContactCapabilities(mContact);
+                } catch (RcsServiceNotRegisteredException e) {
+                    if (LogUtils.isActive) {
+                        Log.w(LOGTAG, "RcsServiceNotRegisteredException: " + e.getMessage());
+                    }
+                }
             }
             /*
              * Open chat to accept session if the parameter IM SESSION START is 0. Client
@@ -251,7 +261,7 @@ public class SingleChatView extends ChatView {
 
             contactOnForeground = mContact;
             // Set activity title with display name
-            String from = RcsDisplayName.getInstance(this).getDisplayName(mContact);
+            String from = RcsContactUtil.getInstance(this).getDisplayName(mContact);
             setTitle(getString(R.string.title_chat, from));
             // Mark as read messages if required
             Set<String> msgIdUnreads = getUnreadMessageIds(mContact);
@@ -321,11 +331,18 @@ public class SingleChatView extends ChatView {
         }
         switch (item.getItemId()) {
             case CHAT_MENU_ITEM_RESEND:
-                // TODO
+                try {
+                    mChat.resendMessage(messageId);
+                } catch (Exception e) {
+                    if (LogUtils.isActive) {
+                        Log.e(LOGTAG, "resend message failed", e);
+                    }
+                }
                 return true;
+
             case CHAT_MENU_ITEM_REVOKE:
-                // TODO
                 return true;
+
             case CHAT_MENU_ITEM_DELETE:
                 try {
                     mChatService.deleteMessage(messageId);
@@ -335,6 +352,7 @@ public class SingleChatView extends ChatView {
                     }
                 }
                 return true;
+
             default:
                 return super.onContextItemSelected(item);
         }
@@ -476,9 +494,7 @@ public class SingleChatView extends ChatView {
                 break;
 
             case R.id.menu_showus_map:
-                Set<String> contacts = new HashSet<String>();
-                contacts.add(mContact.toString());
-                showUsInMap(contacts);
+                DisplayGeoloc.showContactOnMap(this, mContact);
                 break;
 
             case R.id.menu_send_file:

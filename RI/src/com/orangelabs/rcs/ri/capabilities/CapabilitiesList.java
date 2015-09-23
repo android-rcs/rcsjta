@@ -21,7 +21,7 @@ package com.orangelabs.rcs.ri.capabilities;
 import com.gsma.services.rcs.capability.CapabilitiesLog;
 
 import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.Activity;
@@ -98,7 +98,7 @@ public class CapabilitiesList extends Activity {
      * List adapter
      */
     private class CapabilitiesListAdapter extends CursorAdapter {
-        private RcsDisplayName rcsDisplayName;
+        private RcsContactUtil rcsDisplayName;
 
         /**
          * Constructor
@@ -108,7 +108,7 @@ public class CapabilitiesList extends Activity {
          */
         public CapabilitiesListAdapter(Context context, Cursor c) {
             super(context, c);
-            rcsDisplayName = RcsDisplayName.getInstance(context);
+            rcsDisplayName = RcsContactUtil.getInstance(context);
         }
 
         @Override

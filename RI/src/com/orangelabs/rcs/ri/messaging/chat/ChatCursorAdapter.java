@@ -27,7 +27,7 @@ import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.ContactUtil;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.SmileyParser;
 import com.orangelabs.rcs.ri.utils.Smileys;
 
@@ -112,7 +112,7 @@ public class ChatCursorAdapter extends CursorAdapter {
                 ContactId contact = ContactUtil.formatContact(number);
                 if (!mContactIdDisplayNameMap.containsKey(contact)) {
                     // Display name is not known, save it into map
-                    displayName = RcsDisplayName.getInstance(context).getDisplayName(contact);
+                    displayName = RcsContactUtil.getInstance(context).getDisplayName(contact);
                     mContactIdDisplayNameMap.put(contact, displayName);
                 } else {
                     displayName = mContactIdDisplayNameMap.get(contact);

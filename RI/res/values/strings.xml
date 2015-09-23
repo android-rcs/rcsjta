@@ -28,7 +28,6 @@
     <string name="label_invitation_failed">Invitation has failed</string>
     <string name="label_yes">Yes</string>
     <string name="label_no">No</string>
-    <string name="label_select">Select</string>
     <string name="label_load_log_failed">Database access has failed</string>
     <string name="label_log_empty">No entry</string>
     <string name="label_incoming">incoming</string>
@@ -295,7 +294,6 @@
     <string name="label_latitude">Latitude:</string>
     <string name="label_longitude">Longitude:</string>
     <string name="label_accuracy">Accuracy:</string>
-    <string name="label_select_geoloc_map">Use a long click to select a location on the map.</string>
     <string name="label_geoloc_not_found">No geoloc info to display!</string>
 
     <!-- Intents menu -->

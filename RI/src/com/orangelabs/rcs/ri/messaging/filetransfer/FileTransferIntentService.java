@@ -26,7 +26,7 @@ import com.gsma.services.rcs.filetransfer.FileTransferIntent;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.chat.group.GroupChatDAO;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.IntentService;
@@ -166,7 +166,7 @@ public class FileTransferIntentService extends IntentService {
         PendingIntent contentIntent = PendingIntent.getActivity(this, uniqueId, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
-        String displayName = RcsDisplayName.getInstance(this).getDisplayName(contact);
+        String displayName = RcsContactUtil.getInstance(this).getDisplayName(contact);
         String title = getString(R.string.title_recv_file_transfer);
 
         /* Create notification */

@@ -19,9 +19,11 @@
 package com.orangelabs.rcs.ri.sharing.geoloc;
 
 import com.gsma.services.rcs.capability.CapabilitiesLog;
+import com.gsma.services.rcs.contact.ContactId;
 
 import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.messaging.geoloc.ShowUsInMap;
+import com.orangelabs.rcs.ri.messaging.geoloc.DisplayGeoloc;
+import com.orangelabs.rcs.ri.utils.ContactUtil;
 
 import android.app.ListActivity;
 import android.content.Intent;
@@ -32,7 +34,8 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Geoloc sharing API
@@ -68,7 +71,7 @@ public class TestGeolocSharingApi extends ListActivity {
                 break;
 
             case 1:
-                ArrayList<String> list = new ArrayList<String>();
+                Set<ContactId> contacts = new HashSet<ContactId>();
                 Cursor cursor = null;
                 try {
                     cursor = getContentResolver().query(CapabilitiesLog.CONTENT_URI, PROJECTION,
@@ -76,9 +79,9 @@ public class TestGeolocSharingApi extends ListActivity {
                     while (cursor.moveToNext()) {
                         String contact = cursor.getString(cursor
                                 .getColumnIndexOrThrow(CapabilitiesLog.CONTACT));
-                        list.add(contact);
+                        contacts.add(ContactUtil.formatContact(contact));
                     }
-                    ShowUsInMap.startShowUsInMap(this, list);
+                    DisplayGeoloc.showContactsOnMap(this, contacts);
                 } catch (Exception e) {
                     // Skip intentionally
                 } finally {

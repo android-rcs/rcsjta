@@ -30,9 +30,9 @@ import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.api.connection.utils.LockAccess;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.geoloc.EditGeoloc;
-import com.orangelabs.rcs.ri.messaging.geoloc.ShowUsInMap;
+import com.orangelabs.rcs.ri.messaging.geoloc.SelectGeoloc;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.AlertDialog;
@@ -57,9 +57,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
-
-import java.util.ArrayList;
-import java.util.Set;
 
 /**
  * Chat view
@@ -352,7 +349,7 @@ public abstract class ChatView extends FragmentActivity implements
      */
     protected void getGeoLoc() {
         // Start a new activity to send a geolocation
-        startActivityForResult(new Intent(this, EditGeoloc.class), SELECT_GEOLOCATION);
+        startActivityForResult(new Intent(this, SelectGeoloc.class), SELECT_GEOLOCATION);
     }
 
     /**
@@ -378,22 +375,13 @@ public abstract class ChatView extends FragmentActivity implements
     }
 
     /**
-     * Show us in a map
-     * 
-     * @param participants Set of participants
-     */
-    protected void showUsInMap(Set<String> participants) {
-        ShowUsInMap.startShowUsInMap(this, new ArrayList<String>(participants));
-    }
-
-    /**
      * Display composing event for contact
      * 
      * @param contact the contact ID
      * @param status True if contact is composing
      */
     protected void displayComposingEvent(final ContactId contact, final boolean status) {
-        final String from = RcsDisplayName.getInstance(this).getDisplayName(contact);
+        final String from = RcsContactUtil.getInstance(this).getDisplayName(contact);
         // Execute on UI handler since callback is executed from service
         mHandler.post(new Runnable() {
             public void run() {

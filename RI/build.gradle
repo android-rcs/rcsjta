@@ -42,8 +42,7 @@ dependencies {
     compile project(':api_cnx')
     compile project(':mediaplayer')
     compile 'com.android.support:support-v4:21.0.0'
-    //Use offical version above instead of local version below
-    //compile files('libs/android-support-v4.jar')
+	compile 'com.google.android.gms:play-services:7.8.0'
 }
 
 //Below install dependecy was added to always install RCS service before

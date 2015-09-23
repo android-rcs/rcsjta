@@ -34,18 +34,16 @@ import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.messaging.geoloc.DisplayGeoloc;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcelable;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -165,15 +163,12 @@ public class ReceiveGeolocSharing extends Activity {
                             ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
                             progressBar.setProgress(progressBar.getMax());
 
-                            // Show the shared geoloc
-                            Intent intent = new Intent(ReceiveGeolocSharing.this,
-                                    DisplayGeoloc.class);
-                            intent.putExtra(DisplayGeoloc.EXTRA_CONTACT, (Parcelable) contact);
+                            /* Show the shared geoloc */
 
                             try {
                                 mGeoloc = mGeolocSharing.getGeoloc();
-                                intent.putExtra(DisplayGeoloc.EXTRA_GEOLOC, (Parcelable) mGeoloc);
-                                startActivity(intent);
+                                DisplayGeoloc.showContactOnMap(ReceiveGeolocSharing.this, contact,
+                                        mGeoloc);
                             } catch (RcsServiceException e) {
                                 if (LogUtils.isActive) {
                                     Log.d(LOGTAG, "onStateChanged failed to get geoloc for "
@@ -262,7 +257,7 @@ public class ReceiveGeolocSharing extends Activity {
 
             // Display sharing infos
             TextView fromTextView = (TextView) findViewById(R.id.from);
-            String from = RcsDisplayName.getInstance(this).getDisplayName(mRemoteContact);
+            String from = RcsContactUtil.getInstance(this).getDisplayName(mRemoteContact);
             fromTextView.setText(getString(R.string.label_from_args, from));
 
             // Display accept/reject dialog

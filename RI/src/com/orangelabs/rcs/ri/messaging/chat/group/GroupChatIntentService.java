@@ -27,7 +27,7 @@ import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.chat.ChatMessageDAO;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.IntentService;
@@ -220,7 +220,7 @@ public class GroupChatIntentService extends IntentService {
             /* Create notification */
             ContactId contact = message.getContact();
             String mimeType = message.getMimeType();
-            String displayName = RcsDisplayName.getInstance(this).getDisplayName(contact);
+            String displayName = RcsContactUtil.getInstance(this).getDisplayName(contact);
             String title = getString(R.string.title_recv_chat, displayName);
 
             String msg;
@@ -295,7 +295,7 @@ public class GroupChatIntentService extends IntentService {
             GroupChat gc = ConnectionManager.getInstance().getChatApi().getGroupChat(chatId);
             if (gc != null) {
                 ContactId contact = gc.getRemoteContact();
-                return RcsDisplayName.getInstance(this).getDisplayName(contact);
+                return RcsContactUtil.getInstance(this).getDisplayName(contact);
             }
         } catch (Exception e) {
             if (LogUtils.isActive) {

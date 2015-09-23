@@ -18,6 +18,9 @@
 
 package com.orangelabs.rcs.ri.utils;
 
+import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.RcsPersistentStorageException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactService;
 import com.gsma.services.rcs.contact.RcsContact;
@@ -33,11 +36,11 @@ import android.util.Log;
  * 
  * @author YPLO6403
  */
-public class RcsDisplayName {
+public class RcsContactUtil {
 
-    private static final String LOGTAG = LogUtils.getTag(RcsDisplayName.class.getSimpleName());
+    private static final String LOGTAG = LogUtils.getTag(RcsContactUtil.class.getSimpleName());
 
-    private static volatile RcsDisplayName sInstance;
+    private static volatile RcsContactUtil sInstance;
 
     private ContactService mService;
 
@@ -48,7 +51,7 @@ public class RcsDisplayName {
      * 
      * @param context
      */
-    private RcsDisplayName(Context context) {
+    private RcsContactUtil(Context context) {
         mService = ConnectionManager.getInstance().getContactApi();
         sDefaultDisplayName = context.getString(R.string.label_no_contact);
     }
@@ -59,18 +62,16 @@ public class RcsDisplayName {
      * @param context the context
      * @return the singleton instance.
      */
-    public static RcsDisplayName getInstance(Context context) {
-        if (sInstance == null) {
-            synchronized (RcsDisplayName.class) {
-                if (sInstance == null) {
-                    if (context == null) {
-                        throw new IllegalArgumentException("Context is null");
-                    }
-                    sInstance = new RcsDisplayName(context);
-                }
-            }
+    public static RcsContactUtil getInstance(Context context) {
+        if (sInstance != null) {
+            return sInstance;
         }
-        return sInstance;
+        synchronized (RcsContactUtil.class) {
+            if (sInstance == null) {
+                sInstance = new RcsContactUtil(context);
+            }
+            return sInstance;
+        }
     }
 
     /**
@@ -100,12 +101,21 @@ public class RcsDisplayName {
             } else {
                 return displayName;
             }
-        } catch (Exception e) {
+        } catch (RcsServiceNotAvailableException e) {
             if (LogUtils.isActive) {
-                Log.e(LOGTAG, "Cannot get displayName", e);
+                Log.i(LOGTAG, "RcsServiceNotAvailableException");
             }
-            return contact.toString();
+
+        } catch (RcsPersistentStorageException e) {
+            if (LogUtils.isActive) {
+                Log.w(LOGTAG, "RcsServiceNotAvailableException", e);
+            }
+        } catch (RcsGenericException e) {
+            if (LogUtils.isActive) {
+                Log.w(LOGTAG, "RcsGenericException", e);
+            }
         }
+        return contact.toString();
     }
 
     /**

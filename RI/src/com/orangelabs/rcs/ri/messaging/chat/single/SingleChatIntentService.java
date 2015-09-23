@@ -25,7 +25,7 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.chat.ChatMessageDAO;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.IntentService;
@@ -187,7 +187,7 @@ public class SingleChatIntentService extends IntentService {
             }
             PendingIntent contentIntent = PendingIntent.getActivity(context, uniqueId, intent,
                     PendingIntent.FLAG_UPDATE_CURRENT);
-            String displayName = RcsDisplayName.getInstance(this).getDisplayName(contact);
+            String displayName = RcsContactUtil.getInstance(this).getDisplayName(contact);
             String title = context.getString(R.string.title_recv_chat, displayName);
             String mimeType = message.getMimeType();
             String msg;

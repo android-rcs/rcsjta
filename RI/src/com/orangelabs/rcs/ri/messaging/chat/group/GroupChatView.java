@@ -45,8 +45,9 @@ import com.orangelabs.rcs.ri.messaging.chat.ChatMessageDAO;
 import com.orangelabs.rcs.ri.messaging.chat.ChatView;
 import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager;
 import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager.INotifyComposing;
+import com.orangelabs.rcs.ri.messaging.geoloc.DisplayGeoloc;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Smileys;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -499,7 +500,7 @@ public class GroupChatView extends ChatView {
         // Manual accept
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.title_group_chat);
-        String from = RcsDisplayName.getInstance(this).getDisplayName(remote);
+        String from = RcsContactUtil.getInstance(this).getDisplayName(remote);
         String topic = (TextUtils.isEmpty(mSubject)) ? getString(R.string.label_no_subject)
                 : mSubject;
         String msg = getString(R.string.label_gc_from_subject, from, topic);
@@ -752,7 +753,7 @@ public class GroupChatView extends ChatView {
 
             case R.id.menu_showus_map:
                 try {
-                    showUsInMap(getSetOfParticipants(mGroupChat.getParticipants()));
+                    DisplayGeoloc.showContactsOnMap(this, mGroupChat.getParticipants().keySet());
                 } catch (RcsServiceException e) {
                     Utils.displayToast(this, "Fail to query for participants", e);
                 }

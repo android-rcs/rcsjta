@@ -33,7 +33,7 @@ import com.orangelabs.rcs.api.connection.utils.LockAccess;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.Activity;
@@ -312,7 +312,7 @@ public class MessagingSessionView extends Activity {
                     return;
                 }
                 mContact = mSession.getRemoteContact();
-                String from = RcsDisplayName.getInstance(this).getDisplayName(mContact);
+                String from = RcsContactUtil.getInstance(this).getDisplayName(mContact);
 
                 /* Manual accept */
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -327,7 +327,7 @@ public class MessagingSessionView extends Activity {
             /* Display session info */
             TextView featureTagEdit = (TextView) findViewById(R.id.feature_tag);
             featureTagEdit.setText(mServiceId);
-            String from = RcsDisplayName.getInstance(this).getDisplayName(mContact);
+            String from = RcsContactUtil.getInstance(this).getDisplayName(mContact);
             TextView contactEdit = (TextView) findViewById(R.id.contact);
             contactEdit.setText(from);
             Button sendBtn = (Button) findViewById(R.id.send_btn);

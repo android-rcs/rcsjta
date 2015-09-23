@@ -36,7 +36,7 @@ import com.orangelabs.rcs.ri.sharing.video.media.TerminatingVideoPlayer;
 import com.orangelabs.rcs.ri.sharing.video.media.VideoPlayerListener;
 import com.orangelabs.rcs.ri.sharing.video.media.VideoSurfaceView;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.Activity;
@@ -246,7 +246,7 @@ public class IncomingVideoSharing extends Activity implements VideoPlayerListene
             }
 
             ContactId remote = mVshDao.getContact();
-            String from = RcsDisplayName.getInstance(this).getDisplayName(remote);
+            String from = RcsContactUtil.getInstance(this).getDisplayName(remote);
 
             // Display sharing information
             TextView fromTextView = (TextView) findViewById(R.id.from);

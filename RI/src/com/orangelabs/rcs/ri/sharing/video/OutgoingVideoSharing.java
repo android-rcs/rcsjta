@@ -39,7 +39,7 @@ import com.orangelabs.rcs.ri.sharing.video.media.VideoSurfaceView;
 import com.orangelabs.rcs.ri.utils.ContactListAdapter;
 import com.orangelabs.rcs.ri.utils.ContactUtil;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.Activity;
@@ -1142,7 +1142,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
     private void displayRemoteContact() {
         TextView fromTextView = (TextView) findViewById(R.id.with);
         fromTextView.setVisibility(View.VISIBLE);
-        String displayName = RcsDisplayName.getInstance(this).getDisplayName(mContact);
+        String displayName = RcsContactUtil.getInstance(this).getDisplayName(mContact);
         fromTextView.setText(getString(R.string.label_with_args, displayName));
     }
 }

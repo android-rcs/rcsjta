@@ -35,7 +35,7 @@ import com.orangelabs.rcs.api.connection.utils.LockAccess;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.Activity;
@@ -195,7 +195,7 @@ public class ReceiveFileTransfer extends Activity {
         mGgroupFileTransfer = (intent.getBooleanExtra(FileTransferIntentService.EXTRA_GROUP_FILE,
                 false));
 
-        String from = RcsDisplayName.getInstance(this).getDisplayName(mFtDao.getContact());
+        String from = RcsContactUtil.getInstance(this).getDisplayName(mFtDao.getContact());
         TextView fromTextView = (TextView) findViewById(R.id.from);
         fromTextView.setText(getString(R.string.label_from_args, from));
 

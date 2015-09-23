@@ -23,7 +23,7 @@ import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfoLog;
 
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -83,7 +83,7 @@ public class GroupDeliveryInfoCursorAdapter extends CursorAdapter {
                 .getInt(holder.columnReason));
         // Set the display name
         String number = cursor.getString(holder.columnContact);
-        String displayName = RcsDisplayName.getInstance(mContext).getDisplayName(number);
+        String displayName = RcsContactUtil.getInstance(mContext).getDisplayName(number);
         holder.contactText.setText(mContext.getString(R.string.label_from_args, displayName));
 
         if (deliver == 0) {
