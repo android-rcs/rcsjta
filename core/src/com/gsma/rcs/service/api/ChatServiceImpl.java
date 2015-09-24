@@ -22,7 +22,6 @@
 
 package com.gsma.rcs.service.api;
 
-import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
@@ -97,10 +96,6 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     private final ContactManager mContactManager;
 
-    private final Core mCore;
-
-    private final OneToOneUndeliveredImManager mOneToOneUndeliveredImManager;
-
     private final Map<ContactId, OneToOneChatImpl> mOneToOneChatCache = new HashMap<ContactId, OneToOneChatImpl>();
 
     private final Map<String, GroupChatImpl> mGroupChatCache = new HashMap<String, GroupChatImpl>();
@@ -130,18 +125,16 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param oneToOneUndeliveredImManager OneToOneUndeliveredImManager
      */
     public ChatServiceImpl(InstantMessagingService imService, MessagingLog messagingLog,
-            HistoryLog historyLog, RcsSettings rcsSettings, ContactManager contactManager,
-            Core core, OneToOneUndeliveredImManager oneToOneUndeliveredImManager) {
+            HistoryLog historyLog, RcsSettings rcsSettings, ContactManager contactManager) {
         if (sLogger.isActivated()) {
             sLogger.info("Chat service API is loaded");
         }
         mImService = imService;
+        mImService.register(this);
         mMessagingLog = messagingLog;
         mHistoryLog = historyLog;
         mRcsSettings = rcsSettings;
         mContactManager = contactManager;
-        mCore = core;
-        mOneToOneUndeliveredImManager = oneToOneUndeliveredImManager;
     }
 
     private ReasonCode imdnToFailedReasonCode(ImdnDocument imdn) {
@@ -166,16 +159,9 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param timestamp Timestamp sent in payload for IMDN datetime
      * @throws MsrpException
      */
-    public void tryToSendOne2OneDisplayedDeliveryReport(String msgId, ContactId remote,
-            long timestamp) throws MsrpException {
-
-        OneToOneChatImpl chatImpl = mOneToOneChatCache.get(remote);
-        if (chatImpl != null) {
-            chatImpl.sendDisplayedDeliveryReport(remote, msgId, timestamp);
-            return;
-        }
-        mImService.getImdnManager().sendMessageDeliveryStatus(remote.toString(), remote, msgId,
-                ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp);
+    public void sendOne2OneDisplayedDeliveryReport(String msgId, ContactId remote, long timestamp)
+            throws MsrpException {
+        getOrCreateOneToOneChat(remote).sendDisplayedDeliveryReport(remote, msgId, timestamp);
     }
 
     /**
@@ -186,10 +172,9 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param timestamp Timestamp sent in payload for IMDN datetime
      * @throws MsrpException
      */
-    public void tryToSendGroupChatDisplayedDeliveryReport(final String msgId,
-            final ContactId contact, final long timestamp, String chatId) throws MsrpException {
+    public void sendGroupChatDisplayedDeliveryReport(final String msgId, final ContactId contact,
+            final long timestamp, String chatId) throws MsrpException {
         final GroupChatSession session = mImService.getGroupChatSession(chatId);
-
         if (session == null || !session.isMediaEstablished()) {
             if (sLogger.isActivated()) {
                 sLogger.info("No suitable session found to send the delivery status for " + msgId
@@ -203,7 +188,6 @@ public class ChatServiceImpl extends IChatService.Stub {
         if (sLogger.isActivated()) {
             sLogger.info("Using the available session to send displayed for " + msgId);
         }
-
         session.sendMsrpMessageDeliveryStatus(contact, msgId,
                 ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp);
     }
@@ -226,6 +210,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * 
      * @return Returns true if registered else returns false
      */
+    @Override
     public boolean isServiceRegistered() {
         return ServerApiUtils.isImsConnected();
     }
@@ -235,6 +220,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * 
      * @return the reason code for IMS service registration
      */
+    @Override
     public int getServiceRegistrationReasonCode() {
         return ServerApiUtils.getServiceRegistrationReasonCode().toInt();
     }
@@ -244,6 +230,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * 
      * @param listener Service registration listener
      */
+    @Override
     public void addEventListener(IRcsServiceRegistrationListener listener) {
         if (sLogger.isActivated()) {
             sLogger.info("Add a service listener");
@@ -258,6 +245,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * 
      * @param listener Service registration listener
      */
+    @Override
     public void removeEventListener(IRcsServiceRegistrationListener listener) {
         if (sLogger.isActivated()) {
             sLogger.info("Remove a service listener");
@@ -271,7 +259,6 @@ public class ChatServiceImpl extends IChatService.Stub {
      * Notifies registration event
      */
     public void notifyRegistration() {
-        // Notify listeners
         synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.broadcastServiceRegistered();
         }
@@ -283,7 +270,6 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param reasonCode for unregistration
      */
     public void notifyUnRegistration(RcsServiceRegistration.ReasonCode reasonCode) {
-        // Notify listeners
         synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.broadcastServiceUnRegistered(reasonCode);
         }
@@ -301,10 +287,8 @@ public class ChatServiceImpl extends IChatService.Stub {
                     .append(" (display=").append(session.getRemoteDisplayName()).append(")")
                     .toString());
         }
-        // Add session in the list
         OneToOneChatImpl oneToOneChat = getOrCreateOneToOneChat(contact);
         session.addListener(oneToOneChat);
-        addOneToOneChat(contact, oneToOneChat);
 
         ChatMessage firstMessage = session.getFirstMessage();
         if (firstMessage != null) {
@@ -334,7 +318,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param contact Contact ID
      * @param imdn Imdn document
      */
-    public void receiveOneToOneMessageDeliveryStatus(ContactId contact, ImdnDocument imdn) {
+    public void onOneToOneMessageDeliveryStatusReceived(ContactId contact, ImdnDocument imdn) {
         String status = imdn.getStatus();
         String msgId = imdn.getMsgId();
         String notificationType = imdn.getNotificationType();
@@ -359,7 +343,7 @@ public class ChatServiceImpl extends IChatService.Stub {
             }
 
         } else if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
-            mOneToOneUndeliveredImManager.cancelDeliveryTimeoutAlarm(msgId);
+            mImService.getDeliveryExpirationManager().cancelDeliveryTimeoutAlarm(msgId);
             synchronized (mLock) {
                 if (mMessagingLog.setChatMessageStatusDelivered(msgId, timestamp)) {
                     mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, mimeType,
@@ -368,7 +352,7 @@ public class ChatServiceImpl extends IChatService.Stub {
             }
 
         } else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
-            mOneToOneUndeliveredImManager.cancelDeliveryTimeoutAlarm(msgId);
+            mImService.getDeliveryExpirationManager().cancelDeliveryTimeoutAlarm(msgId);
             synchronized (mLock) {
                 if (mMessagingLog.setChatMessageStatusDisplayed(msgId, timestamp)) {
                     mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, mimeType,
@@ -408,9 +392,8 @@ public class ChatServiceImpl extends IChatService.Stub {
     public OneToOneChatImpl getOrCreateOneToOneChat(ContactId contact) {
         OneToOneChatImpl oneToOneChat = mOneToOneChatCache.get(contact);
         if (oneToOneChat == null) {
-            oneToOneChat = new OneToOneChatImpl(contact, mOneToOneChatEventBroadcaster, mImService,
-                    mMessagingLog, mHistoryLog, mRcsSettings, this, mContactManager, mCore,
-                    mOneToOneUndeliveredImManager);
+            oneToOneChat = new OneToOneChatImpl(mImService, contact, mOneToOneChatEventBroadcaster,
+                    mMessagingLog, mHistoryLog, mRcsSettings, this, mContactManager);
             mOneToOneChatCache.put(contact, oneToOneChat);
         }
         return oneToOneChat;
@@ -423,6 +406,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @return IOneToOneChat
      * @throws RemoteException
      */
+    @Override
     public IOneToOneChat getOneToOneChat(ContactId contact) throws RemoteException {
         if (contact == null) {
             throw new ServerApiIllegalArgumentException("contact must not be null!");
@@ -455,13 +439,8 @@ public class ChatServiceImpl extends IChatService.Stub {
                     .toString());
         }
         String chatId = session.getContributionID();
-        GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
-                chatId, mMessagingLog, mRcsSettings);
-        GroupChatImpl groupChat = new GroupChatImpl(chatId, mGroupChatEventBroadcaster, mImService,
-                storageAccessor, mRcsSettings, mContactManager, this, mMessagingLog, mHistoryLog,
-                mCore);
+        GroupChatImpl groupChat = getOrCreateGroupChat(chatId);
         session.addListener(groupChat);
-        addGroupChat(groupChat);
     }
 
     /**
@@ -502,6 +481,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      *             Note: List is used instead of Set because AIDL does only support List
      *             </p>
      */
+    @Override
     public IGroupChat initiateGroupChat(List<ContactId> contacts, String subject)
             throws RemoteException {
         if (contacts == null || contacts.isEmpty()) {
@@ -516,30 +496,67 @@ public class ChatServiceImpl extends IChatService.Stub {
             throw new ServerApiPermissionDeniedException(
                     "The GroupChat feature is not activated on the connected IMS server!");
         }
-        // Test IMS connection
         ServerApiUtils.testIms();
         if (sLogger.isActivated()) {
             sLogger.info("Initiate an ad-hoc group chat session");
         }
         try {
-            Set<ContactId> contactToInvite = new HashSet<ContactId>(contacts);
             long timestamp = System.currentTimeMillis();
-            final GroupChatSession session = mImService.initiateAdhocGroupChatSession(
-                    contactToInvite, subject, timestamp);
-            String chatId = session.getContributionID();
-            GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
-                    chatId, subject, Direction.OUTGOING, mMessagingLog, mRcsSettings, timestamp);
-            GroupChatImpl groupChat = new GroupChatImpl(chatId, mGroupChatEventBroadcaster,
-                    mImService, storageAccessor, mRcsSettings, mContactManager, this,
-                    mMessagingLog, mHistoryLog, mCore);
-            session.addListener(groupChat);
+            final GroupChatSession session = mImService.createOriginatingAdHocGroupChatSession(
+                    new HashSet<ContactId>(contacts), subject, timestamp);
+            final String chatId = session.getContributionID();
+            final GroupChatImpl groupChat = getOrCreateGroupChat(chatId);
 
             mMessagingLog.addGroupChat(session.getContributionID(), session.getRemoteContact(),
                     session.getSubject(), session.getParticipants(), GroupChat.State.INITIATING,
                     GroupChat.ReasonCode.UNSPECIFIED, Direction.OUTGOING, timestamp);
 
-            addGroupChat(groupChat);
-            session.startSession();
+            mImService.scheduleImOperation(new Runnable() {
+                public void run() {
+                    try {
+                        if (!isServiceRegistered() || !mImService.isChatSessionAvailable()) {
+                            sLogger.error(new StringBuilder(
+                                    "Failed to initiate group chat with chatId '").append(chatId)
+                                    .append("'!").toString());
+                            setGroupChatStateAndReasonCode(chatId, GroupChat.State.FAILED,
+                                    GroupChat.ReasonCode.FAILED_INITIATION);
+                            return;
+                        }
+                        session.addListener(groupChat);
+                        session.startSession();
+
+                    } catch (SipPayloadException e) {
+                        sLogger.error(new StringBuilder(
+                                "Failed to initiate group chat with chatId '").append(chatId)
+                                .append("'!").toString(), e);
+                        setGroupChatStateAndReasonCode(chatId, GroupChat.State.FAILED,
+                                GroupChat.ReasonCode.FAILED_INITIATION);
+
+                    } catch (SipNetworkException e) {
+                        if (sLogger.isActivated()) {
+                            sLogger.debug(new StringBuilder(
+                                    "Failed to initiate group chat with chatId '").append(chatId)
+                                    .append("'! (").append(e.getMessage()).append(")").toString());
+                        }
+                        setGroupChatStateAndReasonCode(chatId, GroupChat.State.FAILED,
+                                GroupChat.ReasonCode.FAILED_INITIATION);
+
+                    } catch (RuntimeException e) {
+                        /*
+                         * Normally we are not allowed to catch runtime exceptions as these are
+                         * genuine bugs which should be handled/fixed within the code. However the
+                         * cases when we are executing operations on a thread unhandling such
+                         * exceptions will eventually lead to exit the system and thus can bring the
+                         * whole system down, which is not intended.
+                         */
+                        sLogger.error(new StringBuilder(
+                                "Failed to initiate group chat with chatId '").append(chatId)
+                                .append("'!").toString(), e);
+                        setGroupChatStateAndReasonCode(chatId, GroupChat.State.FAILED,
+                                GroupChat.ReasonCode.FAILED_INITIATION);
+                    }
+                }
+            });
             return groupChat;
 
         } catch (ServerApiBaseException e) {
@@ -557,11 +574,11 @@ public class ChatServiceImpl extends IChatService.Stub {
     public GroupChatImpl getOrCreateGroupChat(String chatId) {
         GroupChatImpl groupChat = mGroupChatCache.get(chatId);
         if (groupChat == null) {
-            GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
+            GroupChatPersistedStorageAccessor persistedStorage = new GroupChatPersistedStorageAccessor(
                     chatId, mMessagingLog, mRcsSettings);
-            groupChat = new GroupChatImpl(chatId, mGroupChatEventBroadcaster, mImService,
-                    storageAccessor, mRcsSettings, mContactManager, this, mMessagingLog,
-                    mHistoryLog, mCore);
+            groupChat = new GroupChatImpl(mImService, chatId, mGroupChatEventBroadcaster,
+                    persistedStorage, mRcsSettings, this, mContactManager, mMessagingLog,
+                    mHistoryLog);
             mGroupChatCache.put(chatId, groupChat);
         }
         return groupChat;
@@ -574,6 +591,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @return IGroupChat
      * @throws RemoteException
      */
+    @Override
     public IGroupChat getGroupChat(String chatId) throws RemoteException {
         if (TextUtils.isEmpty(chatId)) {
             throw new ServerApiIllegalArgumentException("chatId must not be null or empty!");
@@ -599,6 +617,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @return boolean
      * @throws RemoteException
      */
+    @Override
     public boolean isAllowedToInitiateGroupChat() throws RemoteException {
         try {
             if (!mRcsSettings.isGroupChatActivated()) {
@@ -641,6 +660,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @return true if it's possible to initiate a new group chat
      * @throws RemoteException
      */
+    @Override
     public boolean isAllowedToInitiateGroupChat2(ContactId contact) throws RemoteException {
         if (contact == null) {
             throw new ServerApiIllegalArgumentException("contact must not be null!");
@@ -695,16 +715,18 @@ public class ChatServiceImpl extends IChatService.Stub {
      * Deletes all one to one chat from history and abort/reject any associated ongoing session if
      * such exists.
      */
+    @Override
     public void deleteOneToOneChats() {
-        mCore.getListener().handleDeleteOneToOneChats(mImService);
+        mImService.tryToDeleteOneToOneChats();
     }
 
     /**
      * Deletes all group chat from history and abort/reject any associated ongoing session if such
      * exists.
      */
+    @Override
     public void deleteGroupChats() {
-        mCore.getListener().handleDeleteGroupChats(mImService);
+        mImService.tryToDeleteGroupChats();
     }
 
     /**
@@ -713,8 +735,9 @@ public class ChatServiceImpl extends IChatService.Stub {
      * 
      * @param contact
      */
+    @Override
     public void deleteOneToOneChat(ContactId contact) {
-        mCore.getListener().handleDeleteOneToOneChat(mImService, contact);
+        mImService.tryToDeleteOneToOneChat(contact);
     }
 
     /**
@@ -723,8 +746,9 @@ public class ChatServiceImpl extends IChatService.Stub {
      * 
      * @param chatId
      */
+    @Override
     public void deleteGroupChat(String chatId) {
-        mCore.getListener().handleDeleteGroupChat(mImService, chatId);
+        mImService.tryToDeleteGroupChat(chatId);
     }
 
     /**
@@ -733,8 +757,9 @@ public class ChatServiceImpl extends IChatService.Stub {
      * 
      * @param msgId
      */
+    @Override
     public void deleteMessage(String msgId) {
-        mCore.getListener().handleDeleteMessage(mImService, msgId);
+        mImService.tryToDeleteChatMessage(msgId);
     }
 
     /**
@@ -744,15 +769,32 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param msgIds
      * @throws RemoteException
      */
-    public void clearMessageDeliveryExpiration(List<String> msgIds) throws RemoteException {
+    @Override
+    public void clearMessageDeliveryExpiration(final List<String> msgIds) throws RemoteException {
         if (msgIds == null || msgIds.isEmpty()) {
             throw new ServerApiIllegalArgumentException(
                     "Undelivered chat messageId list must not be null and empty!");
         }
-        for (String msgId : msgIds) {
-            mOneToOneUndeliveredImManager.cancelDeliveryTimeoutAlarm(msgId);
-        }
-        mMessagingLog.clearMessageDeliveryExpiration(msgIds);
+        mImService.scheduleImOperation(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    for (String msgId : msgIds) {
+                        mImService.getDeliveryExpirationManager().cancelDeliveryTimeoutAlarm(msgId);
+                    }
+                    mMessagingLog.clearMessageDeliveryExpiration(msgIds);
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error("Failed to mark message as read!", e);
+                }
+            }
+        });
     }
 
     /**
@@ -761,6 +803,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param listener One-to-One chat event listener
      * @throws RemoteException
      */
+    @Override
     public void addEventListener2(IOneToOneChatListener listener) throws RemoteException {
         if (listener == null) {
             throw new ServerApiIllegalArgumentException("listener must not be null!");
@@ -790,6 +833,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param listener One-to-One chat event listener
      * @throws RemoteException
      */
+    @Override
     public void removeEventListener2(IOneToOneChatListener listener) throws RemoteException {
         if (listener == null) {
             throw new ServerApiIllegalArgumentException("listener must not be null!");
@@ -819,6 +863,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param listener Group chat event listener
      * @throws RemoteException
      */
+    @Override
     public void addEventListener3(IGroupChatListener listener) throws RemoteException {
         if (listener == null) {
             throw new ServerApiIllegalArgumentException("listener must not be null!");
@@ -848,6 +893,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param listener Group chat event listener
      * @throws RemoteException
      */
+    @Override
     public void removeEventListener3(IGroupChatListener listener) throws RemoteException {
         if (listener == null) {
             throw new ServerApiIllegalArgumentException("listener must not be null!");
@@ -876,6 +922,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * 
      * @return Configuration
      */
+    @Override
     public IChatServiceConfiguration getConfiguration() {
         return new ChatServiceConfigurationImpl(mRcsSettings);
     }
@@ -887,34 +934,39 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @throws RemoteException
      */
     @Override
-    public void markMessageAsRead(String msgId) throws RemoteException {
+    public void markMessageAsRead(final String msgId) throws RemoteException {
         if (TextUtils.isEmpty(msgId)) {
             throw new ServerApiIllegalArgumentException("msgId must not be null or empty!");
         }
-        try {
-            mMessagingLog.markMessageAsRead(msgId);
-            if (mRcsSettings.isImReportsActivated() && mRcsSettings.isRespondToDisplayReports()) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("tryToDispatchAllPendingDisplayNotifications for msgID "
-                            .concat(msgId));
-                }
-
-                ImdnManager imdnManager = mImService.getImdnManager();
-                if (imdnManager.isSendOneToOneDeliveryDisplayedReportsEnabled()
-                        || imdnManager.isSendGroupDeliveryDisplayedReportsEnabled()) {
-                    mCore.getListener().tryToDispatchAllPendingDisplayNotifications();
+        mImService.scheduleImOperation(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mMessagingLog.markMessageAsRead(msgId);
+                    if (mRcsSettings.isImReportsActivated()
+                            && mRcsSettings.isRespondToDisplayReports()) {
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("tryToDispatchAllPendingDisplayNotifications for msgID "
+                                    .concat(msgId));
+                        }
+                        ImdnManager imdnManager = mImService.getImdnManager();
+                        if (imdnManager.isSendOneToOneDeliveryDisplayedReportsEnabled()
+                                || imdnManager.isSendGroupDeliveryDisplayedReportsEnabled()) {
+                            mImService.tryToDispatchAllPendingDisplayNotifications();
+                        }
+                    }
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error("Failed to mark message as read!", e);
                 }
             }
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
-
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
+        });
     }
 
     /**
@@ -952,13 +1004,10 @@ public class ChatServiceImpl extends IChatService.Stub {
      * 
      * @param session OneToOneChatSession
      */
-    public void handleOneToOneChatSessionInitiation(OneToOneChatSession session) {
+    public void receiveOneToOneChatSessionInitiation(OneToOneChatSession session) {
         ContactId contact = session.getRemoteContact();
-        OneToOneChatImpl oneToOneChat = new OneToOneChatImpl(contact,
-                mOneToOneChatEventBroadcaster, mImService, mMessagingLog, mHistoryLog,
-                mRcsSettings, this, mContactManager, mCore, mOneToOneUndeliveredImManager);
+        OneToOneChatImpl oneToOneChat = getOrCreateOneToOneChat(contact);
         session.addListener(oneToOneChat);
-        addOneToOneChat(contact, oneToOneChat);
     }
 
     /**
@@ -968,14 +1017,15 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @return IChatMessage
      * @throws RemoteException
      */
+    @Override
     public IChatMessage getChatMessage(String msgId) throws RemoteException {
         if (TextUtils.isEmpty(msgId)) {
             throw new ServerApiIllegalArgumentException("msgId must not be null or empty!");
         }
         try {
-            ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
+            ChatMessagePersistedStorageAccessor persistedStorage = new ChatMessagePersistedStorageAccessor(
                     mMessagingLog, msgId);
-            return new ChatMessageImpl(persistentStorage);
+            return new ChatMessageImpl(persistedStorage);
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -994,8 +1044,8 @@ public class ChatServiceImpl extends IChatService.Stub {
      * 
      * @param chatId
      */
-    public void handleRejoinGroupChatAsPartOfSendOperation(String chatId)
-            throws SipPayloadException, SipNetworkException {
+    public void rejoinGroupChatAsPartOfSendOperation(String chatId) throws SipPayloadException,
+            SipNetworkException {
         GroupChatImpl groupChat = getOrCreateGroupChat(chatId);
         groupChat.setRejoinedAsPartOfSendOperation(true);
         groupChat.rejoinGroupChat();
@@ -1008,8 +1058,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @throws SipNetworkException
      * @throws SipPayloadException
      */
-    public void handleRejoinGroupChat(String chatId) throws SipPayloadException,
-            SipNetworkException {
+    public void rejoinGroupChat(String chatId) throws SipPayloadException, SipNetworkException {
         GroupChatImpl groupChat = getOrCreateGroupChat(chatId);
         groupChat.rejoinGroupChat();
     }
@@ -1019,6 +1068,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * 
      * @return the common service configuration
      */
+    @Override
     public ICommonServiceConfiguration getCommonConfiguration() {
         return new CommonServiceConfigurationImpl(mRcsSettings);
     }
@@ -1103,11 +1153,11 @@ public class ChatServiceImpl extends IChatService.Stub {
         return getOrCreateGroupChat(chatId).isGroupChatAbandoned();
     }
 
-    public void handleDisplayReportSent(String chatId, ContactId remote, String msgId) {
+    public void onDisplayReportSent(String chatId, ContactId remote, String msgId) {
         if (remote != null && chatId.equals(remote.toString())) {
-            getOrCreateOneToOneChat(remote).handleChatMessageDisplayReportSent(msgId);
+            getOrCreateOneToOneChat(remote).onChatMessageDisplayReportSent(msgId);
         } else {
-            getOrCreateGroupChat(chatId).handleChatMessageDisplayReportSent(msgId);
+            getOrCreateGroupChat(chatId).onChatMessageDisplayReportSent(msgId);
         }
     }
 }

@@ -72,10 +72,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
      */
     private final Object mLock = new Object();
 
-    /**
-     * The logger
-     */
-    private final Logger mLogger = Logger.getLogger(getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(VideoSharingImpl.class.getSimpleName());
 
     /**
      * Constructor
@@ -123,8 +120,8 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
     }
 
     private void handleSessionRejected(ReasonCode reasonCode, ContactId contact) {
-        if (mLogger.isActivated()) {
-            mLogger.info("Session rejected; reasonCode=".concat(String.valueOf(reasonCode)));
+        if (sLogger.isActivated()) {
+            sLogger.info("Session rejected; reasonCode=".concat(String.valueOf(reasonCode)));
         }
         synchronized (mLock) {
             mVideoSharingService.removeVideoSharing(mSharingId);
@@ -164,12 +161,12 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -190,12 +187,12 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -227,12 +224,12 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -254,12 +251,12 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -284,12 +281,12 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -304,8 +301,8 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         if (player == null) {
             throw new ServerApiIllegalArgumentException("player must not be null!");
         }
-        if (mLogger.isActivated()) {
-            mLogger.info("Accept session invitation");
+        if (sLogger.isActivated()) {
+            sLogger.info("Accept session invitation");
         }
         try {
             final VideoStreamingSession session = mRichcallService
@@ -318,12 +315,12 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
             session.acceptSession();
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -335,8 +332,8 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
      */
     public void rejectInvitation() throws RemoteException {
         try {
-            if (mLogger.isActivated()) {
-                mLogger.info("Reject session invitation");
+            if (sLogger.isActivated()) {
+                sLogger.info("Reject session invitation");
             }
             final VideoStreamingSession session = mRichcallService
                     .getVideoSharingSession(mSharingId);
@@ -347,12 +344,12 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
             session.rejectSession(InvitationStatus.INVITATION_REJECTED_DECLINE);
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -363,55 +360,41 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
      * @throws RemoteException
      */
     public void abortSharing() throws RemoteException {
-        try {
-            if (mLogger.isActivated()) {
-                mLogger.info("Cancel session");
-            }
-            final VideoStreamingSession session = mRichcallService
-                    .getVideoSharingSession(mSharingId);
-            if (session == null) {
-                throw new ServerApiGenericException(
-                        "No session with sharing ID:".concat(mSharingId));
-            }
-            new Thread() {
-                public void run() {
-                    // @FIXME:Terminate Session should not run on a new thread
-                    try {
-                        session.terminateSession(TerminationReason.TERMINATION_BY_USER);
-                    } catch (SipPayloadException e) {
-                        mLogger.error(
-                                "Failed to terminate session with sharing ID : ".concat(mSharingId),
-                                e);
-                    } catch (SipNetworkException e) {
-                        if (mLogger.isActivated()) {
-                            mLogger.debug(e.getMessage());
-                        }
-                    } catch (RuntimeException e) {
-                        /*
-                         * Normally we are not allowed to catch runtime exceptions as these are
-                         * genuine bugs which should be handled/fixed within the code. However the
-                         * cases when we are executing operations on a thread unhandling such
-                         * exceptions will eventually lead to exit the system and thus can bring the
-                         * whole system down, which is not intended.
-                         */
-                        mLogger.error(
-                                "Failed to terminate session with sharing ID : ".concat(mSharingId),
-                                e);
+        mRichcallService.scheduleVideoShareOperation(new Runnable() {
+            public void run() {
+                try {
+                    if (sLogger.isActivated()) {
+                        sLogger.info("Abort session");
                     }
+                    final VideoStreamingSession session = mRichcallService
+                            .getVideoSharingSession(mSharingId);
+                    if (session == null) {
+                        sLogger.debug("No ongoing session with sharing ID:" + mSharingId
+                                + " is found so nothing to abort!");
+                        return;
+                    }
+                    session.terminateSession(TerminationReason.TERMINATION_BY_USER);
 
+                } catch (SipNetworkException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(e.getMessage());
+                    }
+                } catch (SipPayloadException e) {
+                    sLogger.error(
+                            "Failed to terminate session with sharing ID : ".concat(mSharingId), e);
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error(
+                            "Failed to terminate session with sharing ID : ".concat(mSharingId), e);
                 }
-            }.start();
-
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
-            throw e;
-
-        } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
+        });
     }
 
     /**
@@ -441,12 +424,12 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -470,12 +453,12 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -497,12 +480,12 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -532,12 +515,12 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -547,9 +530,9 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
     /**
      * Session is started
      */
-    public void handleSessionStarted(ContactId contact) {
-        if (mLogger.isActivated()) {
-            mLogger.info("Session started");
+    public void onSessionStarted(ContactId contact) {
+        if (sLogger.isActivated()) {
+            sLogger.info("Session started");
         }
         synchronized (mLock) {
             setStateAndReasonCode(contact, State.STARTED, ReasonCode.UNSPECIFIED);
@@ -562,9 +545,9 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
      * @param reason Termination reason
      */
 
-    public void handleSessionAborted(ContactId contact, TerminationReason reason) {
-        if (mLogger.isActivated()) {
-            mLogger.info("Session aborted, reason=".concat(String.valueOf(reason)));
+    public void onSessionAborted(ContactId contact, TerminationReason reason) {
+        if (sLogger.isActivated()) {
+            sLogger.info("Session aborted, reason=".concat(String.valueOf(reason)));
         }
         synchronized (mLock) {
             mVideoSharingService.removeVideoSharing(mSharingId);
@@ -596,8 +579,8 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
      * @param error Error
      */
     public void handleSharingError(ContactId contact, ContentSharingError error) {
-        if (mLogger.isActivated()) {
-            mLogger.info("Sharing error ".concat(String.valueOf(error.getErrorCode())));
+        if (sLogger.isActivated()) {
+            sLogger.info("Sharing error ".concat(String.valueOf(error.getErrorCode())));
         }
         VideoSharingStateAndReasonCode stateAndReasonCode = toStateAndReasonCode(error);
         State state = stateAndReasonCode.getState();
@@ -609,9 +592,9 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
     }
 
     @Override
-    public void handleSessionAccepted(ContactId contact) {
-        if (mLogger.isActivated()) {
-            mLogger.info("Accepting sharing");
+    public void onSessionAccepting(ContactId contact) {
+        if (sLogger.isActivated()) {
+            sLogger.info("Accepting sharing");
         }
         synchronized (mLock) {
             setStateAndReasonCode(contact, State.ACCEPTING, ReasonCode.UNSPECIFIED);
@@ -629,7 +612,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
     }
 
     @Override
-    public void handleSessionRejected(ContactId contact, TerminationReason reason) {
+    public void onSessionRejected(ContactId contact, TerminationReason reason) {
         switch (reason) {
             case TERMINATION_BY_USER:
                 handleSessionRejected(ReasonCode.REJECTED_BY_USER, contact);
@@ -653,8 +636,8 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 
     @Override
     public void handleSessionInvited(ContactId contact, MmContent content, long timestamp) {
-        if (mLogger.isActivated()) {
-            mLogger.info("Invited to video sharing session");
+        if (sLogger.isActivated()) {
+            sLogger.info("Invited to video sharing session");
         }
         synchronized (mLock) {
             mPersistentStorage.addVideoSharing(contact, Direction.INCOMING, (VideoContent) content,

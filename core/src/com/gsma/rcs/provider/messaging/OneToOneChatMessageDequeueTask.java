@@ -41,16 +41,12 @@ public class OneToOneChatMessageDequeueTask extends DequeueTask {
 
     private final ContactId mContact;
 
-    public OneToOneChatMessageDequeueTask(Object lock, Context ctx, Core core, ContactId contact,
+    public OneToOneChatMessageDequeueTask(Context ctx, Core core, ContactId contact,
             MessagingLog messagingLog, ChatServiceImpl chatService, RcsSettings rcsSettings,
             ContactManager contactManager, FileTransferServiceImpl fileTransferService) {
-        super(lock, ctx, core, contactManager, messagingLog, rcsSettings, chatService,
+        super(ctx, core, contactManager, messagingLog, rcsSettings, chatService,
                 fileTransferService);
         mContact = contact;
-    }
-
-    private void handleDequeuingFailure(ContactId contact, String id, String mimeType) {
-        setOneToOneChatMessageAsFailed(mContact, id, mimeType);
     }
 
     public void run() {
@@ -63,91 +59,91 @@ public class OneToOneChatMessageDequeueTask extends DequeueTask {
         String mimeType = null;
         Cursor cursor = null;
         try {
-            synchronized (mLock) {
-                if (!isImsConnected()) {
-                    if (logActivated) {
-                        mLogger.debug("IMS not connected, exiting dequeue task to dequeue one-to-one chat messages for contact "
-                                .concat(mContact.toString()));
-                    }
-                    return;
+            if (!isImsConnected()) {
+                if (logActivated) {
+                    mLogger.debug("IMS not connected, exiting dequeue task to dequeue one-to-one chat messages for contact "
+                            .concat(mContact.toString()));
                 }
-                if (mCore.isStopping()) {
-                    if (logActivated) {
-                        mLogger.debug("Core service is stopped, exiting dequeue task to dequeue one-to-one chat messages for contact "
-                                .concat(mContact.toString()));
-                    }
-                    return;
+                return;
+            }
+            if (isShuttingDownOrStopped()) {
+                if (logActivated) {
+                    mLogger.debug("Core service is shutting down/stopped, exiting dequeue task to dequeue one-to-one chat messages for contact "
+                            .concat(mContact.toString()));
                 }
-                cursor = mMessagingLog.getQueuedOneToOneChatMessages(mContact);
-                int msgIdIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_MESSAGE_ID);
-                int contentIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_CONTENT);
-                int mimeTypeIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_MIME_TYPE);
-                OneToOneChatImpl oneToOneChat = mChatService.getOrCreateOneToOneChat(mContact);
-                while (cursor.moveToNext()) {
-                    try {
-                        if (!isImsConnected()) {
-                            if (logActivated) {
-                                mLogger.debug("IMS not connected, exiting dequeue task to dequeue one-to-one chat messages for contact "
-                                        .concat(mContact.toString()));
-                            }
-                            return;
-                        }
-                        if (mCore.isStopping()) {
-                            if (logActivated) {
-                                mLogger.debug("Core service is stopped, exiting dequeue task to dequeue one-to-one chat messages for contact "
-                                        .concat(mContact.toString()));
-                            }
-                            return;
-                        }
-                        id = cursor.getString(msgIdIdx);
-                        mimeType = cursor.getString(mimeTypeIdx);
-                        if (!isPossibleToDequeueOneToOneChatMessage(mContact)) {
-                            setOneToOneChatMessageAsFailed(mContact, id, mimeType);
-                            continue;
-                        }
-                        if (!isAllowedToDequeueOneToOneChatMessage(mContact)) {
-                            continue;
-                        }
-                        String content = cursor.getString(contentIdx);
-                        long timestamp = System.currentTimeMillis();
-                        /* For outgoing message, timestampSent = timestamp */
-                        ChatMessage msg = ChatUtils.createChatMessage(id,
-                                ChatUtils.apiMimeTypeToNetworkMimeType(mimeType), content,
-                                mContact, null, timestamp, timestamp);
-                        oneToOneChat.dequeueOneToOneChatMessage(msg);
-                    } catch (MsrpException e) {
+                return;
+            }
+            cursor = mMessagingLog.getQueuedOneToOneChatMessages(mContact);
+            int msgIdIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_MESSAGE_ID);
+            int contentIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_CONTENT);
+            int mimeTypeIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_MIME_TYPE);
+            OneToOneChatImpl oneToOneChat = mChatService.getOrCreateOneToOneChat(mContact);
+            while (cursor.moveToNext()) {
+                try {
+                    if (!isImsConnected()) {
                         if (logActivated) {
-                            mLogger.debug(new StringBuilder(
-                                    "Failed to dequeue one-one chat message '").append(id)
-                                    .append("' message for contact '").append(mContact)
-                                    .append("' due to: ").append(e.getMessage()).toString());
+                            mLogger.debug("IMS not connected, exiting dequeue task to dequeue one-to-one chat messages for contact "
+                                    .concat(mContact.toString()));
                         }
-                    } catch (SipNetworkException e) {
+                        return;
+                    }
+                    if (isShuttingDownOrStopped()) {
                         if (logActivated) {
-                            mLogger.debug(new StringBuilder(
-                                    "Failed to dequeue one-one chat message '").append(id)
-                                    .append("' message for contact '").append(mContact)
-                                    .append("' due to: ").append(e.getMessage()).toString());
+                            mLogger.debug("Core service is shutting down/stopped, exiting dequeue task to dequeue one-to-one chat messages for contact "
+                                    .concat(mContact.toString()));
                         }
-                    } catch (SipPayloadException e) {
-                        mLogger.error(new StringBuilder("Failed to dequeue one-one chat message '")
+                        return;
+                    }
+                    id = cursor.getString(msgIdIdx);
+                    mimeType = cursor.getString(mimeTypeIdx);
+                    if (!isPossibleToDequeueOneToOneChatMessage(mContact)) {
+                        setOneToOneChatMessageAsFailedDequeue(mContact, id, mimeType);
+                        continue;
+                    }
+                    if (!isAllowedToDequeueOneToOneChatMessage(mContact)) {
+                        continue;
+                    }
+                    String content = cursor.getString(contentIdx);
+                    long timestamp = System.currentTimeMillis();
+                    /* For outgoing message, timestampSent = timestamp */
+                    ChatMessage msg = ChatUtils.createChatMessage(id,
+                            ChatUtils.apiMimeTypeToNetworkMimeType(mimeType), content, mContact,
+                            null, timestamp, timestamp);
+                    oneToOneChat.dequeueOneToOneChatMessage(msg);
+
+                } catch (MsrpException e) {
+                    if (logActivated) {
+                        mLogger.debug(new StringBuilder("Failed to dequeue one-one chat message '")
                                 .append(id).append("' message for contact '").append(mContact)
-                                .toString(), e);
-                        handleDequeuingFailure(mContact, id, mimeType);
-                    } catch (RuntimeException e) {
-                        /*
-                         * Normally all the terminal and non-terminal cases should be handled above
-                         * so if we come here that means that there is a bug and so we output a
-                         * stack trace so the bug can then be properly tracked down and fixed. We
-                         * also mark the respective entry that failed to dequeue as FAILED.
-                         */
-                        mLogger.error(new StringBuilder("Failed to dequeue one-one chat message '")
-                                .append(id).append("'for contact '").append(mContact).append("' ")
-                                .toString(), e);
-                        handleDequeuingFailure(mContact, id, mimeType);
+                                .append("' due to: ").append(e.getMessage()).toString());
                     }
+
+                } catch (SipNetworkException e) {
+                    if (logActivated) {
+                        mLogger.debug(new StringBuilder("Failed to dequeue one-one chat message '")
+                                .append(id).append("' message for contact '").append(mContact)
+                                .append("' due to: ").append(e.getMessage()).toString());
+                    }
+                } catch (SipPayloadException e) {
+                    mLogger.error(new StringBuilder("Failed to dequeue one-one chat message '")
+                            .append(id).append("' message for contact '").append(mContact)
+                            .toString(), e);
+                    setOneToOneChatMessageAsFailedDequeue(mContact, id, mimeType);
+
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally all the terminal and non-terminal cases should be handled above so
+                     * if we come here that means that there is a bug and so we output a stack trace
+                     * so the bug can then be properly tracked down and fixed. We also mark the
+                     * respective entry that failed to dequeue as FAILED.
+                     */
+                    mLogger.error(new StringBuilder("Failed to dequeue one-one chat message '")
+                            .append(id).append("'for contact '").append(mContact).append("' ")
+                            .toString(), e);
+                    setOneToOneChatMessageAsFailedDequeue(mContact, id, mimeType);
                 }
             }
+
         } catch (RuntimeException e) {
             /*
              * Normally all the terminal and non-terminal cases should be handled above so if we
@@ -162,7 +158,8 @@ public class OneToOneChatMessageDequeueTask extends DequeueTask {
             if (id == null) {
                 return;
             }
-            handleDequeuingFailure(mContact, id, mimeType);
+            setOneToOneChatMessageAsFailedDequeue(mContact, id, mimeType);
+
         } finally {
             if (cursor != null) {
                 cursor.close();

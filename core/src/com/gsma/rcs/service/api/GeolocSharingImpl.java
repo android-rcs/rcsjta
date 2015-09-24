@@ -65,11 +65,8 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
     /**
      * Lock used for synchronisation
      */
-    private final Object lock = new Object();
+    private final Object mLock = new Object();
 
-    /**
-     * The logger
-     */
     private final static Logger sLogger = Logger.getLogger(GeolocSharingImpl.class.getSimpleName());
 
     /**
@@ -352,58 +349,46 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
      * @throws RemoteException
      */
     public void abortSharing() throws RemoteException {
-        try {
-            if (sLogger.isActivated()) {
-                sLogger.info("Cancel session");
-            }
-            final GeolocTransferSession session = mRichcallService
-                    .getGeolocTransferSession(mSharingId);
-            if (session == null) {
-                throw new ServerApiGenericException(new StringBuilder("Session with sharing ID '")
-                        .append(mSharingId).append("' not available!").toString());
-            }
-            if (session.isGeolocTransfered()) {
-                throw new ServerApiPermissionDeniedException(
-                        "Cannot abort as geoloc is already transferred!");
-            }
-            new Thread() {
-                public void run() {
-                    // @FIXME:Terminate Session should not run on a new thread
-                    try {
-                        session.terminateSession(TerminationReason.TERMINATION_BY_USER);
-                    } catch (SipPayloadException e) {
-                        sLogger.error(
-                                "Failed to terminate session with sharing ID : ".concat(mSharingId),
-                                e);
-                    } catch (SipNetworkException e) {
-                        if (sLogger.isActivated()) {
-                            sLogger.debug(e.getMessage());
-                        }
-                    } catch (RuntimeException e) {
-                        /*
-                         * Normally we are not allowed to catch runtime exceptions as these are
-                         * genuine bugs which should be handled/fixed within the code. However the
-                         * cases when we are executing operations on a thread unhandling such
-                         * exceptions will eventually lead to exit the system and thus can bring the
-                         * whole system down, which is not intended.
-                         */
-                        sLogger.error(
-                                "Failed to terminate session with sharing ID : ".concat(mSharingId),
-                                e);
+        mRichcallService.scheduleGeolocShareOperation(new Runnable() {
+            public void run() {
+                try {
+                    if (sLogger.isActivated()) {
+                        sLogger.info("Abort session");
                     }
+                    final GeolocTransferSession session = mRichcallService
+                            .getGeolocTransferSession(mSharingId);
+                    if (session == null) {
+                        sLogger.debug("No ongoing session with sharing ID:" + mSharingId
+                                + " is found so nothing to abort!");
+                        return;
+                    }
+                    if (session.isGeolocTransfered()) {
+                        sLogger.debug("Session with sharing ID:" + mSharingId
+                                + " is already transferred so nothing to abort!");
+                        return;
+                    }
+                    session.terminateSession(TerminationReason.TERMINATION_BY_USER);
+
+                } catch (SipNetworkException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(e.getMessage());
+                    }
+                } catch (SipPayloadException e) {
+                    sLogger.error(
+                            "Failed to terminate session with sharing ID : ".concat(mSharingId), e);
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error(
+                            "Failed to terminate session with sharing ID : ".concat(mSharingId), e);
                 }
-            }.start();
-
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
-            throw e;
-
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
+        });
     }
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/
@@ -445,7 +430,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
         if (sLogger.isActivated()) {
             sLogger.info("Session rejected; reasonCode=" + reasonCode + ".");
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             mGeolocSharingService.removeGeolocSharing(mSharingId);
             setStateAndReasonCode(contact, State.REJECTED, reasonCode);
         }
@@ -454,11 +439,11 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
     /**
      * Session is started
      */
-    public void handleSessionStarted(ContactId contact) {
+    public void onSessionStarted(ContactId contact) {
         if (sLogger.isActivated()) {
             sLogger.info("Session started.");
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             setStateAndReasonCode(contact, State.STARTED, ReasonCode.UNSPECIFIED);
         }
     }
@@ -469,12 +454,12 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
      * @param contact
      * @param reason Termination reason
      */
-    public void handleSessionAborted(ContactId contact, TerminationReason reason) {
+    public void onSessionAborted(ContactId contact, TerminationReason reason) {
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("Session aborted; reason=").append(reason).append(".")
                     .toString());
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             mGeolocSharingService.removeGeolocSharing(mSharingId);
             switch (reason) {
                 case TERMINATION_BY_TIMEOUT:
@@ -519,7 +504,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
         GeolocSharingStateAndReasonCode stateAndReasonCode = toStateAndReasonCode(error);
         State state = stateAndReasonCode.getState();
         ReasonCode reasonCode = stateAndReasonCode.getReasonCode();
-        synchronized (lock) {
+        synchronized (mLock) {
             mGeolocSharingService.removeGeolocSharing(mSharingId);
             setStateAndReasonCode(contact, state, reasonCode);
         }
@@ -536,7 +521,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
         if (sLogger.isActivated()) {
             sLogger.info("Geoloc transferred.");
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             mGeolocSharingService.removeGeolocSharing(mSharingId);
             if (initiatedByRemote) {
                 if (RichCallHistory.getInstance().setGeolocSharingTransferred(mSharingId, geoloc)) {
@@ -554,17 +539,17 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
     }
 
     @Override
-    public void handleSessionAccepted(ContactId contact) {
+    public void onSessionAccepting(ContactId contact) {
         if (sLogger.isActivated()) {
             sLogger.info("Accepting sharing.");
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             setStateAndReasonCode(contact, State.ACCEPTING, ReasonCode.UNSPECIFIED);
         }
     }
 
     @Override
-    public void handleSessionRejected(ContactId contact, TerminationReason reason) {
+    public void onSessionRejected(ContactId contact, TerminationReason reason) {
         switch (reason) {
             case TERMINATION_BY_USER:
                 handleSessionRejected(ReasonCode.REJECTED_BY_USER, contact);
@@ -588,7 +573,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 
     @Override
     public void handleSessionInvited(ContactId contact, long timestamp) {
-        synchronized (lock) {
+        synchronized (mLock) {
             mPersistentStorage.addIncomingGeolocSharing(contact, State.INVITED,
                     ReasonCode.UNSPECIFIED, timestamp);
             mBroadcaster.broadcastInvitation(mSharingId);
@@ -597,7 +582,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 
     @Override
     public void handle180Ringing(ContactId contact) {
-        synchronized (lock) {
+        synchronized (mLock) {
             setStateAndReasonCode(contact, State.RINGING, ReasonCode.UNSPECIFIED);
         }
     }

@@ -54,7 +54,7 @@ public class AccountChangedReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, final Intent intent) {
-        Core.getInstance().scheduleForBackgroundExecution(new Runnable() {
+        Core.getInstance().scheduleCoreOperation(new Runnable() {
             @Override
             public void run() {
                 try {

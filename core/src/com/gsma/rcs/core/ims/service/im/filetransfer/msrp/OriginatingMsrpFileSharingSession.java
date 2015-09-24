@@ -86,6 +86,8 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      */
     private MsrpManager msrpMgr;
 
+    private final InstantMessagingService mImService;
+
     private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
 
     /**
@@ -100,10 +102,9 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * @param timestamp Local timestamp for the session
      * @param contactManager
      */
-    public OriginatingMsrpFileSharingSession(String fileTransferId,
-            InstantMessagingService imService, MmContent content, ContactId contact,
-            MmContent fileIcon, RcsSettings rcsSettings, long timestamp,
-            ContactManager contactManager) {
+    public OriginatingMsrpFileSharingSession(InstantMessagingService imService,
+            String fileTransferId, MmContent content, ContactId contact, MmContent fileIcon,
+            RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
         super(imService, content, contact, fileIcon, fileTransferId, rcsSettings, timestamp,
                 contactManager);
 
@@ -111,6 +112,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
             mLogger.debug(new StringBuilder("OriginatingFileSharingSession contact=")
                     .append(contact).append(" filename=").append(content.getName()).toString());
         }
+        mImService = imService;
         // Create dialog path
         createOriginatingDialogPath();
 
@@ -317,7 +319,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
                     e);
             ContactId contact = getRemoteContact();
             for (ImsSessionListener listener : getListeners()) {
-                ((FileSharingSessionListener) listener).handleTransferNotAllowedToSend(contact);
+                ((FileSharingSessionListener) listener).onTransferNotAllowedToSend(contact);
             }
         }
     }
@@ -340,14 +342,13 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
             ContactId contact = getRemoteContact();
             MmContent content = getContent();
             for (ImsSessionListener listener : getListeners()) {
-                ((FileSharingSessionListener) listener).handleFileTransfered(content, contact,
+                ((FileSharingSessionListener) listener).onFileTransfered(content, contact,
                         FileTransferData.UNKNOWN_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION,
                         FileTransferProtocol.MSRP);
             }
-
-            ((InstantMessagingService) getImsService()).receiveOneToOneFileDeliveryStatus(contact,
-                    new ImdnDocument(getFileTransferId(), ImdnDocument.DISPLAY,
-                            ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp));
+            mImService.receiveOneToOneFileDeliveryStatus(contact, new ImdnDocument(
+                    getFileTransferId(), ImdnDocument.DISPLAY,
+                    ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp));
         } catch (SipPayloadException e) {
             mLogger.error("Failed to notify msrp data transfered for msgId : ".concat(msgId), e);
         } catch (SipNetworkException e) {
@@ -385,7 +386,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
     public void msrpTransferProgress(long currentSize, long totalSize) {
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
-            ((FileSharingSessionListener) listener).handleTransferProgress(contact, currentSize,
+            ((FileSharingSessionListener) listener).onTransferProgress(contact, currentSize,
                     totalSize);
         }
     }
@@ -439,10 +440,9 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      */
     public void handle200OK(SipResponse resp) throws SipPayloadException, SipNetworkException {
         long timestamp = System.currentTimeMillis();
-        ((InstantMessagingService) getImsService()).receiveOneToOneFileDeliveryStatus(
-                getRemoteContact(), new ImdnDocument(getFileTransferId(),
-                        ImdnDocument.POSITIVE_DELIVERY, ImdnDocument.DELIVERY_STATUS_DELIVERED,
-                        timestamp));
+        mImService.receiveOneToOneFileDeliveryStatus(getRemoteContact(), new ImdnDocument(
+                getFileTransferId(), ImdnDocument.POSITIVE_DELIVERY,
+                ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp));
         super.handle200OK(resp);
     }
 }

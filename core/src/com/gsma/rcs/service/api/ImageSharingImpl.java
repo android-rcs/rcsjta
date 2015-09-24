@@ -66,12 +66,9 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     /**
      * Lock used for synchronization
      */
-    private final Object lock = new Object();
+    private final Object mLock = new Object();
 
-    /**
-     * The logger
-     */
-    private final Logger mLogger = Logger.getLogger(getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(ImageSharingImpl.class.getSimpleName());
 
     /**
      * Constructor
@@ -136,10 +133,10 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     }
 
     private void handleSessionRejected(ReasonCode reasonCode, ContactId contact) {
-        if (mLogger.isActivated()) {
-            mLogger.info("Session rejected; reasonCode=" + reasonCode + ".");
+        if (sLogger.isActivated()) {
+            sLogger.info("Session rejected; reasonCode=" + reasonCode + ".");
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             mImageSharingService.removeImageSharing(mSharingId);
             setStateAndReasonCode(contact, ImageSharing.State.REJECTED, reasonCode);
         }
@@ -157,12 +154,12 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -183,12 +180,12 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -209,12 +206,12 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -235,12 +232,12 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -261,12 +258,12 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -287,12 +284,12 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -326,12 +323,12 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -352,12 +349,12 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -382,12 +379,12 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -410,12 +407,12 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -427,8 +424,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
      */
     public void acceptInvitation() throws RemoteException {
         try {
-            if (mLogger.isActivated()) {
-                mLogger.info("Accept session invitation");
+            if (sLogger.isActivated()) {
+                sLogger.info("Accept session invitation");
             }
             final ImageTransferSession session = mRichcallService
                     .getImageTransferSession(mSharingId);
@@ -439,12 +436,12 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
             session.acceptSession();
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -456,8 +453,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
      */
     public void rejectInvitation() throws RemoteException {
         try {
-            if (mLogger.isActivated()) {
-                mLogger.info("Reject session invitation");
+            if (sLogger.isActivated()) {
+                sLogger.info("Reject session invitation");
             }
             final ImageTransferSession session = mRichcallService
                     .getImageTransferSession(mSharingId);
@@ -468,12 +465,12 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
             session.rejectSession(InvitationStatus.INVITATION_REJECTED_DECLINE);
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -484,59 +481,46 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
      * @throws RemoteException
      */
     public void abortSharing() throws RemoteException {
-        try {
-            if (mLogger.isActivated()) {
-                mLogger.info("Cancel session");
-            }
-            final ImageTransferSession session = mRichcallService
-                    .getImageTransferSession(mSharingId);
-            if (session == null) {
-                throw new ServerApiGenericException(new StringBuilder("Session with sharing ID '")
-                        .append(mSharingId).append("' not available!").toString());
-            }
-            if (session.isImageTransfered()) {
-                throw new ServerApiPermissionDeniedException(
-                        "Cannot abort as image is already transferred!");
-            }
-            new Thread() {
-                public void run() {
-                    // @FIXME:Terminate Session should not run on a new thread
-                    try {
-                        session.terminateSession(TerminationReason.TERMINATION_BY_USER);
-                    } catch (SipPayloadException e) {
-                        mLogger.error(
-                                "Failed to terminate session with sharingId : ".concat(mSharingId),
-                                e);
-                    } catch (SipNetworkException e) {
-                        if (mLogger.isActivated()) {
-                            mLogger.debug(e.getMessage());
-                        }
-                    } catch (RuntimeException e) {
-                        /*
-                         * Normally we are not allowed to catch runtime exceptions as these are
-                         * genuine bugs which should be handled/fixed within the code. However the
-                         * cases when we are executing operations on a thread unhandling such
-                         * exceptions will eventually lead to exit the system and thus can bring the
-                         * whole system down, which is not intended.
-                         */
-                        mLogger.error(
-                                "Failed to terminate session with sharingId : ".concat(mSharingId),
-                                e);
+        mRichcallService.scheduleImageShareOperation(new Runnable() {
+            public void run() {
+                try {
+                    if (sLogger.isActivated()) {
+                        sLogger.info("Abort session");
                     }
+                    final ImageTransferSession session = mRichcallService
+                            .getImageTransferSession(mSharingId);
+                    if (session == null) {
+                        sLogger.debug("No ongoing session with sharing ID:" + mSharingId
+                                + " is found so nothing to abort!");
+                        return;
+                    }
+                    if (session.isImageTransfered()) {
+                        sLogger.debug("Session with sharing ID:" + mSharingId
+                                + " is already transferred so nothing to abort!");
+                        return;
+                    }
+                    session.terminateSession(TerminationReason.TERMINATION_BY_USER);
 
+                } catch (SipNetworkException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(e.getMessage());
+                    }
+                } catch (SipPayloadException e) {
+                    sLogger.error(
+                            "Failed to terminate session with sharingId : ".concat(mSharingId), e);
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error(
+                            "Failed to terminate session with sharingId : ".concat(mSharingId), e);
                 }
-            }.start();
-
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
-            throw e;
-
-        } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
+        });
     }
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/
@@ -544,11 +528,11 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     /**
      * Session is started
      */
-    public void handleSessionStarted(ContactId contact) {
-        if (mLogger.isActivated()) {
-            mLogger.info("Session started");
+    public void onSessionStarted(ContactId contact) {
+        if (sLogger.isActivated()) {
+            sLogger.info("Session started");
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             setStateAndReasonCode(contact, ImageSharing.State.STARTED, ReasonCode.UNSPECIFIED);
         }
     }
@@ -558,12 +542,12 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
      * 
      * @param reason Termination reason
      */
-    public void handleSessionAborted(ContactId contact, TerminationReason reason) {
-        if (mLogger.isActivated()) {
-            mLogger.info(new StringBuilder("Session aborted (terminationReason ").append(reason)
+    public void onSessionAborted(ContactId contact, TerminationReason reason) {
+        if (sLogger.isActivated()) {
+            sLogger.info(new StringBuilder("Session aborted (terminationReason ").append(reason)
                     .append(")").toString());
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             mImageSharingService.removeImageSharing(mSharingId);
             switch (reason) {
                 case TERMINATION_BY_SYSTEM:
@@ -601,13 +585,13 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
      * @param error Error
      */
     public void handleSharingError(ContactId contact, ContentSharingError error) {
-        if (mLogger.isActivated()) {
-            mLogger.info("Sharing error " + error.getErrorCode());
+        if (sLogger.isActivated()) {
+            sLogger.info("Sharing error " + error.getErrorCode());
         }
         ImageSharingStateAndReasonCode stateAndReasonCode = toStateAndReasonCode(error);
         State state = stateAndReasonCode.getState();
         ReasonCode reasonCode = stateAndReasonCode.getReasonCode();
-        synchronized (lock) {
+        synchronized (mLock) {
             mImageSharingService.removeImageSharing(mSharingId);
             setStateAndReasonCode(contact, state, reasonCode);
         }
@@ -620,7 +604,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
      * @param totalSize Total size to be transferred
      */
     public void handleSharingProgress(ContactId contact, long currentSize, long totalSize) {
-        synchronized (lock) {
+        synchronized (mLock) {
             if (mPersistentStorage.setProgress(currentSize)) {
                 mBroadcaster.broadcastProgressUpdate(contact, mSharingId, currentSize, totalSize);
             }
@@ -634,27 +618,27 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
      * @param file File URI associated to the received content
      */
     public void handleContentTransfered(ContactId contact, Uri file) {
-        if (mLogger.isActivated()) {
-            mLogger.info("Image transferred");
+        if (sLogger.isActivated()) {
+            sLogger.info("Image transferred");
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             mImageSharingService.removeImageSharing(mSharingId);
             setStateAndReasonCode(contact, ImageSharing.State.TRANSFERRED, ReasonCode.UNSPECIFIED);
         }
     }
 
     @Override
-    public void handleSessionAccepted(ContactId contact) {
-        if (mLogger.isActivated()) {
-            mLogger.info("Accepting sharing");
+    public void onSessionAccepting(ContactId contact) {
+        if (sLogger.isActivated()) {
+            sLogger.info("Accepting sharing");
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             setStateAndReasonCode(contact, ImageSharing.State.ACCEPTING, ReasonCode.UNSPECIFIED);
         }
     }
 
     @Override
-    public void handleSessionRejected(ContactId contact, TerminationReason reason) {
+    public void onSessionRejected(ContactId contact, TerminationReason reason) {
         switch (reason) {
             case TERMINATION_BY_USER:
                 handleSessionRejected(ReasonCode.REJECTED_BY_USER, contact);
@@ -678,10 +662,10 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 
     @Override
     public void handleSessionInvited(ContactId contact, MmContent content, long timestamp) {
-        if (mLogger.isActivated()) {
-            mLogger.info("Invited to image sharing session");
+        if (sLogger.isActivated()) {
+            sLogger.info("Invited to image sharing session");
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             mPersistentStorage.addImageSharing(contact, Direction.INCOMING, content,
                     ImageSharing.State.INVITED, ReasonCode.UNSPECIFIED, timestamp);
         }
@@ -691,7 +675,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 
     @Override
     public void handle180Ringing(ContactId contact) {
-        synchronized (lock) {
+        synchronized (mLock) {
             setStateAndReasonCode(contact, ImageSharing.State.RINGING, ReasonCode.UNSPECIFIED);
         }
     }

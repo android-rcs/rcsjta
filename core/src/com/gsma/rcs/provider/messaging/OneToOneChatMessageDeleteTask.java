@@ -49,8 +49,8 @@ public class OneToOneChatMessageDeleteTask extends DeleteTask.GroupedByContactId
      * @param imsLock the ims operation lock
      */
     public OneToOneChatMessageDeleteTask(ChatServiceImpl chatService,
-            InstantMessagingService imService, LocalContentResolver contentResolver, Object imsLock) {
-        super(contentResolver, imsLock, MessageData.CONTENT_URI, MessageData.KEY_MESSAGE_ID,
+            InstantMessagingService imService, LocalContentResolver contentResolver) {
+        super(contentResolver, MessageData.CONTENT_URI, MessageData.KEY_MESSAGE_ID,
                 MessageData.KEY_CONTACT, SELECTION_ONETOONE_CHATMESSAGES);
         mChatService = chatService;
         mImService = imService;
@@ -68,8 +68,8 @@ public class OneToOneChatMessageDeleteTask extends DeleteTask.GroupedByContactId
      */
     public OneToOneChatMessageDeleteTask(ChatServiceImpl chatService,
             InstantMessagingService imService, LocalContentResolver contentResolver,
-            Object imsLock, String messageId) {
-        super(contentResolver, imsLock, MessageData.CONTENT_URI, MessageData.KEY_MESSAGE_ID,
+            String messageId) {
+        super(contentResolver, MessageData.CONTENT_URI, MessageData.KEY_MESSAGE_ID,
                 MessageData.KEY_CONTACT, null, messageId);
         mChatService = chatService;
         mImService = imService;
@@ -86,8 +86,8 @@ public class OneToOneChatMessageDeleteTask extends DeleteTask.GroupedByContactId
      */
     public OneToOneChatMessageDeleteTask(ChatServiceImpl chatService,
             InstantMessagingService imService, LocalContentResolver contentResolver,
-            Object imsLock, ContactId contact) {
-        super(contentResolver, imsLock, MessageData.CONTENT_URI, MessageData.KEY_MESSAGE_ID,
+            ContactId contact) {
+        super(contentResolver, MessageData.CONTENT_URI, MessageData.KEY_MESSAGE_ID,
                 MessageData.KEY_CONTACT, contact);
         mChatService = chatService;
         mImService = imService;

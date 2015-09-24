@@ -121,7 +121,7 @@ public abstract class ContentSharingSession extends ImsServiceSession {
         super.receiveBye(bye);
         ContactId remote = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
-            listener.handleSessionAborted(remote, TerminationReason.TERMINATION_BY_REMOTE);
+            listener.onSessionAborted(remote, TerminationReason.TERMINATION_BY_REMOTE);
         }
         getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
     }

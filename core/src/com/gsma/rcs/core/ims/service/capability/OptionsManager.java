@@ -189,7 +189,7 @@ public class OptionsManager implements DiscoveryManager {
      * @throws SipPayloadException
      * @throws SipNetworkException
      */
-    public void receiveCapabilityRequest(SipRequest options) throws SipPayloadException,
+    public void onCapabilityRequestReceived(SipRequest options) throws SipPayloadException,
             SipNetworkException {
         String sipId = SipUtils.getAssertedIdentity(options);
         try {
@@ -232,8 +232,7 @@ public class OptionsManager implements DiscoveryManager {
             }
 
             // Notify listener
-            mImsModule.getCore().getListener()
-                    .handleCapabilitiesNotification(contact, capabilities);
+            mImsModule.getCapabilityService().onReceivedCapabilities(contact, capabilities);
 
         } catch (ContactManagerException e) {
             throw new SipPayloadException(new StringBuilder(
@@ -248,7 +247,7 @@ public class OptionsManager implements DiscoveryManager {
 
     /**
      * Requests capabilities for a set of contacts
-     * 
+     *
      * @param contacts Set of contacts to query.
      * @param callback Callback to execute once all contacts have been queried or null if caller
      *            does need to be notified

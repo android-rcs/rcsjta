@@ -24,7 +24,6 @@ package com.gsma.rcs.core.ims.service.richcall;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
@@ -47,18 +46,31 @@ import com.gsma.rcs.core.ims.service.richcall.image.TerminatingImageTransferSess
 import com.gsma.rcs.core.ims.service.richcall.video.OriginatingVideoStreamingSession;
 import com.gsma.rcs.core.ims.service.richcall.video.TerminatingVideoStreamingSession;
 import com.gsma.rcs.core.ims.service.richcall.video.VideoStreamingSession;
+import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.sharing.GeolocSharingDeleteTask;
+import com.gsma.rcs.provider.sharing.ImageSharingDeleteTask;
+import com.gsma.rcs.provider.sharing.RichCallHistory;
+import com.gsma.rcs.provider.sharing.UpdateGeolocSharingStateAfterUngracefulTerminationTask;
+import com.gsma.rcs.provider.sharing.UpdateImageSharingStateAfterUngracefulTerminationTask;
+import com.gsma.rcs.provider.sharing.UpdateVideoSharingStateAfterUngracefulTerminationTask;
+import com.gsma.rcs.provider.sharing.VideoSharingDeleteTask;
+import com.gsma.rcs.service.api.GeolocSharingServiceImpl;
+import com.gsma.rcs.service.api.ImageSharingServiceImpl;
+import com.gsma.rcs.service.api.VideoSharingServiceImpl;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
-import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.video.IVideoPlayer;
 import com.gsma.services.rcs.sharing.video.VideoSharing;
+
+import android.os.Handler;
+import android.os.HandlerThread;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -73,6 +85,19 @@ import javax2.sip.message.Response;
  * @author Jean-Marc AUFFRET
  */
 public class RichcallService extends ImsService {
+
+    private static final String ISH_OPERATION_THREAD_NAME = "IshOperations";
+
+    private static final String ISH_DELETE_OPERATION_THREAD_NAME = "IshDeleteOperations";
+
+    private static final String VSH_OPERATION_THREAD_NAME = "VshOperations";
+
+    private static final String VSH_DELETE_OPERATION_THREAD_NAME = "VshDeleteOperations";
+
+    private static final String GSH_OPERATION_THREAD_NAME = "GshOperations";
+
+    private static final String GSH_DELETE_OPERATION_THREAD_NAME = "GshDeleteOperations";
+
     /**
      * Video share features tags
      */
@@ -115,9 +140,29 @@ public class RichcallService extends ImsService {
 
     private final RcsSettings mRcsSettings;
 
-    private final Core mCore;
-
     private final CallManager mCallManager;
+
+    private final RichCallHistory mRichCallHistory;
+
+    private final LocalContentResolver mLocalContentResolver;
+
+    private final Handler mImageSharingOperationHandler;
+
+    private final Handler mImageSharingDeleteOperationHandler;
+
+    private final Handler mVideoSharingOperationHandler;
+
+    private final Handler mVideoSharingDeleteOperationHandler;
+
+    private final Handler mGeolocSharingOperationHandler;
+
+    private final Handler mGeolocSharingDeleteOperationHandler;
+
+    private ImageSharingServiceImpl mImageSharingService;
+
+    private VideoSharingServiceImpl mVideoSharingService;
+
+    private GeolocSharingServiceImpl mGeolocSharingService;
 
     /**
      * Constructor
@@ -129,35 +174,76 @@ public class RichcallService extends ImsService {
      * @param callManager
      * @param ipCallService
      */
-    public RichcallService(ImsModule parent, Core core, ContactManager contactsManager,
-            RcsSettings rcsSettings, CallManager callManager) {
+    public RichcallService(ImsModule parent, RichCallHistory richCallHistory,
+            ContactManager contactsManager, RcsSettings rcsSettings, CallManager callManager,
+            LocalContentResolver localContentResolver) {
         super(parent, true);
-        mCore = core;
         mContactManager = contactsManager;
         mRcsSettings = rcsSettings;
         mCallManager = callManager;
+        mRichCallHistory = richCallHistory;
+        mLocalContentResolver = localContentResolver;
+
+        mImageSharingOperationHandler = allocateBgHandler(ISH_OPERATION_THREAD_NAME);
+        mImageSharingDeleteOperationHandler = allocateBgHandler(ISH_DELETE_OPERATION_THREAD_NAME);
+        mVideoSharingOperationHandler = allocateBgHandler(VSH_OPERATION_THREAD_NAME);
+        mVideoSharingDeleteOperationHandler = allocateBgHandler(VSH_DELETE_OPERATION_THREAD_NAME);
+        mGeolocSharingOperationHandler = allocateBgHandler(GSH_OPERATION_THREAD_NAME);
+        mGeolocSharingDeleteOperationHandler = allocateBgHandler(GSH_DELETE_OPERATION_THREAD_NAME);
     }
 
-    private void handleImageSharingInvitationRejected(SipRequest invite, ContactId contact,
-            ImageSharing.ReasonCode reasonCode, long timestamp) throws SipPayloadException {
-        MmContent content = ContentManager.createMmContentFromSdp(invite, mRcsSettings);
-        mCore.getListener().handleImageSharingInvitationRejected(contact, content, reasonCode,
-                timestamp);
+    private Handler allocateBgHandler(String threadName) {
+        HandlerThread thread = new HandlerThread(threadName);
+        thread.start();
+        return new Handler(thread.getLooper());
     }
 
-    private void handleVideoSharingInvitationRejected(SipRequest invite, ContactId contact,
-            VideoSharing.ReasonCode reasonCode, long timestamp) throws SipPayloadException {
-        String remoteSdp = invite.getSdpContent();
-        SipUtils.assertContentIsNotNull(remoteSdp, invite);
-        VideoContent content = ContentManager.createLiveVideoContentFromSdp(remoteSdp
-                .getBytes(UTF8));
-        mCore.getListener().handleVideoSharingInvitationRejected(contact, content, reasonCode,
-                timestamp);
+    public void register(ImageSharingServiceImpl service) {
+        if (sLogger.isActivated()) {
+            sLogger.debug(service.getClass().getName() + " registered ok.");
+        }
+        mImageSharingService = service;
     }
 
-    private void handleGeolocSharingInvitationRejected(ContactId contact, ReasonCode reasonCode,
-            long timestamp) {
-        mCore.getListener().handleGeolocSharingInvitationRejected(contact, reasonCode, timestamp);
+    public void register(VideoSharingServiceImpl service) {
+        if (sLogger.isActivated()) {
+            sLogger.debug(service.getClass().getName() + " registered ok.");
+        }
+        mVideoSharingService = service;
+    }
+
+    public void register(GeolocSharingServiceImpl service) {
+        if (sLogger.isActivated()) {
+            sLogger.debug(service.getClass().getName() + " registered ok.");
+        }
+        mGeolocSharingService = service;
+    }
+
+    /**
+     * Initializes richcall service
+     */
+    public void initialize() {
+    }
+
+    public void scheduleImageShareOperation(Runnable runnable) {
+        mImageSharingOperationHandler.post(runnable);
+    }
+
+    public void scheduleVideoShareOperation(Runnable runnable) {
+        mVideoSharingOperationHandler.post(runnable);
+    }
+
+    public void scheduleGeolocShareOperation(Runnable runnable) {
+        mGeolocSharingOperationHandler.post(runnable);
+    }
+
+    public void onCoreLayerStarted() {
+        scheduleImageShareOperation(new UpdateImageSharingStateAfterUngracefulTerminationTask(
+                mRichCallHistory, mImageSharingService));
+        scheduleVideoShareOperation(new UpdateVideoSharingStateAfterUngracefulTerminationTask(
+                mRichCallHistory, mVideoSharingService));
+        scheduleGeolocShareOperation(new UpdateGeolocSharingStateAfterUngracefulTerminationTask(
+                mRichCallHistory, mGeolocSharingService));
     }
 
     /**
@@ -389,7 +475,7 @@ public class RichcallService extends ImsService {
      * @return CSh session
      * @throws CoreException
      */
-    public ImageTransferSession initiateImageSharingSession(ContactId contact, MmContent content,
+    public ImageTransferSession createImageSharingSession(ContactId contact, MmContent content,
             MmContent thumbnail, long timestamp) throws CoreException {
         if (sLogger.isActivated()) {
             sLogger.info("Initiate image sharing session with contact " + contact + ", file "
@@ -453,122 +539,149 @@ public class RichcallService extends ImsService {
      * 
      * @param invite Initial invite
      * @param timestamp Local timestamp when got SipRequest
-     * @throws SipPayloadException
-     * @throws SipNetworkException
      */
-    public void receiveImageSharingInvitation(SipRequest invite, long timestamp)
-            throws SipPayloadException, SipNetworkException {
-        boolean logActivated = sLogger.isActivated();
-        if (logActivated) {
-            sLogger.info("Receive an image sharing session invitation");
-        }
-
-        /* Check validity of contact */
-        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(SipUtils
-                .getAssertedIdentity(invite));
-        if (number == null) {
-            if (logActivated) {
-                sLogger.debug("Rich call not established: cannot parse contact");
-            }
-            sendErrorResponse(invite, Response.SESSION_NOT_ACCEPTABLE);
-            return;
-
-        }
-        ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
-        mContactManager.setContactDisplayName(contact,
-                SipUtils.getDisplayNameFromUri(invite.getFrom()));
-
-        // Test if call is established
-        if (!isCallConnectedWith(contact)) {
-            if (logActivated) {
-                sLogger.debug("Rich call not established: reject the invitation");
-            }
-            sendErrorResponse(invite, Response.SESSION_NOT_ACCEPTABLE);
-            return;
-        }
-
-        // Test if the contact is blocked
-        if (mContactManager.isBlockedForContact(contact)) {
-            if (logActivated) {
-                sLogger.debug("Contact " + contact
-                        + " is blocked: automatically reject the sharing invitation");
-            }
-            handleImageSharingInvitationRejected(invite, contact,
-                    ImageSharing.ReasonCode.REJECTED_SPAM, timestamp);
-            // Send a 603 Decline response
-            sendErrorResponse(invite, Response.DECLINE);
-            return;
-        }
-
-        // Reject if there are already 2 bidirectional sessions with a given contact
-        boolean rejectInvitation = false;
-        if (isCurrentlyImageSharingBiDirectional()) {
-            // Already a bidirectional session
-            if (logActivated) {
-                sLogger.debug("Max sessions reached");
-            }
-            rejectInvitation = true;
-            handleImageSharingInvitationRejected(invite, contact,
-                    ImageSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS, timestamp);
-        } else if (isCurrentlyImageSharingUniDirectional()) {
-            ImageTransferSession currentSession = getUnidirectionalImageSharingSession();
-            if (isSessionTerminating(currentSession)) {
-                // Terminating session already used
-                if (logActivated) {
-                    sLogger.debug("Max terminating sessions reached");
-                }
-                rejectInvitation = true;
-            } else if (contact == null || !contact.equals(currentSession.getRemoteContact())) {
-                // Not the same contact
-                if (logActivated) {
-                    sLogger.debug("Only bidirectional session with same contact authorized");
-                }
-                rejectInvitation = true;
-                handleImageSharingInvitationRejected(invite, contact,
-                        ImageSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS, timestamp);
-            }
-        }
-        if (rejectInvitation) {
-            if (logActivated) {
-                sLogger.debug("Reject the invitation");
-            }
-            sendErrorResponse(invite, Response.BUSY_HERE);
-            return;
-        }
-
-        // Auto reject if file too big or if storage capacity is too small
-        MmContent content = ContentManager.createMmContentFromSdp(invite, mRcsSettings);
-        ContentSharingError error = ImageTransferSession.isImageCapacityAcceptable(
-                content.getSize(), mRcsSettings);
-        if (error != null) {
-            // Send a 603 Decline response
-            sendErrorResponse(invite, Response.DECLINE);
-            int errorCode = error.getErrorCode();
-            switch (errorCode) {
-                case ContentSharingError.MEDIA_SIZE_TOO_BIG:
-                    handleImageSharingInvitationRejected(invite, contact,
-                            ImageSharing.ReasonCode.REJECTED_MAX_SIZE, timestamp);
-                    break;
-                case ContentSharingError.NOT_ENOUGH_STORAGE_SPACE:
-                    handleImageSharingInvitationRejected(invite, contact,
-                            ImageSharing.ReasonCode.REJECTED_LOW_SPACE, timestamp);
-                    break;
-                default:
-                    if (sLogger.isActivated()) {
-                        sLogger.error("Unexpected error while receiving image share invitation"
-                                .concat(Integer.toString(errorCode)));
+    public void onImageSharingInvitationReceived(final SipRequest invite, final long timestamp) {
+        final RichcallService richCallService = this;
+        scheduleImageShareOperation(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    boolean logActivated = sLogger.isActivated();
+                    if (logActivated) {
+                        sLogger.info("Receive an image sharing session invitation");
                     }
+
+                    /* Check validity of contact */
+                    PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(SipUtils
+                            .getAssertedIdentity(invite));
+                    if (number == null) {
+                        if (logActivated) {
+                            sLogger.debug("Rich call not established: cannot parse contact");
+                        }
+                        sendErrorResponse(invite, Response.SESSION_NOT_ACCEPTABLE);
+                        return;
+
+                    }
+                    ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
+                    mContactManager.setContactDisplayName(contact,
+                            SipUtils.getDisplayNameFromUri(invite.getFrom()));
+
+                    // Test if call is established
+                    if (!isCallConnectedWith(contact)) {
+                        if (logActivated) {
+                            sLogger.debug("Rich call not established: reject the invitation");
+                        }
+                        sendErrorResponse(invite, Response.SESSION_NOT_ACCEPTABLE);
+                        return;
+                    }
+
+                    // Test if the contact is blocked
+                    if (mContactManager.isBlockedForContact(contact)) {
+                        if (logActivated) {
+                            sLogger.debug("Contact " + contact
+                                    + " is blocked: automatically reject the sharing invitation");
+                        }
+                        MmContent content = ContentManager.createMmContentFromSdp(invite,
+                                mRcsSettings);
+                        addImageSharingInvitationRejected(contact, content,
+                                ImageSharing.ReasonCode.REJECTED_SPAM, timestamp);
+                        sendErrorResponse(invite, Response.DECLINE);
+                        return;
+                    }
+
+                    MmContent content = ContentManager.createMmContentFromSdp(invite, mRcsSettings);
+                    // Reject if there are already 2 bidirectional sessions with a given contact
+                    boolean rejectInvitation = false;
+                    if (isCurrentlyImageSharingBiDirectional()) {
+                        // Already a bidirectional session
+                        if (logActivated) {
+                            sLogger.debug("Max sessions reached");
+                        }
+                        rejectInvitation = true;
+                        addImageSharingInvitationRejected(contact, content,
+                                ImageSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS, timestamp);
+                    } else if (isCurrentlyImageSharingUniDirectional()) {
+                        ImageTransferSession currentSession = getUnidirectionalImageSharingSession();
+                        if (isSessionTerminating(currentSession)) {
+                            // Terminating session already used
+                            if (logActivated) {
+                                sLogger.debug("Max terminating sessions reached");
+                            }
+                            rejectInvitation = true;
+                        } else if (contact == null
+                                || !contact.equals(currentSession.getRemoteContact())) {
+                            // Not the same contact
+                            if (logActivated) {
+                                sLogger.debug("Only bidirectional session with same contact authorized");
+                            }
+                            rejectInvitation = true;
+                            addImageSharingInvitationRejected(contact, content,
+                                    ImageSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS,
+                                    timestamp);
+                        }
+                    }
+                    if (rejectInvitation) {
+                        if (logActivated) {
+                            sLogger.debug("Reject the invitation");
+                        }
+                        sendErrorResponse(invite, Response.BUSY_HERE);
+                        return;
+                    }
+
+                    // Auto reject if file too big or if storage capacity is too small
+                    ContentSharingError error = ImageTransferSession.isImageCapacityAcceptable(
+                            content.getSize(), mRcsSettings);
+                    if (error != null) {
+                        sendErrorResponse(invite, Response.DECLINE);
+                        int errorCode = error.getErrorCode();
+                        switch (errorCode) {
+                            case ContentSharingError.MEDIA_SIZE_TOO_BIG:
+                                addImageSharingInvitationRejected(contact, content,
+                                        ImageSharing.ReasonCode.REJECTED_MAX_SIZE, timestamp);
+                                break;
+                            case ContentSharingError.NOT_ENOUGH_STORAGE_SPACE:
+                                addImageSharingInvitationRejected(contact, content,
+                                        ImageSharing.ReasonCode.REJECTED_LOW_SPACE, timestamp);
+                                break;
+                            default:
+                                if (sLogger.isActivated()) {
+                                    sLogger.error("Unexpected error while receiving image share invitation"
+                                            .concat(Integer.toString(errorCode)));
+                                }
+                        }
+                        return;
+                    }
+
+                    ImageTransferSession session = new TerminatingImageTransferSession(
+                            richCallService, invite, contact, mRcsSettings, timestamp,
+                            mContactManager);
+
+                    mImageSharingService.receiveImageSharingInvitation(session);
+
+                    session.startSession();
+
+                } catch (SipNetworkException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Failed to receive image share invitation! ("
+                                + e.getMessage() + ")");
+                    }
+                    tryToSendErrorResponse(invite, Response.BUSY_HERE);
+                } catch (SipPayloadException e) {
+                    sLogger.error("Failed to receive image share invitation!", e);
+                    tryToSendErrorResponse(invite, Response.DECLINE);
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error("Failed to receive image share invitation!", e);
+                    tryToSendErrorResponse(invite, Response.DECLINE);
+                }
             }
-            return;
-        }
-
-        // Create a new session
-        ImageTransferSession session = new TerminatingImageTransferSession(this, invite, contact,
-                mRcsSettings, timestamp, mContactManager);
-
-        mCore.getListener().handleContentSharingTransferInvitation(session);
-
-        session.startSession();
+        });
     }
 
     /**
@@ -580,7 +693,7 @@ public class RichcallService extends ImsService {
      * @return CSh session
      * @throws CoreException
      */
-    public VideoStreamingSession initiateLiveVideoSharingSession(ContactId contact,
+    public VideoStreamingSession createLiveVideoSharingSession(ContactId contact,
             IVideoPlayer player, long timestamp) throws CoreException {
         if (sLogger.isActivated()) {
             sLogger.info("Initiate a live video sharing session");
@@ -646,98 +759,130 @@ public class RichcallService extends ImsService {
      * 
      * @param invite Initial invite
      * @param timestamp Local timestamp when got SipRequest
-     * @throws SipPayloadException
-     * @throws SipNetworkException
      */
-    public void receiveVideoSharingInvitation(SipRequest invite, long timestamp)
-            throws SipPayloadException, SipNetworkException {
-        boolean logActivated = sLogger.isActivated();
-        if (logActivated) {
-            sLogger.info("Receive a video sharing invitation");
-        }
+    public void onVideoSharingInvitationReceived(final SipRequest invite, final long timestamp) {
+        final RichcallService richCallService = this;
+        scheduleVideoShareOperation(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    boolean logActivated = sLogger.isActivated();
+                    if (logActivated) {
+                        sLogger.info("Receive a video sharing invitation");
+                    }
+                    /* Check validity of contact */
+                    PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(SipUtils
+                            .getAssertedIdentity(invite));
+                    if (number == null) {
+                        if (logActivated) {
+                            sLogger.debug("Rich call not established: cannot parse contact");
+                        }
+                        sendErrorResponse(invite, Response.SESSION_NOT_ACCEPTABLE);
+                        return;
 
-        /* Check validity of contact */
-        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(SipUtils
-                .getAssertedIdentity(invite));
-        if (number == null) {
-            if (logActivated) {
-                sLogger.debug("Rich call not established: cannot parse contact");
-            }
-            sendErrorResponse(invite, Response.SESSION_NOT_ACCEPTABLE);
-            return;
+                    }
+                    ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
+                    mContactManager.setContactDisplayName(contact,
+                            SipUtils.getDisplayNameFromUri(invite.getFrom()));
 
-        }
-        ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
-        mContactManager.setContactDisplayName(contact,
-                SipUtils.getDisplayNameFromUri(invite.getFrom()));
+                    // Test if call is established
+                    if (!isCallConnectedWith(contact)) {
+                        if (logActivated) {
+                            sLogger.debug("Rich call not established: reject the invitation");
+                        }
+                        sendErrorResponse(invite, Response.SESSION_NOT_ACCEPTABLE);
+                        return;
+                    }
 
-        // Test if call is established
-        if (!isCallConnectedWith(contact)) {
-            if (logActivated) {
-                sLogger.debug("Rich call not established: reject the invitation");
-            }
-            sendErrorResponse(invite, Response.SESSION_NOT_ACCEPTABLE);
-            return;
-        }
+                    String remoteSdp = invite.getSdpContent();
+                    SipUtils.assertContentIsNotNull(remoteSdp, invite);
+                    VideoContent content = ContentManager.createLiveVideoContentFromSdp(remoteSdp
+                            .getBytes(UTF8));
 
-        // Test if the contact is blocked
-        if (mContactManager.isBlockedForContact(contact)) {
-            if (logActivated) {
-                sLogger.debug("Contact " + contact
-                        + " is blocked: automatically reject the sharing invitation");
-            }
-            handleVideoSharingInvitationRejected(invite, contact,
-                    VideoSharing.ReasonCode.REJECTED_SPAM, timestamp);
-            // Send a 603 Decline response
-            sendErrorResponse(invite, Response.DECLINE);
-            return;
-        }
+                    // Test if the contact is blocked
+                    if (mContactManager.isBlockedForContact(contact)) {
+                        if (logActivated) {
+                            sLogger.debug("Contact " + contact
+                                    + " is blocked: automatically reject the sharing invitation");
+                        }
+                        addVideoSharingInvitationRejected(contact, content,
+                                VideoSharing.ReasonCode.REJECTED_SPAM, timestamp);
+                        sendErrorResponse(invite, Response.DECLINE);
+                        return;
+                    }
 
-        // Reject if there are already 2 bidirectional sessions with a given contact
-        boolean rejectInvitation = false;
-        if (isCurrentlyVideoSharingBiDirectional()) {
-            // Already a bidirectional session
-            if (logActivated) {
-                sLogger.debug("Max sessions reached");
-            }
-            rejectInvitation = true;
-            handleVideoSharingInvitationRejected(invite, contact,
-                    VideoSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS, timestamp);
-        } else if (isCurrentlyVideoSharingUniDirectional()) {
-            VideoStreamingSession currentSession = getUnidirectionalVideoSharingSession();
-            if (isSessionTerminating(currentSession)) {
-                // Terminating session already used
-                if (logActivated) {
-                    sLogger.debug("Max terminating sessions reached");
+                    // Reject if there are already 2 bidirectional sessions with a given contact
+                    boolean rejectInvitation = false;
+                    if (isCurrentlyVideoSharingBiDirectional()) {
+                        // Already a bidirectional session
+                        if (logActivated) {
+                            sLogger.debug("Max sessions reached");
+                        }
+                        rejectInvitation = true;
+                        addVideoSharingInvitationRejected(contact, content,
+                                VideoSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS, timestamp);
+                    } else if (isCurrentlyVideoSharingUniDirectional()) {
+                        VideoStreamingSession currentSession = getUnidirectionalVideoSharingSession();
+                        if (isSessionTerminating(currentSession)) {
+                            // Terminating session already used
+                            if (logActivated) {
+                                sLogger.debug("Max terminating sessions reached");
+                            }
+                            rejectInvitation = true;
+                            addVideoSharingInvitationRejected(contact, content,
+                                    VideoSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS,
+                                    timestamp);
+                        } else if (contact == null
+                                || !contact.equals(currentSession.getRemoteContact())) {
+                            // Not the same contact
+                            if (logActivated) {
+                                sLogger.debug("Only bidirectional session with same contact authorized");
+                            }
+                            rejectInvitation = true;
+                            addVideoSharingInvitationRejected(contact, content,
+                                    VideoSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS,
+                                    timestamp);
+                        }
+                    }
+                    if (rejectInvitation) {
+                        if (logActivated) {
+                            sLogger.debug("Reject the invitation");
+                        }
+                        sendErrorResponse(invite, Response.BUSY_HERE);
+                        return;
+                    }
+
+                    // Create a new session
+                    VideoStreamingSession session = new TerminatingVideoStreamingSession(
+                            richCallService, invite, contact, mRcsSettings, timestamp,
+                            mContactManager);
+
+                    mVideoSharingService.receiveVideoSharingInvitation(session);
+
+                    session.startSession();
+
+                } catch (SipNetworkException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Failed to receive video share invitation! ("
+                                + e.getMessage() + ")");
+                    }
+                    tryToSendErrorResponse(invite, Response.BUSY_HERE);
+                } catch (SipPayloadException e) {
+                    sLogger.error("Failed to receive video share invitation!", e);
+                    tryToSendErrorResponse(invite, Response.DECLINE);
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error("Failed to receive video share invitation!", e);
+                    tryToSendErrorResponse(invite, Response.DECLINE);
                 }
-                rejectInvitation = true;
-                handleVideoSharingInvitationRejected(invite, contact,
-                        VideoSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS, timestamp);
-            } else if (contact == null || !contact.equals(currentSession.getRemoteContact())) {
-                // Not the same contact
-                if (logActivated) {
-                    sLogger.debug("Only bidirectional session with same contact authorized");
-                }
-                rejectInvitation = true;
-                handleVideoSharingInvitationRejected(invite, contact,
-                        VideoSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS, timestamp);
             }
-        }
-        if (rejectInvitation) {
-            if (logActivated) {
-                sLogger.debug("Reject the invitation");
-            }
-            sendErrorResponse(invite, Response.BUSY_HERE);
-            return;
-        }
-
-        // Create a new session
-        VideoStreamingSession session = new TerminatingVideoStreamingSession(this, invite, contact,
-                mRcsSettings, timestamp, mContactManager);
-
-        mCore.getListener().handleContentSharingStreamingInvitation(session);
-
-        session.startSession();
+        });
     }
 
     /**
@@ -750,7 +895,7 @@ public class RichcallService extends ImsService {
      * @return GeolocTransferSession
      * @throws CoreException
      */
-    public GeolocTransferSession initiateGeolocSharingSession(ContactId contact, MmContent content,
+    public GeolocTransferSession createGeolocSharingSession(ContactId contact, MmContent content,
             Geoloc geoloc, long timestamp) throws CoreException {
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("Initiate geoloc sharing session with contact ")
@@ -782,95 +927,125 @@ public class RichcallService extends ImsService {
      * @throws SipPayloadException
      * @throws SipNetworkException
      */
-    public void receiveGeolocSharingInvitation(SipRequest invite, long timestamp)
-            throws SipPayloadException, SipNetworkException {
-        boolean logActivated = sLogger.isActivated();
-        if (logActivated) {
-            sLogger.info("Receive a geoloc sharing session invitation");
-        }
+    public void onGeolocSharingInvitationReceived(final SipRequest invite, final long timestamp) {
+        final RichcallService richCallService = this;
+        scheduleGeolocShareOperation(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    boolean logActivated = sLogger.isActivated();
+                    if (logActivated) {
+                        sLogger.info("Receive a geoloc sharing session invitation");
+                    }
 
-        /* Check validity of contact */
-        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(SipUtils
-                .getAssertedIdentity(invite));
-        if (number == null) {
-            if (logActivated) {
-                sLogger.debug("Rich call not established: cannot parse contact");
-            }
-            sendErrorResponse(invite, Response.SESSION_NOT_ACCEPTABLE);
-            return;
+                    /* Check validity of contact */
+                    PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(SipUtils
+                            .getAssertedIdentity(invite));
+                    if (number == null) {
+                        if (logActivated) {
+                            sLogger.debug("Rich call not established: cannot parse contact");
+                        }
+                        sendErrorResponse(invite, Response.SESSION_NOT_ACCEPTABLE);
+                        return;
 
-        }
-        ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
-        mContactManager.setContactDisplayName(contact,
-                SipUtils.getDisplayNameFromUri(invite.getFrom()));
+                    }
+                    ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
+                    mContactManager.setContactDisplayName(contact,
+                            SipUtils.getDisplayNameFromUri(invite.getFrom()));
 
-        // Test if call is established
-        if (!isCallConnectedWith(contact)) {
-            if (logActivated) {
-                sLogger.debug("Rich call not established: reject the invitation");
-            }
-            sendErrorResponse(invite, Response.SESSION_NOT_ACCEPTABLE);
-            return;
-        }
+                    // Test if call is established
+                    if (!isCallConnectedWith(contact)) {
+                        if (logActivated) {
+                            sLogger.debug("Rich call not established: reject the invitation");
+                        }
+                        sendErrorResponse(invite, Response.SESSION_NOT_ACCEPTABLE);
+                        return;
+                    }
 
-        // Test if the contact is blocked
-        if (mContactManager.isBlockedForContact(contact)) {
-            if (logActivated) {
-                sLogger.debug("Contact " + contact
-                        + " is blocked: automatically reject the sharing invitation");
-            }
-            handleGeolocSharingInvitationRejected(contact, GeolocSharing.ReasonCode.REJECTED_SPAM,
-                    timestamp);
-            // Send a 603 Decline response
-            sendErrorResponse(invite, Response.DECLINE);
-            return;
-        }
+                    // Test if the contact is blocked
+                    if (mContactManager.isBlockedForContact(contact)) {
+                        if (logActivated) {
+                            sLogger.debug("Contact " + contact
+                                    + " is blocked: automatically reject the sharing invitation");
+                        }
+                        addGeolocSharingInvitationRejected(contact,
+                                GeolocSharing.ReasonCode.REJECTED_SPAM, timestamp);
+                        sendErrorResponse(invite, Response.DECLINE);
+                        return;
+                    }
 
-        // Reject if there are already 2 bidirectional sessions with a given contact
-        boolean rejectInvitation = false;
-        if (isCurrentlyGeolocSharingBiDirectional()) {
-            // Already a bidirectional session
-            if (logActivated) {
-                sLogger.debug("Max sessions reached");
-            }
-            handleGeolocSharingInvitationRejected(contact,
-                    GeolocSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS, timestamp);
-            rejectInvitation = true;
-        } else if (isCurrentlyGeolocSharingUniDirectional()) {
-            GeolocTransferSession currentSession = getUnidirectionalGeolocSharingSession();
-            if (isSessionTerminating(currentSession)) {
-                // Terminating session already used
-                if (logActivated) {
-                    sLogger.debug("Max terminating sessions reached");
+                    // Reject if there are already 2 bidirectional sessions with a given contact
+                    boolean rejectInvitation = false;
+                    if (isCurrentlyGeolocSharingBiDirectional()) {
+                        // Already a bidirectional session
+                        if (logActivated) {
+                            sLogger.debug("Max sessions reached");
+                        }
+                        addGeolocSharingInvitationRejected(contact,
+                                GeolocSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS, timestamp);
+                        rejectInvitation = true;
+                    } else if (isCurrentlyGeolocSharingUniDirectional()) {
+                        GeolocTransferSession currentSession = getUnidirectionalGeolocSharingSession();
+                        if (isSessionTerminating(currentSession)) {
+                            // Terminating session already used
+                            if (logActivated) {
+                                sLogger.debug("Max terminating sessions reached");
+                            }
+                            addGeolocSharingInvitationRejected(contact,
+                                    GeolocSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS,
+                                    timestamp);
+                            rejectInvitation = true;
+                        } else if (contact == null
+                                || !contact.equals(currentSession.getRemoteContact())) {
+                            // Not the same contact
+                            if (logActivated) {
+                                sLogger.debug("Only bidirectional session with same contact authorized");
+                            }
+                            addGeolocSharingInvitationRejected(contact,
+                                    GeolocSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS,
+                                    timestamp);
+                            rejectInvitation = true;
+                        }
+                    }
+                    if (rejectInvitation) {
+                        if (logActivated) {
+                            sLogger.debug("Reject the invitation");
+                        }
+                        sendErrorResponse(invite, Response.BUSY_HERE);
+                        return;
+                    }
+
+                    // Create a new session
+                    GeolocTransferSession session = new TerminatingGeolocTransferSession(
+                            richCallService, invite, contact, mRcsSettings, timestamp,
+                            mContactManager);
+
+                    mGeolocSharingService.receiveGeolocSharingInvitation(session);
+
+                    session.startSession();
+
+                } catch (SipNetworkException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Failed to receive geoloc share invitation! ("
+                                + e.getMessage() + ")");
+                    }
+                    tryToSendErrorResponse(invite, Response.BUSY_HERE);
+                } catch (SipPayloadException e) {
+                    sLogger.error("Failed to receive geoloc share invitation!", e);
+                    tryToSendErrorResponse(invite, Response.DECLINE);
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error("Failed to receive geoloc share invitation!", e);
+                    tryToSendErrorResponse(invite, Response.DECLINE);
                 }
-                handleGeolocSharingInvitationRejected(contact,
-                        GeolocSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS, timestamp);
-                rejectInvitation = true;
-            } else if (contact == null || !contact.equals(currentSession.getRemoteContact())) {
-                // Not the same contact
-                if (logActivated) {
-                    sLogger.debug("Only bidirectional session with same contact authorized");
-                }
-                handleGeolocSharingInvitationRejected(contact,
-                        GeolocSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS, timestamp);
-                rejectInvitation = true;
             }
-        }
-        if (rejectInvitation) {
-            if (logActivated) {
-                sLogger.debug("Reject the invitation");
-            }
-            sendErrorResponse(invite, Response.BUSY_HERE);
-            return;
-        }
-
-        // Create a new session
-        GeolocTransferSession session = new TerminatingGeolocTransferSession(this, invite, contact,
-                mRcsSettings, timestamp, mContactManager);
-
-        mCore.getListener().handleContentSharingTransferInvitation(session);
-
-        session.startSession();
+        });
     }
 
     /**
@@ -905,6 +1080,140 @@ public class RichcallService extends ImsService {
      */
     private boolean isSessionTerminating(ContentSharingSession session) {
         return (session instanceof TerminatingImageTransferSession || session instanceof TerminatingVideoStreamingSession);
+    }
+
+    /**
+     * Handles image sharing rejection
+     *
+     * @param remoteContact Remote contact
+     * @param content Multimedia content
+     * @param reasonCode Rejected reason code
+     * @param timestamp Local timestamp when got image sharing invitation
+     */
+    public void addImageSharingInvitationRejected(ContactId remoteContact, MmContent content,
+            ImageSharing.ReasonCode reasonCode, long timestamp) {
+        mImageSharingService.addImageSharingInvitationRejected(remoteContact, content, reasonCode,
+                timestamp);
+    }
+
+    /**
+     * Handle the case of rejected video sharing
+     *
+     * @param remoteContact Remote contact
+     * @param content Video content
+     * @param reasonCode Rejected reason code
+     * @param timestamp Local timestamp when got video sharing invitation
+     */
+    public void addVideoSharingInvitationRejected(ContactId remoteContact, VideoContent content,
+            VideoSharing.ReasonCode reasonCode, long timestamp) {
+        mVideoSharingService.addVideoSharingInvitationRejected(remoteContact, content, reasonCode,
+                timestamp);
+    }
+
+    /**
+     * Handle the case of rejected geoloc sharing
+     *
+     * @param remoteContact Remote contact
+     * @param reasonCode Rejected reason code
+     * @param timestamp Local timestamp when got geoloc sharing invitation
+     */
+    public void addGeolocSharingInvitationRejected(ContactId remoteContact,
+            GeolocSharing.ReasonCode reasonCode, long timestamp) {
+        mGeolocSharingService.addGeolocSharingInvitationRejected(remoteContact, reasonCode,
+                timestamp);
+    }
+
+    /**
+     * Try to delete all image sharing from history and abort/reject any associated ongoing session
+     * if such exists.
+     */
+    public void tryToDeleteImageSharings() {
+        mImageSharingDeleteOperationHandler.post(new ImageSharingDeleteTask(mImageSharingService,
+                this, mLocalContentResolver));
+    }
+
+    /**
+     * Try to delete image sharing with a given contact from history and abort/reject any associated
+     * ongoing session if such exists.
+     *
+     * @param contact
+     */
+    public void tryToDeleteImageSharings(ContactId contact) {
+        mImageSharingDeleteOperationHandler.post(new ImageSharingDeleteTask(mImageSharingService,
+                this, mLocalContentResolver, contact));
+    }
+
+    /**
+     * Try to delete a image sharing by its sharing id from history and abort/reject any associated
+     * ongoing session if such exists.
+     *
+     * @param sharingId
+     */
+    public void tryToDeleteImageSharing(String sharingId) {
+        mImageSharingDeleteOperationHandler.post(new ImageSharingDeleteTask(mImageSharingService,
+                this, mLocalContentResolver, sharingId));
+    }
+
+    /**
+     * Try to delete all video sharing from history and abort/reject any associated ongoing session
+     * if such exists.
+     */
+    public void tryToDeleteVideoSharings() {
+        mVideoSharingDeleteOperationHandler.post(new VideoSharingDeleteTask(mVideoSharingService,
+                this, mLocalContentResolver));
+    }
+
+    /**
+     * Try to delete video sharing with a given contact from history and abort/reject any associated
+     * ongoing session if such exists.
+     *
+     * @param contact
+     */
+    public void tryToDeleteVideoSharings(ContactId contact) {
+        mVideoSharingDeleteOperationHandler.post(new VideoSharingDeleteTask(mVideoSharingService,
+                this, mLocalContentResolver, contact));
+    }
+
+    /**
+     * Try to delete a video sharing by its sharing id from history and abort/reject any associated
+     * ongoing session if such exists.
+     *
+     * @param sharingId
+     */
+    public void tryToDeleteVideoSharing(String sharingId) {
+        mVideoSharingDeleteOperationHandler.post(new VideoSharingDeleteTask(mVideoSharingService,
+                this, mLocalContentResolver, sharingId));
+    }
+
+    /**
+     * Try to delete all geoloc sharing from history and abort/reject any associated ongoing session
+     * if such exists.
+     */
+    public void tryToDeleteGeolocSharings() {
+        mGeolocSharingDeleteOperationHandler.post(new GeolocSharingDeleteTask(
+                mGeolocSharingService, this, mLocalContentResolver));
+    }
+
+    /**
+     * Try to delete geoloc sharing with a given contact from history and abort/reject any
+     * associated ongoing session if such exists.
+     *
+     * @param contact
+     */
+    public void tryToDeleteGeolocSharings(ContactId contact) {
+        mGeolocSharingDeleteOperationHandler.post(new GeolocSharingDeleteTask(
+                mGeolocSharingService, this, mLocalContentResolver, contact));
+    }
+
+    /**
+     * Try to delete a geoloc sharing by its sharing id from history and abort/reject any associated
+     * ongoing session if such exists.
+     *
+     * @param sharingId
+     */
+    public void tryToDeleteGeolocSharing(String sharingId) {
+        mGeolocSharingDeleteOperationHandler.post(new GeolocSharingDeleteTask(
+                mGeolocSharingService, this, mLocalContentResolver, sharingId));
     }
 
 }

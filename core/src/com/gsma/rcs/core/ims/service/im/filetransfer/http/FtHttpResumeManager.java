@@ -128,39 +128,27 @@ public class FtHttpResumeManager implements Runnable {
                 FtHttpResumeDownload downloadInfo = (FtHttpResumeDownload) mFtHttpResume;
                 MmContent downloadContent = ContentManager.createMmContent(mFtHttpResume.getFile(),
                         downloadInfo.getSize(), downloadInfo.getFileName());
-
-                // Creates the Resume Download session object
                 final DownloadFromResumeFileSharingSession resumeDownload = new DownloadFromResumeFileSharingSession(
                         mImsService, downloadContent, downloadInfo, mRcsSettings, mMessagingLog,
                         mContactManager);
                 resumeDownload.addListener(getFileSharingSessionListener());
+                mImsService.resumeIncomingFileTransfer(resumeDownload,
+                        resumeDownload.isGroupFileTransfer());
                 resumeDownload.startSession();
-                mImsService
-                        .getImsModule()
-                        .getCore()
-                        .getListener()
-                        .handleIncomingFileTransferResuming(resumeDownload,
-                                resumeDownload.isGroupFileTransfer(),
-                                resumeDownload.getChatSessionID(),
-                                resumeDownload.getContributionID());
                 break;
 
             case OUTGOING:
                 // TODO : only managed for 1-1 FToHTTP
                 FtHttpResumeUpload uploadInfo = (FtHttpResumeUpload) mFtHttpResume;
                 if (!mFtHttpResume.isGroupTransfer()) {
-                    // Get upload content
                     MmContent uploadContent = ContentManager.createMmContent(uploadInfo.getFile(),
                             uploadInfo.getSize(), uploadInfo.getFileName());
-
-                    // Create Resume Upload session
                     final ResumeUploadFileSharingSession resumeUpload = new ResumeUploadFileSharingSession(
                             mImsService, uploadContent, uploadInfo, mRcsSettings, mMessagingLog,
                             mContactManager);
                     resumeUpload.addListener(getFileSharingSessionListener());
+                    mImsService.resumeOutgoingFileTransfer(resumeUpload, false);
                     resumeUpload.startSession();
-                    mImsService.getImsModule().getCore().getListener()
-                            .handleOutgoingFileTransferResuming(resumeUpload, false);
                 }
                 break;
 
@@ -180,33 +168,33 @@ public class FtHttpResumeManager implements Runnable {
             AtomicBoolean fired = new AtomicBoolean(false);
 
             @Override
-            public void handleSessionStarted(ContactId contact) {
+            public void onSessionStarted(ContactId contact) {
             }
 
             @Override
-            public void handleSessionAborted(ContactId contact, TerminationReason reason) {
+            public void onSessionAborted(ContactId contact, TerminationReason reason) {
                 if (fired.compareAndSet(false, true)) {
                     processNext();
                 }
             }
 
             @Override
-            public void handleTransferProgress(ContactId contact, long currentSize, long totalSize) {
+            public void onTransferProgress(ContactId contact, long currentSize, long totalSize) {
             }
 
             @Override
-            public void handleTransferNotAllowedToSend(ContactId contact) {
+            public void onTransferNotAllowedToSend(ContactId contact) {
             }
 
             @Override
-            public void handleTransferError(FileSharingError error, ContactId contact) {
+            public void onTransferError(FileSharingError error, ContactId contact) {
                 if (fired.compareAndSet(false, true)) {
                     processNext();
                 }
             }
 
             @Override
-            public void handleFileTransfered(MmContent content, ContactId contact,
+            public void onFileTransfered(MmContent content, ContactId contact,
                     long fileExpiration, long fileIconExpiration, FileTransferProtocol ftProtocol) {
                 if (fired.compareAndSet(false, true)) {
                     processNext();
@@ -214,32 +202,32 @@ public class FtHttpResumeManager implements Runnable {
             }
 
             @Override
-            public void handleFileTransferResumed(ContactId contact) {
+            public void onFileTransferResumed(ContactId contact) {
             }
 
             @Override
-            public void handleSessionAccepted(ContactId contact) {
+            public void onSessionAccepting(ContactId contact) {
             }
 
             @Override
-            public void handleFileTransferPausedByUser(ContactId contact) {
+            public void onFileTransferPausedByUser(ContactId contact) {
             }
 
             @Override
-            public void handleFileTransferPausedBySystem(ContactId contact) {
+            public void onFileTransferPausedBySystem(ContactId contact) {
             }
 
             @Override
-            public void handleSessionRejected(ContactId contact, TerminationReason reason) {
+            public void onSessionRejected(ContactId contact, TerminationReason reason) {
             }
 
             @Override
-            public void handleSessionInvited(ContactId contact, MmContent file, MmContent fileIcon,
+            public void onSessionInvited(ContactId contact, MmContent file, MmContent fileIcon,
                     long timestamp, long timestampSent, long fileExpiration, long fileIconExpiration) {
             }
 
             @Override
-            public void handleSessionAutoAccepted(ContactId contact, MmContent file,
+            public void onSessionAutoAccepted(ContactId contact, MmContent file,
                     MmContent fileIcon, long timestamp, long timestampSent, long fileExpiration,
                     long fileIconExpiration) {
             }

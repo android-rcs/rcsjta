@@ -173,11 +173,15 @@ public class RichCallHistory {
      * 
      * @param localContentResolver Local content resolver
      */
-    public static void createInstance(LocalContentResolver localContentResolver) {
+    public static RichCallHistory createInstance(LocalContentResolver localContentResolver) {
+        if (sInstance != null) {
+            return sInstance;
+        }
         synchronized (RichCallHistory.class) {
             if (sInstance == null) {
                 sInstance = new RichCallHistory(localContentResolver);
             }
+            return sInstance;
         }
     }
 

@@ -22,7 +22,6 @@ w * Software Name : RCS IMS Stack
 
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
-import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
@@ -60,11 +59,10 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
     public ResumeUploadFileSharingSession(InstantMessagingService imService, MmContent content,
             FtHttpResumeUpload resumeUpload, RcsSettings rcsSettings, MessagingLog messagingLog,
             ContactManager contactManager) {
-        super(resumeUpload.getFileTransferId(), imService, content, resumeUpload.getContact(),
+        super(imService, resumeUpload.getFileTransferId(), content, resumeUpload.getContact(),
                 resumeUpload.getFileicon() != null ? FileTransferUtils.createMmContent(resumeUpload
-                        .getFileicon()) : null, resumeUpload.getTId(), Core.getInstance(),
-                messagingLog, rcsSettings, resumeUpload.getTimestamp(), resumeUpload
-                        .getTimestampSent(), contactManager);
+                        .getFileicon()) : null, resumeUpload.getTId(), messagingLog, rcsSettings,
+                resumeUpload.getTimestamp(), resumeUpload.getTimestampSent(), contactManager);
     }
 
     /**

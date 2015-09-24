@@ -43,14 +43,14 @@ public interface SipSessionListener extends ImsSessionListener {
      * @param contact Remote contact
      * @param error Error
      */
-    public void handleReceiveData(ContactId contact, byte[] data);
+    public void onDataReceived(ContactId contact, byte[] data);
 
     /**
      * Destination user agent received INVITE, and is alerting user of call
      * 
      * @param contact Remote contact
      */
-    public void handle180Ringing(ContactId contact);
+    public void onSessionRinging(ContactId contact);
 
     /**
      * A session invitation has been received
@@ -58,5 +58,5 @@ public interface SipSessionListener extends ImsSessionListener {
      * @param contact Remote contact
      * @param sessionInvite
      */
-    public void handleSessionInvited(ContactId contact, Intent sessionInvite);
+    public void onSessionInvited(ContactId contact, Intent sessionInvite);
 }

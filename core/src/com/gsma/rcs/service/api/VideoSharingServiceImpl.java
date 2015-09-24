@@ -26,10 +26,8 @@ import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.service.SessionIdGenerator;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.richcall.video.VideoStreamingSession;
-import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.sharing.RichCallHistory;
-import com.gsma.rcs.provider.sharing.VideoSharingDeleteTask;
 import com.gsma.rcs.provider.sharing.VideoSharingPersistedStorageAccessor;
 import com.gsma.rcs.service.broadcaster.RcsServiceRegistrationEventBroadcaster;
 import com.gsma.rcs.service.broadcaster.VideoSharingEventBroadcaster;
@@ -56,7 +54,6 @@ import android.text.TextUtils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 
 /**
  * Rich call API service
@@ -75,18 +72,12 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 
     private final RcsSettings mRcsSettings;
 
-    private final LocalContentResolver mLocalContentResolver;
-
-    private final ExecutorService mImOperationExecutor;
-
     private final Map<String, IVideoSharing> mVideoSharingCache = new HashMap<String, IVideoSharing>();
 
     /**
      * Lock used for synchronization
      */
     private final Object mLock = new Object();
-
-    private final Object mImsLock;
 
     private static final Logger sLogger = Logger.getLogger(VideoSharingServiceImpl.class
             .getSimpleName());
@@ -104,17 +95,14 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @param imsLock ims lock object
      */
     public VideoSharingServiceImpl(RichcallService richcallService, RichCallHistory richCallLog,
-            RcsSettings rcsSettings, LocalContentResolver localContentResolver,
-            ExecutorService imOperationExecutor, Object imsLock) {
+            RcsSettings rcsSettings) {
         if (sLogger.isActivated()) {
             sLogger.info("Video sharing API is loaded");
         }
         mRichcallService = richcallService;
+        mRichcallService.register(this);
         mRichCallLog = richCallLog;
         mRcsSettings = rcsSettings;
-        mLocalContentResolver = localContentResolver;
-        mImOperationExecutor = imOperationExecutor;
-        mImsLock = imsLock;
     }
 
     /**
@@ -162,6 +150,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * 
      * @return Returns true if registered else returns false
      */
+    @Override
     public boolean isServiceRegistered() {
         return ServerApiUtils.isImsConnected();
     }
@@ -171,6 +160,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * 
      * @return the reason code for IMS service registration
      */
+    @Override
     public int getServiceRegistrationReasonCode() {
         return ServerApiUtils.getServiceRegistrationReasonCode().toInt();
     }
@@ -180,6 +170,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * 
      * @param listener Service registration listener
      */
+    @Override
     public void addEventListener(IRcsServiceRegistrationListener listener) {
         if (sLogger.isActivated()) {
             sLogger.info("Add a service listener");
@@ -194,6 +185,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * 
      * @param listener Service registration listener
      */
+    @Override
     public void removeEventListener(IRcsServiceRegistrationListener listener) {
         if (sLogger.isActivated()) {
             sLogger.info("Remove a service listener");
@@ -207,7 +199,6 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * Notifies registration event
      */
     public void notifyRegistration() {
-        // Notify listeners
         synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.broadcastServiceRegistered();
         }
@@ -219,7 +210,6 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @param reasonCode for unregistration
      */
     public void notifyUnRegistration(RcsServiceRegistration.ReasonCode reasonCode) {
-        // Notify listeners
         synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.broadcastServiceUnRegistered(reasonCode);
         }
@@ -253,10 +243,10 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
         }
 
         String sharingId = session.getSessionID();
-        VideoSharingPersistedStorageAccessor storageAccessor = new VideoSharingPersistedStorageAccessor(
+        VideoSharingPersistedStorageAccessor persistedStorage = new VideoSharingPersistedStorageAccessor(
                 sharingId, mRichCallLog);
         VideoSharingImpl videoSharing = new VideoSharingImpl(sharingId, mRichcallService,
-                mBroadcaster, storageAccessor, this);
+                mBroadcaster, persistedStorage, this);
         addVideoSharing(videoSharing, sharingId);
         session.addListener(videoSharing);
     }
@@ -267,6 +257,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @return Configuration
      * @throws RemoteException
      */
+    @Override
     public IVideoSharingServiceConfiguration getConfiguration() throws RemoteException {
         try {
             return new VideoSharingServiceConfigurationImpl(mRcsSettings);
@@ -295,6 +286,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @return Video sharing
      * @throws RemoteException
      */
+    @Override
     public IVideoSharing shareVideo(ContactId contact, IVideoPlayer player) throws RemoteException {
         if (contact == null) {
             throw new ServerApiIllegalArgumentException("contact must not be null!");
@@ -308,25 +300,40 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
         ServerApiUtils.testIms();
         try {
             long timestamp = System.currentTimeMillis();
-            final VideoStreamingSession session = mRichcallService.initiateLiveVideoSharingSession(
+            final VideoStreamingSession session = mRichcallService.createLiveVideoSharingSession(
                     contact, player, timestamp);
-
-            String sharingId = session.getSessionID();
+            final String sharingId = session.getSessionID();
             VideoContent content = (VideoContent) session.getContent();
             mRichCallLog.addVideoSharing(sharingId, contact, Direction.OUTGOING, content,
                     VideoSharing.State.INITIATING, ReasonCode.UNSPECIFIED, timestamp);
-            mBroadcaster.broadcastStateChanged(contact, sharingId, VideoSharing.State.INITIATING,
-                    ReasonCode.UNSPECIFIED);
 
-            VideoSharingPersistedStorageAccessor storageAccessor = new VideoSharingPersistedStorageAccessor(
+            VideoSharingPersistedStorageAccessor persistedStorage = new VideoSharingPersistedStorageAccessor(
                     sharingId, contact, Direction.OUTGOING, mRichCallLog, content.getEncoding(),
                     content.getHeight(), content.getWidth(), timestamp);
-            VideoSharingImpl videoSharing = new VideoSharingImpl(sharingId, mRichcallService,
-                    mBroadcaster, storageAccessor, this);
+            final VideoSharingImpl videoSharing = new VideoSharingImpl(sharingId, mRichcallService,
+                    mBroadcaster, persistedStorage, this);
 
-            addVideoSharing(videoSharing, sharingId);
-            session.addListener(videoSharing);
-            session.startSession();
+            final VideoSharingServiceImpl videoSharingService = this;
+            mRichcallService.scheduleImageShareOperation(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        session.addListener(videoSharing);
+                        videoSharingService.addVideoSharing(videoSharing, sharingId);
+                        session.startSession();
+
+                    } catch (RuntimeException e) {
+                        /*
+                         * Normally we are not allowed to catch runtime exceptions as these are
+                         * genuine bugs which should be handled/fixed within the code. However the
+                         * cases when we are executing operations on a thread unhandling such
+                         * exceptions will eventually lead to exit the system and thus can bring the
+                         * whole system down, which is not intended.
+                         */
+                        sLogger.error("Failed initiate video sharing right now!", e);
+                    }
+                }
+            });
             return videoSharing;
 
         } catch (ServerApiBaseException e) {
@@ -360,10 +367,10 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
             if (videoSharing != null) {
                 return videoSharing;
             }
-            VideoSharingPersistedStorageAccessor storageAccessor = new VideoSharingPersistedStorageAccessor(
+            VideoSharingPersistedStorageAccessor persistedStorage = new VideoSharingPersistedStorageAccessor(
                     sharingId, mRichCallLog);
-            return new VideoSharingImpl(sharingId, mRichcallService, mBroadcaster, storageAccessor,
-                    this);
+            return new VideoSharingImpl(sharingId, mRichcallService, mBroadcaster,
+                    persistedStorage, this);
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -477,19 +484,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @throws RemoteException
      */
     public void deleteVideoSharings() throws RemoteException {
-        try {
-            mImOperationExecutor.execute(new VideoSharingDeleteTask(this, mRichcallService,
-                    mLocalContentResolver, mImsLock));
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
-
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
+        mRichcallService.tryToDeleteVideoSharings();
     }
 
     /**
@@ -503,19 +498,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
         if (contact == null) {
             throw new ServerApiIllegalArgumentException("contact must not be null!");
         }
-        try {
-            mImOperationExecutor.execute(new VideoSharingDeleteTask(this, mRichcallService,
-                    mLocalContentResolver, mImsLock, contact));
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
-
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
+        mRichcallService.tryToDeleteVideoSharings(contact);
     }
 
     /**
@@ -529,19 +512,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
         if (TextUtils.isEmpty(sharingId)) {
             throw new ServerApiIllegalArgumentException("sharingId must not be null or empty!");
         }
-        try {
-            mImOperationExecutor.execute(new VideoSharingDeleteTask(this, mRichcallService,
-                    mLocalContentResolver, mImsLock, sharingId));
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
-
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
+        mRichcallService.tryToDeleteVideoSharing(sharingId);
     }
 
     public void broadcastDeleted(ContactId contact, Set<String> sharingIds) {

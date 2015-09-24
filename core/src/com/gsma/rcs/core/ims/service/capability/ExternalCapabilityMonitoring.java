@@ -56,7 +56,7 @@ public class ExternalCapabilityMonitoring extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context ctx, final Intent intent) {
-        mCore.scheduleForBackgroundExecution(new Runnable() {
+        mCore.scheduleCoreOperation(new Runnable() {
             @Override
             public void run() {
                 try {

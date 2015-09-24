@@ -131,7 +131,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                     removeSession();
 
                     for (ImsSessionListener listener : listeners) {
-                        listener.handleSessionRejected(contact,
+                        listener.onSessionRejected(contact,
                                 TerminationReason.TERMINATION_BY_USER);
                     }
                     return;
@@ -147,7 +147,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                     removeSession();
 
                     for (ImsSessionListener listener : listeners) {
-                        listener.handleSessionRejected(contact,
+                        listener.onSessionRejected(contact,
                                 TerminationReason.TERMINATION_BY_TIMEOUT);
                     }
                     return;
@@ -167,7 +167,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                     removeSession();
 
                     for (ImsSessionListener listener : listeners) {
-                        listener.handleSessionRejected(contact,
+                        listener.onSessionRejected(contact,
                                 TerminationReason.TERMINATION_BY_REMOTE);
                     }
                     return;
@@ -176,7 +176,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                     setSessionAccepted();
 
                     for (ImsSessionListener listener : listeners) {
-                        listener.handleSessionAccepted(contact);
+                        listener.onSessionAccepting(contact);
                     }
                     break;
 
@@ -279,7 +279,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                 player.setRemoteInfo(selectedVideoCodec, remoteHost, remotePort, getOrientation());
 
                 for (ImsSessionListener listener : listeners) {
-                    listener.handleSessionStarted(contact);
+                    listener.onSessionStarted(contact);
                 }
             } else {
                 if (sLogger.isActivated()) {

@@ -115,8 +115,7 @@ public class HttpsProvisioningManager {
 
     private static final String PARAM_TOKEN = "token";
 
-    private static final String BACKGROUND_THREAD_NAME = HttpsProvisioningManager.class
-            .getSimpleName();
+    private static final String PROVISIONING_OPERATIONS_THREAD_NAME = "ProvisioningOps";
 
     /**
      * First launch flag
@@ -137,7 +136,7 @@ public class HttpsProvisioningManager {
     /**
      * Handler to process messages & runnable associated with background thread.
      */
-    private final Handler mBackgroundHandler;
+    private final Handler mProvisioningOperationHandler;
 
     private final HttpsProvisioningSMS mSmsManager;
 
@@ -204,18 +203,22 @@ public class HttpsProvisioningManager {
         mRetryIntent = retryIntent;
         mFirstProvAfterBoot = first;
         mUser = user;
-        mNetworkCnx = new HttpsProvisioningConnection(this, context);
         mRcsSettings = rcsSettings;
         mMessagingLog = messagingLog;
         mContactManager = contactManager;
+
+        mProvisioningOperationHandler = allocateBgHandler(PROVISIONING_OPERATIONS_THREAD_NAME);
+
+        mNetworkCnx = new HttpsProvisioningConnection(this, context);
         mSmsManager = new HttpsProvisioningSMS(this, context, localContentResolver, rcsSettings,
                 messagingLog, contactManager);
         mRcsAccountManager = new RcsAccountManager(mCtx, contactManager);
+    }
 
-        final HandlerThread backgroundThread = new HandlerThread(BACKGROUND_THREAD_NAME);
-        backgroundThread.start();
-
-        mBackgroundHandler = new Handler(backgroundThread.getLooper());
+    private Handler allocateBgHandler(String threadName) {
+        HandlerThread thread = new HandlerThread(threadName);
+        thread.start();
+        return new Handler(thread.getLooper());
     }
 
     /**
@@ -1034,8 +1037,8 @@ public class HttpsProvisioningManager {
     /**
      * Schedule a background task on Handler for execution
      */
-    /* package private */void scheduleForBackgroundExecution(Runnable task) {
-        mBackgroundHandler.post(task);
+    /* package private */void scheduleProvisioningOperation(Runnable task) {
+        mProvisioningOperationHandler.post(task);
     }
 
     /**

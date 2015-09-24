@@ -39,19 +39,16 @@ public class GroupChatTerminalExceptionTask implements Runnable {
 
     private final HistoryLog mHistoryLog;
 
-    private final Object mLock;
-
     private static final Logger sLogger = Logger.getLogger(GroupChatTerminalExceptionTask.class
             .getName());
 
     /* package private */public GroupChatTerminalExceptionTask(String chatId,
             ChatServiceImpl chatService, FileTransferServiceImpl fileTransferService,
-            HistoryLog historyLog, Object lock) {
+            HistoryLog historyLog) {
         mChatId = chatId;
         mChatService = chatService;
         mFileTransferService = fileTransferService;
         mHistoryLog = historyLog;
-        mLock = lock;
     }
 
     public void run() {
@@ -62,7 +59,6 @@ public class GroupChatTerminalExceptionTask implements Runnable {
         }
         Cursor cursor = null;
         try {
-            synchronized (mLock) {
                 cursor = mHistoryLog.getQueuedGroupChatMessagesAndGroupFileTransfers(mChatId);
                 /* TODO: Handle cursor when null. */
                 int providerIdIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_PROVIDER_ID);
@@ -89,7 +85,6 @@ public class GroupChatTerminalExceptionTask implements Runnable {
                                     .append("'!").toString());
                     }
                 }
-            }
         } catch (RuntimeException e) {
             /*
              * Normally we are not allowed to catch runtime exceptions as these are genuine bugs

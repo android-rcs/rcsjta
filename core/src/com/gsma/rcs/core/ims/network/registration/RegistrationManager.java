@@ -183,7 +183,7 @@ public class RegistrationManager extends PeriodicRefresher {
      * Restart registration procedure
      */
     public void restart() {
-        mCore.scheduleForBackgroundExecution(new Runnable() {
+        mCore.scheduleCoreOperation(new Runnable() {
 
             @Override
             public void run() {
@@ -284,7 +284,7 @@ public class RegistrationManager extends PeriodicRefresher {
                 : RcsServiceRegistration.ReasonCode.CONNECTION_LOST;
 
         // Notify event listener
-        mCore.getListener().handleRegistrationTerminated(mReasonCode);
+        mCore.getListener().onRegistrationTerminated(mReasonCode);
     }
 
     /**
@@ -315,7 +315,7 @@ public class RegistrationManager extends PeriodicRefresher {
             mReasonCode = isBatteryLow() ? RcsServiceRegistration.ReasonCode.BATTERY_LOW
                     : RcsServiceRegistration.ReasonCode.CONNECTION_LOST;
 
-            mCore.getListener().handleRegistrationTerminated(mReasonCode);
+            mCore.getListener().onRegistrationTerminated(mReasonCode);
         } else {
             mPendingUnRegister = true;
         }
@@ -489,7 +489,7 @@ public class RegistrationManager extends PeriodicRefresher {
         }
 
         // Notify event listener
-        mCore.getListener().handleRegistrationSuccessful();
+        mCore.getListener().onRegistrationSuccessful();
 
         /* Start deregister procedure if necessary */
         if (mPendingUnRegister) {
@@ -649,7 +649,7 @@ public class RegistrationManager extends PeriodicRefresher {
         resetDialogPath();
 
         // Notify event listener
-        mCore.getListener().handleRegistrationFailed(error);
+        mCore.getListener().onRegistrationFailed(error);
     }
 
     /**

@@ -51,6 +51,9 @@ public class UpdateImageSharingStateAfterUngracefulTerminationTask implements Ru
     }
 
     public void run() {
+        if (sLogger.isActivated()) {
+            sLogger.debug("initiating.");
+        }
         Cursor cursor = null;
         try {
             cursor = mRichCallHistory.getInterruptedImageSharings();
@@ -80,6 +83,10 @@ public class UpdateImageSharingStateAfterUngracefulTerminationTask implements Ru
                         mImageService.setImageSharingStateAndReasonCode(contact, sharingId,
                                 State.REJECTED, ReasonCode.REJECTED_BY_SYSTEM);
                         break;
+                    default:
+                        sLogger.error(getClass().getName() + " unexpected state (" + state
+                                + ") detected! Error in SQL statement?");
+                        break;
                 }
             }
         } catch (RuntimeException e) {
@@ -94,6 +101,9 @@ public class UpdateImageSharingStateAfterUngracefulTerminationTask implements Ru
                     e);
         } finally {
             CursorUtil.close(cursor);
+            if (sLogger.isActivated()) {
+                sLogger.debug("done");
+            }
         }
     }
 }

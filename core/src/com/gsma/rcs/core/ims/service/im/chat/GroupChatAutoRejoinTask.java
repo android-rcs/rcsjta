@@ -16,30 +16,30 @@
 
 package com.gsma.rcs.core.ims.service.im.chat;
 
-import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.provider.messaging.MessagingLog;
+import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.utils.logger.Logger;
 
 public class GroupChatAutoRejoinTask implements Runnable {
 
     private final MessagingLog mMessagingLog;
 
-    private final Core mCore;
+    private final InstantMessagingService mImService;
 
     private static final Logger sLogger = Logger.getLogger(GroupChatAutoRejoinTask.class.getName());
 
-    public GroupChatAutoRejoinTask(MessagingLog messagingLog, Core core) {
+    public GroupChatAutoRejoinTask(InstantMessagingService imService, MessagingLog messagingLog) {
         mMessagingLog = messagingLog;
-        mCore = core;
+        mImService = imService;
     }
 
     @Override
     public void run() {
         for (String chatId : mMessagingLog.getChatIdsOfActiveGroupChatsForAutoRejoin()) {
             try {
-                mCore.getListener().handleRejoinGroupChat(chatId);
+                mImService.rejoinGroupChat(chatId);
 
             } catch (SipPayloadException e) {
                 sLogger.error(new StringBuilder("Could not auto-rejoin group chat with chatID '")

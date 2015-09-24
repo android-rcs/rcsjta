@@ -108,7 +108,7 @@ public class AnonymousFetchManager implements DiscoveryManager {
      * @throws SipPayloadException
      * @throws SipNetworkException
      */
-    public void receiveNotification(SipRequest notify) throws SipPayloadException,
+    public void onNotificationReceived(SipRequest notify) throws SipPayloadException,
             SipNetworkException {
         try {
             boolean logActivated = logger.isActivated();
@@ -171,8 +171,7 @@ public class AnonymousFetchManager implements DiscoveryManager {
                 mContactManager.setContactCapabilities(contact, capabilities,
                         RcsStatus.RCS_CAPABLE, RegistrationState.UNKNOWN);
 
-                mImsModule.getCore().getListener()
-                        .handleCapabilitiesNotification(contact, capabilities);
+                mImsModule.getCapabilityService().onReceivedCapabilities(contact, capabilities);
             } else {
                 if (logActivated) {
                     logger.debug("Anonymous fetch notification is empty");
@@ -194,8 +193,8 @@ public class AnonymousFetchManager implements DiscoveryManager {
                 mContactManager.setContactCapabilities(contact, Capabilities.sDefaultCapabilities,
                         RcsStatus.NO_INFO, RegistrationState.UNKNOWN);
 
-                mImsModule.getCore().getListener()
-                        .handleCapabilitiesNotification(contact, Capabilities.sDefaultCapabilities);
+                mImsModule.getCapabilityService().onReceivedCapabilities(contact,
+                        Capabilities.sDefaultCapabilities);
             }
         } catch (ParserConfigurationException e) {
             throw new SipPayloadException("Can't parse XML notification! CallId=".concat(notify

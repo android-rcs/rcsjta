@@ -74,7 +74,7 @@ public class StartService extends Service {
      */
     public static final String REGISTRY_NEW_USER_ACCOUNT = "NewUserAccount";
 
-    private static final String BACKGROUND_THREAD_NAME = StartService.class.getSimpleName();
+    private static final String STARTSERVICE_OPERATIONS_THREAD_NAME = "StartServiceOps";
 
     private LocalContentResolver mLocalContentResolver;
 
@@ -122,24 +122,25 @@ public class StartService extends Service {
     /**
      * Handler to process messages & runnable associated with background thread.
      */
-    private Handler mBackgroundHandler;
+    private Handler mStartServiceHandler;
 
-    private Context mContext;
+    private Context mCtx;
 
     private static final int MNC_UNDEFINED = 0;
     private static final int MCC_UNDEFINED = 0;
 
     @Override
     public void onCreate() {
-        mContext = getApplicationContext();
-        ContentResolver contentResolver = mContext.getContentResolver();
-        mLocalContentResolver = new LocalContentResolver(mContext);
+        mStartServiceHandler = allocateBgHandler(STARTSERVICE_OPERATIONS_THREAD_NAME);
+        mCtx = getApplicationContext();
+        ContentResolver contentResolver = mCtx.getContentResolver();
+        mLocalContentResolver = new LocalContentResolver(mCtx);
         mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
         mMessagingLog = MessagingLog.createInstance(mLocalContentResolver, mRcsSettings);
 
-        mContactManager = ContactManager.createInstance(mContext, contentResolver,
+        mContactManager = ContactManager.createInstance(mCtx, contentResolver,
                 mLocalContentResolver, mRcsSettings);
-        mAccountUtility = RcsAccountManager.createInstance(mContext, mContactManager);
+        mAccountUtility = RcsAccountManager.createInstance(mCtx, mContactManager);
 
         mRcsAccountUsername = getString(R.string.rcs_core_account_username);
 
@@ -154,13 +155,14 @@ public class StartService extends Service {
         if (ConfigurationMode.MANUAL == mode) {
             registerNetworkStateListener();
         }
-        mPoolTelephonyManagerIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(
+        mPoolTelephonyManagerIntent = PendingIntent.getBroadcast(mCtx, 0, new Intent(
                 ACTION_POOL_TELEPHONY_MANAGER), 0);
+    }
 
-        final HandlerThread backgroundThread = new HandlerThread(BACKGROUND_THREAD_NAME);
-        backgroundThread.start();
-
-        mBackgroundHandler = new Handler(backgroundThread.getLooper());
+    private Handler allocateBgHandler(String threadName) {
+        HandlerThread thread = new HandlerThread(threadName);
+        thread.start();
+        return new Handler(thread.getLooper());
     }
 
     @Override
@@ -186,7 +188,7 @@ public class StartService extends Service {
         if (logActivated) {
             sLogger.debug("Start RCS service");
         }
-        mBackgroundHandler.post(new Runnable() {
+        mStartServiceHandler.post(new Runnable() {
             @Override
             public void run() {
                 /* Check boot */
@@ -205,7 +207,7 @@ public class StartService extends Service {
                      * provisioning.
                      */
                     boolean accountAvailable = checkAccount();
-                    Configuration config = mContext.getResources().getConfiguration();
+                    Configuration config = mCtx.getResources().getConfiguration();
                     boolean mccAvailable = MCC_UNDEFINED != config.mcc;
 
                     boolean mncDefined = isMobileNetworkCodeDefined();
@@ -282,7 +284,7 @@ public class StartService extends Service {
                 if (action == null) {
                     return;
                 }
-                mBackgroundHandler.post(new Runnable() {
+                mStartServiceHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         try {
@@ -333,7 +335,7 @@ public class StartService extends Service {
         }
 
         // Start the RCS core service
-        LauncherUtils.launchRcsCoreService(mContext, mRcsSettings);
+        LauncherUtils.launchRcsCoreService(mCtx, mRcsSettings);
 
         // Stop Network listener
         if (mNetworkStateListener == null) {
@@ -351,11 +353,11 @@ public class StartService extends Service {
      * @throws RcsAccountException
      */
     private boolean checkAccount() throws IOException, RcsAccountException {
-        AndroidFactory.setApplicationContext(mContext, mRcsSettings);
+        AndroidFactory.setApplicationContext(mCtx, mRcsSettings);
 
         /* Read the current and last end user accounts */
-        mCurrentUserAccount = LauncherUtils.getCurrentUserAccount(mContext);
-        mLastUserAccount = LauncherUtils.getLastUserAccount(mContext);
+        mCurrentUserAccount = LauncherUtils.getCurrentUserAccount(mCtx);
+        mLastUserAccount = LauncherUtils.getLastUserAccount(mCtx);
 
         boolean logActivated = sLogger.isActivated();
         if (logActivated) {
@@ -395,10 +397,10 @@ public class StartService extends Service {
             }
 
             /* Reset RCS account */
-            LauncherUtils.resetRcsConfig(mContext, mLocalContentResolver, mRcsSettings,
-                    mMessagingLog, mContactManager);
+            LauncherUtils.resetRcsConfig(mCtx, mLocalContentResolver, mRcsSettings, mMessagingLog,
+                    mContactManager);
 
-            Configuration config = mContext.getResources().getConfiguration();
+            Configuration config = mCtx.getResources().getConfiguration();
             mRcsSettings.setMobileNetworkCode(config.mnc);
             mRcsSettings.setMobileCountryCode(config.mcc);
 
@@ -411,7 +413,7 @@ public class StartService extends Service {
              * Send service provisioned intent as the configuration settings are now loaded by means
              * of restoring previous values that were backed up during SIM Swap.
              */
-            IntentUtils.sendBroadcastEvent(mContext,
+            IntentUtils.sendBroadcastEvent(mCtx,
                     RcsService.ACTION_SERVICE_PROVISIONING_DATA_CHANGED);
 
             /* Activate service if new account */
@@ -452,7 +454,7 @@ public class StartService extends Service {
         }
 
         /* Save the current end user account */
-        LauncherUtils.setLastUserAccount(mContext, mCurrentUserAccount);
+        LauncherUtils.setLastUserAccount(mCtx, mCurrentUserAccount);
         return true;
     }
 
@@ -475,7 +477,7 @@ public class StartService extends Service {
             /* Manual provisioning: accept terms and conditions */
             mRcsSettings.setTermsAndConditionsResponse(TermsAndConditionsResponse.ACCEPTED);
             /* No auto configuration: directly start the RCS core service */
-            LauncherUtils.launchRcsCoreService(mContext, mRcsSettings);
+            LauncherUtils.launchRcsCoreService(mCtx, mRcsSettings);
             return;
         }
 
@@ -486,7 +488,7 @@ public class StartService extends Service {
             // (-1) : RCS service is permanently disabled. SIM change is required
             if (hasChangedAccount()) {
                 // Start provisioning as a first launch
-                HttpsProvisioningService.startHttpsProvisioningService(mContext, true, user);
+                HttpsProvisioningService.startHttpsProvisioningService(mCtx, true, user);
             } else {
                 if (logActivated) {
                     sLogger.debug("Provisioning is blocked with this account");
@@ -495,23 +497,23 @@ public class StartService extends Service {
 
         } else if (isFirstLaunch() || hasChangedAccount()) {
             // First launch: start the auto config service with special tag
-            HttpsProvisioningService.startHttpsProvisioningService(mContext, true, user);
+            HttpsProvisioningService.startHttpsProvisioningService(mCtx, true, user);
 
         } else if (Version.DISABLED_NOQUERY.toInt() == version) {
             // -2 : RCS client and configuration query is disabled
             if (user) {
                 // Only start query if requested by user action
-                HttpsProvisioningService.startHttpsProvisioningService(mContext, false, user);
+                HttpsProvisioningService.startHttpsProvisioningService(mCtx, false, user);
             }
 
         } else {
             // Start or restart the HTTP provisioning service
-            HttpsProvisioningService.startHttpsProvisioningService(mContext, false, user);
+            HttpsProvisioningService.startHttpsProvisioningService(mCtx, false, user);
             if (Version.DISABLED_DORMANT.toInt() == version) {
                 // -3 : RCS client is disabled but configuration query is not
             } else {
                 // Start the RCS core service
-                LauncherUtils.launchRcsCoreService(mContext, mRcsSettings);
+                LauncherUtils.launchRcsCoreService(mCtx, mRcsSettings);
             }
         }
     }
@@ -588,7 +590,7 @@ public class StartService extends Service {
         if (sLogger.isActivated()) {
             sLogger.debug("Retry polling telephony manager (mcc=" + mcc + ",mnc=" + mnc + ")");
         }
-        AlarmManager am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+        AlarmManager am = (AlarmManager) mCtx.getSystemService(Context.ALARM_SERVICE);
         TimerUtils.setExactTimer(am, System.currentTimeMillis() + TELEPHONY_MANAGER_POOLING_PERIOD,
                 mPoolTelephonyManagerIntent);
     }
@@ -597,7 +599,7 @@ public class StartService extends Service {
         return new BroadcastReceiver() {
             @Override
             public void onReceive(final Context context, final Intent intent) {
-                mBackgroundHandler.post(new Runnable() {
+                mStartServiceHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         try {

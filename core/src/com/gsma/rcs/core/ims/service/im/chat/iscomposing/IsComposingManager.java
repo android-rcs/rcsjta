@@ -96,7 +96,7 @@ public class IsComposingManager {
             List<ImsSessionListener> sessionListeners = mSession.getListeners();
             if ((isComposingInfo != null) && isComposingInfo.isStateActive()) {
                 for (ImsSessionListener sessionListener : sessionListeners) {
-                    ((ChatSessionListener) sessionListener).handleIsComposingEvent(contact, true);
+                    ((ChatSessionListener) sessionListener).onIsComposingEventReceived(contact, true);
                 }
 
                 // Start the expiration timer
@@ -107,7 +107,7 @@ public class IsComposingManager {
                 startExpirationTimer(timeout, contact);
             } else {
                 for (ImsSessionListener sessionListener : sessionListeners) {
-                    ((ChatSessionListener) sessionListener).handleIsComposingEvent(contact, false);
+                    ((ChatSessionListener) sessionListener).onIsComposingEventReceived(contact, false);
                 }
 
                 // Stop the expiration timer
@@ -135,7 +135,7 @@ public class IsComposingManager {
         // We just received an instant message, so if composing info was active, it must
         // be changed to idle. If it was already idle, no need to notify listener again
         for (int j = 0; j < mSession.getListeners().size(); j++) {
-            ((ChatSessionListener) mSession.getListeners().get(j)).handleIsComposingEvent(contact,
+            ((ChatSessionListener) mSession.getListeners().get(j)).onIsComposingEventReceived(contact,
                     state);
         }
 
@@ -201,7 +201,7 @@ public class IsComposingManager {
                         + " is now considered idle");
             }
             for (ImsSessionListener sessionListener : mSession.getListeners()) {
-                ((ChatSessionListener) sessionListener).handleIsComposingEvent(contact, false);
+                ((ChatSessionListener) sessionListener).onIsComposingEventReceived(contact, false);
             }
         }
     }

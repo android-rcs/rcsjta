@@ -45,9 +45,9 @@ public class ImageSharingDeleteTask extends DeleteTask.GroupedByContactId {
      * @param imsLock the ims operation lock
      */
     public ImageSharingDeleteTask(ImageSharingServiceImpl imageSharingService,
-            RichcallService richcallService, LocalContentResolver contentResolver, Object imsLock) {
-        super(contentResolver, imsLock, ImageSharingData.CONTENT_URI,
-                ImageSharingData.KEY_SHARING_ID, ImageSharingData.KEY_CONTACT, (String) null);
+            RichcallService richcallService, LocalContentResolver contentResolver) {
+        super(contentResolver, ImageSharingData.CONTENT_URI, ImageSharingData.KEY_SHARING_ID,
+                ImageSharingData.KEY_CONTACT, (String) null);
         mImageSharingService = imageSharingService;
         mRichcallService = richcallService;
     }
@@ -62,17 +62,17 @@ public class ImageSharingDeleteTask extends DeleteTask.GroupedByContactId {
      * @param sharingId the sharing id
      */
     public ImageSharingDeleteTask(ImageSharingServiceImpl imageSharingService,
-            RichcallService richcallService, LocalContentResolver contentResolver, Object imsLock,
+            RichcallService richcallService, LocalContentResolver contentResolver,
             String sharingId) {
-        super(contentResolver, imsLock, ImageSharingData.CONTENT_URI,
-                ImageSharingData.KEY_SHARING_ID, ImageSharingData.KEY_CONTACT, null, sharingId);
+        super(contentResolver, ImageSharingData.CONTENT_URI, ImageSharingData.KEY_SHARING_ID,
+                ImageSharingData.KEY_CONTACT, null, sharingId);
         mImageSharingService = imageSharingService;
         mRichcallService = richcallService;
     }
 
     /**
      * Deletion of all image sharing with a specific contact.
-     * 
+     *
      * @param imageSharingService the image service impl
      * @param richcallService the rich call service
      * @param contentResolver the local content resolver
@@ -80,9 +80,9 @@ public class ImageSharingDeleteTask extends DeleteTask.GroupedByContactId {
      * @param contact the contact id
      */
     public ImageSharingDeleteTask(ImageSharingServiceImpl imageSharingService,
-            RichcallService richcallService, LocalContentResolver contentResolver, Object imsLock,
+            RichcallService richcallService, LocalContentResolver contentResolver,
             ContactId contact) {
-        super(contentResolver, imsLock, ImageSharingData.CONTENT_URI,
+        super(contentResolver, ImageSharingData.CONTENT_URI,
                 ImageSharingData.KEY_SHARING_ID, ImageSharingData.KEY_CONTACT, contact);
         mImageSharingService = imageSharingService;
         mRichcallService = richcallService;

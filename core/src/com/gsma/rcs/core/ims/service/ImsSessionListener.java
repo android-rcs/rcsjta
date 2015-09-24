@@ -36,7 +36,7 @@ public interface ImsSessionListener {
      * 
      * @param contact Remote contact
      */
-    public void handleSessionStarted(ContactId contact);
+    public void onSessionStarted(ContactId contact);
 
     /**
      * Session has been aborted
@@ -44,7 +44,7 @@ public interface ImsSessionListener {
      * @param contact Remote contact
      * @param reason Termination reason
      */
-    public void handleSessionAborted(ContactId contact, TerminationReason reason);
+    public void onSessionAborted(ContactId contact, TerminationReason reason);
 
     /**
      * Session is being rejected by user
@@ -52,12 +52,12 @@ public interface ImsSessionListener {
      * @param contact Remote contact
      * @param reason Termination reason
      */
-    public void handleSessionRejected(ContactId contact, TerminationReason reason);
+    public void onSessionRejected(ContactId contact, TerminationReason reason);
 
     /**
      * Accept has been called and the session is in the process of being started
      * 
      * @param contact Remote contact
      */
-    public void handleSessionAccepted(ContactId contact);
+    public void onSessionAccepting(ContactId contact);
 }

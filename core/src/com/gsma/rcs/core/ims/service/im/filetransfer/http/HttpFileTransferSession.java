@@ -193,7 +193,7 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
 
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
-            ((FileSharingSessionListener) listener).handleTransferError(
+            ((FileSharingSessionListener) listener).onTransferError(
                     new FileSharingError(error), contact);
         }
     }
@@ -243,7 +243,7 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
         long fileExpiration = getFileExpiration();
         long fileIconExpiration = getIconExpiration();
         for (ImsSessionListener listener : getListeners()) {
-            ((FileSharingSessionListener) listener).handleFileTransfered(content, contact,
+            ((FileSharingSessionListener) listener).onFileTransfered(content, contact,
                     fileExpiration, fileIconExpiration, FileTransferProtocol.HTTP);
         }
     }
@@ -257,7 +257,7 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
     public void httpTransferProgress(long currentSize, long totalSize) {
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
-            ((FileSharingSessionListener) listener).handleTransferProgress(contact, currentSize,
+            ((FileSharingSessionListener) listener).onTransferProgress(contact, currentSize,
                     totalSize);
         }
     }
@@ -268,7 +268,7 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
     public void httpTransferNotAllowedToSend() {
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
-            ((FileSharingSessionListener) listener).handleTransferNotAllowedToSend(contact);
+            ((FileSharingSessionListener) listener).onTransferNotAllowedToSend(contact);
         }
     }
 
@@ -279,7 +279,7 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
         mSessionState = State.ESTABLISHED;
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
-            ((FileSharingSessionListener) listener).handleSessionStarted(contact);
+            ((FileSharingSessionListener) listener).onSessionStarted(contact);
         }
     }
 
@@ -289,7 +289,7 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
     public void httpTransferPausedByUser() {
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
-            ((FileSharingSessionListener) listener).handleFileTransferPausedByUser(contact);
+            ((FileSharingSessionListener) listener).onFileTransferPausedByUser(contact);
         }
     }
 
@@ -299,7 +299,7 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
     public void httpTransferPausedBySystem() {
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
-            ((FileSharingSessionListener) listener).handleFileTransferPausedBySystem(contact);
+            ((FileSharingSessionListener) listener).onFileTransferPausedBySystem(contact);
         }
     }
 
@@ -309,7 +309,7 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
     public void httpTransferResumed() {
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
-            ((FileSharingSessionListener) listener).handleFileTransferResumed(contact);
+            ((FileSharingSessionListener) listener).onFileTransferResumed(contact);
         }
     }
 
@@ -345,7 +345,7 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
         super.receiveBye(bye);
         ContactId remote = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
-            listener.handleSessionAborted(remote, TerminationReason.TERMINATION_BY_REMOTE);
+            listener.onSessionAborted(remote, TerminationReason.TERMINATION_BY_REMOTE);
         }
         getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
     }

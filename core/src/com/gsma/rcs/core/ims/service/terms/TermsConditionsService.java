@@ -142,19 +142,19 @@ public class TermsConditionsService extends ImsService {
      * @throws SipPayloadException
      * @throws SipNetworkException
      */
-    public void receiveMessage(SipRequest message) throws SipPayloadException, SipNetworkException {
-        boolean logActivated = sLogger.isActivated();
-        if (logActivated) {
-            sLogger.debug("Receive terms message");
-        }
+    public void onMessageReceived(SipRequest message) {
         try {
+            boolean logActivated = sLogger.isActivated();
+            if (logActivated) {
+                sLogger.debug("Receive terms message");
+            }
             if (logActivated) {
                 sLogger.info("Send 200 OK");
             }
-            SipResponse response = SipMessageFactory.createResponse(message,
-                    IdGenerator.getIdentifier(), Response.OK);
             final ImsModule imsModule = getImsModule();
-            imsModule.getSipManager().sendSipResponse(response);
+            imsModule.getSipManager().sendSipResponse(
+                    SipMessageFactory.createResponse(message, IdGenerator.getIdentifier(),
+                            Response.OK));
 
             String lang = Locale.getDefault().getLanguage();
 
@@ -175,7 +175,7 @@ public class TermsConditionsService extends ImsService {
                 imsModule
                         .getCore()
                         .getListener()
-                        .handleUserConfirmationRequest(contact, parser.getId(), parser.getType(),
+                        .onUserConfirmationRequest(contact, parser.getId(), parser.getType(),
                                 parser.getPin(), parser.getSubject(), parser.getText(),
                                 parser.getButtonAccept(), parser.getButtonReject(),
                                 parser.getTimeout());
@@ -187,7 +187,7 @@ public class TermsConditionsService extends ImsService {
                 imsModule
                         .getCore()
                         .getListener()
-                        .handleUserConfirmationAck(contact, parser.getId(), parser.getStatus(),
+                        .onUserConfirmationAck(contact, parser.getId(), parser.getStatus(),
                                 parser.getSubject(), parser.getText());
 
             } else if (USER_NOTIFICATION_MIME_TYPE.equals(contentType)) {
@@ -197,21 +197,36 @@ public class TermsConditionsService extends ImsService {
                 imsModule
                         .getCore()
                         .getListener()
-                        .handleUserNotification(contact, parser.getId(), parser.getSubject(),
+                        .onUserNotification(contact, parser.getId(), parser.getSubject(),
                                 parser.getText(), parser.getButtonOk());
             } else {
                 if (logActivated) {
                     sLogger.warn("Unknown terms request ".concat(contentType));
                 }
             }
-        } catch (ParserConfigurationException e) {
-            throw new SipPayloadException("Can't parse terms request!", e);
-
-        } catch (SAXException e) {
-            throw new SipPayloadException("Can't parse terms request!", e);
 
         } catch (IOException e) {
-            throw new SipNetworkException("Can't parse terms request!", e);
+            if (sLogger.isActivated()) {
+                sLogger.debug("Failed to receive terms request! (" + e.getMessage() + ")");
+            }
+        } catch (SipNetworkException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Failed to receive terms request! (" + e.getMessage() + ")");
+            }
+        } catch (ParserConfigurationException e) {
+            sLogger.error("Failed to receive terms request!", e);
+        } catch (SAXException e) {
+            sLogger.error("Failed to receive terms request!", e);
+        } catch (SipPayloadException e) {
+            sLogger.error("Failed to receive terms request!", e);
+        } catch (RuntimeException e) {
+            /*
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
+             */
+            sLogger.error("Failed to receive terms request!", e);
         }
     }
 

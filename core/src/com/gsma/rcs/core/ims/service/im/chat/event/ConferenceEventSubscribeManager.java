@@ -282,7 +282,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
             ParticipantStatus status = participant.getValue();
             if (isGroupChatEventRequired(contact, status, groupChatEventsInDB))
                 for (ImsSessionListener listener : mSession.getListeners()) {
-                    ((GroupChatSessionListener) listener).handleConferenceEvent(contact, status,
+                    ((GroupChatSessionListener) listener).onConferenceEventReceived(contact, status,
                             timestamp);
                 }
         }

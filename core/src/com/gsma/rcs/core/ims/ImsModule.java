@@ -47,9 +47,12 @@ import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.terms.TermsConditionsService;
 import com.gsma.rcs.core.ims.userprofile.UserProfile;
+import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.history.HistoryLog;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.sharing.RichCallHistory;
 import com.gsma.rcs.utils.logger.Logger;
 
 import android.content.Context;
@@ -98,8 +101,9 @@ public class ImsModule implements SipEventListener {
      * @param messagingLog Messaging log accessor
      * @param addressBookManager The address book manager instance
      */
-    public ImsModule(Core core, Context ctx, RcsSettings rcsSettings,
-            ContactManager contactManager, MessagingLog messagingLog,
+    public ImsModule(Core core, Context ctx, LocalContentResolver localContentResolver,
+            RcsSettings rcsSettings, ContactManager contactManager, MessagingLog messagingLog,
+            HistoryLog historyLog, RichCallHistory richCallHistory,
             AddressBookManager addressBookManager) {
         mCore = core;
         mRcsSettings = rcsSettings;
@@ -111,12 +115,13 @@ public class ImsModule implements SipEventListener {
         mServices = new HashMap<ImsServiceType, ImsService>();
         mServices.put(ImsServiceType.TERMS_CONDITIONS,
                 new TermsConditionsService(this, rcsSettings));
-        mServices.put(ImsServiceType.CAPABILITY, new CapabilityService(this, core, rcsSettings,
+        mServices.put(ImsServiceType.CAPABILITY, new CapabilityService(this, rcsSettings,
                 contactManager, addressBookManager));
-        mServices.put(ImsServiceType.INSTANT_MESSAGING, new InstantMessagingService(this, core,
-                rcsSettings, contactManager, messagingLog));
-        mServices.put(ImsServiceType.RICHCALL, new RichcallService(this, core, contactManager,
-                rcsSettings, mCallManager));
+        mServices.put(ImsServiceType.INSTANT_MESSAGING, new InstantMessagingService(this,
+                rcsSettings, contactManager, messagingLog, historyLog, localContentResolver, ctx,
+                core));
+        mServices.put(ImsServiceType.RICHCALL, new RichcallService(this, richCallHistory,
+                contactManager, rcsSettings, mCallManager, localContentResolver));
         mServices.put(ImsServiceType.PRESENCE, new PresenceService(this, ctx, rcsSettings,
                 contactManager, addressBookManager));
         mServices.put(ImsServiceType.SIP, new SipService(this, contactManager, rcsSettings));
@@ -138,6 +143,7 @@ public class ImsModule implements SipEventListener {
 
         mCnxManager.initialize();
         getInstantMessagingService().initialize();
+        getRichcallService().initialize();
         getPresenceService().initialize();
 
         mInitializationFinished = true;

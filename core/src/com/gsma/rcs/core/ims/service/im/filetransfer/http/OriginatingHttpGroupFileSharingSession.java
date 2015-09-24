@@ -24,7 +24,6 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
@@ -61,8 +60,6 @@ import java.io.IOException;
 public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSession implements
         HttpUploadTransferEventListener {
 
-    private final Core mCore;
-
     /**
      * HTTP upload manager
      */
@@ -83,6 +80,8 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
      * file sharing
      */
     private long mTimestampSent;
+
+    private InstantMessagingService mImService;
 
     /**
      * The logger
@@ -108,16 +107,16 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
      * @param timestampSent the timestamp sent in payload for the group file sharing
      * @param contactManager
      */
-    public OriginatingHttpGroupFileSharingSession(String fileTransferId,
-            InstantMessagingService imService, MmContent content, MmContent fileIcon,
-            Uri conferenceId, String chatSessionId, String chatContributionId, String tId,
-            Core core, RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
-            long timestampSent, ContactManager contactManager) {
+    public OriginatingHttpGroupFileSharingSession(InstantMessagingService imService,
+            String fileTransferId, MmContent content, MmContent fileIcon, Uri conferenceId,
+            String chatSessionId, String chatContributionId, String tId, RcsSettings rcsSettings,
+            MessagingLog messagingLog, long timestamp, long timestampSent,
+            ContactManager contactManager) {
         super(imService, content, null, conferenceId, fileIcon, chatSessionId, chatContributionId,
                 fileTransferId, rcsSettings, messagingLog, timestamp,
                 FileTransferData.UNKNOWN_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION,
                 contactManager);
-        mCore = core;
+        mImService = imService;
         mTimestampSent = timestampSent;
 
         // Instantiate the upload manager
@@ -244,7 +243,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
             }
 
             String chatId = getContributionID();
-            mChatSession = mCore.getImService().getGroupChatSession(chatId);
+            mChatSession = mImService.getGroupChatSession(chatId);
             if (mChatSession != null && mChatSession.isMediaEstablished()) {
                 if (logActivated) {
                     sLogger.debug("Send file transfer info via an existing chat session");
@@ -260,7 +259,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                  * dequeue the file transfer message
                  */
                 if (mChatSession == null) {
-                    mCore.getListener().handleRejoinGroupChatAsPartOfSendOperation(chatId);
+                    mImService.rejoinGroupChatAsPartOfSendOperation(chatId);
                 } else if (!mChatSession.isMediaEstablished() && mChatSession.isInitiatedByRemote()) {
                     if (logActivated) {
                         sLogger.debug(new StringBuilder("Group chat session with chatId '")
@@ -390,7 +389,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                     }
                     for (ImsSessionListener listener : getListeners()) {
                         ((FileSharingSessionListener) listener)
-                                .handleFileTransferPausedBySystem(contact);
+                                .onFileTransferPausedBySystem(contact);
                     }
                     return;
                 }
@@ -399,11 +398,11 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
             default:
                 if (State.ESTABLISHED == state) {
                     for (ImsSessionListener listener : getListeners()) {
-                        listener.handleSessionAborted(contact, reason);
+                        listener.onSessionAborted(contact, reason);
                     }
                 } else {
                     for (ImsSessionListener listener : getListeners()) {
-                        listener.handleSessionRejected(contact, reason);
+                        listener.onSessionRejected(contact, reason);
                     }
                 }
                 break;

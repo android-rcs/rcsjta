@@ -278,7 +278,7 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
     public void receiveData(byte[] data) {
         ContactId contact = getRemoteContact();
         for (int j = 0; j < getListeners().size(); j++) {
-            ((SipSessionListener) getListeners().get(j)).handleReceiveData(contact, data);
+            ((SipSessionListener) getListeners().get(j)).onDataReceived(contact, data);
         }
     }
 

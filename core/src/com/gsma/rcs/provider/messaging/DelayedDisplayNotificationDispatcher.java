@@ -85,10 +85,10 @@ public class DelayedDisplayNotificationDispatcher implements Runnable {
                 ContactId contact = ContactUtil.createContactIdFromTrustedData(contactNumber);
 
                 if (chatId.equals(contactNumber)) {
-                    mChatApi.tryToSendOne2OneDisplayedDeliveryReport(msgId, contact,
+                    mChatApi.sendOne2OneDisplayedDeliveryReport(msgId, contact,
                             timestampDisplayed);
                 } else {
-                    mChatApi.tryToSendGroupChatDisplayedDeliveryReport(msgId, contact,
+                    mChatApi.sendGroupChatDisplayedDeliveryReport(msgId, contact,
                             timestampDisplayed, chatId);
                 }
             }

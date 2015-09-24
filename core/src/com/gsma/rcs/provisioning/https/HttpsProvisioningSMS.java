@@ -125,7 +125,7 @@ public class HttpsProvisioningSMS {
         mSmsProvisioningReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(final Context ctx, final Intent intent) {
-                mManager.scheduleForBackgroundExecution(new Runnable() {
+                mManager.scheduleProvisioningOperation(new Runnable() {
                     @Override
                     public void run() {
                         try {

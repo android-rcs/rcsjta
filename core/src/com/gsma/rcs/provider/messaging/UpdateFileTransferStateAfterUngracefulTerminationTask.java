@@ -42,6 +42,9 @@ public class UpdateFileTransferStateAfterUngracefulTerminationTask implements Ru
     }
 
     public void run() {
+        if (sLogger.isActivated()) {
+            sLogger.debug("initiating.");
+        }
         Cursor cursor = null;
         try {
             cursor = mMessagingLog.getInterruptedFileTransfers();
@@ -112,7 +115,10 @@ public class UpdateFileTransferStateAfterUngracefulTerminationTask implements Ru
                                     fileTransferId, contact, State.REJECTED,
                                     ReasonCode.REJECTED_BY_SYSTEM);
                             break;
-                    /* TODO: Handle default. */
+                        default:
+                            sLogger.error(getClass().getName() + " unexpected state (" + state
+                                    + ") detected! Error in SQL statement?");
+                            break;
                     }
                 } else {
                     /* Http file transfer */
@@ -168,7 +174,10 @@ public class UpdateFileTransferStateAfterUngracefulTerminationTask implements Ru
                                     fileTransferId, contact, State.REJECTED,
                                     ReasonCode.REJECTED_BY_TIMEOUT);
                             break;
-                    /* TODO: Handle default. */
+                        default:
+                            sLogger.error(getClass().getName() + " unexpected state (" + state
+                                    + ") detected! Error in SQL statement?");
+                            break;
                     }
                 }
             }
@@ -184,6 +193,9 @@ public class UpdateFileTransferStateAfterUngracefulTerminationTask implements Ru
                     e);
         } finally {
             CursorUtil.close(cursor);
+            if (sLogger.isActivated()) {
+                sLogger.debug("done.");
+            }
         }
     }
 }

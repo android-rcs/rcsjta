@@ -16,8 +16,8 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.rcs.core.ims.service.im.chat.imdn.DeliveryExpirationManager;
 import com.gsma.rcs.provider.CursorUtil;
-import com.gsma.rcs.service.api.OneToOneUndeliveredImManager;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
@@ -26,72 +26,64 @@ import android.database.Cursor;
 
 public class RecreateDeliveryExpirationAlarms implements Runnable {
 
-    private final OneToOneUndeliveredImManager mOneToOneUndeliveredImManager;
+    private final DeliveryExpirationManager mOneToOneUndeliveredImManager;
 
     private final MessagingLog mMessagingLog;
-
-    private final Object mLock;
 
     private static final Logger sLogger = Logger.getLogger(RecreateDeliveryExpirationAlarms.class
             .getName());
 
     public RecreateDeliveryExpirationAlarms(MessagingLog messagingLog,
-            OneToOneUndeliveredImManager oneToOneUndeliveredImManager, Object lock) {
+            DeliveryExpirationManager oneToOneUndeliveredImManager) {
         mMessagingLog = messagingLog;
         mOneToOneUndeliveredImManager = oneToOneUndeliveredImManager;
-        mLock = lock;
     }
 
     @Override
     public void run() {
         if (sLogger.isActivated()) {
-            sLogger.debug("Execute task to recreate delivery expiration alarms.");
+            sLogger.debug("initiating.");
         }
         Cursor cursor = null;
         try {
-            synchronized (mLock) {
-                long currentTime = System.currentTimeMillis();
-                cursor = mMessagingLog.getUndeliveredOneToOneChatMessages();
-                int msgIdIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_MESSAGE_ID);
-                int chatMessageContactIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_CONTACT);
-                int chatMessageDeliveryExpirationIdx = cursor
-                        .getColumnIndexOrThrow(MessageData.KEY_DELIVERY_EXPIRATION);
-                while (cursor.moveToNext()) {
-                    String msgId = cursor.getString(msgIdIdx);
-                    ContactId contact = ContactUtil.createContactIdFromTrustedData(cursor
-                            .getString(chatMessageContactIdx));
-                    long deliveryExpiration = cursor.getLong(chatMessageDeliveryExpirationIdx);
-                    if (deliveryExpiration > currentTime) {
-                        mOneToOneUndeliveredImManager
-                                .scheduleOneToOneChatMessageDeliveryTimeoutAlarm(contact, msgId,
-                                        deliveryExpiration);
-                    } else {
-                        mOneToOneUndeliveredImManager.handleChatMessageDeliveryExpiration(contact,
-                                msgId);
-                    }
+            long currentTime = System.currentTimeMillis();
+            cursor = mMessagingLog.getUndeliveredOneToOneChatMessages();
+            int msgIdIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_MESSAGE_ID);
+            int chatMessageContactIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_CONTACT);
+            int chatMessageDeliveryExpirationIdx = cursor
+                    .getColumnIndexOrThrow(MessageData.KEY_DELIVERY_EXPIRATION);
+            while (cursor.moveToNext()) {
+                String msgId = cursor.getString(msgIdIdx);
+                ContactId contact = ContactUtil.createContactIdFromTrustedData(cursor
+                        .getString(chatMessageContactIdx));
+                long deliveryExpiration = cursor.getLong(chatMessageDeliveryExpirationIdx);
+                if (deliveryExpiration > currentTime) {
+                    mOneToOneUndeliveredImManager.scheduleOneToOneChatMessageDeliveryTimeoutAlarm(
+                            contact, msgId, deliveryExpiration);
+                } else {
+                    mOneToOneUndeliveredImManager.onChatMessageDeliveryExpirationReceived(contact,
+                            msgId);
                 }
-                CursorUtil.close(cursor);
+            }
+            CursorUtil.close(cursor);
 
-                cursor = mMessagingLog.getUnDeliveredOneToOneFileTransfers();
+            cursor = mMessagingLog.getUnDeliveredOneToOneFileTransfers();
 
-                int fileTransferIdIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FT_ID);
-                int fileTransferContactIdx = cursor
-                        .getColumnIndexOrThrow(FileTransferData.KEY_CONTACT);
-                int fileTransferDeliveryExpirationIdx = cursor
-                        .getColumnIndexOrThrow(FileTransferData.KEY_DELIVERY_EXPIRATION);
-                while (cursor.moveToNext()) {
-                    String fileTransferId = cursor.getString(fileTransferIdIdx);
-                    ContactId contact = ContactUtil.createContactIdFromTrustedData(cursor
-                            .getString(fileTransferContactIdx));
-                    long deliveryExpiration = cursor.getLong(fileTransferDeliveryExpirationIdx);
-                    if (deliveryExpiration > currentTime) {
-                        mOneToOneUndeliveredImManager
-                                .scheduleOneToOneFileTransferDeliveryTimeoutAlarm(contact,
-                                        fileTransferId, deliveryExpiration);
-                    } else {
-                        mOneToOneUndeliveredImManager.handleFileTransferDeliveryExpiration(contact,
-                                fileTransferId);
-                    }
+            int fileTransferIdIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FT_ID);
+            int fileTransferContactIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_CONTACT);
+            int fileTransferDeliveryExpirationIdx = cursor
+                    .getColumnIndexOrThrow(FileTransferData.KEY_DELIVERY_EXPIRATION);
+            while (cursor.moveToNext()) {
+                String fileTransferId = cursor.getString(fileTransferIdIdx);
+                ContactId contact = ContactUtil.createContactIdFromTrustedData(cursor
+                        .getString(fileTransferContactIdx));
+                long deliveryExpiration = cursor.getLong(fileTransferDeliveryExpirationIdx);
+                if (deliveryExpiration > currentTime) {
+                    mOneToOneUndeliveredImManager.scheduleOneToOneFileTransferDeliveryTimeoutAlarm(
+                            contact, fileTransferId, deliveryExpiration);
+                } else {
+                    mOneToOneUndeliveredImManager.onFileTransferDeliveryExpirationReceived(contact,
+                            fileTransferId);
                 }
             }
         } catch (RuntimeException e) {
@@ -106,6 +98,9 @@ public class RecreateDeliveryExpirationAlarms implements Runnable {
                     e);
         } finally {
             CursorUtil.close(cursor);
+            if (sLogger.isActivated()) {
+                sLogger.debug("done.");
+            }
         }
     }
 }

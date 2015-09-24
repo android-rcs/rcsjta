@@ -23,8 +23,6 @@
 package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.InvitationStatus;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.sip.SipService;
@@ -58,11 +56,12 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 
     private final MultimediaSessionServiceImpl mMultimediaSessionService;
 
-    private final MultimediaSessionStorageAccessor mMultimediaSessionStorageAccessor;
+    private final MultimediaSessionStorageAccessor mPersistedStorage;
 
     private final Object mLock = new Object();
 
-    private final Logger mLogger = Logger.getLogger(getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(MultimediaStreamingSessionImpl.class
+            .getName());
 
     /**
      * Constructor
@@ -84,30 +83,30 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
         mBroadcaster = broadcaster;
         mSipService = sipService;
         mMultimediaSessionService = multimediaSessionService;
-        mMultimediaSessionStorageAccessor = new MultimediaSessionStorageAccessor(direction,
-                contact, serviceId, state);
+        mPersistedStorage = new MultimediaSessionStorageAccessor(direction, contact, serviceId,
+                state);
     }
 
     private void handleSessionRejected(ReasonCode reasonCode, ContactId contact) {
-        if (mLogger.isActivated()) {
-            mLogger.info("Session rejected; reasonCode=" + reasonCode + ".");
+        if (sLogger.isActivated()) {
+            sLogger.info("Session rejected; reasonCode=" + reasonCode + ".");
         }
         String sessionId = getSessionId();
         synchronized (mLock) {
             mMultimediaSessionService.removeMultimediaStreaming(sessionId);
-            mMultimediaSessionStorageAccessor.setStateAndReasonCode(State.REJECTED, reasonCode);
+            mPersistedStorage.setStateAndReasonCode(State.REJECTED, reasonCode);
             mBroadcaster.broadcastStateChanged(contact, sessionId, State.REJECTED, reasonCode);
         }
     }
 
     private void removeSession(ContactId contact, State state, ReasonCode reasonCode) {
         mMultimediaSessionService.removeMultimediaStreaming(mSessionId);
-        mMultimediaSessionStorageAccessor.setStateAndReasonCode(state, reasonCode);
+        mPersistedStorage.setStateAndReasonCode(state, reasonCode);
         mBroadcaster.broadcastStateChanged(contact, mSessionId, state, reasonCode);
     }
 
     private void setStateAndReason(ContactId contact, State state, ReasonCode reason) {
-        mMultimediaSessionStorageAccessor.setStateAndReasonCode(state, reason);
+        mPersistedStorage.setStateAndReasonCode(state, reason);
         mBroadcaster.broadcastStateChanged(contact, mSessionId, state, reason);
     }
 
@@ -130,18 +129,18 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
         try {
             GenericSipRtpSession session = mSipService.getGenericSipRtpSession(mSessionId);
             if (session == null) {
-                return mMultimediaSessionStorageAccessor.getRemoteContact();
+                return mPersistedStorage.getRemoteContact();
             }
             return session.getRemoteContact();
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -156,7 +155,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
         try {
             GenericSipRtpSession session = mSipService.getGenericSipRtpSession(mSessionId);
             if (session == null) {
-                return mMultimediaSessionStorageAccessor.getState().toInt();
+                return mPersistedStorage.getState().toInt();
             }
             SipDialogPath dialogPath = session.getDialogPath();
             if (dialogPath != null && dialogPath.isSessionEstablished()) {
@@ -171,12 +170,12 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -191,18 +190,18 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
         try {
             GenericSipRtpSession session = mSipService.getGenericSipRtpSession(mSessionId);
             if (session == null) {
-                return mMultimediaSessionStorageAccessor.getReasonCode().toInt();
+                return mPersistedStorage.getReasonCode().toInt();
             }
             return ReasonCode.UNSPECIFIED.toInt();
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -218,7 +217,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
         try {
             GenericSipRtpSession session = mSipService.getGenericSipRtpSession(mSessionId);
             if (session == null) {
-                return mMultimediaSessionStorageAccessor.getDirection().toInt();
+                return mPersistedStorage.getDirection().toInt();
             }
             if (session.isInitiatedByRemote()) {
                 return Direction.INCOMING.toInt();
@@ -227,12 +226,12 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -247,18 +246,18 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
         try {
             GenericSipRtpSession session = mSipService.getGenericSipRtpSession(mSessionId);
             if (session == null) {
-                return mMultimediaSessionStorageAccessor.getServiceId();
+                return mPersistedStorage.getServiceId();
             }
             return session.getServiceId();
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -270,8 +269,8 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
      */
     public void acceptInvitation() throws RemoteException {
         try {
-            if (mLogger.isActivated()) {
-                mLogger.info("Accept session invitation");
+            if (sLogger.isActivated()) {
+                sLogger.info("Accept session invitation");
             }
             final GenericSipRtpSession session = mSipService.getGenericSipRtpSession(mSessionId);
             if (session == null) {
@@ -282,12 +281,12 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
             session.acceptSession();
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -299,8 +298,8 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
      */
     public void rejectInvitation() throws RemoteException {
         try {
-            if (mLogger.isActivated()) {
-                mLogger.info("Reject session invitation");
+            if (sLogger.isActivated()) {
+                sLogger.info("Reject session invitation");
             }
             final GenericSipRtpSession session = mSipService.getGenericSipRtpSession(mSessionId);
             if (session == null) {
@@ -311,12 +310,12 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
             session.rejectSession(InvitationStatus.INVITATION_REJECTED_DECLINE);
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -328,51 +327,30 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
      */
     public void abortSession() throws RemoteException {
         try {
-            if (mLogger.isActivated()) {
-                mLogger.info("Cancel session");
+            if (sLogger.isActivated()) {
+                sLogger.info("Abort session");
             }
             final GenericSipRtpSession session = mSipService.getGenericSipRtpSession(mSessionId);
             if (session == null) {
-                throw new ServerApiGenericException(new StringBuilder("Session with session ID '")
-                        .append(mSessionId).append("' not available!").toString());
+                sLogger.debug("No ongoing session with id:" + mSessionId
+                        + " is found so nothing to abort!");
+                return;
+            }
+            if (session.isSessionInterrupted()) {
+                sLogger.debug("Session with sharing ID:" + mSessionId + " is already aborted!");
+                return;
             }
             ServerApiUtils.testApiExtensionPermission(session.getServiceId());
-            new Thread() {
-                public void run() {
-                    // @FIXME:Terminate Session should not run on a new thread
-                    try {
-                        session.terminateSession(TerminationReason.TERMINATION_BY_USER);
-                    } catch (SipPayloadException e) {
-                        mLogger.error(
-                                "Failed to terminate session with session ID : ".concat(mSessionId),
-                                e);
-                    } catch (SipNetworkException e) {
-                        if (mLogger.isActivated()) {
-                            mLogger.debug(e.getMessage());
-                        }
-                    } catch (RuntimeException e) {
-                        /*
-                         * Normally we are not allowed to catch runtime exceptions as these are
-                         * genuine bugs which should be handled/fixed within the code. However the
-                         * cases when we are executing operations on a thread unhandling such
-                         * exceptions will eventually lead to exit the system and thus can bring the
-                         * whole system down, which is not intended.
-                         */
-                        mLogger.error(
-                                "Failed to terminate session with session ID : ".concat(mSessionId),
-                                e);
-                    }
-                }
-            }.start();
+            session.terminateSession(TerminationReason.TERMINATION_BY_USER);
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -397,12 +375,12 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
             session.sendPlayload(content);
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
-                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
             throw e;
 
         } catch (Exception e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
     }
@@ -412,9 +390,9 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
     /**
      * Session is started
      */
-    public void handleSessionStarted(ContactId contact) {
-        if (mLogger.isActivated()) {
-            mLogger.info("Session started");
+    public void onSessionStarted(ContactId contact) {
+        if (sLogger.isActivated()) {
+            sLogger.info("Session started");
         }
         synchronized (mLock) {
             setStateAndReason(contact, State.STARTED, ReasonCode.UNSPECIFIED);
@@ -426,9 +404,9 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
      * 
      * @param reason Termination reason
      */
-    public void handleSessionAborted(ContactId contact, TerminationReason reason) {
-        if (mLogger.isActivated()) {
-            mLogger.info(new StringBuilder("Session aborted (terminationReason ").append(reason)
+    public void onSessionAborted(ContactId contact, TerminationReason reason) {
+        if (sLogger.isActivated()) {
+            sLogger.info(new StringBuilder("Session aborted (terminationReason ").append(reason)
                     .append(")").toString());
         }
         synchronized (mLock) {
@@ -460,8 +438,8 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
      * @param error Error
      */
     public void handleSessionError(ContactId contact, SipSessionError error) {
-        if (mLogger.isActivated()) {
-            mLogger.info("Session error " + error.getErrorCode());
+        if (sLogger.isActivated()) {
+            sLogger.info("Session error " + error.getErrorCode());
         }
         synchronized (mLock) {
             mMultimediaSessionService.removeMultimediaStreaming(mSessionId);
@@ -489,16 +467,16 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
      * @param data Data
      * @param contact
      */
-    public void handleReceiveData(ContactId contact, byte[] data) {
+    public void onDataReceived(ContactId contact, byte[] data) {
         synchronized (mLock) {
             mBroadcaster.broadcastPayloadReceived(contact, mSessionId, data);
         }
     }
 
     @Override
-    public void handleSessionAccepted(ContactId contact) {
-        if (mLogger.isActivated()) {
-            mLogger.info("Accepting session");
+    public void onSessionAccepting(ContactId contact) {
+        if (sLogger.isActivated()) {
+            sLogger.info("Accepting session");
         }
         synchronized (mLock) {
             setStateAndReason(contact, State.ACCEPTING, ReasonCode.UNSPECIFIED);
@@ -506,7 +484,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
     }
 
     @Override
-    public void handleSessionRejected(ContactId contact, TerminationReason reason) {
+    public void onSessionRejected(ContactId contact, TerminationReason reason) {
         switch (reason) {
             case TERMINATION_BY_USER:
                 handleSessionRejected(ReasonCode.REJECTED_BY_USER, contact);
@@ -529,15 +507,15 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
     }
 
     @Override
-    public void handleSessionInvited(ContactId contact, Intent sessionInvite) {
-        if (mLogger.isActivated()) {
-            mLogger.info("Invited to multimedia streaming session");
+    public void onSessionInvited(ContactId contact, Intent sessionInvite) {
+        if (sLogger.isActivated()) {
+            sLogger.info("Invited to multimedia streaming session");
         }
         mBroadcaster.broadcastInvitation(mSessionId, sessionInvite);
     }
 
     @Override
-    public void handle180Ringing(ContactId contact) {
+    public void onSessionRinging(ContactId contact) {
         synchronized (mLock) {
             setStateAndReason(contact, State.RINGING, ReasonCode.UNSPECIFIED);
         }

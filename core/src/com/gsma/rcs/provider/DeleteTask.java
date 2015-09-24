@@ -53,8 +53,6 @@ public abstract class DeleteTask<T> implements Runnable {
 
     private final boolean mPathAppended;
 
-    private final Object mLock;
-
     private boolean mDeleteAllAtOnce;
 
     protected final LocalContentResolver mLocalContentResolver;
@@ -63,25 +61,24 @@ public abstract class DeleteTask<T> implements Runnable {
 
         private final ContactId mContact;
 
-        public GroupedByContactId(LocalContentResolver contentResolver, Object lock,
-                Uri contentUri, String columnPrimaryKey, String columnGroupBy, String selection,
+        public GroupedByContactId(LocalContentResolver contentResolver, Uri contentUri,
+                String columnPrimaryKey, String columnGroupBy, String selection,
                 String... selectionArgs) {
-            super(contentResolver, lock, contentUri, columnPrimaryKey, columnGroupBy, selection,
+            super(contentResolver, contentUri, columnPrimaryKey, columnGroupBy, selection,
                     selectionArgs);
             mContact = null;
         }
 
         /**
          * @param contentResolver
-         * @param lock
          * @param contentUri
          * @param columnPrimaryKey
          * @param columnContact
          * @param contact
          */
-        public GroupedByContactId(LocalContentResolver contentResolver, Object lock,
+        public GroupedByContactId(LocalContentResolver contentResolver,
                 Uri contentUri, String columnPrimaryKey, String columnContact, ContactId contact) {
-            super(contentResolver, lock, contentUri, columnPrimaryKey, columnContact,
+            super(contentResolver, contentUri, columnPrimaryKey, columnContact,
                     new StringBuilder(columnContact).append("=?").toString(), contact.toString());
             mContact = contact;
         }
@@ -102,10 +99,10 @@ public abstract class DeleteTask<T> implements Runnable {
 
     public abstract static class GroupedByChatId extends DeleteTask<String> {
 
-        public GroupedByChatId(LocalContentResolver contentResolver, Object lock, Uri contentUri,
+        public GroupedByChatId(LocalContentResolver contentResolver, Uri contentUri,
                 String columnPrimaryKey, String columnGroupBy, String selection,
                 String... selectionArgs) {
-            super(contentResolver, lock, contentUri, columnPrimaryKey, columnGroupBy, selection,
+            super(contentResolver, contentUri, columnPrimaryKey, columnGroupBy, selection,
                     selectionArgs);
         }
 
@@ -120,9 +117,9 @@ public abstract class DeleteTask<T> implements Runnable {
 
         private static final String DEFAULT_KEY = "";
 
-        public NotGrouped(LocalContentResolver contentResolver, Object lock, Uri contentUri,
+        public NotGrouped(LocalContentResolver contentResolver, Uri contentUri,
                 String columnPrimaryKey, String selection, String... selectionArgs) {
-            super(contentResolver, lock, contentUri, columnPrimaryKey, null, selection,
+            super(contentResolver, contentUri, columnPrimaryKey, null, selection,
                     selectionArgs);
         }
 
@@ -152,7 +149,6 @@ public abstract class DeleteTask<T> implements Runnable {
      * dependencies.
      * 
      * @param contentResolver the local content resolver
-     * @param lock the lock used during effective deletion
      * @param contentUri the content uri (not path appended)
      * @param columnPrimaryKey the primary key of the item to delete
      * @param columnGroupBy the column by which to group (chat id, contact id) the selection of the
@@ -162,10 +158,9 @@ public abstract class DeleteTask<T> implements Runnable {
      *            of the item).
      * @param selectionArgs the selection arguments of the scope
      */
-    public DeleteTask(LocalContentResolver contentResolver, Object lock, Uri contentUri,
+    public DeleteTask(LocalContentResolver contentResolver, Uri contentUri,
             String columnPrimaryKey, String columnGroupBy, String selection,
             String... selectionArgs) {
-        mLock = lock;
         mLocalContentResolver = contentResolver;
         if (selection == null && selectionArgs != null && selectionArgs.length == 1) {
             mContentUri = contentUri.buildUpon().appendPath(selectionArgs[0].toString()).build();
@@ -243,17 +238,15 @@ public abstract class DeleteTask<T> implements Runnable {
         if (items == null || items.isEmpty()) {
             return null;
         }
-        synchronized (mLock) {
-            for (T groupId : items.keySet()) {
-                for (String itemKey : items.get(groupId)) {
-                    onRowDelete(groupId, itemKey);
-                    if (!mDeleteAllAtOnce) {
-                        mLocalContentResolver.delete(getAppendedPathUri(itemKey), null, null);
-                    }
+        for (T groupId : items.keySet()) {
+            for (String itemKey : items.get(groupId)) {
+                onRowDelete(groupId, itemKey);
+                if (!mDeleteAllAtOnce) {
+                    mLocalContentResolver.delete(getAppendedPathUri(itemKey), null, null);
                 }
-                if (mDeleteAllAtOnce) {
-                    mLocalContentResolver.delete(mContentUri, mSelection, mSelectionArgs);
-                }
+            }
+            if (mDeleteAllAtOnce) {
+                mLocalContentResolver.delete(mContentUri, mSelection, mSelectionArgs);
             }
         }
         return items;

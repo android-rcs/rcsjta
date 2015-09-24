@@ -247,8 +247,8 @@ public class OptionsRequestTask implements Runnable {
             mContactManager.setContactCapabilities(mContact, info.getCapabilities(),
                     info.getRcsStatus(), RegistrationState.OFFLINE);
 
-            mImsModule.getCore().getListener()
-                    .handleCapabilitiesNotification(mContact, info.getCapabilities());
+            mImsModule.getCapabilityService().onReceivedCapabilities(mContact,
+                    info.getCapabilities());
         }
     }
 
@@ -268,8 +268,8 @@ public class OptionsRequestTask implements Runnable {
         /* The contact is not RCS */
         mContactManager.setContactCapabilities(mContact, Capabilities.sDefaultCapabilities,
                 RcsStatus.NOT_RCS, RegistrationState.UNKNOWN);
-        mImsModule.getCore().getListener()
-                .handleCapabilitiesNotification(mContact, Capabilities.sDefaultCapabilities);
+        mImsModule.getCapabilityService().onReceivedCapabilities(mContact,
+                Capabilities.sDefaultCapabilities);
     }
 
     /**
@@ -311,7 +311,7 @@ public class OptionsRequestTask implements Runnable {
             mContactManager.setContactCapabilities(mContact, capabilities, RcsStatus.NOT_RCS,
                     RegistrationState.UNKNOWN);
         }
-        mImsModule.getCore().getListener().handleCapabilitiesNotification(mContact, capabilities);
+        mImsModule.getCapabilityService().onReceivedCapabilities(mContact, capabilities);
     }
 
     /**

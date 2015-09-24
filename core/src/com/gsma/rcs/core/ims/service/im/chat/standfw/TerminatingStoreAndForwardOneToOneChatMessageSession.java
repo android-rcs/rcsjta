@@ -156,7 +156,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
                 }
 
                 for (ImsSessionListener listener : listeners) {
-                    ((OneToOneChatSessionListener) listener).handleSessionAutoAccepted(contact);
+                    ((OneToOneChatSessionListener) listener).onSessionAutoAccepted(contact);
                 }
             } else {
                 if (logActivated) {
@@ -164,7 +164,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
                 }
 
                 for (ImsSessionListener listener : listeners) {
-                    ((OneToOneChatSessionListener) listener).handleSessionInvited(contact);
+                    ((OneToOneChatSessionListener) listener).onSessionInvited(contact);
                 }
 
                 send180Ringing(dialogPath.getInvite(), dialogPath.getLocalTag());
@@ -181,7 +181,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
                         removeSession();
 
                         for (ImsSessionListener listener : listeners) {
-                            listener.handleSessionRejected(contact,
+                            listener.onSessionRejected(contact,
                                     TerminationReason.TERMINATION_BY_USER);
                         }
                         return;
@@ -197,7 +197,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
                         removeSession();
 
                         for (ImsSessionListener listener : listeners) {
-                            listener.handleSessionRejected(contact,
+                            listener.onSessionRejected(contact,
                                     TerminationReason.TERMINATION_BY_TIMEOUT);
                         }
                         return;
@@ -217,7 +217,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
                         removeSession();
 
                         for (ImsSessionListener listener : listeners) {
-                            listener.handleSessionRejected(contact,
+                            listener.onSessionRejected(contact,
                                     TerminationReason.TERMINATION_BY_REMOTE);
                         }
                         return;
@@ -226,7 +226,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
                         setSessionAccepted();
 
                         for (ImsSessionListener listener : listeners) {
-                            listener.handleSessionAccepted(contact);
+                            listener.onSessionAccepting(contact);
                         }
                         break;
 
@@ -349,7 +349,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
                 }
 
                 for (ImsSessionListener listener : listeners) {
-                    listener.handleSessionStarted(contact);
+                    listener.onSessionStarted(contact);
                 }
                 SessionTimerManager sessionTimerManager = getSessionTimerManager();
                 if (sessionTimerManager.isSessionTimerActivated(resp)) {

@@ -45,9 +45,9 @@ public class GeolocSharingDeleteTask extends DeleteTask.GroupedByContactId {
      * @param imsLock the ims operation lock
      */
     public GeolocSharingDeleteTask(GeolocSharingServiceImpl geolocSharingService,
-            RichcallService richcallService, LocalContentResolver contentResolver, Object imsLock) {
-        super(contentResolver, imsLock, GeolocSharingData.CONTENT_URI,
-                GeolocSharingData.KEY_SHARING_ID, GeolocSharingData.KEY_CONTACT, (String) null);
+            RichcallService richcallService, LocalContentResolver contentResolver) {
+        super(contentResolver, GeolocSharingData.CONTENT_URI, GeolocSharingData.KEY_SHARING_ID,
+                GeolocSharingData.KEY_CONTACT, (String) null);
         mGeolocSharingService = geolocSharingService;
         mRichcallService = richcallService;
     }
@@ -62,9 +62,9 @@ public class GeolocSharingDeleteTask extends DeleteTask.GroupedByContactId {
      * @param contact the contact id
      */
     public GeolocSharingDeleteTask(GeolocSharingServiceImpl geolocSharingService,
-            RichcallService richcallService, LocalContentResolver contentResolver, Object imsLock,
+            RichcallService richcallService, LocalContentResolver contentResolver,
             ContactId contact) {
-        super(contentResolver, imsLock, GeolocSharingData.CONTENT_URI,
+        super(contentResolver, GeolocSharingData.CONTENT_URI,
                 GeolocSharingData.KEY_SHARING_ID, GeolocSharingData.KEY_CONTACT, contact);
         mGeolocSharingService = geolocSharingService;
         mRichcallService = richcallService;
@@ -80,10 +80,10 @@ public class GeolocSharingDeleteTask extends DeleteTask.GroupedByContactId {
      * @param transferId the transfer id
      */
     public GeolocSharingDeleteTask(GeolocSharingServiceImpl geolocSharingService,
-            RichcallService richcallService, LocalContentResolver contentResolver, Object imsLock,
+            RichcallService richcallService, LocalContentResolver contentResolver,
             String transferId) {
-        super(contentResolver, imsLock, GeolocSharingData.CONTENT_URI,
-                GeolocSharingData.KEY_SHARING_ID, GeolocSharingData.KEY_CONTACT, null, transferId);
+        super(contentResolver, GeolocSharingData.CONTENT_URI, GeolocSharingData.KEY_SHARING_ID,
+                GeolocSharingData.KEY_CONTACT, null, transferId);
         mGeolocSharingService = geolocSharingService;
         mRichcallService = richcallService;
     }

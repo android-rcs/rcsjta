@@ -40,14 +40,14 @@ public interface FileSharingSessionListener extends ImsSessionListener {
      * @param currentSize Data size transfered
      * @param totalSize Total size to be transfered
      */
-    public void handleTransferProgress(ContactId contact, long currentSize, long totalSize);
+    public void onTransferProgress(ContactId contact, long currentSize, long totalSize);
 
     /**
      * File transfer not allowed to send
      * 
      * @param contact Remote contact
      */
-    public void handleTransferNotAllowedToSend(ContactId contact);
+    public void onTransferNotAllowedToSend(ContactId contact);
 
     /**
      * File transfer error
@@ -55,7 +55,7 @@ public interface FileSharingSessionListener extends ImsSessionListener {
      * @param error Error
      * @param contact Remote contact
      */
-    public void handleTransferError(FileSharingError error, ContactId contact);
+    public void onTransferError(FileSharingError error, ContactId contact);
 
     /**
      * File has been transfered In case of file transfer over MSRP, the terminating side has
@@ -69,7 +69,7 @@ public interface FileSharingSessionListener extends ImsSessionListener {
      *            download
      * @param ftProtocol FileTransferProtocol
      */
-    public void handleFileTransfered(MmContent content, ContactId contact, long fileExpiration,
+    public void onFileTransfered(MmContent content, ContactId contact, long fileExpiration,
             long fileIconExpiration, FileTransferProtocol ftProtocol);
 
     /**
@@ -77,21 +77,21 @@ public interface FileSharingSessionListener extends ImsSessionListener {
      * 
      * @param contact Remote contact
      */
-    public void handleFileTransferPausedByUser(ContactId contact);
+    public void onFileTransferPausedByUser(ContactId contact);
 
     /**
      * File transfer has been paused by system
      * 
      * @param contact Remote contact
      */
-    public void handleFileTransferPausedBySystem(ContactId contact);
+    public void onFileTransferPausedBySystem(ContactId contact);
 
     /**
      * File transfer has been resumed
      * 
      * @param contact Remote contact
      */
-    public void handleFileTransferResumed(ContactId contact);
+    public void onFileTransferResumed(ContactId contact);
 
     /**
      * A session invitation has been received
@@ -104,7 +104,7 @@ public interface FileSharingSessionListener extends ImsSessionListener {
      * @param fileExpiration
      * @param fileIconExpiration
      */
-    public void handleSessionInvited(ContactId contact, MmContent file, MmContent fileIcon,
+    public void onSessionInvited(ContactId contact, MmContent file, MmContent fileIcon,
             long timestamp, long timestampSent, long fileExpiration, long fileIconExpiration);
 
     /**
@@ -118,6 +118,6 @@ public interface FileSharingSessionListener extends ImsSessionListener {
      * @param fileExpiration
      * @param fileIconExpiration
      */
-    public void handleSessionAutoAccepted(ContactId contact, MmContent file, MmContent fileIcon,
+    public void onSessionAutoAccepted(ContactId contact, MmContent file, MmContent fileIcon,
             long timestamp, long timestampSent, long fileExpiration, long fileIconExpiration);
 }

@@ -170,7 +170,7 @@ public class PresenceSubscribeManager extends SubscribeManager {
                             getImsModule().getPresenceService().getXdmManager()
                                     .removeContactFromGrantedList(contact);
                         }
-                        getImsModule().getCore().getListener()
+                        getImsModule().getPresenceService()
                                 .handlePresenceSharingNotification(contact, state, reason);
                     }
                 }
@@ -186,7 +186,7 @@ public class PresenceSubscribeManager extends SubscribeManager {
                 throw new SipPayloadException("Invalid entity :".concat(entity));
             }
             ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
-            getImsModule().getCore().getListener()
+            getImsModule().getPresenceService()
                     .handlePresenceInfoNotification(contact, presenceInfo);
         } catch (ParserConfigurationException e) {
             throw new SipPayloadException("Can't parse presence notification!", e);

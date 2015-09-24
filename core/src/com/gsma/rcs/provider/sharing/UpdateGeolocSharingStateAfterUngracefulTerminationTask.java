@@ -51,6 +51,9 @@ public class UpdateGeolocSharingStateAfterUngracefulTerminationTask implements R
     }
 
     public void run() {
+        if (sLogger.isActivated()) {
+            sLogger.debug("initiating.");
+        }
         Cursor cursor = null;
         try {
             cursor = mRichCallHistory.getInterruptedGeolocSharings();
@@ -80,7 +83,10 @@ public class UpdateGeolocSharingStateAfterUngracefulTerminationTask implements R
                         mGeolocService.setGeolocSharingStateAndReasonCode(contact, sharingId,
                                 State.REJECTED, ReasonCode.REJECTED_BY_SYSTEM);
                         break;
-                /* TODO: Handle default. */
+                    default:
+                        sLogger.error(getClass().getName() + " unexpected state (" + state
+                                + ") detected! Error in SQL statement?");
+                        break;
                 }
             }
         } catch (RuntimeException e) {
@@ -95,6 +101,9 @@ public class UpdateGeolocSharingStateAfterUngracefulTerminationTask implements R
                     e);
         } finally {
             CursorUtil.close(cursor);
+            if (sLogger.isActivated()) {
+                sLogger.debug("done.");
+            }
         }
     }
 }

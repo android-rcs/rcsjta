@@ -36,6 +36,7 @@ import com.gsma.rcs.core.ims.service.sip.streaming.OriginatingSipRtpSession;
 import com.gsma.rcs.core.ims.service.sip.streaming.TerminatingSipRtpSession;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.MultimediaSessionServiceImpl;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
@@ -57,7 +58,7 @@ public class SipService extends ImsService {
     /**
      * The logger
      */
-    private final static Logger logger = Logger.getLogger(SipService.class.getSimpleName());
+    private final static Logger sLogger = Logger.getLogger(SipService.class.getSimpleName());
 
     /**
      * MIME-type for multimedia services
@@ -78,6 +79,8 @@ public class SipService extends ImsService {
 
     private final RcsSettings mRcsSettings;
 
+    private MultimediaSessionServiceImpl mMmSessionService;
+
     /**
      * Constructor
      * 
@@ -90,6 +93,13 @@ public class SipService extends ImsService {
 
         mContactManager = contactManager;
         mRcsSettings = rcsSettings;
+    }
+
+    public void register(MultimediaSessionServiceImpl service) {
+        if (sLogger.isActivated()) {
+            sLogger.debug(service.getClass().getName() + " registered ok.");
+        }
+        mMmSessionService = service;
     }
 
     /**
@@ -127,9 +137,9 @@ public class SipService extends ImsService {
      * @param featureTag Feature tag of the service
      * @return SIP session
      */
-    public GenericSipMsrpSession initiateMsrpSession(ContactId contact, String featureTag) {
-        if (logger.isActivated()) {
-            logger.info("Initiate a MSRP session with contact " + contact);
+    public GenericSipMsrpSession createMsrpSession(ContactId contact, String featureTag) {
+        if (sLogger.isActivated()) {
+            sLogger.info("Initiate a MSRP session with contact " + contact);
         }
 
         // Create a new session
@@ -149,41 +159,55 @@ public class SipService extends ImsService {
      * @throws SipNetworkException
      * @throws SipPayloadException
      */
-    public void receiveMsrpSessionInvitation(Intent sessionInvite, SipRequest invite, long timestamp)
-            throws SipPayloadException, SipNetworkException {
-        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(SipUtils
-                .getAssertedIdentity(invite));
-        if (number == null) {
-            if (logger.isActivated()) {
-                logger.warn("Cannot process MSRP invitation: invalid SIP header");
+    public void onMsrpSessionInvitationReceived(Intent sessionInvite, SipRequest invite,
+            long timestamp) {
+        try {
+            PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(SipUtils
+                    .getAssertedIdentity(invite));
+            if (number == null) {
+                if (sLogger.isActivated()) {
+                    sLogger.warn("Cannot process MSRP invitation: invalid SIP header");
+                }
+                sendErrorResponse(invite, Response.SESSION_NOT_ACCEPTABLE);
+                return;
             }
-            sendErrorResponse(invite, Response.SESSION_NOT_ACCEPTABLE);
-            return;
-        }
-        // Test if the contact is blocked
-        ContactId remote = ContactUtil.createContactIdFromValidatedData(number);
-        mContactManager.setContactDisplayName(remote,
-                SipUtils.getDisplayNameFromUri(invite.getFrom()));
+            // Test if the contact is blocked
+            ContactId remote = ContactUtil.createContactIdFromValidatedData(number);
+            mContactManager.setContactDisplayName(remote,
+                    SipUtils.getDisplayNameFromUri(invite.getFrom()));
 
-        if (mContactManager.isBlockedForContact(remote)) {
-            if (logger.isActivated()) {
-                logger.debug("Contact " + remote
-                        + " is blocked: automatically reject the session invitation");
+            if (mContactManager.isBlockedForContact(remote)) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Contact " + remote
+                            + " is blocked: automatically reject the session invitation");
+                }
+                sendErrorResponse(invite, Response.DECLINE);
+                return;
             }
 
-            // Send a 603 Decline response
-            sendErrorResponse(invite, Response.DECLINE);
-            return;
+            TerminatingSipMsrpSession session = new TerminatingSipMsrpSession(this, invite, remote,
+                    sessionInvite, mRcsSettings, timestamp, mContactManager);
+
+            mMmSessionService.receiveSipMsrpSessionInvitation(sessionInvite, session);
+
+            session.startSession();
+
+        } catch (SipNetworkException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Failed to receive generic msrp session invitation! ("
+                        + e.getMessage() + ")");
+            }
+        } catch (SipPayloadException e) {
+            sLogger.error("Failed to receive generic msrp session invitation!", e);
+        } catch (RuntimeException e) {
+            /*
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
+             */
+            sLogger.error("Failed to receive generic msrp session invitation!", e);
         }
-
-        // Create a new session
-        TerminatingSipMsrpSession session = new TerminatingSipMsrpSession(this, invite, remote,
-                sessionInvite, mRcsSettings, timestamp, mContactManager);
-
-        getImsModule().getCore().getListener()
-                .handleSipMsrpSessionInvitation(sessionInvite, session);
-
-        session.startSession();
     }
 
     /**
@@ -193,9 +217,9 @@ public class SipService extends ImsService {
      * @param featureTag Feature tag of the service
      * @return SIP session
      */
-    public GenericSipRtpSession initiateRtpSession(ContactId contact, String featureTag) {
-        if (logger.isActivated()) {
-            logger.info("Initiate a RTP session with contact " + contact);
+    public GenericSipRtpSession createRtpSession(ContactId contact, String featureTag) {
+        if (sLogger.isActivated()) {
+            sLogger.info("Initiate a RTP session with contact " + contact);
         }
 
         // Create a new session
@@ -215,47 +239,61 @@ public class SipService extends ImsService {
      * @throws SipNetworkException
      * @throws SipPayloadException
      */
-    public void receiveRtpSessionInvitation(Intent sessionInvite, SipRequest invite, long timestamp)
-            throws SipPayloadException, SipNetworkException {
-        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(SipUtils
-                .getAssertedIdentity(invite));
-        if (number == null) {
-            if (logger.isActivated()) {
-                logger.warn("Cannot process RTP invitation: invalid SIP header");
+    public void onRtpSessionInvitationReceived(Intent sessionInvite, SipRequest invite,
+            long timestamp) {
+        try {
+            PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(SipUtils
+                    .getAssertedIdentity(invite));
+            if (number == null) {
+                if (sLogger.isActivated()) {
+                    sLogger.warn("Cannot process RTP invitation: invalid SIP header");
+                }
+                sendErrorResponse(invite, Response.SESSION_NOT_ACCEPTABLE);
+                return;
             }
-            sendErrorResponse(invite, Response.SESSION_NOT_ACCEPTABLE);
-            return;
-        }
-        // Test if the contact is blocked
-        ContactId remote = ContactUtil.createContactIdFromValidatedData(number);
-        mContactManager.setContactDisplayName(remote,
-                SipUtils.getDisplayNameFromUri(invite.getFrom()));
+            // Test if the contact is blocked
+            ContactId remote = ContactUtil.createContactIdFromValidatedData(number);
+            mContactManager.setContactDisplayName(remote,
+                    SipUtils.getDisplayNameFromUri(invite.getFrom()));
 
-        if (mContactManager.isBlockedForContact(remote)) {
-            if (logger.isActivated()) {
-                logger.debug("Contact " + remote
-                        + " is blocked: automatically reject the session invitation");
+            if (mContactManager.isBlockedForContact(remote)) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Contact " + remote
+                            + " is blocked: automatically reject the session invitation");
+                }
+                sendErrorResponse(invite, Response.DECLINE);
+                return;
             }
 
-            // Send a 603 Decline response
-            sendErrorResponse(invite, Response.DECLINE);
-            return;
+            TerminatingSipRtpSession session = new TerminatingSipRtpSession(this, invite, remote,
+                    sessionInvite, mRcsSettings, timestamp, mContactManager);
+
+            mMmSessionService.receiveSipRtpSessionInvitation(sessionInvite, session);
+
+            session.startSession();
+
+        } catch (SipNetworkException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Failed to receive generic rtp session invitation! (" + e.getMessage()
+                        + ")");
+            }
+        } catch (SipPayloadException e) {
+            sLogger.error("Failed to receive generic rtp session invitation!", e);
+        } catch (RuntimeException e) {
+            /*
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
+             */
+            sLogger.error("Failed to receive generic rtp session invitation!", e);
         }
-
-        // Create a new session
-        TerminatingSipRtpSession session = new TerminatingSipRtpSession(this, invite, remote,
-                sessionInvite, mRcsSettings, timestamp, mContactManager);
-
-        getImsModule().getCore().getListener()
-                .handleSipRtpSessionInvitation(sessionInvite, session);
-
-        session.startSession();
     }
 
     public void addSession(GenericSipMsrpSession session) {
         final String sessionId = session.getSessionID();
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Add GenericSipMsrpSession with sessionId '")
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("Add GenericSipMsrpSession with sessionId '")
                     .append(sessionId).append("'").toString());
         }
         synchronized (getImsServiceSessionOperationLock()) {
@@ -266,8 +304,8 @@ public class SipService extends ImsService {
 
     public void removeSession(final GenericSipMsrpSession session) {
         final String sessionId = session.getSessionID();
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Remove GenericSipMsrpSession with sessionId '")
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("Remove GenericSipMsrpSession with sessionId '")
                     .append(sessionId).append("'").toString());
         }
         synchronized (getImsServiceSessionOperationLock()) {
@@ -277,8 +315,8 @@ public class SipService extends ImsService {
     }
 
     public GenericSipMsrpSession getGenericSipMsrpSession(String sessionId) {
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Get GenericSipMsrpSession with sessionId '")
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("Get GenericSipMsrpSession with sessionId '")
                     .append(sessionId).append("'").toString());
         }
         synchronized (getImsServiceSessionOperationLock()) {
@@ -288,8 +326,8 @@ public class SipService extends ImsService {
 
     public void addSession(GenericSipRtpSession session) {
         final String sessionId = session.getSessionID();
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Add GenericSipRtpSession with sessionId '")
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("Add GenericSipRtpSession with sessionId '")
                     .append(sessionId).append("'").toString());
         }
         synchronized (getImsServiceSessionOperationLock()) {
@@ -300,8 +338,8 @@ public class SipService extends ImsService {
 
     public void removeSession(final GenericSipRtpSession session) {
         final String sessionId = session.getSessionID();
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Remove GenericSipRtpSession with sessionId '")
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("Remove GenericSipRtpSession with sessionId '")
                     .append(sessionId).append("'").toString());
         }
         synchronized (getImsServiceSessionOperationLock()) {
@@ -311,8 +349,8 @@ public class SipService extends ImsService {
     }
 
     public GenericSipRtpSession getGenericSipRtpSession(String sessionId) {
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Get GenericSipRtpSession with sessionId '")
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("Get GenericSipRtpSession with sessionId '")
                     .append(sessionId).append("'").toString());
         }
         synchronized (getImsServiceSessionOperationLock()) {

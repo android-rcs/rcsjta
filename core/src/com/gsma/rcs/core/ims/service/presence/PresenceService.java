@@ -34,6 +34,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
+import com.gsma.rcs.core.ims.service.presence.pidf.PidfDocument;
 import com.gsma.rcs.core.ims.service.presence.xdm.XdmManager;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.contact.ContactManagerException;
@@ -982,4 +983,45 @@ public class PresenceService extends ImsService implements AddressBookEventListe
             }
         }
     }
+
+    /**
+     * A new presence sharing notification has been received
+     *
+     * @param contact Contact identifier
+     * @param status Status
+     * @param reason Reason
+     */
+    public void handlePresenceSharingNotification(ContactId contact, String status, String reason) {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event presence sharing notification for " + contact + " ("
+                    + status + ":" + reason + ")");
+        }
+        // Not used
+    }
+
+    /**
+     * A new presence info notification has been received
+     *
+     * @param contact Contact identifier
+     * @param presence Presence info document
+     */
+    public void handlePresenceInfoNotification(ContactId contact, PidfDocument presence) {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event presence info notification for " + contact);
+        }
+        // Not used
+    }
+
+    /**
+     * A new presence sharing invitation has been received
+     *
+     * @param contact Contact identifier
+     */
+    public void handlePresenceSharingInvitation(ContactId contact) {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event presence sharing invitation");
+        }
+        // Not used
+    }
+
 }

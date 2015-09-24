@@ -49,7 +49,7 @@ public class StoreAndForwardManager {
 
     private final ContactManager mContactManager;
 
-    private final static Logger logger = Logger.getLogger(StoreAndForwardManager.class
+    private final static Logger sLogger = Logger.getLogger(StoreAndForwardManager.class
             .getSimpleName());
 
     /**
@@ -62,8 +62,8 @@ public class StoreAndForwardManager {
      */
     public StoreAndForwardManager(InstantMessagingService imService, RcsSettings rcsSettings,
             ContactManager contactManager, MessagingLog messagingLog) {
-        mRcsSettings = rcsSettings;
         mImService = imService;
+        mRcsSettings = rcsSettings;
         mContactManager = contactManager;
         mMessagingLog = messagingLog;
     }
@@ -77,39 +77,33 @@ public class StoreAndForwardManager {
      * @throws SipPayloadException
      * @throws SipNetworkException
      */
-    public void receiveStoredMessages(SipRequest invite, ContactId contact, long timestamp)
+    public void receiveStoreAndForwardMessageInvitation(SipRequest invite, ContactId contact, long timestamp)
             throws SipPayloadException, SipNetworkException {
-        if (logger.isActivated()) {
-            logger.debug("Receive stored messages");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Receive stored messages");
         }
         TerminatingStoreAndForwardOneToOneChatMessageSession session = new TerminatingStoreAndForwardOneToOneChatMessageSession(
                 mImService, invite, contact, mRcsSettings, mMessagingLog, timestamp,
                 mContactManager);
-
-        mImService.getImsModule().getCore().getListener()
-                .handleStoreAndForwardMsgSessionInvitation(session);
-
+        mImService.receiveStoreAndForwardMsgSessionInvitation(session);
         session.startSession();
     }
 
     /**
      * Receive stored notifications
-     * 
+     *
      * @param invite Received invite
      * @param contact Contact identifier
      * @param timestamp Local timestamp when got SipRequest
      */
-    public void receiveStoredNotifications(SipRequest invite, ContactId contact, long timestamp) {
-        if (logger.isActivated()) {
-            logger.debug("Receive stored notifications");
+    public void receiveStoreAndForwardNotificationInvitation(SipRequest invite, ContactId contact, long timestamp) {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Receive stored notifications");
         }
         TerminatingStoreAndForwardOneToOneChatNotificationSession session = new TerminatingStoreAndForwardOneToOneChatNotificationSession(
                 mImService, invite, contact, mRcsSettings, mMessagingLog, timestamp,
                 mContactManager);
-
-        mImService.getImsModule().getCore().getListener()
-                .handleStoreAndForwardNotificationSessionInvitation(session);
-
+        mImService.receiveStoreAndForwardNotificationSessionInvitation(session);
         session.startSession();
     }
 }

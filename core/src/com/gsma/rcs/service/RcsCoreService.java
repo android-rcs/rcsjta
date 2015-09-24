@@ -26,55 +26,21 @@ import com.gsma.rcs.addressbook.AccountChangedReceiver;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.CoreListener;
 import com.gsma.rcs.core.TerminalInfo;
-import com.gsma.rcs.core.content.MmContent;
-import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.ImsError;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
-import com.gsma.rcs.core.ims.service.capability.Capabilities;
+import com.gsma.rcs.core.ims.service.capability.CapabilityService;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
-import com.gsma.rcs.core.ims.service.im.chat.GroupChatAutoRejoinTask;
-import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
-import com.gsma.rcs.core.ims.service.im.chat.TerminatingAdhocGroupChatSession;
-import com.gsma.rcs.core.ims.service.im.chat.TerminatingOneToOneChatSession;
-import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
-import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
-import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatMessageSession;
-import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatNotificationSession;
-import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
-import com.gsma.rcs.core.ims.service.im.filetransfer.http.FtHttpResumeManager;
-import com.gsma.rcs.core.ims.service.presence.pidf.PidfDocument;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
-import com.gsma.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
-import com.gsma.rcs.core.ims.service.richcall.image.ImageTransferSession;
-import com.gsma.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.gsma.rcs.core.ims.service.sip.SipService;
-import com.gsma.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
-import com.gsma.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
-import com.gsma.rcs.provider.history.GroupChatDequeueTask;
-import com.gsma.rcs.provider.history.GroupChatTerminalExceptionTask;
 import com.gsma.rcs.provider.history.HistoryLog;
-import com.gsma.rcs.provider.history.OneToOneChatDequeueTask;
-import com.gsma.rcs.provider.messaging.DelayedDisplayNotificationDispatcher;
-import com.gsma.rcs.provider.messaging.FileTransferDequeueTask;
-import com.gsma.rcs.provider.messaging.GroupChatDeleteTask;
-import com.gsma.rcs.provider.messaging.GroupChatMessageDeleteTask;
-import com.gsma.rcs.provider.messaging.GroupFileTransferDeleteTask;
 import com.gsma.rcs.provider.messaging.MessagingLog;
-import com.gsma.rcs.provider.messaging.OneToOneChatMessageDeleteTask;
-import com.gsma.rcs.provider.messaging.OneToOneChatMessageDequeueTask;
-import com.gsma.rcs.provider.messaging.OneToOneFileTransferDeleteTask;
-import com.gsma.rcs.provider.messaging.RecreateDeliveryExpirationAlarms;
-import com.gsma.rcs.provider.messaging.UpdateFileTransferStateAfterUngracefulTerminationTask;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.sharing.RichCallHistory;
-import com.gsma.rcs.provider.sharing.UpdateGeolocSharingStateAfterUngracefulTerminationTask;
-import com.gsma.rcs.provider.sharing.UpdateImageSharingStateAfterUngracefulTerminationTask;
-import com.gsma.rcs.provider.sharing.UpdateVideoSharingStateAfterUngracefulTerminationTask;
 import com.gsma.rcs.service.api.CapabilityServiceImpl;
 import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.rcs.service.api.ContactServiceImpl;
@@ -84,29 +50,21 @@ import com.gsma.rcs.service.api.GeolocSharingServiceImpl;
 import com.gsma.rcs.service.api.HistoryServiceImpl;
 import com.gsma.rcs.service.api.ImageSharingServiceImpl;
 import com.gsma.rcs.service.api.MultimediaSessionServiceImpl;
-import com.gsma.rcs.service.api.OneToOneUndeliveredImManager;
 import com.gsma.rcs.service.api.VideoSharingServiceImpl;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.capability.ICapabilityService;
-import com.gsma.services.rcs.chat.GroupChat;
-import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.chat.IChatService;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.IContactService;
 import com.gsma.services.rcs.extension.IMultimediaSessionService;
-import com.gsma.services.rcs.filetransfer.FileTransfer;
-import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.IFileTransferService;
 import com.gsma.services.rcs.history.IHistoryService;
-import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharingService;
 import com.gsma.services.rcs.sharing.image.IImageSharingService;
-import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.video.IVideoSharingService;
-import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.upload.IFileUploadService;
 
 import android.app.Service;
@@ -120,10 +78,7 @@ import android.os.IBinder;
 
 import java.io.IOException;
 import java.security.KeyStoreException;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * RCS core service. This service offers a flat API to any other process (activities) to access to
@@ -134,14 +89,6 @@ import java.util.concurrent.Executors;
 public class RcsCoreService extends Service implements CoreListener {
 
     private static final String BACKGROUND_THREAD_NAME = RcsCoreService.class.getSimpleName();
-
-    private final Object mOperationLock = new Object();
-
-    private final ExecutorService mImOperationExecutor = Executors.newSingleThreadExecutor();
-
-    private final ExecutorService mRcOperationExecutor = Executors.newSingleThreadExecutor();
-
-    private OneToOneUndeliveredImManager mOneToOneUndeliveredImManager;
 
     private CpuManager mCpuManager;
 
@@ -165,7 +112,7 @@ public class RcsCoreService extends Service implements CoreListener {
 
     private HistoryServiceImpl mHistoryApi;
 
-    private MultimediaSessionServiceImpl mSessionApi;
+    private MultimediaSessionServiceImpl mMmSessionApi;
 
     private FileUploadServiceImpl mUploadApi;
 
@@ -205,9 +152,9 @@ public class RcsCoreService extends Service implements CoreListener {
         mContentResolver = mCtx.getContentResolver();
         mLocalContentResolver = new LocalContentResolver(mContentResolver);
         mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
+        mHistoryLog = HistoryLog.createInstance(mLocalContentResolver);
+        mRichCallHistory = RichCallHistory.createInstance(mLocalContentResolver);
         mMessagingLog = MessagingLog.createInstance(mLocalContentResolver, mRcsSettings);
-        RichCallHistory.createInstance(mLocalContentResolver);
-        mRichCallHistory = RichCallHistory.getInstance();
         mContactManager = ContactManager.createInstance(mCtx, mContentResolver,
                 mLocalContentResolver, mRcsSettings);
         AndroidFactory.setApplicationContext(mCtx, mRcsSettings);
@@ -326,33 +273,27 @@ public class RcsCoreService extends Service implements CoreListener {
             return;
         }
         try {
-            mHistoryLog = HistoryLog.createInstance(mLocalContentResolver);
+            core = Core.createCore(mCtx, this, mRcsSettings, mContentResolver,
+                    mLocalContentResolver, mContactManager, mMessagingLog, mHistoryLog,
+                    mRichCallHistory);
 
-            core = Core.createCore(mCtx, this, mRcsSettings, mContentResolver, mContactManager,
-                    mMessagingLog);
-
-            mContactApi = new ContactServiceImpl(mContactManager, mRcsSettings);
-            mCapabilityApi = new CapabilityServiceImpl(mContactManager, mRcsSettings,
-                    core.getCapabilityService());
             InstantMessagingService imService = core.getImService();
             RichcallService richCallService = core.getRichcallService();
             SipService sipService = core.getSipService();
+            CapabilityService capabilityService = core.getCapabilityService();
 
-            mOneToOneUndeliveredImManager = new OneToOneUndeliveredImManager(mCtx, mMessagingLog,
-                    imService);
+            mContactApi = new ContactServiceImpl(mContactManager, mRcsSettings);
+            mCapabilityApi = new CapabilityServiceImpl(capabilityService, mContactManager,
+                    mRcsSettings);
             mChatApi = new ChatServiceImpl(imService, mMessagingLog, mHistoryLog, mRcsSettings,
-                    mContactManager, core, mOneToOneUndeliveredImManager);
+                    mContactManager);
             mFtApi = new FileTransferServiceImpl(imService, mChatApi, mMessagingLog, mRcsSettings,
-                    mContactManager, core, mLocalContentResolver, mImOperationExecutor,
-                    mOperationLock, mOneToOneUndeliveredImManager);
-            mVshApi = new VideoSharingServiceImpl(richCallService, mRichCallHistory, mRcsSettings,
-                    mLocalContentResolver, mRcOperationExecutor, mOperationLock);
-            mIshApi = new ImageSharingServiceImpl(richCallService, mRichCallHistory, mRcsSettings,
-                    mLocalContentResolver, mRcOperationExecutor, mOperationLock);
-            mGshApi = new GeolocSharingServiceImpl(richCallService, mRichCallHistory, mRcsSettings,
-                    mLocalContentResolver, mRcOperationExecutor, mOperationLock);
+                    mContactManager, mLocalContentResolver);
+            mVshApi = new VideoSharingServiceImpl(richCallService, mRichCallHistory, mRcsSettings);
+            mIshApi = new ImageSharingServiceImpl(richCallService, mRichCallHistory, mRcsSettings);
+            mGshApi = new GeolocSharingServiceImpl(richCallService, mRichCallHistory, mRcsSettings);
             mHistoryApi = new HistoryServiceImpl(mCtx);
-            mSessionApi = new MultimediaSessionServiceImpl(sipService, mRcsSettings,
+            mMmSessionApi = new MultimediaSessionServiceImpl(sipService, mRcsSettings,
                     mContactManager);
             mUploadApi = new FileUploadServiceImpl(imService, mRcsSettings);
 
@@ -457,9 +398,6 @@ public class RcsCoreService extends Service implements CoreListener {
             mHistoryApi.close();
             mHistoryApi = null;
         }
-        if (mOneToOneUndeliveredImManager != null) {
-            mOneToOneUndeliveredImManager.cleanup();
-        }
 
         // Terminate the core in background
         Core.terminateCore();
@@ -521,7 +459,7 @@ public class RcsCoreService extends Service implements CoreListener {
             if (sLogger.isActivated()) {
                 sLogger.debug("Multimedia session API binding");
             }
-            return mSessionApi;
+            return mMmSessionApi;
         } else if (IFileUploadService.class.getName().equals(intent.getAction())) {
             if (sLogger.isActivated()) {
                 sLogger.debug("File upload service API binding");
@@ -559,8 +497,8 @@ public class RcsCoreService extends Service implements CoreListener {
         if (mGshApi != null) {
             mGshApi.notifyRegistration();
         }
-        if (mSessionApi != null) {
-            mSessionApi.notifyRegistration();
+        if (mMmSessionApi != null) {
+            mMmSessionApi.notifyRegistration();
         }
     }
 
@@ -591,36 +529,26 @@ public class RcsCoreService extends Service implements CoreListener {
         if (mGshApi != null) {
             mGshApi.notifyUnRegistration(reason);
         }
-        if (mSessionApi != null) {
-            mSessionApi.notifyUnRegistration(reason);
+        if (mMmSessionApi != null) {
+            mMmSessionApi.notifyUnRegistration(reason);
         }
     }
 
     @Override
-    public void handleCoreLayerStarted() {
+    public void onCoreLayerStarted() {
         if (sLogger.isActivated()) {
             sLogger.debug("Handle event core started");
         }
-        /* Update interrupted file transfer status */
-        mImOperationExecutor.execute(new UpdateFileTransferStateAfterUngracefulTerminationTask(
-                mMessagingLog, mFtApi));
-        mRcOperationExecutor.execute(new UpdateGeolocSharingStateAfterUngracefulTerminationTask(
-                mRichCallHistory, mGshApi));
-        mRcOperationExecutor.execute(new UpdateImageSharingStateAfterUngracefulTerminationTask(
-                mRichCallHistory, mIshApi));
-        mRcOperationExecutor.execute(new UpdateVideoSharingStateAfterUngracefulTerminationTask(
-                mRichCallHistory, mVshApi));
-        /*
-         * Recreate delivery expiration alarm for one-one chat messages and one-one file transfers
-         * after boot
-         */
-        mImOperationExecutor.execute(new RecreateDeliveryExpirationAlarms(mMessagingLog,
-                mOneToOneUndeliveredImManager, mOperationLock));
+
+        Core core = Core.getInstance();
+        core.getImService().onCoreLayerStarted();
+        core.getRichcallService().onCoreLayerStarted();
+
         IntentUtils.sendBroadcastEvent(mCtx, RcsService.ACTION_SERVICE_UP);
     }
 
     @Override
-    public void handleCoreLayerStopped() {
+    public void onCoreLayerStopped() {
         boolean logActivated = sLogger.isActivated();
         // Display a notification
         if (logActivated) {
@@ -658,483 +586,65 @@ public class RcsCoreService extends Service implements CoreListener {
     }
 
     @Override
-    public void handleRegistrationSuccessful() {
+    public void onRegistrationSuccessful() {
         if (sLogger.isActivated()) {
             sLogger.debug("Handle event registration ok");
         }
-
-        // Notify APIs
         notifyRegistrationToApi();
     }
 
     @Override
-    public void handleRegistrationFailed(ImsError error) {
+    public void onRegistrationFailed(ImsError error) {
         if (sLogger.isActivated()) {
             sLogger.debug("Handle event registration failed");
         }
-
-        // Notify APIs
         notifyUnRegistrationToApi(RcsServiceRegistration.ReasonCode.CONNECTION_LOST);
     }
 
     @Override
-    public void handleRegistrationTerminated(RcsServiceRegistration.ReasonCode reason) {
+    public void onRegistrationTerminated(RcsServiceRegistration.ReasonCode reason) {
         if (sLogger.isActivated()) {
             sLogger.debug("Handle event registration terminated: ".concat(reason.name()));
         }
-
-        // Notify APIs
         notifyUnRegistrationToApi(reason);
     }
 
     @Override
-    public void handlePresenceSharingNotification(ContactId contact, String status, String reason) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Handle event presence sharing notification for " + contact + " ("
-                    + status + ":" + reason + ")");
-        }
-        // Not used
-    }
-
-    @Override
-    public void handlePresenceInfoNotification(ContactId contact, PidfDocument presence) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Handle event presence info notification for " + contact);
-        }
-        // Not used
-    }
-
-    @Override
-    public void handleCapabilitiesNotification(ContactId contact, Capabilities capabilities) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Handle capabilities update notification for " + contact + " ("
-                    + capabilities.toString() + ")");
-        }
-
-        // Notify API
-        mCapabilityApi.receiveCapabilities(contact, capabilities);
-    }
-
-    @Override
-    public void handlePresenceSharingInvitation(ContactId contact) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Handle event presence sharing invitation");
-        }
-        // Not used
-    }
-
-    @Override
-    public void handleContentSharingTransferInvitation(ImageTransferSession session) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Handle event content sharing transfer invitation");
-        }
-
-        // Broadcast the invitation
-        mIshApi.receiveImageSharingInvitation(session);
-    }
-
-    @Override
-    public void handleContentSharingTransferInvitation(GeolocTransferSession session) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Handle event content sharing transfer invitation");
-        }
-
-        // Broadcast the invitation
-        mGshApi.receiveGeolocSharingInvitation(session);
-    }
-
-    @Override
-    public void handleContentSharingStreamingInvitation(VideoStreamingSession session) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Handle event content sharing streaming invitation");
-        }
-
-        // Broadcast the invitation
-        mVshApi.receiveVideoSharingInvitation(session);
-    }
-
-    @Override
-    public void handleFileTransferInvitation(FileSharingSession fileSharingSession,
-            boolean isGroup, ContactId contact, String displayName, long fileExpiration) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Handle event file transfer invitation");
-        }
-
-        // Broadcast the invitation
-        mFtApi.receiveFileTransferInvitation(fileSharingSession, isGroup, contact, displayName);
-    }
-
-    @Override
-    public void handleOneToOneFileTransferInvitation(FileSharingSession fileSharingSession,
-            OneToOneChatSession oneToOneChatSession, long fileExpiration) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Handle event file transfer invitation");
-        }
-
-        // Broadcast the invitation
-        mFtApi.receiveFileTransferInvitation(fileSharingSession, false,
-                oneToOneChatSession.getRemoteContact(), oneToOneChatSession.getRemoteDisplayName());
-    }
-
-    @Override
-    public void handleOneToOneResendFileTransferInvitation(FileSharingSession session,
-            ContactId contact, String displayName) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Handle event file transfer resend invitation");
-        }
-        mFtApi.receiveResendFileTransferInvitation(session, contact, displayName);
-    }
-
-    @Override
-    public void handleIncomingFileTransferResuming(FileSharingSession session, boolean isGroup,
-            String chatSessionId, String chatId) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Handle event incoming file transfer resuming");
-        }
-
-        // Broadcast the invitation
-        mFtApi.resumeIncomingFileTransfer(session, isGroup, chatSessionId, chatId);
-    }
-
-    @Override
-    public void handleOutgoingFileTransferResuming(FileSharingSession session, boolean isGroup) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Handle event outgoing file transfer resuming");
-        }
-
-        // Broadcast the invitation
-        mFtApi.resumeOutgoingFileTransfer(session, isGroup);
-    }
-
-    @Override
-    public void handleOneOneChatSessionInvitation(TerminatingOneToOneChatSession session) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Handle event receive 1-1 chat session invitation");
-        }
-
-        mChatApi.receiveOneToOneChatInvitation(session);
-    }
-
-    @Override
-    public void handleAdhocGroupChatSessionInvitation(TerminatingAdhocGroupChatSession session) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Handle event receive ad-hoc group chat session invitation");
-        }
-
-        // Broadcast the invitation
-        mChatApi.receiveGroupChatInvitation(session);
-    }
-
-    @Override
-    public void handleStoreAndForwardMsgSessionInvitation(
-            TerminatingStoreAndForwardOneToOneChatMessageSession session) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Handle event S&F messages session invitation");
-        }
-
-        mChatApi.receiveOneToOneChatInvitation(session);
-    }
-
-    @Override
-    public void handleStoreAndForwardNotificationSessionInvitation(
-            TerminatingStoreAndForwardOneToOneChatNotificationSession session) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Handle event S&F notification session invitation");
-        }
-
-        mChatApi.receiveOneToOneChatInvitation(session);
-    }
-
-    @Override
-    public void handleOneToOneMessageDeliveryStatus(ContactId contact, ImdnDocument imdn) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Handle one to one message delivery status");
-        }
-
-        mChatApi.receiveOneToOneMessageDeliveryStatus(contact, imdn);
-    }
-
-    @Override
-    public void handleGroupMessageDeliveryStatus(String chatId, ContactId contact, ImdnDocument imdn) {
-        mChatApi.getOrCreateGroupChat(chatId).handleMessageDeliveryStatus(contact, imdn);
-    }
-
-    @Override
-    public void handleOneToOneFileDeliveryStatus(ContactId contact, ImdnDocument imdn) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Handle file delivery status: fileTransferId=" + imdn.getMsgId()
-                    + " notification_type=" + imdn.getNotificationType() + " status="
-                    + imdn.getStatus() + " contact=" + contact);
-        }
-
-        mFtApi.handleOneToOneFileDeliveryStatus(imdn, contact);
-    }
-
-    @Override
-    public void handleGroupFileDeliveryStatus(String chatId, ContactId contact, ImdnDocument imdn) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Handle group file delivery status: fileTransferId=" + imdn.getMsgId()
-                    + " notification_type=" + imdn.getNotificationType() + " status="
-                    + imdn.getStatus() + " contact=" + contact);
-        }
-
-        mFtApi.handleGroupFileDeliveryStatus(chatId, imdn, contact);
-    }
-
-    @Override
-    public void handleSipMsrpSessionInvitation(Intent intent, GenericSipMsrpSession session) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Handle event receive SIP MSRP session invitation");
-        }
-
-        // Broadcast the invitation
-        mSessionApi.receiveSipMsrpSessionInvitation(intent, session);
-    }
-
-    @Override
-    public void handleSipRtpSessionInvitation(Intent intent, GenericSipRtpSession session) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Handle event receive SIP RTP session invitation");
-        }
-
-        // Broadcast the invitation
-        mSessionApi.receiveSipRtpSessionInvitation(intent, session);
-    }
-
-    @Override
-    public void handleUserConfirmationRequest(ContactId remote, String id, String type,
-            boolean pin, String subject, String text, String acceptButtonLabel,
-            String rejectButtonLabel, long timeout) {
+    public void onUserConfirmationRequest(ContactId remote, String id, String type, boolean pin,
+            String subject, String text, String acceptButtonLabel, String rejectButtonLabel,
+            long timeout) {
         if (sLogger.isActivated()) {
             sLogger.debug("Handle event user terms confirmation request");
         }
-
         // Nothing to do here
     }
 
     @Override
-    public void handleUserConfirmationAck(ContactId remote, String id, String status,
-            String subject, String text) {
+    public void onUserConfirmationAck(ContactId remote, String id, String status, String subject,
+            String text) {
         if (sLogger.isActivated()) {
             sLogger.debug("Handle event user terms confirmation ack");
         }
-
         // Nothing to do here
     }
 
     @Override
-    public void handleUserNotification(ContactId remote, String id, String subject, String text,
+    public void onUserNotification(ContactId remote, String id, String subject, String text,
             String okButtonLabel) {
         if (sLogger.isActivated()) {
             sLogger.debug("Handle event user terms notification");
         }
-
         // Nothing to do here
     }
 
     @Override
-    public void handleSimHasChanged() {
+    public void onSimChangeDetected() {
         if (sLogger.isActivated()) {
             sLogger.debug("Handle SIM has changed");
         }
-
         // Restart the RCS service
         LauncherUtils.stopRcsService(mCtx);
         LauncherUtils.launchRcsService(mCtx, true, false, mRcsSettings);
     }
 
-    @Override
-    public void handleFileTransferInvitationRejected(ContactId remoteContact, MmContent content,
-            MmContent fileicon, FileTransfer.ReasonCode reasonCode, long timestamp,
-            long timestampSent) {
-        mFtApi.addFileTransferInvitationRejected(remoteContact, content, fileicon, reasonCode,
-                timestamp, timestampSent);
-    }
-
-    @Override
-    public void handleResendFileTransferInvitationRejected(String fileTransferId,
-            ContactId remoteContact, FileTransfer.ReasonCode reasonCode, long timestamp,
-            long timestampSent) {
-        mFtApi.setResendFileTransferInvitationRejected(fileTransferId, remoteContact, reasonCode,
-                timestamp, timestampSent);
-    }
-
-    @Override
-    public void handleGroupChatInvitationRejected(String chatId, ContactId remoteContact,
-            String subject, Map<ContactId, ParticipantStatus> participants,
-            GroupChat.ReasonCode reasonCode, long timestamp) {
-        mChatApi.addGroupChatInvitationRejected(chatId, remoteContact, subject, participants,
-                reasonCode, timestamp);
-    }
-
-    @Override
-    public void handleImageSharingInvitationRejected(ContactId remoteContact, MmContent content,
-            ImageSharing.ReasonCode reasonCode, long timestamp) {
-        mIshApi.addImageSharingInvitationRejected(remoteContact, content, reasonCode, timestamp);
-    }
-
-    @Override
-    public void handleVideoSharingInvitationRejected(ContactId remoteContact, VideoContent content,
-            VideoSharing.ReasonCode reasonCode, long timestamp) {
-        mVshApi.addVideoSharingInvitationRejected(remoteContact, content, reasonCode, timestamp);
-    }
-
-    @Override
-    public void handleGeolocSharingInvitationRejected(ContactId remoteContact,
-            GeolocSharing.ReasonCode reasonCode, long timestamp) {
-        mGshApi.addGeolocSharingInvitationRejected(remoteContact, reasonCode, timestamp);
-    }
-
-    public void handleOneOneChatSessionInitiation(OneToOneChatSession session) {
-        mChatApi.handleOneToOneChatSessionInitiation(session);
-    }
-
-    @Override
-    public void handleRejoinGroupChatAsPartOfSendOperation(String chatId)
-            throws SipPayloadException, SipNetworkException {
-        mChatApi.handleRejoinGroupChatAsPartOfSendOperation(chatId);
-    }
-
-    @Override
-    public void handleRejoinGroupChat(String chatId) throws SipPayloadException,
-            SipNetworkException {
-        mChatApi.handleRejoinGroupChat(chatId);
-    }
-
-    @Override
-    public void tryToStartImServiceTasks(Core core) {
-        /* Try to auto-rejoin group chats that are still marked as active. */
-        mImOperationExecutor.execute(new GroupChatAutoRejoinTask(mMessagingLog, core));
-        InstantMessagingService imService = core.getImService();
-        /* Try to start auto resuming of HTTP file transfers marked as PAUSED_BY_SYSTEM */
-        mImOperationExecutor.execute(new FtHttpResumeManager(imService, mRcsSettings,
-                mMessagingLog, mContactManager));
-        /* Try to dequeue one-to-one chat messages and one-to-one file transfers. */
-        mImOperationExecutor.execute(new OneToOneChatDequeueTask(mOperationLock, mCtx, core,
-                mChatApi, mFtApi, mHistoryLog, mMessagingLog, mContactManager, mRcsSettings));
-
-        ImdnManager imdnManager = imService.getImdnManager();
-        if (imdnManager.isSendOneToOneDeliveryDisplayedReportsEnabled()
-                || imdnManager.isSendGroupDeliveryDisplayedReportsEnabled()) {
-            /*
-             * Try to send delayed displayed notifications for read messages if they were not sent
-             * before already. This only attempts to send report and in case of failure the report
-             * will be sent later as postponed delivery report
-             */
-            mImOperationExecutor.execute(new DelayedDisplayNotificationDispatcher(
-                    mLocalContentResolver, mChatApi));
-        }
-    }
-
-    @Override
-    public void tryToInviteQueuedGroupChatParticipantInvitations(String chatId,
-            InstantMessagingService imService) {
-        mImOperationExecutor.execute(new GroupChatInviteQueuedParticipantsTask(chatId, mChatApi,
-                imService));
-    }
-
-    @Override
-    public void tryToDispatchAllPendingDisplayNotifications() {
-        mImOperationExecutor.execute(new DelayedDisplayNotificationDispatcher(
-                mLocalContentResolver, mChatApi));
-    }
-
-    @Override
-    public void tryToDequeueGroupChatMessagesAndGroupFileTransfers(String chatId, Core core) {
-        mImOperationExecutor.execute(new GroupChatDequeueTask(mOperationLock, mCtx, core, chatId,
-                mMessagingLog, mChatApi, mFtApi, mRcsSettings, mHistoryLog, mContactManager));
-    }
-
-    @Override
-    public void tryToDequeueOneToOneChatMessages(ContactId contact, Core core) {
-        mImOperationExecutor.execute(new OneToOneChatMessageDequeueTask(mOperationLock, mCtx, core,
-                contact, mMessagingLog, mChatApi, mRcsSettings, mContactManager, mFtApi));
-    }
-
-    @Override
-    public void tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(Core core) {
-        mImOperationExecutor.execute(new OneToOneChatDequeueTask(mOperationLock, mCtx, core,
-                mChatApi, mFtApi, mHistoryLog, mMessagingLog, mContactManager, mRcsSettings));
-    }
-
-    @Override
-    public void tryToDequeueFileTransfers(Core core) {
-        mImOperationExecutor.execute(new FileTransferDequeueTask(mOperationLock, mCtx, core,
-                mMessagingLog, mChatApi, mFtApi, mContactManager, mRcsSettings));
-    }
-
-    @Override
-    public void tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(String chatId) {
-        mImOperationExecutor.execute(new GroupChatTerminalExceptionTask(chatId, mChatApi, mFtApi,
-                mHistoryLog, mOperationLock));
-    }
-
-    @Override
-    public void handleOneToOneChatMessageDeliveryExpiration(Intent intent) {
-        mOneToOneUndeliveredImManager.handleChatMessageDeliveryExpiration(intent);
-    }
-
-    @Override
-    public void handleOneToOneFileTransferDeliveryExpiration(Intent intent) {
-        mOneToOneUndeliveredImManager.handleFileTransferDeliveryExpiration(intent);
-    }
-
-    @Override
-    public void handleChatMessageDisplayReportSent(String chatId, ContactId remote, String msgId) {
-        mChatApi.handleDisplayReportSent(chatId, remote, msgId);
-    }
-
-    @Override
-    public void handleOneToOneFileTransferFailure(String fileTransferId, ContactId contact,
-            ReasonCode reasonCode) {
-        mFtApi.setOneToOneFileTransferStateAndReasonCode(fileTransferId, contact,
-                FileTransfer.State.FAILED, reasonCode);
-    }
-
-    @Override
-    public void handleDeleteOneToOneChats(InstantMessagingService imService) {
-        mImOperationExecutor.execute(new OneToOneFileTransferDeleteTask(mFtApi, imService,
-                mLocalContentResolver, mOperationLock));
-        mImOperationExecutor.execute(new OneToOneChatMessageDeleteTask(mChatApi, imService,
-                mLocalContentResolver, mOperationLock));
-    }
-
-    @Override
-    public void handleDeleteGroupChats(InstantMessagingService imService) {
-        mImOperationExecutor.execute(new GroupFileTransferDeleteTask(mFtApi, imService,
-                mLocalContentResolver, mOperationLock));
-        mImOperationExecutor.execute(new GroupChatMessageDeleteTask(mChatApi, imService,
-                mLocalContentResolver, mOperationLock));
-        mImOperationExecutor.execute(new GroupChatDeleteTask(mChatApi, imService,
-                mLocalContentResolver, mOperationLock));
-    }
-
-    @Override
-    public void handleDeleteOneToOneChat(InstantMessagingService imService, ContactId contact) {
-        mImOperationExecutor.execute(new OneToOneFileTransferDeleteTask(mFtApi, imService,
-                mLocalContentResolver, mOperationLock, contact));
-        mImOperationExecutor.execute(new OneToOneChatMessageDeleteTask(mChatApi, imService,
-                mLocalContentResolver, mOperationLock, contact));
-    }
-
-    @Override
-    public void handleDeleteGroupChat(InstantMessagingService imService, String chatId) {
-        mImOperationExecutor.execute(new GroupChatMessageDeleteTask(mChatApi, imService,
-                mLocalContentResolver, mOperationLock, chatId));
-        mImOperationExecutor.execute(new GroupFileTransferDeleteTask(mFtApi, imService,
-                mLocalContentResolver, mOperationLock, chatId));
-        mImOperationExecutor.execute(new GroupChatDeleteTask(mChatApi, imService,
-                mLocalContentResolver, mOperationLock, chatId));
-    }
-
-    @Override
-    public void handleDeleteMessage(InstantMessagingService imService, String msgId) {
-        if (mMessagingLog.isOneToOneChatMessage(msgId)) {
-            mImOperationExecutor.execute(new OneToOneChatMessageDeleteTask(mChatApi, imService,
-                    mLocalContentResolver, mOperationLock, msgId));
-        } else {
-            mImOperationExecutor.execute(new GroupChatMessageDeleteTask(mChatApi, imService,
-                    mLocalContentResolver, mOperationLock, null, msgId));
-        }
-    }
 }

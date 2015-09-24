@@ -134,7 +134,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                     removeSession();
 
                     for (ImsSessionListener listener : listeners) {
-                        listener.handleSessionRejected(contact,
+                        listener.onSessionRejected(contact,
                                 TerminationReason.TERMINATION_BY_USER);
                     }
                     return;
@@ -150,7 +150,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                     removeSession();
 
                     for (ImsSessionListener listener : listeners) {
-                        listener.handleSessionRejected(contact,
+                        listener.onSessionRejected(contact,
                                 TerminationReason.TERMINATION_BY_TIMEOUT);
                     }
                     return;
@@ -170,7 +170,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                     removeSession();
 
                     for (ImsSessionListener listener : listeners) {
-                        listener.handleSessionRejected(contact,
+                        listener.onSessionRejected(contact,
                                 TerminationReason.TERMINATION_BY_REMOTE);
                     }
                     return;
@@ -178,7 +178,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                     setSessionAccepted();
 
                     for (ImsSessionListener listener : listeners) {
-                        listener.handleSessionAccepted(contact);
+                        listener.onSessionAccepting(contact);
                     }
                     break;
 
@@ -286,7 +286,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                 }
                 dialogPath.setSessionEstablished();
                 for (ImsSessionListener listener : listeners) {
-                    listener.handleSessionStarted(contact);
+                    listener.onSessionStarted(contact);
                 }
                 SessionTimerManager sessionTimerManager = getSessionTimerManager();
                 if (sessionTimerManager.isSessionTimerActivated(resp)) {

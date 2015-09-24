@@ -169,7 +169,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 
                 for (ImsSessionListener listener : listeners) {
 
-                    ((FileSharingSessionListener) listener).handleSessionAutoAccepted(contact,
+                    ((FileSharingSessionListener) listener).onSessionAutoAccepted(contact,
                             file, fileIcon, timestamp, mTimestampSent,
                             FileTransferData.UNKNOWN_EXPIRATION,
                             FileTransferData.UNKNOWN_EXPIRATION);
@@ -181,7 +181,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                 }
 
                 for (ImsSessionListener listener : listeners) {
-                    ((FileSharingSessionListener) listener).handleSessionInvited(contact, file,
+                    ((FileSharingSessionListener) listener).onSessionInvited(contact, file,
                             fileIcon, timestamp, mTimestampSent,
                             FileTransferData.UNKNOWN_EXPIRATION,
                             FileTransferData.UNKNOWN_EXPIRATION);
@@ -201,7 +201,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                         removeSession();
 
                         for (ImsSessionListener listener : listeners) {
-                            listener.handleSessionRejected(contact,
+                            listener.onSessionRejected(contact,
                                     TerminationReason.TERMINATION_BY_USER);
                         }
                         return;
@@ -216,7 +216,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                         removeSession();
 
                         for (ImsSessionListener listener : listeners) {
-                            listener.handleSessionRejected(contact,
+                            listener.onSessionRejected(contact,
                                     TerminationReason.TERMINATION_BY_TIMEOUT);
                         }
                         return;
@@ -236,7 +236,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                         removeSession();
 
                         for (ImsSessionListener listener : listeners) {
-                            listener.handleSessionRejected(contact,
+                            listener.onSessionRejected(contact,
                                     TerminationReason.TERMINATION_BY_REMOTE);
                         }
                         return;
@@ -245,7 +245,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                         setSessionAccepted();
 
                         for (ImsSessionListener listener : listeners) {
-                            ((FileSharingSessionListener) listener).handleSessionAccepted(contact);
+                            ((FileSharingSessionListener) listener).onSessionAccepting(contact);
                         }
                         break;
 
@@ -393,7 +393,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                 dialogPath.setSessionEstablished();
 
                 for (ImsSessionListener listener : listeners) {
-                    listener.handleSessionStarted(contact);
+                    listener.onSessionStarted(contact);
                 }
 
                 /* Start session timer */
@@ -460,14 +460,14 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
             getContent().writeData2File(data);
             getContent().closeFile();
             for (ImsSessionListener listener : listeners) {
-                ((FileSharingSessionListener) listener).handleFileTransfered(file, contact,
+                ((FileSharingSessionListener) listener).onFileTransfered(file, contact,
                         FileTransferData.UNKNOWN_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION,
                         FileTransferProtocol.MSRP);
             }
         } catch (IOException e) {
             deleteFile();
             for (ImsSessionListener listener : listeners) {
-                ((FileSharingSessionListener) listener).handleTransferError(new FileSharingError(
+                ((FileSharingSessionListener) listener).onTransferError(new FileSharingError(
                         FileSharingError.MEDIA_SAVING_FAILED), contact);
             }
         }
@@ -500,13 +500,13 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
         try {
             getContent().writeData2File(data);
             for (ImsSessionListener listener : listeners) {
-                ((FileSharingSessionListener) listener).handleTransferProgress(contact,
+                ((FileSharingSessionListener) listener).onTransferProgress(contact,
                         currentSize, totalSize);
             }
         } catch (IOException e) {
             deleteFile();
             for (ImsSessionListener listener : listeners) {
-                ((FileSharingSessionListener) listener).handleTransferError(new FileSharingError(
+                ((FileSharingSessionListener) listener).onTransferError(new FileSharingError(
                         FileSharingError.MEDIA_SAVING_FAILED, e.getMessage()), contact);
             }
         }

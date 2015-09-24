@@ -24,7 +24,6 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
@@ -60,7 +59,7 @@ import java.io.IOException;
 public class OriginatingHttpFileSharingSession extends HttpFileTransferSession implements
         HttpUploadTransferEventListener {
 
-    private final Core mCore;
+    private final InstantMessagingService mImService;
 
     protected HttpUploadManager mUploadManager;
 
@@ -89,16 +88,15 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
      * @param timestampSent the timestamp sent in payload for the file sharing
      * @param contactManager
      */
-    public OriginatingHttpFileSharingSession(String fileTransferId,
-            InstantMessagingService imService, MmContent content, ContactId contact,
-            MmContent fileIcon, String tId, Core core, MessagingLog messagingLog,
-            RcsSettings rcsSettings, long timestamp, long timestampSent,
-            ContactManager contactManager) {
+    public OriginatingHttpFileSharingSession(InstantMessagingService imService,
+            String fileTransferId, MmContent content, ContactId contact, MmContent fileIcon,
+            String tId, MessagingLog messagingLog, RcsSettings rcsSettings, long timestamp,
+            long timestampSent, ContactManager contactManager) {
         super(imService, content, contact, PhoneUtils.formatContactIdToUri(contact), fileIcon,
                 null, null, fileTransferId, rcsSettings, messagingLog, timestamp,
                 FileTransferData.UNKNOWN_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION,
                 contactManager);
-        mCore = core;
+        mImService = imService;
         mTimestampSent = timestampSent;
         if (sLogger.isActivated()) {
             sLogger.debug("OriginatingHttpFileSharingSession contact=".concat(contact.toString()));
@@ -186,8 +184,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                 setIconExpiration(FileTransferData.UNKNOWN_EXPIRATION);
             }
 
-            OneToOneChatSession chatSession = mCore.getImService().getOneToOneChatSession(
-                    getRemoteContact());
+            OneToOneChatSession chatSession = mImService.getOneToOneChatSession(getRemoteContact());
             // Note: FileTransferId is always generated to equal the associated msgId of a
             // FileTransfer invitation message.
             String msgId = getFileTransferId();
@@ -222,8 +219,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                 long timestamp = getTimestamp();
                 ChatMessage firstMsg = ChatUtils.createFileTransferMessage(getRemoteContact(),
                         fileInfo, msgId, timestamp, mTimestampSent);
-                InstantMessagingService imService = mCore.getImService();
-                if (!imService.isChatSessionAvailable()) {
+                if (!mImService.isChatSessionAvailable()) {
                     if (logActivated) {
                         sLogger.debug("Couldn't initiate One to one session as max chat sessions reached.");
                     }
@@ -231,12 +227,12 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                     removeSession();
                     return;
                 }
-                chatSession = imService.initiateOneToOneChatSession(getRemoteContact(), firstMsg);
+                chatSession = mImService.createOneToOneChatSession(getRemoteContact(), firstMsg);
                 setChatSessionID(chatSession.getSessionID());
                 setContributionID(chatSession.getContributionID());
 
                 chatSession.startSession();
-                mCore.getListener().handleOneOneChatSessionInitiation(chatSession);
+                mImService.receiveOneOneChatSessionInitiation(chatSession);
             }
 
             // File transfered
@@ -393,7 +389,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                     }
                     for (ImsSessionListener listener : getListeners()) {
                         ((FileSharingSessionListener) listener)
-                                .handleFileTransferPausedBySystem(contact);
+                                .onFileTransferPausedBySystem(contact);
                     }
                     return;
                 }
@@ -402,11 +398,11 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
             default:
                 if (State.ESTABLISHED == state) {
                     for (ImsSessionListener listener : getListeners()) {
-                        listener.handleSessionAborted(contact, reason);
+                        listener.onSessionAborted(contact, reason);
                     }
                 } else {
                     for (ImsSessionListener listener : getListeners()) {
-                        listener.handleSessionRejected(contact, reason);
+                        listener.onSessionRejected(contact, reason);
                     }
                 }
                 break;

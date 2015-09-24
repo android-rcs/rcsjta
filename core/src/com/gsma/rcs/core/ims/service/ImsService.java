@@ -278,4 +278,24 @@ public abstract class ImsService {
                 error);
         getImsModule().getSipManager().sendSipResponse(resp);
     }
+
+    /**
+     * Try to send an error response to an invitation before to create a service session. If failing
+     * then just log the failure but throw now exception.
+     * 
+     * @param invite Invite request
+     * @param error Error code
+     */
+    public void tryToSendErrorResponse(SipRequest invite, int error) {
+        try {
+            sendErrorResponse(invite, error);
+        } catch (SipNetworkException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Unable to send error response! (" + e.getMessage() + ")");
+            }
+        } catch (SipPayloadException e) {
+            sLogger.error("Unable to send error response!", e);
+        }
+    }
+
 }

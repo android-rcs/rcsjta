@@ -336,9 +336,9 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
             PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(from);
             if (number != null) {
                 ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
-                receiveDeliveryStatus(contact, cpimMsg.getMessageContent());
+                onDeliveryStatusReceived(contact, cpimMsg.getMessageContent());
             } else {
-                receiveDeliveryStatus(getRemoteContact(), cpimMsg.getMessageContent());
+                onDeliveryStatusReceived(getRemoteContact(), cpimMsg.getMessageContent());
             }
         } else {
             if (logActivated) {

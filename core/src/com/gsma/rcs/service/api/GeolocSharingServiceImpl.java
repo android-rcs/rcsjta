@@ -31,9 +31,7 @@ import com.gsma.rcs.core.ims.service.SessionIdGenerator;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
-import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.provider.sharing.GeolocSharingDeleteTask;
 import com.gsma.rcs.provider.sharing.GeolocSharingPersistedStorageAccessor;
 import com.gsma.rcs.provider.sharing.RichCallHistory;
 import com.gsma.rcs.service.broadcaster.GeolocSharingEventBroadcaster;
@@ -61,7 +59,6 @@ import android.text.TextUtils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 
 /**
  * Geoloc sharing service implementation
@@ -78,10 +75,6 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 
     private final RichCallHistory mRichcallLog;
 
-    private final LocalContentResolver mLocalContentResolver;
-
-    private final ExecutorService mImOperationExecutor;
-
     private final Map<String, IGeolocSharing> mGeolocSharingCache = new HashMap<String, IGeolocSharing>();
 
     private static final Logger sLogger = Logger.getLogger(GeolocSharingServiceImpl.class
@@ -90,9 +83,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
     /**
      * Lock used for synchronization
      */
-    private final Object lock = new Object();
-
-    private final Object mImsLock;
+    private final Object mLock = new Object();
 
     private final RcsSettings mRcsSettings;
 
@@ -107,18 +98,14 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * @param imsLock ims lock object
      */
     public GeolocSharingServiceImpl(RichcallService richcallService,
-            RichCallHistory richCallHistory, RcsSettings rcsSettings,
-            LocalContentResolver localContentResolver, ExecutorService imOperationExecutor,
-            Object imsLock) {
+            RichCallHistory richCallHistory, RcsSettings rcsSettings) {
         if (sLogger.isActivated()) {
             sLogger.info("Geoloc sharing service API is loaded.");
         }
         mRichcallService = richcallService;
+        mRichcallService.register(this);
         mRichcallLog = richCallHistory;
         mRcsSettings = rcsSettings;
-        mLocalContentResolver = localContentResolver;
-        mImOperationExecutor = imOperationExecutor;
-        mImsLock = imsLock;
     }
 
     /**
@@ -144,7 +131,6 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
             sLogger.debug(new StringBuilder("Add an geoloc sharing in the list (size=")
                     .append(mGeolocSharingCache.size()).append(")").toString());
         }
-
         mGeolocSharingCache.put(sharingId, geolocSharing);
     }
 
@@ -158,7 +144,6 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
             sLogger.debug("Remove a geoloc sharing from the list (size="
                     + mGeolocSharingCache.size() + ")");
         }
-
         mGeolocSharingCache.remove(sharingId);
     }
 
@@ -167,6 +152,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * 
      * @return Returns true if registered else returns false
      */
+    @Override
     public boolean isServiceRegistered() {
         return ServerApiUtils.isImsConnected();
     }
@@ -176,6 +162,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * 
      * @return the reason code for IMS service registration
      */
+    @Override
     public int getServiceRegistrationReasonCode() {
         return ServerApiUtils.getServiceRegistrationReasonCode().toInt();
     }
@@ -185,11 +172,12 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * 
      * @param listener Service registration listener
      */
+    @Override
     public void addEventListener(IRcsServiceRegistrationListener listener) {
         if (sLogger.isActivated()) {
             sLogger.info("Add a service listener");
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.addEventListener(listener);
         }
     }
@@ -199,11 +187,12 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * 
      * @param listener Service registration listener
      */
+    @Override
     public void removeEventListener(IRcsServiceRegistrationListener listener) {
         if (sLogger.isActivated()) {
             sLogger.info("Remove a service listener");
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.removeEventListener(listener);
         }
     }
@@ -213,7 +202,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      */
     public void notifyRegistration() {
         // Notify listeners
-        synchronized (lock) {
+        synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.broadcastServiceRegistered();
         }
     }
@@ -225,7 +214,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      */
     public void notifyUnRegistration(RcsServiceRegistration.ReasonCode reasonCode) {
         // Notify listeners
-        synchronized (lock) {
+        synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.broadcastServiceUnRegistered(reasonCode);
         }
     }
@@ -241,8 +230,6 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
                     .append(session.getRemoteContact()).append("; displayName=")
                     .append(session.getRemoteDisplayName()).append(".").toString());
         }
-        // TODO : Add entry into GeolocSharing provider (to be implemented as part of CR025)
-
         ContactId contact = session.getRemoteContact();
         String sharingId = session.getSessionID();
         GeolocSharingPersistedStorageAccessor persistedStorage = new GeolocSharingPersistedStorageAccessor(
@@ -295,22 +282,38 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
             byte[] data = geolocDoc.getBytes(UTF8);
             MmContent content = new GeolocContent("geoloc.xml", data.length, data);
 
-            final GeolocTransferSession session = mRichcallService.initiateGeolocSharingSession(
+            final GeolocTransferSession session = mRichcallService.createGeolocSharingSession(
                     contact, content, geoloc, timestamp);
-            String sharingId = session.getSessionID();
-            mRichcallLog.addOutgoingGeolocSharing(contact, sharingId, geoloc, State.INITIATING,
-                    ReasonCode.UNSPECIFIED, timestamp);
-            mBroadcaster.broadcastStateChanged(contact, sharingId, State.INITIATING,
-                    ReasonCode.UNSPECIFIED);
-
-            GeolocSharingPersistedStorageAccessor persistedStorage = new GeolocSharingPersistedStorageAccessor(
+            final String sharingId = session.getSessionID();
+            final GeolocSharingPersistedStorageAccessor persistedStorage = new GeolocSharingPersistedStorageAccessor(
                     sharingId, contact, geoloc, Direction.OUTGOING, mRichcallLog, timestamp);
-            GeolocSharingImpl geolocSharing = new GeolocSharingImpl(sharingId, mBroadcaster,
+            final GeolocSharingImpl geolocSharing = new GeolocSharingImpl(sharingId, mBroadcaster,
                     mRichcallService, this, persistedStorage);
 
-            session.addListener(geolocSharing);
-            addGeolocSharing(geolocSharing, sharingId);
-            session.startSession();
+            mRichcallLog.addOutgoingGeolocSharing(contact, sharingId, geoloc, State.INITIATING,
+                    ReasonCode.UNSPECIFIED, timestamp);
+
+            final GeolocSharingServiceImpl geolocSharingService = this;
+            mRichcallService.scheduleGeolocShareOperation(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        session.addListener(geolocSharing);
+                        geolocSharingService.addGeolocSharing(geolocSharing, sharingId);
+                        session.startSession();
+
+                    } catch (RuntimeException e) {
+                        /*
+                         * Normally we are not allowed to catch runtime exceptions as these are
+                         * genuine bugs which should be handled/fixed within the code. However the
+                         * cases when we are executing operations on a thread unhandling such
+                         * exceptions will eventually lead to exit the system and thus can bring the
+                         * whole system down, which is not intended.
+                         */
+                        sLogger.error("Failed initiate geoloc sharing right now!", e);
+                    }
+                }
+            });
             return geolocSharing;
 
         } catch (ServerApiBaseException e) {
@@ -367,6 +370,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * @param listener Listener
      * @throws RemoteException
      */
+    @Override
     public void addEventListener2(IGeolocSharingListener listener) throws RemoteException {
         if (listener == null) {
             throw new ServerApiIllegalArgumentException("listener must not be null!");
@@ -375,7 +379,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
             sLogger.info("Add a Geoloc sharing event listener");
         }
         try {
-            synchronized (lock) {
+            synchronized (mLock) {
                 mBroadcaster.addEventListener(listener);
             }
         } catch (ServerApiBaseException e) {
@@ -395,6 +399,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * 
      * @param listener Listener
      */
+    @Override
     public void removeEventListener2(IGeolocSharingListener listener) {
         if (listener == null) {
             throw new ServerApiIllegalArgumentException("listener must not be null!");
@@ -403,7 +408,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
             sLogger.info("Remove a Geoloc sharing event listener");
         }
         try {
-            synchronized (lock) {
+            synchronized (mLock) {
                 mBroadcaster.removeEventListener(listener);
             }
         } catch (ServerApiBaseException e) {
@@ -424,6 +429,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * @return Version
      * @see VERSION_CODES
      */
+    @Override
     public int getServiceVersion() {
         return RcsService.Build.API_VERSION;
     }
@@ -465,19 +471,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * @throws RemoteException
      */
     public void deleteGeolocSharings() throws RemoteException {
-        try {
-            mImOperationExecutor.execute(new GeolocSharingDeleteTask(this, mRichcallService,
-                    mLocalContentResolver, mImsLock));
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
-
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
+        mRichcallService.tryToDeleteGeolocSharings();
     }
 
     /**
@@ -491,19 +485,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
         if (contact == null) {
             throw new ServerApiIllegalArgumentException("contact must not be null!");
         }
-        try {
-            mImOperationExecutor.execute(new GeolocSharingDeleteTask(this, mRichcallService,
-                    mLocalContentResolver, mImsLock, contact));
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
-
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
+        mRichcallService.tryToDeleteGeolocSharings(contact);
     }
 
     /**
@@ -517,19 +499,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
         if (TextUtils.isEmpty(sharingId)) {
             throw new ServerApiIllegalArgumentException("sharingId must not be null or empty!");
         }
-        try {
-            mImOperationExecutor.execute(new GeolocSharingDeleteTask(this, mRichcallService,
-                    mLocalContentResolver, mImsLock, sharingId));
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
-
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
+        mRichcallService.tryToDeleteGeolocSharing(sharingId);
     }
 
     public void broadcastDeleted(ContactId contact, Set<String> sharingIds) {

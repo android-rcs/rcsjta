@@ -298,7 +298,7 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
 
         ContactId contact = getRemoteContact();
         for (int i = 0; i < getListeners().size(); i++) {
-            ((SipSessionListener) getListeners().get(i)).handleReceiveData(contact, data);
+            ((SipSessionListener) getListeners().get(i)).onDataReceived(contact, data);
         }
     }
 

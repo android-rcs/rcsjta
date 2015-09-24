@@ -241,7 +241,7 @@ public class ImsConnectionManager implements Runnable {
     private class NetworkStateListener extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, final Intent intent) {
-            mCore.scheduleForBackgroundExecution(new Runnable() {
+            mCore.scheduleCoreOperation(new Runnable() {
                 @Override
                 public void run() {
 
@@ -317,7 +317,7 @@ public class ImsConnectionManager implements Runnable {
                 if (lastUserAccount != null) {
                     if ((currentUserAccount == null)
                             || !currentUserAccount.equalsIgnoreCase(lastUserAccount)) {
-                        mImsModule.getCoreListener().handleSimHasChanged();
+                        mImsModule.getCoreListener().onSimChangeDetected();
                         return;
                     }
                 }
@@ -682,7 +682,7 @@ public class ImsConnectionManager implements Runnable {
     private class BatteryLevelListener extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, final Intent intent) {
-            mCore.scheduleForBackgroundExecution(new Runnable() {
+            mCore.scheduleCoreOperation(new Runnable() {
                 @Override
                 public void run() {
                     try {

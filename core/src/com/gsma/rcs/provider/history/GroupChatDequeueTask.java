@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2015 Sony Mobile Communications Inc.
  * Copyright (C) 2010 France Telecom S.A.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -52,26 +52,27 @@ public class GroupChatDequeueTask extends DequeueTask {
 
     private final HistoryLog mHistoryLog;
 
-    public GroupChatDequeueTask(Object lock, Context ctx, Core core, String chatId,
-            MessagingLog messagingLog, ChatServiceImpl chatService,
-            FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings,
-            HistoryLog historyLog, ContactManager contactManager) {
-        super(lock, ctx, core, contactManager, messagingLog, rcsSettings, chatService,
+    public GroupChatDequeueTask(Context ctx, Core core, MessagingLog messagingLog,
+            ChatServiceImpl chatService, FileTransferServiceImpl fileTransferService,
+            RcsSettings rcsSettings, ContactManager contactManager, HistoryLog historyLog, String chatId) {
+        super(ctx, core, contactManager, messagingLog, rcsSettings, chatService,
                 fileTransferService);
         mChatId = chatId;
         mHistoryLog = historyLog;
     }
 
-    private void handleDequeuingFailure(int providerId, String chatId, String id, String mimeType) {
+    private void setGroupChatEntryAsFailedDequeue(int providerId, String chatId, String id,
+            String mimeType) {
         switch (providerId) {
             case MessageData.HISTORYLOG_MEMBER_ID:
-                setGroupChatMessageAsFailed(mChatId, id, mimeType);
+                setGroupChatMessageAsFailedDequeue(chatId, id, mimeType);
                 break;
             case FileTransferData.HISTORYLOG_MEMBER_ID:
-                setGroupFileTransferAsFailed(mChatId, id);
+                setGroupFileTransferAsFailedDequeue(chatId, id);
                 break;
             default:
-                break;
+                throw new IllegalArgumentException("Provider id " + providerId
+                        + " not supported in this context!");
         }
     }
 
@@ -90,146 +91,144 @@ public class GroupChatDequeueTask extends DequeueTask {
         String mimeType = null;
         Cursor cursor = null;
         try {
-            synchronized (mLock) {
-                if (!isImsConnected()) {
-                    if (logActivated) {
-                        mLogger.debug("IMS not connected, exiting dequeue task to dequeue group chat messages and group file transfers for chatId "
-                                .concat(mChatId));
-                    }
-                    return;
+            if (!isImsConnected()) {
+                if (logActivated) {
+                    mLogger.debug("IMS not connected, exiting dequeue task to dequeue group chat messages and group file transfers for chatId "
+                            .concat(mChatId));
                 }
-                if (mCore.isStopping()) {
-                    if (logActivated) {
-                        mLogger.debug("Core service is stopped, exiting dequeue task to dequeue group chat messages and group file transfers for chatId "
-                                .concat(mChatId));
-                    }
-                    return;
+                return;
+            }
+            if (isShuttingDownOrStopped()) {
+                if (logActivated) {
+                    mLogger.debug("Core service is shutting down/stopped, exiting dequeue task to dequeue group chat messages and group file transfers for chatId "
+                            .concat(mChatId));
                 }
-                cursor = mHistoryLog.getQueuedGroupChatMessagesAndGroupFileTransfers(mChatId);
-                int providerIdIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_PROVIDER_ID);
-                int idIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_ID);
-                int contentIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_CONTENT);
-                int mimeTypeIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_MIME_TYPE);
-                int fileIconIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_FILEICON);
-                int statusIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_STATUS);
-                int fileSizeIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_FILESIZE);
-                GroupChatImpl groupChat = mChatService.getOrCreateGroupChat(mChatId);
-                while (cursor.moveToNext()) {
-                    try {
-                        if (!isImsConnected()) {
-                            if (logActivated) {
-                                mLogger.debug("IMS not connected, exiting dequeue task to dequeue group chat messages and group file transfers for chatId "
-                                        .concat(mChatId));
-                            }
-                            return;
-                        }
-                        if (mCore.isStopping()) {
-                            if (logActivated) {
-                                mLogger.debug("Core service is stopped, exiting dequeue task to dequeue group chat messages and group file transfers for chatId "
-                                        .concat(mChatId));
-                            }
-                            return;
-                        }
-                        providerId = cursor.getInt(providerIdIdx);
-                        id = cursor.getString(idIdx);
-                        mimeType = cursor.getString(mimeTypeIdx);
-                        switch (providerId) {
-                            case MessageData.HISTORYLOG_MEMBER_ID:
-                                if (!isPossibleToDequeueGroupChatMessage(mChatId)) {
-                                    setGroupChatMessageAsFailed(mChatId, id, mimeType);
-                                    continue;
-                                }
-                                String content = cursor.getString(contentIdx);
-                                long timestamp = System.currentTimeMillis();
-                                /* For outgoing message, timestampSent = timestamp */
-                                ChatMessage message = ChatUtils.createChatMessage(id,
-                                        ChatUtils.apiMimeTypeToNetworkMimeType(mimeType), content,
-                                        null, null, timestamp, timestamp);
-                                groupChat.dequeueGroupChatMessage(message);
-
-                                break;
-                            case FileTransferData.HISTORYLOG_MEMBER_ID:
-                                Uri file = Uri.parse(cursor.getString(contentIdx));
-                                if (!isPossibleToDequeueGroupFileTransfer(mChatId, file,
-                                        cursor.getLong(fileSizeIdx))) {
-                                    setGroupFileTransferAsFailed(mChatId, id);
-                                    continue;
-                                }
-                                State state = State.valueOf(cursor.getInt(statusIdx));
-                                switch (state) {
-                                    case QUEUED:
-                                        if (!isAllowedToDequeueGroupFileTransfer()) {
-                                            continue;
-                                        }
-                                        MmContent fileContent = FileTransferUtils
-                                                .createMmContent(file);
-                                        MmContent fileIconContent = null;
-                                        String fileIcon = cursor.getString(fileIconIdx);
-                                        if (fileIcon != null) {
-                                            Uri fileIconUri = Uri.parse(fileIcon);
-                                            fileIconContent = FileTransferUtils
-                                                    .createMmContent(fileIconUri);
-                                        }
-                                        mFileTransferService.dequeueGroupFileTransfer(mChatId, id,
-                                                fileContent, fileIconContent);
-                                        break;
-                                    case STARTED:
-                                        if (!isPossibleToDequeueGroupChatMessage(mChatId)) {
-                                            setGroupFileTransferAsFailed(mChatId, id);
-                                            continue;
-                                        }
-                                        GroupFileTransferImpl groupFileTransfer = mFileTransferService
-                                                .getOrCreateGroupFileTransfer(mChatId, id);
-                                        String fileInfo = FileTransferUtils
-                                                .createHttpFileTransferXml(mMessagingLog
-                                                        .getGroupFileDownloadInfo(id));
-                                        groupChat.dequeueGroupFileInfo(id, fileInfo,
-                                                displayedReportEnabled, deliveryReportEnabled,
-                                                groupFileTransfer);
-
-                                        break;
-                                    default:
-                                        break;
-                                }
-                                break;
-                            default:
-                                break;
-                        }
-                    } catch (MsrpException e) {
+                return;
+            }
+            cursor = mHistoryLog.getQueuedGroupChatMessagesAndGroupFileTransfers(mChatId);
+            int providerIdIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_PROVIDER_ID);
+            int idIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_ID);
+            int contentIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_CONTENT);
+            int mimeTypeIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_MIME_TYPE);
+            int fileIconIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_FILEICON);
+            int statusIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_STATUS);
+            int fileSizeIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_FILESIZE);
+            GroupChatImpl groupChat = mChatService.getOrCreateGroupChat(mChatId);
+            while (cursor.moveToNext()) {
+                try {
+                    if (!isImsConnected()) {
                         if (logActivated) {
-                            mLogger.debug(new StringBuilder(
-                                    "Failed to dequeue group chat entry with id '").append(id)
-                                    .append("' on group chat '").append(mChatId)
-                                    .append("' due to: ").append(e.getMessage()).toString());
+                            mLogger.debug("IMS not connected, exiting dequeue task to dequeue group chat messages and group file transfers for chatId "
+                                    .concat(mChatId));
                         }
-                    } catch (SipNetworkException e) {
-                        if (logActivated) {
-                            mLogger.debug(new StringBuilder(
-                                    "Failed to dequeue group chat entry with id '").append(id)
-                                    .append("' on group chat '").append(mChatId)
-                                    .append("' due to: ").append(e.getMessage()).toString());
-                        }
-                    } catch (SipPayloadException e) {
-                        mLogger.error(
-                                new StringBuilder("Failed to dequeue group chat entry with id '")
-                                        .append(id).append("' on group chat '").append(mChatId)
-                                        .toString(), e);
-                        handleDequeuingFailure(providerId, mChatId, id, mimeType);
-                    } catch (RuntimeException e) {
-                        /*
-                         * Normally all the terminal and non-terminal cases should be handled above
-                         * so if we come here that means that there is a bug and so we output a
-                         * stack trace so the bug can then be properly tracked down and fixed. We
-                         * also mark the respective entry that failed to dequeue as FAILED.
-                         */
-                        mLogger.error(
-                                new StringBuilder("Failed to dequeue group chat entry with id '")
-                                        .append(id).append("' and chatId '").append(mChatId)
-                                        .append("'").toString(), e);
-                        handleDequeuingFailure(providerId, mChatId, id, mimeType);
+                        return;
                     }
+                    if (isShuttingDownOrStopped()) {
+                        if (logActivated) {
+                            mLogger.debug("Core service is shutting down/stopped, exiting dequeue task to dequeue group chat messages and group file transfers for chatId "
+                                    .concat(mChatId));
+                        }
+                        return;
+                    }
+                    providerId = cursor.getInt(providerIdIdx);
+                    id = cursor.getString(idIdx);
+                    mimeType = cursor.getString(mimeTypeIdx);
+                    switch (providerId) {
+                        case MessageData.HISTORYLOG_MEMBER_ID:
+                            if (!isPossibleToDequeueGroupChatMessage(mChatId)) {
+                                setGroupChatMessageAsFailedDequeue(mChatId, id, mimeType);
+                                continue;
+                            }
+                            String content = cursor.getString(contentIdx);
+                            long timestamp = System.currentTimeMillis();
+                            /* For outgoing message, timestampSent = timestamp */
+                            ChatMessage message = ChatUtils.createChatMessage(id,
+                                    ChatUtils.apiMimeTypeToNetworkMimeType(mimeType), content,
+                                    null, null, timestamp, timestamp);
+                            groupChat.dequeueGroupChatMessage(message);
+                            break;
+                        case FileTransferData.HISTORYLOG_MEMBER_ID:
+                            Uri file = Uri.parse(cursor.getString(contentIdx));
+                            if (!isPossibleToDequeueGroupFileTransfer(mChatId, file,
+                                    cursor.getLong(fileSizeIdx))) {
+                                setGroupFileTransferAsFailedDequeue(mChatId, id);
+                                continue;
+                            }
+                            State state = State.valueOf(cursor.getInt(statusIdx));
+                            switch (state) {
+                                case QUEUED:
+                                    if (!isAllowedToDequeueGroupFileTransfer()) {
+                                        continue;
+                                    }
+                                    MmContent fileContent = FileTransferUtils.createMmContent(file);
+                                    MmContent fileIconContent = null;
+                                    String fileIcon = cursor.getString(fileIconIdx);
+                                    if (fileIcon != null) {
+                                        Uri fileIconUri = Uri.parse(fileIcon);
+                                        fileIconContent = FileTransferUtils
+                                                .createMmContent(fileIconUri);
+                                    }
+                                    mFileTransferService.dequeueGroupFileTransfer(mChatId, id,
+                                            fileContent, fileIconContent);
+                                    break;
+                                case STARTED:
+                                    if (!isPossibleToDequeueGroupChatMessage(mChatId)) {
+                                        setGroupFileTransferAsFailedDequeue(mChatId, id);
+                                        continue;
+                                    }
+                                    GroupFileTransferImpl groupFileTransfer = mFileTransferService
+                                            .getOrCreateGroupFileTransfer(mChatId, id);
+                                    String fileInfo = FileTransferUtils
+                                            .createHttpFileTransferXml(mMessagingLog
+                                                    .getGroupFileDownloadInfo(id));
+                                    groupChat.dequeueGroupFileInfo(id, fileInfo,
+                                            displayedReportEnabled, deliveryReportEnabled,
+                                            groupFileTransfer);
+
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+
+                } catch (MsrpException e) {
+                    if (logActivated) {
+                        mLogger.debug(new StringBuilder(
+                                "Failed to dequeue group chat entry with id '").append(id)
+                                .append("' on group chat '").append(mChatId).append("' due to: ")
+                                .append(e.getMessage()).toString());
+                    }
+
+                } catch (SipNetworkException e) {
+                    if (logActivated) {
+                        mLogger.debug(new StringBuilder(
+                                "Failed to dequeue group chat entry with id '").append(id)
+                                .append("' on group chat '").append(mChatId).append("' due to: ")
+                                .append(e.getMessage()).toString());
+                    }
+
+                } catch (SipPayloadException e) {
+                    mLogger.error(new StringBuilder("Failed to dequeue group chat entry with id '")
+                            .append(id).append("' on group chat '").append(mChatId).toString(), e);
+                    setGroupChatEntryAsFailedDequeue(providerId, mChatId, id, mimeType);
+
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally all the terminal and non-terminal cases should be handled above so
+                     * if we come here that means that there is a bug and so we output a stack trace
+                     * so the bug can then be properly tracked down and fixed. We also mark the
+                     * respective entry that failed to dequeue as FAILED.
+                     */
+                    mLogger.error(new StringBuilder("Failed to dequeue group chat entry with id '")
+                            .append(id).append("' and chatId '").append(mChatId).append("'")
+                            .toString(), e);
+                    setGroupChatEntryAsFailedDequeue(providerId, mChatId, id, mimeType);
                 }
             }
+
         } catch (RuntimeException e) {
             /*
              * Normally all the terminal and non-terminal cases should be handled above so if we
@@ -245,7 +244,8 @@ public class GroupChatDequeueTask extends DequeueTask {
             if (id == null) {
                 return;
             }
-            handleDequeuingFailure(providerId, mChatId, id, mimeType);
+            setGroupChatEntryAsFailedDequeue(providerId, mChatId, id, mimeType);
+
         } finally {
             if (cursor != null) {
                 cursor.close();

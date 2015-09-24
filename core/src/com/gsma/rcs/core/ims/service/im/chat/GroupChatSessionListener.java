@@ -43,7 +43,7 @@ public interface GroupChatSessionListener extends ChatSessionListener {
      * @param status ParticipantStatus for the contact
      * @param timestamp Local timestamp when got notification
      */
-    public void handleConferenceEvent(ContactId contact, ParticipantStatus status, long timestamp);
+    public void onConferenceEventReceived(ContactId contact, ParticipantStatus status, long timestamp);
 
     /**
      * A session invitation has been received
@@ -53,7 +53,7 @@ public interface GroupChatSessionListener extends ChatSessionListener {
      * @param participants Participants
      * @param timestamp Local timestamp when got invitation
      */
-    public void handleSessionInvited(ContactId contact, String subject,
+    public void onSessionInvited(ContactId contact, String subject,
             Map<ContactId, GroupChat.ParticipantStatus> participants, long timestamp);
 
     /**
@@ -64,7 +64,7 @@ public interface GroupChatSessionListener extends ChatSessionListener {
      * @param participants Participants
      * @param timestamp Local timestamp when got invitation
      */
-    public void handleSessionAutoAccepted(ContactId contact, String subject,
+    public void onSessionAutoAccepted(ContactId contact, String subject,
             Map<ContactId, GroupChat.ParticipantStatus> participants, long timestamp);
 
     /**
@@ -73,7 +73,7 @@ public interface GroupChatSessionListener extends ChatSessionListener {
      * @param updatedParticipants Updated participants
      * @param allParticipants All group participants
      */
-    public void handleParticipantUpdates(Map<ContactId, ParticipantStatus> updatedParticipants,
+    public void onParticipantsUpdated(Map<ContactId, ParticipantStatus> updatedParticipants,
             Map<ContactId, ParticipantStatus> allParticipants);
 
     /**
@@ -83,7 +83,7 @@ public interface GroupChatSessionListener extends ChatSessionListener {
      * @param chatId
      * @param chunktype
      */
-    public void handleDeliveryReportSendViaMsrpFailure(String msgId, String chatId,
+    public void onDeliveryReportSendViaMsrpFailure(String msgId, String chatId,
             TypeMsrpChunk chunktype);
 
     /**
@@ -93,5 +93,5 @@ public interface GroupChatSessionListener extends ChatSessionListener {
      * @throws SipNetworkException
      * @throws SipPayloadException
      */
-    public void handleImError(ChatError error) throws SipPayloadException, SipNetworkException;
+    public void onImError(ChatError error) throws SipPayloadException, SipNetworkException;
 }

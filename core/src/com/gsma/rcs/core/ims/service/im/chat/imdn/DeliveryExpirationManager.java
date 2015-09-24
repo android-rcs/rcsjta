@@ -14,10 +14,11 @@
  * the License.
  */
 
-package com.gsma.rcs.service.api;
+package com.gsma.rcs.core.ims.service.im.chat.imdn;
 
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.provider.messaging.MessagingLog;
+import com.gsma.rcs.service.api.OneToOneDeliveryExpirationService;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.TimerUtils;
@@ -35,11 +36,11 @@ import android.os.Parcelable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class OneToOneUndeliveredImManager {
+public class DeliveryExpirationManager {
 
-    /* package private */static final String ACTION_CHAT_MESSAGE_DELIVERY_TIMEOUT = "com.gsma.rcs.action.ONE_TO_ONE_CHAT_MESSAGE_DELIVERY_TIMEOUT";
+    public static final String ACTION_CHAT_MESSAGE_DELIVERY_TIMEOUT = "com.gsma.rcs.action.ONE_TO_ONE_CHAT_MESSAGE_DELIVERY_TIMEOUT";
 
-    /* package private */static final String ACTION_FILE_TRANSFER_DELIVERY_TIMEOUT = "com.gsma.rcs.action.ONE_TO_ONE_FILE_TRANSFER_DELIVERY_TIMEOUT";
+    public static final String ACTION_FILE_TRANSFER_DELIVERY_TIMEOUT = "com.gsma.rcs.action.ONE_TO_ONE_FILE_TRANSFER_DELIVERY_TIMEOUT";
 
     private static final String EXTRA_ID = "id";
 
@@ -55,10 +56,11 @@ public class OneToOneUndeliveredImManager {
 
     private final InstantMessagingService mImService;
 
-    private final Logger mLogger = Logger.getLogger(getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(DeliveryExpirationManager.class
+            .getSimpleName());
 
-    public OneToOneUndeliveredImManager(Context ctx, MessagingLog messagingLog,
-            InstantMessagingService imService) {
+    public DeliveryExpirationManager(InstantMessagingService imService, Context ctx,
+            MessagingLog messagingLog) {
         mCtx = ctx;
         mMessagingLog = messagingLog;
         mImService = imService;
@@ -120,9 +122,9 @@ public class OneToOneUndeliveredImManager {
         }
     }
 
-    /* package private */void cancelDeliveryTimeoutAlarm(String id) {
-        if (mLogger.isActivated()) {
-            mLogger.debug("Cancel delivery expiration timer for Id ".concat(id));
+    public void cancelDeliveryTimeoutAlarm(String id) {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Cancel delivery expiration timer for Id ".concat(id));
         }
         synchronized (mUndeliveredImAlarms) {
             PendingIntent undeliveredMessageAlarm = mUndeliveredImAlarms.remove(id);
@@ -134,8 +136,8 @@ public class OneToOneUndeliveredImManager {
 
     public void scheduleOneToOneChatMessageDeliveryTimeoutAlarm(ContactId contact, String msgId,
             long triggerTime) {
-        if (mLogger.isActivated()) {
-            mLogger.debug("Schedule delivery expiration timer for message with msgId "
+        if (sLogger.isActivated()) {
+            sLogger.debug("Schedule delivery expiration timer for message with msgId "
                     .concat(msgId));
         }
         scheduleDeliveryTimeoutAlarm(msgId, triggerTime,
@@ -144,15 +146,15 @@ public class OneToOneUndeliveredImManager {
 
     public void scheduleOneToOneFileTransferDeliveryTimeoutAlarm(ContactId contact,
             String fileTransferId, long triggerTime) {
-        if (mLogger.isActivated()) {
-            mLogger.debug("Schedule delivery expiration timer for file with fileTransferId "
+        if (sLogger.isActivated()) {
+            sLogger.debug("Schedule delivery expiration timer for file with fileTransferId "
                     .concat(fileTransferId));
         }
         scheduleDeliveryTimeoutAlarm(fileTransferId, triggerTime,
                 createUndeliveredFileTransferPendingIntent(contact, fileTransferId));
     }
 
-    public void handleChatMessageDeliveryExpiration(ContactId contact, String msgId) {
+    public void onChatMessageDeliveryExpirationReceived(ContactId contact, String msgId) {
         cancelDeliveryTimeoutAlarm(msgId);
         mMessagingLog.setChatMessageDeliveryExpired(msgId);
         mImService.getImsModule().getCapabilityService().requestContactCapabilities(contact);
@@ -165,7 +167,7 @@ public class OneToOneUndeliveredImManager {
         mCtx.sendBroadcast(undeliveredMessage);
     }
 
-    public void handleFileTransferDeliveryExpiration(ContactId contact, String fileTransferId) {
+    public void onFileTransferDeliveryExpirationReceived(ContactId contact, String fileTransferId) {
         cancelDeliveryTimeoutAlarm(fileTransferId);
         mMessagingLog.setFileTransferDeliveryExpired(fileTransferId);
         mImService.getImsModule().getCapabilityService().requestContactCapabilities(contact);
@@ -179,17 +181,27 @@ public class OneToOneUndeliveredImManager {
         mCtx.sendBroadcast(undeliveredFile);
     }
 
-    public void handleChatMessageDeliveryExpiration(Intent intent) {
+    /**
+     * Handle one-one chat message delivery expiration
+     *
+     * @param intent
+     */
+    public void onChatMessageDeliveryExpirationReceived(Intent intent) {
         ContactId contact = ContactUtil.createContactIdFromTrustedData(intent
                 .getStringExtra(EXTRA_CONTACT));
         String msgId = intent.getStringExtra(EXTRA_ID);
-        handleChatMessageDeliveryExpiration(contact, msgId);
+        onChatMessageDeliveryExpirationReceived(contact, msgId);
     }
 
-    public void handleFileTransferDeliveryExpiration(Intent intent) {
+    /**
+     * Handle one-one file transfer delivery expiration
+     *
+     * @param intent
+     */
+    public void onFileTransferDeliveryExpirationReceived(Intent intent) {
         ContactId contact = ContactUtil.createContactIdFromTrustedData(intent
                 .getStringExtra(EXTRA_CONTACT));
         String fileTransferId = intent.getStringExtra(EXTRA_ID);
-        handleFileTransferDeliveryExpiration(contact, fileTransferId);
+        onFileTransferDeliveryExpirationReceived(contact, fileTransferId);
     }
 }

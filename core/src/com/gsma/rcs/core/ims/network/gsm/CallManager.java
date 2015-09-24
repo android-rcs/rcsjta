@@ -146,7 +146,7 @@ public class CallManager {
      */
     private PhoneStateListener listener = new PhoneStateListener() {
         public void onCallStateChanged(final int state, final String incomingNumber) {
-            mImsModule.getCore().scheduleForBackgroundExecution(new Runnable() {
+            mImsModule.getCore().scheduleCoreOperation(new Runnable() {
                 @Override
                 public void run() {
                     try {

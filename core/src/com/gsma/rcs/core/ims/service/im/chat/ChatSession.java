@@ -176,7 +176,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         mIsComposingMgr.receiveIsComposingEvent(msg.getRemoteContact(), false);
 
         for (ImsSessionListener listener : getListeners()) {
-            ((ChatSessionListener) listener).handleReceiveMessage(msg, imdnDisplayedRequested);
+            ((ChatSessionListener) listener).onMessageReceived(msg, imdnDisplayedRequested);
         }
     }
 
@@ -577,7 +577,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                         } else if (ChatUtils.isApplicationIsComposingType(contentType)) {
                             receiveIsComposing(contact, cpimMsg.getMessageContent().getBytes(UTF8));
                         } else if (ChatUtils.isMessageImdnType(contentType)) {
-                            receiveDeliveryStatus(contact, cpimMsg.getMessageContent());
+                            onDeliveryStatusReceived(contact, cpimMsg.getMessageContent());
                         } else if (ChatUtils.isGeolocType(contentType)) {
                             ChatMessage msg = new ChatMessage(cpimMsgId, contact,
                                     cpimMsg.getMessageContent(), GeolocInfoDocument.MIME_TYPE,
@@ -671,21 +671,15 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     private void handleFileTransferInvitationRejected(ContactId contact, MmContent content,
             MmContent fileIcon, FileTransfer.ReasonCode reasonCode, long timestamp,
             long timestampSent) {
-        mImService
-                .getImsModule()
-                .getCoreListener()
-                .handleFileTransferInvitationRejected(contact, content, fileIcon, reasonCode,
-                        timestamp, timestampSent);
+        mImService.addFileTransferInvitationRejected(contact, content, fileIcon, reasonCode,
+                timestamp, timestampSent);
     }
 
     private void handleResendFileTransferInvitationRejected(String fileTransferId,
             ContactId contact, FileTransfer.ReasonCode reasonCode, long timestamp,
             long timestampSent) {
-        mImService
-                .getImsModule()
-                .getCoreListener()
-                .handleResendFileTransferInvitationRejected(fileTransferId, contact, reasonCode,
-                        timestamp, timestampSent);
+        mImService.setResendFileTransferInvitationRejected(fileTransferId, contact, reasonCode,
+                timestamp, timestampSent);
     }
 
     /**
@@ -826,16 +820,10 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             }
             if (fileResent) {
                 mImService
-                        .getImsModule()
-                        .getCoreListener()
-                        .handleOneToOneResendFileTransferInvitation(fileSession, contact,
-                                displayName);
+                        .receiveResendFileTransferInvitation(fileSession, contact, displayName);
             } else {
-                mImService
-                        .getImsModule()
-                        .getCoreListener()
-                        .handleFileTransferInvitation(fileSession, isGroupChat(), contact,
-                                displayName, fileTransferInfo.getExpiration());
+                mImService.receiveFileTransferInvitation(fileSession, isGroupChat(), contact,
+                        displayName, fileTransferInfo.getExpiration());
             }
             fileSession.startSession();
 
@@ -957,7 +945,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
             if (mMessagingLog.getMessageChatId(msgId) != null) {
                 for (ImsSessionListener listener : getListeners()) {
-                    ((ChatSessionListener) listener).handleChatMessageDisplayReportSent(msgId);
+                    ((ChatSessionListener) listener).onChatMessageDisplayReportSent(msgId);
                 }
             }
         }
@@ -971,13 +959,13 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @throws SipPayloadException
      * @throws SipNetworkException
      */
-    public void receiveDeliveryStatus(ContactId contact, String xml) throws SipPayloadException,
+    public void onDeliveryStatusReceived(ContactId contact, String xml) throws SipPayloadException,
             SipNetworkException {
         try {
             ImdnDocument imdn = ChatUtils.parseDeliveryReport(xml);
 
             for (ImsSessionListener listener : getListeners()) {
-                ((ChatSessionListener) listener).handleDeliveryStatus(mContributionId, contact,
+                ((ChatSessionListener) listener).onDeliveryStatusReceived(mContributionId, contact,
                         imdn);
             }
         } catch (SAXException e) {

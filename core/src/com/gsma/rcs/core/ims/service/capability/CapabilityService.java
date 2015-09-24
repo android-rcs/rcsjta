@@ -24,7 +24,6 @@ package com.gsma.rcs.core.ims.service.capability;
 
 import com.gsma.rcs.addressbook.AddressBookEventListener;
 import com.gsma.rcs.addressbook.AddressBookManager;
-import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
@@ -35,8 +34,12 @@ import com.gsma.rcs.core.ims.service.capability.SyncContactTask.ISyncContactTask
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.CapabilityServiceImpl;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
+
+import android.os.Handler;
+import android.os.HandlerThread;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -50,6 +53,8 @@ import java.util.concurrent.Executors;
  * @author jexa7410
  */
 public class CapabilityService extends ImsService implements AddressBookEventListener {
+
+    private static final String CAPABILITIES_OPERATION_THREAD_NAME = "CapabiltiesOps";
 
     private final RcsSettings mRcsSettings;
 
@@ -71,29 +76,33 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
 
     private static final int MAX_CONTACTS_TO_DISPLAY = 10;
 
-    private final Core mCore;
+    /**
+     * This purpose of this handler is to make the request asynchronous with the mechanisms provider
+     * by android by placing the request in the main thread message queue.
+     */
+    private final Handler mCapabilityOperationsHandler;
+
+    private CapabilityServiceImpl mCapabilityService;
 
     /**
      * Constructor
-     * 
+     *
      * @param parent IMS module
      * @param core The core instance
      * @param rcsSettings RCS settings accessor
      * @param contactsManager Contact manager accessor
      * @param addressBookManager The address book manager instance
      */
-    public CapabilityService(ImsModule parent, Core core, RcsSettings rcsSettings,
+    public CapabilityService(ImsModule parent, RcsSettings rcsSettings,
             ContactManager contactsManager, AddressBookManager addressBookManager) {
         super(parent, true);
-        mCore = core;
         mRcsSettings = rcsSettings;
         mContactManager = contactsManager;
-        mPollingManager = new PollingManager(this, mRcsSettings, mContactManager);
-        mOptionsManager = new OptionsManager(parent, mRcsSettings, mContactManager);
-        mAnonymousFetchManager = new AnonymousFetchManager(parent, mRcsSettings, mContactManager);
         mAddressBookManager = addressBookManager;
-        mISyncContactTaskListener = new ISyncContactTaskListener() {
 
+        mCapabilityOperationsHandler = allocateBgHandler(CAPABILITIES_OPERATION_THREAD_NAME);
+
+        mISyncContactTaskListener = new ISyncContactTaskListener() {
             @Override
             public void endOfSyncContactTask() {
                 if (!isServiceStarted()) {
@@ -107,6 +116,27 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
                 }
             }
         };
+
+        mPollingManager = new PollingManager(this, mRcsSettings, mContactManager);
+        mOptionsManager = new OptionsManager(parent, mRcsSettings, mContactManager);
+        mAnonymousFetchManager = new AnonymousFetchManager(parent, mRcsSettings, mContactManager);
+    }
+
+    private Handler allocateBgHandler(String threadName) {
+        HandlerThread thread = new HandlerThread(threadName);
+        thread.start();
+        return new Handler(thread.getLooper());
+    }
+
+    public void register(CapabilityServiceImpl service) {
+        if (sLogger.isActivated()) {
+            sLogger.debug(service.getClass().getName() + " registered ok.");
+        }
+        mCapabilityService = service;
+    }
+
+    public void scheduleCapabilityOperation(Runnable runnable) {
+        mCapabilityOperationsHandler.post(runnable);
     }
 
     /**
@@ -210,21 +240,63 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      * @throws SipNetworkException
      * @throws SipPayloadException
      */
-    public void receiveCapabilityRequest(SipRequest options) throws SipPayloadException,
-            SipNetworkException {
-        mOptionsManager.receiveCapabilityRequest(options);
+    public void onCapabilityRequestReceived(final SipRequest options) {
+        scheduleCapabilityOperation(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mOptionsManager.onCapabilityRequestReceived(options);
+                } catch (SipNetworkException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Failed to receive capability request! (" + e.getMessage()
+                                + ")");
+                    }
+                } catch (SipPayloadException e) {
+                    sLogger.error("Failed to receive capability request!", e);
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error("Failed to receive capability request!", e);
+                }
+            }
+        });
     }
 
     /**
      * Receive a notification (anonymous fetch procedure)
-     * 
+     *
      * @param notify Received notify
-     * @throws SipNetworkException
-     * @throws SipPayloadException
      */
-    public void receiveNotification(SipRequest notify) throws SipPayloadException,
-            SipNetworkException {
-        mAnonymousFetchManager.receiveNotification(notify);
+    public void onNotificationReceived(final SipRequest notify) {
+        scheduleCapabilityOperation(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mAnonymousFetchManager.onNotificationReceived(notify);
+                } catch (SipNetworkException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Failed to receive capability notification! ("
+                                + e.getMessage() + ")");
+                    }
+                } catch (SipPayloadException e) {
+                    sLogger.error("Failed to receive capability notification!", e);
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error("Failed to receive capability notification!", e);
+                }
+            }
+        });
     }
 
     private void synchronizeContacts() {
@@ -271,7 +343,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
             capabilities = capaBuilder.build();
             mContactManager.setContactCapabilities(contact, capabilities);
 
-            mCore.getListener().handleCapabilitiesNotification(contact, capabilities);
+            onReceivedCapabilities(contact, capabilities);
 
         } catch (ContactManagerException e) {
             throw new SipPayloadException(
@@ -282,6 +354,20 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
                     "Failed to reset content share capabilities for contact : ".concat(contact
                             .toString()), e);
         }
+    }
+
+    /**
+     * Capabilities update notification has been received
+     *
+     * @param contact Contact identifier
+     * @param capabilities Capabilities
+     */
+    public void onReceivedCapabilities(ContactId contact, Capabilities capabilities) {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle capabilities update notification for " + contact + " ("
+                    + capabilities.toString() + ")");
+        }
+        mCapabilityService.receiveCapabilities(contact, capabilities);
     }
 
 }

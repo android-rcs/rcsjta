@@ -17,6 +17,8 @@
 package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.Core;
+import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
+import com.gsma.rcs.core.ims.service.im.chat.imdn.DeliveryExpirationManager;
 import com.gsma.rcs.utils.logger.Logger;
 
 import android.app.IntentService;
@@ -41,17 +43,21 @@ public class OneToOneDeliveryExpirationService extends IntentService {
             }
             return;
         }
-        core.scheduleForBackgroundExecution(new Runnable() {
+        InstantMessagingService imService = core.getImService();
+        final DeliveryExpirationManager deliveryExpirarationManager = imService
+                .getDeliveryExpirationManager();
+        imService.scheduleImOperation(new Runnable() {
             @Override
             public void run() {
                 String action = intent.getAction();
                 try {
-                    if (OneToOneUndeliveredImManager.ACTION_CHAT_MESSAGE_DELIVERY_TIMEOUT
+                    if (DeliveryExpirationManager.ACTION_CHAT_MESSAGE_DELIVERY_TIMEOUT
                             .equals(action)) {
-                        core.getListener().handleOneToOneChatMessageDeliveryExpiration(intent);
-                    } else if (OneToOneUndeliveredImManager.ACTION_FILE_TRANSFER_DELIVERY_TIMEOUT
+                        deliveryExpirarationManager.onChatMessageDeliveryExpirationReceived(intent);
+                    } else if (DeliveryExpirationManager.ACTION_FILE_TRANSFER_DELIVERY_TIMEOUT
                             .equals(action)) {
-                        core.getListener().handleOneToOneFileTransferDeliveryExpiration(intent);
+                        deliveryExpirarationManager
+                                .onFileTransferDeliveryExpirationReceived(intent);
                     }
                 } catch (RuntimeException e) {
                     /*

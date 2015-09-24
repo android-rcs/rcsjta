@@ -545,12 +545,12 @@ public abstract class ImsServiceSession extends Thread {
         Collection<ImsSessionListener> listeners = getListeners();
         if (wasEstablished) {
             for (ImsSessionListener listener : listeners) {
-                listener.handleSessionAborted(mContact, reason);
+                listener.onSessionAborted(mContact, reason);
             }
             return;
         }
         for (ImsSessionListener listener : listeners) {
-            listener.handleSessionRejected(mContact, reason);
+            listener.onSessionRejected(mContact, reason);
         }
     }
 
@@ -1074,7 +1074,7 @@ public abstract class ImsServiceSession extends Thread {
             openMediaSession();
 
             for (ImsSessionListener listener : getListeners()) {
-                listener.handleSessionStarted(mContact);
+                listener.onSessionStarted(mContact);
             }
 
             /* Start session timer */

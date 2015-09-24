@@ -166,7 +166,7 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
 
         ContactId contact = getRemoteContact();
         for (int j = 0; j < getListeners().size(); j++) {
-            ((FileSharingSessionListener) getListeners().get(j)).handleTransferError(
+            ((FileSharingSessionListener) getListeners().get(j)).onTransferError(
                     new FileSharingError(error), contact);
         }
     }
@@ -200,7 +200,7 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
             }
             ContactId contact = getRemoteContact();
             for (ImsSessionListener listener : getListeners()) {
-                ((FileSharingSessionListener) listener).handleTransferError(new FileSharingError(
+                ((FileSharingSessionListener) listener).onTransferError(new FileSharingError(
                         FileSharingError.MEDIA_TRANSFER_FAILED, error), contact);
             }
         } catch (SipPayloadException e) {
@@ -246,7 +246,7 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
          */
         if (!isFileTransfered()) {
             for (ImsSessionListener listener : getListeners()) {
-                listener.handleSessionAborted(contact, TerminationReason.TERMINATION_BY_REMOTE);
+                listener.onSessionAborted(contact, TerminationReason.TERMINATION_BY_REMOTE);
             }
         }
         getImsService().getImsModule().getCapabilityService().requestContactCapabilities(contact);

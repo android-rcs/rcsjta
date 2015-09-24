@@ -103,7 +103,7 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
             Collection<ImsSessionListener> listeners = getListeners();
             ContactId contact = getRemoteContact();
             for (ImsSessionListener listener : listeners) {
-                ((SipSessionListener) listener).handleSessionInvited(contact, mSessionInvite);
+                ((SipSessionListener) listener).onSessionInvited(contact, mSessionInvite);
             }
 
             InvitationStatus answer = waitInvitationAnswer();
@@ -118,8 +118,7 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
                     removeSession();
 
                     for (ImsSessionListener listener : listeners) {
-                        listener.handleSessionRejected(contact,
-                                TerminationReason.TERMINATION_BY_USER);
+                        listener.onSessionRejected(contact, TerminationReason.TERMINATION_BY_USER);
                     }
                     return;
 
@@ -134,7 +133,7 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
                     removeSession();
 
                     for (ImsSessionListener listener : listeners) {
-                        listener.handleSessionRejected(contact,
+                        listener.onSessionRejected(contact,
                                 TerminationReason.TERMINATION_BY_TIMEOUT);
                     }
                     return;
@@ -154,8 +153,7 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
                     removeSession();
 
                     for (ImsSessionListener listener : listeners) {
-                        listener.handleSessionRejected(contact,
-                                TerminationReason.TERMINATION_BY_REMOTE);
+                        listener.onSessionRejected(contact, TerminationReason.TERMINATION_BY_REMOTE);
                     }
                     return;
 
@@ -163,7 +161,7 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
                     setSessionAccepted();
 
                     for (ImsSessionListener listener : listeners) {
-                        listener.handleSessionAccepted(contact);
+                        listener.onSessionAccepting(contact);
                     }
                     break;
 
@@ -286,7 +284,7 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
 
                 // Notify listeners
                 for (int j = 0; j < getListeners().size(); j++) {
-                    getListeners().get(j).handleSessionStarted(contact);
+                    getListeners().get(j).onSessionStarted(contact);
                 }
             } else {
                 if (logActivated) {

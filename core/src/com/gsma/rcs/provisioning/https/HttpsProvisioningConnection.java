@@ -104,7 +104,7 @@ public class HttpsProvisioningConnection {
         mNetworkStateListener = new BroadcastReceiver() {
             @Override
             public void onReceive(final Context context, final Intent intent) {
-                mProvisioningManager.scheduleForBackgroundExecution(new Runnable() {
+                mProvisioningManager.scheduleProvisioningOperation(new Runnable() {
                     @Override
                     public void run() {
                         String action = intent.getAction();
@@ -185,7 +185,7 @@ public class HttpsProvisioningConnection {
         mWifiDisablingListener = new BroadcastReceiver() {
             @Override
             public void onReceive(final Context context, final Intent intent) {
-                mProvisioningManager.scheduleForBackgroundExecution(new Runnable() {
+                mProvisioningManager.scheduleProvisioningOperation(new Runnable() {
                     @Override
                     public void run() {
                         try {

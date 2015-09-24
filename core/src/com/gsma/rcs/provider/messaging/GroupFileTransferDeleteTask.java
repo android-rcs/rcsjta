@@ -52,8 +52,8 @@ public class GroupFileTransferDeleteTask extends DeleteTask.GroupedByChatId {
      * @param imsLock the IMS operation lock
      */
     public GroupFileTransferDeleteTask(FileTransferServiceImpl fileTransferService,
-            InstantMessagingService imService, LocalContentResolver contentResolver, Object imsLock) {
-        super(contentResolver, imsLock, FileTransferData.CONTENT_URI, FileTransferData.KEY_FT_ID,
+            InstantMessagingService imService, LocalContentResolver contentResolver) {
+        super(contentResolver, FileTransferData.CONTENT_URI, FileTransferData.KEY_FT_ID,
                 FileTransferData.KEY_CHAT_ID, SELECTION_ALL_GROUP_FILETRANSFERS);
         mFileTransferService = fileTransferService;
         mImService = imService;
@@ -70,8 +70,8 @@ public class GroupFileTransferDeleteTask extends DeleteTask.GroupedByChatId {
      */
     public GroupFileTransferDeleteTask(FileTransferServiceImpl fileTransferService,
             InstantMessagingService imService, LocalContentResolver contentResolver,
-            Object imsLock, String chatId) {
-        super(contentResolver, imsLock, FileTransferData.CONTENT_URI, FileTransferData.KEY_FT_ID,
+            String chatId) {
+        super(contentResolver, FileTransferData.CONTENT_URI, FileTransferData.KEY_FT_ID,
                 FileTransferData.KEY_CHAT_ID, SELECTION_FILETRANSFER_BY_CHATID, chatId);
         mFileTransferService = fileTransferService;
         mImService = imService;
@@ -88,9 +88,9 @@ public class GroupFileTransferDeleteTask extends DeleteTask.GroupedByChatId {
      * @param transferId the transfer id
      */
     public GroupFileTransferDeleteTask(FileTransferServiceImpl fileTransferService,
-            InstantMessagingService imService, LocalContentResolver contentResolver,
-            Object imsLock, String chatId, String transferId) {
-        super(contentResolver, imsLock, FileTransferData.CONTENT_URI, FileTransferData.KEY_FT_ID,
+            InstantMessagingService imService, LocalContentResolver contentResolver, String chatId,
+            String transferId) {
+        super(contentResolver, FileTransferData.CONTENT_URI, FileTransferData.KEY_FT_ID,
                 FileTransferData.KEY_CHAT_ID, null, transferId);
         mFileTransferService = fileTransferService;
         mImService = imService;

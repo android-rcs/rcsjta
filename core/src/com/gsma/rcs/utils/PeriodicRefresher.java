@@ -143,7 +143,7 @@ public abstract class PeriodicRefresher {
      */
     private class KeepAlive extends BroadcastReceiver {
         public void onReceive(Context context, Intent intent) {
-            Core.getInstance().scheduleForBackgroundExecution(new Runnable() {
+            Core.getInstance().scheduleCoreOperation(new Runnable() {
                 @Override
                 public void run() {
                     try {

@@ -24,7 +24,6 @@ package com.gsma.rcs.core.ims.service.im.chat.imdn;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
@@ -33,8 +32,8 @@ import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.SessionAuthenticationAgent;
+import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -54,9 +53,8 @@ import javax2.sip.message.Response;
  * @author jexa7410
  */
 public class ImdnManager extends Thread {
-    private final ImsService mImsService;
 
-    private final Core mCore;
+    private final InstantMessagingService mImService;
 
     private FifoBuffer mBuffer = new FifoBuffer();
 
@@ -70,9 +68,8 @@ public class ImdnManager extends Thread {
      * @param imsService IMS service
      * @param rcsSettings
      */
-    public ImdnManager(ImsService imsService, Core core, RcsSettings rcsSettings) {
-        mImsService = imsService;
-        mCore = core;
+    public ImdnManager(InstantMessagingService imService, RcsSettings rcsSettings) {
+        mImService = imService;
         mRcsSettings = rcsSettings;
     }
 
@@ -138,7 +135,7 @@ public class ImdnManager extends Thread {
                  * display report was now successfully send we mark this message as fully received
                  */
                 if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(delivery.getStatus())) {
-                    mCore.getListener().handleChatMessageDisplayReportSent(delivery.getChatId(),
+                    mImService.onChatMessageDisplayReportSent(delivery.getChatId(),
                             delivery.getRemote(), delivery.getMsgId());
                 }
             } catch (SipPayloadException e) {
@@ -225,7 +222,7 @@ public class ImdnManager extends Thread {
                 /* Set the Authorization header */
                 authenticationAgent.setProxyAuthorizationHeader(msg);
 
-                ctx = mImsService.getImsModule().getSipManager().sendSipMessageAndWait(msg);
+                ctx = mImService.getImsModule().getSipManager().sendSipMessageAndWait(msg);
 
                 analyzeSipResponse(ctx, authenticationAgent, dialogPath, cpim);
                 break;
@@ -269,14 +266,14 @@ public class ImdnManager extends Thread {
 
             // Create authentication agent
             SessionAuthenticationAgent authenticationAgent = new SessionAuthenticationAgent(
-                    mImsService.getImsModule());
+                    mImService.getImsModule());
             // @FIXME: This should be an URI instead of String
             String toUri = PhoneUtils.formatContactIdToUri(deliveryStatus.getRemote()).toString();
             // Create a dialog path
-            SipDialogPath dialogPath = new SipDialogPath(mImsService.getImsModule().getSipManager()
-                    .getSipStack(), mImsService.getImsModule().getSipManager().getSipStack()
+            SipDialogPath dialogPath = new SipDialogPath(mImService.getImsModule().getSipManager()
+                    .getSipStack(), mImService.getImsModule().getSipManager().getSipStack()
                     .generateCallId(), 1, toUri, ImsModule.getImsUserProfile().getPublicUri(),
-                    toUri, mImsService.getImsModule().getSipManager().getSipStack()
+                    toUri, mImService.getImsModule().getSipManager().getSipStack()
                             .getServiceRoutePath(), mRcsSettings);
             dialogPath.setRemoteSipInstance(remoteInstanceId);
 
@@ -288,7 +285,7 @@ public class ImdnManager extends Thread {
                     FeatureTags.FEATURE_OMA_IM, CpimMessage.MIME_TYPE, cpim.getBytes(UTF8));
 
             // Send MESSAGE request
-            SipTransactionContext ctx = mImsService.getImsModule().getSipManager()
+            SipTransactionContext ctx = mImService.getImsModule().getSipManager()
                     .sendSipMessageAndWait(msg);
 
             // Analyze received message

@@ -22,8 +22,6 @@
 
 package com.gsma.rcs.service.api;
 
-import com.gsma.rcs.core.Core;
-import com.gsma.rcs.core.CoreListener;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
@@ -84,10 +82,6 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
 
     private final ContactManager mContactManager;
 
-    private final Core mCore;
-
-    private final OneToOneUndeliveredImManager mUndeliveredImManager;
-
     /**
      * Lock used for synchronization
      */
@@ -112,108 +106,30 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * @param core Core
      * @param undeliveredImManager OneToOneUndeliveredImManager
      */
-    public OneToOneChatImpl(ContactId contact, IOneToOneChatEventBroadcaster broadcaster,
-            InstantMessagingService imService, MessagingLog messagingLog, HistoryLog historyLog,
-            RcsSettings rcsSettings, ChatServiceImpl chatService, ContactManager contactManager,
-            Core core, OneToOneUndeliveredImManager undeliveredImManager) {
+    public OneToOneChatImpl(InstantMessagingService imService, ContactId contact,
+            IOneToOneChatEventBroadcaster broadcaster, MessagingLog messagingLog,
+            HistoryLog historyLog, RcsSettings rcsSettings, ChatServiceImpl chatService,
+            ContactManager contactManager) {
+        mImService = imService;
         mContact = contact;
         mBroadcaster = broadcaster;
-        mImService = imService;
         mMessagingLog = messagingLog;
         mChatService = chatService;
         mRcsSettings = rcsSettings;
         mContactManager = contactManager;
-        mCore = core;
-        mUndeliveredImManager = undeliveredImManager;
     }
 
-    private void sendChatMessageInNewSession(ChatMessage msg) throws SipPayloadException,
+    private void sendChatMessageInNewSession(final ChatMessage msg) throws SipPayloadException,
             SipNetworkException {
-        final OneToOneChatSession newSession = mImService
-                .initiateOneToOneChatSession(mContact, msg);
-        newSession.addListener(this);
-        mChatService.addOneToOneChat(mContact, this);
+        final OneToOneChatSession newSession = mImService.createOneToOneChatSession(mContact, msg);
+        newSession.addListener(OneToOneChatImpl.this);
         newSession.startSession();
-        handleMessageSent(msg.getMessageId(), ChatUtils.networkMimeTypeToApiMimeType(msg));
+        onMessageSent(msg.getMessageId(), ChatUtils.networkMimeTypeToApiMimeType(msg));
     }
 
-    private void sendChatMessageWithinSession(final OneToOneChatSession session, ChatMessage msg) {
-        try {
-            session.sendChatMessage(msg);
-        } catch (MsrpException e) {
-            String msgId = msg.getMessageId();
-            sLogger.error(
-                    new StringBuilder("Failed to send chat message with msgId '").append(msgId)
-                            .append("' within chat session").toString(), e);
-            mChatService.setOneToOneChatMessageStatusAndReasonCode(msgId, msg.getMimeType(),
-                    mContact, Status.FAILED, ReasonCode.FAILED_SEND);
-        }
-    }
-
-    /**
-     * Sends a chat message
-     * 
-     * @param msg Message
-     * @throws SipPayloadException
-     * @throws SipNetworkException
-     */
-    private void sendChatMessage(final ChatMessage msg) throws SipPayloadException,
-            SipNetworkException {
-        synchronized (mLock) {
-            boolean loggerActivated = sLogger.isActivated();
-            if (loggerActivated) {
-                sLogger.debug(new StringBuilder("Send chat message, msgId ")
-                        .append(msg.getMessageId()).append(" and mimeType ")
-                        .append(msg.getMimeType()).toString());
-            }
-            mImService.acceptStoreAndForwardMessageSessionIfSuchExists(mContact);
-            final OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
-            if (session == null) {
-                if (!mImService.isChatSessionAvailable()) {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("Cannot start new session since to limit of sessions is reached; queue message.");
-                    }
-                    addOutgoingChatMessage(msg, Status.QUEUED);
-                    return;
-                }
-                if (loggerActivated) {
-                    sLogger.debug("Core session is not yet established: initiate a new session to send the message.");
-                }
-                addOutgoingChatMessage(msg, Status.SENDING);
-                sendChatMessageInNewSession(msg);
-                return;
-            }
-            if (session.isMediaEstablished()) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Core session is established: use existing one to send the message");
-                }
-                addOutgoingChatMessage(msg, Status.SENDING);
-                sendChatMessageWithinSession(session, msg);
-                return;
-            }
-            /*
-             * TODO : If session is originated by remote, then queue the message and accept the
-             * pending session as part of this send operation
-             */
-            if (session.isInitiatedByRemote()) {
-                addOutgoingChatMessage(msg, Status.QUEUED);
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Accept one-to-one chat session with contact ".concat(mContact
-                            .toString()));
-                }
-                session.acceptSession();
-            } else {
-                if (!mImService.isChatSessionAvailable()) {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("Cannot start new session since to limit of sessions is reached; queue message.");
-                    }
-                    addOutgoingChatMessage(msg, Status.QUEUED);
-                    return;
-                }
-                addOutgoingChatMessage(msg, Status.SENDING);
-                sendChatMessageInNewSession(msg);
-            }
-        }
+    private void sendChatMessageWithinSession(final OneToOneChatSession session,
+            final ChatMessage msg) throws MsrpException {
+        session.sendChatMessage(msg);
     }
 
     /**
@@ -224,7 +140,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * @throws SipNetworkException
      */
     private void resendChatMessage(final ChatMessage msg) throws SipPayloadException,
-            SipNetworkException {
+            SipNetworkException, MsrpException {
         synchronized (mLock) {
             String msgId = msg.getMessageId();
             String mimeType = msg.getMimeType();
@@ -289,6 +205,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * 
      * @return ContactId
      */
+    @Override
     public ContactId getRemoteContact() {
         return mContact;
     }
@@ -300,6 +217,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * @return boolean
      * @throws RemoteException
      */
+    @Override
     public boolean isAllowedToSendMessage() throws RemoteException {
         try {
             if (!mRcsSettings.getMyCapabilities().isImSessionSupported()) {
@@ -393,8 +311,9 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             mMessagingLog.addOutgoingOneToOneChatMessage(msg, status, ReasonCode.UNSPECIFIED,
                     deliveryExpiration);
             if (deliveryExpiration != 0) {
-                mUndeliveredImManager.scheduleOneToOneChatMessageDeliveryTimeoutAlarm(mContact,
-                        msgId, deliveryExpiration);
+                mImService.getDeliveryExpirationManager()
+                        .scheduleOneToOneChatMessageDeliveryTimeoutAlarm(mContact, msgId,
+                                deliveryExpiration);
             }
         } catch (IOException e) {
             throw new SipNetworkException(
@@ -408,13 +327,14 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * @param msgId
      * @param mimeType
      * @param state state of message
+     * @param reasonCode
      */
-    private void setChatMessageStatus(String msgId, String mimeType, Status status) {
+    private void setChatMessageStatusAndReasonCode(String msgId, String mimeType, Status status,
+            ReasonCode reasonCode) {
         synchronized (mLock) {
-            if (mMessagingLog.setChatMessageStatusAndReasonCode(msgId, status,
-                    ReasonCode.UNSPECIFIED)) {
+            if (mMessagingLog.setChatMessageStatusAndReasonCode(msgId, status, reasonCode)) {
                 mBroadcaster.broadcastMessageStatusChanged(mContact, mimeType, msgId, status,
-                        ReasonCode.UNSPECIFIED);
+                        reasonCode);
             }
         }
     }
@@ -444,6 +364,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * @return Chat message
      * @throws RemoteException
      */
+    @Override
     public IChatMessage sendMessage(String message) throws RemoteException {
         if (TextUtils.isEmpty(message)) {
             throw new ServerApiIllegalArgumentException("message must not be null or empty!");
@@ -463,19 +384,16 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             mImService.removeOneToOneChatComposingStatus(mContact); /* clear cache */
             long timestamp = System.currentTimeMillis();
             /* For outgoing message, timestampSent = timestamp */
-            ChatMessage msg = ChatUtils.createTextMessage(mContact, message, timestamp, timestamp);
-            ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
+            final ChatMessage msg = ChatUtils.createTextMessage(mContact, message, timestamp,
+                    timestamp);
+            ChatMessagePersistedStorageAccessor persistedStorage = new ChatMessagePersistedStorageAccessor(
                     mMessagingLog, msg.getMessageId(), msg.getRemoteContact(), message,
                     MimeType.TEXT_MESSAGE, mContact.toString(), Direction.OUTGOING);
+            /* Always insert message with status QUEUED */
+            addOutgoingChatMessage(msg, Status.QUEUED);
 
-            /* If the IMS is connected at this time then send this message. */
-            if (ServerApiUtils.isImsConnected()) {
-                sendChatMessage(msg);
-            } else {
-                /* If the IMS is NOT connected at this time then queue message. */
-                addOutgoingChatMessage(msg, Status.QUEUED);
-            }
-            return new ChatMessageImpl(persistentStorage);
+            mImService.tryToDequeueOneToOneChatMessages(mContact);
+            return new ChatMessageImpl(persistedStorage);
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -496,6 +414,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * @return ChatMessage
      * @throws RemoteException
      */
+    @Override
     public IChatMessage sendMessage2(Geoloc geoloc) throws RemoteException {
         if (geoloc == null) {
             throw new ServerApiIllegalArgumentException("geoloc must not be null!");
@@ -517,18 +436,15 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         try {
             long timestamp = System.currentTimeMillis();
             /** For outgoing message, timestampSent = timestamp */
-            ChatMessage msg = ChatUtils.createGeolocMessage(mContact, geoloc, timestamp, timestamp);
+            final ChatMessage msg = ChatUtils.createGeolocMessage(mContact, geoloc, timestamp,
+                    timestamp);
             ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
                     mMessagingLog, msg.getMessageId(), msg.getRemoteContact(), msg.toString(),
                     MimeType.GEOLOC_MESSAGE, mContact.toString(), Direction.OUTGOING);
+            /* Always insert message with status QUEUED */
+            addOutgoingChatMessage(msg, Status.QUEUED);
 
-            /* If the IMS is connected at this time then send this message. */
-            if (ServerApiUtils.isImsConnected()) {
-                sendChatMessage(msg);
-            } else {
-                /* If the IMS is NOT connected at this time then queue message. */
-                addOutgoingChatMessage(msg, Status.QUEUED);
-            }
+            mImService.tryToDequeueOneToOneChatMessages(mContact);
             return new ChatMessageImpl(persistentStorage);
 
         } catch (ServerApiBaseException e) {
@@ -608,11 +524,11 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         mMessagingLog.setFileTransferTimestamps(fileTransferId, timestamp, timestampSent);
         ChatMessage firstMsg = ChatUtils.createFileTransferMessage(getRemoteContact(), fileInfo,
                 fileTransferId, timestamp, timestampSent);
-        OneToOneChatSession chatSession = mImService.initiateOneToOneChatSession(
-                getRemoteContact(), firstMsg);
+        OneToOneChatSession chatSession = mImService.createOneToOneChatSession(getRemoteContact(),
+                firstMsg);
         chatSession.startSession();
-        mCore.getListener().handleOneOneChatSessionInitiation(chatSession);
-        oneToOneFileTransfer.handleFileInfoDequeued(getRemoteContact());
+        mImService.receiveOneOneChatSessionInitiation(chatSession);
+        oneToOneFileTransfer.onFileInfoDequeued(getRemoteContact());
     }
 
     /**
@@ -701,74 +617,81 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * @param status
      * @throws RemoteException
      */
+    @Override
     public void setComposingStatus(final boolean status) throws RemoteException {
-        try {
-            mImService.removeOneToOneChatComposingStatus(mContact);
-            ImSessionStartMode imSessionStartMode = mRcsSettings.getImSessionStartMode();
-            switch (imSessionStartMode) {
-                case ON_OPENING:
-                case ON_COMPOSING:
-                    mImService.acceptStoreAndForwardMessageSessionIfSuchExists(mContact);
-                    break;
-                default:
-                    break;
-            }
-            final OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
-            if (session == null) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Unable to send composing event '" + status
-                            + "' since oneToOne chat session found with contact '" + mContact
-                            + "' does not exist for now.");
-                }
-                mImService.addOneToOneChatComposingStatus(mContact, status);
-            } else if (session.getDialogPath().isSessionEstablished()) {
-                session.sendIsComposingStatus(status);
-            } else if (!session.isInitiatedByRemote()) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Unable to send composing event '" + status
-                            + "' since oneToOne chat session found with contact '" + mContact
-                            + "' is initiated locally.");
-                }
-                mImService.addOneToOneChatComposingStatus(mContact, status);
-            } else {
-                switch (imSessionStartMode) {
-                    case ON_OPENING:
-                    case ON_COMPOSING:
+        mImService.scheduleImOperation(new Runnable() {
+            public void run() {
+                try {
+                    mImService.removeOneToOneChatComposingStatus(mContact);
+                    ImSessionStartMode imSessionStartMode = mRcsSettings.getImSessionStartMode();
+                    switch (imSessionStartMode) {
+                        case ON_OPENING:
+                        case ON_COMPOSING:
+                            mImService.acceptStoreAndForwardMessageSessionIfSuchExists(mContact);
+                            break;
+                        default:
+                            break;
+                    }
+                    final OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
+                    if (session == null) {
                         if (sLogger.isActivated()) {
-                            sLogger.debug("OneToOne chat session found with contact '" + mContact
-                                    + "' is not established and imSessionStartMode = "
-                                    + imSessionStartMode
-                                    + " so accepting it and sending composing event '" + status
-                                    + "'");
-                        }
-                        session.acceptSession();
-                        session.sendIsComposingStatus(status);
-                        break;
-                    default:
-                        if (sLogger.isActivated()) {
-                            sLogger.debug("OneToOne chat session found with contact '" + mContact
-                                    + "' is not established and imSessionStartMode = "
-                                    + imSessionStartMode
-                                    + " so can't accept it and sending composing event '" + status
-                                    + "' yet.");
+                            sLogger.debug("Unable to send composing event '" + status
+                                    + "' since oneToOne chat session found with contact '"
+                                    + mContact + "' does not exist for now.");
                         }
                         mImService.addOneToOneChatComposingStatus(mContact, status);
-                        break;
+                    } else if (session.getDialogPath().isSessionEstablished()) {
+                        session.sendIsComposingStatus(status);
+                    } else if (!session.isInitiatedByRemote()) {
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("Unable to send composing event '" + status
+                                    + "' since oneToOne chat session found with contact '"
+                                    + mContact + "' is initiated locally.");
+                        }
+                        mImService.addOneToOneChatComposingStatus(mContact, status);
+                    } else {
+                        switch (imSessionStartMode) {
+                            case ON_OPENING:
+                            case ON_COMPOSING:
+                                if (sLogger.isActivated()) {
+                                    sLogger.debug("OneToOne chat session found with contact '"
+                                            + mContact
+                                            + "' is not established and imSessionStartMode = "
+                                            + imSessionStartMode
+                                            + " so accepting it and sending composing event '"
+                                            + status + "'");
+                                }
+                                session.acceptSession();
+                                session.sendIsComposingStatus(status);
+                                break;
+                            default:
+                                if (sLogger.isActivated()) {
+                                    sLogger.debug("OneToOne chat session found with contact '"
+                                            + mContact
+                                            + "' is not established and imSessionStartMode = "
+                                            + imSessionStartMode
+                                            + " so can't accept it and sending composing event '"
+                                            + status + "' yet.");
+                                }
+                                mImService.addOneToOneChatComposingStatus(mContact, status);
+                                break;
+                        }
+                    }
+                } catch (MsrpException e) {
+                    mImService.addOneToOneChatComposingStatus(mContact, status);
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error(new StringBuilder("Failed to send composing status to contact '")
+                            .append(mContact).append("'").toString(), e);
                 }
             }
-        } catch (MsrpException e) {
-            mImService.addOneToOneChatComposingStatus(mContact, status);
-        } catch (ServerApiBaseException e) {
-            mImService.addOneToOneChatComposingStatus(mContact, status);
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
-        } catch (Exception e) {
-            mImService.addOneToOneChatComposingStatus(mContact, status);
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
+        });
     }
 
     /**
@@ -778,51 +701,58 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * @see ImSessionStartMode
      * @throws RemoteException
      */
+    @Override
     public void openChat() throws RemoteException {
-        if (sLogger.isActivated()) {
-            sLogger.info("Open a 1-1 chat session with " + mContact);
-        }
-        try {
-            ImSessionStartMode imSessionStartMode = mRcsSettings.getImSessionStartMode();
-            if (ImSessionStartMode.ON_OPENING == imSessionStartMode) {
-                mImService.acceptStoreAndForwardMessageSessionIfSuchExists(mContact);
-            }
-            final OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
-            if (session == null) {
-                /*
-                 * If there is no session ongoing right now then we do not need to open anything
-                 * right now so we just return here. A sending of a new message on this one-to-one
-                 * chat will anyway result in creating a new session so we do not need to do
-                 * anything more here for now.
-                 */
-                return;
-            }
-            if (!session.getDialogPath().isSessionEstablished()) {
-                if (!session.isInitiatedByRemote()) {
-                    /*
-                     * This method needs to accept pending invitation if IM_SESSION_START_MODE is 0,
-                     * which is not applicable if session is remote originated so we return here.
-                     */
-                    return;
+        mImService.scheduleImOperation(new Runnable() {
+            public void run() {
+                if (sLogger.isActivated()) {
+                    sLogger.info("Open a 1-1 chat session with " + mContact);
                 }
-                if (ImSessionStartMode.ON_OPENING == imSessionStartMode) {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("Accept one-to-one chat session with contact "
-                                .concat(mContact.toString()));
+                try {
+                    ImSessionStartMode imSessionStartMode = mRcsSettings.getImSessionStartMode();
+                    if (ImSessionStartMode.ON_OPENING == imSessionStartMode) {
+                        mImService.acceptStoreAndForwardMessageSessionIfSuchExists(mContact);
                     }
-                    session.acceptSession();
+                    final OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
+                    if (session == null) {
+                        /*
+                         * If there is no session ongoing right now then we do not need to open
+                         * anything right now so we just return here. A sending of a new message on
+                         * this one-to-one chat will anyway result in creating a new session so we
+                         * do not need to do anything more here for now.
+                         */
+                        return;
+                    }
+                    if (!session.getDialogPath().isSessionEstablished()) {
+                        if (!session.isInitiatedByRemote()) {
+                            /*
+                             * This method needs to accept pending invitation if
+                             * IM_SESSION_START_MODE is 0, which is not applicable if session is
+                             * remote originated so we return here.
+                             */
+                            return;
+                        }
+                        if (ImSessionStartMode.ON_OPENING == imSessionStartMode) {
+                            if (sLogger.isActivated()) {
+                                sLogger.debug("Accept one-to-one chat session with contact "
+                                        .concat(mContact.toString()));
+                            }
+                            session.acceptSession();
+                        }
+                    }
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error(new StringBuilder("Failed to open one-one chat with contact : '")
+                            .append(mContact).append("'").toString(), e);
                 }
             }
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
-
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
+        });
     }
 
     /**
@@ -831,43 +761,65 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * @param msgId
      * @throws RemoteException
      */
-    public void resendMessage(String msgId) throws RemoteException {
+    @Override
+    public void resendMessage(final String msgId) throws RemoteException {
         if (TextUtils.isEmpty(msgId)) {
             throw new ServerApiIllegalArgumentException(
                     "OnetoOneChat messageId must not be null or empty!");
         }
-        try {
-            ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
-                    mMessagingLog, msgId);
-            String mimeType = ChatUtils.apiMimeTypeToNetworkMimeType(persistentStorage
-                    .getMimeType());
-            /* Set new timestamp for resend message */
-            long timestamp = System.currentTimeMillis();
-            /* For outgoing message, timestampSent = timestamp */
-            ChatMessage msg = new ChatMessage(msgId, mContact, persistentStorage.getContent(),
-                    mimeType, timestamp, timestamp, null);
-            if (ServerApiUtils.isImsConnected()) {
-                resendChatMessage(msg);
-            } else {
-                /* If the IMS is NOT connected at this time then re-queue message. */
-                setChatMessageStatus(msgId, mimeType, Status.QUEUED);
+        mImService.scheduleImOperation(new Runnable() {
+            public void run() {
+                ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
+                        mMessagingLog, msgId);
+                final String mimeType = ChatUtils.apiMimeTypeToNetworkMimeType(persistentStorage
+                        .getMimeType());
+                /* Set new timestamp for resend message */
+                long timestamp = System.currentTimeMillis();
+                /* For outgoing message, timestampSent = timestamp */
+                final ChatMessage msg = new ChatMessage(msgId, mContact, persistentStorage
+                        .getContent(), mimeType, timestamp, timestamp, null);
+                try {
+                    if (ServerApiUtils.isImsConnected()) {
+                        resendChatMessage(msg);
+                    } else {
+                        /* If the IMS is NOT connected at this time then re-queue message. */
+                        setChatMessageStatusAndReasonCode(msgId, mimeType, Status.QUEUED,
+                                ReasonCode.UNSPECIFIED);
+                    }
+                } catch (SipPayloadException e) {
+                    sLogger.error(new StringBuilder("Failed to send chat message with msgId '")
+                            .append(msgId).append("'").toString(), e);
+                    setChatMessageStatusAndReasonCode(msgId, mimeType, Status.FAILED,
+                            ReasonCode.FAILED_SEND);
+                } catch (SipNetworkException e) {
+                    sLogger.error(new StringBuilder("Failed to send chat message with msgId '")
+                            .append(msg.getMessageId()).append("'").toString(), e);
+                    setChatMessageStatusAndReasonCode(msgId, mimeType, Status.FAILED,
+                            ReasonCode.FAILED_SEND);
+                } catch (MsrpException e) {
+                    sLogger.error(new StringBuilder("Failed to send chat message with msgId '")
+                            .append(msg.getMessageId()).append("'").toString(), e);
+                    setChatMessageStatusAndReasonCode(msgId, mimeType, Status.FAILED,
+                            ReasonCode.FAILED_SEND);
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error(new StringBuilder("Failed to send chat message with msgId '")
+                            .append(msg.getMessageId()).append("'").toString(), e);
+                }
             }
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
-
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
+        });
     }
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/
 
     @Override
-    public void handleSessionStarted(ContactId contact) {
+    public void onSessionStarted(ContactId contact) {
         boolean loggerActivated = sLogger.isActivated();
         if (loggerActivated) {
             sLogger.info("Session started");
@@ -897,11 +849,11 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                 }
             }
         }
-        mCore.getListener().tryToDequeueOneToOneChatMessages(mContact, mCore);
+        mImService.tryToDequeueOneToOneChatMessages(contact);
     }
 
     @Override
-    public void handleSessionAborted(ContactId contact, TerminationReason reason) {
+    public void onSessionAborted(ContactId contact, TerminationReason reason) {
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("Session aborted (reason ").append(reason).append(")")
                     .toString());
@@ -909,65 +861,84 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         synchronized (mLock) {
             mChatService.removeOneToOneChat(mContact);
         }
-        mCore.getListener().tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(mCore);
+        mImService.tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers();
     }
 
     @Override
-    public void handleReceiveMessage(ChatMessage msg, boolean imdnDisplayedRequested)
-            throws SipPayloadException, SipNetworkException {
-        String msgId = msg.getMessageId();
-        try {
-            if (sLogger.isActivated()) {
-                sLogger.info(new StringBuilder("New IM with messageId '").append(msgId)
-                        .append("' received from ").append(mContact).append(".").toString());
-            }
-            String mimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
-            synchronized (mLock) {
-                if (mContactManager.isBlockedForContact(mContact)) {
+    public void onMessageReceived(final ChatMessage msg, final boolean imdnDisplayedRequested) {
+        mImService.scheduleImOperation(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String msgId = msg.getMessageId();
                     if (sLogger.isActivated()) {
-                        sLogger.debug("Contact "
-                                + mContact
-                                + " is blocked: automatically abort the chat session and store message to spam folder.");
+                        sLogger.info(new StringBuilder("New IM with messageId '").append(msgId)
+                                .append("' received from ").append(mContact).append(".").toString());
                     }
-                    OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
-                    if (session != null) {
-                        session.terminateSession(TerminationReason.TERMINATION_BY_USER);
+                    String mimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
+                    synchronized (mLock) {
+                        if (mContactManager.isBlockedForContact(mContact)) {
+                            if (sLogger.isActivated()) {
+                                sLogger.debug("Contact "
+                                        + mContact
+                                        + " is blocked: automatically abort the chat session and store message to spam folder.");
+                            }
+                            OneToOneChatSession session = mImService
+                                    .getOneToOneChatSession(mContact);
+                            if (session != null) {
+                                session.terminateSession(TerminationReason.TERMINATION_BY_USER);
+                            }
+                            mMessagingLog.addOneToOneSpamMessage(msg);
+                            mBroadcaster.broadcastMessageReceived(mimeType, msgId);
+                            return;
+                        }
+                        mMessagingLog.addIncomingOneToOneChatMessage(msg, imdnDisplayedRequested);
+                        mBroadcaster.broadcastMessageReceived(mimeType, msgId);
                     }
-                    mMessagingLog.addOneToOneSpamMessage(msg);
-                    mBroadcaster.broadcastMessageReceived(mimeType, msgId);
-                    return;
+                } catch (IOException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Failed to receive chat message! (" + e.getMessage() + ")");
+                    }
+                } catch (SipNetworkException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Failed to receive chat message! (" + e.getMessage() + ")");
+                    }
+                } catch (SipPayloadException e) {
+                    sLogger.error("Failed to receive chat message!", e);
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error("Failed to receive chat message!", e);
                 }
-                mMessagingLog.addIncomingOneToOneChatMessage(msg, imdnDisplayedRequested);
-                mBroadcaster.broadcastMessageReceived(mimeType, msgId);
             }
-        } catch (IOException e) {
-            throw new SipNetworkException(new StringBuilder(
-                    "Failed to handle new IM with messageId '").append(msgId)
-                    .append("' received from ").append(mContact).append(".").toString(), e);
-        }
+        });
     }
 
     @Override
-    public void handleImError(ChatError error, String msgId, String mimeType) {
+    public void onImError(ChatError error, String msgId, String mimeType) {
         int errorCode = error.getErrorCode();
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("IM error ").append(errorCode)
                     .append(" ; First message '").append(msgId).append("'").toString());
         }
-        CoreListener listener = mCore.getListener();
         synchronized (mLock) {
             mChatService.removeOneToOneChat(mContact);
             switch (errorCode) {
                 case ChatError.SESSION_INITIATION_FAILED:
                 case ChatError.SESSION_INITIATION_CANCELLED:
-                    mUndeliveredImManager.cancelDeliveryTimeoutAlarm(msgId);
+                    mImService.getDeliveryExpirationManager().cancelDeliveryTimeoutAlarm(msgId);
                     if (FileTransferUtils.isFileTransferHttpType(mimeType)) {
-                        listener.handleOneToOneFileTransferFailure(msgId, mContact,
+                        mImService.setOneToOneFileTransferFailureReasonCode(msgId, mContact,
                                 FileTransfer.ReasonCode.FAILED_DATA_TRANSFER);
                     } else if (ChatUtils.isTextPlainType(mimeType)
                             || MimeType.GEOLOC_MESSAGE.equals(mimeType)) {
-                        mChatService.setOneToOneChatMessageStatusAndReasonCode(msgId, mimeType,
-                                mContact, Status.FAILED, ReasonCode.FAILED_SEND);
+                        setChatMessageStatusAndReasonCode(msgId, mimeType, Status.FAILED,
+                                ReasonCode.FAILED_SEND);
                     }
                     break;
                 /*
@@ -981,11 +952,11 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                     break;
             }
         }
-        listener.tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(mCore);
+        mImService.tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers();
     }
 
     @Override
-    public void handleIsComposingEvent(ContactId contact, boolean status) {
+    public void onIsComposingEventReceived(ContactId contact, boolean status) {
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("").append(contact)
                     .append(" is composing status set to ").append(status).toString());
@@ -996,7 +967,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     }
 
     @Override
-    public void handleMessageSent(String msgId, String mimeType) {
+    public void onMessageSent(String msgId, String mimeType) {
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("Message sent; msgId=").append(msgId).append(".")
                     .toString());
@@ -1011,7 +982,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     }
 
     @Override
-    public void handleMessageFailedSend(String msgId, String mimeType) {
+    public void onMessageFailedSend(String msgId, String mimeType) {
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("Message sent; msgId=").append(msgId).append(".")
                     .toString());
@@ -1026,16 +997,16 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     }
 
     @Override
-    public void handleMessageDeliveryStatus(ContactId contact, ImdnDocument imdn) {
-        mChatService.receiveOneToOneMessageDeliveryStatus(contact, imdn);
+    public void onMessageDeliveryStatusReceived(ContactId contact, ImdnDocument imdn) {
+        mChatService.onOneToOneMessageDeliveryStatusReceived(contact, imdn);
     }
 
     @Override
-    public void handleDeliveryStatus(String contributionId, ContactId contact, ImdnDocument imdn) {
+    public void onDeliveryStatusReceived(String contributionId, ContactId contact, ImdnDocument imdn) {
         String msgId = imdn.getMsgId();
 
         if (mMessagingLog.isMessagePersisted(msgId)) {
-            handleMessageDeliveryStatus(contact, imdn);
+            onMessageDeliveryStatusReceived(contact, imdn);
             return;
         }
 
@@ -1051,7 +1022,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     }
 
     @Override
-    public void handleSessionRejected(ContactId contact, TerminationReason reason) {
+    public void onSessionRejected(ContactId contact, TerminationReason reason) {
         if (sLogger.isActivated()) {
             switch (reason) {
                 case TERMINATION_BY_USER:
@@ -1079,26 +1050,26 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         synchronized (mLock) {
             mChatService.removeOneToOneChat(mContact);
         }
-        mCore.getListener().tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers(mCore);
+        mImService.tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers();
     }
 
     @Override
-    public void handleSessionInvited(ContactId contact) {
+    public void onSessionInvited(ContactId contact) {
         /* Not used by one-to-one chat */
     }
 
     @Override
-    public void handleSessionAccepted(ContactId contact) {
+    public void onSessionAccepting(ContactId contact) {
         /* Not used by one-to-one chat */
     }
 
     @Override
-    public void handleSessionAutoAccepted(ContactId contact) {
+    public void onSessionAutoAccepted(ContactId contact) {
         /* Not used by one-to-one chat */
     }
 
     @Override
-    public void handleChatMessageDisplayReportSent(String msgId) {
+    public void onChatMessageDisplayReportSent(String msgId) {
         synchronized (mLock) {
             if (mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.RECEIVED,
                     ReasonCode.UNSPECIFIED)) {
@@ -1110,7 +1081,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     }
 
     @Override
-    public void handleDeliveryReportSendViaMsrpFailure(String msgId, ContactId contact,
+    public void onDeliveryReportSendViaMsrpFailure(String msgId, ContactId contact,
             TypeMsrpChunk typeMsrpChunk) {
         if (TypeMsrpChunk.MessageDeliveredReport.equals(typeMsrpChunk)) {
             if (sLogger.isActivated()) {

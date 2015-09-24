@@ -160,7 +160,7 @@ public abstract class OneToOneChatSession extends ChatSession {
         }
         String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
         for (ImsSessionListener listener : getListeners()) {
-            ((ChatSessionListener) listener).handleMessageSent(msgId, apiMimeType);
+            ((ChatSessionListener) listener).onMessageSent(msgId, apiMimeType);
         }
     }
 
@@ -198,7 +198,7 @@ public abstract class OneToOneChatSession extends ChatSession {
         }
         sendDataChunks(IdGenerator.generateMessageID(), networkContent, CpimMessage.MIME_TYPE,
                 MsrpSession.TypeMsrpChunk.HttpFileSharing);
-        fileTransfer.handleFileInfoDequeued(getRemoteContact());
+        fileTransfer.onFileInfoDequeued(getRemoteContact());
     }
 
     /**
@@ -310,12 +310,12 @@ public abstract class OneToOneChatSession extends ChatSession {
         ContactId remote = getRemoteContact();
         if (TypeMsrpChunk.MessageDeliveredReport.equals(typeMsrpChunk)) {
             for (ImsSessionListener listener : getListeners()) {
-                ((OneToOneChatSessionListener) listener).handleDeliveryReportSendViaMsrpFailure(
+                ((OneToOneChatSessionListener) listener).onDeliveryReportSendViaMsrpFailure(
                         msgId, remote, typeMsrpChunk);
             }
         } else if (TypeMsrpChunk.MessageDisplayedReport.equals(typeMsrpChunk)) {
             for (ImsSessionListener listener : getListeners()) {
-                ((OneToOneChatSessionListener) listener).handleDeliveryReportSendViaMsrpFailure(
+                ((OneToOneChatSessionListener) listener).onDeliveryReportSendViaMsrpFailure(
                         msgId, remote, typeMsrpChunk);
             }
         } else if ((msgId != null) && TypeMsrpChunk.TextMessage.equals(typeMsrpChunk)) {
@@ -323,7 +323,7 @@ public abstract class OneToOneChatSession extends ChatSession {
                 ImdnDocument imdn = new ImdnDocument(msgId, ImdnDocument.DELIVERY_NOTIFICATION,
                         ImdnDocument.DELIVERY_STATUS_FAILED, ImdnDocument.IMDN_DATETIME_NOT_SET);
                 ContactId contact = null;
-                ((ChatSessionListener) listener).handleMessageDeliveryStatus(contact, imdn);
+                ((ChatSessionListener) listener).onMessageDeliveryStatusReceived(contact, imdn);
             }
         } else {
             // do nothing
@@ -372,7 +372,7 @@ public abstract class OneToOneChatSession extends ChatSession {
         super.receiveBye(bye);
         ContactId remote = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
-            listener.handleSessionAborted(remote, TerminationReason.TERMINATION_BY_REMOTE);
+            listener.onSessionAborted(remote, TerminationReason.TERMINATION_BY_REMOTE);
         }
         getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
     }
@@ -419,7 +419,7 @@ public abstract class OneToOneChatSession extends ChatSession {
             apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
         }
         for (ImsSessionListener listener : getListeners()) {
-            ((OneToOneChatSessionListener) listener).handleImError(error, msgId, apiMimeType);
+            ((OneToOneChatSessionListener) listener).onImError(error, msgId, apiMimeType);
         }
     }
 }

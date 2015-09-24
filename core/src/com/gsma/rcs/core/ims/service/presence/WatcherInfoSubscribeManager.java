@@ -45,7 +45,6 @@ import java.io.IOException;
 import java.text.ParseException;
 
 import javax.xml.parsers.ParserConfigurationException;
-
 import javax2.sip.header.SubscriptionStateHeader;
 
 /**
@@ -142,13 +141,13 @@ public class WatcherInfoSubscribeManager extends SubscribeManager {
                         if ((status != null) && (event != null)) {
                             if (status.equalsIgnoreCase("pending")) {
                                 // It's an invitation or a new status
-                                getImsModule().getCore().getListener()
+                                getImsModule().getPresenceService()
                                         .handlePresenceSharingInvitation(contact);
                             }
 
                             // Notify listener
-                            getImsModule().getCore().getListener()
-                                    .handlePresenceSharingNotification(contact, status, event);
+                            getImsModule().getPresenceService().handlePresenceSharingNotification(
+                                    contact, status, event);
                         }
                     }
                 }

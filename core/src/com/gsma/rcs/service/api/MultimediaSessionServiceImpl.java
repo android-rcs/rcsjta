@@ -81,7 +81,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
     /**
      * Lock used for synchronization
      */
-    private final Object lock = new Object();
+    private final Object mLock = new Object();
 
     private static final Logger sLogger = Logger.getLogger(MultimediaSessionServiceImpl.class
             .getSimpleName());
@@ -99,6 +99,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
             sLogger.info("Multimedia session API is loaded");
         }
         mSipService = sipService;
+        mSipService.register(this);
         mRcsSettings = rcsSettings;
     }
 
@@ -197,7 +198,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
         if (sLogger.isActivated()) {
             sLogger.info("Add a service listener");
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.addEventListener(listener);
         }
     }
@@ -211,7 +212,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
         if (sLogger.isActivated()) {
             sLogger.info("Remove a service listener");
         }
-        synchronized (lock) {
+        synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.removeEventListener(listener);
         }
     }
@@ -220,8 +221,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * Notifies registration event
      */
     public void notifyRegistration() {
-        // Notify listeners
-        synchronized (lock) {
+        synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.broadcastServiceRegistered();
         }
     }
@@ -232,8 +232,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @param reasonCode for unregistration
      */
     public void notifyUnRegistration(RcsServiceRegistration.ReasonCode reasonCode) {
-        // Notify listeners
-        synchronized (lock) {
+        synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.broadcastServiceUnRegistered(reasonCode);
         }
     }
@@ -319,8 +318,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
         try {
             String featureTag = FeatureTags.FEATURE_RCSE + "=\""
                     + FeatureTags.FEATURE_RCSE_EXTENSION + "." + serviceId + "\"";
-            final GenericSipMsrpSession session = mSipService.initiateMsrpSession(contact,
-                    featureTag);
+            final GenericSipMsrpSession session = mSipService
+                    .createMsrpSession(contact, featureTag);
             MultimediaMessagingSessionImpl multiMediaMessaging = new MultimediaMessagingSessionImpl(
                     session.getSessionID(), mMultimediaMessagingSessionEventBroadcaster,
                     mSipService, this, Direction.OUTGOING, contact, serviceId, State.INITIATING);
@@ -435,8 +434,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
         try {
             String featureTag = FeatureTags.FEATURE_RCSE + "=\""
                     + FeatureTags.FEATURE_RCSE_EXTENSION + "." + serviceId + "\"";
-            final GenericSipRtpSession session = mSipService
-                    .initiateRtpSession(contact, featureTag);
+            final GenericSipRtpSession session = mSipService.createRtpSession(contact, featureTag);
 
             MultimediaStreamingSessionImpl multimediaStreaming = new MultimediaStreamingSessionImpl(
                     session.getSessionID(), mMultimediaStreamingSessionEventBroadcaster,
@@ -550,7 +548,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
             sLogger.info("Add an event listener");
         }
         try {
-            synchronized (lock) {
+            synchronized (mLock) {
                 mMultimediaMessagingSessionEventBroadcaster
                         .addMultimediaMessagingEventListener(listener);
             }
@@ -581,7 +579,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
             sLogger.info("Remove an event listener");
         }
         try {
-            synchronized (lock) {
+            synchronized (mLock) {
                 mMultimediaMessagingSessionEventBroadcaster
                         .removeMultimediaMessagingEventListener(listener);
             }
@@ -612,7 +610,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
             sLogger.info("Add an event listener");
         }
         try {
-            synchronized (lock) {
+            synchronized (mLock) {
                 mMultimediaStreamingSessionEventBroadcaster
                         .addMultimediaStreamingEventListener(listener);
             }
@@ -643,7 +641,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
             sLogger.info("Remove an event listener");
         }
         try {
-            synchronized (lock) {
+            synchronized (mLock) {
                 mMultimediaStreamingSessionEventBroadcaster
                         .removeMultimediaStreamingEventListener(listener);
             }

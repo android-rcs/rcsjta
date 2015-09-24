@@ -211,7 +211,7 @@ public class HttpsProvisioningService extends Service {
         if (requestConfig) {
             if (logActivated)
                 sLogger.debug("Request HTTP configuration update");
-            mHttpsProvisioningMng.scheduleForBackgroundExecution(new Runnable() {
+            mHttpsProvisioningMng.scheduleProvisioningOperation(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -325,7 +325,7 @@ public class HttpsProvisioningService extends Service {
     private BroadcastReceiver retryReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, final Intent intent) {
-            mHttpsProvisioningMng.scheduleForBackgroundExecution(new Runnable() {
+            mHttpsProvisioningMng.scheduleProvisioningOperation(new Runnable() {
                 public void run() {
                     try {
                         mHttpsProvisioningMng.updateConfig();

@@ -52,7 +52,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 
     private final FileUploadServiceImpl mFileUploadService;
 
-    private final FileUploadStorageAccessor mFileUploadStorageAccessor;
+    private final FileUploadStorageAccessor mPersistedStorage;
 
     private final Object mLock = new Object();
 
@@ -73,7 +73,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
         mBroadcaster = broadcaster;
         mImService = imService;
         mFileUploadService = fileUploadService;
-        mFileUploadStorageAccessor = new FileUploadStorageAccessor(file, State.INITIATING);
+        mPersistedStorage = new FileUploadStorageAccessor(file, State.INITIATING);
     }
 
     /**
@@ -110,7 +110,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
             FileUploadSession session = mImService.getFileUploadSession(mUploadId);
             FileTransferHttpInfoDocument file;
             if (session == null) {
-                return mFileUploadStorageAccessor.getInfo();
+                return mPersistedStorage.getInfo();
             }
             if ((file = session.getFileInfoDocument()) == null) {
                 return null;
@@ -139,7 +139,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
         try {
             FileUploadSession session = mImService.getFileUploadSession(mUploadId);
             if (session == null) {
-                return mFileUploadStorageAccessor.getFile();
+                return mPersistedStorage.getFile();
             }
             return session.getContent().getUri();
 
@@ -165,7 +165,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
         try {
             FileUploadSession session = mImService.getFileUploadSession(mUploadId);
             if (session == null) {
-                return mFileUploadStorageAccessor.getState().toInt();
+                return mPersistedStorage.getState().toInt();
             }
             synchronized (mLock) {
                 if (FileUploadSession.State.PENDING == session.getSessionState()) {
@@ -227,7 +227,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
     /*------------------------------- SESSION EVENTS ----------------------------------*/
 
     private void setState(String uploadId, FileUpload.State state) {
-        mFileUploadStorageAccessor.setState(state);
+        mPersistedStorage.setState(state);
         mBroadcaster.broadcastStateChanged(mUploadId, state);
     }
 
@@ -257,7 +257,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 
     private void setStateAndInfoThenBroadcast(String uploadId, FileUpload.State state,
             FileUploadInfo info) {
-        mFileUploadStorageAccessor.setInfo(info);
+        mPersistedStorage.setInfo(info);
         setState(uploadId, state);
         mBroadcaster.broadcastUploaded(uploadId, info);
     }

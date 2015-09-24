@@ -30,7 +30,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-/* package private */class GroupChatInviteQueuedParticipantsTask implements Runnable {
+public class GroupChatInviteQueuedParticipantsTask implements Runnable {
 
     private static final Set<ParticipantStatus> INVITE_QUEUED_STATUSES = new HashSet<ParticipantStatus>();
     static {
@@ -46,7 +46,7 @@ import java.util.Set;
     private static final Logger sLogger = Logger
             .getLogger(GroupChatInviteQueuedParticipantsTask.class.getName());
 
-    /* package private */GroupChatInviteQueuedParticipantsTask(String chatId,
+    public GroupChatInviteQueuedParticipantsTask(String chatId,
             ChatServiceImpl chatService, InstantMessagingService imService) {
         mChatId = chatId;
         mChatService = chatService;
@@ -74,7 +74,7 @@ import java.util.Set;
 
                 if (session.getMaxNumberOfAdditionalParticipants() < participantsToBeInvited.size()) {
                     for (ContactId contact : participantsToBeInvited) {
-                        groupChat.handleAddParticipantFailed(contact,
+                        groupChat.onAddParticipantFailed(contact,
                                 "Maximum number of participants reached");
                     }
                     return;

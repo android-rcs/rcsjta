@@ -52,8 +52,8 @@ public class GroupChatMessageDeleteTask extends DeleteTask.GroupedByChatId {
      * @param imsLock the ims operation lock
      */
     public GroupChatMessageDeleteTask(ChatServiceImpl chatService,
-            InstantMessagingService imService, LocalContentResolver contentResolver, Object imsLock) {
-        super(contentResolver, imsLock, MessageData.CONTENT_URI, MessageData.KEY_MESSAGE_ID,
+            InstantMessagingService imService, LocalContentResolver contentResolver) {
+        super(contentResolver, MessageData.CONTENT_URI, MessageData.KEY_MESSAGE_ID,
                 MessageData.KEY_CHAT_ID, SELECTION_GROUP_CHATMESSAGES);
         mChatService = chatService;
         mImService = imService;
@@ -70,8 +70,8 @@ public class GroupChatMessageDeleteTask extends DeleteTask.GroupedByChatId {
      */
     public GroupChatMessageDeleteTask(ChatServiceImpl chatService,
             InstantMessagingService imService, LocalContentResolver contentResolver,
-            Object imsLock, String chatId) {
-        super(contentResolver, imsLock, MessageData.CONTENT_URI, MessageData.KEY_MESSAGE_ID,
+            String chatId) {
+        super(contentResolver, MessageData.CONTENT_URI, MessageData.KEY_MESSAGE_ID,
                 MessageData.KEY_CHAT_ID, SELECTION_CHATMESSAGES_BY_CHATID, chatId);
         mChatService = chatService;
         mImService = imService;
@@ -89,8 +89,8 @@ public class GroupChatMessageDeleteTask extends DeleteTask.GroupedByChatId {
      */
     public GroupChatMessageDeleteTask(ChatServiceImpl chatService,
             InstantMessagingService imService, LocalContentResolver contentResolver,
-            Object imsLock, String chatId, String messageId) {
-        super(contentResolver, imsLock, MessageData.CONTENT_URI, MessageData.KEY_MESSAGE_ID,
+            String chatId, String messageId) {
+        super(contentResolver, MessageData.CONTENT_URI, MessageData.KEY_MESSAGE_ID,
                 MessageData.KEY_CHAT_ID, null, messageId);
         mChatService = chatService;
         mImService = imService;

@@ -42,7 +42,7 @@ public interface ChatSessionListener extends ImsSessionListener {
      * @throws SipPayloadException
      * @throws SipNetworkException
      */
-    public void handleReceiveMessage(ChatMessage msg, boolean imdnDisplayedRequested)
+    public void onMessageReceived(ChatMessage msg, boolean imdnDisplayedRequested)
             throws SipPayloadException, SipNetworkException;
 
     /**
@@ -51,7 +51,7 @@ public interface ChatSessionListener extends ImsSessionListener {
      * @param contact Contact identifier
      * @param status Status
      */
-    public void handleIsComposingEvent(ContactId contact, boolean status);
+    public void onIsComposingEventReceived(ContactId contact, boolean status);
 
     /**
      * Notifying that a message has been sent
@@ -59,7 +59,7 @@ public interface ChatSessionListener extends ImsSessionListener {
      * @param msgId Message ID
      * @param mimeType MIME type
      */
-    public void handleMessageSent(String msgId, String mimeType);
+    public void onMessageSent(String msgId, String mimeType);
 
     /**
      * Notifying failure of sending message
@@ -67,7 +67,7 @@ public interface ChatSessionListener extends ImsSessionListener {
      * @param msgId Message ID
      * @param mimeType MIME type
      */
-    public void handleMessageFailedSend(String msgId, String mimeType);
+    public void onMessageFailedSend(String msgId, String mimeType);
 
     /**
      * New message delivery status that are received as part of imdn notification
@@ -75,7 +75,7 @@ public interface ChatSessionListener extends ImsSessionListener {
      * @param contact the remote contact identifier
      * @param ImdnDocument imdn Imdn document
      */
-    public void handleMessageDeliveryStatus(ContactId contact, ImdnDocument imdn);
+    public void onMessageDeliveryStatusReceived(ContactId contact, ImdnDocument imdn);
 
     /**
      * New message or file transfer delivery status that are received as part of imdn notification
@@ -84,12 +84,12 @@ public interface ChatSessionListener extends ImsSessionListener {
      * @param contact the remote contact identifier
      * @param imdn Imdn Document
      */
-    public void handleDeliveryStatus(String contributionId, ContactId contact, ImdnDocument imdn);
+    public void onDeliveryStatusReceived(String contributionId, ContactId contact, ImdnDocument imdn);
 
     /**
      * Handle imdn DISPLAY report sent for message
      * 
      * @param msgId
      */
-    public void handleChatMessageDisplayReportSent(String msgId);
+    public void onChatMessageDisplayReportSent(String msgId);
 }

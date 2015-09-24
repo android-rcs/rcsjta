@@ -146,7 +146,7 @@ public class OriginatingSipRtpSession extends GenericSipRtpSession {
         }
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
-            ((SipSessionListener) listener).handle180Ringing(contact);
+            ((SipSessionListener) listener).onSessionRinging(contact);
         }
     }
 

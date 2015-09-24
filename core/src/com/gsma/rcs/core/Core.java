@@ -34,9 +34,12 @@ import com.gsma.rcs.core.ims.service.presence.PresenceService;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.terms.TermsConditionsService;
+import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.history.HistoryLog;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.sharing.RichCallHistory;
 import com.gsma.rcs.utils.DeviceUtils;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -107,16 +110,17 @@ public class Core {
      * @throws KeyStoreException
      */
     public static Core createCore(Context ctx, CoreListener listener, RcsSettings rcsSettings,
-            ContentResolver contentResolver, ContactManager contactsManager,
-            MessagingLog messagingLog) throws IOException, KeyStoreException {
+            ContentResolver contentResolver, LocalContentResolver localContentResolver,
+            ContactManager contactsManager, MessagingLog messagingLog, HistoryLog historyLog,
+            RichCallHistory richCallHistory) throws IOException, KeyStoreException {
         if (sInstance != null) {
             return sInstance;
         }
         synchronized (Core.class) {
             if (sInstance == null) {
                 KeyStoreManager.loadKeyStore(rcsSettings);
-                sInstance = new Core(ctx, listener, rcsSettings, contentResolver, contactsManager,
-                        messagingLog);
+                sInstance = new Core(ctx, listener, contentResolver, localContentResolver,
+                        rcsSettings, contactsManager, messagingLog, historyLog, richCallHistory);
             }
         }
         return sInstance;
@@ -146,9 +150,10 @@ public class Core {
      * @param contactManager The contact manager
      * @param messagingLog The messaging log accessor
      */
-    private Core(Context ctx, CoreListener listener, RcsSettings rcsSettings,
-            ContentResolver contentResolver, ContactManager contactManager,
-            MessagingLog messagingLog) {
+    private Core(Context ctx, CoreListener listener, ContentResolver contentResolver,
+            LocalContentResolver localContentResolver, RcsSettings rcsSettings,
+            ContactManager contactManager, MessagingLog messagingLog, HistoryLog historyLog,
+            RichCallHistory richCallHistory) {
         boolean logActivated = sLogger.isActivated();
         if (logActivated) {
             sLogger.info("Terminal core initialization");
@@ -172,8 +177,8 @@ public class Core {
         mBackgroundHandler = new Handler(backgroundThread.getLooper());
 
         /* Create the IMS module */
-        mImsModule = new ImsModule(this, ctx, mRcsSettings, contactManager, messagingLog,
-                mAddressBookManager);
+        mImsModule = new ImsModule(this, ctx, localContentResolver, mRcsSettings, contactManager,
+                messagingLog, historyLog, richCallHistory, mAddressBookManager);
 
         if (logActivated) {
             sLogger.info("Terminal core is created with success");
@@ -208,7 +213,7 @@ public class Core {
     /**
      * Schedule a background task on Handler for execution
      */
-    public void scheduleForBackgroundExecution(Runnable task) {
+    public void scheduleCoreOperation(Runnable task) {
         mBackgroundHandler.post(task);
     }
 
@@ -240,8 +245,7 @@ public class Core {
         mImsModule.start();
         mAddressBookManager.start();
         mLocaleManager.start();
-        /* Notify event listener */
-        mListener.handleCoreLayerStarted();
+        mListener.onCoreLayerStarted();
 
         mStarted = true;
         if (sLogger.isActivated()) {
@@ -251,7 +255,7 @@ public class Core {
 
     /**
      * Stop the terminal core
-     * 
+     *
      * @throws SipPayloadException
      * @throws SipNetworkException
      */
@@ -274,8 +278,7 @@ public class Core {
             sLogger.info("RCS core service has been stopped with success");
         }
         sInstance = null;
-        /* Notify event listener */
-        mListener.handleCoreLayerStopped();
+        mListener.onCoreLayerStopped();
     }
 
     /**

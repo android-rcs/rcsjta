@@ -50,8 +50,8 @@ public class OneToOneFileTransferDeleteTask extends DeleteTask.GroupedByContactI
      * @param imsLock the IMS operation lock
      */
     public OneToOneFileTransferDeleteTask(FileTransferServiceImpl fileTransferService,
-            InstantMessagingService imService, LocalContentResolver contentResolver, Object imsLock) {
-        super(contentResolver, imsLock, FileTransferData.CONTENT_URI, FileTransferData.KEY_FT_ID,
+            InstantMessagingService imService, LocalContentResolver contentResolver) {
+        super(contentResolver, FileTransferData.CONTENT_URI, FileTransferData.KEY_FT_ID,
                 FileTransferData.KEY_CONTACT, SELECTION_ALL_ONETOONE_FILETRANSFERS);
         mFileTransferService = fileTransferService;
         mImService = imService;
@@ -68,8 +68,8 @@ public class OneToOneFileTransferDeleteTask extends DeleteTask.GroupedByContactI
      */
     public OneToOneFileTransferDeleteTask(FileTransferServiceImpl fileTransferService,
             InstantMessagingService imService, LocalContentResolver contentResolver,
-            Object imsLock, String transferId) {
-        super(contentResolver, imsLock, FileTransferData.CONTENT_URI, FileTransferData.KEY_FT_ID,
+            String transferId) {
+        super(contentResolver, FileTransferData.CONTENT_URI, FileTransferData.KEY_FT_ID,
                 FileTransferData.KEY_CONTACT, null, transferId);
         mFileTransferService = fileTransferService;
         mImService = imService;
@@ -86,8 +86,8 @@ public class OneToOneFileTransferDeleteTask extends DeleteTask.GroupedByContactI
      */
     public OneToOneFileTransferDeleteTask(FileTransferServiceImpl fileTransferService,
             InstantMessagingService imService, LocalContentResolver contentResolver,
-            Object imsLock, ContactId contact) {
-        super(contentResolver, imsLock, FileTransferData.CONTENT_URI, FileTransferData.KEY_FT_ID,
+            ContactId contact) {
+        super(contentResolver, FileTransferData.CONTENT_URI, FileTransferData.KEY_FT_ID,
                 FileTransferData.KEY_CONTACT, contact);
         mFileTransferService = fileTransferService;
         mImService = imService;

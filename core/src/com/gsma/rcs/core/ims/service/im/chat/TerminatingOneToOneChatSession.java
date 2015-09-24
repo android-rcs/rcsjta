@@ -148,7 +148,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
                 }
 
                 for (ImsSessionListener listener : listeners) {
-                    ((OneToOneChatSessionListener) listener).handleSessionAutoAccepted(remote);
+                    ((OneToOneChatSessionListener) listener).onSessionAutoAccepted(remote);
                 }
             } else {
                 if (logActivated) {
@@ -156,7 +156,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
                 }
 
                 for (ImsSessionListener listener : listeners) {
-                    ((OneToOneChatSessionListener) listener).handleSessionInvited(remote);
+                    ((OneToOneChatSessionListener) listener).onSessionInvited(remote);
                 }
 
                 send180Ringing(dialogPath.getInvite(), dialogPath.getLocalTag());
@@ -173,7 +173,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
                         removeSession();
 
                         for (ImsSessionListener listener : listeners) {
-                            listener.handleSessionRejected(remote,
+                            listener.onSessionRejected(remote,
                                     TerminationReason.TERMINATION_BY_USER);
                         }
                         return;
@@ -189,7 +189,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
                         removeSession();
 
                         for (ImsSessionListener listener : listeners) {
-                            listener.handleSessionRejected(remote,
+                            listener.onSessionRejected(remote,
                                     TerminationReason.TERMINATION_BY_TIMEOUT);
                         }
                         return;
@@ -209,7 +209,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
                         removeSession();
 
                         for (ImsSessionListener listener : listeners) {
-                            listener.handleSessionRejected(remote,
+                            listener.onSessionRejected(remote,
                                     TerminationReason.TERMINATION_BY_REMOTE);
                         }
                         return;
@@ -218,7 +218,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
                         setSessionAccepted();
 
                         for (ImsSessionListener listener : listeners) {
-                            listener.handleSessionAccepted(remote);
+                            listener.onSessionAccepting(remote);
                         }
                         break;
 
@@ -350,7 +350,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
                     sendEmptyDataChunk();
                 }
                 for (ImsSessionListener listener : listeners) {
-                    listener.handleSessionStarted(remote);
+                    listener.onSessionStarted(remote);
                 }
                 SessionTimerManager sessionTimerManager = getSessionTimerManager();
                 if (sessionTimerManager.isSessionTimerActivated(resp)) {

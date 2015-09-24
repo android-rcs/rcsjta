@@ -38,7 +38,6 @@ import com.gsma.services.rcs.capability.ICapabilitiesListener;
 import com.gsma.services.rcs.capability.ICapabilityService;
 import com.gsma.services.rcs.contact.ContactId;
 
-import android.os.Handler;
 import android.os.RemoteException;
 
 /**
@@ -64,12 +63,6 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
             .getSimpleName());
 
     private final ContactManager mContactManager;
-
-    /**
-     * This purpose of this handler is to make the request asynchronous with the mechanisms provider
-     * by android by placing the request in the main thread message queue.
-     */
-    private final Handler mOptionsExchangeRequestHandler;
 
     private final CapabilityService mCapabilityService;
 
@@ -101,16 +94,15 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      * @param rcsSettings
      * @param capabilityService
      */
-    public CapabilityServiceImpl(ContactManager contactManager, RcsSettings rcsSettings,
-            CapabilityService capabilityService) {
+    public CapabilityServiceImpl(CapabilityService capabilityService,
+            ContactManager contactManager, RcsSettings rcsSettings) {
         if (sLogger.isActivated()) {
             sLogger.info("Capability service API is loaded");
         }
-
-        mContactManager = contactManager;
-        mOptionsExchangeRequestHandler = new Handler();
-        mRcsSettings = rcsSettings;
         mCapabilityService = capabilityService;
+        mCapabilityService.register(this);
+        mContactManager = contactManager;
+        mRcsSettings = rcsSettings;
     }
 
     /**
@@ -276,21 +268,8 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
         if (sLogger.isActivated()) {
             sLogger.info("Request capabilities for contact " + contact);
         }
-
-        // Test IMS connection
         ServerApiUtils.testIms();
-        try {
-            mOptionsExchangeRequestHandler.post(new CapabilitiesRequester(contact));
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
-
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
+        mCapabilityService.scheduleCapabilityOperation(new CapabilitiesRequester(contact));
     }
 
     /**
@@ -339,21 +318,8 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
         if (sLogger.isActivated()) {
             sLogger.info("Request all contacts capabilities");
         }
-        // Test IMS connection
         ServerApiUtils.testIms();
-
-        try {
-            mOptionsExchangeRequestHandler.post(new AllCapabilitiesRequester());
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
-
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
+        mCapabilityService.scheduleCapabilityOperation(new AllCapabilitiesRequester());
     }
 
     /**

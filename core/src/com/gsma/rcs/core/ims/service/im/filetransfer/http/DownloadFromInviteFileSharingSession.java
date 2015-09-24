@@ -169,7 +169,7 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
                 }
 
                 for (ImsSessionListener listener : listeners) {
-                    ((FileSharingSessionListener) listener).handleSessionAutoAccepted(contact,
+                    ((FileSharingSessionListener) listener).onSessionAutoAccepted(contact,
                             getContent(), getFileicon(), getTimestamp(), mTimestampSent,
                             fileExpiration, getIconExpiration());
                 }
@@ -183,7 +183,7 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
                     mLogger.debug("Received HTTP file transfer invitation marked for manual accept");
                 }
                 for (ImsSessionListener listener : listeners) {
-                    ((FileSharingSessionListener) listener).handleSessionInvited(contact,
+                    ((FileSharingSessionListener) listener).onSessionInvited(contact,
                             getContent(), getFileicon(), getTimestamp(), mTimestampSent,
                             fileExpiration, getIconExpiration());
                 }
@@ -201,7 +201,7 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
                     removeSession();
 
                     for (ImsSessionListener listener : listeners) {
-                        listener.handleSessionRejected(contact,
+                        listener.onSessionRejected(contact,
                                 TerminationReason.TERMINATION_BY_TIMEOUT);
                     }
                     return;
@@ -226,7 +226,7 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
                          */
                         removeSession();
                         for (ImsSessionListener listener : listeners) {
-                            listener.handleSessionRejected(contact,
+                            listener.onSessionRejected(contact,
                                     TerminationReason.TERMINATION_BY_USER);
                         }
                         return;
@@ -238,7 +238,7 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
                         removeSession();
 
                         for (ImsSessionListener listener : listeners) {
-                            listener.handleSessionRejected(contact,
+                            listener.onSessionRejected(contact,
                                     TerminationReason.TERMINATION_BY_TIMEOUT);
                         }
                         return;
@@ -250,7 +250,7 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
                         removeSession();
 
                         for (ImsSessionListener listener : listeners) {
-                            listener.handleSessionRejected(contact,
+                            listener.onSessionRejected(contact,
                                     TerminationReason.TERMINATION_BY_REMOTE);
                         }
                         return;
@@ -258,7 +258,7 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
                     case INVITATION_ACCEPTED:
                         setSessionAccepted();
                         for (ImsSessionListener listener : listeners) {
-                            ((FileSharingSessionListener) listener).handleSessionAccepted(contact);
+                            ((FileSharingSessionListener) listener).onSessionAccepting(contact);
                         }
                         break;
 

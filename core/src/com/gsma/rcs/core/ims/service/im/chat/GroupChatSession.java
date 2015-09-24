@@ -261,7 +261,7 @@ public abstract class GroupChatSession extends ChatSession {
                 mParticipants.put(participant.getKey(), participant.getValue());
             }
             for (ImsSessionListener listener : getListeners()) {
-                ((GroupChatSessionListener) listener).handleParticipantUpdates(
+                ((GroupChatSessionListener) listener).onParticipantsUpdated(
                         participantsToUpdate, mParticipants);
             }
         }
@@ -353,7 +353,7 @@ public abstract class GroupChatSession extends ChatSession {
             reason = TerminationReason.TERMINATION_BY_REMOTE;
         }
         for (ImsSessionListener listener : getListeners()) {
-            listener.handleSessionAborted(getRemoteContact(), reason);
+            listener.onSessionAborted(getRemoteContact(), reason);
         }
     }
 
@@ -404,7 +404,7 @@ public abstract class GroupChatSession extends ChatSession {
         }
         String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
         for (ImsSessionListener listener : getListeners()) {
-            ((ChatSessionListener) listener).handleMessageSent(msgId, apiMimeType);
+            ((ChatSessionListener) listener).onMessageSent(msgId, apiMimeType);
         }
     }
 
@@ -458,7 +458,7 @@ public abstract class GroupChatSession extends ChatSession {
         if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
             if (mMessagingLog.getMessageChatId(msgId) != null) {
                 for (ImsSessionListener listener : getListeners()) {
-                    ((ChatSessionListener) listener).handleChatMessageDisplayReportSent(msgId);
+                    ((ChatSessionListener) listener).onChatMessageDisplayReportSent(msgId);
                 }
             }
         }
@@ -497,7 +497,7 @@ public abstract class GroupChatSession extends ChatSession {
         }
         sendDataChunks(IdGenerator.generateMessageID(), networkContent, CpimMessage.MIME_TYPE,
                 TypeMsrpChunk.HttpFileSharing);
-        fileTransfer.handleFileInfoDequeued();
+        fileTransfer.onFileInfoDequeued();
     }
 
     /**
@@ -819,7 +819,7 @@ public abstract class GroupChatSession extends ChatSession {
                                 ContactId me = ContactUtil.createContactIdFromValidatedData(number);
                                 // Only consider delivery report if sent to me
                                 if (localId != null && localId.equals(me)) {
-                                    receiveDeliveryStatus(remoteId, cpimMsg.getMessageContent());
+                                    onDeliveryStatusReceived(remoteId, cpimMsg.getMessageContent());
                                 } else {
                                     if (logActivated) {
                                         sLogger.debug("Discard delivery report send to " + localId);
@@ -908,12 +908,12 @@ public abstract class GroupChatSession extends ChatSession {
             String chatId = getContributionID();
             if (TypeMsrpChunk.MessageDeliveredReport.equals(typeMsrpChunk)) {
                 for (ImsSessionListener listener : getListeners()) {
-                    ((GroupChatSessionListener) listener).handleDeliveryReportSendViaMsrpFailure(
+                    ((GroupChatSessionListener) listener).onDeliveryReportSendViaMsrpFailure(
                             msgId, chatId, typeMsrpChunk);
                 }
             } else if (TypeMsrpChunk.MessageDisplayedReport.equals(typeMsrpChunk)) {
                 for (ImsSessionListener listener : getListeners()) {
-                    ((GroupChatSessionListener) listener).handleDeliveryReportSendViaMsrpFailure(
+                    ((GroupChatSessionListener) listener).onDeliveryReportSendViaMsrpFailure(
                             msgId, chatId, typeMsrpChunk);
                 }
             } else if ((msgId != null) && TypeMsrpChunk.TextMessage.equals(typeMsrpChunk)) {
@@ -921,7 +921,7 @@ public abstract class GroupChatSession extends ChatSession {
                     ImdnDocument imdn = new ImdnDocument(msgId, ImdnDocument.DELIVERY_NOTIFICATION,
                             ImdnDocument.DELIVERY_STATUS_FAILED, ImdnDocument.IMDN_DATETIME_NOT_SET);
                     ContactId contact = null;
-                    ((ChatSessionListener) listener).handleMessageDeliveryStatus(contact, imdn);
+                    ((ChatSessionListener) listener).onMessageDeliveryStatusReceived(contact, imdn);
                 }
             } else {
                 // do nothing
@@ -959,7 +959,7 @@ public abstract class GroupChatSession extends ChatSession {
 
             ChatError chatError = new ChatError(errorCode, error);
             for (ImsSessionListener listener : getListeners()) {
-                ((GroupChatSessionListener) listener).handleImError(chatError);
+                ((GroupChatSessionListener) listener).onImError(chatError);
             }
         } catch (SipPayloadException e) {
             sLogger.error(
@@ -1003,7 +1003,7 @@ public abstract class GroupChatSession extends ChatSession {
 
             ChatError chatError = new ChatError(error);
             for (ImsSessionListener listener : getListeners()) {
-                ((GroupChatSessionListener) listener).handleImError(chatError);
+                ((GroupChatSessionListener) listener).onImError(chatError);
             }
         } catch (SipPayloadException e) {
             sLogger.error(new StringBuilder("Failed to handle error").append(error).append("!")

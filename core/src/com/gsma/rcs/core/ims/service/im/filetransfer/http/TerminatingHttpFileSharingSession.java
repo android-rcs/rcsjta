@@ -352,7 +352,7 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
                 }
                 for (ImsSessionListener listener : getListeners()) {
                     ((FileSharingSessionListener) listener)
-                            .handleFileTransferPausedBySystem(remote);
+                            .onFileTransferPausedBySystem(remote);
                 }
                 return;
             default:
@@ -361,12 +361,12 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
 
         if (sessionAccepted) {
             for (ImsSessionListener listener : getListeners()) {
-                listener.handleSessionAborted(remote, reason);
+                listener.onSessionAborted(remote, reason);
             }
             return;
         }
         for (ImsSessionListener listener : getListeners()) {
-            listener.handleSessionRejected(remote, reason);
+            listener.onSessionRejected(remote, reason);
         }
     }
 }

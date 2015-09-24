@@ -43,11 +43,9 @@ import android.os.Process;
 
 public abstract class DequeueTask implements Runnable {
 
-    protected final Object mLock;
+    private final Core mCore;
 
     protected final Context mCtx;
-
-    protected final Core mCore;
 
     protected final InstantMessagingService mImService;
 
@@ -63,13 +61,12 @@ public abstract class DequeueTask implements Runnable {
 
     protected final Logger mLogger = Logger.getLogger(getClass().getName());
 
-    public DequeueTask(Object lock, Context ctx, Core core, ContactManager contactManager,
-            MessagingLog messagingLog, RcsSettings rcsSettings, ChatServiceImpl chatService,
+    public DequeueTask(Context ctx, Core core, ContactManager contactManager, MessagingLog messagingLog,
+            RcsSettings rcsSettings, ChatServiceImpl chatService,
             FileTransferServiceImpl fileTransferService) {
-        mLock = lock;
         mCtx = ctx;
         mCore = core;
-        mImService = mCore.getImService();
+        mImService = core.getImService();
         mContactManager = contactManager;
         mMessagingLog = messagingLog;
         mRcsSettings = rcsSettings;
@@ -316,7 +313,8 @@ public abstract class DequeueTask implements Runnable {
      * @param msgId
      * @param mimeType
      */
-    protected void setOneToOneChatMessageAsFailed(ContactId contact, String msgId, String mimeType) {
+    protected void setOneToOneChatMessageAsFailedDequeue(ContactId contact, String msgId,
+            String mimeType) {
         mChatService.setOneToOneChatMessageStatusAndReasonCode(msgId, mimeType, contact,
                 Status.FAILED, Content.ReasonCode.FAILED_SEND);
     }
@@ -328,7 +326,7 @@ public abstract class DequeueTask implements Runnable {
      * @param msgId
      * @param mimeType
      */
-    protected void setGroupChatMessageAsFailed(String chatId, String msgId, String mimeType) {
+    protected void setGroupChatMessageAsFailedDequeue(String chatId, String msgId, String mimeType) {
         mChatService.setGroupChatMessageStatusAndReasonCode(msgId, mimeType, chatId, Status.FAILED,
                 Content.ReasonCode.FAILED_SEND);
     }
@@ -339,7 +337,7 @@ public abstract class DequeueTask implements Runnable {
      * @param contact
      * @param fileTransferId
      */
-    protected void setOneToOneFileTransferAsFailed(ContactId contact, String fileTransferId) {
+    protected void setOneToOneFileTransferAsFailedDequeue(ContactId contact, String fileTransferId) {
         mFileTransferService.setOneToOneFileTransferStateAndReasonCode(fileTransferId, contact,
                 State.FAILED, FileTransfer.ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
     }
@@ -350,7 +348,7 @@ public abstract class DequeueTask implements Runnable {
      * @param chatId
      * @param fileTransferId
      */
-    protected void setGroupFileTransferAsFailed(String chatId, String fileTransferId) {
+    protected void setGroupFileTransferAsFailedDequeue(String chatId, String fileTransferId) {
         mFileTransferService.setGroupFileTransferStateAndReasonCode(fileTransferId, chatId,
                 State.FAILED, FileTransfer.ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
     }
@@ -363,4 +361,14 @@ public abstract class DequeueTask implements Runnable {
     protected boolean isImsConnected() {
         return ServerApiUtils.isImsConnected();
     }
+
+    /**
+     * Is Core shutting down right now or already stopped
+     *
+     * @return boolean
+     */
+    protected boolean isShuttingDownOrStopped() {
+        return mCore.isStopping() || !mCore.isStarted();
+    }
+
 }

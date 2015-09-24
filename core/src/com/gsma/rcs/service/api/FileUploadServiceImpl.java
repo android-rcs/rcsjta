@@ -94,7 +94,6 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      */
     public void close() {
         mFileUploadCache.clear();
-
         if (sLogger.isActivated()) {
             sLogger.info("File upload service API is closed");
         }
@@ -106,12 +105,11 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      * @param filUpload File upload
      * @throws RemoteException
      */
-    private void addFileUpload(FileUploadImpl filUpload) throws RemoteException {
+    private void addFileUpload(String sessionId, FileUploadImpl filUpload) {
         if (sLogger.isActivated()) {
             sLogger.debug("Add a file upload in the list (size=" + mFileUploadCache.size() + ")");
         }
-
-        mFileUploadCache.put(filUpload.getUploadId(), filUpload);
+        mFileUploadCache.put(sessionId, filUpload);
     }
 
     /**
@@ -124,7 +122,6 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
             sLogger.debug("Remove a file upload from the list (size=" + mFileUploadCache.size()
                     + ")");
         }
-
         mFileUploadCache.remove(sessionId);
     }
 
@@ -151,6 +148,15 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
     }
 
     /**
+     * Returns true if the service is registered to the platform, else returns false
+     *
+     * @return Returns true if registered else returns false
+     */
+    public boolean isServiceRegistered() {
+        return ServerApiUtils.isImsConnected();
+    }
+
+    /**
      * Uploads a file to the RCS content server. The parameter file contains the URI of the file to
      * be uploaded (for a local or a remote file).
      * 
@@ -168,24 +174,44 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
         }
         ServerApiUtils.testCore();
         ServerApiUtils.testIms();
-        try {
-            mImService.assertAvailableFileTransferSession("Max file transfer sessions achieved.");
 
+        try {
             FileDescription desc = FileFactory.getFactory().getFileDescription(file);
             MmContent content = ContentManager
                     .createMmContent(file, desc.getSize(), desc.getName());
 
             mImService.assertFileSizeNotExceedingMaxLimit(content.getSize(),
                     "File exceeds max size.");
+            mImService.assertAvailableFileTransferSession("Max file transfer sessions achieved.");
 
             final FileUploadSession session = new FileUploadSession(content, fileicon, mRcsSettings);
+            final FileUploadImpl fileUpload = new FileUploadImpl(session.getUploadID(),
+                    mBroadcaster, mImService, this, file);
 
-            FileUploadImpl fileUpload = new FileUploadImpl(session.getUploadID(), mBroadcaster,
-                    mImService, this, file);
+            final FileUploadServiceImpl fileUploadService = this;
+            mImService.scheduleImOperation(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (!isServiceRegistered() || !mImService.isFileTransferSessionAvailable()) {
+                            sLogger.error("Failed initiate file upload right now!");
+                        }
+                        session.addListener(fileUpload);
+                        fileUploadService.addFileUpload(session.getUploadID(), fileUpload);
+                        session.startSession();
 
-            session.addListener(fileUpload);
-            addFileUpload(fileUpload);
-            session.startSession();
+                    } catch (RuntimeException e) {
+                        /*
+                         * Normally we are not allowed to catch runtime exceptions as these are
+                         * genuine bugs which should be handled/fixed within the code. However the
+                         * cases when we are executing operations on a thread unhandling such
+                         * exceptions will eventually lead to exit the system and thus can bring the
+                         * whole system down, which is not intended.
+                         */
+                        sLogger.error("Failed initiate file upload right now!", e);
+                    }
+                }
+            });
             return fileUpload;
 
         } catch (ServerApiBaseException e) {
