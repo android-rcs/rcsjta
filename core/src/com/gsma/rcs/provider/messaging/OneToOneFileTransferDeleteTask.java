@@ -19,6 +19,7 @@ package com.gsma.rcs.provider.messaging;
 import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
+import com.gsma.rcs.core.ims.service.im.chat.imdn.DeliveryExpirationManager;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.provider.DeleteTask;
 import com.gsma.rcs.provider.LocalContentResolver;
@@ -119,6 +120,10 @@ public class OneToOneFileTransferDeleteTask extends DeleteTask.GroupedByContactI
 
     @Override
     protected void onCompleted(ContactId contact, Set<String> transferIds) {
+        DeliveryExpirationManager expirationManager = mImService.getDeliveryExpirationManager();
+        for (String transferId : transferIds) {
+            expirationManager.cancelDeliveryTimeoutAlarm(transferId);
+        }
         mFileTransferService.broadcastOneToOneFileTransferDeleted(contact, transferIds);
     }
 }

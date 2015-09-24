@@ -20,6 +20,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
 import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
+import com.gsma.rcs.core.ims.service.im.chat.imdn.DeliveryExpirationManager;
 import com.gsma.rcs.provider.DeleteTask;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.service.api.ChatServiceImpl;
@@ -123,7 +124,10 @@ public class OneToOneChatMessageDeleteTask extends DeleteTask.GroupedByContactId
 
     @Override
     protected void onCompleted(ContactId contact, Set<String> msgIds) {
+        DeliveryExpirationManager expirationManager = mImService.getDeliveryExpirationManager();
+        for (String messageId : msgIds) {
+            expirationManager.cancelDeliveryTimeoutAlarm(messageId);
+        }
         mChatService.broadcastOneToOneMessagesDeleted(contact, msgIds);
     }
-
 }
