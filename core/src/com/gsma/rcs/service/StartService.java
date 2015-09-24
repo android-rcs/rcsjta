@@ -369,11 +369,13 @@ public class StartService extends Service {
         /* Check the current SIM */
         if (mCurrentUserAccount == null) {
             if (isFirstLaunch()) {
-                // If it's a first launch the IMSI is necessary to initialize the service the first
-                // time
+                /*
+                 * If it's a first launch the IMSI is required to initialize the service the first
+                 * time.
+                 */
                 return false;
             }
-            // Set the user account ID from the last used IMSI
+            /* If it is not the first launch then set the user account ID from the last used IMSI */
             mCurrentUserAccount = mLastUserAccount;
         }
 

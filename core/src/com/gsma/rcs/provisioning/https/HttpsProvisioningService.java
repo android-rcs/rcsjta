@@ -137,6 +137,14 @@ public class HttpsProvisioningService extends Service {
         TelephonyManager tm = (TelephonyManager) mContext
                 .getSystemService(Context.TELEPHONY_SERVICE);
         String imsi = tm.getSubscriberId();
+        if (imsi == null) {
+            /*
+             * IMSI may be null if SIM card is not present or Telephony manager is not fully
+             * initialized and it is not the first launch. We should then consider the last user
+             * account.
+             */
+            imsi = LauncherUtils.getLastUserAccount(mContext);
+        }
         String imei = tm.getDeviceId();
 
         mHttpsProvisioningMng = new HttpsProvisioningManager(imei, imsi, mContext,
