@@ -798,7 +798,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                         sLogger.info("Pause session");
                     }
                     FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
-                    ((HttpFileTransferSession) session).pauseFileTransfer();
+                    ((HttpFileTransferSession) session).onPause();
                 } catch (RuntimeException e) {
                     /*
                      * Intentionally catch runtime exceptions as else it will abruptly end the
@@ -934,7 +934,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                         session.startSession();
                         return;
                     }
-                    ((HttpFileTransferSession) session).resumeFileTransfer();
+                    ((HttpFileTransferSession) session).onResume();
                 } catch (RuntimeException e) {
                     /*
                      * Intentionally catch runtime exceptions as else it will abruptly end the

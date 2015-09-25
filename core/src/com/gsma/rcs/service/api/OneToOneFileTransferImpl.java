@@ -854,7 +854,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                 try {
                     FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
 
-                    ((HttpFileTransferSession) session).pauseFileTransfer();
+                    ((HttpFileTransferSession) session).onPause();
                 } catch (RuntimeException e) {
                     /*
                      * Intentionally catch runtime exceptions as else it will abruptly end the
@@ -998,7 +998,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                         session.startSession();
                         return;
                     }
-                    ((HttpFileTransferSession) session).resumeFileTransfer();
+                    ((HttpFileTransferSession) session).onResume();
+
                 } catch (RuntimeException e) {
                     /*
                      * Intentionally catch runtime exceptions as else it will abruptly end the

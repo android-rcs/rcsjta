@@ -193,8 +193,8 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
 
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
-            ((FileSharingSessionListener) listener).onTransferError(
-                    new FileSharingError(error), contact);
+            ((FileSharingSessionListener) listener).onTransferError(new FileSharingError(error),
+                    contact);
         }
     }
 
@@ -325,20 +325,12 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
     /**
      * Pausing file transfer Implementation should be overridden in subclasses
      */
-    public void pauseFileTransfer() {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Pausing is not available");
-        }
-    }
+    public abstract void onPause();
 
     /**
      * Resuming file transfer Implementation should be overridden in subclasses
      */
-    public void resumeFileTransfer() {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Resuming is not available");
-        }
-    }
+    public abstract void onResume();
 
     @Override
     public void receiveBye(SipRequest bye) throws SipPayloadException, SipNetworkException {

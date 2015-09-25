@@ -555,14 +555,12 @@ public class HttpUploadManager extends HttpTransferManager {
                     .parseFileTransferHttpResumeInfo(resp);
 
             if (ftResumeInfo == null) {
-                if (sLogger.isActivated()) {
-                    sLogger.error("Cannot parse resume info! restart upload");
-                }
+                sLogger.error("Cannot parse resume info! restart upload");
                 return uploadFile();
             }
             if ((ftResumeInfo.getEnd() - ftResumeInfo.getStart()) >= (mContent.getSize() - 1)) {
                 if (sLogger.isActivated()) {
-                    sLogger.info("Nothing to resume: uploaded complete");
+                    sLogger.debug("Nothing to resume: uploaded complete");
                 }
                 return sendGetDownloadInfo(); /* The file has already been uploaded completely */
             }
