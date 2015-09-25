@@ -22,7 +22,7 @@
 
 package com.gsma.rcs.platform.network;
 
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.security.cert.KeyStoreManager;
 import com.gsma.rcs.core.ims.security.cert.X509KeyManagerWrapper;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -128,9 +128,9 @@ public class AndroidSecureSocketConnection extends AndroidSocketConnection {
      * @param remoteAddr Remote address
      * @param remotePort Remote port
      * @throws IOException
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public void open(String remoteAddr, int remotePort) throws IOException, SipPayloadException {
+    public void open(String remoteAddr, int remotePort) throws IOException, PayloadException {
         // Changed by Deutsche Telekom
         SSLSocket s = (SSLSocket) getSslFactory().createSocket(remoteAddr, remotePort);
         // Changed by Deutsche Telekom
@@ -170,10 +170,10 @@ public class AndroidSecureSocketConnection extends AndroidSocketConnection {
      * @param socket
      * @return String
      * @throws SSLPeerUnverifiedException
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
     private String getFingerprint(String algorithm, SSLSocket socket)
-            throws SSLPeerUnverifiedException, SipPayloadException {
+            throws SSLPeerUnverifiedException, PayloadException {
         try {
             final SSLSession session = socket.getSession();
             if (session == null) {
@@ -190,10 +190,10 @@ public class AndroidSecureSocketConnection extends AndroidSocketConnection {
             return KeyStoreManager.getCertFingerprint(certs[0], algorithm);
 
         } catch (CertificateEncodingException e) {
-            throw new SipPayloadException("SSL session not available!", e);
+            throw new PayloadException("SSL session not available!", e);
 
         } catch (NoSuchAlgorithmException e) {
-            throw new SipPayloadException("SSL session not available!", e);
+            throw new PayloadException("SSL session not available!", e);
         }
     }
 

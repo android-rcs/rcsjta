@@ -25,11 +25,11 @@ package com.gsma.rcs.core.content;
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.MimeManager;
@@ -309,10 +309,10 @@ public class ContentManager {
      * @param invite SIP invite request
      * @param rcsSettings
      * @return Content instance
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
     public static MmContent createMmContentFromSdp(SipRequest invite, RcsSettings rcsSettings)
-            throws SipPayloadException {
+            throws PayloadException {
         String remoteSdp = invite.getSdpContent();
         SipUtils.assertContentIsNotNull(remoteSdp, invite);
         SdpParser parser = new SdpParser(remoteSdp.getBytes(UTF8));

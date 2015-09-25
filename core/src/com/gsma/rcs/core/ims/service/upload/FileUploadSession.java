@@ -24,8 +24,8 @@ package com.gsma.rcs.core.ims.service.upload;
 
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
@@ -166,11 +166,11 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
         } catch (IOException e) {
             removeSession();
             mListener.handleUploadError(FileSharingError.MEDIA_UPLOAD_FAILED);
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error("Failed to initiate session for HTTP uploadId ".concat(mUploadId), e);
             removeSession();
             mListener.handleUploadError(FileSharingError.MEDIA_UPLOAD_FAILED);
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
@@ -191,10 +191,10 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
      * Analyze the result
      * 
      * @param result Byte array result
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void storeResult(byte[] result) throws SipPayloadException, SipNetworkException {
+    private void storeResult(byte[] result) throws PayloadException, NetworkException {
         // Check if upload has been cancelled
         if (mUploadManager.isCancelled()) {
             return;

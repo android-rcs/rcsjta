@@ -25,9 +25,8 @@ package com.gsma.rcs.core.ims.network;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.ImsNetworkInterface.DnsResolvedFields;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.rtp.core.RtpSource;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.platform.network.NetworkFactory;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -213,10 +212,10 @@ public class ImsConnectionManager implements Runnable {
     /**
      * Terminate the connection manager
      * 
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void terminate() throws SipPayloadException, SipNetworkException {
+    public void terminate() throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Terminate the IMS connection manager");
         }
@@ -247,10 +246,10 @@ public class ImsConnectionManager implements Runnable {
 
                     try {
                         connectionEvent(intent);
-                    } catch (SipPayloadException e) {
+                    } catch (PayloadException e) {
                         sLogger.error("Unable to handle connection event for intent action : "
                                 .concat(intent.getAction()), e);
-                    } catch (SipNetworkException e) {
+                    } catch (NetworkException e) {
                         if (sLogger.isActivated()) {
                             sLogger.debug(e.getMessage());
                         }
@@ -277,15 +276,15 @@ public class ImsConnectionManager implements Runnable {
      * Connection event
      * 
      * @param intent Intent
-     * @throws SipPayloadException
+     * @throws PayloadException
      * @throws CertificateException
-     * @throws SipNetworkException
+     * @throws NetworkException
      */
     // @FIXME: This method is doing so many things at this moment and has become too complex thus
     // needs a complete refactor, However at this moment due to other prior tasks the refactoring
     // task has been kept in backlog.
-    private void connectionEvent(Intent intent) throws SipPayloadException, CertificateException,
-            SipNetworkException {
+    private void connectionEvent(Intent intent) throws PayloadException, CertificateException,
+            NetworkException {
         try {
             if (mDisconnectedByBattery) {
                 return;
@@ -475,10 +474,10 @@ public class ImsConnectionManager implements Runnable {
     /**
      * Disconnect from IMS network interface
      * 
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void disconnectFromIms() throws SipPayloadException, SipNetworkException {
+    private void disconnectFromIms() throws PayloadException, NetworkException {
         // Stop the IMS connection
         stopImsConnection(TerminationReason.TERMINATION_BY_CONNECTION_LOST);
 
@@ -507,11 +506,11 @@ public class ImsConnectionManager implements Runnable {
     /**
      * Stop the IMS connection
      * 
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     private synchronized void stopImsConnection(TerminationReason reasonCode)
-            throws SipPayloadException, SipNetworkException {
+            throws PayloadException, NetworkException {
         if (mImsPollingThreadId == -1) {
             return;
         }
@@ -597,14 +596,14 @@ public class ImsConnectionManager implements Runnable {
                             }
                         }
                     }
-                } catch (SipPayloadException e) {
+                } catch (PayloadException e) {
                     sLogger.error("Can't register to the IMS!", e);
                     mCurrentNetworkInterface.getSipManager().closeStack();
                     /* Increment number of failures */
                     nbFailures++;
                     /* Force to perform a new DNS lookup */
                     mDnsResolvedFields = null;
-                } catch (SipNetworkException e) {
+                } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug(e.getMessage());
                     }
@@ -713,10 +712,10 @@ public class ImsConnectionManager implements Runnable {
                                 connectionEvent(new Intent(ConnectivityManager.CONNECTIVITY_ACTION));
                             }
                         }
-                    } catch (SipPayloadException e) {
+                    } catch (PayloadException e) {
                         sLogger.error("Unable to handle connection event for intent action : "
                                 .concat(intent.getAction()), e);
-                    } catch (SipNetworkException e) {
+                    } catch (NetworkException e) {
                         if (sLogger.isActivated()) {
                             sLogger.debug(e.getMessage());
                         }

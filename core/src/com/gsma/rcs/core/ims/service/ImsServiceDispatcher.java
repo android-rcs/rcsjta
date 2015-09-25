@@ -24,11 +24,11 @@ package com.gsma.rcs.core.ims.service;
 
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.ImsNetworkInterface;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.standfw.StoreAndForwardManager;
@@ -117,11 +117,11 @@ public class ImsServiceDispatcher extends Thread {
         while ((request = (SipRequest) mBuffer.getObject()) != null) {
             try {
                 dispatch(request, System.currentTimeMillis());
-            } catch (SipPayloadException e) {
+            } catch (PayloadException e) {
                 sLogger.error("Failed to dispatch received SIP request! CallId=".concat(request
                         .getCallId()), e);
                 handleImsDispatchError(request);
-            } catch (SipNetworkException e) {
+            } catch (NetworkException e) {
                 if (sLogger.isActivated()) {
                     sLogger.debug(e.getMessage());
                 }
@@ -149,11 +149,11 @@ public class ImsServiceDispatcher extends Thread {
      * 
      * @param request SIP request
      * @param timestamp Local timestamp when got SipRequest
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void dispatch(SipRequest request, long timestamp) throws SipPayloadException,
-            SipNetworkException {
+    private void dispatch(SipRequest request, long timestamp) throws PayloadException,
+            NetworkException {
         boolean logActivated = sLogger.isActivated();
         if (logActivated) {
             sLogger.debug("Receive " + request.getMethod() + " request");
@@ -508,11 +508,11 @@ public class ImsServiceDispatcher extends Thread {
      * 
      * @param notify SIP request
      * @param timestamp Local timestamp when got SipRequest
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void dispatchNotify(SipRequest notify, long timestamp) throws SipPayloadException,
-            SipNetworkException {
+    private void dispatchNotify(SipRequest notify, long timestamp) throws PayloadException,
+            NetworkException {
 
         mImsModule.getSipManager().sendSipResponse(
                 SipMessageFactory.createResponse(notify, Response.OK));
@@ -585,10 +585,10 @@ public class ImsServiceDispatcher extends Thread {
      * Send a 100 Trying response to the remote party
      * 
      * @param request SIP request
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void send100Trying(SipRequest request) throws SipNetworkException, SipPayloadException {
+    private void send100Trying(SipRequest request) throws NetworkException, PayloadException {
         mImsModule.getCurrentNetworkInterface().getSipManager()
                 .sendSipResponse(SipMessageFactory.createResponse(request, null, Response.TRYING));
     }
@@ -598,11 +598,11 @@ public class ImsServiceDispatcher extends Thread {
      * 
      * @param request SIP request
      * @param code Response code
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void sendFinalResponse(SipRequest request, int code) throws SipNetworkException,
-            SipPayloadException {
+    private void sendFinalResponse(SipRequest request, int code) throws NetworkException,
+            PayloadException {
         mImsModule
                 .getCurrentNetworkInterface()
                 .getSipManager()
@@ -616,11 +616,11 @@ public class ImsServiceDispatcher extends Thread {
      * @param request SIP request
      * @param code Response code
      * @param warning Warning message
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     private void sendFinalResponse(SipRequest request, int code, String warning)
-            throws SipNetworkException, SipPayloadException {
+            throws NetworkException, PayloadException {
         mImsModule
                 .getCurrentNetworkInterface()
                 .getSipManager()

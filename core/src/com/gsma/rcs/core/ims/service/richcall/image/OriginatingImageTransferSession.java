@@ -25,16 +25,16 @@ package com.gsma.rcs.core.ims.service.richcall.image;
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
@@ -235,10 +235,10 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
                         .concat(getFileTransferId()));
             }
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             mLogger.error("Failed to send invite!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (mLogger.isActivated()) {
                 mLogger.debug(e.getMessage());
             }
@@ -281,9 +281,9 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
      * Open media session
      * 
      * @throws IOException
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public void openMediaSession() throws IOException, SipPayloadException {
+    public void openMediaSession() throws IOException, PayloadException {
         msrpMgr.openMsrpSession();
     }
 
@@ -332,9 +332,9 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
             for (ImsSessionListener listener : getListeners()) {
                 ((ImageTransferSessionListener) listener).handleContentTransfered(contact, image);
             }
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             mLogger.error("Failed to notify msrp data transfered for msgId : ".concat(msgId), e);
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (mLogger.isActivated()) {
                 mLogger.debug(e.getMessage());
             }
@@ -421,11 +421,11 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
                 ((ImageTransferSessionListener) listener).handleSharingError(contact,
                         new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
             }
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             mLogger.error(
                     new StringBuilder("Failed to handle msrp error").append(error)
                             .append(" for message ").append(msgId).toString(), e);
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (mLogger.isActivated()) {
                 mLogger.debug(e.getMessage());
             }

@@ -25,11 +25,11 @@ package com.gsma.rcs.core.ims.service.presence;
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.presence.pidf.PidfDocument;
 import com.gsma.rcs.core.ims.service.presence.pidf.PidfParser;
@@ -96,11 +96,11 @@ public class PresenceSubscribeManager extends SubscribeManager {
      * @param dialog SIP dialog path
      * @param expirePeriod Expiration period in milliseconds
      * @return SIP request
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
     @Override
     public SipRequest createSubscribe(SipDialogPath dialog, long expirePeriod)
-            throws SipPayloadException {
+            throws PayloadException {
         try {
             SipRequest subscribe = SipMessageFactory.createSubscribe(dialog, expirePeriod);
             subscribe.addHeader(EventHeader.NAME, "presence");
@@ -110,7 +110,7 @@ public class PresenceSubscribeManager extends SubscribeManager {
             return subscribe;
 
         } catch (ParseException e) {
-            throw new SipPayloadException("Failed to create subscribe request!", e);
+            throw new PayloadException("Failed to create subscribe request!", e);
         }
     }
 
@@ -118,11 +118,11 @@ public class PresenceSubscribeManager extends SubscribeManager {
      * Receive a notification
      * 
      * @param notify Received notify
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void receiveNotification(SipRequest notify) throws SipPayloadException,
-            SipNetworkException {
+    public void receiveNotification(SipRequest notify) throws PayloadException,
+            NetworkException {
         if (!isNotifyForThisSubscriber(notify)) {
             return;
         }
@@ -131,14 +131,14 @@ public class PresenceSubscribeManager extends SubscribeManager {
         }
         String content = notify.getContent();
         if (TextUtils.isEmpty(content)) {
-            throw new SipPayloadException(
+            throw new PayloadException(
                     "Presence notification content should not be null or empty!");
         }
         try {
             String boundary = notify.getBoundaryContentType();
             Multipart multi = new Multipart(content, boundary);
             if (!multi.isMultipart()) {
-                throw new SipPayloadException("Presence notification content not multipart!");
+                throw new PayloadException("Presence notification content not multipart!");
             }
             String rlmiPart = multi.getPart("application/rlmi+xml");
             if (rlmiPart != null) {
@@ -183,19 +183,19 @@ public class PresenceSubscribeManager extends SubscribeManager {
             String entity = presenceInfo.getEntity();
             PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(entity);
             if (number == null) {
-                throw new SipPayloadException("Invalid entity :".concat(entity));
+                throw new PayloadException("Invalid entity :".concat(entity));
             }
             ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
             getImsModule().getPresenceService()
                     .handlePresenceInfoNotification(contact, presenceInfo);
         } catch (ParserConfigurationException e) {
-            throw new SipPayloadException("Can't parse presence notification!", e);
+            throw new PayloadException("Can't parse presence notification!", e);
 
         } catch (SAXException e) {
-            throw new SipPayloadException("Can't parse presence notification!", e);
+            throw new PayloadException("Can't parse presence notification!", e);
 
         } catch (IOException e) {
-            throw new SipNetworkException("Can't parse presence notification!", e);
+            throw new NetworkException("Can't parse presence notification!", e);
         }
 
         SubscriptionStateHeader stateHeader = (SubscriptionStateHeader) notify

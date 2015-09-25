@@ -22,7 +22,7 @@
 
 package com.gsma.rcs.core.ims.network.registration;
 
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 
@@ -55,15 +55,15 @@ public abstract class RegistrationProcedure {
      * Write the security header to REGISTER request
      * 
      * @param request Request
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public abstract void writeSecurityHeader(SipRequest request) throws SipPayloadException;
+    public abstract void writeSecurityHeader(SipRequest request) throws PayloadException;
 
     /**
      * Read the security header from REGISTER response
      * 
      * @param response Response
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public abstract void readSecurityHeader(SipResponse response) throws SipPayloadException;
+    public abstract void readSecurityHeader(SipResponse response) throws PayloadException;
 }

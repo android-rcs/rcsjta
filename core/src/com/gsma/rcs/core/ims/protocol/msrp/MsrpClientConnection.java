@@ -24,7 +24,7 @@ package com.gsma.rcs.core.ims.protocol.msrp;
 
 import java.io.IOException;
 
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.platform.network.NetworkFactory;
 import com.gsma.rcs.platform.network.SocketConnection;
 import com.gsma.rcs.utils.logger.Logger;
@@ -122,9 +122,9 @@ public class MsrpClientConnection extends MsrpConnection {
      * 
      * @return Socket
      * @throws IOException
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public SocketConnection getSocketConnection() throws IOException, SipPayloadException {
+    public SocketConnection getSocketConnection() throws IOException, PayloadException {
         if (logger.isActivated()) {
             logger.debug("Open client socket to " + remoteAddress + ":" + remotePort);
         }

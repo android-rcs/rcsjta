@@ -25,8 +25,8 @@ package com.gsma.rcs.core;
 import com.gsma.rcs.addressbook.AddressBookManager;
 import com.gsma.rcs.addressbook.LocaleManager;
 import com.gsma.rcs.core.ims.ImsModule;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.security.cert.KeyStoreManager;
 import com.gsma.rcs.core.ims.service.capability.CapabilityService;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -129,10 +129,10 @@ public class Core {
     /**
      * Terminate the core
      * 
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public synchronized static void terminateCore() throws SipPayloadException, SipNetworkException {
+    public synchronized static void terminateCore() throws PayloadException, NetworkException {
         if (sInstance == null) {
             return;
         }
@@ -256,10 +256,10 @@ public class Core {
     /**
      * Stop the terminal core
      *
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void stopCore() throws SipPayloadException, SipNetworkException {
+    private void stopCore() throws PayloadException, NetworkException {
         if (!mStarted) {
             return;
         }

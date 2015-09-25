@@ -27,8 +27,8 @@ import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.CoreListener;
 import com.gsma.rcs.core.TerminalInfo;
 import com.gsma.rcs.core.ims.ImsError;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.capability.CapabilityService;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
@@ -223,10 +223,10 @@ public class RcsCoreService extends Service implements CoreListener {
                 // much appropriate level.
                 try {
                     stopCore();
-                } catch (SipPayloadException e) {
+                } catch (PayloadException e) {
                     sLogger.error("Unable to stop IMS core!", e);
 
-                } catch (SipNetworkException e) {
+                } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug(e.getMessage());
                     }
@@ -352,10 +352,10 @@ public class RcsCoreService extends Service implements CoreListener {
     /**
      * Stop core
      * 
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private synchronized void stopCore() throws SipPayloadException, SipNetworkException {
+    private synchronized void stopCore() throws PayloadException, NetworkException {
         if (Core.getInstance() == null) {
             // Already stopped
             return;

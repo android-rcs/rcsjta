@@ -25,8 +25,8 @@ package com.gsma.rcs.core.ims.service.im.chat;
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.ims.ImsModule;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.im.chat.resourcelist.ResourceListDocument;
 import com.gsma.rcs.core.ims.service.im.chat.resourcelist.ResourceListParser;
 import com.gsma.rcs.utils.ContactUtil;
@@ -61,11 +61,11 @@ public class ParticipantInfoUtils {
      * @param xml Resource-list document in XML
      * @param status Participant info status
      * @return the set of participants
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
     public static Map<ContactId, ParticipantStatus> parseResourceList(String xml,
-            ParticipantStatus status) throws SipNetworkException, SipPayloadException {
+            ParticipantStatus status) throws NetworkException, PayloadException {
         Map<ContactId, ParticipantStatus> participants = new HashMap<ContactId, ParticipantStatus>();
         try {
             InputSource pidfInput = new InputSource(new ByteArrayInputStream(xml.getBytes(UTF8)));
@@ -87,13 +87,13 @@ public class ParticipantInfoUtils {
                 }
             }
         } catch (IOException e) {
-            throw new SipNetworkException("Can't parse resource-list document!", e);
+            throw new NetworkException("Can't parse resource-list document!", e);
 
         } catch (ParserConfigurationException e) {
-            throw new SipPayloadException("Can't parse resource-list document!", e);
+            throw new PayloadException("Can't parse resource-list document!", e);
 
         } catch (SAXException e) {
-            throw new SipPayloadException("Can't parse resource-list document!", e);
+            throw new PayloadException("Can't parse resource-list document!", e);
         }
         return participants;
     }

@@ -27,9 +27,9 @@ import static com.gsma.rcs.utils.StringUtils.UTF8_STR;
 
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
@@ -181,10 +181,10 @@ public class FileTransferUtils {
      * @param request Request
      * @param rcsSettings
      * @return fileIcon the file icon content persisted on disk
-     * @throws SipNetworkException
+     * @throws NetworkException
      */
     public static MmContent extractFileIcon(SipRequest request, RcsSettings rcsSettings)
-            throws SipNetworkException {
+            throws NetworkException {
         try {
             // Extract message from content/CPIM
             String content = request.getContent();
@@ -220,7 +220,7 @@ public class FileTransferUtils {
             return null;
 
         } catch (IOException e) {
-            throw new SipNetworkException("Failed to extract file icon!", e);
+            throw new NetworkException("Failed to extract file icon!", e);
         }
     }
 
@@ -230,11 +230,11 @@ public class FileTransferUtils {
      * @param xml XML document
      * @param rcsSettings RCS settings
      * @return File transfer document
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     public static FileTransferHttpInfoDocument parseFileTransferHttpDocument(byte[] xml,
-            RcsSettings rcsSettings) throws SipPayloadException, SipNetworkException {
+            RcsSettings rcsSettings) throws PayloadException, NetworkException {
         try {
             InputSource ftHttpInput = new InputSource(new ByteArrayInputStream(xml));
             FileTransferHttpInfoParser ftHttpParser = new FileTransferHttpInfoParser(ftHttpInput,
@@ -242,13 +242,13 @@ public class FileTransferUtils {
             return ftHttpParser.getFtInfo();
 
         } catch (ParserConfigurationException e) {
-            throw new SipPayloadException("Can't parse FT HTTP document!", e);
+            throw new PayloadException("Can't parse FT HTTP document!", e);
 
         } catch (SAXException e) {
-            throw new SipPayloadException("Can't parse FT HTTP document!", e);
+            throw new PayloadException("Can't parse FT HTTP document!", e);
 
         } catch (IOException e) {
-            throw new SipNetworkException("Can't parse FT HTTP document!", e);
+            throw new NetworkException("Can't parse FT HTTP document!", e);
         }
     }
 
@@ -258,11 +258,11 @@ public class FileTransferUtils {
      * @param request Request
      * @param rcsSettings RCS settings
      * @return FT HTTP info
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     public static FileTransferHttpInfoDocument getHttpFTInfo(SipRequest request,
-            RcsSettings rcsSettings) throws SipPayloadException, SipNetworkException {
+            RcsSettings rcsSettings) throws PayloadException, NetworkException {
         /* Not a valid timestamp here as the message is just for temp use */
         long timestamp = -1;
         ChatMessage message = ChatUtils.getFirstMessage(request, timestamp);

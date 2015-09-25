@@ -23,11 +23,11 @@
 package com.gsma.rcs.core.ims.service.im.filetransfer;
 
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsServiceSession;
@@ -126,9 +126,9 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
      * Create an INVITE request
      * 
      * @return the INVITE request
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public SipRequest createInvite() throws SipPayloadException {
+    public SipRequest createInvite() throws PayloadException {
         try {
             SipRequest invite;
             SipDialogPath dialogPath = getDialogPath();
@@ -144,7 +144,7 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
             return invite;
 
         } catch (ParseException e) {
-            throw new SipPayloadException("Failed to create invite request!", e);
+            throw new PayloadException("Failed to create invite request!", e);
         }
     }
 
@@ -203,11 +203,11 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
                 ((FileSharingSessionListener) listener).onTransferError(new FileSharingError(
                         FileSharingError.MEDIA_TRANSFER_FAILED, error), contact);
             }
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error(
                     new StringBuilder("Failed to handle msrp error").append(error)
                             .append(" for message ").append(msgId).toString(), e);
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
@@ -235,7 +235,7 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
     }
 
     @Override
-    public void receiveBye(SipRequest bye) throws SipPayloadException, SipNetworkException {
+    public void receiveBye(SipRequest bye) throws PayloadException, NetworkException {
         super.receiveBye(bye);
         ContactId contact = getRemoteContact();
         /*

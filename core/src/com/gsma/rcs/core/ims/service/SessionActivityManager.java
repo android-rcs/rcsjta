@@ -22,8 +22,8 @@
 
 package com.gsma.rcs.core.ims.service;
 
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PeriodicRefresher;
 import com.gsma.rcs.utils.logger.Logger;
@@ -104,10 +104,10 @@ public class SessionActivityManager extends PeriodicRefresher {
     /**
      * Periodic processing
      * 
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void periodicProcessing() throws SipPayloadException, SipNetworkException {
+    public void periodicProcessing() throws PayloadException, NetworkException {
         long timeout = mRcsSettings.getChatIdleDuration();
         long inactivityPeriod = System.currentTimeMillis() - mActivityTimestamp;
         long remainingPeriod = timeout - inactivityPeriod;

@@ -25,12 +25,12 @@ package com.gsma.rcs.core.ims.service.im.chat;
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -328,17 +328,17 @@ public abstract class GroupChatSession extends ChatSession {
      * Close session
      * 
      * @param reason Reason
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void closeSession(TerminationReason reason) throws SipPayloadException,
-            SipNetworkException {
+    public void closeSession(TerminationReason reason) throws PayloadException,
+            NetworkException {
         mConferenceSubscriber.terminate();
         super.closeSession(reason);
     }
 
     @Override
-    public void receiveBye(SipRequest bye) throws SipPayloadException, SipNetworkException {
+    public void receiveBye(SipRequest bye) throws PayloadException, NetworkException {
         mConferenceSubscriber.terminate();
         super.receiveBye(bye);
         /*
@@ -361,10 +361,10 @@ public abstract class GroupChatSession extends ChatSession {
      * Receive CANCEL request
      * 
      * @param cancel CANCEL request
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void receiveCancel(SipRequest cancel) throws SipNetworkException, SipPayloadException {
+    public void receiveCancel(SipRequest cancel) throws NetworkException, PayloadException {
         mConferenceSubscriber.terminate();
 
         super.receiveCancel(cancel);
@@ -532,10 +532,10 @@ public abstract class GroupChatSession extends ChatSession {
      * Invite a contact to the session
      * 
      * @param contact Contact to invite
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void inviteContact(ContactId contact) throws SipPayloadException, SipNetworkException {
+    public void inviteContact(ContactId contact) throws PayloadException, NetworkException {
         Set<ContactId> contacts = new HashSet<ContactId>();
         contacts.add(contact);
         inviteParticipants(contacts);
@@ -545,11 +545,11 @@ public abstract class GroupChatSession extends ChatSession {
      * Add a set of participants to the session
      * 
      * @param contacts set of participants
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void inviteParticipants(Set<ContactId> contacts) throws SipPayloadException,
-            SipNetworkException {
+    public void inviteParticipants(Set<ContactId> contacts) throws PayloadException,
+            NetworkException {
         try {
             int nbrOfContacts = contacts.size();
 
@@ -637,10 +637,10 @@ public abstract class GroupChatSession extends ChatSession {
                 updateParticipants(contacts, ParticipantStatus.FAILED);
             }
         } catch (InvalidArgumentException e) {
-            throw new SipPayloadException("REFER request has failed for contacts : " + contacts, e);
+            throw new PayloadException("REFER request has failed for contacts : " + contacts, e);
 
         } catch (ParseException e) {
-            throw new SipPayloadException("REFER request has failed for contacts : " + contacts, e);
+            throw new PayloadException("REFER request has failed for contacts : " + contacts, e);
         }
     }
 
@@ -655,9 +655,9 @@ public abstract class GroupChatSession extends ChatSession {
      * Create an INVITE request
      * 
      * @return the INVITE request
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public SipRequest createInvite() throws SipPayloadException {
+    public SipRequest createInvite() throws PayloadException {
         // Nothing to do in terminating side
         return null;
     }
@@ -666,10 +666,10 @@ public abstract class GroupChatSession extends ChatSession {
      * Handle 200 0K response
      * 
      * @param resp 200 OK response
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void handle200OK(SipResponse resp) throws SipPayloadException, SipNetworkException {
+    public void handle200OK(SipResponse resp) throws PayloadException, NetworkException {
         super.handle200OK(resp);
 
         mConferenceSubscriber.subscribe();
@@ -688,7 +688,7 @@ public abstract class GroupChatSession extends ChatSession {
      */
     @Override
     public void msrpDataReceived(String msgId, byte[] data, String mimeType)
-            throws SipPayloadException, SipNetworkException {
+            throws PayloadException, NetworkException {
         try {
             boolean logActivated = sLogger.isActivated();
             if (logActivated) {
@@ -846,7 +846,7 @@ public abstract class GroupChatSession extends ChatSession {
                 }
             }
         } catch (IOException e) {
-            throw new SipNetworkException(
+            throw new NetworkException(
                     "Unable to handle delivery status for msgId : ".concat(msgId), e);
         }
     }
@@ -868,8 +868,8 @@ public abstract class GroupChatSession extends ChatSession {
     }
 
     @Override
-    public void terminateSession(TerminationReason reason) throws SipPayloadException,
-            SipNetworkException {
+    public void terminateSession(TerminationReason reason) throws PayloadException,
+            NetworkException {
         /*
          * If there is an ongoing group chat session with same chatId, this session has to be
          * silently aborted so after aborting the session we make sure to not call the rest of this
@@ -961,11 +961,11 @@ public abstract class GroupChatSession extends ChatSession {
             for (ImsSessionListener listener : getListeners()) {
                 ((GroupChatSessionListener) listener).onImError(chatError);
             }
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error(
                     new StringBuilder("Failed to handle msrp error").append(error)
                             .append(" for message ").append(msgId).toString(), e);
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
@@ -1005,10 +1005,10 @@ public abstract class GroupChatSession extends ChatSession {
             for (ImsSessionListener listener : getListeners()) {
                 ((GroupChatSessionListener) listener).onImError(chatError);
             }
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error(new StringBuilder("Failed to handle error").append(error).append("!")
                     .toString(), e);
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }

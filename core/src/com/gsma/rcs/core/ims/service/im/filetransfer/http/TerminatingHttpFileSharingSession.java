@@ -24,9 +24,9 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -142,7 +142,7 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
                         System.currentTimeMillis());
             }
 
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
@@ -175,7 +175,7 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
                     .concat(mRemoteInstanceId), e);
             handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
 
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error("Download of file has failed for mRemoteInstanceId : "
                     .concat(mRemoteInstanceId), e);
             handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
@@ -207,11 +207,11 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
      * @param status Report status
      * @param timestamp Local timestamp
      * @throws MsrpException
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
     protected void sendDeliveryReport(String status, long timestamp) throws MsrpException,
-            SipPayloadException, SipNetworkException {
+            PayloadException, NetworkException {
         String msgId = getFileTransferId();
         if (sLogger.isActivated()) {
             sLogger.debug("Send delivery report ".concat(status));
@@ -280,7 +280,7 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
                                 System.currentTimeMillis());
                     }
 
-                } catch (SipNetworkException e) {
+                } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug(e.getMessage());
                     }
@@ -313,7 +313,7 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
                             .concat(mRemoteInstanceId), e);
                     handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
 
-                } catch (SipPayloadException e) {
+                } catch (PayloadException e) {
                     sLogger.error("Download of file has failed for mRemoteInstanceId : "
                             .concat(mRemoteInstanceId), e);
                     handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
@@ -337,8 +337,8 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
     }
 
     @Override
-    public void terminateSession(TerminationReason reason) throws SipPayloadException,
-            SipNetworkException {
+    public void terminateSession(TerminationReason reason) throws PayloadException,
+            NetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug("terminateSession reason=".concat(reason.toString()));
         }

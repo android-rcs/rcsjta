@@ -23,9 +23,9 @@
 package com.gsma.rcs.core.ims.service;
 
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
@@ -212,18 +212,18 @@ public abstract class ImsService {
     /**
      * Start the IMS service
      * 
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public abstract void start() throws SipPayloadException, SipNetworkException;
+    public abstract void start() throws PayloadException, NetworkException;
 
     /**
      * Stop the IMS service
      * 
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public abstract void stop() throws SipPayloadException, SipNetworkException;
+    public abstract void stop() throws PayloadException, NetworkException;
 
     /**
      * Check the IMS service
@@ -235,11 +235,11 @@ public abstract class ImsService {
      * started state.
      * 
      * @param reason termination reason
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void terminateAllSessions(TerminationReason reason) throws SipPayloadException,
-            SipNetworkException {
+    public void terminateAllSessions(TerminationReason reason) throws PayloadException,
+            NetworkException {
         synchronized (getImsServiceSessionOperationLock()) {
             /*
              * Iterate over a copy of the session set to allow removal in the cache map while
@@ -266,11 +266,11 @@ public abstract class ImsService {
      * 
      * @param invite Invite request
      * @param error Error code
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void sendErrorResponse(SipRequest invite, int error) throws SipPayloadException,
-            SipNetworkException {
+    public void sendErrorResponse(SipRequest invite, int error) throws PayloadException,
+            NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Send error ".concat(String.valueOf(error)));
         }
@@ -289,11 +289,11 @@ public abstract class ImsService {
     public void tryToSendErrorResponse(SipRequest invite, int error) {
         try {
             sendErrorResponse(invite, error);
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug("Unable to send error response! (" + e.getMessage() + ")");
             }
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error("Unable to send error response!", e);
         }
     }

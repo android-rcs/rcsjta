@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.protocol.sip;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PeriodicRefresher;
 import com.gsma.rcs.utils.logger.Logger;
@@ -83,9 +84,9 @@ public class KeepAliveManager extends PeriodicRefresher {
     /**
      * Keep-alive processing
      * 
-     * @throws SipNetworkException
+     * @throws NetworkException
      */
-    public void periodicProcessing() throws SipNetworkException {
+    public void periodicProcessing() throws NetworkException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.debug("Send keep-alive");
@@ -95,7 +96,7 @@ public class KeepAliveManager extends PeriodicRefresher {
                     mSip.getOutboundProxyAddr(), mSip.getOutboundProxyPort());
             startTimer(System.currentTimeMillis(), mPeriod);
         } catch (IOException e) {
-            throw new SipNetworkException("Failed to send keep-alive!", e);
+            throw new NetworkException("Failed to send keep-alive!", e);
         }
     }
 

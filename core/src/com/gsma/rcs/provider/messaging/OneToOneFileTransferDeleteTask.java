@@ -16,8 +16,8 @@
 
 package com.gsma.rcs.provider.messaging;
 
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.DeliveryExpirationManager;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
@@ -95,7 +95,7 @@ public class OneToOneFileTransferDeleteTask extends DeleteTask.GroupedByContactI
     }
 
     @Override
-    protected void onRowDelete(ContactId contact, String transferId) throws SipPayloadException {
+    protected void onRowDelete(ContactId contact, String transferId) throws PayloadException {
         FileSharingSession session = mImService.getFileSharingSession(transferId);
         if (session == null) {
             mFileTransferService.ensureThumbnailIsDeleted(transferId);
@@ -105,7 +105,7 @@ public class OneToOneFileTransferDeleteTask extends DeleteTask.GroupedByContactI
         }
         try {
             session.deleteSession();
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             /*
              * If network is lost during a delete operation the remaining part of the delete
              * operation (delete from persistent storage) can succeed to 100% anyway since delete

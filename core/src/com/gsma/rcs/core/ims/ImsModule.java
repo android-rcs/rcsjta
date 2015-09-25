@@ -27,12 +27,12 @@ import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.CoreListener;
 import com.gsma.rcs.core.ims.network.ImsConnectionManager;
 import com.gsma.rcs.core.ims.network.ImsNetworkInterface;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.gsm.CallManager;
 import com.gsma.rcs.core.ims.network.sip.SipManager;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpConnection;
 import com.gsma.rcs.core.ims.protocol.sip.SipEventListener;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsService.ImsServiceType;
@@ -215,10 +215,10 @@ public class ImsModule implements SipEventListener {
     /**
      * Stop the IMS module
      * 
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void stop() throws SipPayloadException, SipNetworkException {
+    public void stop() throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Stop the IMS module");
         }
@@ -234,10 +234,10 @@ public class ImsModule implements SipEventListener {
     /**
      * Start IMS services
      * 
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void startImsServices() throws SipPayloadException, SipNetworkException {
+    public void startImsServices() throws PayloadException, NetworkException {
         for (ImsService imsService : mServices.values()) {
             if (imsService.isActivated()) {
                 if (sLogger.isActivated()) {
@@ -253,11 +253,11 @@ public class ImsModule implements SipEventListener {
      * Stop IMS services
      * 
      * @param reasonCode The reason code
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void stopImsServices(TerminationReason reasonCode) throws SipPayloadException,
-            SipNetworkException {
+    public void stopImsServices(TerminationReason reasonCode) throws PayloadException,
+            NetworkException {
         // Terminate all pending sessions
         terminateAllSessions(reasonCode);
 
@@ -270,10 +270,10 @@ public class ImsModule implements SipEventListener {
                     }
                     imsService.stop();
                 }
-            } catch (SipPayloadException e) {
+            } catch (PayloadException e) {
                 sLogger.error(
                         "Unable to stop IMS service: ".concat(imsService.getClass().getName()), e);
-            } catch (SipNetworkException e) {
+            } catch (NetworkException e) {
                 if (sLogger.isActivated()) {
                     sLogger.debug(e.getMessage());
                 }
@@ -402,11 +402,11 @@ public class ImsModule implements SipEventListener {
      * started state.
      * 
      * @param reasonCode The reason code
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void terminateAllSessions(TerminationReason reasonCode) throws SipPayloadException,
-            SipNetworkException {
+    public void terminateAllSessions(TerminationReason reasonCode) throws PayloadException,
+            NetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug("Terminate all sessions");
         }

@@ -26,12 +26,12 @@ import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
@@ -122,6 +122,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.xml.parsers.ParserConfigurationException;
+
 import javax2.sip.header.ContactHeader;
 import javax2.sip.message.Response;
 
@@ -301,8 +302,8 @@ public class InstantMessagingService extends ImsService {
                 mDeliveryExpirationManager));
     }
 
-    private void send403Forbidden(SipRequest request, String warning) throws SipPayloadException,
-            SipNetworkException {
+    private void send403Forbidden(SipRequest request, String warning) throws PayloadException,
+            NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Send 403 Forbidden (warning=" + warning + ")");
         }
@@ -925,7 +926,7 @@ public class InstantMessagingService extends ImsService {
                                 + e.getMessage() + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
-                } catch (SipNetworkException e) {
+                } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug("Failed to receive msrp file transfer invitation! ("
                                 + e.getMessage() + ")");
@@ -934,7 +935,7 @@ public class InstantMessagingService extends ImsService {
                 } catch (ContactManagerException e) {
                     sLogger.error("Failed to receive msrp file transfer invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
-                } catch (SipPayloadException e) {
+                } catch (PayloadException e) {
                     sLogger.error("Failed to receive msrp file transfer invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
                 } catch (RuntimeException e) {
@@ -1119,7 +1120,7 @@ public class InstantMessagingService extends ImsService {
                                 + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
-                } catch (SipNetworkException e) {
+                } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug("Failed to receive o2o chat invitation! (" + e.getMessage()
                                 + ")");
@@ -1128,7 +1129,7 @@ public class InstantMessagingService extends ImsService {
                 } catch (ContactManagerException e) {
                     sLogger.error("Failed to receive o2o chat invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
-                } catch (SipPayloadException e) {
+                } catch (PayloadException e) {
                     sLogger.error("Failed to receive o2o chat invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
                 } catch (RuntimeException e) {
@@ -1264,7 +1265,7 @@ public class InstantMessagingService extends ImsService {
                                 + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
-                } catch (SipNetworkException e) {
+                } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug("Failed to receive group chat invitation! (" + e.getMessage()
                                 + ")");
@@ -1273,7 +1274,7 @@ public class InstantMessagingService extends ImsService {
                 } catch (ContactManagerException e) {
                     sLogger.error("Failed to receive group chat invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
-                } catch (SipPayloadException e) {
+                } catch (PayloadException e) {
                     sLogger.error("Failed to receive group chat invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
                 } catch (RuntimeException e) {
@@ -1386,12 +1387,12 @@ public class InstantMessagingService extends ImsService {
                         session.getConferenceEventSubscriber().receiveNotification(notify,
                                 timestamp);
                     }
-                } catch (SipNetworkException e) {
+                } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug("Failed to receive group conference notification! ("
                                 + e.getMessage() + ")");
                     }
-                } catch (SipPayloadException e) {
+                } catch (PayloadException e) {
                     sLogger.error("Failed to receive group conference notification!", e);
                 } catch (RuntimeException e) {
                     sLogger.error("Failed to receive group conference notification!", e);
@@ -1462,7 +1463,7 @@ public class InstantMessagingService extends ImsService {
                         sLogger.debug("Failed to receive chat message delivery report! ("
                                 + e.getMessage() + ")");
                     }
-                } catch (SipNetworkException e) {
+                } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug("Failed to receive chat message delivery report! ("
                                 + e.getMessage() + ")");
@@ -1471,7 +1472,7 @@ public class InstantMessagingService extends ImsService {
                     sLogger.error("Failed to receive chat message delivery report!", e);
                 } catch (SAXException e) {
                     sLogger.error("Failed to receive chat message delivery report!", e);
-                } catch (SipPayloadException e) {
+                } catch (PayloadException e) {
                     sLogger.error("Failed to receive chat message delivery report!", e);
                 } catch (RuntimeException e) {
                     /*
@@ -1546,13 +1547,13 @@ public class InstantMessagingService extends ImsService {
                                 + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
-                } catch (SipNetworkException e) {
+                } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug("Failed to receive s&f chat messages! (" + e.getMessage()
                                 + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
-                } catch (SipPayloadException e) {
+                } catch (PayloadException e) {
                     sLogger.error("Failed to receive s&f chat messages!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
                 } catch (RuntimeException e) {
@@ -1606,13 +1607,13 @@ public class InstantMessagingService extends ImsService {
                     getStoreAndForwardManager().receiveStoreAndForwardNotificationInvitation(
                             invite, remote, timestamp);
 
-                } catch (SipNetworkException e) {
+                } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug("Failed to receive s&f push notifications! ("
                                 + e.getMessage() + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
-                } catch (SipPayloadException e) {
+                } catch (PayloadException e) {
                     sLogger.error("Failed to receive s&f push notifications!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
                 } catch (RuntimeException e) {
@@ -1845,13 +1846,13 @@ public class InstantMessagingService extends ImsService {
                                 + e.getMessage() + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
-                } catch (SipNetworkException e) {
+                } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug("Failed to receive http o2o file transfer invitation! ("
                                 + e.getMessage() + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
-                } catch (SipPayloadException e) {
+                } catch (PayloadException e) {
                     sLogger.error("Failed to receive http o2o file transfer invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
                 } catch (ContactManagerException e) {
@@ -1993,13 +1994,13 @@ public class InstantMessagingService extends ImsService {
                     }
                     filetransferSession.startSession();
 
-                } catch (SipNetworkException e) {
+                } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug("Failed to receive s&f o2o http file transfer invitation! ("
                                 + e.getMessage() + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
-                } catch (SipPayloadException e) {
+                } catch (PayloadException e) {
                     sLogger.error("Failed to receive s&f o2o file http transfer invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
                 } catch (RuntimeException e) {
@@ -2234,10 +2235,10 @@ public class InstantMessagingService extends ImsService {
      * Handle auto rejoin group chat
      * 
      * @param chatId
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void rejoinGroupChat(String chatId) throws SipPayloadException, SipNetworkException {
+    public void rejoinGroupChat(String chatId) throws PayloadException, NetworkException {
         mChatService.rejoinGroupChat(chatId);
     }
 
@@ -2245,11 +2246,11 @@ public class InstantMessagingService extends ImsService {
      * Handle rejoin group chat as part of send operation
      * 
      * @param chatId
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void rejoinGroupChatAsPartOfSendOperation(String chatId) throws SipPayloadException,
-            SipNetworkException {
+    public void rejoinGroupChatAsPartOfSendOperation(String chatId) throws PayloadException,
+            NetworkException {
         mChatService.rejoinGroupChatAsPartOfSendOperation(chatId);
     }
 

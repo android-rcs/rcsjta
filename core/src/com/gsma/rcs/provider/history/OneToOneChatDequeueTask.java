@@ -18,9 +18,9 @@ package com.gsma.rcs.provider.history;
 
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
@@ -203,13 +203,13 @@ public class OneToOneChatDequeueTask extends DequeueTask {
                                 .append(id).append("' for contact '").append(contact)
                                 .append("' due to: ").append(e.getMessage()).toString());
                     }
-                } catch (SipNetworkException e) {
+                } catch (NetworkException e) {
                     if (logActivated) {
                         mLogger.debug(new StringBuilder("Failed to dequeue one-one entry with id '")
                                 .append(id).append("' for contact '").append(contact)
                                 .append("' due to: ").append(e.getMessage()).toString());
                     }
-                } catch (SipPayloadException e) {
+                } catch (PayloadException e) {
                     mLogger.error(new StringBuilder("Failed to dequeue one-one entry with id '")
                             .append(id).append("' for contact '").append(contact).toString(), e);
                     setOneToOneChatEntryAsFailedDequeue(providerId, contact, id, mimeType);

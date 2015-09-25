@@ -25,16 +25,16 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.msrp;
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
@@ -253,10 +253,10 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
                         .concat(getFileTransferId()));
             }
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             mLogger.error("Unable to set and send initial invite!", e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (mLogger.isActivated()) {
                 mLogger.debug(e.getMessage());
             }
@@ -296,9 +296,9 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * Open media session
      * 
      * @throws IOException
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public void openMediaSession() throws IOException, SipPayloadException {
+    public void openMediaSession() throws IOException, PayloadException {
         msrpMgr.openMsrpSession();
     }
 
@@ -349,9 +349,9 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
             mImService.receiveOneToOneFileDeliveryStatus(contact, new ImdnDocument(
                     getFileTransferId(), ImdnDocument.DISPLAY,
                     ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp));
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             mLogger.error("Failed to notify msrp data transfered for msgId : ".concat(msgId), e);
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (mLogger.isActivated()) {
                 mLogger.debug(e.getMessage());
             }
@@ -435,10 +435,10 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * Handle 200 0K response
      * 
      * @param resp 200 OK response
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void handle200OK(SipResponse resp) throws SipPayloadException, SipNetworkException {
+    public void handle200OK(SipResponse resp) throws PayloadException, NetworkException {
         long timestamp = System.currentTimeMillis();
         mImService.receiveOneToOneFileDeliveryStatus(getRemoteContact(), new ImdnDocument(
                 getFileTransferId(), ImdnDocument.POSITIVE_DELIVERY,

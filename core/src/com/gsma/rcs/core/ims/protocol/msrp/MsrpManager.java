@@ -22,12 +22,12 @@
 
 package com.gsma.rcs.core.ims.protocol.msrp;
 
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.InetAddressUtils;
@@ -167,9 +167,9 @@ public class MsrpManager {
      * Open the MSRP session
      * 
      * @throws IOException
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public void openMsrpSession() throws IOException, SipPayloadException {
+    public void openMsrpSession() throws IOException, PayloadException {
         if ((mMsrpSession == null) || (mMsrpSession.getConnection() == null)) {
             throw new IOException("Session not yet created");
         }
@@ -182,9 +182,9 @@ public class MsrpManager {
      * 
      * @param timeout Timeout value (in milliseconds)
      * @throws IOException
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public void openMsrpSession(long timeout) throws IOException, SipPayloadException {
+    public void openMsrpSession(long timeout) throws IOException, PayloadException {
         if ((mMsrpSession == null) || (mMsrpSession.getConnection() == null)) {
             throw new IOException("Session not yet created");
         }

@@ -25,14 +25,14 @@ package com.gsma.rcs.core.ims.service.richcall.video;
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
@@ -132,10 +132,10 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
         } catch (RemoteException e) {
             sLogger.error("Failed initiate a new live video sharing session as originating!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error("Failed to send invite!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
@@ -154,11 +154,11 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
      * Prepare media session
      * 
      * @throws MediaException
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void prepareMediaSession() throws MediaException, SipPayloadException,
-            SipNetworkException {
+    public void prepareMediaSession() throws MediaException, PayloadException,
+            NetworkException {
         // Parse the remote SDP part
         SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(UTF8));
         MediaDescription mediaVideo = parser.getMediaDescription("video");

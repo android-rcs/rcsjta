@@ -23,8 +23,8 @@
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import com.gsma.rcs.core.content.MmContent;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
@@ -156,15 +156,15 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * Create an INVITE request
      * 
      * @return the INVITE request
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public SipRequest createInvite() throws SipPayloadException {
+    public SipRequest createInvite() throws PayloadException {
         // Not used here
         return null;
     }
 
-    protected void closeHttpSession(TerminationReason reason) throws SipPayloadException,
-            SipNetworkException {
+    protected void closeHttpSession(TerminationReason reason) throws PayloadException,
+            NetworkException {
         interruptSession();
 
         closeSession(reason);
@@ -333,7 +333,7 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
     public abstract void onResume();
 
     @Override
-    public void receiveBye(SipRequest bye) throws SipPayloadException, SipNetworkException {
+    public void receiveBye(SipRequest bye) throws PayloadException, NetworkException {
         super.receiveBye(bye);
         ContactId remote = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {

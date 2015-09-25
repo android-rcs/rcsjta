@@ -23,8 +23,8 @@
 package com.gsma.rcs.utils;
 
 import com.gsma.rcs.core.Core;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -74,10 +74,10 @@ public abstract class PeriodicRefresher {
     /**
      * Periodic processing
      * 
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public abstract void periodicProcessing() throws SipPayloadException, SipNetworkException;
+    public abstract void periodicProcessing() throws PayloadException, NetworkException;
 
     /**
      * Start the timer
@@ -148,9 +148,9 @@ public abstract class PeriodicRefresher {
                 public void run() {
                     try {
                         periodicProcessing();
-                    } catch (SipPayloadException e) {
+                    } catch (PayloadException e) {
                         sLogger.error("IMS re-registration unsuccessful!", e);
-                    } catch (SipNetworkException e) {
+                    } catch (NetworkException e) {
                         /* Nothing to be handled here */
                         if (sLogger.isActivated()) {
                             sLogger.debug(e.getMessage());

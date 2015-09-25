@@ -22,7 +22,7 @@
 
 package com.gsma.rcs.core.ims.service.im.chat.iscomposing;
 
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSessionListener;
@@ -84,11 +84,11 @@ public class IsComposingManager {
      * 
      * @param contact Contact identifier
      * @param event Event
-     * @throws SipPayloadException
+     * @throws PayloadException
      * @throws IOException
      */
     public void receiveIsComposingEvent(ContactId contact, byte[] event)
-            throws SipPayloadException, IOException {
+            throws PayloadException, IOException {
         try {
             InputSource input = new InputSource(new ByteArrayInputStream(event));
             IsComposingParser parser = new IsComposingParser(input);
@@ -114,12 +114,12 @@ public class IsComposingManager {
                 stopExpirationTimer(contact);
             }
         } catch (ParserConfigurationException e) {
-            throw new SipPayloadException(
+            throw new PayloadException(
                     "Can't parse is-composing event for session ID : ".concat(mSession
                             .getSessionID()), e);
 
         } catch (SAXException e) {
-            throw new SipPayloadException(
+            throw new PayloadException(
                     "Can't parse is-composing event for session ID : ".concat(mSession
                             .getSessionID()), e);
         }

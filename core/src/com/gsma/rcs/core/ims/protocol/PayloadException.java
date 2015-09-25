@@ -14,16 +14,16 @@
  * the License.
  */
 
-package com.gsma.rcs.core.ims.protocol.sip;
+package com.gsma.rcs.core.ims.protocol;
 
 /**
- * To be thrown when a SIP transaction fails due to corrupted/invalid entries in payload. For ex :
- * Error while parsing SDP e.t.c.
+ * To be thrown when a transaction fails due to corrupted/invalid entries in payload. For ex : Error
+ * while parsing SDP e.t.c.
  * <p>
  * These exceptions should be logged and need to be communicated properly to upper service layers.
  * </p>
  */
-public class SipPayloadException extends Exception {
+public class PayloadException extends Exception {
 
     static final long serialVersionUID = 1L;
 
@@ -32,7 +32,7 @@ public class SipPayloadException extends Exception {
      * 
      * @param message Error message obtained either from a constant string or through e.getMessage()
      */
-    public SipPayloadException(String message) {
+    public PayloadException(String message) {
         super(message);
     }
 
@@ -44,7 +44,7 @@ public class SipPayloadException extends Exception {
      *            method). (A null value is permitted, and indicates that the cause is nonexistent
      *            or unknown.)
      */
-    public SipPayloadException(String message, Throwable cause) {
+    public PayloadException(String message, Throwable cause) {
         super(message, cause);
     }
 

@@ -24,8 +24,10 @@ package com.gsma.rcs.core.ims.service.im.chat.standfw;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
@@ -33,8 +35,6 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -78,13 +78,13 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp for the session
      * @param contactManager
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     public TerminatingStoreAndForwardOneToOneChatMessageSession(InstantMessagingService imService,
             SipRequest invite, ContactId contact, RcsSettings rcsSettings,
             MessagingLog messagingLog, long timestamp, ContactManager contactManager)
-            throws SipPayloadException, SipNetworkException {
+            throws PayloadException, NetworkException {
         super(imService, contact, PhoneUtils.formatContactIdToUri(contact), ChatUtils
                 .getFirstMessage(invite, timestamp), rcsSettings, messagingLog, timestamp,
                 contactManager);
@@ -108,10 +108,10 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
      * Check is session should be auto accepted. This method should only be called once per session
      * 
      * @return true if one-to-one chat session should be auto accepted
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private boolean shouldBeAutoAccepted() throws SipPayloadException, SipNetworkException {
+    private boolean shouldBeAutoAccepted() throws PayloadException, NetworkException {
         /*
          * In case the invite contains a http file transfer info the chat session should be
          * auto-accepted so that the file transfer session can be started.
@@ -368,10 +368,10 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
             }
         } catch (MsrpException e) {
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error("Unable to send 200OK response!", e);
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (logActivated) {
                 sLogger.debug(e.getMessage());
             }

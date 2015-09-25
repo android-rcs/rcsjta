@@ -23,9 +23,9 @@
 package com.gsma.rcs.core.ims.service.capability;
 
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
@@ -88,11 +88,11 @@ public class AnonymousFetchManager implements DiscoveryManager {
      * Request contact capabilities
      * 
      * @param contact Remote contact identifier
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void requestCapabilities(ContactId contact) throws SipPayloadException,
-            SipNetworkException {
+    public void requestCapabilities(ContactId contact) throws PayloadException,
+            NetworkException {
         if (logger.isActivated()) {
             logger.debug("Request capabilities in background for " + contact);
         }
@@ -105,11 +105,11 @@ public class AnonymousFetchManager implements DiscoveryManager {
      * Receive a notification
      * 
      * @param notify Received notify
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void onNotificationReceived(SipRequest notify) throws SipPayloadException,
-            SipNetworkException {
+    public void onNotificationReceived(SipRequest notify) throws PayloadException,
+            NetworkException {
         try {
             boolean logActivated = logger.isActivated();
             if (logActivated) {
@@ -197,16 +197,16 @@ public class AnonymousFetchManager implements DiscoveryManager {
                         Capabilities.sDefaultCapabilities);
             }
         } catch (ParserConfigurationException e) {
-            throw new SipPayloadException("Can't parse XML notification! CallId=".concat(notify
+            throw new PayloadException("Can't parse XML notification! CallId=".concat(notify
                     .getCallId()), e);
         } catch (SAXException e) {
-            throw new SipPayloadException("Can't parse XML notification! CallId=".concat(notify
+            throw new PayloadException("Can't parse XML notification! CallId=".concat(notify
                     .getCallId()), e);
         } catch (ContactManagerException e) {
-            throw new SipPayloadException("Can't parse XML notification! CallId=".concat(notify
+            throw new PayloadException("Can't parse XML notification! CallId=".concat(notify
                     .getCallId()), e);
         } catch (IOException e) {
-            throw new SipNetworkException("Can't parse XML notification! CallId=".concat(notify
+            throw new NetworkException("Can't parse XML notification! CallId=".concat(notify
                     .getCallId()), e);
         }
     }

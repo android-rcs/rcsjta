@@ -16,8 +16,8 @@
 
 package com.gsma.rcs.provider.messaging;
 
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.provider.DeleteTask;
@@ -74,7 +74,7 @@ public class GroupChatDeleteTask extends DeleteTask.NotGrouped {
     }
 
     @Override
-    protected void onRowDelete(String chatId) throws SipPayloadException {
+    protected void onRowDelete(String chatId) throws PayloadException {
         GroupChatSession session = mImService.getGroupChatSession(chatId);
         if (session == null) {
             mLocalContentResolver.delete(GroupDeliveryInfoData.CONTENT_URI,
@@ -86,7 +86,7 @@ public class GroupChatDeleteTask extends DeleteTask.NotGrouped {
         }
         try {
             session.deleteSession();
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             /*
              * If network is lost during a delete operation the remaining part of the delete
              * operation (delete from persistent storage) can succeed to 100% anyway since delete

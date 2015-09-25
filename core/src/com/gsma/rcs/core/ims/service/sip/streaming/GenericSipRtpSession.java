@@ -24,7 +24,9 @@ package com.gsma.rcs.core.ims.service.sip.streaming;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.rtp.MediaRtpReceiver;
 import com.gsma.rcs.core.ims.protocol.rtp.MediaRtpSender;
 import com.gsma.rcs.core.ims.protocol.rtp.RtpException;
@@ -35,8 +37,6 @@ import com.gsma.rcs.core.ims.protocol.rtp.stream.RtpStreamListener;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.sip.GenericSipSession;
@@ -253,9 +253,9 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
                 ((SipSessionListener) listener).handleSessionError(contact, new SipSessionError(
                         SipSessionError.MEDIA_FAILED));
             }
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error("Failed to abort rtp stream!", e);
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }

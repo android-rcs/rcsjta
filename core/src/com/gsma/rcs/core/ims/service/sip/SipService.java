@@ -23,9 +23,9 @@
 package com.gsma.rcs.core.ims.service.sip;
 
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
@@ -156,8 +156,8 @@ public class SipService extends ImsService {
      * @param sessionInvite Resolved intent
      * @param invite Initial invite
      * @param timestamp Local timestamp when got SipRequest
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
     public void onMsrpSessionInvitationReceived(Intent sessionInvite, SipRequest invite,
             long timestamp) {
@@ -192,12 +192,12 @@ public class SipService extends ImsService {
 
             session.startSession();
 
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug("Failed to receive generic msrp session invitation! ("
                         + e.getMessage() + ")");
             }
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error("Failed to receive generic msrp session invitation!", e);
         } catch (RuntimeException e) {
             /*
@@ -236,8 +236,8 @@ public class SipService extends ImsService {
      * @param sessionInvite Resolved intent
      * @param invite Initial invite
      * @param timestamp Local timestamp when got SipRequest
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
     public void onRtpSessionInvitationReceived(Intent sessionInvite, SipRequest invite,
             long timestamp) {
@@ -272,12 +272,12 @@ public class SipService extends ImsService {
 
             session.startSession();
 
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug("Failed to receive generic rtp session invitation! (" + e.getMessage()
                         + ")");
             }
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error("Failed to receive generic rtp session invitation!", e);
         } catch (RuntimeException e) {
             /*

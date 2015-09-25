@@ -25,10 +25,10 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -116,7 +116,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
             byte[] result = mUploadManager.uploadFile();
             sendResultToContact(result);
 
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
@@ -129,7 +129,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                             .append(getFileTransferId()).toString(), e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
 
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error(
                     new StringBuilder("Failed to initiate file transfer session for sessionId : ")
                             .append(getSessionID()).append(" with fileTransferId : ")
@@ -149,8 +149,8 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
         }
     }
 
-    protected void sendResultToContact(byte[] result) throws SipPayloadException,
-            SipNetworkException {
+    protected void sendResultToContact(byte[] result) throws PayloadException,
+            NetworkException {
         try {
             // Check if upload has been cancelled
             if (mUploadManager.isCancelled()) {
@@ -241,7 +241,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
             handleFileTransfered();
 
         } catch (MsrpException e) {
-            throw new SipNetworkException(
+            throw new NetworkException(
                     "Failed to send result chunks for transferId : ".concat(getFileTransferId()), e);
         }
     }
@@ -311,7 +311,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                         sendResultToContact(null);
                     }
 
-                } catch (SipNetworkException e) {
+                } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug(e.getMessage());
                     }
@@ -324,7 +324,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                                     .append(getFileTransferId()).toString(), e);
                     handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
 
-                } catch (SipPayloadException e) {
+                } catch (PayloadException e) {
                     sLogger.error(
                             new StringBuilder("Failed to resume upload for sessionId : ")
                                     .append(getSessionID()).append(" with fileTransferId : ")
@@ -384,8 +384,8 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
     }
 
     @Override
-    public void terminateSession(TerminationReason reason) throws SipPayloadException,
-            SipNetworkException {
+    public void terminateSession(TerminationReason reason) throws PayloadException,
+            NetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug("terminateSession reason=".concat(reason.toString()));
         }

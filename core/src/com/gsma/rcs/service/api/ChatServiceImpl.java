@@ -22,9 +22,9 @@
 
 package com.gsma.rcs.service.api;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
@@ -525,14 +525,14 @@ public class ChatServiceImpl extends IChatService.Stub {
                         session.addListener(groupChat);
                         session.startSession();
 
-                    } catch (SipPayloadException e) {
+                    } catch (PayloadException e) {
                         sLogger.error(new StringBuilder(
                                 "Failed to initiate group chat with chatId '").append(chatId)
                                 .append("'!").toString(), e);
                         setGroupChatStateAndReasonCode(chatId, GroupChat.State.FAILED,
                                 GroupChat.ReasonCode.FAILED_INITIATION);
 
-                    } catch (SipNetworkException e) {
+                    } catch (NetworkException e) {
                         if (sLogger.isActivated()) {
                             sLogger.debug(new StringBuilder(
                                     "Failed to initiate group chat with chatId '").append(chatId)
@@ -1044,8 +1044,8 @@ public class ChatServiceImpl extends IChatService.Stub {
      * 
      * @param chatId
      */
-    public void rejoinGroupChatAsPartOfSendOperation(String chatId) throws SipPayloadException,
-            SipNetworkException {
+    public void rejoinGroupChatAsPartOfSendOperation(String chatId) throws PayloadException,
+            NetworkException {
         GroupChatImpl groupChat = getOrCreateGroupChat(chatId);
         groupChat.setRejoinedAsPartOfSendOperation(true);
         groupChat.rejoinGroupChat();
@@ -1055,10 +1055,10 @@ public class ChatServiceImpl extends IChatService.Stub {
      * Handle rejoin group chat
      * 
      * @param chatId
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void rejoinGroupChat(String chatId) throws SipPayloadException, SipNetworkException {
+    public void rejoinGroupChat(String chatId) throws PayloadException, NetworkException {
         GroupChatImpl groupChat = getOrCreateGroupChat(chatId);
         groupChat.rejoinGroupChat();
     }

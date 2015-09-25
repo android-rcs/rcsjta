@@ -26,15 +26,15 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.content.GeolocContent;
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
@@ -166,10 +166,10 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
         } catch (ParseException e) {
             sLogger.error("Failed initiate a new sharing session as originating!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error("Failed initiate a new sharing session as originating!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
@@ -209,9 +209,9 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
      * Open media session
      * 
      * @throws IOException
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public void openMediaSession() throws IOException, SipPayloadException {
+    public void openMediaSession() throws IOException, PayloadException {
         msrpMgr.openMsrpSession();
     }
 
@@ -263,9 +263,9 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
                 ((GeolocTransferSessionListener) listener).handleContentTransfered(contact, geoloc,
                         initiatedByRemote);
             }
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error("Failed to notify msrp data transfered for msgId : ".concat(msgId), e);
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
@@ -348,11 +348,11 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
                 ((GeolocTransferSessionListener) listener).handleSharingError(contact,
                         new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
             }
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error(
                     new StringBuilder("Failed to handle msrp error").append(error)
                             .append(" for message ").append(msgId).toString(), e);
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }

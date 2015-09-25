@@ -24,11 +24,11 @@ package com.gsma.rcs.core.ims.service.im.chat.event;
 
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -177,11 +177,11 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * 
      * @param notify Received notify
      * @param timestamp Local timestamp when got SipRequest
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void receiveNotification(SipRequest notify, long timestamp) throws SipPayloadException,
-            SipNetworkException {
+    public void receiveNotification(SipRequest notify, long timestamp) throws PayloadException,
+            NetworkException {
         boolean logActivated = sLogger.isActivated();
         if (logActivated) {
             sLogger.debug("New conference event notification received");
@@ -245,13 +245,13 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
                     }
                 }
             } catch (ParserConfigurationException e) {
-                throw new SipPayloadException("Can't parse XML notification", e);
+                throw new PayloadException("Can't parse XML notification", e);
 
             } catch (SAXException e) {
-                throw new SipPayloadException("Can't parse XML notification", e);
+                throw new PayloadException("Can't parse XML notification", e);
 
             } catch (IOException e) {
-                throw new SipNetworkException("Can't parse XML notification", e);
+                throw new NetworkException("Can't parse XML notification", e);
             }
         }
 
@@ -359,10 +359,10 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
     /**
      * Terminate manager
      * 
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void terminate() throws SipPayloadException, SipNetworkException {
+    public void terminate() throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Terminate the subscribe manager");
         }
@@ -387,10 +387,10 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * @param dialog SIP dialog path
      * @param expirePeriod Expiration period in milliseconds
      * @return SIP request
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
     private SipRequest createSubscribe(SipDialogPath dialog, long expirePeriod)
-            throws SipPayloadException {
+            throws PayloadException {
         try {
             // Create SUBSCRIBE message
             SipRequest subscribe = SipMessageFactory.createSubscribe(dialog, expirePeriod);
@@ -408,7 +408,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
             return subscribe;
 
         } catch (ParseException e) {
-            throw new SipPayloadException(
+            throw new PayloadException(
                     "Unable to form subscribe message with featureTags : ".concat(Arrays.asList(
                             InstantMessagingService.CHAT_FEATURE_TAGS).toString()), e);
         }
@@ -417,10 +417,10 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
     /**
      * Subscription refresh processing
      * 
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void periodicProcessing() throws SipPayloadException, SipNetworkException {
+    public void periodicProcessing() throws PayloadException, NetworkException {
         // Make a subscribe
         if (sLogger.isActivated()) {
             sLogger.info("Execute re-subscribe");
@@ -433,10 +433,10 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
     /**
      * Subscribe
      * 
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public synchronized void subscribe() throws SipPayloadException, SipNetworkException {
+    public synchronized void subscribe() throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Subscribe to " + getIdentity());
         }
@@ -465,10 +465,10 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
     /**
      * Unsubscribe
      * 
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public synchronized void unSubscribe() throws SipPayloadException, SipNetworkException {
+    public synchronized void unSubscribe() throws PayloadException, NetworkException {
         if (!mSubscribed) {
             return;
         }
@@ -515,11 +515,11 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * Send SUBSCRIBE message
      * 
      * @param subscribe SIP SUBSCRIBE
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void sendSubscribe(SipRequest subscribe) throws SipPayloadException,
-            SipNetworkException {
+    private void sendSubscribe(SipRequest subscribe) throws PayloadException,
+            NetworkException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info(new StringBuilder("Send SUBSCRIBE, expire=")
@@ -569,12 +569,12 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
                 handleError(new ChatError(ChatError.SUBSCRIBE_CONFERENCE_FAILED));
             }
         } catch (InvalidArgumentException e) {
-            throw new SipPayloadException(
+            throw new PayloadException(
                     "Unable to set authorization header for subscribe "
                             .concat(subscribe.toString()),
                     e);
         } catch (ParseException e) {
-            throw new SipPayloadException(
+            throw new PayloadException(
                     "Unable to set authorization header for subscribe "
                             .concat(subscribe.toString()),
                     e);
@@ -635,11 +635,11 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * 
      * @param ctx SIP transaction context
      * @throws InvalidArgumentException
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void handle407Authentication(SipTransactionContext ctx) throws SipPayloadException,
-            SipNetworkException {
+    private void handle407Authentication(SipTransactionContext ctx) throws PayloadException,
+            NetworkException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info("407 response received");
@@ -659,10 +659,10 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
             mAuthenticationAgent.setProxyAuthorizationHeader(subscribe);
             sendSubscribe(subscribe);
         } catch (InvalidArgumentException e) {
-            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
+            throw new PayloadException("Failed to handle 407 authentication response!", e);
 
         } catch (ParseException e) {
-            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
+            throw new PayloadException("Failed to handle 407 authentication response!", e);
         }
     }
 
@@ -670,11 +670,11 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * Handle 423 response
      * 
      * @param ctx SIP transaction context
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void handle423IntervalTooBrief(SipTransactionContext ctx) throws SipPayloadException,
-            SipNetworkException {
+    private void handle423IntervalTooBrief(SipTransactionContext ctx) throws PayloadException,
+            NetworkException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info("423 interval too brief response received");
@@ -703,10 +703,10 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 
             sendSubscribe(subscribe);
         } catch (InvalidArgumentException e) {
-            throw new SipPayloadException("Failed to handle interval too brief response!", e);
+            throw new PayloadException("Failed to handle interval too brief response!", e);
 
         } catch (ParseException e) {
-            throw new SipPayloadException("Failed to handle interval too brief response!", e);
+            throw new PayloadException("Failed to handle interval too brief response!", e);
         }
     }
 

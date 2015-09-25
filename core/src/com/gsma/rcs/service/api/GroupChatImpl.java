@@ -22,11 +22,11 @@
 
 package com.gsma.rcs.service.api;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
@@ -400,7 +400,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     }
 
     private void addOutgoingGroupChatMessage(ChatMessage msg, Status status,
-            Content.ReasonCode reasonCode) throws SipPayloadException, IOException {
+            Content.ReasonCode reasonCode) throws PayloadException, IOException {
         Set<ContactId> recipients = getRecipients();
         if (recipients == null) {
             throw new ServerApiPersistentStorageException(
@@ -720,10 +720,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     /* Terminate the session */
                     session.terminateSession(TerminationReason.TERMINATION_BY_USER);
 
-                } catch (SipPayloadException e) {
+                } catch (PayloadException e) {
                     sLogger.error("Failed to terminate session with sessionId : ".concat(mChatId),
                             e);
-                } catch (SipNetworkException e) {
+                } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug(e.getMessage());
                     }
@@ -939,10 +939,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                                 rejoinGroupChat();
                             }
                         }
-                    } catch (SipPayloadException e) {
+                    } catch (PayloadException e) {
                         sLogger.error("Failed to invite participants for group chat!", e);
                         session.handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
-                    } catch (SipNetworkException e) {
+                    } catch (NetworkException e) {
                         sLogger.error("Failed to invite participants for group chat!", e);
                         session.handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
                     } catch (RuntimeException e) {
@@ -976,11 +976,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * 
      * @param session
      * @param participants
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
     public void inviteParticipants(final GroupChatSession session, final Set<ContactId> participants)
-            throws SipPayloadException, SipNetworkException {
+            throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug(new StringBuilder("Adding ")
                     .append(Arrays.toString(participants.toArray())).append(" to the session.")
@@ -1026,11 +1026,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * 
      * @param msg
      * @throws MsrpException
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void dequeueGroupChatMessage(ChatMessage msg) throws MsrpException, SipPayloadException,
-            SipNetworkException {
+    public void dequeueGroupChatMessage(ChatMessage msg) throws MsrpException, PayloadException,
+            NetworkException {
         final GroupChatSession session = mImService.getGroupChatSession(mChatId);
         if (session == null) {
             mImService.rejoinGroupChatAsPartOfSendOperation(mChatId);
@@ -1060,13 +1060,13 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * @param deliveredReportEnabled
      * @param groupFileTransfer
      * @throws MsrpException
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
     public void dequeueGroupFileInfo(String fileTransferId, String fileInfo,
             boolean displayedReportEnabled, boolean deliveredReportEnabled,
-            GroupFileTransferImpl groupFileTransfer) throws MsrpException, SipPayloadException,
-            SipNetworkException {
+            GroupFileTransferImpl groupFileTransfer) throws MsrpException, PayloadException,
+            NetworkException {
         GroupChatSession session = mImService.getGroupChatSession(mChatId);
         if (session == null) {
             mImService.rejoinGroupChatAsPartOfSendOperation(mChatId);
@@ -1343,10 +1343,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * Rejoins an existing group chat from its unique chat ID
      * 
      * @return Group chat
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public IGroupChat rejoinGroupChat() throws SipPayloadException, SipNetworkException {
+    public IGroupChat rejoinGroupChat() throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Rejoin group chat session related to the conversation " + mChatId);
         }
@@ -1362,10 +1362,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * Restarts a previous group chat from its unique chat ID
      * 
      * @return Group chat
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public IGroupChat restartGroupChat() throws SipPayloadException, SipNetworkException {
+    public IGroupChat restartGroupChat() throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Restart group chat session related to the conversation " + mChatId);
         }
@@ -1438,11 +1438,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     /**
      * Try to restart group chat session on failure of restart
      * 
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    private void handleGroupChatRejoinAsPartOfSendOperationFailed() throws SipPayloadException,
-            SipNetworkException {
+    private void handleGroupChatRejoinAsPartOfSendOperationFailed() throws PayloadException,
+            NetworkException {
         restartGroupChat();
     }
 
@@ -1557,7 +1557,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     @Override
     public void onMessageReceived(ChatMessage msg, boolean imdnDisplayedRequested)
-            throws SipPayloadException, SipNetworkException {
+            throws PayloadException, NetworkException {
         String msgId = null;
         ContactId remote = null;
         try {
@@ -1579,17 +1579,17 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 mBroadcaster.broadcastMessageReceived(mimeType, msgId);
             }
         } catch (ContactManagerException e) {
-            throw new SipPayloadException(new StringBuilder("Failed to handle new IM with Id '")
+            throw new PayloadException(new StringBuilder("Failed to handle new IM with Id '")
                     .append(msgId).append("' received from ").append(remote).toString(), e);
 
         } catch (IOException e) {
-            throw new SipNetworkException(new StringBuilder("Failed to handle new IM with Id '")
+            throw new NetworkException(new StringBuilder("Failed to handle new IM with Id '")
                     .append(msgId).append("' received from ").append(remote).toString(), e);
         }
     }
 
     @Override
-    public void onImError(ChatError error) throws SipPayloadException, SipNetworkException {
+    public void onImError(ChatError error) throws PayloadException, NetworkException {
         GroupChatSession session = mImService.getGroupChatSession(mChatId);
         int chatErrorCode = error.getErrorCode();
         if (session != null && session.isPendingForRemoval()) {

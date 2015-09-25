@@ -22,10 +22,10 @@
 
 package com.gsma.rcs.service.api;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -119,8 +119,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         mContactManager = contactManager;
     }
 
-    private void sendChatMessageInNewSession(final ChatMessage msg) throws SipPayloadException,
-            SipNetworkException {
+    private void sendChatMessageInNewSession(final ChatMessage msg) throws PayloadException,
+            NetworkException {
         final OneToOneChatSession newSession = mImService.createOneToOneChatSession(mContact, msg);
         newSession.addListener(OneToOneChatImpl.this);
         newSession.startSession();
@@ -136,11 +136,11 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * Resends a chat message
      * 
      * @param msg Message
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void resendChatMessage(final ChatMessage msg) throws SipPayloadException,
-            SipNetworkException, MsrpException {
+    private void resendChatMessage(final ChatMessage msg) throws PayloadException,
+            NetworkException, MsrpException {
         synchronized (mLock) {
             String msgId = msg.getMessageId();
             String mimeType = msg.getMimeType();
@@ -298,11 +298,11 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * 
      * @param msg InstantMessage
      * @param state state of message
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void addOutgoingChatMessage(ChatMessage msg, Status status) throws SipPayloadException,
-            SipNetworkException {
+    private void addOutgoingChatMessage(ChatMessage msg, Status status) throws PayloadException,
+            NetworkException {
         try {
             String msgId = msg.getMessageId();
 
@@ -316,7 +316,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                                 deliveryExpiration);
             }
         } catch (IOException e) {
-            throw new SipNetworkException(
+            throw new NetworkException(
                     "Failed to add chat message for contact: ".concat(mContact.toString()), e);
         }
     }
@@ -464,11 +464,11 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * 
      * @param msg
      * @throws MsrpException
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     public void dequeueOneToOneChatMessage(ChatMessage msg) throws MsrpException,
-            SipPayloadException, SipNetworkException {
+            PayloadException, NetworkException {
         String msgId = msg.getMessageId();
         if (sLogger.isActivated()) {
             sLogger.debug("Dequeue chat message msgId=".concat(msgId));
@@ -512,12 +512,12 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * @param fileInfo
      * @param oneToOneFileTransfer
      * @throws MsrpException
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     private void sendFileInfoInNewSession(String fileTransferId, String fileInfo,
             OneToOneFileTransferImpl oneToOneFileTransfer) throws MsrpException,
-            SipPayloadException, SipNetworkException {
+            PayloadException, NetworkException {
         long timestamp = System.currentTimeMillis();
         /* For outgoing file transfer, timestampSent = timestamp */
         long timestampSent = timestamp;
@@ -540,13 +540,13 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * @param deliverReportsEnabled
      * @param oneToOneFileTransfer
      * @throws MsrpException
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     public void dequeueOneToOneFileInfo(String fileTransferId, String fileInfo,
             boolean displayReportsEnabled, boolean deliverReportsEnabled,
             OneToOneFileTransferImpl oneToOneFileTransfer) throws MsrpException,
-            SipPayloadException, SipNetworkException {
+            PayloadException, NetworkException {
         mImService.acceptStoreAndForwardMessageSessionIfSuchExists(mContact);
         OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
         if (session == null) {
@@ -786,12 +786,12 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                         setChatMessageStatusAndReasonCode(msgId, mimeType, Status.QUEUED,
                                 ReasonCode.UNSPECIFIED);
                     }
-                } catch (SipPayloadException e) {
+                } catch (PayloadException e) {
                     sLogger.error(new StringBuilder("Failed to send chat message with msgId '")
                             .append(msgId).append("'").toString(), e);
                     setChatMessageStatusAndReasonCode(msgId, mimeType, Status.FAILED,
                             ReasonCode.FAILED_SEND);
-                } catch (SipNetworkException e) {
+                } catch (NetworkException e) {
                     sLogger.error(new StringBuilder("Failed to send chat message with msgId '")
                             .append(msg.getMessageId()).append("'").toString(), e);
                     setChatMessageStatusAndReasonCode(msgId, mimeType, Status.FAILED,
@@ -899,11 +899,11 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                     if (sLogger.isActivated()) {
                         sLogger.debug("Failed to receive chat message! (" + e.getMessage() + ")");
                     }
-                } catch (SipNetworkException e) {
+                } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug("Failed to receive chat message! (" + e.getMessage() + ")");
                     }
-                } catch (SipPayloadException e) {
+                } catch (PayloadException e) {
                     sLogger.error("Failed to receive chat message!", e);
                 } catch (RuntimeException e) {
                     /*

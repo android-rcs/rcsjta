@@ -23,10 +23,10 @@
 package com.gsma.rcs.core.ims.service.presence;
 
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -143,11 +143,11 @@ public abstract class SubscribeManager extends PeriodicRefresher {
      * Receive a notification
      * 
      * @param notify Received notify
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public abstract void receiveNotification(SipRequest notify) throws SipPayloadException,
-            SipNetworkException;
+    public abstract void receiveNotification(SipRequest notify) throws PayloadException,
+            NetworkException;
 
     /**
      * Check if the received notification if for this subscriber
@@ -214,10 +214,10 @@ public abstract class SubscribeManager extends PeriodicRefresher {
      * @param dialog SIP dialog path
      * @param expirePeriod Expiration period in milliseconds
      * @return SIP request
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
     public abstract SipRequest createSubscribe(SipDialogPath dialog, long expirePeriod)
-            throws SipPayloadException;
+            throws PayloadException;
 
     /**
      * Subscription refresh processing
@@ -351,11 +351,11 @@ public abstract class SubscribeManager extends PeriodicRefresher {
      * Send SUBSCRIBE message
      * 
      * @param subscribe SIP SUBSCRIBE
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    private void sendSubscribe(SipRequest subscribe) throws SipPayloadException,
-            SipNetworkException {
+    private void sendSubscribe(SipRequest subscribe) throws PayloadException,
+            NetworkException {
         try {
             if (logger.isActivated()) {
                 logger.info(new StringBuilder("Send SUBSCRIBE, expire=")
@@ -396,10 +396,10 @@ public abstract class SubscribeManager extends PeriodicRefresher {
             }
             handleError(new PresenceError(PresenceError.SUBSCRIBE_FAILED));
         } catch (InvalidArgumentException e) {
-            throw new SipPayloadException("Can't send sip subscribe!", e);
+            throw new PayloadException("Can't send sip subscribe!", e);
 
         } catch (ParseException e) {
-            throw new SipPayloadException("Can't send sip subscribe!", e);
+            throw new PayloadException("Can't send sip subscribe!", e);
         }
     }
 
@@ -449,11 +449,11 @@ public abstract class SubscribeManager extends PeriodicRefresher {
      * Handle 407 response
      * 
      * @param ctx SIP transaction context
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void handle407Authentication(SipTransactionContext ctx) throws SipPayloadException,
-            SipNetworkException {
+    private void handle407Authentication(SipTransactionContext ctx) throws PayloadException,
+            NetworkException {
         try {
             if (logger.isActivated()) {
                 logger.info("407 response received");
@@ -471,10 +471,10 @@ public abstract class SubscribeManager extends PeriodicRefresher {
             mAuthenticationAgent.setProxyAuthorizationHeader(subscribe);
             sendSubscribe(subscribe);
         } catch (InvalidArgumentException e) {
-            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
+            throw new PayloadException("Failed to handle 407 authentication response!", e);
 
         } catch (ParseException e) {
-            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
+            throw new PayloadException("Failed to handle 407 authentication response!", e);
         }
     }
 
@@ -482,11 +482,11 @@ public abstract class SubscribeManager extends PeriodicRefresher {
      * Handle 423 response
      * 
      * @param ctx SIP transaction context
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void handle423IntervalTooBrief(SipTransactionContext ctx) throws SipPayloadException,
-            SipNetworkException {
+    private void handle423IntervalTooBrief(SipTransactionContext ctx) throws PayloadException,
+            NetworkException {
         try {
             if (logger.isActivated()) {
                 logger.info("423 interval too brief response received");
@@ -509,10 +509,10 @@ public abstract class SubscribeManager extends PeriodicRefresher {
             mAuthenticationAgent.setProxyAuthorizationHeader(subscribe);
             sendSubscribe(subscribe);
         } catch (InvalidArgumentException e) {
-            throw new SipPayloadException("Failed to handle 423 interval too brief response!", e);
+            throw new PayloadException("Failed to handle 423 interval too brief response!", e);
 
         } catch (ParseException e) {
-            throw new SipPayloadException("Failed to handle 423 interval too brief response!", e);
+            throw new PayloadException("Failed to handle 423 interval too brief response!", e);
         }
     }
 

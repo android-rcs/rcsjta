@@ -25,11 +25,11 @@ package com.gsma.rcs.core.ims.service.im.chat.imdn;
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.gsma.rcs.core.ims.service.SessionAuthenticationAgent;
@@ -138,11 +138,11 @@ public class ImdnManager extends Thread {
                     mImService.onChatMessageDisplayReportSent(delivery.getChatId(),
                             delivery.getRemote(), delivery.getMsgId());
                 }
-            } catch (SipPayloadException e) {
+            } catch (PayloadException e) {
                 sLogger.error(
                         "Failed to send delivery status for chatId : ".concat(delivery.getChatId()),
                         e);
-            } catch (SipNetworkException e) {
+            } catch (NetworkException e) {
                 if (sLogger.isActivated()) {
                     sLogger.debug(e.getMessage());
                 }
@@ -183,12 +183,12 @@ public class ImdnManager extends Thread {
      * @param status Delivery status
      * @param remoteInstanceId
      * @param timestamp Timestamp sent in payload for IMDN datetime
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     public void sendMessageDeliveryStatusImmediately(String chatId, ContactId remote, String msgId,
             String status, final String remoteInstanceId, long timestamp)
-            throws SipPayloadException, SipNetworkException {
+            throws PayloadException, NetworkException {
         // Execute request in background
         final DeliveryStatus delivery = new DeliveryStatus(chatId, remote, msgId, status, timestamp);
         sendSipMessageDeliveryStatus(delivery, remoteInstanceId);
@@ -196,7 +196,7 @@ public class ImdnManager extends Thread {
 
     private void analyzeSipResponse(SipTransactionContext ctx,
             SessionAuthenticationAgent authenticationAgent, SipDialogPath dialogPath, String cpim)
-            throws SipNetworkException, SipPayloadException, InvalidArgumentException,
+            throws NetworkException, PayloadException, InvalidArgumentException,
             ParseException {
         int statusCode = ctx.getStatusCode();
         switch (statusCode) {
@@ -233,7 +233,7 @@ public class ImdnManager extends Thread {
                 }
                 break;
             default:
-                throw new SipNetworkException(new StringBuilder("Delivery report has failed: ")
+                throw new NetworkException(new StringBuilder("Delivery report has failed: ")
                         .append(statusCode).append(" response received").toString());
         }
     }
@@ -243,11 +243,11 @@ public class ImdnManager extends Thread {
      * 
      * @param deliveryStatus Delivery status
      * @param remoteInstanceId Remote SIP instance
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     private void sendSipMessageDeliveryStatus(DeliveryStatus deliveryStatus, String remoteInstanceId)
-            throws SipPayloadException, SipNetworkException {
+            throws PayloadException, NetworkException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.debug("Send delivery status " + deliveryStatus.getStatus()
@@ -292,12 +292,12 @@ public class ImdnManager extends Thread {
             analyzeSipResponse(ctx, authenticationAgent, dialogPath, cpim);
 
         } catch (InvalidArgumentException e) {
-            throw new SipPayloadException(
+            throw new PayloadException(
                     "Unable to set authorization header for remoteInstanceId : "
                             .concat(remoteInstanceId),
                     e);
         } catch (ParseException e) {
-            throw new SipPayloadException(
+            throw new PayloadException(
                     "Unable to set authorization header for remoteInstanceId : "
                             .concat(remoteInstanceId),
                     e);

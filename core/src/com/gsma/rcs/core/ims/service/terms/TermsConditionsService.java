@@ -23,13 +23,13 @@
 package com.gsma.rcs.core.ims.service.terms;
 
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipManager;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipInterface;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -139,8 +139,8 @@ public class TermsConditionsService extends ImsService {
      * Receive a SIP message
      * 
      * @param message Received message
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     public void onMessageReceived(SipRequest message) {
         try {
@@ -209,7 +209,7 @@ public class TermsConditionsService extends ImsService {
             if (sLogger.isActivated()) {
                 sLogger.debug("Failed to receive terms request! (" + e.getMessage() + ")");
             }
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug("Failed to receive terms request! (" + e.getMessage() + ")");
             }
@@ -217,7 +217,7 @@ public class TermsConditionsService extends ImsService {
             sLogger.error("Failed to receive terms request!", e);
         } catch (SAXException e) {
             sLogger.error("Failed to receive terms request!", e);
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error("Failed to receive terms request!", e);
         } catch (RuntimeException e) {
             /*
@@ -235,16 +235,16 @@ public class TermsConditionsService extends ImsService {
      * 
      * @param requestId Request ID
      * @param pin Response value
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void acceptTerms(String requestId, String pin) throws SipPayloadException,
-            SipNetworkException {
+    public void acceptTerms(String requestId, String pin) throws PayloadException,
+            NetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug("Send response for request ".concat(requestId));
         }
         if (TextUtils.isEmpty(requestId)) {
-            throw new SipPayloadException("requestId should never be null or empty!");
+            throw new PayloadException("requestId should never be null or empty!");
         }
         sendSipMessage(mRcsSettings.getEndUserConfirmationRequestUri(), requestId, ACCEPT_RESPONSE,
                 pin);
@@ -255,16 +255,16 @@ public class TermsConditionsService extends ImsService {
      * 
      * @param requestId Request ID
      * @param pin Response value
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void rejectTerms(String requestId, String pin) throws SipPayloadException,
-            SipNetworkException {
+    public void rejectTerms(String requestId, String pin) throws PayloadException,
+            NetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug("Send response for request ".concat(requestId));
         }
         if (TextUtils.isEmpty(requestId)) {
-            throw new SipPayloadException("requestId should never be null or empty!");
+            throw new PayloadException("requestId should never be null or empty!");
         }
         sendSipMessage(mRcsSettings.getEndUserConfirmationRequestUri(), requestId,
                 DECLINE_RESPONSE, pin);
@@ -277,11 +277,11 @@ public class TermsConditionsService extends ImsService {
      * @param requestId
      * @param responseValue
      * @param pin
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     private void sendSipMessage(Uri eucr, String requestId, String responseValue, String pin)
-            throws SipPayloadException, SipNetworkException {
+            throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug("Send SIP response");
         }
@@ -352,11 +352,11 @@ public class TermsConditionsService extends ImsService {
      * @param dialogPath
      * @param sipResponse
      * @param response
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     private void handle407Authentication(SipDialogPath dialogPath, SipResponse sipResponse,
-            String response) throws SipPayloadException, SipNetworkException {
+            String response) throws PayloadException, NetworkException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info("407 response received");
@@ -387,10 +387,10 @@ public class TermsConditionsService extends ImsService {
                             .append(statusCode).append(" received!").toString());
             }
         } catch (InvalidArgumentException e) {
-            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
+            throw new PayloadException("Failed to handle 407 authentication response!", e);
 
         } catch (ParseException e) {
-            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
+            throw new PayloadException("Failed to handle 407 authentication response!", e);
         }
     }
 }

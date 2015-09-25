@@ -22,12 +22,12 @@
 
 package com.gsma.rcs.core.ims.service.im.chat;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
@@ -226,9 +226,9 @@ public abstract class OneToOneChatSession extends ChatSession {
      * 
      * @param content Content part
      * @return Request
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    private SipRequest createMultipartInviteRequest(String content) throws SipPayloadException {
+    private SipRequest createMultipartInviteRequest(String content) throws PayloadException {
         try {
             SipRequest invite = SipMessageFactory.createMultipartInvite(getDialogPath(),
                     getFeatureTags(), content, BOUNDARY_TAG);
@@ -236,7 +236,7 @@ public abstract class OneToOneChatSession extends ChatSession {
             return invite;
 
         } catch (ParseException e) {
-            throw new SipPayloadException("Failed to create multipart invite request!", e);
+            throw new PayloadException("Failed to create multipart invite request!", e);
         }
     }
 
@@ -245,9 +245,9 @@ public abstract class OneToOneChatSession extends ChatSession {
      * 
      * @param content Content part
      * @return Request
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    private SipRequest createInviteRequest(String content) throws SipPayloadException {
+    private SipRequest createInviteRequest(String content) throws PayloadException {
         try {
             SipRequest invite = SipMessageFactory.createInvite(getDialogPath(),
                     InstantMessagingService.CHAT_FEATURE_TAGS, content);
@@ -255,7 +255,7 @@ public abstract class OneToOneChatSession extends ChatSession {
             return invite;
 
         } catch (ParseException e) {
-            throw new SipPayloadException("Failed to create invite request!", e);
+            throw new PayloadException("Failed to create invite request!", e);
         }
     }
 
@@ -263,9 +263,9 @@ public abstract class OneToOneChatSession extends ChatSession {
      * Create an INVITE request
      * 
      * @return the INVITE request
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public SipRequest createInvite() throws SipPayloadException {
+    public SipRequest createInvite() throws PayloadException {
         String content = getDialogPath().getLocalContent();
         if (getFirstMessage() != null) {
             return createMultipartInviteRequest(content);
@@ -277,10 +277,10 @@ public abstract class OneToOneChatSession extends ChatSession {
      * Handle 200 0K response
      * 
      * @param resp 200 OK response
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void handle200OK(SipResponse resp) throws SipPayloadException, SipNetworkException {
+    public void handle200OK(SipResponse resp) throws PayloadException, NetworkException {
         super.handle200OK(resp);
         getActivityManager().start();
     }
@@ -368,7 +368,7 @@ public abstract class OneToOneChatSession extends ChatSession {
     }
 
     @Override
-    public void receiveBye(SipRequest bye) throws SipPayloadException, SipNetworkException {
+    public void receiveBye(SipRequest bye) throws PayloadException, NetworkException {
         super.receiveBye(bye);
         ContactId remote = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
@@ -378,7 +378,7 @@ public abstract class OneToOneChatSession extends ChatSession {
     }
 
     @Override
-    public void receiveCancel(SipRequest cancel) throws SipNetworkException, SipPayloadException {
+    public void receiveCancel(SipRequest cancel) throws NetworkException, PayloadException {
         super.receiveCancel(cancel);
         getImsService().getImsModule().getCapabilityService()
                 .requestContactCapabilities(getRemoteContact());

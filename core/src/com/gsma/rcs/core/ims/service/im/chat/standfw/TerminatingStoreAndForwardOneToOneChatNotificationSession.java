@@ -24,7 +24,9 @@ package com.gsma.rcs.core.ims.service.im.chat.standfw;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
@@ -32,8 +34,6 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -230,10 +230,10 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
             }
         } catch (MsrpException e) {
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error("Unable to send 200OK response!", e);
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (logActivated) {
                 sLogger.debug(e.getMessage());
             }
@@ -305,11 +305,11 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
      * @param msgId Message ID
      * @param data Received data
      * @param mimeType Data mime-type
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
     public void msrpDataReceived(String msgId, byte[] data, String mimeType)
-            throws SipPayloadException, SipNetworkException {
+            throws PayloadException, NetworkException {
         final boolean logActivated = sLogger.isActivated();
         if (logActivated) {
             sLogger.debug(new StringBuilder("Data received (type ").append(mimeType).append(")")

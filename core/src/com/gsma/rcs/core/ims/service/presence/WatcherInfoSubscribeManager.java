@@ -23,10 +23,10 @@
 package com.gsma.rcs.core.ims.service.presence;
 
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.presence.watcherinfo.Watcher;
 import com.gsma.rcs.core.ims.service.presence.watcherinfo.WatcherInfoDocument;
@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.text.ParseException;
 
 import javax.xml.parsers.ParserConfigurationException;
+
 import javax2.sip.header.SubscriptionStateHeader;
 
 /**
@@ -83,11 +84,11 @@ public class WatcherInfoSubscribeManager extends SubscribeManager {
      * @param dialog SIP dialog path
      * @param expirePeriod Expiration period in milliseconds
      * @return SIP request
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
     @Override
     public SipRequest createSubscribe(SipDialogPath dialog, long expirePeriod)
-            throws SipPayloadException {
+            throws PayloadException {
         try {
             SipRequest subscribe = SipMessageFactory.createSubscribe(dialog, expirePeriod);
             subscribe.addHeader("Event", "presence.winfo");
@@ -95,7 +96,7 @@ public class WatcherInfoSubscribeManager extends SubscribeManager {
             return subscribe;
 
         } catch (ParseException e) {
-            throw new SipPayloadException("Failed to create subscribe request!", e);
+            throw new PayloadException("Failed to create subscribe request!", e);
         }
     }
 
@@ -103,11 +104,11 @@ public class WatcherInfoSubscribeManager extends SubscribeManager {
      * Receive a notification
      * 
      * @param notify Received notify
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void receiveNotification(SipRequest notify) throws SipPayloadException,
-            SipNetworkException {
+    public void receiveNotification(SipRequest notify) throws PayloadException,
+            NetworkException {
         // Check notification
         if (!isNotifyForThisSubscriber(notify)) {
             return;
@@ -152,13 +153,13 @@ public class WatcherInfoSubscribeManager extends SubscribeManager {
                     }
                 }
             } catch (ParserConfigurationException e) {
-                throw new SipPayloadException("Can't parse watcher-info notification!", e);
+                throw new PayloadException("Can't parse watcher-info notification!", e);
 
             } catch (SAXException e) {
-                throw new SipPayloadException("Can't parse watcher-info notification!", e);
+                throw new PayloadException("Can't parse watcher-info notification!", e);
 
             } catch (IOException e) {
-                throw new SipNetworkException("Can't parse watcher-info notification!", e);
+                throw new NetworkException("Can't parse watcher-info notification!", e);
             }
         }
 

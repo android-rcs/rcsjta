@@ -24,8 +24,8 @@ package com.gsma.rcs.core.ims.protocol.msrp;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.IdGenerator;
@@ -843,11 +843,11 @@ public class MsrpSession {
      * @param flag Continuation flag
      * @param data Received data
      * @param totalSize Total size of the content
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
     public void receiveMsrpSend(String txId, Hashtable<String, String> headers, int flag,
-            byte[] data, long totalSize) throws SipPayloadException, SipNetworkException {
+            byte[] data, long totalSize) throws PayloadException, NetworkException {
         try {
             mIsEstablished = true;
             if (sLogger.isActivated()) {
@@ -923,7 +923,7 @@ public class MsrpSession {
                 }
             }
         } catch (IOException e) {
-            throw new SipNetworkException(new StringBuilder(
+            throw new NetworkException(new StringBuilder(
                     "Failed to SEND request for received (flag=").append(flag)
                     .append(", transaction=").append(txId).append(", totalSize=").append(totalSize)
                     .append(")").toString(), e);

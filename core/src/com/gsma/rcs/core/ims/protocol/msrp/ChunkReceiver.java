@@ -24,9 +24,9 @@ package com.gsma.rcs.core.ims.protocol.msrp;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.utils.logger.Logger;
 
 import java.io.IOException;
@@ -281,7 +281,7 @@ public class ChunkReceiver extends Thread {
                 session.checkMsrpTransactionInfo();
                 mTerminated = true;
             }
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error("Unable to receive chunks!", e);
             if (!mTerminated) {
                 /* Notify the session listener that an error has occured */
@@ -293,7 +293,7 @@ public class ChunkReceiver extends Thread {
                 session.checkMsrpTransactionInfo();
                 mTerminated = true;
             }
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }

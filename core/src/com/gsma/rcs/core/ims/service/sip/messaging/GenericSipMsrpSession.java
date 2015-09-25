@@ -24,7 +24,9 @@ package com.gsma.rcs.core.ims.service.sip.messaging;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
@@ -34,8 +36,6 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.SessionActivityManager;
@@ -199,9 +199,9 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
      * Open media session
      * 
      * @throws IOException
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public void openMediaSession() throws IOException, SipPayloadException {
+    public void openMediaSession() throws IOException, PayloadException {
         getMsrpMgr().openMsrpSession();
     }
 
@@ -223,11 +223,11 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
     /**
      * Session inactivity event
      * 
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
     @Override
-    public void handleInactivityEvent() throws SipPayloadException, SipNetworkException {
+    public void handleInactivityEvent() throws PayloadException, NetworkException {
         if (logger.isActivated()) {
             logger.debug("Session inactivity event");
         }
@@ -239,10 +239,10 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
      * Handle 200 0K response
      * 
      * @param resp 200 OK response
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void handle200OK(SipResponse resp) throws SipPayloadException, SipNetworkException {
+    public void handle200OK(SipResponse resp) throws PayloadException, NetworkException {
         super.handle200OK(resp);
 
         getActivityManager().start();

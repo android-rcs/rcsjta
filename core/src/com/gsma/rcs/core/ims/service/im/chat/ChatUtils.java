@@ -26,11 +26,11 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 import static com.gsma.rcs.utils.StringUtils.UTF8_STR;
 
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimParser;
@@ -70,6 +70,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
+
 import javax2.sip.header.ContactHeader;
 import javax2.sip.header.ExtensionHeader;
 
@@ -336,9 +337,9 @@ public class ChatUtils {
      * 
      * @param request Request
      * @return Boolean
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public static boolean isImdnDeliveredRequested(SipRequest request) throws SipPayloadException {
+    public static boolean isImdnDeliveredRequested(SipRequest request) throws PayloadException {
         /* Read ID from multipart content */
         String content = request.getContent();
         SipUtils.assertContentIsNotNull(content, request);
@@ -357,9 +358,9 @@ public class ChatUtils {
      * 
      * @param request Request
      * @return Boolean
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public static boolean isImdnDisplayedRequested(SipRequest request) throws SipPayloadException {
+    public static boolean isImdnDisplayedRequested(SipRequest request) throws PayloadException {
         /* Read ID from multipart content */
         String content = request.getContent();
         SipUtils.assertContentIsNotNull(content, request);
@@ -378,9 +379,9 @@ public class ChatUtils {
      * 
      * @param request Request
      * @return Message ID
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public static String getMessageId(SipRequest request) throws SipPayloadException {
+    public static String getMessageId(SipRequest request) throws PayloadException {
         /* Read ID from multipart content */
         String content = request.getContent();
         SipUtils.assertContentIsNotNull(content, request);
@@ -658,26 +659,26 @@ public class ChatUtils {
      * 
      * @param xml XML document
      * @return Geolocation
-     * @throws SipPayloadException
+     * @throws PayloadException
      * @throws IOException
      */
-    public static Geoloc parseGeolocDocument(String xml) throws SipPayloadException, IOException {
+    public static Geoloc parseGeolocDocument(String xml) throws PayloadException, IOException {
         try {
             InputSource geolocInput = new InputSource(new ByteArrayInputStream(xml.getBytes(UTF8)));
             GeolocInfoParser geolocParser = new GeolocInfoParser(geolocInput);
             GeolocInfoDocument geolocDocument = geolocParser.getGeoLocInfo();
             if (geolocDocument == null) {
-                throw new SipPayloadException("Unable to parse geoloc document!");
+                throw new PayloadException("Unable to parse geoloc document!");
             }
             Geoloc geoloc = new Geoloc(geolocDocument.getLabel(), geolocDocument.getLatitude(),
                     geolocDocument.getLongitude(), geolocDocument.getExpiration(),
                     geolocDocument.getRadius());
             return geoloc;
         } catch (ParserConfigurationException e) {
-            throw new SipPayloadException("Unable to parse geoloc document!", e);
+            throw new PayloadException("Unable to parse geoloc document!", e);
 
         } catch (SAXException e) {
-            throw new SipPayloadException("Unable to parse geoloc document!", e);
+            throw new PayloadException("Unable to parse geoloc document!", e);
         }
     }
 
@@ -752,10 +753,10 @@ public class ChatUtils {
      * @param invite Request
      * @param timestamp Local timestamp
      * @return First message
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
     public static ChatMessage getFirstMessage(SipRequest invite, long timestamp)
-            throws SipPayloadException {
+            throws PayloadException {
         ChatMessage msg = getFirstMessageFromCpim(invite, timestamp);
         if (msg != null) {
             return msg;
@@ -789,10 +790,10 @@ public class ChatUtils {
      * @param invite Request
      * @param timestamp Local timestamp
      * @return First message
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
     private static ChatMessage getFirstMessageFromCpim(SipRequest invite, long timestamp)
-            throws SipPayloadException {
+            throws PayloadException {
         CpimMessage cpimMsg = extractCpimMessage(invite);
         if (cpimMsg == null) {
             return null;
@@ -832,17 +833,17 @@ public class ChatUtils {
      * @param invite Request
      * @param timestamp Local timestamp
      * @return First message
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
     private static ChatMessage getFirstMessageFromSubject(SipRequest invite, long timestamp)
-            throws SipPayloadException {
+            throws PayloadException {
         String subject = invite.getSubject();
         if (TextUtils.isEmpty(subject)) {
             return null;
         }
         ContactId remote = getReferredIdentityAsContactId(invite);
         if (remote == null) {
-            throw new SipPayloadException("Cannot parse contact from message subject!");
+            throw new PayloadException("Cannot parse contact from message subject!");
         }
         /**
          * Since in subject, there is no DateTime or datetime included, then we need to fake that by
@@ -878,11 +879,11 @@ public class ChatUtils {
      * @param request Request
      * @param status Status to assign to created participants
      * @return Participants based on contacts in the request
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     public static Map<ContactId, ParticipantStatus> getParticipants(SipRequest request,
-            ParticipantStatus status) throws SipNetworkException, SipPayloadException {
+            ParticipantStatus status) throws NetworkException, PayloadException {
         Map<ContactId, ParticipantStatus> participants = new HashMap<ContactId, ParticipantStatus>();
         String content = request.getContent();
         String boundary = request.getBoundaryContentType();
@@ -969,10 +970,10 @@ public class ChatUtils {
      * @param msg
      * @return Persisted content
      * @throws IOException
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
     public static String networkContentToPersistedContent(ChatMessage msg)
-            throws SipPayloadException, IOException {
+            throws PayloadException, IOException {
         /*
          * Geolocation chat messages does not have the same mimetype in the payload as in the TAPI.
          * Text chat messages do.

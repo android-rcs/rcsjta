@@ -29,11 +29,11 @@ import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.gsm.CallManager;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
@@ -660,13 +660,13 @@ public class RichcallService extends ImsService {
 
                     session.startSession();
 
-                } catch (SipNetworkException e) {
+                } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug("Failed to receive image share invitation! ("
                                 + e.getMessage() + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
-                } catch (SipPayloadException e) {
+                } catch (PayloadException e) {
                     sLogger.error("Failed to receive image share invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
                 } catch (RuntimeException e) {
@@ -861,13 +861,13 @@ public class RichcallService extends ImsService {
 
                     session.startSession();
 
-                } catch (SipNetworkException e) {
+                } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug("Failed to receive video share invitation! ("
                                 + e.getMessage() + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
-                } catch (SipPayloadException e) {
+                } catch (PayloadException e) {
                     sLogger.error("Failed to receive video share invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
                 } catch (RuntimeException e) {
@@ -924,8 +924,8 @@ public class RichcallService extends ImsService {
      * 
      * @param invite Initial invite
      * @param timestamp Local timestamp when got SipRequest
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     public void onGeolocSharingInvitationReceived(final SipRequest invite, final long timestamp) {
         final RichcallService richCallService = this;
@@ -1024,13 +1024,13 @@ public class RichcallService extends ImsService {
 
                     session.startSession();
 
-                } catch (SipNetworkException e) {
+                } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug("Failed to receive geoloc share invitation! ("
                                 + e.getMessage() + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
-                } catch (SipPayloadException e) {
+                } catch (PayloadException e) {
                     sLogger.error("Failed to receive geoloc share invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
                 } catch (RuntimeException e) {
@@ -1052,10 +1052,10 @@ public class RichcallService extends ImsService {
      * This function is used when all session needs to terminated in both invitation pending and
      * started state.
      * 
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void terminateAllSessions() throws SipPayloadException, SipNetworkException {
+    public void terminateAllSessions() throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug("Terminate all sessions");
         }

@@ -16,8 +16,8 @@
 
 package com.gsma.rcs.service;
 
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.service.api.ChatServiceImpl;
@@ -81,11 +81,11 @@ public class GroupChatInviteQueuedParticipantsTask implements Runnable {
                 }
                 session.inviteParticipants(participantsToBeInvited);
             }
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error(
                     "Exception occured while trying to invite queued participants to group chat with chatId "
                             .concat(mChatId), e);
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }

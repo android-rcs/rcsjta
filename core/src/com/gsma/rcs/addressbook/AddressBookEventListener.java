@@ -22,8 +22,8 @@
 
 package com.gsma.rcs.addressbook;
 
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.provider.contact.ContactManagerException;
 
 /**
@@ -34,9 +34,9 @@ public interface AddressBookEventListener {
      * Address book content has changed
      * 
      * @throws ContactManagerException
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void handleAddressBookHasChanged() throws ContactManagerException, SipPayloadException,
-            SipNetworkException;
+    public void handleAddressBookHasChanged() throws ContactManagerException, PayloadException,
+            NetworkException;
 }

@@ -22,10 +22,10 @@
 
 package com.gsma.rcs.core.ims.service.im.chat;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -121,10 +121,10 @@ public class RejoinGroupChatSession extends GroupChatSession {
         } catch (ParseException e) {
             mLogger.error("Unable to set authorization header for chat invite!", e);
             handleError(new ChatError(ChatError.SESSION_REJOIN_FAILED, e));
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             mLogger.error("Unable to send 200OK response!", e);
             handleError(new ChatError(ChatError.SESSION_REJOIN_FAILED, e));
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (mLogger.isActivated()) {
                 mLogger.debug(e.getMessage());
             }
@@ -144,9 +144,9 @@ public class RejoinGroupChatSession extends GroupChatSession {
      * 
      * @param content Content part
      * @return Request
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    private SipRequest createInviteRequest(String content) throws SipPayloadException {
+    private SipRequest createInviteRequest(String content) throws PayloadException {
         try {
             SipRequest invite = SipMessageFactory.createInvite(getDialogPath(), getFeatureTags(),
                     getAcceptContactTags(), content);
@@ -158,7 +158,7 @@ public class RejoinGroupChatSession extends GroupChatSession {
             return invite;
 
         } catch (ParseException e) {
-            throw new SipPayloadException("Failed to create invite request!", e);
+            throw new PayloadException("Failed to create invite request!", e);
         }
     }
 
@@ -166,9 +166,9 @@ public class RejoinGroupChatSession extends GroupChatSession {
      * Create an INVITE request
      * 
      * @return the INVITE request
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public SipRequest createInvite() throws SipPayloadException {
+    public SipRequest createInvite() throws PayloadException {
         return createInviteRequest(getDialogPath().getLocalContent());
     }
 

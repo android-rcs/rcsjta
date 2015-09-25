@@ -26,8 +26,10 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpConstants;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
@@ -38,8 +40,6 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -99,12 +99,12 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * @param timestamp Local timestamp for the session
      * @param timestampSent the remote timestamp sent in payload for the file sharing
      * @param contactManager
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     public TerminatingMsrpFileSharingSession(InstantMessagingService imService, SipRequest invite,
             ContactId remote, RcsSettings rcsSettings, long timestamp, long timestampSent,
-            ContactManager contactManager) throws SipPayloadException, SipNetworkException {
+            ContactManager contactManager) throws PayloadException, NetworkException {
         super(imService, ContentManager.createMmContentFromSdp(invite, rcsSettings), remote,
                 FileTransferUtils.extractFileIcon(invite, rcsSettings), IdGenerator
                         .generateMessageID(), rcsSettings, timestamp, contactManager);
@@ -412,10 +412,10 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
             }
         } catch (MsrpException e) {
             handleError(new FileSharingError(FileSharingError.SEND_RESPONSE_FAILED, e));
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error("Unable to send 200OK response!", e);
             handleError(new FileSharingError(FileSharingError.SEND_RESPONSE_FAILED, e));
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }

@@ -18,8 +18,8 @@ package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.InvitationStatus;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -705,11 +705,11 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                     }
                     session.terminateSession(TerminationReason.TERMINATION_BY_USER);
 
-                } catch (SipNetworkException e) {
+                } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug(e.getMessage());
                     }
-                } catch (SipPayloadException e) {
+                } catch (PayloadException e) {
                     sLogger.error("Failed to terminate session with fileTransferId : "
                             .concat(mFileTransferId), e);
                 } catch (RuntimeException e) {

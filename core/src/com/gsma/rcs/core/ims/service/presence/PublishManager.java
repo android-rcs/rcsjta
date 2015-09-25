@@ -23,11 +23,11 @@
 package com.gsma.rcs.core.ims.service.presence;
 
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -144,10 +144,10 @@ public class PublishManager extends PeriodicRefresher {
     /**
      * Publish refresh processing
      * 
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void periodicProcessing() throws SipPayloadException, SipNetworkException {
+    public void periodicProcessing() throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Execute re-publish");
         }
@@ -162,11 +162,11 @@ public class PublishManager extends PeriodicRefresher {
      * 
      * @param info Presence info
      * @return Boolean
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public synchronized boolean publish(String info) throws SipPayloadException,
-            SipNetworkException {
+    public synchronized boolean publish(String info) throws PayloadException,
+            NetworkException {
         mDialogPath = createDialogPath();
         mDialogPath.setLocalContent(info);
         SipRequest publish = SipMessageFactory.createPublish(mDialogPath, mExpirePeriod,
@@ -178,10 +178,10 @@ public class PublishManager extends PeriodicRefresher {
     /**
      * Unpublish
      * 
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public synchronized void unPublish() throws SipPayloadException, SipNetworkException {
+    public synchronized void unPublish() throws PayloadException, NetworkException {
         if (!mPublished) {
             return;
         }
@@ -196,10 +196,10 @@ public class PublishManager extends PeriodicRefresher {
      * Send PUBLISH message
      * 
      * @param publish SIP PUBLISH
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    private void sendPublish(SipRequest publish) throws SipPayloadException, SipNetworkException {
+    private void sendPublish(SipRequest publish) throws PayloadException, NetworkException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info(new StringBuilder("Send PUBLISH, expire=")
@@ -241,10 +241,10 @@ public class PublishManager extends PeriodicRefresher {
                 handleError(new PresenceError(PresenceError.PUBLISH_FAILED));
             }
         } catch (InvalidArgumentException e) {
-            throw new SipPayloadException("Publish has failed!", e);
+            throw new PayloadException("Publish has failed!", e);
 
         } catch (ParseException e) {
-            throw new SipPayloadException("Publish has failed!", e);
+            throw new PayloadException("Publish has failed!", e);
         }
     }
 
@@ -296,11 +296,11 @@ public class PublishManager extends PeriodicRefresher {
      * Handle 407 response
      * 
      * @param ctx SIP transaction context
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void handle407Authentication(SipTransactionContext ctx) throws SipPayloadException,
-            SipNetworkException {
+    private void handle407Authentication(SipTransactionContext ctx) throws PayloadException,
+            NetworkException {
         try {
             // 407 response received
             if (sLogger.isActivated()) {
@@ -330,10 +330,10 @@ public class PublishManager extends PeriodicRefresher {
             // Send PUBLISH request
             sendPublish(publish);
         } catch (InvalidArgumentException e) {
-            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
+            throw new PayloadException("Failed to handle 407 authentication response!", e);
 
         } catch (ParseException e) {
-            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
+            throw new PayloadException("Failed to handle 407 authentication response!", e);
         }
     }
 
@@ -341,11 +341,11 @@ public class PublishManager extends PeriodicRefresher {
      * Handle 412 response
      * 
      * @param ctx SIP transaction context
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     private void handle412ConditionalRequestFailed(SipTransactionContext ctx)
-            throws SipPayloadException, SipNetworkException {
+            throws PayloadException, NetworkException {
         // 412 response received
         if (sLogger.isActivated()) {
             sLogger.info("412 conditional response received");
@@ -369,11 +369,11 @@ public class PublishManager extends PeriodicRefresher {
      * Handle 423 response
      * 
      * @param ctx SIP transaction context
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void handle423IntervalTooBrief(SipTransactionContext ctx) throws SipPayloadException,
-            SipNetworkException {
+    private void handle423IntervalTooBrief(SipTransactionContext ctx) throws PayloadException,
+            NetworkException {
         // 423 response received
         if (sLogger.isActivated()) {
             sLogger.info("423 interval too brief response received");

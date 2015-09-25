@@ -26,8 +26,8 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 import static com.gsma.rcs.utils.StringUtils.UTF8_STR;
 
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.http.HttpAuthenticationAgent;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -529,9 +529,9 @@ public class HttpUploadManager extends HttpTransferManager {
      * 
      * @return byte[] contains the info to send to terminating side
      * @throws IOException
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public byte[] resumeUpload() throws IOException, SipPayloadException {
+    public byte[] resumeUpload() throws IOException, PayloadException {
         if (sLogger.isActivated()) {
             sLogger.debug("User resumes transfer (TID=" + mTId + ")");
         }
@@ -570,10 +570,10 @@ public class HttpUploadManager extends HttpTransferManager {
             return null;
 
         } catch (ParserConfigurationException e) {
-            throw new SipPayloadException("Unable to parse file transfer resume info!", e);
+            throw new PayloadException("Unable to parse file transfer resume info!", e);
 
         } catch (SAXException e) {
-            throw new SipPayloadException("Unable to parse file transfer resume info!", e);
+            throw new PayloadException("Unable to parse file transfer resume info!", e);
         }
     }
 

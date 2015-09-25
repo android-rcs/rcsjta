@@ -14,17 +14,17 @@
  * the License.
  */
 
-package com.gsma.rcs.core.ims.protocol.sip;
+package com.gsma.rcs.core.ims.network;
 
 /**
- * To be thrown when a SIP transaction gets interrupted due to network error, For ex : Loss of
+ * To be thrown when a transaction gets interrupted due to network error, For ex : Loss of
  * connectivity or Airplane mode e.t.c
  * <p>
  * These exceptions should not be logged as there is not much to do for handling such type of
  * exceptions other then re-trying the transactions once network is restored.
  * </p>
  */
-public class SipNetworkException extends Exception {
+public class NetworkException extends Exception {
 
     static final long serialVersionUID = 1L;
 
@@ -33,7 +33,7 @@ public class SipNetworkException extends Exception {
      * 
      * @param message Error message obtained either from a constant string or through e.getMessage()
      */
-    public SipNetworkException(String message) {
+    public NetworkException(String message) {
         super(message);
     }
 
@@ -45,7 +45,7 @@ public class SipNetworkException extends Exception {
      *            method). (A null value is permitted, and indicates that the cause is nonexistent
      *            or unknown.)
      */
-    public SipNetworkException(String message, Throwable cause) {
+    public NetworkException(String message, Throwable cause) {
         super(message, cause);
     }
 

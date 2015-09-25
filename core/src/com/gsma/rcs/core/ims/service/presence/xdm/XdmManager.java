@@ -27,14 +27,14 @@ import static com.gsma.rcs.utils.StringUtils.UTF8_STR;
 
 import com.gsma.rcs.core.TerminalInfo;
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.http.HttpAuthenticationAgent;
 import com.gsma.rcs.core.ims.protocol.http.HttpDeleteRequest;
 import com.gsma.rcs.core.ims.protocol.http.HttpGetRequest;
 import com.gsma.rcs.core.ims.protocol.http.HttpPutRequest;
 import com.gsma.rcs.core.ims.protocol.http.HttpRequest;
 import com.gsma.rcs.core.ims.protocol.http.HttpResponse;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.presence.PhotoIcon;
 import com.gsma.rcs.core.ims.service.presence.directory.Folder;
 import com.gsma.rcs.core.ims.service.presence.directory.XcapDirectoryParser;
@@ -68,6 +68,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
+
 import javax2.sip.message.Response;
 
 /**
@@ -138,11 +139,11 @@ public class XdmManager {
      * 
      * @param request HTTP request
      * @return HTTP response
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private HttpResponse sendRequestToXDMS(HttpRequest request) throws SipPayloadException,
-            SipNetworkException {
+    private HttpResponse sendRequestToXDMS(HttpRequest request) throws PayloadException,
+            NetworkException {
         return sendRequestToXDMS(request, new HttpAuthenticationAgent(xdmServerLogin, xdmServerPwd));
     }
 
@@ -152,12 +153,12 @@ public class XdmManager {
      * @param request HTTP request
      * @param authenticationAgent Authentication agent
      * @return HTTP response
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     private HttpResponse sendRequestToXDMS(HttpRequest request,
-            HttpAuthenticationAgent authenticationAgent) throws SipPayloadException,
-            SipNetworkException {
+            HttpAuthenticationAgent authenticationAgent) throws PayloadException,
+            NetworkException {
         HttpResponse response = sendHttpRequest(request, authenticationAgent);
         final int responseCode = response.getResponseCode();
         switch (responseCode) {
@@ -181,7 +182,7 @@ public class XdmManager {
                 return sendRequestToXDMS(request);
 
             default:
-                throw new SipNetworkException("Invalid response : ".concat(String
+                throw new NetworkException("Invalid response : ".concat(String
                         .valueOf(responseCode)));
         }
     }
@@ -192,14 +193,14 @@ public class XdmManager {
      * @param request HTTP request
      * @param authenticationAgent Authentication agent
      * @return HTTP response
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     // @FIXME: This method needs a complete refactor, However at this moment due to other prior
     // tasks the refactoring task has been kept in backlog.
     private HttpResponse sendHttpRequest(HttpRequest request,
-            HttpAuthenticationAgent authenticationAgent) throws SipPayloadException,
-            SipNetworkException {
+            HttpAuthenticationAgent authenticationAgent) throws PayloadException,
+            NetworkException {
         SocketConnection conn = null;
         InputStream is = null;
         OutputStream os = null;
@@ -352,12 +353,12 @@ public class XdmManager {
             return response;
 
         } catch (MalformedURLException e) {
-            throw new SipPayloadException(
+            throw new PayloadException(
                     "Failed to send http request, malformed uri: ".concat(xdmServerAddr.toString()),
                     e);
 
         } catch (IOException e) {
-            throw new SipNetworkException("Failed to send http request!", e);
+            throw new NetworkException("Failed to send http request!", e);
 
         } finally {
             CloseableUtils.tryToClose(conn);
@@ -369,10 +370,10 @@ public class XdmManager {
     /**
      * Initialize the XDM interface
      * 
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void initialize() throws SipPayloadException, SipNetworkException {
+    public void initialize() throws PayloadException, NetworkException {
         try {
             UserProfile profile = ImsModule.getImsUserProfile();
             xdmServerAddr = profile.getXdmServerAddr();
@@ -381,7 +382,7 @@ public class XdmManager {
 
             HttpResponse response = getXcapDocuments();
             if (!response.isSuccessfullResponse()) {
-                throw new SipNetworkException(
+                throw new NetworkException(
                         "Failed to get successfull response from presence server!");
             }
             // Analyze the XCAP directory
@@ -434,13 +435,13 @@ public class XdmManager {
                 }
             }
         } catch (ParserConfigurationException e) {
-            throw new SipPayloadException("Can't parse the XCAP directory document!", e);
+            throw new PayloadException("Can't parse the XCAP directory document!", e);
 
         } catch (SAXException e) {
-            throw new SipPayloadException("Can't parse the XCAP directory document!", e);
+            throw new PayloadException("Can't parse the XCAP directory document!", e);
 
         } catch (IOException e) {
-            throw new SipNetworkException("Can't parse the XCAP directory document!", e);
+            throw new NetworkException("Can't parse the XCAP directory document!", e);
         }
     }
 
@@ -448,10 +449,10 @@ public class XdmManager {
      * Get XCAP managed documents
      * 
      * @return Response
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private HttpResponse getXcapDocuments() throws SipPayloadException, SipNetworkException {
+    private HttpResponse getXcapDocuments() throws PayloadException, NetworkException {
         return sendRequestToXDMS(new HttpGetRequest(new StringBuilder(XCAP_SCHEME)
                 .append(ImsModule.getImsUserProfile().getPublicUri()).append(XCAP_FRAGMENT)
                 .toString()));
@@ -461,10 +462,10 @@ public class XdmManager {
      * Set RCS list
      * 
      * @return Response
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private HttpResponse setRcsList() throws SipPayloadException, SipNetworkException {
+    private HttpResponse setRcsList() throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Set RCS list");
         }
@@ -491,10 +492,10 @@ public class XdmManager {
      * Set resources list
      * 
      * @return Response
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private HttpResponse setResourcesList() throws SipPayloadException, SipNetworkException {
+    private HttpResponse setResourcesList() throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Set resources list");
         }
@@ -533,10 +534,10 @@ public class XdmManager {
      * Set presence rules
      * 
      * @return Response
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private HttpResponse setPresenceRules() throws SipPayloadException, SipNetworkException {
+    private HttpResponse setPresenceRules() throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Set presence rules");
         }
@@ -605,11 +606,11 @@ public class XdmManager {
      * 
      * @param contact Contact
      * @return Response
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public HttpResponse addContactToGrantedList(ContactId contact) throws SipPayloadException,
-            SipNetworkException {
+    public HttpResponse addContactToGrantedList(ContactId contact) throws PayloadException,
+            NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Add " + contact + " to granted list");
         }
@@ -646,11 +647,11 @@ public class XdmManager {
      * 
      * @param contact Contact
      * @return Response
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public HttpResponse removeContactFromGrantedList(ContactId contact) throws SipPayloadException,
-            SipNetworkException {
+    public HttpResponse removeContactFromGrantedList(ContactId contact) throws PayloadException,
+            NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Remove " + contact + " from granted list");
         }
@@ -700,10 +701,10 @@ public class XdmManager {
      * Returns the list of granted contacts
      * 
      * @return List
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public Set<ContactId> getGrantedContacts() throws SipPayloadException, SipNetworkException {
+    public Set<ContactId> getGrantedContacts() throws PayloadException, NetworkException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info("Get granted contacts list");
@@ -713,7 +714,7 @@ public class XdmManager {
                     + "/index/~~/resource-lists/list%5B@name=%22rcs%22%5D";
             HttpResponse response = sendRequestToXDMS(new HttpGetRequest(url));
             if (!response.isSuccessfullResponse()) {
-                throw new SipPayloadException(new StringBuilder(
+                throw new PayloadException(new StringBuilder(
                         "Can't get granted contacts list, Error Response :  ")
                         .append(response.getResponseCode()).append("!").toString());
             }
@@ -725,13 +726,13 @@ public class XdmManager {
             return convertListOfUrisToSetOfContactId(parser.getUris());
 
         } catch (ParserConfigurationException e) {
-            throw new SipPayloadException("Unable to get granted contacts list!", e);
+            throw new PayloadException("Unable to get granted contacts list!", e);
 
         } catch (SAXException e) {
-            throw new SipPayloadException("Unable to get granted contacts list!", e);
+            throw new PayloadException("Unable to get granted contacts list!", e);
 
         } catch (IOException e) {
-            throw new SipNetworkException("Unable to get granted contacts list!", e);
+            throw new NetworkException("Unable to get granted contacts list!", e);
         }
     }
 
@@ -740,11 +741,11 @@ public class XdmManager {
      * 
      * @param contact Contact
      * @return Response
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public HttpResponse removeContactFromBlockedList(ContactId contact) throws SipPayloadException,
-            SipNetworkException {
+    public HttpResponse removeContactFromBlockedList(ContactId contact) throws PayloadException,
+            NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Remove " + contact + " from blocked list");
         }
@@ -759,10 +760,10 @@ public class XdmManager {
      * Returns the list of blocked contacts
      * 
      * @return List
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public Set<ContactId> getBlockedContacts() throws SipPayloadException, SipNetworkException {
+    public Set<ContactId> getBlockedContacts() throws PayloadException, NetworkException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info("Get blocked contacts list");
@@ -772,7 +773,7 @@ public class XdmManager {
                     + "/index/~~/resource-lists/list%5B@name=%22rcs_blockedcontacts%22%5D";
             HttpResponse response = sendRequestToXDMS(new HttpGetRequest(url));
             if (!response.isSuccessfullResponse()) {
-                throw new SipPayloadException(new StringBuilder(
+                throw new PayloadException(new StringBuilder(
                         "Can't get blocked contacts list, Error Response :  ")
                         .append(response.getResponseCode()).append("!").toString());
             }
@@ -784,13 +785,13 @@ public class XdmManager {
             return convertListOfUrisToSetOfContactId(parser.getUris());
 
         } catch (ParserConfigurationException e) {
-            throw new SipPayloadException("Unable to get blocked contacts list!", e);
+            throw new PayloadException("Unable to get blocked contacts list!", e);
 
         } catch (SAXException e) {
-            throw new SipPayloadException("Unable to get blocked contacts list!", e);
+            throw new PayloadException("Unable to get blocked contacts list!", e);
 
         } catch (IOException e) {
-            throw new SipNetworkException("Unable to get blocked contacts list!", e);
+            throw new NetworkException("Unable to get blocked contacts list!", e);
         }
     }
 
@@ -799,11 +800,11 @@ public class XdmManager {
      * 
      * @param contact Contact
      * @return Response
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public HttpResponse addContactToRevokedList(ContactId contact) throws SipPayloadException,
-            SipNetworkException {
+    public HttpResponse addContactToRevokedList(ContactId contact) throws PayloadException,
+            NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Add " + contact + " to revoked list");
         }
@@ -820,11 +821,11 @@ public class XdmManager {
      * 
      * @param contact Contact
      * @return Response
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public HttpResponse removeContactFromRevokedList(ContactId contact) throws SipPayloadException,
-            SipNetworkException {
+    public HttpResponse removeContactFromRevokedList(ContactId contact) throws PayloadException,
+            NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Remove " + contact + " from revoked list");
         }
@@ -851,11 +852,11 @@ public class XdmManager {
      * 
      * @param photo Photo icon
      * @return Response
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public HttpResponse uploadEndUserPhoto(PhotoIcon photo) throws SipPayloadException,
-            SipNetworkException {
+    public HttpResponse uploadEndUserPhoto(PhotoIcon photo) throws PayloadException,
+            NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Upload the end user photo");
         }
@@ -877,10 +878,10 @@ public class XdmManager {
      * Delete the end user photo
      * 
      * @return Response
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public HttpResponse deleteEndUserPhoto() throws SipPayloadException, SipNetworkException {
+    public HttpResponse deleteEndUserPhoto() throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Delete the end user photo");
         }
@@ -895,11 +896,11 @@ public class XdmManager {
      * 
      * @param info Presence info
      * @return Response
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public HttpResponse setPresenceInfo(String info) throws SipPayloadException,
-            SipNetworkException {
+    public HttpResponse setPresenceInfo(String info) throws PayloadException,
+            NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Update presence info");
         }

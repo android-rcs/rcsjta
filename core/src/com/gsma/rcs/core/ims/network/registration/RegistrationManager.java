@@ -26,12 +26,12 @@ import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.ImsError;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.ImsNetworkInterface;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipInterface;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -193,9 +193,9 @@ public class RegistrationManager extends PeriodicRefresher {
 
                 try {
                     register();
-                } catch (SipPayloadException e) {
+                } catch (PayloadException e) {
                     sLogger.error("Registration has failed!", e);
-                } catch (SipNetworkException e) {
+                } catch (NetworkException e) {
                     /* Nothing to be handled here */
                     if (sLogger.isActivated()) {
                         sLogger.debug(e.getMessage());
@@ -216,10 +216,10 @@ public class RegistrationManager extends PeriodicRefresher {
     /**
      * Attempts to perform a registration to IMS
      * 
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public synchronized void register() throws SipPayloadException, SipNetworkException {
+    public synchronized void register() throws PayloadException, NetworkException {
         try {
             if (mDialogPath == null) {
                 /* Reset the registration authentication procedure */
@@ -248,10 +248,10 @@ public class RegistrationManager extends PeriodicRefresher {
                     getExpiryValue(), mInstanceId);
 
             sendRegister(register);
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             handleError(new ImsError(ImsError.REGISTRATION_FAILED, e));
             throw e;
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             handleError(new ImsError(ImsError.REGISTRATION_FAILED, e));
             throw e;
         }
@@ -290,10 +290,10 @@ public class RegistrationManager extends PeriodicRefresher {
     /**
      * Performs a de-registration to IMS
      * 
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public synchronized void deRegister() throws SipPayloadException, SipNetworkException {
+    public synchronized void deRegister() throws PayloadException, NetworkException {
         if (mRegistered) {
             mPendingUnRegister = false;
 
@@ -325,10 +325,10 @@ public class RegistrationManager extends PeriodicRefresher {
      * Send REGISTER message
      * 
      * @param register SIP REGISTER
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void sendRegister(SipRequest register) throws SipPayloadException, SipNetworkException {
+    private void sendRegister(SipRequest register) throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("Send REGISTER, expire=").append(register.getExpires())
                     .append("ms").toString());
@@ -403,11 +403,11 @@ public class RegistrationManager extends PeriodicRefresher {
      * Handle 200 0K response
      * 
      * @param ctx SIP transaction context
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void handle200OK(SipTransactionContext ctx) throws SipPayloadException,
-            SipNetworkException {
+    private void handle200OK(SipTransactionContext ctx) throws PayloadException,
+            NetworkException {
         // 200 OK response received
         if (sLogger.isActivated()) {
             sLogger.info("200 OK response received");
@@ -513,11 +513,11 @@ public class RegistrationManager extends PeriodicRefresher {
      * Handle 302 response
      * 
      * @param ctx SIP transaction context
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void handle302MovedTemporarily(SipTransactionContext ctx) throws SipPayloadException,
-            SipNetworkException {
+    private void handle302MovedTemporarily(SipTransactionContext ctx) throws PayloadException,
+            NetworkException {
         // 302 Moved Temporarily response received
         if (sLogger.isActivated()) {
             sLogger.info("302 Moved Temporarily response received");
@@ -549,11 +549,11 @@ public class RegistrationManager extends PeriodicRefresher {
      * Handle 401 response
      * 
      * @param ctx SIP transaction context
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void handle401Unauthorized(SipTransactionContext ctx) throws SipPayloadException,
-            SipNetworkException {
+    private void handle401Unauthorized(SipTransactionContext ctx) throws PayloadException,
+            NetworkException {
         /**
          * Increment the number of 401 failures
          */
@@ -596,11 +596,11 @@ public class RegistrationManager extends PeriodicRefresher {
      * Handle 423 response
      * 
      * @param ctx SIP transaction context
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void handle423IntervalTooBrief(SipTransactionContext ctx) throws SipPayloadException,
-            SipNetworkException {
+    private void handle423IntervalTooBrief(SipTransactionContext ctx) throws PayloadException,
+            NetworkException {
         // 423 response received
         if (sLogger.isActivated()) {
             sLogger.info("423 response received");
@@ -694,10 +694,10 @@ public class RegistrationManager extends PeriodicRefresher {
     /**
      * Registration processing
      * 
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void periodicProcessing() throws SipPayloadException, SipNetworkException {
+    public void periodicProcessing() throws PayloadException, NetworkException {
         // Make a registration
         if (sLogger.isActivated()) {
             sLogger.info("Execute re-registration");
@@ -709,11 +709,11 @@ public class RegistrationManager extends PeriodicRefresher {
      * Handle 4xx5xx6xx response without retry header
      * 
      * @param ctx SIP transaction context
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     private void handle4xx5xx6xxNoRetryAfterHeader(SipTransactionContext ctx)
-            throws SipPayloadException, SipNetworkException {
+            throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("4xx5xx6xx response without retry after header received");
         }

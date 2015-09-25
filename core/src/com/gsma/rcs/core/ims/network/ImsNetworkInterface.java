@@ -30,8 +30,7 @@ import com.gsma.rcs.core.ims.network.registration.HttpDigestRegistrationProcedur
 import com.gsma.rcs.core.ims.network.registration.RegistrationManager;
 import com.gsma.rcs.core.ims.network.registration.RegistrationProcedure;
 import com.gsma.rcs.core.ims.network.sip.SipManager;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.userprofile.GibaUserProfileInterface;
 import com.gsma.rcs.core.ims.userprofile.SettingsUserProfileInterface;
 import com.gsma.rcs.core.ims.userprofile.UserProfile;
@@ -547,10 +546,10 @@ public abstract class ImsNetworkInterface {
      * Get the DNS resolved fields.
      * 
      * @return The {@link DnsResolvedFields} object containing the DNS resolved fields.
-     * @throws SipPayloadException
+     * @throws PayloadException
      * @throws UnknownHostException
      */
-    protected DnsResolvedFields getDnsResolvedFields() throws SipPayloadException,
+    protected DnsResolvedFields getDnsResolvedFields() throws PayloadException,
             UnknownHostException {
         try {
             // Changed by Deutsche Telekom
@@ -588,7 +587,7 @@ public abstract class ImsNetworkInterface {
                 } else if (ListeningPoint.TLS.equals(mImsProxyProtocol)) {
                     service = DNS_SIP_TLS_SERVICE;
                 } else {
-                    throw new SipPayloadException(
+                    throw new PayloadException(
                             "Unkown SIP protocol : ".concat(mImsProxyProtocol));
                 }
 
@@ -658,7 +657,7 @@ public abstract class ImsNetworkInterface {
                 /* Try to use IMS proxy address as a fallback */
                 String imsProxyAddrResolved = getDnsA(mImsProxyAddr);
                 if (imsProxyAddrResolved == null) {
-                    throw new SipPayloadException(new StringBuilder("Proxy IP address : ")
+                    throw new PayloadException(new StringBuilder("Proxy IP address : ")
                             .append(mImsProxyAddr).append(" not found!").toString());
                 }
                 dnsResolvedFields = new DnsResolvedFields(imsProxyAddrResolved, mImsProxyPort);
@@ -673,7 +672,7 @@ public abstract class ImsNetworkInterface {
             return dnsResolvedFields;
 
         } catch (TextParseException e) {
-            throw new SipPayloadException(new StringBuilder(
+            throw new PayloadException(new StringBuilder(
                     "Failed to resolve dns for proxy configuration: ").append(mImsProxyAddr)
                     .append(" with protocol: ").append(mImsProxyProtocol).append("!").toString(), e);
         }
@@ -685,12 +684,12 @@ public abstract class ImsNetworkInterface {
      * @param dnsResolvedFields The {@link DnsResolvedFields} object containing the DNS resolved
      *            fields.
      * @return Registration result
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     // Changed by Deutsche Telekom
-    public void register(DnsResolvedFields dnsResolvedFields) throws SipPayloadException,
-            SipNetworkException {
+    public void register(DnsResolvedFields dnsResolvedFields) throws PayloadException,
+            NetworkException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.debug("Register to IMS");
@@ -721,7 +720,7 @@ public abstract class ImsNetworkInterface {
                 mSip.getSipStack().getKeepAliveManager().start();
             }
         } catch (UnknownHostException e) {
-            throw new SipPayloadException(
+            throw new PayloadException(
                     "Unable to register due to stack initialization failure for address : "
                             .concat(mImsProxyAddr),
                     e);
@@ -731,10 +730,10 @@ public abstract class ImsNetworkInterface {
     /**
      * Unregister from the IMS
      * 
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void unregister() throws SipPayloadException, SipNetworkException {
+    public void unregister() throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug("Unregister from IMS");
         }

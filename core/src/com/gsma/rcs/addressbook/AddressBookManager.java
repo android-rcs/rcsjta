@@ -22,8 +22,8 @@
 
 package com.gsma.rcs.addressbook;
 
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.utils.logger.Logger;
@@ -259,9 +259,9 @@ public class AddressBookManager {
                                 }
                             } catch (ContactManagerException e) {
                                 sLogger.error("Failed to check address book!", e);
-                            } catch (SipPayloadException e) {
+                            } catch (PayloadException e) {
                                 sLogger.error("Failed to check address book!", e);
-                            } catch (SipNetworkException e) {
+                            } catch (NetworkException e) {
                                 if (sLogger.isActivated()) {
                                     sLogger.debug(e.getMessage());
                                 }

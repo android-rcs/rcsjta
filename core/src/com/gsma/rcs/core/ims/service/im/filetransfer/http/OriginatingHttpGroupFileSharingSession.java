@@ -26,10 +26,10 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -134,7 +134,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
             byte[] result = mUploadManager.uploadFile();
             sendResultToContact(result);
 
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
@@ -147,7 +147,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                             .append(getFileTransferId()).toString(), e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
 
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error(
                     new StringBuilder("Failed to initiate file transfer session for sessionId : ")
                             .append(getSessionID()).append(" with fileTransferId : ")
@@ -213,10 +213,10 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
      * Prepare to send the info to terminating side
      * 
      * @param result byte[] which contains the result of the 200 OK from the content server
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void sendResultToContact(byte[] result) throws SipPayloadException, SipNetworkException {
+    private void sendResultToContact(byte[] result) throws PayloadException, NetworkException {
         try {
             if (mUploadManager.isCancelled()) {
                 return;
@@ -273,7 +273,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                 }
             }
         } catch (MsrpException e) {
-            throw new SipNetworkException(
+            throw new NetworkException(
                     "Failed to send result chunks for transferId : ".concat(getFileTransferId()), e);
         }
     }
@@ -321,7 +321,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                         sendResultToContact(null);
                     }
 
-                } catch (SipNetworkException e) {
+                } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug(e.getMessage());
                     }
@@ -334,7 +334,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                                     .append(getFileTransferId()).toString(), e);
                     handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
 
-                } catch (SipPayloadException e) {
+                } catch (PayloadException e) {
                     sLogger.error(
                             new StringBuilder("Failed to resume upload for sessionId : ")
                                     .append(getSessionID()).append(" with fileTransferId : ")
@@ -384,8 +384,8 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
     }
 
     @Override
-    public void terminateSession(TerminationReason reason) throws SipPayloadException,
-            SipNetworkException {
+    public void terminateSession(TerminationReason reason) throws PayloadException,
+            NetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug("terminateSession reason=".concat(reason.toString()));
         }

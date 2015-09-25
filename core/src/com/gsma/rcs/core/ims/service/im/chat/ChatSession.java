@@ -25,15 +25,15 @@ package com.gsma.rcs.core.ims.service.im.chat;
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
@@ -162,11 +162,11 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * 
      * @param msg Chat message
      * @param imdnDisplayedRequested Indicates whether display report was requested
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     protected void receive(ChatMessage msg, boolean imdnDisplayedRequested)
-            throws SipPayloadException, SipNetworkException {
+            throws PayloadException, NetworkException {
         if (mMessagingLog.isMessagePersisted(msg.getMessageId())) {
             // Message already received
             return;
@@ -452,11 +452,11 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     /**
      * Session inactivity event
      * 
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
     @Override
-    public void handleInactivityEvent() throws SipPayloadException, SipNetworkException {
+    public void handleInactivityEvent() throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug("Session inactivity event");
         }
@@ -470,11 +470,11 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param msgId Message ID
      * @param data Received data
      * @param mimeType Data mime-type
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
     public void msrpDataReceived(String msgId, byte[] data, String mimeType)
-            throws SipPayloadException, SipNetworkException {
+            throws PayloadException, NetworkException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info("Data received (type " + mimeType + ")");
@@ -611,7 +611,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                 }
             }
         } catch (IOException e) {
-            throw new SipNetworkException(
+            throw new NetworkException(
                     "Unable to handle delivery status for msgId : ".concat(msgId), e);
         }
     }
@@ -652,9 +652,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param contact Contact
      * @param event Event
      * @throws IOException
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    protected void receiveIsComposing(ContactId contact, byte[] event) throws SipPayloadException,
+    protected void receiveIsComposing(ContactId contact, byte[] event) throws PayloadException,
             IOException {
         mIsComposingMgr.receiveIsComposingEvent(contact, event);
     }
@@ -691,12 +691,12 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param msgId Message ID
      * @param timestamp The local timestamp of the message for receiving a HttpFileTransfer
      * @param timestampSent Remote timestamp sent in payload for receiving a HttpFileTransfer
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     protected void receiveHttpFileTransfer(ContactId contact, String displayName,
             FileTransferHttpInfoDocument fileTransferInfo, String msgId, long timestamp,
-            long timestampSent) throws SipPayloadException, SipNetworkException {
+            long timestampSent) throws PayloadException, NetworkException {
         try {
             /*
              * Update the remote contact's capabilities to include at least HTTP FT and IM session
@@ -828,11 +828,11 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             fileSession.startSession();
 
         } catch (ContactManagerException e) {
-            throw new SipPayloadException(new StringBuilder(
+            throw new PayloadException(new StringBuilder(
                     "Failed to receive file transfer with fileTransferId : ").append(msgId)
                     .append("for contact : ").append(contact).toString(), e);
         } catch (IOException e) {
-            throw new SipNetworkException(new StringBuilder(
+            throw new NetworkException(new StringBuilder(
                     "Failed to receive file transfer with fileTransferId : ").append(msgId)
                     .append("for contact : ").append(contact).toString(), e);
         }
@@ -956,11 +956,11 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * 
      * @param contact Contact identifier
      * @param xml XML document
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void onDeliveryStatusReceived(ContactId contact, String xml) throws SipPayloadException,
-            SipNetworkException {
+    public void onDeliveryStatusReceived(ContactId contact, String xml) throws PayloadException,
+            NetworkException {
         try {
             ImdnDocument imdn = ChatUtils.parseDeliveryReport(xml);
 
@@ -969,15 +969,15 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                         imdn);
             }
         } catch (SAXException e) {
-            throw new SipPayloadException(new StringBuilder(
+            throw new PayloadException(new StringBuilder(
                     "Failed to parse IMDN document for contact : ").append(contact).toString(), e);
 
         } catch (ParserConfigurationException e) {
-            throw new SipPayloadException(new StringBuilder(
+            throw new PayloadException(new StringBuilder(
                     "Failed to parse IMDN document for contact : ").append(contact).toString(), e);
 
         } catch (IOException e) {
-            throw new SipNetworkException(new StringBuilder(
+            throw new NetworkException(new StringBuilder(
                     "Failed to parse IMDN document for contact : ").append(contact).toString(), e);
         }
     }
@@ -1004,9 +1004,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * Open media session
      * 
      * @throws IOException
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public void openMediaSession() throws IOException, SipPayloadException {
+    public void openMediaSession() throws IOException, PayloadException {
         getMsrpMgr().openMsrpSession();
         sendEmptyDataChunk();
     }
@@ -1029,10 +1029,10 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * Handle 200 0K response
      * 
      * @param resp 200 OK response
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void handle200OK(SipResponse resp) throws SipPayloadException, SipNetworkException {
+    public void handle200OK(SipResponse resp) throws PayloadException, NetworkException {
         super.handle200OK(resp);
 
         // Check if geolocation push supported by remote

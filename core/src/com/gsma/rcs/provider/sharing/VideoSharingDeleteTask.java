@@ -16,8 +16,8 @@
 
 package com.gsma.rcs.provider.sharing;
 
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.gsma.rcs.provider.DeleteTask;
@@ -89,7 +89,7 @@ public class VideoSharingDeleteTask extends DeleteTask.GroupedByContactId {
     }
 
     @Override
-    protected void onRowDelete(ContactId contact, String sharingId) throws SipPayloadException {
+    protected void onRowDelete(ContactId contact, String sharingId) throws PayloadException {
         VideoStreamingSession session = mRichcallService.getVideoSharingSession(sharingId);
         if (session == null) {
             mVideoSharingService.removeVideoSharing(sharingId);
@@ -98,7 +98,7 @@ public class VideoSharingDeleteTask extends DeleteTask.GroupedByContactId {
         }
         try {
             session.deleteSession();
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             /*
              * If network is lost during a delete operation the remaining part of the delete
              * operation (delete from persistent storage) can succeed to 100% anyway since delete

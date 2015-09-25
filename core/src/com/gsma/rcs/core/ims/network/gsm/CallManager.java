@@ -23,8 +23,8 @@
 package com.gsma.rcs.core.ims.network.gsm;
 
 import com.gsma.rcs.core.ims.ImsModule;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.capability.CapabilityService;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
@@ -247,12 +247,12 @@ public class CallManager {
                                 break;
                         }
 
-                    } catch (SipPayloadException e) {
+                    } catch (PayloadException e) {
                         sLogger.error(
                                 new StringBuilder("Unable to handle call state : ").append(state)
                                         .append(" for incoming number : ").append(incomingNumber)
                                         .toString(), e);
-                    } catch (SipNetworkException e) {
+                    } catch (NetworkException e) {
                         if (sLogger.isActivated()) {
                             sLogger.debug(e.getMessage());
                         }
@@ -362,10 +362,10 @@ public class CallManager {
     /**
      * Call leg has changed
      * 
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    private void callLegHasChanged() throws SipPayloadException, SipNetworkException {
+    private void callLegHasChanged() throws PayloadException, NetworkException {
         if (mMultipartyCall | mCallHold) {
             /* Terminate richcall sessions if call hold or multiparty call */
             mImsModule.getRichcallService().terminateAllSessions();
@@ -379,10 +379,10 @@ public class CallManager {
      * Set multiparty call
      * 
      * @param state State
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void setMultiPartyCall(boolean state) throws SipPayloadException, SipNetworkException {
+    public void setMultiPartyCall(boolean state) throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Set multiparty call to " + state);
         }
@@ -395,10 +395,10 @@ public class CallManager {
      * Set call hold
      * 
      * @param state State
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void setCallHold(boolean state) throws SipPayloadException, SipNetworkException {
+    public void setCallHold(boolean state) throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Set call hold to " + state);
         }
@@ -411,10 +411,10 @@ public class CallManager {
      * Connection event
      * 
      * @param connected Connection state
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void connectionEvent(boolean connected) throws SipPayloadException, SipNetworkException {
+    public void connectionEvent(boolean connected) throws PayloadException, NetworkException {
         if (sContact == null) {
             return;
         }

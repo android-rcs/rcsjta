@@ -23,7 +23,7 @@
 package com.gsma.rcs.core.ims.network.registration;
 
 import com.gsma.rcs.core.ims.ImsModule;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.security.HttpDigestMd5Authentication;
@@ -85,9 +85,9 @@ public class HttpDigestRegistrationProcedure extends RegistrationProcedure {
      * Write security header to REGISTER request
      * 
      * @param request Request
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public void writeSecurityHeader(SipRequest request) throws SipPayloadException {
+    public void writeSecurityHeader(SipRequest request) throws PayloadException {
         try {
             String realm = mDigest.getRealm();
             UserProfile profile = ImsModule.getImsUserProfile();
@@ -125,7 +125,7 @@ public class HttpDigestRegistrationProcedure extends RegistrationProcedure {
             }
             request.addHeader(AuthorizationHeader.NAME, auth.toString());
         } catch (ParseException e) {
-            throw new SipPayloadException("Failed to write security header!", e);
+            throw new PayloadException("Failed to write security header!", e);
         }
     }
 
@@ -133,9 +133,9 @@ public class HttpDigestRegistrationProcedure extends RegistrationProcedure {
      * Read security header from REGISTER response
      * 
      * @param response SIP response
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public void readSecurityHeader(SipResponse response) throws SipPayloadException {
+    public void readSecurityHeader(SipResponse response) throws PayloadException {
 
         WWWAuthenticateHeader wwwHeader = (WWWAuthenticateHeader) response
                 .getHeader(WWWAuthenticateHeader.NAME);

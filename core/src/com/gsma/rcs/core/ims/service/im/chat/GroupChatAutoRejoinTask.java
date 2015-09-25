@@ -16,8 +16,8 @@
 
 package com.gsma.rcs.core.ims.service.im.chat;
 
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.utils.logger.Logger;
@@ -41,10 +41,10 @@ public class GroupChatAutoRejoinTask implements Runnable {
             try {
                 mImService.rejoinGroupChat(chatId);
 
-            } catch (SipPayloadException e) {
+            } catch (PayloadException e) {
                 sLogger.error(new StringBuilder("Could not auto-rejoin group chat with chatID '")
                         .append(chatId).append("' due to: ").append(e.getMessage()).toString(), e);
-            } catch (SipNetworkException e) {
+            } catch (NetworkException e) {
                 if (sLogger.isActivated()) {
                     sLogger.debug(e.getMessage());
                 }

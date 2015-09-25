@@ -24,8 +24,10 @@ package com.gsma.rcs.core.ims.service.im.chat;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
@@ -33,8 +35,6 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -82,13 +82,13 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp for the session
      * @param contactManager Contact manager accessor
-     * @throws SipPayloadException Thrown if constructor fails to get information from payload
-     * @throws SipNetworkException
+     * @throws PayloadException Thrown if constructor fails to get information from payload
+     * @throws NetworkException
      */
     public TerminatingAdhocGroupChatSession(InstantMessagingService imService, SipRequest invite,
             ContactId contact, Map<ContactId, ParticipantStatus> participantsFromInvite,
             Uri remoteContact, RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
-            ContactManager contactManager) throws SipPayloadException, SipNetworkException {
+            ContactManager contactManager) throws PayloadException, NetworkException {
         super(imService, contact, remoteContact, participantsFromInvite, rcsSettings, messagingLog,
                 timestamp, contactManager);
 
@@ -116,10 +116,10 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
      * Check is session should be auto accepted. This method should only be called once per session
      * 
      * @return true if group chat session should be auto accepted
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private boolean shouldBeAutoAccepted() throws SipPayloadException, SipNetworkException {
+    private boolean shouldBeAutoAccepted() throws PayloadException, NetworkException {
         /*
          * In case the invite contains a http file transfer info the chat session should be
          * auto-accepted so that the file transfer session can be started.
@@ -422,10 +422,10 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
             }
         } catch (MsrpException e) {
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error("Unable to send 200OK response!", e);
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (logActivated) {
                 sLogger.debug(e.getMessage());
             }
@@ -446,11 +446,11 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
      * Invite missing participants.
      * 
      * @param participants Set of missing participant identifiers
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
     private void inviteMissingParticipants(final Set<ContactId> participants)
-            throws SipPayloadException, SipNetworkException {
+            throws PayloadException, NetworkException {
         final boolean logActivated = sLogger.isActivated();
         if (logActivated) {
             sLogger.info("Invite missing participants: ".concat(participants.toString()));
@@ -520,7 +520,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
     }
 
     @Override
-    public void receiveBye(SipRequest bye) throws SipPayloadException, SipNetworkException {
+    public void receiveBye(SipRequest bye) throws PayloadException, NetworkException {
         super.receiveBye(bye);
 
         requestContactCapabilities(getDialogPath().getRemoteParty());
@@ -530,10 +530,10 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
      * Receive CANCEL request
      * 
      * @param cancel CANCEL request
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void receiveCancel(SipRequest cancel) throws SipNetworkException, SipPayloadException {
+    public void receiveCancel(SipRequest cancel) throws NetworkException, PayloadException {
         super.receiveCancel(cancel);
         requestContactCapabilities(getDialogPath().getRemoteParty());
     }

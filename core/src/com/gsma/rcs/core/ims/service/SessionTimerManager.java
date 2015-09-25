@@ -22,11 +22,11 @@
 
 package com.gsma.rcs.core.ims.service;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipMessage;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -172,10 +172,10 @@ public class SessionTimerManager extends PeriodicRefresher {
     /**
      * Periodic session timer processing
      * 
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void periodicProcessing() throws SipPayloadException, SipNetworkException {
+    public void periodicProcessing() throws PayloadException, NetworkException {
         if (UAC_ROLE.equals(mRefresher)) {
             // Refresher role
             sessionRefreshForUAC();
@@ -189,10 +189,10 @@ public class SessionTimerManager extends PeriodicRefresher {
      * Session refresh processing for UAC role. If the refresher never sends a session refresh
      * request then the session should be terminated.
      * 
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void sessionRefreshForUAC() throws SipPayloadException, SipNetworkException {
+    private void sessionRefreshForUAC() throws PayloadException, NetworkException {
         try {
             if (mLogger.isActivated()) {
                 mLogger.debug("Session timer refresh (UAC role)");
@@ -210,10 +210,10 @@ public class SessionTimerManager extends PeriodicRefresher {
             // Send RE-INVITE request
             sendReInvite(reInvite);
         } catch (InvalidArgumentException e) {
-            throw new SipPayloadException("Unable to process Session timer refresh (UAC role)!", e);
+            throw new PayloadException("Unable to process Session timer refresh (UAC role)!", e);
 
         } catch (ParseException e) {
-            throw new SipPayloadException("Unable to process Session timer refresh (UAC role)!", e);
+            throw new PayloadException("Unable to process Session timer refresh (UAC role)!", e);
         }
     }
 
@@ -221,10 +221,10 @@ public class SessionTimerManager extends PeriodicRefresher {
      * Send RE-INVITE message
      * 
      * @param reInvite SIP RE-INVITE
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void sendReInvite(SipRequest reInvite) throws SipPayloadException, SipNetworkException {
+    private void sendReInvite(SipRequest reInvite) throws PayloadException, NetworkException {
         try {
             if (mLogger.isActivated()) {
                 mLogger.debug("Send RE-INVITE");
@@ -300,13 +300,13 @@ public class SessionTimerManager extends PeriodicRefresher {
                 }
             } else {
                 /* No response received: timeout */
-                throw new SipPayloadException("No response received: timeout!");
+                throw new PayloadException("No response received: timeout!");
             }
         } catch (InvalidArgumentException e) {
-            throw new SipPayloadException("Unable to fetch Authorization header!", e);
+            throw new PayloadException("Unable to fetch Authorization header!", e);
 
         } catch (ParseException e) {
-            throw new SipPayloadException("Unable to fetch Authorization header!", e);
+            throw new PayloadException("Unable to fetch Authorization header!", e);
         }
     }
 
@@ -314,10 +314,10 @@ public class SessionTimerManager extends PeriodicRefresher {
      * Session refresh processing for UAS role. If the refresher never gets a response from the
      * remote then the session should be terminated.
      * 
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    private void sessionRefreshForUAS() throws SipPayloadException, SipNetworkException {
+    private void sessionRefreshForUAS() throws PayloadException, NetworkException {
         if (mLogger.isActivated()) {
             mLogger.debug("Session timer refresh (UAS role)");
         }
@@ -342,11 +342,11 @@ public class SessionTimerManager extends PeriodicRefresher {
      * Receive RE-INVITE request
      * 
      * @param reInvite RE-INVITE request
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void receiveReInvite(SipRequest reInvite) throws SipPayloadException,
-            SipNetworkException {
+    public void receiveReInvite(SipRequest reInvite) throws PayloadException,
+            NetworkException {
         if (mLogger.isActivated()) {
             mLogger.debug("Session refresh request received");
         }
@@ -365,7 +365,7 @@ public class SessionTimerManager extends PeriodicRefresher {
             }
             mSession.getDialogPath().setSessionEstablished();
         } else {
-            throw new SipPayloadException(
+            throw new PayloadException(
                     "No ACK received for INVITE with sessionId: ".concat(String.valueOf(mSession
                             .getId())));
         }
@@ -375,10 +375,10 @@ public class SessionTimerManager extends PeriodicRefresher {
      * Receive UPDATE request
      * 
      * @param update UPDATE request
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void receiveUpdate(SipRequest update) throws SipNetworkException, SipPayloadException {
+    public void receiveUpdate(SipRequest update) throws NetworkException, PayloadException {
         if (mLogger.isActivated()) {
             mLogger.debug("Session refresh request received");
         }

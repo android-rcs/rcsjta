@@ -27,10 +27,10 @@ import static com.gsma.rcs.utils.StringUtils.UTF8_STR;
 import com.gsma.rcs.addressbook.AddressBookEventListener;
 import com.gsma.rcs.addressbook.AddressBookManager;
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.http.HttpResponse;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
@@ -126,10 +126,10 @@ public class PresenceService extends ImsService implements AddressBookEventListe
     /**
      * Start the IMS service
      * 
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public synchronized void start() throws SipPayloadException, SipNetworkException {
+    public synchronized void start() throws PayloadException, NetworkException {
         if (isServiceStarted()) {
             // Already started
             return;
@@ -217,11 +217,11 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * 
      * @param list of granted contacts
      * @param list of blocked contacts
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     private void firstLaunchOrAccountChangedCheck(Set<ContactId> grantedContacts,
-            Set<ContactId> blockedContacts) throws SipPayloadException, SipNetworkException {
+            Set<ContactId> blockedContacts) throws PayloadException, NetworkException {
         final String publicUri = ImsModule.getImsUserProfile().getPublicUri();
         try {
             boolean logActivated = sLogger.isActivated();
@@ -266,26 +266,26 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                 }
             }
         } catch (OperationApplicationException e) {
-            throw new SipPayloadException("Failed creating contact for URI : ".concat(publicUri), e);
+            throw new PayloadException("Failed creating contact for URI : ".concat(publicUri), e);
 
         } catch (ContactManagerException e) {
-            throw new SipPayloadException("Failed creating contact : ".concat(publicUri), e);
+            throw new PayloadException("Failed creating contact : ".concat(publicUri), e);
 
         } catch (RemoteException e) {
-            throw new SipPayloadException("Failed creating contact : ".concat(publicUri), e);
+            throw new PayloadException("Failed creating contact : ".concat(publicUri), e);
 
         } catch (IOException e) {
-            throw new SipNetworkException("Failed creating contact : ".concat(publicUri), e);
+            throw new NetworkException("Failed creating contact : ".concat(publicUri), e);
         }
     }
 
     /**
      * Stop the IMS service
      * 
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public synchronized void stop() throws SipPayloadException, SipNetworkException {
+    public synchronized void stop() throws PayloadException, NetworkException {
         if (!isServiceStarted()) {
             // Already stopped
             return;
@@ -675,11 +675,11 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * 
      * @param photoIcon Photo-icon
      * @return Boolean result
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    private boolean updatePhotoIcon(PhotoIcon photoIcon) throws SipPayloadException,
-            SipNetworkException {
+    private boolean updatePhotoIcon(PhotoIcon photoIcon) throws PayloadException,
+            NetworkException {
         boolean result = false;
 
         // Photo-icon management
@@ -718,11 +718,11 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * 
      * @param info Presence info
      * @return true if the presence info has been publish with success, else returns false
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public boolean publishPresenceInfo(PresenceInfo info) throws SipPayloadException,
-            SipNetworkException {
+    public boolean publishPresenceInfo(PresenceInfo info) throws PayloadException,
+            NetworkException {
         boolean result = false;
 
         // Photo-icon management
@@ -770,10 +770,10 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * 
      * @param photo Photo icon
      * @return Boolean result
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public boolean uploadPhotoIcon(PhotoIcon photo) throws SipPayloadException, SipNetworkException {
+    public boolean uploadPhotoIcon(PhotoIcon photo) throws PayloadException, NetworkException {
         // Upload the photo to the XDM server
         HttpResponse response = mXdm.uploadEndUserPhoto(photo);
         if ((response != null) && response.isSuccessfullResponse()) {
@@ -798,10 +798,10 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * Delete photo icon
      * 
      * @return Boolean result
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public boolean deletePhotoIcon() throws SipPayloadException, SipNetworkException {
+    public boolean deletePhotoIcon() throws PayloadException, NetworkException {
         // Delete the photo from the XDM server
         HttpResponse response = mXdm.deleteEndUserPhoto();
         if ((response != null)
@@ -816,11 +816,11 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * 
      * @param contact Contact
      * @return Returns true if XDM request was successful, else false
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public boolean inviteContactToSharePresence(ContactId contact) throws SipPayloadException,
-            SipNetworkException {
+    public boolean inviteContactToSharePresence(ContactId contact) throws PayloadException,
+            NetworkException {
         // Remove contact from the blocked contacts list
         mXdm.removeContactFromBlockedList(contact);
 
@@ -840,11 +840,11 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * 
      * @param contact Contact
      * @return Returns true if XDM request was successful, else false
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public boolean revokeSharedContact(ContactId contact) throws SipPayloadException,
-            SipNetworkException {
+    public boolean revokeSharedContact(ContactId contact) throws PayloadException,
+            NetworkException {
         // Add contact in the revoked contacts list
         HttpResponse response = mXdm.addContactToRevokedList(contact);
         if ((response == null) || (!response.isSuccessfullResponse())) {
@@ -865,11 +865,11 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * 
      * @param contact Contact
      * @return Returns true if XDM request was successful, else false
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public boolean removeRevokedContact(ContactId contact) throws SipPayloadException,
-            SipNetworkException {
+    public boolean removeRevokedContact(ContactId contact) throws PayloadException,
+            NetworkException {
         // Remove contact from the revoked contacts list
         HttpResponse response = mXdm.removeContactFromRevokedList(contact);
         if ((response != null)
@@ -884,11 +884,11 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * 
      * @param contact Contact
      * @return Returns true if XDM request was successful, else false
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public boolean removeBlockedContact(ContactId contact) throws SipPayloadException,
-            SipNetworkException {
+    public boolean removeBlockedContact(ContactId contact) throws PayloadException,
+            NetworkException {
         // Remove contact from the blocked contacts list
         HttpResponse response = mXdm.removeContactFromBlockedList(contact);
         if ((response != null)
@@ -901,10 +901,10 @@ public class PresenceService extends ImsService implements AddressBookEventListe
     /**
      * Address book content has changed
      * 
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void handleAddressBookHasChanged() throws SipPayloadException, SipNetworkException {
+    public void handleAddressBookHasChanged() throws PayloadException, NetworkException {
         // If a contact used to be in a RCS relationship with us but is not in the address book any
         // more, we may have to remove or
         // unblock it

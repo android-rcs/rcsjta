@@ -22,8 +22,8 @@
 
 package com.gsma.rcs.core.ims.service.capability;
 
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.services.rcs.contact.ContactId;
 
 /**
@@ -36,9 +36,9 @@ public interface DiscoveryManager {
      * Request contact capabilities
      * 
      * @param contact Remote contact identifier
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void requestCapabilities(ContactId contact) throws SipPayloadException,
-            SipNetworkException;
+    public void requestCapabilities(ContactId contact) throws PayloadException,
+            NetworkException;
 }

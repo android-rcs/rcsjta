@@ -23,8 +23,8 @@
 package com.gsma.rcs.core.ims.network.sip;
 
 import com.gsma.rcs.core.TerminalInfo;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipMessage;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.utils.PhoneUtils;
 
@@ -328,12 +328,12 @@ public class SipUtils {
      * 
      * @param message SIP message
      * @return Expire period in milliseconds or -1 in case of error
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public static long getMinExpiresPeriod(SipMessage message) throws SipPayloadException {
+    public static long getMinExpiresPeriod(SipMessage message) throws PayloadException {
         MinExpiresHeader minHeader = (MinExpiresHeader) message.getHeader(MinExpiresHeader.NAME);
         if (minHeader == null) {
-            throw new SipPayloadException(
+            throw new PayloadException(
                     "Unable to read value for header :".concat(MinExpiresHeader.NAME));
         }
         return minHeader.getExpires() * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
@@ -665,9 +665,9 @@ public class SipUtils {
     }
 
     public static void assertContentIsNotNull(String content, SipRequest invite)
-            throws SipPayloadException {
+            throws PayloadException {
         if (content == null) {
-            throw new SipPayloadException("Unable to extract content from invite : ".concat(invite
+            throw new PayloadException("Unable to extract content from invite : ".concat(invite
                     .toString()));
         }
     }

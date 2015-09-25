@@ -25,8 +25,10 @@ package com.gsma.rcs.core.ims.service.richcall.geoloc;
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.content.ContentManager;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
@@ -36,8 +38,6 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -85,11 +85,11 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
     public TerminatingGeolocTransferSession(ImsService parent, SipRequest invite,
             ContactId contact, RcsSettings rcsSettings, long timestamp,
-            ContactManager contactManager) throws SipPayloadException {
+            ContactManager contactManager) throws PayloadException {
         super(parent, ContentManager.createMmContentFromSdp(invite, rcsSettings), contact,
                 rcsSettings, timestamp, contactManager);
         createTerminatingDialogPath(invite);
@@ -303,10 +303,10 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         } catch (IOException e) {
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error("Failed to send 200OK response!", e);
             handleError(new ContentSharingError(ContentSharingError.SEND_RESPONSE_FAILED, e));
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
@@ -349,11 +349,11 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
      * @param msgId Message ID
      * @param data Last received data chunk
      * @param mimeType Data mime-type
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
     public void msrpDataReceived(String msgId, byte[] data, String mimeType)
-            throws SipPayloadException, SipNetworkException {
+            throws PayloadException, NetworkException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info("Data received");
@@ -369,7 +369,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                         initiatedByRemote);
             }
         } catch (IOException e) {
-            throw new SipNetworkException("Failed to receive msrp data for msgId".concat(msgId), e);
+            throw new NetworkException("Failed to receive msrp data for msgId".concat(msgId), e);
         }
     }
 
@@ -437,11 +437,11 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                 ((GeolocTransferSessionListener) listener).handleSharingError(contact,
                         new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
             }
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error(
                     new StringBuilder("Failed to handle msrp error").append(error)
                             .append(" for message ").append(msgId).toString(), e);
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }

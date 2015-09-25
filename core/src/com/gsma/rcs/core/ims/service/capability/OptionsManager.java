@@ -23,10 +23,10 @@
 package com.gsma.rcs.core.ims.service.capability;
 
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
@@ -186,11 +186,11 @@ public class OptionsManager implements DiscoveryManager {
      * Receive a capability request (options procedure)
      * 
      * @param options Received options message
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void onCapabilityRequestReceived(SipRequest options) throws SipPayloadException,
-            SipNetworkException {
+    public void onCapabilityRequestReceived(SipRequest options) throws PayloadException,
+            NetworkException {
         String sipId = SipUtils.getAssertedIdentity(options);
         try {
             PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(sipId);
@@ -235,11 +235,11 @@ public class OptionsManager implements DiscoveryManager {
             mImsModule.getCapabilityService().onReceivedCapabilities(contact, capabilities);
 
         } catch (ContactManagerException e) {
-            throw new SipPayloadException(new StringBuilder(
+            throw new PayloadException(new StringBuilder(
                     "Failed to receive capability request '").append(sipId).append("'").toString(),
                     e);
         } catch (IOException e) {
-            throw new SipNetworkException(new StringBuilder(
+            throw new NetworkException(new StringBuilder(
                     "Failed to receive capability request '").append(sipId).append("'").toString(),
                     e);
         }

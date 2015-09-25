@@ -16,7 +16,7 @@
 
 package com.gsma.rcs.provider;
 
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
@@ -124,7 +124,7 @@ public abstract class DeleteTask<T> implements Runnable {
         }
 
         @Override
-        protected void onRowDelete(String groupId, String itemId) throws SipPayloadException {
+        protected void onRowDelete(String groupId, String itemId) throws PayloadException {
             onRowDelete(itemId);
         }
 
@@ -133,7 +133,7 @@ public abstract class DeleteTask<T> implements Runnable {
             onCompleted(deletedIds);
         }
 
-        protected abstract void onRowDelete(String itemId) throws SipPayloadException;
+        protected abstract void onRowDelete(String itemId) throws PayloadException;
 
         protected abstract void onCompleted(Set<String> deletedIds);
 
@@ -231,9 +231,9 @@ public abstract class DeleteTask<T> implements Runnable {
      * Execution can be run several times as incoming items can be deleted.
      * 
      * @return the result of the execution as map (deleted ids mapped by group column)
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    private Map<T, Set<String>> tryDelete() throws SipPayloadException {
+    private Map<T, Set<String>> tryDelete() throws PayloadException {
         Map<T, Set<String>> items = getGroupedItemIds();
         if (items == null || items.isEmpty()) {
             return null;
@@ -268,9 +268,9 @@ public abstract class DeleteTask<T> implements Runnable {
     /**
      * @param groupId key of the group
      * @param itemId
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    protected abstract void onRowDelete(T groupId, String itemId) throws SipPayloadException;
+    protected abstract void onRowDelete(T groupId, String itemId) throws PayloadException;
 
     /**
      * Called after the delete is completed to report the ids deleted per group chatId or contact.
@@ -307,7 +307,7 @@ public abstract class DeleteTask<T> implements Runnable {
                     }
                 }
             }
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error("Exception occurred while deleting!", e);
         } catch (RuntimeException e) {
             /*

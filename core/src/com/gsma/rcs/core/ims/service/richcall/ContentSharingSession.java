@@ -23,8 +23,8 @@
 package com.gsma.rcs.core.ims.service.richcall;
 
 import com.gsma.rcs.core.content.MmContent;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceSession;
@@ -117,7 +117,7 @@ public abstract class ContentSharingSession extends ImsServiceSession {
     }
 
     @Override
-    public void receiveBye(SipRequest bye) throws SipPayloadException, SipNetworkException {
+    public void receiveBye(SipRequest bye) throws PayloadException, NetworkException {
         super.receiveBye(bye);
         ContactId remote = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
@@ -127,7 +127,7 @@ public abstract class ContentSharingSession extends ImsServiceSession {
     }
 
     @Override
-    public void receiveCancel(SipRequest cancel) throws SipNetworkException, SipPayloadException {
+    public void receiveCancel(SipRequest cancel) throws NetworkException, PayloadException {
         super.receiveCancel(cancel);
 
         // Request capabilities to the remote

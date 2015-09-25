@@ -25,8 +25,8 @@ package com.gsma.rcs.core.ims.service.capability;
 import com.gsma.rcs.addressbook.AddressBookEventListener;
 import com.gsma.rcs.addressbook.AddressBookManager;
 import com.gsma.rcs.core.ims.ImsModule;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.capability.Capabilities.CapabilitiesBuilder;
@@ -237,8 +237,8 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      * Receive a capability request (options procedure)
      * 
      * @param options Received options message
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
     public void onCapabilityRequestReceived(final SipRequest options) {
         scheduleCapabilityOperation(new Runnable() {
@@ -246,12 +246,12 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
             public void run() {
                 try {
                     mOptionsManager.onCapabilityRequestReceived(options);
-                } catch (SipNetworkException e) {
+                } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug("Failed to receive capability request! (" + e.getMessage()
                                 + ")");
                     }
-                } catch (SipPayloadException e) {
+                } catch (PayloadException e) {
                     sLogger.error("Failed to receive capability request!", e);
                 } catch (RuntimeException e) {
                     /*
@@ -278,12 +278,12 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
             public void run() {
                 try {
                     mAnonymousFetchManager.onNotificationReceived(notify);
-                } catch (SipNetworkException e) {
+                } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug("Failed to receive capability notification! ("
                                 + e.getMessage() + ")");
                     }
-                } catch (SipPayloadException e) {
+                } catch (PayloadException e) {
                     sLogger.error("Failed to receive capability notification!", e);
                 } catch (RuntimeException e) {
                     /*
@@ -324,11 +324,11 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      * Reset the content sharing capabilities for a given contact identifier
      * 
      * @param contact Contact identifier
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     public void resetContactCapabilitiesForContentSharing(ContactId contact)
-            throws SipPayloadException, SipNetworkException {
+            throws PayloadException, NetworkException {
         try {
             Capabilities capabilities = mContactManager.getContactCapabilities(contact);
             if (capabilities == null
@@ -346,11 +346,11 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
             onReceivedCapabilities(contact, capabilities);
 
         } catch (ContactManagerException e) {
-            throw new SipPayloadException(
+            throw new PayloadException(
                     "Failed to reset content share capabilities for contact : ".concat(contact
                             .toString()), e);
         } catch (IOException e) {
-            throw new SipNetworkException(
+            throw new NetworkException(
                     "Failed to reset content share capabilities for contact : ".concat(contact
                             .toString()), e);
         }

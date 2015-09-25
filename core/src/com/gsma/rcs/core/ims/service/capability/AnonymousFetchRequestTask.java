@@ -23,11 +23,11 @@
 package com.gsma.rcs.core.ims.service.capability;
 
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -108,20 +108,20 @@ public class AnonymousFetchRequestTask {
     /**
      * Start task
      * 
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void start() throws SipPayloadException, SipNetworkException {
+    public void start() throws PayloadException, NetworkException {
         sendSubscribe();
     }
 
     /**
      * Send a SUBSCRIBE request
      * 
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    private void sendSubscribe() throws SipPayloadException, SipNetworkException {
+    private void sendSubscribe() throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Send SUBSCRIBE request to " + mContact);
         }
@@ -154,9 +154,9 @@ public class AnonymousFetchRequestTask {
      * Create a SUBSCRIBE request
      * 
      * @return SIP request
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    private SipRequest createSubscribe() throws SipPayloadException {
+    private SipRequest createSubscribe() throws PayloadException {
         try {
             SipRequest subscribe = SipMessageFactory.createSubscribe(mDialogPath, 0);
             subscribe.addHeader(SipUtils.HEADER_PRIVACY, "id");
@@ -165,7 +165,7 @@ public class AnonymousFetchRequestTask {
             return subscribe;
 
         } catch (ParseException e) {
-            throw new SipPayloadException("Failed to create subscribe request!", e);
+            throw new PayloadException("Failed to create subscribe request!", e);
         }
     }
 
@@ -173,11 +173,11 @@ public class AnonymousFetchRequestTask {
      * Send SUBSCRIBE message
      * 
      * @param subscribe SIP SUBSCRIBE
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void sendSubscribe(SipRequest subscribe) throws SipPayloadException,
-            SipNetworkException {
+    private void sendSubscribe(SipRequest subscribe) throws PayloadException,
+            NetworkException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info(new StringBuilder("Send SUBSCRIBE, expire=")
@@ -213,10 +213,10 @@ public class AnonymousFetchRequestTask {
                 handleError(new PresenceError(PresenceError.SUBSCRIBE_FAILED));
             }
         } catch (ContactManagerException e) {
-            throw new SipPayloadException("Failed to send SUBSCRIBE!", e);
+            throw new PayloadException("Failed to send SUBSCRIBE!", e);
 
         } catch (IOException e) {
-            throw new SipNetworkException("Failed to send SUBSCRIBE!", e);
+            throw new NetworkException("Failed to send SUBSCRIBE!", e);
         }
     }
 
@@ -235,11 +235,11 @@ public class AnonymousFetchRequestTask {
      * Handle 407 response
      * 
      * @param ctx SIP transaction context
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void handle407Authentication(SipTransactionContext ctx) throws SipPayloadException,
-            SipNetworkException {
+    private void handle407Authentication(SipTransactionContext ctx) throws PayloadException,
+            NetworkException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info("407 response received");
@@ -264,10 +264,10 @@ public class AnonymousFetchRequestTask {
 
             sendSubscribe(subscribe);
         } catch (InvalidArgumentException e) {
-            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
+            throw new PayloadException("Failed to handle 407 authentication response!", e);
 
         } catch (ParseException e) {
-            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
+            throw new PayloadException("Failed to handle 407 authentication response!", e);
         }
     }
 

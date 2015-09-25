@@ -22,11 +22,11 @@
 
 package com.gsma.rcs.core.ims.service.sip;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
@@ -100,9 +100,9 @@ public abstract class GenericSipSession extends ImsServiceSession {
      * Create an INVITE request
      * 
      * @return Request
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public SipRequest createInvite() throws SipPayloadException {
+    public SipRequest createInvite() throws PayloadException {
         String ext = new StringBuilder(FeatureTags.FEATURE_3GPP).append("=\"")
                 .append(FeatureTags.FEATURE_3GPP_EXTENSION).append("\"").toString();
         SipRequest invite = SipMessageFactory.createInvite(getDialogPath(), new String[] {
@@ -116,7 +116,7 @@ public abstract class GenericSipSession extends ImsServiceSession {
                     PPreferredServiceHeader.NAME, FeatureTags.FEATURE_3GPP_SERVICE_EXTENSION);
             invite.getStackMessage().addHeader(header);
         } catch (ParseException e) {
-            throw new SipPayloadException(
+            throw new PayloadException(
                     "Can't add SIP headertype ".concat(FeatureTags.FEATURE_3GPP_SERVICE_EXTENSION),
                     e);
         }
@@ -128,9 +128,9 @@ public abstract class GenericSipSession extends ImsServiceSession {
      * Create 200 OK response
      * 
      * @return Response
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public SipResponse create200OKResponse() throws SipPayloadException {
+    public SipResponse create200OKResponse() throws PayloadException {
         String ext = FeatureTags.FEATURE_3GPP + "=\"" + FeatureTags.FEATURE_3GPP_EXTENSION + "\"";
         SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
                 new String[] {
@@ -186,7 +186,7 @@ public abstract class GenericSipSession extends ImsServiceSession {
     }
 
     @Override
-    public void receiveBye(SipRequest bye) throws SipPayloadException, SipNetworkException {
+    public void receiveBye(SipRequest bye) throws PayloadException, NetworkException {
         super.receiveBye(bye);
         ContactId remote = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
@@ -196,7 +196,7 @@ public abstract class GenericSipSession extends ImsServiceSession {
     }
 
     @Override
-    public void receiveCancel(SipRequest cancel) throws SipNetworkException, SipPayloadException {
+    public void receiveCancel(SipRequest cancel) throws NetworkException, PayloadException {
         super.receiveCancel(cancel);
 
         // Request capabilities to the remote

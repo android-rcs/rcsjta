@@ -22,7 +22,7 @@
 
 package com.gsma.rcs.provider.messaging;
 
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
@@ -47,21 +47,21 @@ public interface IMessageLog {
      * Add a spam message
      * 
      * @param msg Chat message
-     * @throws SipPayloadException
+     * @throws PayloadException
      * @throws IOException
      */
-    public void addOneToOneSpamMessage(ChatMessage msg) throws SipPayloadException, IOException;
+    public void addOneToOneSpamMessage(ChatMessage msg) throws PayloadException, IOException;
 
     /**
      * Add a chat message
      * 
      * @param msg Chat message
      * @param imdnDisplayedRequested IMDN display report requested
-     * @throws SipPayloadException
+     * @throws PayloadException
      * @throws IOException
      */
     public void addIncomingOneToOneChatMessage(ChatMessage msg, boolean imdnDisplayedRequested)
-            throws SipPayloadException, IOException;
+            throws PayloadException, IOException;
 
     /**
      * Add a chat message
@@ -70,11 +70,11 @@ public interface IMessageLog {
      * @param status Message status
      * @param reasonCode Status reason code
      * @param deliveryExpiration TODO
-     * @throws SipPayloadException
+     * @throws PayloadException
      * @throws IOException
      */
     public void addOutgoingOneToOneChatMessage(ChatMessage msg, Status status,
-            ReasonCode reasonCode, long deliveryExpiration) throws SipPayloadException, IOException;
+            ReasonCode reasonCode, long deliveryExpiration) throws PayloadException, IOException;
 
     /**
      * Add an incoming group chat message
@@ -82,11 +82,11 @@ public interface IMessageLog {
      * @param chatId Chat ID
      * @param msg Chat message
      * @param imdnDisplayedRequested IMDN display report requested
-     * @throws SipPayloadException
+     * @throws PayloadException
      * @throws IOException
      */
     public void addIncomingGroupChatMessage(String chatId, ChatMessage msg,
-            boolean imdnDisplayedRequested) throws SipPayloadException, IOException;
+            boolean imdnDisplayedRequested) throws PayloadException, IOException;
 
     /**
      * Add an outgoing group chat message
@@ -95,12 +95,12 @@ public interface IMessageLog {
      * @param msg Chat message
      * @param status Message status
      * @param reasonCode Status reason code
-     * @throws SipPayloadException
+     * @throws PayloadException
      * @throws IOException
      */
     public void addOutgoingGroupChatMessage(String chatId, ChatMessage msg,
             Set<ContactId> recipients, Status status, ReasonCode reasonCode)
-            throws SipPayloadException, IOException;
+            throws PayloadException, IOException;
 
     /**
      * Add group chat system message

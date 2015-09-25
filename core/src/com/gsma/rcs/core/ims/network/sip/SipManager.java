@@ -23,12 +23,12 @@
 package com.gsma.rcs.core.ims.network.sip;
 
 import com.gsma.rcs.core.ims.network.ImsNetworkInterface;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.KeepAliveManager;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipInterface;
 import com.gsma.rcs.core.ims.protocol.sip.SipMessage;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -125,12 +125,12 @@ public class SipManager {
      * @param protocol
      * @param tcpFallback TCP fallback according to RFC3261 chapter 18.1.1
      * @param networkType type of network
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     public synchronized void initStack(String localAddr, String proxyAddr, int proxyPort,
-            String protocol, boolean tcpFallback, int networkType) throws SipPayloadException,
-            SipNetworkException {
+            String protocol, boolean tcpFallback, int networkType) throws PayloadException,
+            NetworkException {
 
         closeStack();
 
@@ -156,11 +156,11 @@ public class SipManager {
      * 
      * @param message SIP message
      * @return Transaction context
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     public SipTransactionContext sendSipMessageAndWait(SipMessage message)
-            throws SipPayloadException, SipNetworkException {
+            throws PayloadException, NetworkException {
         return sendSipMessageAndWait(message, SipManager.sTimeout);
     }
 
@@ -170,11 +170,11 @@ public class SipManager {
      * @param message SIP message
      * @param timeout SIP timeout in milliseconds
      * @return Transaction context
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     public SipTransactionContext sendSipMessageAndWait(SipMessage message, long timeout)
-            throws SipPayloadException, SipNetworkException {
+            throws PayloadException, NetworkException {
         return sendSipMessageAndWait(message, timeout, null);
     }
 
@@ -183,11 +183,11 @@ public class SipManager {
      * 
      * @param message SIP message
      * @return Transaction context
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public SipTransactionContext sendSipMessage(SipMessage message) throws SipPayloadException,
-            SipNetworkException {
+    public SipTransactionContext sendSipMessage(SipMessage message) throws PayloadException,
+            NetworkException {
         return sendSipMessage(message, null);
     }
 
@@ -198,12 +198,12 @@ public class SipManager {
      * @param timeout in milliseconds
      * @param callback callback to handle provisional response
      * @return SIP transaction context
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     public SipTransactionContext sendSipMessageAndWait(SipMessage message, long timeout,
             SipTransactionContext.INotifySipProvisionalResponse callback)
-            throws SipNetworkException, SipPayloadException {
+            throws NetworkException, PayloadException {
         SipTransactionContext ctx = sipstack.sendSipMessageAndWait(message, callback);
         ctx.waitResponse(timeout);
 
@@ -273,12 +273,12 @@ public class SipManager {
      * @param message
      * @param callback callback to handle provisional response
      * @return SIP transaction context
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     public SipTransactionContext sendSipMessage(SipMessage message,
             SipTransactionContext.INotifySipProvisionalResponse callback)
-            throws SipNetworkException, SipPayloadException {
+            throws NetworkException, PayloadException {
         SipTransactionContext ctx = sipstack.sendSipMessageAndWait(message, callback);
         return ctx;
     }
@@ -366,9 +366,9 @@ public class SipManager {
      * Send a SIP response
      * 
      * @param response SIP response
-     * @throws SipNetworkException
+     * @throws NetworkException
      */
-    public void sendSipResponse(SipResponse response) throws SipNetworkException {
+    public void sendSipResponse(SipResponse response) throws NetworkException {
         sipstack.sendSipResponse(response);
     }
 
@@ -376,10 +376,10 @@ public class SipManager {
      * Send a SIP ACK
      * 
      * @param dialog Dialog path
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void sendSipAck(SipDialogPath dialog) throws SipPayloadException, SipNetworkException {
+    public void sendSipAck(SipDialogPath dialog) throws PayloadException, NetworkException {
         sipstack.sendSipAck(dialog);
     }
 
@@ -387,10 +387,10 @@ public class SipManager {
      * Send a SIP BYE
      * 
      * @param dialog Dialog path
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void sendSipBye(SipDialogPath dialog) throws SipPayloadException, SipNetworkException {
+    public void sendSipBye(SipDialogPath dialog) throws PayloadException, NetworkException {
         sipstack.sendSipBye(dialog);
     }
 
@@ -398,10 +398,10 @@ public class SipManager {
      * Send a SIP CANCEL
      * 
      * @param dialog Dialog path
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void sendSipCancel(SipDialogPath dialog) throws SipPayloadException, SipNetworkException {
+    public void sendSipCancel(SipDialogPath dialog) throws PayloadException, NetworkException {
         sipstack.sendSipCancel(dialog);
 
     }
@@ -412,11 +412,11 @@ public class SipManager {
      * @param dialog Dialog path
      * @param request Request
      * @return SipTransactionContext
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
     public SipTransactionContext sendSubsequentRequest(SipDialogPath dialog, SipRequest request)
-            throws SipNetworkException, SipPayloadException {
+            throws NetworkException, PayloadException {
         return sendSubsequentRequest(dialog, request, SipManager.sTimeout);
     }
 
@@ -427,11 +427,11 @@ public class SipManager {
      * @param request Request
      * @param timeout SIP timeout in milliseconds
      * @return SipTransactionContext
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     private SipTransactionContext sendSubsequentRequest(SipDialogPath dialog, SipRequest request,
-            long timeout) throws SipNetworkException, SipPayloadException {
+            long timeout) throws NetworkException, PayloadException {
         SipTransactionContext ctx = sipstack.sendSubsequentRequest(dialog, request);
         ctx.waitResponse(timeout);
 
@@ -441,7 +441,7 @@ public class SipManager {
             WarningHeader warn = (WarningHeader) ctx.getSipResponse().getHeader(WarningHeader.NAME);
             if ((Response.FORBIDDEN == code) && (warn == null)) {
                 mNetworkInterface.getRegistrationManager().restart();
-                throw new SipPayloadException(
+                throw new PayloadException(
                         "Stack not properly registered with status code : ".concat(Integer
                                 .toString(code)));
             }

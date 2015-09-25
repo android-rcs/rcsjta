@@ -24,12 +24,12 @@ package com.gsma.rcs.core.ims.service.im.chat;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -174,10 +174,10 @@ public class RestartGroupChatSession extends GroupChatSession {
         } catch (ParseException e) {
             sLogger.error("Unable to set authorization header for chat invite!", e);
             handleError(new ChatError(ChatError.SESSION_RESTART_FAILED, e));
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error("Unable to send 200OK response!", e);
             handleError(new ChatError(ChatError.SESSION_RESTART_FAILED, e));
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
@@ -197,9 +197,9 @@ public class RestartGroupChatSession extends GroupChatSession {
      * 
      * @param content Content part
      * @return Request
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    private SipRequest createInviteRequest(String content) throws SipPayloadException {
+    private SipRequest createInviteRequest(String content) throws PayloadException {
         try {
             SipRequest invite = SipMessageFactory.createMultipartInvite(getDialogPath(),
                     getFeatureTags(), getAcceptContactTags(), content, BOUNDARY_TAG);
@@ -212,7 +212,7 @@ public class RestartGroupChatSession extends GroupChatSession {
             return invite;
 
         } catch (ParseException e) {
-            throw new SipPayloadException("Failed to create invite request!", e);
+            throw new PayloadException("Failed to create invite request!", e);
         }
     }
 
@@ -220,9 +220,9 @@ public class RestartGroupChatSession extends GroupChatSession {
      * Create an INVITE request
      * 
      * @return the INVITE request
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public SipRequest createInvite() throws SipPayloadException {
+    public SipRequest createInvite() throws PayloadException {
         return createInviteRequest(getDialogPath().getLocalContent());
     }
 

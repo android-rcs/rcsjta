@@ -24,7 +24,7 @@ package com.gsma.rcs.core.ims.network.registration;
 
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.userprofile.UserProfile;
@@ -126,15 +126,15 @@ public class GibaRegistrationProcedure extends RegistrationProcedure {
      * Read the security header from REGISTER response
      * 
      * @param response Response
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public void readSecurityHeader(SipResponse response) throws SipPayloadException {
+    public void readSecurityHeader(SipResponse response) throws PayloadException {
         SipURI sipUri = getSipUri(response.getHeaders(SipUtils.HEADER_P_ASSOCIATED_URI));
 
         String user = sipUri.getUser();
         PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(user);
         if (number == null) {
-            throw new SipPayloadException(new StringBuilder(
+            throw new PayloadException(new StringBuilder(
                     "Can't read a SIP-URI from the P-Associated-URI header: invalid user '")
                     .append(user).append("'").toString());
         }
@@ -150,9 +150,9 @@ public class GibaRegistrationProcedure extends RegistrationProcedure {
      * 
      * @param list
      * @return
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    private SipURI getSipUri(ListIterator<Header> list) throws SipPayloadException {
+    private SipURI getSipUri(ListIterator<Header> list) throws PayloadException {
         SipURI sipUri = null;
         while (list.hasNext()) {
             ExtensionHeader associatedHeader = (ExtensionHeader) list.next();
@@ -172,7 +172,7 @@ public class GibaRegistrationProcedure extends RegistrationProcedure {
             }
         }
         if (sipUri == null) {
-            throw new SipPayloadException("No SIP-URI found in the P-Associated-URI header!");
+            throw new PayloadException("No SIP-URI found in the P-Associated-URI header!");
         }
         return sipUri;
     }

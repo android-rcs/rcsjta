@@ -22,9 +22,9 @@
 
 package com.gsma.rcs.core.ims.service;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -84,10 +84,10 @@ public class UpdateSessionManager {
      * @param featureTags featureTags to set in reInvite
      * @param content reInvite content
      * @return reInvite request
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
     public SipRequest createReInvite(String[] featureTags, String content)
-            throws SipPayloadException {
+            throws PayloadException {
         if (sLogger.isActivated()) {
             sLogger.debug("createReInvite()");
         }
@@ -117,10 +117,10 @@ public class UpdateSessionManager {
             return reInvite;
 
         } catch (InvalidArgumentException e) {
-            throw new SipPayloadException("Unable to create re-invite request!", e);
+            throw new PayloadException("Unable to create re-invite request!", e);
 
         } catch (ParseException e) {
-            throw new SipPayloadException("Unable to create re-invite request!", e);
+            throw new PayloadException("Unable to create re-invite request!", e);
         }
 
     }
@@ -130,11 +130,11 @@ public class UpdateSessionManager {
      * 
      * @param request ReInvite request
      * @param serviceContext service context of ReInvite
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void sendReInvite(SipRequest request, int serviceContext) throws SipPayloadException,
-            SipNetworkException {
+    public void sendReInvite(SipRequest request, int serviceContext) throws PayloadException,
+            NetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug("sendReInvite()");
         }
@@ -183,11 +183,11 @@ public class UpdateSessionManager {
      * @param featureTags featureTags to set in request
      * @param sdpResponse
      * @param serviceContext service context of reInvite request
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     public void send200OkReInviteResp(SipRequest request, String[] featureTags, String sdpResponse,
-            int serviceContext) throws SipPayloadException, SipNetworkException {
+            int serviceContext) throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug("receiveReInvite()");
         }
@@ -215,11 +215,11 @@ public class UpdateSessionManager {
      * @param request RE-INVITE request
      * @param featureTags featureTags to set in request
      * @param serviceContext service context of reInvite request
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     public void waitUserAckAndSendReInviteResp(SipRequest request, String[] featureTags,
-            int serviceContext) throws SipPayloadException, SipNetworkException {
+            int serviceContext) throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug("waitUserAckAndSendReInviteResp()");
         }

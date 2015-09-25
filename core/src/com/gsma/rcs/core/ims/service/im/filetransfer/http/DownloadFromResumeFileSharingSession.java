@@ -23,8 +23,8 @@ w * Software Name : RCS IMS Stack
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import com.gsma.rcs.core.content.MmContent;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
@@ -132,10 +132,10 @@ public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSha
                 return;
             }
             handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             mLogger.error("Resume Download file has failed for ".concat(mResume.toString()), e);
             handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (mLogger.isActivated()) {
                 mLogger.debug(e.getMessage());
             }

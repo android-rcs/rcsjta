@@ -23,12 +23,12 @@
 package com.gsma.rcs.core.ims.service;
 
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipManager;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -322,10 +322,10 @@ public abstract class ImsServiceSession extends Thread {
     /**
      * Start the session in background
      * 
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public abstract void startSession() throws SipPayloadException, SipNetworkException;
+    public abstract void startSession() throws PayloadException, NetworkException;
 
     /**
      * Removes the session
@@ -519,11 +519,11 @@ public abstract class ImsServiceSession extends Thread {
      * closeSession(TerminationReason).
      * 
      * @param reason Termination reason
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void terminateSession(TerminationReason reason) throws SipPayloadException,
-            SipNetworkException {
+    public void terminateSession(TerminationReason reason) throws PayloadException,
+            NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Terminate the session ".concat(reason.toString()));
         }
@@ -557,10 +557,10 @@ public abstract class ImsServiceSession extends Thread {
     /**
      * Force terminate and remove the session
      * 
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void deleteSession() throws SipPayloadException, SipNetworkException {
+    public void deleteSession() throws PayloadException, NetworkException {
         mInvitationStatus = InvitationStatus.INVITATION_DELETED;
         interruptSession();
         closeSession(TerminationReason.TERMINATION_BY_USER);
@@ -574,11 +574,11 @@ public abstract class ImsServiceSession extends Thread {
      * terminateSession(TerminationReason).
      * 
      * @param reason Reason
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void closeSession(TerminationReason reason) throws SipPayloadException,
-            SipNetworkException {
+    public void closeSession(TerminationReason reason) throws PayloadException,
+            NetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug(new StringBuilder("Close the session (reason ").append(reason)
                     .append(")").toString());
@@ -616,10 +616,10 @@ public abstract class ImsServiceSession extends Thread {
      * Receive BYE request
      * 
      * @param bye BYE request
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void receiveBye(SipRequest bye) throws SipPayloadException, SipNetworkException {
+    public void receiveBye(SipRequest bye) throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Receive a BYE message from the remote");
         }
@@ -638,10 +638,10 @@ public abstract class ImsServiceSession extends Thread {
      * Receive CANCEL request
      * 
      * @param cancel CANCEL request
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void receiveCancel(SipRequest cancel) throws SipNetworkException, SipPayloadException {
+    public void receiveCancel(SipRequest cancel) throws NetworkException, PayloadException {
         if (sLogger.isActivated()) {
             sLogger.info("Receive a CANCEL message from the remote");
         }
@@ -673,11 +673,11 @@ public abstract class ImsServiceSession extends Thread {
      * Receive re-INVITE request
      * 
      * @param reInvite re-INVITE request
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void receiveReInvite(SipRequest reInvite) throws SipPayloadException,
-            SipNetworkException {
+    public void receiveReInvite(SipRequest reInvite) throws PayloadException,
+            NetworkException {
         // Session refresh management
         mSessionTimer.receiveReInvite(reInvite);
     }
@@ -686,10 +686,10 @@ public abstract class ImsServiceSession extends Thread {
      * Receive UPDATE request
      * 
      * @param update UPDATE request
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void receiveUpdate(SipRequest update) throws SipNetworkException, SipPayloadException {
+    public void receiveUpdate(SipRequest update) throws NetworkException, PayloadException {
         mSessionTimer.receiveUpdate(update);
     }
 
@@ -704,29 +704,29 @@ public abstract class ImsServiceSession extends Thread {
      * Prepare media session
      * 
      * @throws IOException
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public abstract void prepareMediaSession() throws IOException, SipPayloadException,
-            SipNetworkException;
+    public abstract void prepareMediaSession() throws IOException, PayloadException,
+            NetworkException;
 
     /**
      * Open media session
      * 
      * @throws IOException
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public abstract void openMediaSession() throws IOException, SipPayloadException;
+    public abstract void openMediaSession() throws IOException, PayloadException;
 
     /**
      * Start media transfer
      * 
      * @throws IOException
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public abstract void startMediaTransfer() throws IOException, SipPayloadException,
-            SipNetworkException;
+    public abstract void startMediaTransfer() throws IOException, PayloadException,
+            NetworkException;
 
     /**
      * Close media session
@@ -738,11 +738,11 @@ public abstract class ImsServiceSession extends Thread {
      * 
      * @param request SIP request
      * @param localTag Local tag
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void send180Ringing(SipRequest request, String localTag) throws SipNetworkException,
-            SipPayloadException {
+    public void send180Ringing(SipRequest request, String localTag) throws NetworkException,
+            PayloadException {
         getImsService()
                 .getImsModule()
                 .getSipManager()
@@ -756,11 +756,11 @@ public abstract class ImsServiceSession extends Thread {
      * @param request SIP request
      * @param localTag Local tag
      * @param status InvitationStatus
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     public void sendErrorResponse(SipRequest request, String localTag, InvitationStatus status)
-            throws SipPayloadException, SipNetworkException {
+            throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("Send ").append(status).append(" error response")
                     .toString());
@@ -788,11 +788,11 @@ public abstract class ImsServiceSession extends Thread {
      * 
      * @param request SIP request
      * @param localTag Local tag
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void send603Decline(SipRequest request, String localTag) throws SipNetworkException,
-            SipPayloadException {
+    public void send603Decline(SipRequest request, String localTag) throws NetworkException,
+            PayloadException {
         if (sLogger.isActivated()) {
             sLogger.info("Send 603 Decline");
         }
@@ -809,11 +809,11 @@ public abstract class ImsServiceSession extends Thread {
      * @param request SIP request
      * @param localTag Local tag
      * @param warning the warning message
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     private void send403Forbidden(SipRequest request, String localTag, String warning)
-            throws SipNetworkException, SipPayloadException {
+            throws NetworkException, PayloadException {
         if (sLogger.isActivated()) {
             sLogger.info("Send 403 Forbidden (warning=" + warning + ")");
         }
@@ -830,11 +830,11 @@ public abstract class ImsServiceSession extends Thread {
      * 
      * @param request SIP request
      * @param localTag Local tag
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void send486Busy(SipRequest request, String localTag) throws SipNetworkException,
-            SipPayloadException {
+    public void send486Busy(SipRequest request, String localTag) throws NetworkException,
+            PayloadException {
         if (sLogger.isActivated()) {
             sLogger.info("Send 486 Busy");
         }
@@ -849,10 +849,10 @@ public abstract class ImsServiceSession extends Thread {
      * Send a 415 "Unsupported Media Type" to the remote party
      * 
      * @param request SIP request
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void send415Error(SipRequest request) throws SipNetworkException, SipPayloadException {
+    public void send415Error(SipRequest request) throws NetworkException, PayloadException {
         if (sLogger.isActivated()) {
             sLogger.info("Send 415 Unsupported Media Type");
         }
@@ -954,18 +954,18 @@ public abstract class ImsServiceSession extends Thread {
      * Create an INVITE request
      * 
      * @return the INVITE request
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public abstract SipRequest createInvite() throws SipPayloadException;
+    public abstract SipRequest createInvite() throws PayloadException;
 
     /**
      * Send INVITE message
      * 
      * @param invite SIP INVITE
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void sendInvite(SipRequest invite) throws SipPayloadException, SipNetworkException {
+    public void sendInvite(SipRequest invite) throws PayloadException, NetworkException {
         // Send INVITE request
         SipTransactionContext ctx = getImsService()
                 .getImsModule()
@@ -1034,10 +1034,10 @@ public abstract class ImsServiceSession extends Thread {
      * Handle 200 0K response
      * 
      * @param resp 200 OK response
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    public void handle200OK(SipResponse resp) throws SipPayloadException, SipNetworkException {
+    public void handle200OK(SipResponse resp) throws PayloadException, NetworkException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info("200 OK response received");
@@ -1083,17 +1083,17 @@ public abstract class ImsServiceSession extends Thread {
             }
             startMediaTransfer();
         } catch (IOException e) {
-            throw new SipNetworkException("Session initiation has failed!", e);
+            throw new NetworkException("Session initiation has failed!", e);
         }
     }
 
     /**
      * Session inactivity event
      * 
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public abstract void handleInactivityEvent() throws SipPayloadException, SipNetworkException;
+    public abstract void handleInactivityEvent() throws PayloadException, NetworkException;
 
     /**
      * Handle default error
@@ -1129,11 +1129,11 @@ public abstract class ImsServiceSession extends Thread {
      * Handle 407 Proxy Authentication Required
      * 
      * @param resp 407 response
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void handle407Authentication(SipResponse resp) throws SipPayloadException,
-            SipNetworkException {
+    public void handle407Authentication(SipResponse resp) throws PayloadException,
+            NetworkException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info("407 response received");
@@ -1160,10 +1160,10 @@ public abstract class ImsServiceSession extends Thread {
             // Send INVITE request
             sendInvite(invite);
         } catch (InvalidArgumentException e) {
-            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
+            throw new PayloadException("Failed to handle 407 authentication response!", e);
 
         } catch (ParseException e) {
-            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
+            throw new PayloadException("Failed to handle 407 authentication response!", e);
         }
 
     }
@@ -1172,11 +1172,11 @@ public abstract class ImsServiceSession extends Thread {
      * Handle 422 response
      * 
      * @param resp 422 response
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
-    public void handle422SessionTooSmall(SipResponse resp) throws SipPayloadException,
-            SipNetworkException {
+    public void handle422SessionTooSmall(SipResponse resp) throws PayloadException,
+            NetworkException {
         try {
             // 422 response received
             if (sLogger.isActivated()) {
@@ -1219,10 +1219,10 @@ public abstract class ImsServiceSession extends Thread {
             // Send INVITE request
             sendInvite(invite);
         } catch (InvalidArgumentException e) {
-            throw new SipPayloadException("Unable to handle session too small response!", e);
+            throw new PayloadException("Unable to handle session too small response!", e);
 
         } catch (ParseException e) {
-            throw new SipPayloadException("Unable to handle session too small response!", e);
+            throw new PayloadException("Unable to handle session too small response!", e);
         }
     }
 
@@ -1306,22 +1306,22 @@ public abstract class ImsServiceSession extends Thread {
      * 
      * @param response reInvite SIP response
      * @param serviceContext context of reInvite
-     * @throws SipNetworkException
-     * @throws SipPayloadException
+     * @throws NetworkException
+     * @throws PayloadException
      */
     public void handleReInvite407ProxyAuthent(SipResponse response, int serviceContext)
-            throws SipPayloadException, SipNetworkException {
+            throws PayloadException, NetworkException {
     }
 
     /**
      * @param ReInvite
      * @param serviceContext
      * @return SDP built
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
     public String buildReInviteSdpResponse(SipRequest ReInvite, int serviceContext)
-            throws SipPayloadException, SipNetworkException {
+            throws PayloadException, NetworkException {
         return null;
     }
 

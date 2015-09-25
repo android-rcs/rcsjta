@@ -23,10 +23,10 @@
 package com.gsma.rcs.core.ims.service.capability;
 
 import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipNetworkException;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -97,10 +97,10 @@ public class OptionsRequestTask implements Runnable {
     public void run() {
         try {
             sendOptions();
-        } catch (SipPayloadException e) {
+        } catch (PayloadException e) {
             sLogger.error("Options request failed for contact : ".concat(mContact.toString()), e);
             handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, e));
-        } catch (SipNetworkException e) {
+        } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
@@ -135,11 +135,11 @@ public class OptionsRequestTask implements Runnable {
     /**
      * Send an OPTIONS request
      * 
-     * @throws SipPayloadException
+     * @throws PayloadException
      * @throws ContactManagerException
-     * @throws SipNetworkException
+     * @throws NetworkException
      */
-    private void sendOptions() throws SipPayloadException, SipNetworkException {
+    private void sendOptions() throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Send an options request to ".concat(mContact.toString()));
         }
@@ -168,12 +168,12 @@ public class OptionsRequestTask implements Runnable {
      * Sends OPTIONS message and waits for response
      * 
      * @param options SIP OPTIONS
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      * @throws ContactManagerException
      */
-    private void sendAndWaitOptions(SipRequest options) throws SipPayloadException,
-            SipNetworkException {
+    private void sendAndWaitOptions(SipRequest options) throws PayloadException,
+            NetworkException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info("Send OPTIONS");
@@ -212,10 +212,10 @@ public class OptionsRequestTask implements Runnable {
                         .toString()));
             }
         } catch (ContactManagerException e) {
-            throw new SipPayloadException("Failed to send OPTIONS!", e);
+            throw new PayloadException("Failed to send OPTIONS!", e);
 
         } catch (IOException e) {
-            throw new SipNetworkException("Failed to send OPTIONS!", e);
+            throw new NetworkException("Failed to send OPTIONS!", e);
         }
     }
 
@@ -318,11 +318,11 @@ public class OptionsRequestTask implements Runnable {
      * Handle 407 response
      * 
      * @param ctx SIP transaction context
-     * @throws SipPayloadException
-     * @throws SipNetworkException
+     * @throws PayloadException
+     * @throws NetworkException
      */
-    private void handle407Authentication(SipTransactionContext ctx) throws SipPayloadException,
-            SipNetworkException {
+    private void handle407Authentication(SipTransactionContext ctx) throws PayloadException,
+            NetworkException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info("407 response received");
@@ -344,10 +344,10 @@ public class OptionsRequestTask implements Runnable {
 
             sendAndWaitOptions(options);
         } catch (InvalidArgumentException e) {
-            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
+            throw new PayloadException("Failed to handle 407 authentication response!", e);
 
         } catch (ParseException e) {
-            throw new SipPayloadException("Failed to handle 407 authentication response!", e);
+            throw new PayloadException("Failed to handle 407 authentication response!", e);
         }
     }
 

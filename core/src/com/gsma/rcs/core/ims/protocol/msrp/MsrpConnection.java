@@ -22,7 +22,7 @@
 
 package com.gsma.rcs.core.ims.protocol.msrp;
 
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.platform.network.SocketConnection;
 import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -82,9 +82,9 @@ public abstract class MsrpConnection {
      * Open the connection
      * 
      * @throws IOException
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public void open() throws IOException, SipPayloadException {
+    public void open() throws IOException, PayloadException {
         // Open socket connection
         mSocket = getSocketConnection();
 
@@ -110,9 +110,9 @@ public abstract class MsrpConnection {
      * 
      * @param timeout Timeout value (in milliseconds)
      * @throws IOException
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public void open(long timeout) throws IOException, SipPayloadException {
+    public void open(long timeout) throws IOException, PayloadException {
         // Open socket connection
         mSocket = getSocketConnection();
 
@@ -189,9 +189,9 @@ public abstract class MsrpConnection {
      * 
      * @return Socket
      * @throws IOException
-     * @throws SipPayloadException
+     * @throws PayloadException
      */
-    public abstract SocketConnection getSocketConnection() throws IOException, SipPayloadException;
+    public abstract SocketConnection getSocketConnection() throws IOException, PayloadException;
 
     /**
      * Checks if MSRP trace is enabled
