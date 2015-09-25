@@ -22,9 +22,9 @@
 
 package com.gsma.rcs.service.api;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
@@ -157,10 +157,10 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param msgId Message ID
      * @param remote Remote contact
      * @param timestamp Timestamp sent in payload for IMDN datetime
-     * @throws MsrpException
+     * @throws NetworkException
      */
     public void sendOne2OneDisplayedDeliveryReport(String msgId, ContactId remote, long timestamp)
-            throws MsrpException {
+            throws NetworkException {
         getOrCreateOneToOneChat(remote).sendDisplayedDeliveryReport(remote, msgId, timestamp);
     }
 
@@ -170,10 +170,10 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param msgId Message ID
      * @param contact Contact ID
      * @param timestamp Timestamp sent in payload for IMDN datetime
-     * @throws MsrpException
+     * @throws NetworkException
      */
     public void sendGroupChatDisplayedDeliveryReport(final String msgId, final ContactId contact,
-            final long timestamp, String chatId) throws MsrpException {
+            final long timestamp, String chatId) throws NetworkException {
         final GroupChatSession session = mImService.getGroupChatSession(chatId);
         if (session == null || !session.isMediaEstablished()) {
             if (sLogger.isActivated()) {

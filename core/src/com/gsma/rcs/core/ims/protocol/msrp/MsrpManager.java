@@ -22,6 +22,8 @@
 
 package com.gsma.rcs.core.ims.protocol.msrp;
 
+import com.gsma.rcs.core.FileAccessException;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
@@ -33,7 +35,6 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.InetAddressUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Vector;
 
@@ -166,14 +167,10 @@ public class MsrpManager {
     /**
      * Open the MSRP session
      * 
-     * @throws IOException
+     * @throws NetworkException
      * @throws PayloadException
      */
-    public void openMsrpSession() throws IOException, PayloadException {
-        if ((mMsrpSession == null) || (mMsrpSession.getConnection() == null)) {
-            throw new IOException("Session not yet created");
-        }
-
+    public void openMsrpSession() throws NetworkException, PayloadException {
         mMsrpSession.getConnection().open();
     }
 
@@ -181,14 +178,10 @@ public class MsrpManager {
      * Open the connection with SO_TIMEOUT on the socket
      * 
      * @param timeout Timeout value (in milliseconds)
-     * @throws IOException
+     * @throws NetworkException
      * @throws PayloadException
      */
-    public void openMsrpSession(long timeout) throws IOException, PayloadException {
-        if ((mMsrpSession == null) || (mMsrpSession.getConnection() == null)) {
-            throw new IOException("Session not yet created");
-        }
-
+    public void openMsrpSession(long timeout) throws NetworkException, PayloadException {
         mMsrpSession.getConnection().open(timeout);
     }
 
@@ -199,10 +192,8 @@ public class MsrpManager {
      * @param sdp remote SDP answer
      * @param listener MsrpEventListener
      * @return MsrpSession
-     * @throws MsrpException
      */
-    public MsrpSession createMsrpSession(byte[] sdp, MsrpEventListener listener)
-            throws MsrpException {
+    public MsrpSession createMsrpSession(byte[] sdp, MsrpEventListener listener) {
         SdpParser parser = new SdpParser(sdp);
 
         Vector<MediaDescription> media = parser.getMediaDescriptions();
@@ -249,11 +240,9 @@ public class MsrpManager {
      * @param listener Event listener
      * @param fingerprint
      * @return Created session
-     * @throws MsrpException
      */
     public MsrpSession createMsrpClientSession(String remoteHost, int remotePort,
-            String remoteMsrpPath, MsrpEventListener listener, String fingerprint)
-            throws MsrpException {
+            String remoteMsrpPath, MsrpEventListener listener, String fingerprint) {
         if (logger.isActivated()) {
             logger.info(new StringBuilder("Create MSRP client end point at ").append(remoteHost)
                     .append(":").append(remotePort).toString());
@@ -280,10 +269,8 @@ public class MsrpManager {
      * @param remoteMsrpPath Remote MSRP path
      * @param listener Event listener
      * @return Created session
-     * @throws MsrpException
      */
-    public MsrpSession createMsrpServerSession(String remoteMsrpPath, MsrpEventListener listener)
-            throws MsrpException {
+    public MsrpSession createMsrpServerSession(String remoteMsrpPath, MsrpEventListener listener) {
         if (logger.isActivated()) {
             logger.info("Create MSRP server end point at " + mLocalMsrpPort);
         }
@@ -315,27 +302,17 @@ public class MsrpManager {
      * @param contentType Content type
      * @param contentSize Content size
      * @param typeMsrpChunk Type of MSRP chunk
-     * @throws MsrpException
+     * @throws NetworkException
      */
     public void sendChunks(InputStream inputStream, String msgId, String contentType,
-            long contentSize, TypeMsrpChunk typeMsrpChunk) throws MsrpException {
-        if (mMsrpSession == null) {
-            throw new MsrpException("MSRP session is null");
-        }
-
+            long contentSize, TypeMsrpChunk typeMsrpChunk) throws NetworkException {
         mMsrpSession.sendChunks(inputStream, msgId, contentType, contentSize, typeMsrpChunk);
     }
 
     /**
      * Send an empty chunk
-     * 
-     * @throws MsrpException
      */
-    public void sendEmptyChunk() throws MsrpException {
-        if (mMsrpSession == null) {
-            throw new MsrpException("MSRP session is null");
-        }
-
+    public void sendEmptyChunk() {
         mMsrpSession.sendEmptyChunk();
     }
 

@@ -22,8 +22,10 @@
 
 package com.gsma.rcs.core.content;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.platform.file.FileFactory;
+import com.gsma.rcs.utils.CloseableUtils;
 
 import android.content.ContentResolver;
 import android.net.Uri;
@@ -213,36 +215,32 @@ public abstract class MmContent {
      * Write data chunk to file
      * 
      * @param data Data to append to file
-     * @throws IOException
+     * @throws FileAccessException
      */
-    public void writeData2File(byte[] data) throws IOException {
-        if (mOut == null) {
-            mPfd = AndroidFactory.getApplicationContext().getContentResolver()
-                    .openFileDescriptor(mFile, "w");
-            // To optimize I/O set buffer size to 8kBytes
-            mOut = new BufferedOutputStream(new FileOutputStream(mPfd.getFileDescriptor()),
-                    8 * 1024);
+    public void writeData2File(byte[] data) throws FileAccessException {
+        try {
+            if (mOut == null) {
+                mPfd = AndroidFactory.getApplicationContext().getContentResolver()
+                        .openFileDescriptor(mFile, "w");
+                // To optimize I/O set buffer size to 8kBytes
+                mOut = new BufferedOutputStream(new FileOutputStream(mPfd.getFileDescriptor()),
+                        8 * 1024);
+            }
+            mOut.write(data);
+        } catch (IOException e) {
+            throw new FileAccessException("Failed to write data chunk to file!", e);
         }
-        mOut.write(data);
     }
 
     /**
      * Close written file and update media storage.
-     * 
-     * @throws IOException
      */
-    public void closeFile() throws IOException {
+    public void closeFile() {
         try {
-            if (mOut != null) {
-                mOut.flush();
-                mOut.close();
-                mOut = null;
-                FileFactory.getFactory().updateMediaStorage(getUri().getEncodedPath());
-            }
+            FileFactory.getFactory().updateMediaStorage(getUri().getEncodedPath());
         } finally {
-            if (mPfd != null) {
-                mPfd.close();
-            }
+            CloseableUtils.tryToClose(mOut);
+            CloseableUtils.tryToClose(mPfd);
         }
     }
 

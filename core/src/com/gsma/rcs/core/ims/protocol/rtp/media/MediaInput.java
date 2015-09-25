@@ -40,7 +40,6 @@ public interface MediaInput {
      * Read a media sample (blocking method)
      * 
      * @return Media sample
-     * @throws MediaException
      */
-    public MediaSample readSample() throws MediaException;
+    public MediaSample readSample();
 }

@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
@@ -203,16 +204,22 @@ public abstract class HttpTransferManager {
      * @param url the URL to connect
      * @param properties HTTP properties to set
      * @return HttpURLConnection
-     * @throws IOException
+     * @throws NetworkException
      */
     protected HttpURLConnection openHttpConnection(URL url, Map<String, String> properties)
-            throws IOException {
-        HttpURLConnection cnx = (HttpURLConnection) url.openConnection();
-        for (Entry<String, String> header : properties.entrySet()) {
-            cnx.setRequestProperty(header.getKey(), header.getValue());
+            throws NetworkException {
+        try {
+            HttpURLConnection cnx = (HttpURLConnection) url.openConnection();
+            for (Entry<String, String> header : properties.entrySet()) {
+                cnx.setRequestProperty(header.getKey(), header.getValue());
+            }
+            cnx.setRequestProperty("User-Agent", SipUtils.userAgentString());
+            return cnx;
+
+        } catch (IOException e) {
+            throw new NetworkException("Failed to open http connection with url : ".concat(url
+                    .toString()), e);
         }
-        cnx.setRequestProperty("User-Agent", SipUtils.userAgentString());
-        return cnx;
     }
 
     /**

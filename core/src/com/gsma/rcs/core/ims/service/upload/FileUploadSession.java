@@ -23,6 +23,7 @@
 package com.gsma.rcs.core.ims.service.upload;
 
 import com.gsma.rcs.core.Core;
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
@@ -164,6 +165,13 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
             removeSession();
             mListener.handleUploadNotAllowedToSend();
         } catch (IOException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
+            removeSession();
+            mListener.handleUploadError(FileSharingError.MEDIA_UPLOAD_FAILED);
+        } catch (FileAccessException e) {
+            sLogger.error("Failed to initiate session for HTTP uploadId ".concat(mUploadId), e);
             removeSession();
             mListener.handleUploadError(FileSharingError.MEDIA_UPLOAD_FAILED);
         } catch (PayloadException e) {
@@ -192,9 +200,8 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
      * 
      * @param result Byte array result
      * @throws PayloadException
-     * @throws NetworkException
      */
-    private void storeResult(byte[] result) throws PayloadException, NetworkException {
+    private void storeResult(byte[] result) throws PayloadException {
         // Check if upload has been cancelled
         if (mUploadManager.isCancelled()) {
             return;

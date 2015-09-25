@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.service.terms;
 
+import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.utils.logger.Logger;
 
 import org.xml.sax.Attributes;
@@ -92,6 +93,8 @@ public class EndUserNotificationParser extends DefaultHandler {
      */
     private final HashMap<String, String> mElementMap;
 
+    private final InputSource mInputSource;
+
     /**
      * The logger
      */
@@ -103,17 +106,32 @@ public class EndUserNotificationParser extends DefaultHandler {
      * 
      * @param inputSource Input source
      * @param requestedLanguage requested language
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws IOException
      */
-    public EndUserNotificationParser(InputSource inputSource, String requestedLanguage)
-            throws ParserConfigurationException, SAXException, IOException {
+    public EndUserNotificationParser(InputSource inputSource, String requestedLanguage) {
         mRequestedLanguage = requestedLanguage;
         mElementMap = new HashMap<String, String>();
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-        SAXParser parser = factory.newSAXParser();
-        parser.parse(inputSource, this);
+        mInputSource = inputSource;
+    }
+
+    /**
+     * Parse the end user notification information
+     * 
+     * @return EndUserNotificationParser
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws ParseFailureException
+     */
+    public EndUserNotificationParser parse() throws ParserConfigurationException, SAXException,
+            ParseFailureException {
+        try {
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            SAXParser parser = factory.newSAXParser();
+            parser.parse(mInputSource, this);
+            return this;
+
+        } catch (IOException e) {
+            throw new ParseFailureException("Failed to parse input source!", e);
+        }
     }
 
     public String getId() {

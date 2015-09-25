@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.platform.network;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.security.cert.KeyStoreManager;
 import com.gsma.rcs.core.ims.security.cert.X509KeyManagerWrapper;
@@ -127,22 +128,24 @@ public class AndroidSecureSocketConnection extends AndroidSocketConnection {
      * 
      * @param remoteAddr Remote address
      * @param remotePort Remote port
-     * @throws IOException
+     * @throws NetworkException
      * @throws PayloadException
      */
-    public void open(String remoteAddr, int remotePort) throws IOException, PayloadException {
-        // Changed by Deutsche Telekom
-        SSLSocket s = (SSLSocket) getSslFactory().createSocket(remoteAddr, remotePort);
-        // Changed by Deutsche Telekom
+    public void open(String remoteAddr, int remotePort) throws NetworkException,
+            PayloadException {
+        SSLSocket socket = null;
         try {
-            s.startHandshake();
+        // Changed by Deutsche Telekom
+            socket = (SSLSocket) getSslFactory().createSocket(remoteAddr, remotePort);
+        // Changed by Deutsche Telekom
+            socket.startHandshake();
             if (mFingerprint != null) {
                 // example of a fingerprint:
                 // SHA-1 4A:AD:B9:B1:3F:82:18:3B:54:02:12:DF:3E:5D:49:6B:19:E5:7C:AB
                 String[] announcedFingerprintElements = mFingerprint.split(" ");
                 if (announcedFingerprintElements != null && announcedFingerprintElements.length > 1) {
                     // use the same hashing algorithm as announced
-                    String usedFingerprint = getFingerprint(announcedFingerprintElements[0], s);
+                    String usedFingerprint = getFingerprint(announcedFingerprintElements[0], socket);
                     // compare fingerprints and stop if not matching
                     if (announcedFingerprintElements[1] != null
                             && !announcedFingerprintElements[1].equals(usedFingerprint)) {
@@ -152,15 +155,20 @@ public class AndroidSecureSocketConnection extends AndroidSocketConnection {
                                     + " is expected!");
                         }
                         /* Close the socket as an attack is assumed */
-                        CloseableUtils.tryToClose(s);
+                        CloseableUtils.tryToClose(socket);
+                        return;
                     }
                 }
             }
+            setSocket(socket);
         } catch (IOException e) {
-            CloseableUtils.tryToClose(s);
-            throw new IOException("SSL handshake failed!", e);
+            throw new NetworkException(new StringBuilder(
+                    "Failed to open socket connection for address : ").append(remoteAddr)
+                    .append("and port : ").append(remotePort).toString(), e);
+        } finally {
+            CloseableUtils.tryToClose(socket);
         }
-        setSocket(s);
+
     }
 
     /**

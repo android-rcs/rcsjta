@@ -18,6 +18,7 @@
 
 package com.gsma.rcs.core.ims.protocol.rtp;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.rtp.codec.Codec;
 import com.gsma.rcs.core.ims.protocol.rtp.stream.DummyPacketSourceStream;
 import com.gsma.rcs.core.ims.protocol.rtp.stream.RtpInputStream;
@@ -64,10 +65,10 @@ public class DummyPacketGenerator {
      * @param remoteAddress Remote address
      * @param remotePort Remote port
      * @param rtpStream already existing RTP input stream
-     * @throws RtpException
+     * @throws NetworkException
      */
     public void prepareSession(String remoteAddress, int remotePort, RtpInputStream rtpStream)
-            throws RtpException {
+            throws NetworkException {
         try {
             // Create the input stream
             inputStream = new DummyPacketSourceStream();
@@ -90,7 +91,7 @@ public class DummyPacketGenerator {
                 logger.debug("Session has been prepared with success");
             }
         } catch (IOException e) {
-            throw new RtpException(new StringBuilder(
+            throw new NetworkException(new StringBuilder(
                     "Can't prepare resources correctly for remoteAddress : ").append(remoteAddress)
                     .append(" with remotePort : ").append(remotePort).append("!").toString(), e);
         }

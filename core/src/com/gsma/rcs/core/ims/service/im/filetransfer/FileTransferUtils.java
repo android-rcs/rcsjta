@@ -25,9 +25,10 @@ package com.gsma.rcs.core.ims.service.im.filetransfer;
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 import static com.gsma.rcs.utils.StringUtils.UTF8_STR;
 
+import com.gsma.rcs.core.FileAccessException;
+import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
-import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
@@ -96,12 +97,13 @@ public class FileTransferUtils {
      * @param fileIconId the identifier of the file icon
      * @param rcsSettings
      * @return the content of the file icon
-     * @throws IOException
+     * @throws FileAccessException
      */
     public static MmContent createFileicon(Uri file, String fileIconId, RcsSettings rcsSettings)
-            throws IOException {
+            throws FileAccessException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         InputStream in = null;
+        MmContent fileIcon = null;
         try {
             in = AndroidFactory.getApplicationContext().getContentResolver().openInputStream(file);
             Bitmap bitmap = BitmapFactory.decodeStream(in);
@@ -142,17 +144,22 @@ public class FileTransferUtils {
             // Generate fileIcon content
             Uri fileIconUri = ContentManager.generateUriForReceivedContent(fileIconName,
                     "image/jpeg", rcsSettings);
-            MmContent fileIcon = ContentManager.createMmContent(fileIconUri, fileIconData.length,
+            fileIcon = ContentManager.createMmContent(fileIconUri, fileIconData.length,
                     fileIconName);
             // persist the fileIcon content
             fileIcon.writeData2File(fileIconData);
-            fileIcon.closeFile();
             if (logger.isActivated()) {
                 logger.debug("Generate Icon " + fileIconName + " for image " + file);
             }
             return fileIcon;
+
+        } catch (IOException e) {
+            throw new FileAccessException(
+                    "Failed to create icon for uri : ".concat(file.toString()), e);
+
         } finally {
             CloseableUtils.tryToClose(in);
+            fileIcon.closeFile();
         }
     }
 
@@ -181,47 +188,39 @@ public class FileTransferUtils {
      * @param request Request
      * @param rcsSettings
      * @return fileIcon the file icon content persisted on disk
-     * @throws NetworkException
+     * @throws FileAccessException
      */
     public static MmContent extractFileIcon(SipRequest request, RcsSettings rcsSettings)
-            throws NetworkException {
+            throws FileAccessException {
+        MmContent result = null;
         try {
-            // Extract message from content/CPIM
             String content = request.getContent();
             String boundary = request.getBoundaryContentType();
             Multipart multi = new Multipart(content, boundary);
-            if (multi.isMultipart()) {
-                String mimeType = "image/jpeg";
-                // Get image/jpeg content
-                String data = multi.getPart(mimeType);
-                if (data == null) {
-                    // Get image/png content
-                    mimeType = "image/png";
-                    data = multi.getPart(mimeType);
-                }
-                if (data != null) {
-                    // Build fileIcon name
-                    String iconName = buildFileiconUrl(ChatUtils.getContributionId(request),
-                            mimeType);
-                    // Generate URL
-                    Uri fileIconUri = ContentManager.generateUriForReceivedContent(iconName,
-                            mimeType, rcsSettings);
-                    // Get binary data
-                    byte[] fileIconData = Base64.decodeBase64(mimeType.getBytes(UTF8));
-                    // Generate fileIcon content
-                    MmContent result = ContentManager.createMmContent(fileIconUri,
-                            fileIconData.length, iconName);
-                    // Decode the content and persist on disk
-                    result.writeData2File(fileIconData);
-                    result.closeFile();
-                    return result;
-                }
+            if (!multi.isMultipart()) {
+                return null;
             }
-            return null;
+            String mimeType = "image/jpeg";
+            String data = multi.getPart(mimeType);
+            if (data == null) {
+                mimeType = "image/png";
+                data = multi.getPart(mimeType);
+            }
+            if (data == null) {
+                return null;
+            }
+            String iconName = buildFileiconUrl(ChatUtils.getContributionId(request), mimeType);
+            Uri fileIconUri = ContentManager.generateUriForReceivedContent(iconName, mimeType,
+                    rcsSettings);
+            byte[] fileIconData = Base64.decodeBase64(mimeType.getBytes(UTF8));
+            result = ContentManager.createMmContent(fileIconUri, fileIconData.length, iconName);
+            result.writeData2File(fileIconData);
+            return result;
 
-        } catch (IOException e) {
-            throw new NetworkException("Failed to extract file icon!", e);
+        } finally {
+            result.closeFile();
         }
+
     }
 
     /**
@@ -231,14 +230,13 @@ public class FileTransferUtils {
      * @param rcsSettings RCS settings
      * @return File transfer document
      * @throws PayloadException
-     * @throws NetworkException
      */
     public static FileTransferHttpInfoDocument parseFileTransferHttpDocument(byte[] xml,
-            RcsSettings rcsSettings) throws PayloadException, NetworkException {
+            RcsSettings rcsSettings) throws PayloadException {
         try {
             InputSource ftHttpInput = new InputSource(new ByteArrayInputStream(xml));
             FileTransferHttpInfoParser ftHttpParser = new FileTransferHttpInfoParser(ftHttpInput,
-                    rcsSettings);
+                    rcsSettings).parse();
             return ftHttpParser.getFtInfo();
 
         } catch (ParserConfigurationException e) {
@@ -247,8 +245,9 @@ public class FileTransferUtils {
         } catch (SAXException e) {
             throw new PayloadException("Can't parse FT HTTP document!", e);
 
-        } catch (IOException e) {
-            throw new NetworkException("Can't parse FT HTTP document!", e);
+        } catch (ParseFailureException e) {
+            throw new PayloadException("Can't parse FT HTTP document!", e);
+
         }
     }
 
@@ -259,10 +258,9 @@ public class FileTransferUtils {
      * @param rcsSettings RCS settings
      * @return FT HTTP info
      * @throws PayloadException
-     * @throws NetworkException
      */
     public static FileTransferHttpInfoDocument getHttpFTInfo(SipRequest request,
-            RcsSettings rcsSettings) throws PayloadException, NetworkException {
+            RcsSettings rcsSettings) throws PayloadException {
         /* Not a valid timestamp here as the message is just for temp use */
         long timestamp = -1;
         ChatMessage message = ChatUtils.getFirstMessage(request, timestamp);

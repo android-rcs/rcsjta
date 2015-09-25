@@ -40,6 +40,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import android.net.Uri;
 import android.util.TimeFormatException;
 
+import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.DateUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -94,21 +95,38 @@ public class FileTransferHttpInfoParser extends DefaultHandler {
 
     private final RcsSettings mRcsSettings;
 
+    private final InputSource mInputSource;
+
     /**
      * Constructor
      * 
      * @param inputSource Input source
      * @param rcsSettings
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws IOException
      */
-    public FileTransferHttpInfoParser(InputSource inputSource, RcsSettings rcsSettings)
-            throws ParserConfigurationException, SAXException, IOException {
+    public FileTransferHttpInfoParser(InputSource inputSource, RcsSettings rcsSettings) {
+        mInputSource = inputSource;
         mRcsSettings = rcsSettings;
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-        SAXParser parser = factory.newSAXParser();
-        parser.parse(inputSource, this);
+    }
+
+    /**
+     * Parse the Http file transfer content
+     * 
+     * @return FileTransferHttpInfoParser
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws ParseFailureException
+     */
+    public FileTransferHttpInfoParser parse() throws ParserConfigurationException, SAXException,
+            ParseFailureException {
+        try {
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            SAXParser parser = factory.newSAXParser();
+            parser.parse(mInputSource, this);
+            return this;
+
+        } catch (IOException e) {
+            throw new ParseFailureException("Failed to parse input source!", e);
+        }
     }
 
     /**

@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.service.capability;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
@@ -188,9 +189,10 @@ public class OptionsManager implements DiscoveryManager {
      * @param options Received options message
      * @throws PayloadException
      * @throws NetworkException
+     * @throws ContactManagerException
      */
     public void onCapabilityRequestReceived(SipRequest options) throws PayloadException,
-            NetworkException {
+            NetworkException, ContactManagerException {
         String sipId = SipUtils.getAssertedIdentity(options);
         try {
             PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(sipId);
@@ -234,20 +236,15 @@ public class OptionsManager implements DiscoveryManager {
             // Notify listener
             mImsModule.getCapabilityService().onReceivedCapabilities(contact, capabilities);
 
-        } catch (ContactManagerException e) {
-            throw new PayloadException(new StringBuilder(
-                    "Failed to receive capability request '").append(sipId).append("'").toString(),
-                    e);
-        } catch (IOException e) {
-            throw new NetworkException(new StringBuilder(
-                    "Failed to receive capability request '").append(sipId).append("'").toString(),
-                    e);
+        } catch (FileAccessException e) {
+            throw new PayloadException(new StringBuilder("Failed to receive capability request '")
+                    .append(sipId).append("'").toString(), e);
         }
     }
 
     /**
      * Requests capabilities for a set of contacts
-     *
+     * 
      * @param contacts Set of contacts to query.
      * @param callback Callback to execute once all contacts have been queried or null if caller
      *            does need to be notified

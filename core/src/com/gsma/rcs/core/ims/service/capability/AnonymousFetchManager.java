@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.service.capability;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
@@ -90,9 +91,10 @@ public class AnonymousFetchManager implements DiscoveryManager {
      * @param contact Remote contact identifier
      * @throws NetworkException
      * @throws PayloadException
+     * @throws ContactManagerException
      */
-    public void requestCapabilities(ContactId contact) throws PayloadException,
-            NetworkException {
+    public void requestCapabilities(ContactId contact) throws PayloadException, NetworkException,
+            ContactManagerException {
         if (logger.isActivated()) {
             logger.debug("Request capabilities in background for " + contact);
         }
@@ -106,10 +108,10 @@ public class AnonymousFetchManager implements DiscoveryManager {
      * 
      * @param notify Received notify
      * @throws PayloadException
-     * @throws NetworkException
+     * @throws ContactManagerException
      */
     public void onNotificationReceived(SipRequest notify) throws PayloadException,
-            NetworkException {
+            ContactManagerException {
         try {
             boolean logActivated = logger.isActivated();
             if (logActivated) {
@@ -196,17 +198,8 @@ public class AnonymousFetchManager implements DiscoveryManager {
                 mImsModule.getCapabilityService().onReceivedCapabilities(contact,
                         Capabilities.sDefaultCapabilities);
             }
-        } catch (ParserConfigurationException e) {
+        } catch (FileAccessException e) {
             throw new PayloadException("Can't parse XML notification! CallId=".concat(notify
-                    .getCallId()), e);
-        } catch (SAXException e) {
-            throw new PayloadException("Can't parse XML notification! CallId=".concat(notify
-                    .getCallId()), e);
-        } catch (ContactManagerException e) {
-            throw new PayloadException("Can't parse XML notification! CallId=".concat(notify
-                    .getCallId()), e);
-        } catch (IOException e) {
-            throw new NetworkException("Can't parse XML notification! CallId=".concat(notify
                     .getCallId()), e);
         }
     }

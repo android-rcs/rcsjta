@@ -24,9 +24,11 @@ package com.gsma.rcs.core.ims.protocol.msrp;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
+import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.utils.logger.Logger;
 
 import java.io.IOException;
@@ -265,19 +267,27 @@ public class ChunkReceiver extends Thread {
                 // Changed by Deutsche Telekom
                 session.checkMsrpTransactionInfo();
             }
-        } catch (IOException e) {
+        } catch (FileAccessException e) {
+            sLogger.error("Unable to receive chunks!", e);
             if (!mTerminated) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug(e.getMessage());
-                }
                 /* Notify the session listener that an error has occured */
-                /* Changed by Deutsche Telekom */
                 final MsrpSession session = mConnection.getSession();
                 session.getMsrpEventListener().msrpTransferError(null, e.getMessage(),
                         TypeMsrpChunk.Unknown);
 
                 /* Check transaction info data */
-                /* Changed by Deutsche Telekom */
+                session.checkMsrpTransactionInfo();
+                mTerminated = true;
+            }
+        } catch (ContactManagerException e) {
+            sLogger.error("Unable to receive chunks!", e);
+            if (!mTerminated) {
+                /* Notify the session listener that an error has occured */
+                final MsrpSession session = mConnection.getSession();
+                session.getMsrpEventListener().msrpTransferError(null, e.getMessage(),
+                        TypeMsrpChunk.Unknown);
+
+                /* Check transaction info data */
                 session.checkMsrpTransactionInfo();
                 mTerminated = true;
             }
@@ -332,9 +342,9 @@ public class ChunkReceiver extends Thread {
      * Read line
      * 
      * @return String
-     * @throws IOException
+     * @throws NetworkException
      */
-    private StringBuilder readLine() throws IOException {
+    private StringBuilder readLine() throws NetworkException {
         try {
             StringBuilder line = new StringBuilder();
             int previous = -1;
@@ -348,7 +358,7 @@ public class ChunkReceiver extends Thread {
             }
             return line;
         } catch (IOException e) {
-            throw new IOException("Failed to read line!", e);
+            throw new NetworkException("Failed to read line!", e);
         }
     }
 
@@ -357,9 +367,9 @@ public class ChunkReceiver extends Thread {
      * 
      * @param chunkSize Chunk size
      * @return Data
-     * @throws IOException
+     * @throws NetworkException
      */
-    private byte[] readChunkedData(int chunkSize, String endTag) throws IOException {
+    private byte[] readChunkedData(int chunkSize, String endTag) throws NetworkException {
         try {
             // Read data until chunk size is reached
             byte[] result = null;
@@ -422,7 +432,7 @@ public class ChunkReceiver extends Thread {
             mStream.read(); // Read CR
             return result;
         } catch (IOException e) {
-            throw new IOException("Failed to read chunk data!", e);
+            throw new NetworkException("Failed to read chunk data!", e);
         }
     }
 }

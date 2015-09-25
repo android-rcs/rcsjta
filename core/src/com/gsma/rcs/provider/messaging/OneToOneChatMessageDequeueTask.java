@@ -17,11 +17,12 @@
 package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.core.Core;
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
+import com.gsma.rcs.core.ims.service.im.chat.SessionUnavailableException;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.DequeueTask;
@@ -110,14 +111,12 @@ public class OneToOneChatMessageDequeueTask extends DequeueTask {
                             ChatUtils.apiMimeTypeToNetworkMimeType(mimeType), content, mContact,
                             null, timestamp, timestamp);
                     oneToOneChat.dequeueOneToOneChatMessage(msg);
-
-                } catch (MsrpException e) {
+                } catch (SessionUnavailableException e) {
                     if (logActivated) {
                         mLogger.debug(new StringBuilder("Failed to dequeue one-one chat message '")
                                 .append(id).append("' message for contact '").append(mContact)
                                 .append("' due to: ").append(e.getMessage()).toString());
                     }
-
                 } catch (NetworkException e) {
                     if (logActivated) {
                         mLogger.debug(new StringBuilder("Failed to dequeue one-one chat message '")
@@ -129,7 +128,6 @@ public class OneToOneChatMessageDequeueTask extends DequeueTask {
                             .append(id).append("' message for contact '").append(mContact)
                             .toString(), e);
                     setOneToOneChatMessageAsFailedDequeue(mContact, id, mimeType);
-
                 } catch (RuntimeException e) {
                     /*
                      * Normally all the terminal and non-terminal cases should be handled above so

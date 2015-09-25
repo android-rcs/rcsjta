@@ -18,6 +18,8 @@
 
 package com.gsma.rcs.core.ims.protocol.rtp;
 
+import com.gsma.rcs.core.FileAccessException;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.rtp.codec.Codec;
 import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.rtp.stream.ProcessorOutputStream;
@@ -111,7 +113,7 @@ public class CodecChain {
                 }
                 return Codec.BUFFER_PROCESSED_OK;
 
-            } catch (MediaException e) {
+            } catch (NetworkException e) {
                 if (logger.isActivated()) {
                     logger.debug(e.getMessage());
                 }

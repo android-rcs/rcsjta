@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.service.terms;
 
+import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -133,22 +134,41 @@ public class TermsRequestParser extends DefaultHandler {
 
     private final RcsSettings mRcsSettings;
 
+    private final InputSource mInputSource;
+
     /**
      * Constructor
      * 
      * @param inputSource Input source
      * @param requestedLanguage
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws IOException
+     * @param rcsSettings
      */
     public TermsRequestParser(InputSource inputSource, String requestedLanguage,
-            RcsSettings rcsSettings) throws ParserConfigurationException, SAXException, IOException {
+            RcsSettings rcsSettings) {
         mRequestedLanguage = requestedLanguage;
         mRcsSettings = rcsSettings;
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-        SAXParser parser = factory.newSAXParser();
-        parser.parse(inputSource, this);
+        mInputSource = inputSource;
+    }
+
+    /**
+     * Parse the terms request information
+     * 
+     * @return TermsRequestParser
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws ParseFailureException
+     */
+    public TermsRequestParser parse() throws ParserConfigurationException, SAXException,
+            ParseFailureException {
+        try {
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            SAXParser parser = factory.newSAXParser();
+            parser.parse(mInputSource, this);
+            return this;
+
+        } catch (IOException e) {
+            throw new ParseFailureException("Failed to parse input source!", e);
+        }
     }
 
     public String getId() {

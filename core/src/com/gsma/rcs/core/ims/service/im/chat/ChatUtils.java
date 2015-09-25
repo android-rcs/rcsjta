@@ -25,6 +25,7 @@ package com.gsma.rcs.core.ims.service.im.chat;
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 import static com.gsma.rcs.utils.StringUtils.UTF8_STR;
 
+import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
@@ -550,12 +551,12 @@ public class ChatUtils {
      * 
      * @param cpim CPIM document
      * @return IMDN document
-     * @throws IOException
+     * @throws ParseFailureException
      * @throws ParserConfigurationException
      * @throws SAXException
      */
     public static ImdnDocument parseCpimDeliveryReport(String cpim) throws SAXException,
-            ParserConfigurationException, IOException {
+            ParserConfigurationException, ParseFailureException {
         ImdnDocument imdn = null;
         // Parse CPIM document
         CpimParser cpimParser = new CpimParser(cpim);
@@ -576,14 +577,14 @@ public class ChatUtils {
      * 
      * @param xml XML document
      * @return IMDN document
-     * @throws IOException
+     * @throws ParseFailureException
      * @throws ParserConfigurationException
      * @throws SAXException
      */
     public static ImdnDocument parseDeliveryReport(String xml) throws SAXException,
-            ParserConfigurationException, IOException {
+            ParserConfigurationException, ParseFailureException {
         InputSource input = new InputSource(new ByteArrayInputStream(xml.getBytes()));
-        ImdnParser parser = new ImdnParser(input);
+        ImdnParser parser = new ImdnParser(input).parse();
         return parser.getImdnDocument();
     }
 
@@ -660,12 +661,11 @@ public class ChatUtils {
      * @param xml XML document
      * @return Geolocation
      * @throws PayloadException
-     * @throws IOException
      */
-    public static Geoloc parseGeolocDocument(String xml) throws PayloadException, IOException {
+    public static Geoloc parseGeolocDocument(String xml) throws PayloadException {
         try {
             InputSource geolocInput = new InputSource(new ByteArrayInputStream(xml.getBytes(UTF8)));
-            GeolocInfoParser geolocParser = new GeolocInfoParser(geolocInput);
+            GeolocInfoParser geolocParser = new GeolocInfoParser(geolocInput).parse();
             GeolocInfoDocument geolocDocument = geolocParser.getGeoLocInfo();
             if (geolocDocument == null) {
                 throw new PayloadException("Unable to parse geoloc document!");
@@ -678,6 +678,9 @@ public class ChatUtils {
             throw new PayloadException("Unable to parse geoloc document!", e);
 
         } catch (SAXException e) {
+            throw new PayloadException("Unable to parse geoloc document!", e);
+
+        } catch (ParseFailureException e) {
             throw new PayloadException("Unable to parse geoloc document!", e);
         }
     }
@@ -880,10 +883,9 @@ public class ChatUtils {
      * @param status Status to assign to created participants
      * @return Participants based on contacts in the request
      * @throws PayloadException
-     * @throws NetworkException
      */
     public static Map<ContactId, ParticipantStatus> getParticipants(SipRequest request,
-            ParticipantStatus status) throws NetworkException, PayloadException {
+            ParticipantStatus status) throws PayloadException {
         Map<ContactId, ParticipantStatus> participants = new HashMap<ContactId, ParticipantStatus>();
         String content = request.getContent();
         String boundary = request.getBoundaryContentType();
@@ -969,11 +971,10 @@ public class ChatUtils {
      * 
      * @param msg
      * @return Persisted content
-     * @throws IOException
      * @throws PayloadException
      */
     public static String networkContentToPersistedContent(ChatMessage msg)
-            throws PayloadException, IOException {
+            throws PayloadException {
         /*
          * Geolocation chat messages does not have the same mimetype in the payload as in the TAPI.
          * Text chat messages do.

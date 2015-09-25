@@ -27,7 +27,6 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
@@ -54,7 +53,6 @@ import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
-import java.io.IOException;
 import java.util.Vector;
 
 /**
@@ -228,8 +226,6 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
                 /* No response received: timeout */
                 handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED));
             }
-        } catch (MsrpException e) {
-            handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
         } catch (PayloadException e) {
             sLogger.error("Unable to send 200OK response!", e);
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
@@ -237,8 +233,6 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
             if (logActivated) {
                 sLogger.debug(e.getMessage());
             }
-            handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
-        } catch (IOException e) {
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
         } catch (RuntimeException e) {
             /*
@@ -308,7 +302,7 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
      * @throws NetworkException
      * @throws PayloadException
      */
-    public void msrpDataReceived(String msgId, byte[] data, String mimeType)
+    public void receiveMsrpData(String msgId, byte[] data, String mimeType)
             throws PayloadException, NetworkException {
         final boolean logActivated = sLogger.isActivated();
         if (logActivated) {
@@ -379,10 +373,8 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
 
     /**
      * Send an empty data chunk
-     * 
-     * @throws MsrpException
      */
-    public void sendEmptyDataChunk() throws MsrpException {
+    public void sendEmptyDataChunk() {
         mMsrpMgr.sendEmptyChunk();
     }
 

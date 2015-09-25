@@ -37,6 +37,7 @@ import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.provider.history.HistoryLog;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -223,13 +224,16 @@ public class RcsCoreService extends Service implements CoreListener {
                 // much appropriate level.
                 try {
                     stopCore();
-                } catch (PayloadException e) {
-                    sLogger.error("Unable to stop IMS core!", e);
-
                 } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug(e.getMessage());
                     }
+
+                } catch (ContactManagerException e) {
+                    sLogger.error("Unable to stop IMS core!", e);
+
+                } catch (PayloadException e) {
+                    sLogger.error("Unable to stop IMS core!", e);
 
                 } catch (RuntimeException e) {
                     /*
@@ -354,8 +358,10 @@ public class RcsCoreService extends Service implements CoreListener {
      * 
      * @throws PayloadException
      * @throws NetworkException
+     * @throws ContactManagerException
      */
-    private synchronized void stopCore() throws PayloadException, NetworkException {
+    private synchronized void stopCore() throws PayloadException, NetworkException,
+            ContactManagerException {
         if (Core.getInstance() == null) {
             // Already stopped
             return;

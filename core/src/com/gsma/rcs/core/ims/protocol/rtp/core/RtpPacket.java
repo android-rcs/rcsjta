@@ -22,6 +22,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import com.gsma.rcs.core.FileAccessException;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.rtp.util.Packet;
 
 /**
@@ -52,40 +54,44 @@ public class RtpPacket extends Packet {
         base = packet;
     }
 
-    public void assemble(int length) throws IOException {
-        this.mLength = length;
-        this.mOffset = 0;
+    public void assemble(int length) throws NetworkException {
+        try {
+            this.mLength = length;
+            this.mOffset = 0;
 
-        ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream(length);
-        DataOutputStream dataoutputstream = new DataOutputStream(bytearrayoutputstream);
-        if (extension) {
-            dataoutputstream.writeByte(144);
-        } else {
-            dataoutputstream.writeByte(128);
-        }
-
-        int i = payloadType;
-        if (marker == 1) {
-            i = payloadType | 0x80;
-        }
-        dataoutputstream.writeByte((byte) i);
-        dataoutputstream.writeShort(seqnum);
-        dataoutputstream.writeInt((int) timestamp);
-        dataoutputstream.writeInt(ssrc);
-
-        if (extension && extensionHeader != null) {
-            // Write extension header id
-            dataoutputstream.writeShort(RtpExtensionHeader.RTP_EXTENSION_HEADER_ID);
-            // Write extension header length
-            dataoutputstream.writeShort(extensionHeader.elementsCount());
-            // Write extension element. For now we will only support the orientation element
-            for (RtpExtensionHeader.ExtensionElement element : extensionHeader) {
-                int orientationElement = (((((element.id & 0xff) << 4) | ((element.data.length - 1) & 0xff)) << 8) | (element.data[0] & 0xff)) << 16;
-                dataoutputstream.writeInt(orientationElement);
+            ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream(length);
+            DataOutputStream dataoutputstream = new DataOutputStream(bytearrayoutputstream);
+            if (extension) {
+                dataoutputstream.writeByte(144);
+            } else {
+                dataoutputstream.writeByte(128);
             }
+
+            int i = payloadType;
+            if (marker == 1) {
+                i = payloadType | 0x80;
+            }
+            dataoutputstream.writeByte((byte) i);
+            dataoutputstream.writeShort(seqnum);
+            dataoutputstream.writeInt((int) timestamp);
+            dataoutputstream.writeInt(ssrc);
+
+            if (extension && extensionHeader != null) {
+                // Write extension header id
+                dataoutputstream.writeShort(RtpExtensionHeader.RTP_EXTENSION_HEADER_ID);
+                // Write extension header length
+                dataoutputstream.writeShort(extensionHeader.elementsCount());
+                // Write extension element. For now we will only support the orientation element
+                for (RtpExtensionHeader.ExtensionElement element : extensionHeader) {
+                    int orientationElement = (((((element.id & 0xff) << 4) | ((element.data.length - 1) & 0xff)) << 8) | (element.data[0] & 0xff)) << 16;
+                    dataoutputstream.writeInt(orientationElement);
+                }
+            }
+            dataoutputstream.write(base.mData, base.mOffset, base.mLength);
+            mData = bytearrayoutputstream.toByteArray();
+        } catch (IOException e) {
+            throw new NetworkException("Failed to write assemble data!", e);
         }
-        dataoutputstream.write(base.mData, base.mOffset, base.mLength);
-        mData = bytearrayoutputstream.toByteArray();
     }
 
     public int calcLength() {

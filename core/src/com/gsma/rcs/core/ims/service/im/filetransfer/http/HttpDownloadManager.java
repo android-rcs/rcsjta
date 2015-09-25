@@ -22,7 +22,9 @@
 
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.CloseableUtils;
@@ -38,6 +40,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -127,9 +130,10 @@ public class HttpDownloadManager extends HttpTransferManager {
      * @throws FileNotFoundException
      * @throws IOException
      * @throws FileNotDownloadedException
+     * @throws NetworkException
      */
     public void downloadFile() throws FileNotFoundException, IOException,
-            FileNotDownloadedException {
+            FileNotDownloadedException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug("Download file " + getHttpServerAddr());
         }
@@ -183,9 +187,10 @@ public class HttpDownloadManager extends HttpTransferManager {
      * @param properties the HTTP properties
      * @throws IOException
      * @throws FileNotDownloadedException
+     * @throws NetworkException
      */
     private void writeHttpContentToFile(URL url, Map<String, String> properties)
-            throws IOException, FileNotDownloadedException {
+            throws IOException, FileNotDownloadedException, NetworkException {
         HttpURLConnection urlConnection = null;
         try {
             /* Execute HTTP Request */
@@ -254,28 +259,30 @@ public class HttpDownloadManager extends HttpTransferManager {
      * 
      * @param iconUri the remote URI of the file icon
      * @param fileIcon the local descriptor
-     * @throws IOException
+     * @throws NetworkException
+     * @throws FileAccessException
      */
-    public void downloadThumbnail(Uri iconUri, MmContent fileIcon) throws IOException {
+    public void downloadThumbnail(Uri iconUri, MmContent fileIcon) throws NetworkException,
+            FileAccessException {
         if (sLogger.isActivated()) {
             sLogger.debug("Download file icon from ".concat(getHttpServerAddr().toString()));
         }
         if (isHttpTraceEnabled()) {
             System.out.println(">>> Send HTTP request:\nGET " + iconUri);
         }
-        ByteArrayOutputStream baos;
-        baos = getThumbnail(new URL(iconUri.toString()));
+        ByteArrayOutputStream baos = null;
         try {
+            baos = getThumbnail(new URL(iconUri.toString()));
             /* Save data to file on disk */
             fileIcon.writeData2File(baos.toByteArray());
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException(
+                    "Failed to download thumbnail for uri : ".concat(iconUri.toString()), e);
+            
         } finally {
             CloseableUtils.tryToClose(baos);
             if (fileIcon != null) {
-                try {
-                    fileIcon.closeFile();
-                } catch (Exception ignore) {
-                    /* Nothing to do, ignore the exception */
-                }
+                fileIcon.closeFile();
             }
         }
     }
@@ -284,9 +291,9 @@ public class HttpDownloadManager extends HttpTransferManager {
      * Get the thumbnail
      * 
      * @param url the URL of the file icon on the content server
-     * @throws IOException
+     * @throws NetworkException
      */
-    private ByteArrayOutputStream getThumbnail(URL url) throws IOException {
+    private ByteArrayOutputStream getThumbnail(URL url) throws NetworkException {
         HttpURLConnection urlConnection = null;
         ByteArrayOutputStream bOutputStream = null;
         try {
@@ -312,7 +319,11 @@ public class HttpDownloadManager extends HttpTransferManager {
                 }
                 return bOutputStream;
             }
-            throw new IOException("Received '" + statusCode + "' from server");
+            throw new NetworkException(new StringBuilder("Invalid statuscode '").append(statusCode)
+                    .append("' received from server!").toString());
+
+        } catch (IOException e) {
+            throw new NetworkException("Failed to get thumbnail!", e);
 
         } finally {
             CloseableUtils.tryToClose(bOutputStream);
@@ -328,9 +339,10 @@ public class HttpDownloadManager extends HttpTransferManager {
      * @throws FileNotFoundException
      * @throws IOException
      * @throws FileNotDownloadedException
+     * @throws NetworkException
      */
     public void resumeDownload() throws FileNotFoundException, IOException,
-            FileNotDownloadedException {
+            FileNotDownloadedException, NetworkException {
         if (mFileDownloadStream == null) {
             mFileDownloadStream = openStreamForFile(mFile);
         }

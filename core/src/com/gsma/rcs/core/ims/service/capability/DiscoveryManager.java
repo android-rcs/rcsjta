@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.capability;
 
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
+import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.services.rcs.contact.ContactId;
 
 /**
@@ -38,7 +39,8 @@ public interface DiscoveryManager {
      * @param contact Remote contact identifier
      * @throws NetworkException
      * @throws PayloadException
+     * @throws ContactManagerException
      */
-    public void requestCapabilities(ContactId contact) throws PayloadException,
-            NetworkException;
+    public void requestCapabilities(ContactId contact) throws PayloadException, NetworkException,
+            ContactManagerException;
 }

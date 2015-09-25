@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.protocol.msrp;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.platform.network.SocketConnection;
 import com.gsma.rcs.utils.CloseableUtils;
@@ -81,10 +82,10 @@ public abstract class MsrpConnection {
     /**
      * Open the connection
      * 
-     * @throws IOException
+     * @throws NetworkException
      * @throws PayloadException
      */
-    public void open() throws IOException, PayloadException {
+    public void open() throws NetworkException, PayloadException {
         // Open socket connection
         mSocket = getSocketConnection();
 
@@ -109,10 +110,10 @@ public abstract class MsrpConnection {
      * Open the connection with SO_TIMEOUT on the socket
      * 
      * @param timeout Timeout value (in milliseconds)
-     * @throws IOException
+     * @throws NetworkException
      * @throws PayloadException
      */
-    public void open(long timeout) throws IOException, PayloadException {
+    public void open(long timeout) throws NetworkException, PayloadException {
         // Open socket connection
         mSocket = getSocketConnection();
 
@@ -165,11 +166,11 @@ public abstract class MsrpConnection {
      * Send a new data chunk
      * 
      * @param chunk Data chunk
-     * @throws IOException
+     * @throws NetworkException
      */
-    public void sendChunk(byte chunk[]) throws IOException {
+    public void sendChunk(byte chunk[]) throws NetworkException {
         if (mSender == null) {
-            throw new IOException("ChunkSender is already closed!");
+            throw new NetworkException("ChunkSender is already closed!");
         }
         mSender.sendChunk(chunk);
     }
@@ -178,9 +179,9 @@ public abstract class MsrpConnection {
      * Send a new data chunk immediately
      * 
      * @param chunk Data chunk
-     * @throws IOException
+     * @throws NetworkException
      */
-    public void sendChunkImmediately(byte chunk[]) throws IOException {
+    public void sendChunkImmediately(byte chunk[]) throws NetworkException {
         mSender.sendChunkImmediately(chunk);
     }
 
@@ -188,10 +189,11 @@ public abstract class MsrpConnection {
      * Returns the socket connection
      * 
      * @return Socket
-     * @throws IOException
      * @throws PayloadException
+     * @throws NetworkException
      */
-    public abstract SocketConnection getSocketConnection() throws IOException, PayloadException;
+    public abstract SocketConnection getSocketConnection() throws PayloadException,
+            NetworkException;
 
     /**
      * Checks if MSRP trace is enabled

@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.im.chat;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
@@ -169,6 +170,9 @@ public class OriginatingOneToOneChatSession extends OneToOneChatSession {
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
         } catch (ParseException e) {
             mLogger.error("Unable to set authorization header for chat invite!", e);
+            handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
+        } catch (FileAccessException e) {
+            mLogger.error("Unable to send 200OK response!", e);
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
         } catch (PayloadException e) {
             mLogger.error("Unable to send 200OK response!", e);

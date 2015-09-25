@@ -24,13 +24,14 @@ package com.gsma.rcs.core.ims.service.im.chat;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.FileAccessException;
+import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
@@ -74,7 +75,6 @@ import android.net.Uri;
 import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -472,147 +472,130 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param mimeType Data mime-type
      * @throws NetworkException
      * @throws PayloadException
+     * @throws ContactManagerException
      */
-    public void msrpDataReceived(String msgId, byte[] data, String mimeType)
-            throws PayloadException, NetworkException {
-        try {
+    public void receiveMsrpData(String msgId, byte[] data, String mimeType)
+            throws PayloadException, NetworkException, ContactManagerException {
+        if (sLogger.isActivated()) {
+            sLogger.info(new StringBuilder("Data received (type ").append(mimeType).append(")")
+                    .toString());
+        }
+        mActivityMgr.updateActivity();
+        if ((data == null) || (data.length == 0)) {
             if (sLogger.isActivated()) {
-                sLogger.info("Data received (type " + mimeType + ")");
+                sLogger.debug("By-pass received empty data");
             }
+            return;
+        }
 
-            // Update the activity manager
-            mActivityMgr.updateActivity();
-
-            if ((data == null) || (data.length == 0)) {
-                // By-pass empty data
-                if (sLogger.isActivated()) {
-                    sLogger.debug("By-pass received empty data");
+        if (ChatUtils.isApplicationIsComposingType(mimeType)) {
+            receiveIsComposing(getRemoteContact(), data);
+            return;
+        }
+        if (ChatUtils.isTextPlainType(mimeType)) {
+            /**
+             * Set message's timestamp to the System.currentTimeMillis, not the session's itself
+             * timestamp
+             */
+            long timestamp = System.currentTimeMillis();
+            /**
+             * Since legacy server can send non CPIM data (like plain text without timestamp) in the
+             * payload, we need to fake timesampSent by using the local timestamp even if this is
+             * not the real proper timestamp from the remote side in this case.
+             */
+            ChatMessage msg = new ChatMessage(msgId, getRemoteContact(), new String(data, UTF8),
+                    MimeType.TEXT_MESSAGE, timestamp, timestamp, null);
+            boolean imdnDisplayedRequested = false;
+            receive(msg, imdnDisplayedRequested);
+            return;
+        }
+        if (ChatUtils.isMessageCpimType(mimeType)) {
+            CpimParser cpimParser = new CpimParser(data);
+            CpimMessage cpimMsg = cpimParser.getCpimMessage();
+            if (cpimMsg != null) {
+                String cpimMsgId = cpimMsg.getHeader(ImdnUtils.HEADER_IMDN_MSG_ID);
+                if (cpimMsgId == null) {
+                    cpimMsgId = msgId;
                 }
-                return;
-            }
 
-            if (ChatUtils.isApplicationIsComposingType(mimeType)) {
-                // Is composing event
-                receiveIsComposing(getRemoteContact(), data);
-                return;
-            }
-            if (ChatUtils.isTextPlainType(mimeType)) {
-                // Text message
+                String contentType = cpimMsg.getContentType();
+                ContactId contact = getRemoteContact();
+                /*
+                 * In One to One chat, the MSRP 'from' header is '<sip:anonymous@anonymous.invalid>'
+                 */
+
+                boolean imdnDisplayedRequested = false;
+
+                String dispositionNotification = cpimMsg
+                        .getHeader(ImdnUtils.HEADER_IMDN_DISPO_NOTIF);
+                if (!isGroupChat()) {
+                    if (dispositionNotification != null
+                            && dispositionNotification.contains(ImdnDocument.DISPLAY)
+                            && mImdnManager.isSendOneToOneDeliveryDisplayedReportsEnabled()) {
+                        imdnDisplayedRequested = true;
+                    }
+                }
+
+                boolean isFToHTTP = FileTransferUtils.isFileTransferHttpType(contentType);
                 /**
                  * Set message's timestamp to the System.currentTimeMillis, not the session's itself
                  * timestamp
                  */
                 long timestamp = System.currentTimeMillis();
-                /**
-                 * Since legacy server can send non CPIM data (like plain text without timestamp) in
-                 * the payload, we need to fake timesampSent by using the local timestamp even if
-                 * this is not the real proper timestamp from the remote side in this case.
-                 */
-                ChatMessage msg = new ChatMessage(msgId, getRemoteContact(),
-                        new String(data, UTF8), MimeType.TEXT_MESSAGE, timestamp, timestamp, null);
-                boolean imdnDisplayedRequested = false;
-                receive(msg, imdnDisplayedRequested);
-                return;
-            }
-            if (ChatUtils.isMessageCpimType(mimeType)) {
-                // Receive a CPIM message
-                CpimParser cpimParser = new CpimParser(data);
-                CpimMessage cpimMsg = cpimParser.getCpimMessage();
-                if (cpimMsg != null) {
-                    String cpimMsgId = cpimMsg.getHeader(ImdnUtils.HEADER_IMDN_MSG_ID);
-                    if (cpimMsgId == null) {
-                        cpimMsgId = msgId;
-                    }
+                long timestampSent = cpimMsg.getTimestampSent();
 
-                    String contentType = cpimMsg.getContentType();
-                    ContactId contact = getRemoteContact();
-                    // In One to One chat, the MSRP 'from' header is
-                    // '<sip:anonymous@anonymous.invalid>'
-
-                    // Check if the message needs a delivery report
-                    boolean imdnDisplayedRequested = false;
-
-                    String dispositionNotification = cpimMsg
-                            .getHeader(ImdnUtils.HEADER_IMDN_DISPO_NOTIF);
-                    if (!isGroupChat()) {
-                        // There is no display notification in Group Chat
-                        if (dispositionNotification != null
-                                && dispositionNotification.contains(ImdnDocument.DISPLAY)
-                                && mImdnManager.isSendOneToOneDeliveryDisplayedReportsEnabled()) {
-                            imdnDisplayedRequested = true;
-                        }
-                    }
-
-                    boolean isFToHTTP = FileTransferUtils.isFileTransferHttpType(contentType);
-                    /**
-                     * Set message's timestamp to the System.currentTimeMillis, not the session's
-                     * itself timestamp
-                     */
-                    long timestamp = System.currentTimeMillis();
-                    long timestampSent = cpimMsg.getTimestampSent();
-
-                    // Analyze received message thanks to the MIME type
-                    if (isFToHTTP) {
-                        // File transfer over HTTP message
-                        // Parse HTTP document
-                        FileTransferHttpInfoDocument fileInfo = FileTransferUtils
-                                .parseFileTransferHttpDocument(cpimMsg.getMessageContent()
-                                        .getBytes(UTF8), mRcsSettings);
-                        if (fileInfo != null) {
-                            receiveHttpFileTransfer(contact, getRemoteDisplayName(), fileInfo,
-                                    cpimMsgId, timestamp, timestampSent);
-                            // Mark the message as waiting a displayed report if needed
-                            if (imdnDisplayedRequested) {
-                                // TODO set File Transfer status to DISPLAY_REPORT_REQUESTED ??
-                            }
-                        } else {
-                            // TODO : else return error to Originating side
+                if (isFToHTTP) {
+                    FileTransferHttpInfoDocument fileInfo = FileTransferUtils
+                            .parseFileTransferHttpDocument(
+                                    cpimMsg.getMessageContent().getBytes(UTF8), mRcsSettings);
+                    if (fileInfo != null) {
+                        receiveHttpFileTransfer(contact, getRemoteDisplayName(), fileInfo,
+                                cpimMsgId, timestamp, timestampSent);
+                        if (imdnDisplayedRequested) {
+                            // TODO set File Transfer status to DISPLAY_REPORT_REQUESTED ??
                         }
                     } else {
-                        if (ChatUtils.isTextPlainType(contentType)) {
-                            ChatMessage msg = new ChatMessage(cpimMsgId, contact,
-                                    cpimMsg.getMessageContent(), MimeType.TEXT_MESSAGE, timestamp,
-                                    timestampSent, null);
-                            receive(msg, imdnDisplayedRequested);
-                        } else if (ChatUtils.isApplicationIsComposingType(contentType)) {
-                            receiveIsComposing(contact, cpimMsg.getMessageContent().getBytes(UTF8));
-                        } else if (ChatUtils.isMessageImdnType(contentType)) {
-                            onDeliveryStatusReceived(contact, cpimMsg.getMessageContent());
-                        } else if (ChatUtils.isGeolocType(contentType)) {
-                            ChatMessage msg = new ChatMessage(cpimMsgId, contact,
-                                    cpimMsg.getMessageContent(), GeolocInfoDocument.MIME_TYPE,
-                                    timestamp, timestampSent, null);
-                            receive(msg, imdnDisplayedRequested);
-                        }
+                        // TODO : else return error to Originating side
                     }
-
-                    if (!mImdnManager.isDeliveryDeliveredReportsEnabled()) {
-                        return;
+                } else {
+                    if (ChatUtils.isTextPlainType(contentType)) {
+                        ChatMessage msg = new ChatMessage(cpimMsgId, contact,
+                                cpimMsg.getMessageContent(), MimeType.TEXT_MESSAGE, timestamp,
+                                timestampSent, null);
+                        receive(msg, imdnDisplayedRequested);
+                    } else if (ChatUtils.isApplicationIsComposingType(contentType)) {
+                        receiveIsComposing(contact, cpimMsg.getMessageContent().getBytes(UTF8));
+                    } else if (ChatUtils.isMessageImdnType(contentType)) {
+                        onDeliveryStatusReceived(contact, cpimMsg.getMessageContent());
+                    } else if (ChatUtils.isGeolocType(contentType)) {
+                        ChatMessage msg = new ChatMessage(cpimMsgId, contact,
+                                cpimMsg.getMessageContent(), GeolocInfoDocument.MIME_TYPE,
+                                timestamp, timestampSent, null);
+                        receive(msg, imdnDisplayedRequested);
                     }
+                }
 
-                    if (isFToHTTP) {
-                        sendMsrpMessageDeliveryStatus(null, cpimMsgId,
-                                ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
-                    } else {
-                        if (dispositionNotification != null) {
-                            if (dispositionNotification.contains(ImdnDocument.POSITIVE_DELIVERY)) {
-                                // Positive delivery requested, send MSRP message with status
-                                // "delivered"
-                                sendMsrpMessageDeliveryStatus(null, cpimMsgId,
-                                        ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
-                            }
+                if (!mImdnManager.isDeliveryDeliveredReportsEnabled()) {
+                    return;
+                }
+
+                if (isFToHTTP) {
+                    sendMsrpMessageDeliveryStatus(null, cpimMsgId,
+                            ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
+                } else {
+                    if (dispositionNotification != null) {
+                        if (dispositionNotification.contains(ImdnDocument.POSITIVE_DELIVERY)) {
+                            sendMsrpMessageDeliveryStatus(null, cpimMsgId,
+                                    ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
                         }
                     }
                 }
-            } else {
-                // Not supported content
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Not supported content " + mimeType + " in chat session");
-                }
             }
-        } catch (IOException e) {
-            throw new NetworkException(
-                    "Unable to handle delivery status for msgId : ".concat(msgId), e);
+        } else {
+            if (sLogger.isActivated()) {
+                sLogger.debug(new StringBuilder("Not supported content ").append(mimeType)
+                        .append(" in chat session").toString());
+            }
         }
     }
 
@@ -651,20 +634,16 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * 
      * @param contact Contact
      * @param event Event
-     * @throws IOException
      * @throws PayloadException
      */
-    protected void receiveIsComposing(ContactId contact, byte[] event) throws PayloadException,
-            IOException {
+    protected void receiveIsComposing(ContactId contact, byte[] event) throws PayloadException {
         mIsComposingMgr.receiveIsComposingEvent(contact, event);
     }
 
     /**
      * Send an empty data chunk
-     * 
-     * @throws MsrpException
      */
-    public void sendEmptyDataChunk() throws MsrpException {
+    public void sendEmptyDataChunk() {
         mMsrpMgr.sendEmptyChunk();
     }
 
@@ -692,11 +671,11 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param timestamp The local timestamp of the message for receiving a HttpFileTransfer
      * @param timestampSent Remote timestamp sent in payload for receiving a HttpFileTransfer
      * @throws PayloadException
-     * @throws NetworkException
+     * @throws ContactManagerException
      */
     protected void receiveHttpFileTransfer(ContactId contact, String displayName,
             FileTransferHttpInfoDocument fileTransferInfo, String msgId, long timestamp,
-            long timestampSent) throws PayloadException, NetworkException {
+            long timestampSent) throws PayloadException, ContactManagerException {
         try {
             /*
              * Update the remote contact's capabilities to include at least HTTP FT and IM session
@@ -802,7 +781,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             if (fileTransferHttpThumbnail != null) {
                 try {
                     fileSession.downloadFileIcon();
-                } catch (IOException e) {
+                } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.error("Failed to download file icon", e);
                     }
@@ -819,20 +798,15 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                 }
             }
             if (fileResent) {
-                mImService
-                        .receiveResendFileTransferInvitation(fileSession, contact, displayName);
+                mImService.receiveResendFileTransferInvitation(fileSession, contact, displayName);
             } else {
                 mImService.receiveFileTransferInvitation(fileSession, isGroupChat(), contact,
                         displayName, fileTransferInfo.getExpiration());
             }
             fileSession.startSession();
 
-        } catch (ContactManagerException e) {
+        } catch (FileAccessException e) {
             throw new PayloadException(new StringBuilder(
-                    "Failed to receive file transfer with fileTransferId : ").append(msgId)
-                    .append("for contact : ").append(contact).toString(), e);
-        } catch (IOException e) {
-            throw new NetworkException(new StringBuilder(
                     "Failed to receive file transfer with fileTransferId : ").append(msgId)
                     .append("for contact : ").append(contact).toString(), e);
         }
@@ -845,10 +819,10 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param data Data
      * @param mime MIME type
      * @param typeMsrpChunk Type of MSRP chunk
-     * @throws MsrpException
+     * @throws NetworkException
      */
     public void sendDataChunks(String msgId, String data, String mime, TypeMsrpChunk typeMsrpChunk)
-            throws MsrpException {
+            throws NetworkException {
         byte[] bytes = data.getBytes(UTF8);
         ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
         mMsrpMgr.sendChunks(stream, msgId, mime, bytes.length, typeMsrpChunk);
@@ -879,17 +853,17 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * Send a chat message
      * 
      * @param msg Chat message
-     * @throws MsrpException
+     * @throws NetworkException
      */
-    public abstract void sendChatMessage(ChatMessage msg) throws MsrpException;
+    public abstract void sendChatMessage(ChatMessage msg) throws NetworkException;
 
     /**
      * Send is composing status
      * 
      * @param status Status
-     * @throws MsrpException
+     * @throws NetworkException
      */
-    public abstract void sendIsComposingStatus(boolean status) throws MsrpException;
+    public abstract void sendIsComposingStatus(boolean status) throws NetworkException;
 
     /**
      * Send message delivery status via MSRP
@@ -898,10 +872,10 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param msgId Message ID
      * @param status Status
      * @param timestamp Timestamp sent in payload for IMDN datetime
-     * @throws MsrpException
+     * @throws NetworkException
      */
     public void sendMsrpMessageDeliveryStatus(ContactId remote, String msgId, String status,
-            long timestamp) throws MsrpException {
+            long timestamp) throws NetworkException {
         String from = ChatUtils.ANONYMOUS_URI;
         String to = ChatUtils.ANONYMOUS_URI;
         sendMsrpMessageDeliveryStatus(from, to, msgId, status, timestamp);
@@ -915,10 +889,10 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param msgId Message ID
      * @param status Status
      * @param timestamp Timestamp sent in payload for IMDN datetime
-     * @throws MsrpException
+     * @throws NetworkException
      */
     public void sendMsrpMessageDeliveryStatus(String fromUri, String toUri, String msgId,
-            String status, long timestamp) throws MsrpException {
+            String status, long timestamp) throws NetworkException {
 
         if (sLogger.isActivated()) {
             sLogger.debug("Send delivery status " + status + " for message " + msgId);
@@ -957,10 +931,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param contact Contact identifier
      * @param xml XML document
      * @throws PayloadException
-     * @throws NetworkException
      */
-    public void onDeliveryStatusReceived(ContactId contact, String xml) throws PayloadException,
-            NetworkException {
+    public void onDeliveryStatusReceived(ContactId contact, String xml) throws PayloadException {
         try {
             ImdnDocument imdn = ChatUtils.parseDeliveryReport(xml);
 
@@ -976,18 +948,16 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             throw new PayloadException(new StringBuilder(
                     "Failed to parse IMDN document for contact : ").append(contact).toString(), e);
 
-        } catch (IOException e) {
-            throw new NetworkException(new StringBuilder(
+        } catch (ParseFailureException e) {
+            throw new PayloadException(new StringBuilder(
                     "Failed to parse IMDN document for contact : ").append(contact).toString(), e);
         }
     }
 
     /**
      * Prepare media session
-     * 
-     * @throws MsrpException
      */
-    public void prepareMediaSession() throws MsrpException {
+    public void prepareMediaSession() {
         // Changed by Deutsche Telekom
         // Get the remote SDP part
         byte[] sdp = getDialogPath().getRemoteContent().getBytes(UTF8);
@@ -1003,20 +973,18 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     /**
      * Open media session
      * 
-     * @throws IOException
      * @throws PayloadException
+     * @throws NetworkException
      */
-    public void openMediaSession() throws IOException, PayloadException {
+    public void openMediaSession() throws PayloadException, NetworkException {
         getMsrpMgr().openMsrpSession();
         sendEmptyDataChunk();
     }
 
     /**
      * Start media transfer
-     * 
-     * @throws IOException
      */
-    public void startMediaTransfer() throws IOException {
+    public void startMediaTransfer() {
         /* Not used here */
     }
 
@@ -1031,8 +999,10 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param resp 200 OK response
      * @throws PayloadException
      * @throws NetworkException
+     * @throws FileAccessException
      */
-    public void handle200OK(SipResponse resp) throws PayloadException, NetworkException {
+    public void handle200OK(SipResponse resp) throws PayloadException, NetworkException,
+            FileAccessException {
         super.handle200OK(resp);
 
         // Check if geolocation push supported by remote

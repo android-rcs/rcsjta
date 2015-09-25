@@ -33,6 +33,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.IOException;
 
+import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.utils.logger.Logger;
 
 /**
@@ -50,8 +51,10 @@ public class ResourceListParser extends DefaultHandler {
      * cp:copyControl="bcc" /> </list> </resource-lists>
      */
 
-    private StringBuffer accumulator;
-    private ResourceListDocument list = null;
+    private StringBuffer mAccumulator;
+    private ResourceListDocument mList;
+
+    private final InputSource mInputSource;
 
     /**
      * The logger
@@ -62,40 +65,55 @@ public class ResourceListParser extends DefaultHandler {
      * Constructor
      * 
      * @param inputSource Input source
-     * @throws SAXException
-     * @throws IOException
-     * @throws ParserConfigurationException
      */
-    public ResourceListParser(InputSource inputSource) throws ParserConfigurationException,
-            SAXException, IOException {
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-        SAXParser parser = factory.newSAXParser();
-        parser.parse(inputSource, this);
+    public ResourceListParser(InputSource inputSource) {
+        mInputSource = inputSource;
+    }
+
+    /**
+     * Parse the resource list
+     * 
+     * @return ResourceListParser
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws ParseFailureException
+     */
+    public ResourceListParser parse() throws ParserConfigurationException, SAXException,
+            ParseFailureException {
+        try {
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            SAXParser parser = factory.newSAXParser();
+            parser.parse(mInputSource, this);
+            return this;
+
+        } catch (IOException e) {
+            throw new ParseFailureException("Failed to parse input source!", e);
+        }
     }
 
     public ResourceListDocument getResourceList() {
-        return list;
+        return mList;
     }
 
     public void startDocument() {
         if (sLogger.isActivated()) {
             sLogger.debug("Start document");
         }
-        accumulator = new StringBuffer();
+        mAccumulator = new StringBuffer();
     }
 
     public void characters(char buffer[], int start, int length) {
-        accumulator.append(buffer, start, length);
+        mAccumulator.append(buffer, start, length);
     }
 
     public void startElement(String namespaceURL, String localName, String qname, Attributes attr) {
-        accumulator.setLength(0);
+        mAccumulator.setLength(0);
 
         if (localName.equals("resource-lists")) {
-            list = new ResourceListDocument();
+            mList = new ResourceListDocument();
         } else if (localName.equals("entry")) {
             String uri = attr.getValue("uri").trim();
-            list.addEntry(uri);
+            mList.addEntry(uri);
         }
     }
 

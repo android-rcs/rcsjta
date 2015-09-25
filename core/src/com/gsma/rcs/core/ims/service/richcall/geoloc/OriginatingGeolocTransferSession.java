@@ -24,13 +24,13 @@ package com.gsma.rcs.core.ims.service.richcall.geoloc;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.content.GeolocContent;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
@@ -49,7 +49,6 @@ import com.gsma.services.rcs.contact.ContactId;
 import android.net.Uri;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 
@@ -166,6 +165,9 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
         } catch (ParseException e) {
             sLogger.error("Failed initiate a new sharing session as originating!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (FileAccessException e) {
+            sLogger.error("Failed initiate a new sharing session as originating!", e);
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         } catch (PayloadException e) {
             sLogger.error("Failed initiate a new sharing session as originating!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
@@ -190,10 +192,8 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
 
     /**
      * Prepare media session
-     * 
-     * @throws MsrpException
      */
-    public void prepareMediaSession() throws MsrpException {
+    public void prepareMediaSession() {
         // Changed by Deutsche Telekom
         // Get the remote SDP part
         byte[] sdp = getDialogPath().getRemoteContent().getBytes(UTF8);
@@ -208,19 +208,19 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
     /**
      * Open media session
      * 
-     * @throws IOException
+     * @throws NetworkException
      * @throws PayloadException
      */
-    public void openMediaSession() throws IOException, PayloadException {
+    public void openMediaSession() throws NetworkException, PayloadException {
         msrpMgr.openMsrpSession();
     }
 
     /**
      * Start media transfer
      * 
-     * @throws IOException
+     * @throws NetworkException
      */
-    public void startMediaTransfer() throws IOException {
+    public void startMediaTransfer() throws NetworkException {
         /* Start sending data chunks */
         byte[] data = ((GeolocContent) getContent()).getData();
         InputStream stream = new ByteArrayInputStream(data);
@@ -287,7 +287,7 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
      * @param data Received data
      * @param mimeType Data mime-type
      */
-    public void msrpDataReceived(String msgId, byte[] data, String mimeType) {
+    public void receiveMsrpData(String msgId, byte[] data, String mimeType) {
         // Not used in originating side
     }
 

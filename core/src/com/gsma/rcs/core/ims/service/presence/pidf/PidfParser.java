@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.service.presence.pidf;
 
+import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.core.ims.service.presence.pidf.geoloc.Geopriv;
 import com.gsma.rcs.utils.DateUtils;
 import com.gsma.rcs.utils.StringUtils;
@@ -72,18 +73,20 @@ public class PidfParser extends DefaultHandler {
      * opd:etag="26362">http://..../rcs_status_icon</rpid:status-icon> </pdm:person> </presence>
      */
 
-    private StringBuffer accumulator;
-    private PidfDocument presence = null;
-    private Tuple tuple = null;
-    private Note note = null;
-    private Contact contact = null;
-    private Basic basic = null;
-    private OverridingWillingness willingness = null;
-    private Status status = null;
-    private Service service = null;
-    private StatusIcon icon = null;
-    private Person person = null;
-    private Geopriv geopriv = null;
+    private StringBuffer mAccumulator;
+    private PidfDocument mPresence;
+    private Tuple mTuple;
+    private Note mNote;
+    private Contact mContact;
+    private Basic mBasic;
+    private OverridingWillingness mWillingness;
+    private Status mStatus;
+    private Service mService;
+    private StatusIcon mIcon;
+    private Person mPerson;
+    private Geopriv mGeopriv;
+
+    private final InputSource mInputSource;
 
     /**
      * The logger
@@ -94,184 +97,199 @@ public class PidfParser extends DefaultHandler {
      * Constructor
      * 
      * @param inputSource Input source
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws IOException
      */
-    public PidfParser(InputSource inputSource) throws ParserConfigurationException, SAXException,
-            IOException {
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-        SAXParser parser = factory.newSAXParser();
-        parser.parse(inputSource, this);
+    public PidfParser(InputSource inputSource) {
+        mInputSource = inputSource;
+    }
+
+    /**
+     * Parse the PIDF input
+     * 
+     * @return PidfParser
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws ParseFailureException
+     */
+    public PidfParser parse() throws ParserConfigurationException, SAXException,
+            ParseFailureException {
+        try {
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            SAXParser parser = factory.newSAXParser();
+            parser.parse(mInputSource, this);
+            return this;
+
+        } catch (IOException e) {
+            throw new ParseFailureException("Failed to parse input source!", e);
+        }
     }
 
     public PidfDocument getPresence() {
-        return presence;
+        return mPresence;
     }
 
     public void startDocument() {
         if (logger.isActivated()) {
             logger.debug("Start document");
         }
-        accumulator = new StringBuffer();
+        mAccumulator = new StringBuffer();
     }
 
     public void characters(char buffer[], int start, int length) {
-        accumulator.append(buffer, start, length);
+        mAccumulator.append(buffer, start, length);
     }
 
     public void startElement(String namespaceURL, String localName, String qname, Attributes attr) {
-        accumulator.setLength(0);
+        mAccumulator.setLength(0);
 
         if (localName.equals("presence")) {
             String entity = attr.getValue("entity").trim();
-            presence = new PidfDocument(entity);
+            mPresence = new PidfDocument(entity);
         } else if (localName.equals("person")) {
             String id = attr.getValue("id").trim();
-            person = new Person(id);
+            mPerson = new Person(id);
         } else if (localName.equals("tuple")) {
             String id = attr.getValue("id").trim();
-            tuple = new Tuple(id);
+            mTuple = new Tuple(id);
         } else if (localName.equals("note")) {
-            note = new Note();
+            mNote = new Note();
             String lang = attr.getValue("xml:lang");
             if (lang != null) {
-                note.setLang(lang.trim());
+                mNote.setLang(lang.trim());
             }
         } else if (localName.equals("contact")) {
-            contact = new Contact();
+            mContact = new Contact();
             String priority = attr.getValue("priority");
             if (priority != null) {
-                contact.setPriority(priority.trim());
+                mContact.setPriority(priority.trim());
             }
             String contactType = attr.getValue("contactType");
 
             if (contactType != null) {
-                contact.setContactType(contactType.trim());
+                mContact.setContactType(contactType.trim());
             }
         } else if (localName.equals("overriding-willingness")) {
-            willingness = new OverridingWillingness();
+            mWillingness = new OverridingWillingness();
             String until = null;
             int indexUntilValue = attr.getIndex("urn:oma:xml:pde:pidf:ext", "until");
             if (indexUntilValue != -1) {
                 until = attr.getValue(indexUntilValue);
             }
             if (until != null) {
-                willingness.setUntilTimestamp(until);
+                mWillingness.setUntilTimestamp(until);
             }
         } else if (localName.equals("status-icon")) {
-            icon = new StatusIcon();
+            mIcon = new StatusIcon();
             String etag = null;
             int indexEtagValue = attr.getIndex("urn:oma:xml:pde:pidf:ext", "etag");
             if (indexEtagValue != -1) {
                 etag = attr.getValue(indexEtagValue);
             }
             if (etag != null) {
-                icon.setEtag(etag);
+                mIcon.setEtag(etag);
             }
         } else if (localName.equals("status")) {
-            status = new Status();
+            mStatus = new Status();
         } else if (localName.equals("service-description")) {
-            service = new Service();
+            mService = new Service();
         } else if (localName.equals("geopriv")) {
-            geopriv = new Geopriv();
+            mGeopriv = new Geopriv();
         }
     }
 
     public void endElement(String namespaceURL, String localName, String qname) {
         if (localName.equals("tuple")) {
-            if (presence != null) {
-                presence.addTuple(tuple);
+            if (mPresence != null) {
+                mPresence.addTuple(mTuple);
             }
-            tuple = null;
+            mTuple = null;
         } else if (localName.equals("person")) {
-            if (person != null) {
-                presence.setPerson(person);
-                person = null;
+            if (mPerson != null) {
+                mPresence.setPerson(mPerson);
+                mPerson = null;
             }
         } else if (localName.equals("note")) {
-            if ((note != null) && (person != null)) {
-                String value = StringUtils.decodeXML(accumulator.toString().trim());
-                note.setValue(value);
-                person.setNote(note);
-                note = null;
+            if ((mNote != null) && (mPerson != null)) {
+                String value = StringUtils.decodeXML(mAccumulator.toString().trim());
+                mNote.setValue(value);
+                mPerson.setNote(mNote);
+                mNote = null;
             }
         } else if (localName.equals("contact")) {
-            if ((contact != null) && (tuple != null)) {
-                contact.setUri(accumulator.toString().trim());
-                tuple.addContact(contact);
-                contact = null;
+            if ((mContact != null) && (mTuple != null)) {
+                mContact.setUri(mAccumulator.toString().trim());
+                mTuple.addContact(mContact);
+                mContact = null;
             }
         } else if (localName.equals("basic")) {
-            basic = new Basic(accumulator.toString().trim());
-            if (status != null) {
-                status.setBasic(basic);
-            } else if (willingness != null) {
-                willingness.setBasic(basic);
+            mBasic = new Basic(mAccumulator.toString().trim());
+            if (mStatus != null) {
+                mStatus.setBasic(mBasic);
+            } else if (mWillingness != null) {
+                mWillingness.setBasic(mBasic);
             }
-            basic = null;
+            mBasic = null;
         } else if (localName.equals("overriding-willingness")) {
-            if ((willingness != null) && (person != null)) {
-                person.setOverridingWillingness(willingness);
-                willingness = null;
+            if ((mWillingness != null) && (mPerson != null)) {
+                mPerson.setOverridingWillingness(mWillingness);
+                mWillingness = null;
             }
         } else if (localName.equals("status-icon")) {
-            String url = accumulator.toString();
-            if ((icon != null) && (person != null)) {
-                icon.setUrl(url.trim());
-                person.setStatusIcon(icon);
-                icon = null;
+            String url = mAccumulator.toString();
+            if ((mIcon != null) && (mPerson != null)) {
+                mIcon.setUrl(url.trim());
+                mPerson.setStatusIcon(mIcon);
+                mIcon = null;
             }
         } else if (localName.equals("status")) {
-            if ((status != null) && (tuple != null)) {
-                tuple.setStatus(status);
-                status = null;
+            if ((mStatus != null) && (mTuple != null)) {
+                mTuple.setStatus(mStatus);
+                mStatus = null;
             }
         } else if (localName.equals("timestamp")) {
-            String timestamp = accumulator.toString();
+            String timestamp = mAccumulator.toString();
             if (timestamp != null) {
                 long ts = DateUtils.decodeDate(timestamp.trim());
-                if (person != null) {
-                    person.setTimestamp(ts);
-                } else if (tuple != null) {
-                    tuple.setTimestamp(ts);
+                if (mPerson != null) {
+                    mPerson.setTimestamp(ts);
+                } else if (mTuple != null) {
+                    mTuple.setTimestamp(ts);
                 }
             }
         } else if (localName.equals("service-description")) {
-            if ((service != null) && (tuple != null)) {
-                tuple.setService(service);
-                service = null;
+            if ((mService != null) && (mTuple != null)) {
+                mTuple.setService(mService);
+                mService = null;
             }
         } else if (localName.equals("service-id")) {
-            if (service != null) {
-                service.setId(accumulator.toString().trim());
+            if (mService != null) {
+                mService.setId(mAccumulator.toString().trim());
             }
         } else if (localName.equals("homepage")) {
-            String homepage = accumulator.toString();
-            if ((homepage != null) && (person != null)) {
-                person.setHomePage(homepage.trim());
+            String homepage = mAccumulator.toString();
+            if ((homepage != null) && (mPerson != null)) {
+                mPerson.setHomePage(homepage.trim());
                 homepage = null;
             }
         } else if (localName.equals("geopriv")) {
-            if ((geopriv != null) && (presence != null)) {
-                presence.setGeopriv(geopriv);
-                geopriv = null;
+            if ((mGeopriv != null) && (mPresence != null)) {
+                mPresence.setGeopriv(mGeopriv);
+                mGeopriv = null;
             }
         } else if (localName.equals("method")) {
-            if (geopriv != null) {
-                geopriv.setMethod(accumulator.toString().trim());
+            if (mGeopriv != null) {
+                mGeopriv.setMethod(mAccumulator.toString().trim());
             }
         } else if (localName.equals("pos")) {
-            if (geopriv != null) {
-                StringTokenizer st = new StringTokenizer(accumulator.toString().trim());
+            if (mGeopriv != null) {
+                StringTokenizer st = new StringTokenizer(mAccumulator.toString().trim());
                 if (st.hasMoreTokens()) {
-                    geopriv.setLatitude(Double.parseDouble(st.nextToken()));
+                    mGeopriv.setLatitude(Double.parseDouble(st.nextToken()));
                 }
                 if (st.hasMoreTokens()) {
-                    geopriv.setLongitude(Double.parseDouble(st.nextToken()));
+                    mGeopriv.setLongitude(Double.parseDouble(st.nextToken()));
                 }
                 if (st.hasMoreTokens()) {
-                    geopriv.setAltitude(Double.parseDouble(st.nextToken()));
+                    mGeopriv.setAltitude(Double.parseDouble(st.nextToken()));
                 }
             }
         } else if (localName.equals("presence")) {

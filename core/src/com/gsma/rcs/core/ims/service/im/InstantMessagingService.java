@@ -23,6 +23,8 @@
 package com.gsma.rcs.core.ims.service.im;
 
 import com.gsma.rcs.core.Core;
+import com.gsma.rcs.core.FileAccessException;
+import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.ImsModule;
@@ -920,18 +922,15 @@ public class InstantMessagingService extends ImsService {
                             displayName);
                     session.startSession();
 
-                } catch (IOException e) {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("Failed to receive msrp file transfer invitation! ("
-                                + e.getMessage() + ")");
-                    }
-                    tryToSendErrorResponse(invite, Response.BUSY_HERE);
                 } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug("Failed to receive msrp file transfer invitation! ("
                                 + e.getMessage() + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
+                } catch (FileAccessException e) {
+                    sLogger.error("Failed to receive msrp file transfer invitation!", e);
+                    tryToSendErrorResponse(invite, Response.DECLINE);
                 } catch (ContactManagerException e) {
                     sLogger.error("Failed to receive msrp file transfer invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
@@ -1114,18 +1113,15 @@ public class InstantMessagingService extends ImsService {
                     mChatService.receiveOneToOneChatInvitation(session);
                     session.startSession();
 
-                } catch (IOException e) {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("Failed to receive o2o chat invitation! (" + e.getMessage()
-                                + ")");
-                    }
-                    tryToSendErrorResponse(invite, Response.BUSY_HERE);
                 } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug("Failed to receive o2o chat invitation! (" + e.getMessage()
                                 + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
+                } catch (FileAccessException e) {
+                    sLogger.error("Failed to receive o2o chat invitation!", e);
+                    tryToSendErrorResponse(invite, Response.DECLINE);
                 } catch (ContactManagerException e) {
                     sLogger.error("Failed to receive o2o chat invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
@@ -1259,18 +1255,15 @@ public class InstantMessagingService extends ImsService {
                     mChatService.receiveGroupChatInvitation(session);
                     session.startSession();
 
-                } catch (IOException e) {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("Failed to receive group chat invitation! (" + e.getMessage()
-                                + ")");
-                    }
-                    tryToSendErrorResponse(invite, Response.BUSY_HERE);
                 } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug("Failed to receive group chat invitation! (" + e.getMessage()
                                 + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
+                } catch (FileAccessException e) {
+                    sLogger.error("Failed to receive group chat invitation!", e);
+                    tryToSendErrorResponse(invite, Response.DECLINE);
                 } catch (ContactManagerException e) {
                     sLogger.error("Failed to receive group chat invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
@@ -1387,11 +1380,6 @@ public class InstantMessagingService extends ImsService {
                         session.getConferenceEventSubscriber().receiveNotification(notify,
                                 timestamp);
                     }
-                } catch (NetworkException e) {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("Failed to receive group conference notification! ("
-                                + e.getMessage() + ")");
-                    }
                 } catch (PayloadException e) {
                     sLogger.error("Failed to receive group conference notification!", e);
                 } catch (RuntimeException e) {
@@ -1458,17 +1446,14 @@ public class InstantMessagingService extends ImsService {
                             .append("not found in our database. Message id ").append(msgId)
                             .append(", ignoring.").toString());
 
-                } catch (IOException e) {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("Failed to receive chat message delivery report! ("
-                                + e.getMessage() + ")");
-                    }
                 } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug("Failed to receive chat message delivery report! ("
                                 + e.getMessage() + ")");
                     }
                 } catch (ParserConfigurationException e) {
+                    sLogger.error("Failed to receive chat message delivery report!", e);
+                } catch (ParseFailureException e) {
                     sLogger.error("Failed to receive chat message delivery report!", e);
                 } catch (SAXException e) {
                     sLogger.error("Failed to receive chat message delivery report!", e);
@@ -1541,12 +1526,6 @@ public class InstantMessagingService extends ImsService {
                     getStoreAndForwardManager().receiveStoreAndForwardMessageInvitation(invite,
                             remote, timestamp);
 
-                } catch (IOException e) {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("Failed to receive s&f chat messages! (" + e.getMessage()
-                                + ")");
-                    }
-                    tryToSendErrorResponse(invite, Response.BUSY_HERE);
                 } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug("Failed to receive s&f chat messages! (" + e.getMessage()
@@ -1812,7 +1791,24 @@ public class InstantMessagingService extends ImsService {
                     if (fileSharingSession.getFileicon() != null) {
                         try {
                             fileSharingSession.downloadFileIcon();
-                        } catch (IOException e) {
+                        } catch (NetworkException e) {
+                            sLogger.error("Failed to download file icon", e);
+                            sendErrorResponse(invite, Response.DECLINE);
+                            if (fileResent) {
+                                setResendFileTransferInvitationRejected(fileTransferId, remote,
+                                        FileTransfer.ReasonCode.REJECTED_MEDIA_FAILED, timestamp,
+                                        timestampSent);
+                                return;
+                            }
+                            MmContent fileContent = ftinfo.getLocalMmContent();
+                            FileTransferHttpThumbnail thumbnail = ftinfo.getFileThumbnail();
+                            MmContent fileIconContent = thumbnail == null ? null : thumbnail
+                                    .getLocalMmContent(fileTransferId);
+                            addFileTransferInvitationRejected(remote, fileContent, fileIconContent,
+                                    FileTransfer.ReasonCode.REJECTED_MEDIA_FAILED, timestamp,
+                                    timestampSent);
+                            return;
+                        } catch (FileAccessException e) {
                             sLogger.error("Failed to download file icon", e);
                             sendErrorResponse(invite, Response.DECLINE);
                             if (fileResent) {
@@ -1840,18 +1836,15 @@ public class InstantMessagingService extends ImsService {
                     }
                     fileSharingSession.startSession();
 
-                } catch (IOException e) {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("Failed to receive http o2o file transfer invitation! ("
-                                + e.getMessage() + ")");
-                    }
-                    tryToSendErrorResponse(invite, Response.BUSY_HERE);
                 } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug("Failed to receive http o2o file transfer invitation! ("
                                 + e.getMessage() + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
+                } catch (FileAccessException e) {
+                    sLogger.error("Failed to receive http o2o file transfer invitation!", e);
+                    tryToSendErrorResponse(invite, Response.DECLINE);
                 } catch (PayloadException e) {
                     sLogger.error("Failed to receive http o2o file transfer invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
@@ -1971,7 +1964,7 @@ public class InstantMessagingService extends ImsService {
                     if (filetransferSession.getFileicon() != null) {
                         try {
                             filetransferSession.downloadFileIcon();
-                        } catch (IOException e) {
+                        } catch (FileAccessException e) {
                             sLogger.error("Failed to download file icon", e);
                             oneToOneChatSession.sendErrorResponse(invite, oneToOneChatSession
                                     .getDialogPath().getLocalTag(),

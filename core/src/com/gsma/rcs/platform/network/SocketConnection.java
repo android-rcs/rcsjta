@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.platform.network;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 
 import java.io.Closeable;
@@ -40,10 +41,10 @@ public interface SocketConnection extends Closeable {
      * 
      * @param remoteAddr Remote address
      * @param remotePort Remote port
-     * @throws IOException
      * @throws PayloadException
+     * @throws NetworkException
      */
-    public void open(String remoteAddr, int remotePort) throws IOException, PayloadException;
+    public void open(String remoteAddr, int remotePort) throws PayloadException, NetworkException;
 
     /**
      * Close the socket
@@ -56,65 +57,61 @@ public interface SocketConnection extends Closeable {
      * Returns the socket input stream
      * 
      * @return Input stream
-     * @throws IOException
+     * @throws NetworkException
      */
-    public InputStream getInputStream() throws IOException;
+    public InputStream getInputStream() throws NetworkException;
 
     /**
      * Returns the socket output stream
      * 
      * @return Output stream
-     * @throws IOException
+     * @throws NetworkException
      */
-    public OutputStream getOutputStream() throws IOException;
+    public OutputStream getOutputStream() throws NetworkException;
 
     /**
      * Returns the remote address of the connection
      * 
      * @return Address
-     * @throws IOException
      */
-    public String getRemoteAddress() throws IOException;
+    public String getRemoteAddress();
 
     /**
      * Returns the remote port of the connection
      * 
      * @return Port
-     * @throws IOException
      */
-    public int getRemotePort() throws IOException;
+    public int getRemotePort();
 
     /**
      * Returns the local address of the connection
      * 
      * @return Address
-     * @throws IOException
      */
-    public String getLocalAddress() throws IOException;
+    public String getLocalAddress();
 
     /**
      * Returns the local port of the connection
      * 
      * @return Port
-     * @throws IOException
      */
-    public int getLocalPort() throws IOException;
+    public int getLocalPort();
 
     /**
      * Get the timeout for this socket during which a reading operation shall block while waiting
      * for data
      * 
      * @return Milliseconds
-     * @throws IOException
+     * @throws NetworkException
      */
-    public int getSoTimeout() throws IOException;
+    public int getSoTimeout() throws NetworkException;
 
     /**
      * Set the timeout for this socket during which a reading operation shall block while waiting
      * for data
      * 
      * @param timeout Timeout in milliseconds
-     * @throws IOException
+     * @throws NetworkException
      */
-    public void setSoTimeout(long timeout) throws IOException;
+    public void setSoTimeout(long timeout) throws NetworkException;
 }

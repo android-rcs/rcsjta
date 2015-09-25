@@ -23,6 +23,7 @@ package com.gsma.rcs.core.ims.service.capability;
 
 import com.gsma.rcs.addressbook.AddressBookEventListener;
 import com.gsma.rcs.addressbook.AddressBookManager;
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.service.ContactInfo;
 import com.gsma.rcs.core.ims.service.capability.OptionsManager.IOptionsManagerListener;
@@ -31,7 +32,6 @@ import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -133,10 +133,8 @@ public class SyncContactTask implements Runnable {
             } while (true);
         } catch (ContactManagerException e) {
             sLogger.error("Failed to synchronize contacts!", e);
-        } catch (IOException e) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(e.getMessage());
-            }
+        } catch (FileAccessException e) {
+            sLogger.error("Failed to synchronize contacts!", e);
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
@@ -191,7 +189,7 @@ public class SyncContactTask implements Runnable {
     }
 
     private Set<ContactId> aggregateNewContactsAndGetUnqueriedOnes()
-            throws ContactManagerException, IOException {
+            throws ContactManagerException, FileAccessException {
         Map<ContactId, Set<Long>> nativeContacts = mContactManager.getAllRawIdsInPhoneAddressBook();
         /*
          * Remove my contact since already created in native address book and no need to query for

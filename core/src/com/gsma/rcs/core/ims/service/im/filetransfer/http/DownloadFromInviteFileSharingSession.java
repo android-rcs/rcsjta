@@ -22,6 +22,8 @@
 
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
+import com.gsma.rcs.core.FileAccessException;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -37,7 +39,6 @@ import com.gsma.services.rcs.contact.ContactId;
 
 import android.net.Uri;
 
-import java.io.IOException;
 import java.util.List;
 
 import javax2.sip.header.ContactHeader;
@@ -144,9 +145,10 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
      * Download file icon from network server.<br>
      * Throws an exception if download fails.
      * 
-     * @throws IOException
+     * @throws FileAccessException
+     * @throws NetworkException
      */
-    public void downloadFileIcon() throws IOException {
+    public void downloadFileIcon() throws NetworkException, FileAccessException {
         mDownloadManager.downloadThumbnail(mIconRemoteUri, getFileicon());
     }
 

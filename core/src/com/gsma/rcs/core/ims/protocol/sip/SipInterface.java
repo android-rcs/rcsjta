@@ -39,10 +39,10 @@ import gov2.nist.javax2.sip.address.AddressImpl;
 import gov2.nist.javax2.sip.message.SIPMessage;
 
 import java.io.File;
-import java.io.IOException;
 import java.security.KeyStoreException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Properties;
 import java.util.TooManyListenersException;
@@ -209,6 +209,8 @@ public class SipInterface implements SipListener {
 
     private static final Logger sLogger = Logger.getLogger(SipInterface.class.getSimpleName());
 
+    private final RcsSettings mRcsSettings;
+
     /**
      * Constructor
      * 
@@ -219,12 +221,9 @@ public class SipInterface implements SipListener {
      * @param tcpFallback TCP fallback according to RFC3261 chapter 18.1.1
      * @param networkType Type of network
      * @param rcsSettings
-     * @throws PayloadException
-     * @throws NetworkException
      */
     public SipInterface(String localIpAddress, String proxyAddr, int proxyPort,
-            String defaultProtocol, boolean tcpFallback, int networkType, RcsSettings rcsSettings)
-            throws PayloadException, NetworkException {
+            String defaultProtocol, boolean tcpFallback, int networkType, RcsSettings rcsSettings) {
         mLocalIpAddress = localIpAddress;
         mDefaultProtocol = defaultProtocol;
         mTcpFallback = tcpFallback;
@@ -249,6 +248,15 @@ public class SipInterface implements SipListener {
         mServiceRoutePath = new Vector<String>();
         mServiceRoutePath.addElement(getDefaultRoute());
 
+        mRcsSettings = rcsSettings;
+    }
+
+    /**
+     * Initialize sip stack
+     * 
+     * @throws PayloadException
+     */
+    public void initialize() throws PayloadException {
         try {
             /* Init SIP factories */
             SipFactory sipFactory = SipFactory.getInstance();
@@ -258,7 +266,7 @@ public class SipInterface implements SipListener {
 
             /* Set SIP stack properties */
             Properties properties = new Properties();
-            properties.setProperty("javax2.sip.STACK_NAME", localIpAddress);
+            properties.setProperty("javax2.sip.STACK_NAME", mLocalIpAddress);
             properties.setProperty("gov2.nist.javax2.sip.THREAD_POOL_SIZE", "1");
             properties.setProperty("javax2.sip.OUTBOUND_PROXY", getOutboundProxy());
             if (mSipTraceEnabled) {
@@ -278,10 +286,10 @@ public class SipInterface implements SipListener {
                             "true");
                 }
             }
-            if (defaultProtocol.equals(ListeningPoint.TLS)) {
+            if (mDefaultProtocol.equals(ListeningPoint.TLS)) {
                 /* Set SSL properties */
                 properties.setProperty("gov2.nist.javax2.sip.TLS_CLIENT_PROTOCOLS", "SSLv3, TLSv1");
-                if (KeyStoreManager.isOwnCertificateUsed(rcsSettings)) {
+                if (KeyStoreManager.isOwnCertificateUsed(mRcsSettings)) {
                     properties.setProperty("javax2.net.ssl.keyStoreType",
                             KeyStoreManager.getKeystoreType());
                     String keyStorePath = KeyStoreManager.getKeystore().getPath();
@@ -297,30 +305,30 @@ public class SipInterface implements SipListener {
 
             mSipStack = sipFactory.createSipStack(properties);
 
-            ListeningPoint udp = mSipStack.createListeningPoint(localIpAddress, mListeningPort,
+            ListeningPoint udp = mSipStack.createListeningPoint(mLocalIpAddress, mListeningPort,
                     ListeningPoint.UDP);
             SipProvider udpSipProvider = mSipStack.createSipProvider(udp);
             udpSipProvider.addSipListener(this);
             mSipProviders.addElement(udpSipProvider);
 
             /* Set the default SIP provider */
-            if (defaultProtocol.equals(ListeningPoint.TLS)) {
-                ListeningPoint tls = mSipStack.createListeningPoint(localIpAddress, mListeningPort,
-                        ListeningPoint.TLS);
+            if (mDefaultProtocol.equals(ListeningPoint.TLS)) {
+                ListeningPoint tls = mSipStack.createListeningPoint(mLocalIpAddress,
+                        mListeningPort, ListeningPoint.TLS);
                 SipProvider tlsSipProvider = mSipStack.createSipProvider(tls);
                 tlsSipProvider.addSipListener(this);
                 mSipProviders.addElement(tlsSipProvider);
                 mDefaultSipProvider = tlsSipProvider;
-            } else if (defaultProtocol.equals(ListeningPoint.TCP)) {
-                ListeningPoint tcp = mSipStack.createListeningPoint(localIpAddress, mListeningPort,
-                        ListeningPoint.TCP);
+            } else if (mDefaultProtocol.equals(ListeningPoint.TCP)) {
+                ListeningPoint tcp = mSipStack.createListeningPoint(mLocalIpAddress,
+                        mListeningPort, ListeningPoint.TCP);
                 SipProvider tcpSipProvider = mSipStack.createSipProvider(tcp);
                 tcpSipProvider.addSipListener(this);
                 mSipProviders.addElement(tcpSipProvider);
                 mDefaultSipProvider = tcpSipProvider;
             } else {
-                ListeningPoint tcp = mSipStack.createListeningPoint(localIpAddress, mListeningPort,
-                        ListeningPoint.TCP);
+                ListeningPoint tcp = mSipStack.createListeningPoint(mLocalIpAddress,
+                        mListeningPort, ListeningPoint.TCP);
                 // Changed by Deutsche Telekom
                 if (this.mTcpFallback == false) {
                     SipProvider tcpSipProvider = mSipStack.createSipProvider(tcp);
@@ -337,61 +345,62 @@ public class SipInterface implements SipListener {
             }
 
             if (sLogger.isActivated()) {
-                if (defaultProtocol.equals(ListeningPoint.UDP))
+                if (mDefaultProtocol.equals(ListeningPoint.UDP))
                     sLogger.debug(new StringBuilder("Default SIP provider is UDP (TCP fallback=")
                             .append(this.mTcpFallback).append(")").toString());
                 else
-                    sLogger.debug("Default SIP provider is ".concat(defaultProtocol));
+                    sLogger.debug("Default SIP provider is ".concat(mDefaultProtocol));
             }
             mSipStack.start();
         } catch (PeerUnavailableException e) {
             throw new PayloadException(new StringBuilder(
-                    "Unable to instantiate SIP stack for localIpAddress : ").append(localIpAddress)
-                    .append(" with defaultProtocol : ").append(defaultProtocol).toString(), e);
+                    "Unable to instantiate SIP stack for localIpAddress : ")
+                    .append(mLocalIpAddress).append(" with defaultProtocol : ")
+                    .append(mDefaultProtocol).toString(), e);
 
         } catch (TransportNotSupportedException e) {
             throw new PayloadException(new StringBuilder(
-                    "Unable to instantiate SIP stack for localIpAddress : ").append(localIpAddress)
-                    .append(" with defaultProtocol : ").append(defaultProtocol).toString(), e);
+                    "Unable to instantiate SIP stack for localIpAddress : ")
+                    .append(mLocalIpAddress).append(" with defaultProtocol : ")
+                    .append(mDefaultProtocol).toString(), e);
 
         } catch (InvalidArgumentException e) {
             throw new PayloadException(new StringBuilder(
-                    "Unable to instantiate SIP stack for localIpAddress : ").append(localIpAddress)
-                    .append(" with defaultProtocol : ").append(defaultProtocol).toString(), e);
+                    "Unable to instantiate SIP stack for localIpAddress : ")
+                    .append(mLocalIpAddress).append(" with defaultProtocol : ")
+                    .append(mDefaultProtocol).toString(), e);
 
         } catch (TooManyListenersException e) {
             throw new PayloadException(new StringBuilder(
-                    "Unable to instantiate SIP stack for localIpAddress : ").append(localIpAddress)
-                    .append(" with defaultProtocol : ").append(defaultProtocol).toString(), e);
+                    "Unable to instantiate SIP stack for localIpAddress : ")
+                    .append(mLocalIpAddress).append(" with defaultProtocol : ")
+                    .append(mDefaultProtocol).toString(), e);
 
         } catch (ObjectInUseException e) {
             throw new PayloadException(new StringBuilder(
-                    "Unable to instantiate SIP stack for localIpAddress : ").append(localIpAddress)
-                    .append(" with defaultProtocol : ").append(defaultProtocol).toString(), e);
+                    "Unable to instantiate SIP stack for localIpAddress : ")
+                    .append(mLocalIpAddress).append(" with defaultProtocol : ")
+                    .append(mDefaultProtocol).toString(), e);
 
         } catch (ProviderDoesNotExistException e) {
             throw new PayloadException(new StringBuilder(
-                    "Unable to instantiate SIP stack for localIpAddress : ").append(localIpAddress)
-                    .append(" with defaultProtocol : ").append(defaultProtocol).toString(), e);
+                    "Unable to instantiate SIP stack for localIpAddress : ")
+                    .append(mLocalIpAddress).append(" with defaultProtocol : ")
+                    .append(mDefaultProtocol).toString(), e);
 
         } catch (SipException e) {
             throw new PayloadException(new StringBuilder(
-                    "Unable to instantiate SIP stack for localIpAddress : ").append(localIpAddress)
-                    .append(" with defaultProtocol : ").append(defaultProtocol).toString(), e);
+                    "Unable to instantiate SIP stack for localIpAddress : ")
+                    .append(mLocalIpAddress).append(" with defaultProtocol : ")
+                    .append(mDefaultProtocol).toString(), e);
         } catch (KeyStoreException e) {
             throw new PayloadException(new StringBuilder(
-                    "Unable to instantiate SIP stack for localIpAddress : ").append(localIpAddress)
-                    .append(" with defaultProtocol : ").append(defaultProtocol).toString(), e);
-
-        } catch (IOException e) {
-            throw new NetworkException(new StringBuilder(
-                    "Unable to instantiate SIP stack for localIpAddress : ").append(localIpAddress)
-                    .append(" with defaultProtocol : ").append(defaultProtocol).toString(), e);
-
+                    "Unable to instantiate SIP stack for localIpAddress : ")
+                    .append(mLocalIpAddress).append(" with defaultProtocol : ")
+                    .append(mDefaultProtocol).toString(), e);
         }
-
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("SIP stack started at ").append(localIpAddress)
+            sLogger.debug(new StringBuilder("SIP stack initialized at ").append(mLocalIpAddress)
                     .append(":").append(mListeningPort).toString());
         }
     }
@@ -627,9 +636,9 @@ public class SipInterface implements SipListener {
      * @return List of headers
      * @throws PayloadException
      */
-    public ArrayList<ViaHeader> getViaHeaders() throws PayloadException {
+    public List<ViaHeader> getViaHeaders() throws PayloadException {
         try {
-            ArrayList<ViaHeader> viaHeaders = new ArrayList<ViaHeader>();
+            List<ViaHeader> viaHeaders = new ArrayList<ViaHeader>();
             ViaHeader via = SipUtils.HEADER_FACTORY.createViaHeader(mLocalIpAddress,
                     mListeningPort, getProxyProtocol(), null);
             viaHeaders.add(via);
@@ -835,8 +844,8 @@ public class SipInterface implements SipListener {
      * @throws NetworkException
      */
     public SipTransactionContext sendSipMessageAndWait(SipMessage message,
-            INotifySipProvisionalResponse callbackSipProvisionalResponse)
-            throws PayloadException, NetworkException {
+            INotifySipProvisionalResponse callbackSipProvisionalResponse) throws PayloadException,
+            NetworkException {
         try {
             if (message instanceof SipRequest) {
                 SipRequest req = (SipRequest) message;
@@ -906,8 +915,8 @@ public class SipInterface implements SipListener {
      * @throws PayloadException
      * @throws NetworkException
      */
-    public SipTransactionContext sendSipMessageAndWait(SipMessage message)
-            throws PayloadException, NetworkException {
+    public SipTransactionContext sendSipMessageAndWait(SipMessage message) throws PayloadException,
+            NetworkException {
         return sendSipMessageAndWait(message, null);
     }
 

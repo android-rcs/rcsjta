@@ -23,6 +23,7 @@
 package com.gsma.rcs.core.ims.service.im.chat.event;
 
 import com.gsma.rcs.core.Core;
+import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
@@ -54,7 +55,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -178,10 +178,8 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * @param notify Received notify
      * @param timestamp Local timestamp when got SipRequest
      * @throws PayloadException
-     * @throws NetworkException
      */
-    public void receiveNotification(SipRequest notify, long timestamp) throws PayloadException,
-            NetworkException {
+    public void receiveNotification(SipRequest notify, long timestamp) throws PayloadException {
         boolean logActivated = sLogger.isActivated();
         if (logActivated) {
             sLogger.debug("New conference event notification received");
@@ -192,7 +190,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
         if (content != null) {
             try {
                 InputSource pidfInput = new InputSource(new ByteArrayInputStream(content));
-                ConferenceInfoParser confParser = new ConferenceInfoParser(pidfInput);
+                ConferenceInfoParser confParser = new ConferenceInfoParser(pidfInput).parse();
                 ConferenceInfoDocument conference = confParser.getConferenceInfo();
                 if (conference != null) {
                     int maxParticipants = conference.getMaxUserCount();
@@ -250,8 +248,8 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
             } catch (SAXException e) {
                 throw new PayloadException("Can't parse XML notification", e);
 
-            } catch (IOException e) {
-                throw new NetworkException("Can't parse XML notification", e);
+            } catch (ParseFailureException e) {
+                throw new PayloadException("Can't parse XML notification", e);
             }
         }
 

@@ -24,11 +24,11 @@ package com.gsma.rcs.core.ims.service.sip.messaging;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
@@ -51,7 +51,6 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.Vector;
 
 /**
@@ -166,10 +165,8 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
 
     /**
      * Prepare media session
-     * 
-     * @throws MsrpException
      */
-    public void prepareMediaSession() throws MsrpException {
+    public void prepareMediaSession() {
         // Parse the remote SDP part
         SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(UTF8));
         Vector<MediaDescription> media = parser.getMediaDescriptions();
@@ -188,20 +185,18 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
 
     /**
      * Start media transfer
-     * 
-     * @throws IOException
      */
-    public void startMediaTransfer() throws IOException {
+    public void startMediaTransfer() {
         // Not to be used here
     }
 
     /**
      * Open media session
      * 
-     * @throws IOException
+     * @throws NetworkException
      * @throws PayloadException
      */
-    public void openMediaSession() throws IOException, PayloadException {
+    public void openMediaSession() throws NetworkException, PayloadException {
         getMsrpMgr().openMsrpSession();
     }
 
@@ -241,8 +236,10 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
      * @param resp 200 OK response
      * @throws PayloadException
      * @throws NetworkException
+     * @throws FileAccessException
      */
-    public void handle200OK(SipResponse resp) throws PayloadException, NetworkException {
+    public void handle200OK(SipResponse resp) throws PayloadException, NetworkException,
+            FileAccessException {
         super.handle200OK(resp);
 
         getActivityManager().start();
@@ -252,9 +249,9 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
      * Sends a message in real time
      * 
      * @param content Message content
-     * @throws MsrpException
+     * @throws NetworkException
      */
-    public void sendMessage(byte[] content) throws MsrpException {
+    public void sendMessage(byte[] content) throws NetworkException {
         ByteArrayInputStream stream = new ByteArrayInputStream(content);
         String msgId = IdGenerator.getIdentifier().replace('_', '-');
         mMsrpMgr.sendChunks(stream, msgId, SipService.MIME_TYPE, content.length,
@@ -281,7 +278,7 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
      * @param data Received data
      * @param mimeType Data mime-type
      */
-    public void msrpDataReceived(String msgId, byte[] data, String mimeType) {
+    public void receiveMsrpData(String msgId, byte[] data, String mimeType) {
         if (logger.isActivated()) {
             logger.info("Data received (type " + mimeType + ")");
         }

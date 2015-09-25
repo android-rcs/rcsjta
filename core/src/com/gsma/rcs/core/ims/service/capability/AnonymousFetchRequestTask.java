@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.service.capability;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
@@ -42,7 +43,6 @@ import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.Vector;
 
@@ -110,8 +110,9 @@ public class AnonymousFetchRequestTask {
      * 
      * @throws NetworkException
      * @throws PayloadException
+     * @throws ContactManagerException
      */
-    public void start() throws PayloadException, NetworkException {
+    public void start() throws PayloadException, NetworkException, ContactManagerException {
         sendSubscribe();
     }
 
@@ -120,8 +121,9 @@ public class AnonymousFetchRequestTask {
      * 
      * @throws NetworkException
      * @throws PayloadException
+     * @throws ContactManagerException
      */
-    private void sendSubscribe() throws PayloadException, NetworkException {
+    private void sendSubscribe() throws PayloadException, NetworkException, ContactManagerException {
         if (sLogger.isActivated()) {
             sLogger.info("Send SUBSCRIBE request to " + mContact);
         }
@@ -175,9 +177,10 @@ public class AnonymousFetchRequestTask {
      * @param subscribe SIP SUBSCRIBE
      * @throws PayloadException
      * @throws NetworkException
+     * @throws ContactManagerException
      */
-    private void sendSubscribe(SipRequest subscribe) throws PayloadException,
-            NetworkException {
+    private void sendSubscribe(SipRequest subscribe) throws PayloadException, NetworkException,
+            ContactManagerException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info(new StringBuilder("Send SUBSCRIBE, expire=")
@@ -212,11 +215,9 @@ public class AnonymousFetchRequestTask {
                 /* No response received: timeout */
                 handleError(new PresenceError(PresenceError.SUBSCRIBE_FAILED));
             }
-        } catch (ContactManagerException e) {
+        } catch (FileAccessException e) {
             throw new PayloadException("Failed to send SUBSCRIBE!", e);
 
-        } catch (IOException e) {
-            throw new NetworkException("Failed to send SUBSCRIBE!", e);
         }
     }
 
@@ -237,9 +238,10 @@ public class AnonymousFetchRequestTask {
      * @param ctx SIP transaction context
      * @throws PayloadException
      * @throws NetworkException
+     * @throws ContactManagerException
      */
     private void handle407Authentication(SipTransactionContext ctx) throws PayloadException,
-            NetworkException {
+            NetworkException, ContactManagerException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info("407 response received");
@@ -292,10 +294,10 @@ public class AnonymousFetchRequestTask {
      * 
      * @param ctx SIP transaction context
      * @throws ContactManagerException
-     * @throws IOException
+     * @throws FileAccessException
      */
     private void handleUserNotFound(SipTransactionContext ctx) throws ContactManagerException,
-            IOException {
+            FileAccessException {
         if (sLogger.isActivated()) {
             sLogger.info("User not found (" + ctx.getStatusCode() + " error)");
         }

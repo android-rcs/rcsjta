@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.richcall.image;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.NetworkException;
@@ -32,7 +33,6 @@ import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpConstants;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
@@ -90,11 +90,11 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
      * @param timestamp Local timestamp for the session
      * @param contactManager
      * @throws PayloadException
-     * @throws NetworkException
+     * @throws FileAccessException
      */
     public TerminatingImageTransferSession(ImsService parent, SipRequest invite, ContactId contact,
             RcsSettings rcsSettings, long timestamp, ContactManager contactManager)
-            throws PayloadException, NetworkException {
+            throws PayloadException, FileAccessException {
         super(parent, ContentManager.createMmContentFromSdp(invite, rcsSettings), contact,
                 FileTransferUtils.extractFileIcon(invite, rcsSettings), rcsSettings, timestamp,
                 contactManager);
@@ -144,8 +144,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                     removeSession();
 
                     for (ImsSessionListener listener : listeners) {
-                        listener.onSessionRejected(contact,
-                                TerminationReason.TERMINATION_BY_USER);
+                        listener.onSessionRejected(contact, TerminationReason.TERMINATION_BY_USER);
                     }
                     return;
 
@@ -180,8 +179,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                     removeSession();
 
                     for (ImsSessionListener listener : listeners) {
-                        listener.onSessionRejected(contact,
-                                TerminationReason.TERMINATION_BY_REMOTE);
+                        listener.onSessionRejected(contact, TerminationReason.TERMINATION_BY_REMOTE);
                     }
                     return;
 
@@ -316,8 +314,6 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                 }
                 handleError(new ContentSharingError(ContentSharingError.SEND_RESPONSE_FAILED));
             }
-        } catch (MsrpException e) {
-            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         } catch (PayloadException e) {
             sLogger.error("Failed to send 200OK response!", e);
             handleError(new ContentSharingError(ContentSharingError.SEND_RESPONSE_FAILED, e));
@@ -326,8 +322,6 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                 sLogger.debug(e.getMessage());
             }
             handleError(new ContentSharingError(ContentSharingError.SEND_RESPONSE_FAILED, e));
-        } catch (IOException e) {
-            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
@@ -344,10 +338,8 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 
     /**
      * Send an empty data chunk
-     * 
-     * @throws MsrpException
      */
-    public void sendEmptyDataChunk() throws MsrpException {
+    public void sendEmptyDataChunk() {
         msrpMgr.sendEmptyChunk();
     }
 
@@ -367,7 +359,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
      * @param data Last received data chunk
      * @param mimeType Data mime-type
      */
-    public void msrpDataReceived(String msgId, byte[] data, String mimeType) {
+    public void receiveMsrpData(String msgId, byte[] data, String mimeType) {
         if (sLogger.isActivated()) {
             sLogger.info("Data received");
         }
@@ -383,7 +375,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                 ((ImageTransferSessionListener) getListeners().get(j)).handleContentTransfered(
                         contact, image);
             }
-        } catch (IOException e) {
+        } catch (FileAccessException e) {
             deleteFile();
             for (int j = 0; j < getListeners().size(); j++) {
                 ((ImageTransferSessionListener) getListeners().get(j)).handleSharingError(contact,
@@ -418,7 +410,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                 ((ImageTransferSessionListener) getListeners().get(j)).handleSharingProgress(
                         contact, currentSize, totalSize);
             }
-        } catch (IOException e) {
+        } catch (FileAccessException e) {
             deleteFile();
             for (int j = 0; j < getListeners().size(); j++) {
                 ((ImageTransferSessionListener) getListeners().get(j)).handleSharingError(contact,

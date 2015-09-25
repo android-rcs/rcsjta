@@ -22,9 +22,9 @@
 
 package com.gsma.rcs.core.ims.protocol.rtp;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.rtp.codec.Codec;
 import com.gsma.rcs.core.ims.protocol.rtp.format.Format;
-import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.rtp.media.MediaOutput;
 import com.gsma.rcs.core.ims.protocol.rtp.stream.MediaRendererStream;
 import com.gsma.rcs.core.ims.protocol.rtp.stream.RtpInputStream;
@@ -40,22 +40,22 @@ public class MediaRtpReceiver {
     /**
      * Media processor
      */
-    protected Processor processor = null;
+    protected Processor mProcessor;
 
     /**
      * Local port number (RTP listening port)
      */
-    protected int localPort;
+    protected int mLocalPort;
 
     /**
      * RTP Input Stream
      */
-    protected RtpInputStream inputStream = null;
+    protected RtpInputStream mInputStream;
 
     /**
      * The logger
      */
-    protected Logger logger = Logger.getLogger(this.getClass().getName());
+    protected static final Logger sLogger = Logger.getLogger(MediaRtpReceiver.class.getName());
 
     /**
      * Constructor
@@ -63,7 +63,7 @@ public class MediaRtpReceiver {
      * @param localPort Local port number
      */
     public MediaRtpReceiver(int localPort) {
-        this.localPort = localPort;
+        this.mLocalPort = localPort;
     }
 
     /**
@@ -74,37 +74,39 @@ public class MediaRtpReceiver {
      * @param renderer Renderer
      * @param format format
      * @param rtpStreamListener RTP Stream listener
-     * @throws MediaException When an error occurs
+     * @throws NetworkException
      */
     public void prepareSession(String remoteAddress, int remotePort, MediaOutput renderer,
-            Format format, RtpStreamListener rtpStreamListener) throws MediaException {
+            Format format, RtpStreamListener rtpStreamListener) throws NetworkException {
         try {
             // Create the input stream
-            inputStream = new RtpInputStream(remoteAddress, remotePort, localPort, format);
-            inputStream.addRtpStreamListener(rtpStreamListener);
-            inputStream.open();
-            if (logger.isActivated()) {
-                logger.debug("Input stream: " + inputStream.getClass().getName());
+            mInputStream = new RtpInputStream(remoteAddress, remotePort, mLocalPort, format);
+            mInputStream.addRtpStreamListener(rtpStreamListener);
+            mInputStream.open();
+            if (sLogger.isActivated()) {
+                sLogger.debug("Input stream: " + mInputStream.getClass().getName());
             }
 
             // Create the output stream
             MediaRendererStream outputStream = new MediaRendererStream(renderer);
             outputStream.open();
-            if (logger.isActivated()) {
-                logger.debug("Output stream: " + outputStream.getClass().getName());
+            if (sLogger.isActivated()) {
+                sLogger.debug("Output stream: " + outputStream.getClass().getName());
             }
 
             // Create the codec chain
             Codec[] codecChain = MediaRegistry.generateDecodingCodecChain(format.getCodec());
 
             // Create the media processor
-            processor = new Processor(inputStream, outputStream, codecChain);
+            mProcessor = new Processor(mInputStream, outputStream, codecChain);
 
-            if (logger.isActivated()) {
-                logger.debug("Session has been prepared with success");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Session has been prepared with success");
             }
         } catch (IOException e) {
-            throw new MediaException("Can't prepare resources", e);
+            throw new NetworkException(new StringBuilder(
+                    "Can't prepare resources correctly for remoteAddress : ").append(remoteAddress)
+                    .append(" with remotePort : ").append(remotePort).append("!").toString(), e);
         }
     }
 
@@ -112,13 +114,13 @@ public class MediaRtpReceiver {
      * Start the RTP session
      */
     public void startSession() {
-        if (logger.isActivated()) {
-            logger.info("Start the session");
+        if (sLogger.isActivated()) {
+            sLogger.info("Start the session");
         }
 
         // Start the media processor
-        if (processor != null) {
-            processor.startProcessing();
+        if (mProcessor != null) {
+            mProcessor.startProcessing();
         }
     }
 
@@ -126,13 +128,13 @@ public class MediaRtpReceiver {
      * Stop the RTP session
      */
     public void stopSession() {
-        if (logger.isActivated()) {
-            logger.info("Stop the session");
+        if (sLogger.isActivated()) {
+            sLogger.info("Stop the session");
         }
 
         // Stop the media processor
-        if (processor != null) {
-            processor.stopProcessing();
+        if (mProcessor != null) {
+            mProcessor.stopProcessing();
         }
     }
 
@@ -142,6 +144,6 @@ public class MediaRtpReceiver {
      * @return RTP input stream
      */
     public RtpInputStream getInputStream() {
-        return inputStream;
+        return mInputStream;
     }
 }

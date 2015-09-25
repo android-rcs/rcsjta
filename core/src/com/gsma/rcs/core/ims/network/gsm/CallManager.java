@@ -26,6 +26,7 @@ import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.capability.CapabilityService;
+import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
@@ -247,6 +248,11 @@ public class CallManager {
                                 break;
                         }
 
+                    } catch (ContactManagerException e) {
+                        sLogger.error(
+                                new StringBuilder("Unable to handle call state : ").append(state)
+                                        .append(" for incoming number : ").append(incomingNumber)
+                                        .toString(), e);
                     } catch (PayloadException e) {
                         sLogger.error(
                                 new StringBuilder("Unable to handle call state : ").append(state)
@@ -413,8 +419,10 @@ public class CallManager {
      * @param connected Connection state
      * @throws PayloadException
      * @throws NetworkException
+     * @throws ContactManagerException
      */
-    public void connectionEvent(boolean connected) throws PayloadException, NetworkException {
+    public void connectionEvent(boolean connected) throws PayloadException, NetworkException,
+            ContactManagerException {
         if (sContact == null) {
             return;
         }

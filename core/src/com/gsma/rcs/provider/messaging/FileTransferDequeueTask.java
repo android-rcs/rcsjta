@@ -17,10 +17,12 @@
 package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.core.Core;
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
+import com.gsma.rcs.core.ims.service.im.chat.SessionNotEstablishedException;
+import com.gsma.rcs.core.ims.service.im.chat.SessionUnavailableException;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.CursorUtil;
@@ -198,14 +200,20 @@ public class FileTransferDequeueTask extends DequeueTask {
                             break;
                     }
 
-                } catch (MsrpException e) {
+                } catch (SessionUnavailableException e) {
                     if (logActivated) {
                         mLogger.debug(new StringBuilder(
                                 "Failed to dequeue file transfer with fileTransferId '").append(id)
                                 .append("' on chat '").append(chatId).append("' due to: ")
                                 .append(e.getMessage()).toString());
                     }
-
+                } catch (SessionNotEstablishedException e) {
+                    if (logActivated) {
+                        mLogger.debug(new StringBuilder(
+                                "Failed to dequeue file transfer with fileTransferId '").append(id)
+                                .append("' on chat '").append(chatId).append("' due to: ")
+                                .append(e.getMessage()).toString());
+                    }
                 } catch (NetworkException e) {
                     if (logActivated) {
                         mLogger.debug(new StringBuilder(

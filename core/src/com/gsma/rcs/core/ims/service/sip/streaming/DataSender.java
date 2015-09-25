@@ -78,12 +78,8 @@ public class DataSender implements MediaInput {
      * Read a media sample (blocking method)
      * 
      * @return Media sample
-     * @throws MediaException
      */
-    public MediaSample readSample() throws MediaException {
-        if (mFifo != null) {
-            return (MediaSample) mFifo.getObject();
-        }
-        throw new MediaException("Media input not opened");
+    public MediaSample readSample() {
+        return (MediaSample) mFifo.getObject();
     }
 }

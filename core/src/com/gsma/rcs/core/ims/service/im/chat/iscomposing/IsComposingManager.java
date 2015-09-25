@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.service.im.chat.iscomposing;
 
+import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
@@ -33,7 +34,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -85,13 +85,11 @@ public class IsComposingManager {
      * @param contact Contact identifier
      * @param event Event
      * @throws PayloadException
-     * @throws IOException
      */
-    public void receiveIsComposingEvent(ContactId contact, byte[] event)
-            throws PayloadException, IOException {
+    public void receiveIsComposingEvent(ContactId contact, byte[] event) throws PayloadException {
         try {
             InputSource input = new InputSource(new ByteArrayInputStream(event));
-            IsComposingParser parser = new IsComposingParser(input);
+            IsComposingParser parser = new IsComposingParser(input).parse();
             IsComposingInfo isComposingInfo = parser.getIsComposingInfo();
             List<ImsSessionListener> sessionListeners = mSession.getListeners();
             if ((isComposingInfo != null) && isComposingInfo.isStateActive()) {
@@ -119,6 +117,11 @@ public class IsComposingManager {
                             .getSessionID()), e);
 
         } catch (SAXException e) {
+            throw new PayloadException(
+                    "Can't parse is-composing event for session ID : ".concat(mSession
+                            .getSessionID()), e);
+
+        } catch (ParseFailureException e) {
             throw new PayloadException(
                     "Can't parse is-composing event for session ID : ".concat(mSession
                             .getSessionID()), e);

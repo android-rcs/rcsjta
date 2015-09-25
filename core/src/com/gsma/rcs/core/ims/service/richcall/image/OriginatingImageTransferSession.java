@@ -24,13 +24,13 @@ package com.gsma.rcs.core.ims.service.richcall.image;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
@@ -53,6 +53,7 @@ import com.gsma.services.rcs.contact.ContactId;
 import android.net.Uri;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -231,9 +232,11 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         } catch (IOException e) {
             if (mLogger.isActivated()) {
-                mLogger.debug("Failed to initiate a new image transfer session with sharingId "
-                        .concat(getFileTransferId()));
+                mLogger.debug(e.getMessage());
             }
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (FileAccessException e) {
+            mLogger.error("Failed to send invite!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         } catch (PayloadException e) {
             mLogger.error("Failed to send invite!", e);
@@ -259,10 +262,8 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
 
     /**
      * Prepare media session
-     * 
-     * @throws MsrpException
      */
-    public void prepareMediaSession() throws MsrpException {
+    public void prepareMediaSession() {
         // Changed by Deutsche Telekom
         /* Get the remote SDP part */
         byte[] sdp = getDialogPath().getRemoteContent().getBytes(UTF8);
@@ -280,24 +281,31 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
     /**
      * Open media session
      * 
-     * @throws IOException
+     * @throws NetworkException
      * @throws PayloadException
      */
-    public void openMediaSession() throws IOException, PayloadException {
+    public void openMediaSession() throws NetworkException, PayloadException {
         msrpMgr.openMsrpSession();
     }
 
     /**
      * Start media transfer
      * 
-     * @throws IOException
+     * @throws NetworkException
+     * @throws FileAccessException
      */
-    public void startMediaTransfer() throws IOException {
-        /* Start sending data chunks */
-        InputStream stream = AndroidFactory.getApplicationContext().getContentResolver()
-                .openInputStream(getContent().getUri());
-        msrpMgr.sendChunks(stream, getFileTransferId(), getContent().getEncoding(), getContent()
-                .getSize(), TypeMsrpChunk.FileSharing);
+    public void startMediaTransfer() throws NetworkException, FileAccessException {
+        try {
+            /* Start sending data chunks */
+            InputStream stream = AndroidFactory.getApplicationContext().getContentResolver()
+                    .openInputStream(getContent().getUri());
+            msrpMgr.sendChunks(stream, getFileTransferId(), getContent().getEncoding(),
+                    getContent().getSize(), TypeMsrpChunk.FileSharing);
+        } catch (FileNotFoundException e) {
+            throw new FileAccessException(
+                    "Failed to initiate media transfer for uri : ".concat(getContent().getUri()
+                            .toString()), e);
+        }
     }
 
     /**
@@ -356,7 +364,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
      * @param data Received data
      * @param mimeType Data mime-type
      */
-    public void msrpDataReceived(String msgId, byte[] data, String mimeType) {
+    public void receiveMsrpData(String msgId, byte[] data, String mimeType) {
         // Not used in originating side
     }
 

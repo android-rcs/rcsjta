@@ -30,7 +30,6 @@ import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
@@ -54,7 +53,6 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.contact.ContactId;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Vector;
 
@@ -299,10 +297,6 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                 }
                 handleError(new ContentSharingError(ContentSharingError.SEND_RESPONSE_FAILED));
             }
-        } catch (MsrpException e) {
-            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
-        } catch (IOException e) {
-            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         } catch (PayloadException e) {
             sLogger.error("Failed to send 200OK response!", e);
             handleError(new ContentSharingError(ContentSharingError.SEND_RESPONSE_FAILED, e));
@@ -327,10 +321,8 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
 
     /**
      * Send an empty data chunk
-     * 
-     * @throws MsrpException
      */
-    public void sendEmptyDataChunk() throws MsrpException {
+    public void sendEmptyDataChunk() {
         msrpMgr.sendEmptyChunk();
     }
 
@@ -349,27 +341,22 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
      * @param msgId Message ID
      * @param data Last received data chunk
      * @param mimeType Data mime-type
-     * @throws NetworkException
      * @throws PayloadException
      */
-    public void msrpDataReceived(String msgId, byte[] data, String mimeType)
-            throws PayloadException, NetworkException {
-        try {
-            if (sLogger.isActivated()) {
-                sLogger.info("Data received");
-            }
-            ContactId contact = getRemoteContact();
-            String geolocDoc = new String(data, UTF8);
-            Geoloc geoloc = ChatUtils.parseGeolocDocument(geolocDoc);
-            setGeoloc(geoloc);
-            geolocTransfered();
-            boolean initiatedByRemote = isInitiatedByRemote();
-            for (ImsSessionListener listener : getListeners()) {
-                ((GeolocTransferSessionListener) listener).handleContentTransfered(contact, geoloc,
-                        initiatedByRemote);
-            }
-        } catch (IOException e) {
-            throw new NetworkException("Failed to receive msrp data for msgId".concat(msgId), e);
+    public void receiveMsrpData(String msgId, byte[] data, String mimeType)
+            throws PayloadException {
+        if (sLogger.isActivated()) {
+            sLogger.info("Data received");
+        }
+        ContactId contact = getRemoteContact();
+        String geolocDoc = new String(data, UTF8);
+        Geoloc geoloc = ChatUtils.parseGeolocDocument(geolocDoc);
+        setGeoloc(geoloc);
+        geolocTransfered();
+        boolean initiatedByRemote = isInitiatedByRemote();
+        for (ImsSessionListener listener : getListeners()) {
+            ((GeolocTransferSessionListener) listener).handleContentTransfered(contact, geoloc,
+                    initiatedByRemote);
         }
     }
 

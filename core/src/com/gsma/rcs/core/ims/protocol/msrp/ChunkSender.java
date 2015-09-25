@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.protocol.msrp;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -104,7 +105,7 @@ public class ChunkSender extends Thread {
                 }
                 writeData(chunk);
             }
-        } catch (IOException e) {
+        } catch (NetworkException e) {
             if (!mTerminated) {
                 if (sLogger.isActivated()) {
                     sLogger.debug(e.getMessage());
@@ -133,9 +134,9 @@ public class ChunkSender extends Thread {
      * Send a chunk
      * 
      * @param chunk New chunk
-     * @throws IOException
+     * @throws NetworkException
      */
-    public void sendChunk(byte chunk[]) throws IOException {
+    public void sendChunk(byte chunk[]) throws NetworkException {
         if (mConnection.getSession().isFailureReportRequested()) {
             mBuffer.putMessage(chunk);
         } else {
@@ -147,9 +148,9 @@ public class ChunkSender extends Thread {
      * Send a chunk immediately
      * 
      * @param chunk New chunk
-     * @throws IOException
+     * @throws NetworkException
      */
-    public void sendChunkImmediately(byte chunk[]) throws IOException {
+    public void sendChunkImmediately(byte chunk[]) throws NetworkException {
         if (MsrpConnection.isMsrpTraceEnabled()) {
             System.out.println(">>> Send MSRP message:\n" + new String(chunk, UTF8));
         }
@@ -160,14 +161,14 @@ public class ChunkSender extends Thread {
      * Write data to the stream
      * 
      * @param chunk Data chunk
-     * @throws IOException
+     * @throws NetworkException
      */
-    private synchronized void writeData(byte chunk[]) throws IOException {
+    private synchronized void writeData(byte chunk[]) throws NetworkException {
         try {
             mStream.write(chunk);
             mStream.flush();
         } catch (IOException e) {
-            throw new IOException("Failed to write data!", e);
+            throw new NetworkException("Failed to write data!", e);
         }
     }
 }

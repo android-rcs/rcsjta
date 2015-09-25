@@ -27,7 +27,6 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
@@ -149,9 +148,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
         }
     }
 
-    protected void sendResultToContact(byte[] result) throws PayloadException,
-            NetworkException {
-        try {
+    protected void sendResultToContact(byte[] result) throws PayloadException, NetworkException {
             // Check if upload has been cancelled
             if (mUploadManager.isCancelled()) {
                 return;
@@ -237,13 +234,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                 chatSession.startSession();
                 mImService.receiveOneOneChatSessionInitiation(chatSession);
             }
-
             handleFileTransfered();
-
-        } catch (MsrpException e) {
-            throw new NetworkException(
-                    "Failed to send result chunks for transferId : ".concat(getFileTransferId()), e);
-        }
     }
 
     @Override

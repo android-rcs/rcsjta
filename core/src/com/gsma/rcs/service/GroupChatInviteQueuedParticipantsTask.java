@@ -46,8 +46,8 @@ public class GroupChatInviteQueuedParticipantsTask implements Runnable {
     private static final Logger sLogger = Logger
             .getLogger(GroupChatInviteQueuedParticipantsTask.class.getName());
 
-    public GroupChatInviteQueuedParticipantsTask(String chatId,
-            ChatServiceImpl chatService, InstantMessagingService imService) {
+    public GroupChatInviteQueuedParticipantsTask(String chatId, ChatServiceImpl chatService,
+            InstantMessagingService imService) {
         mChatId = chatId;
         mChatService = chatService;
         mImService = imService;
@@ -81,14 +81,14 @@ public class GroupChatInviteQueuedParticipantsTask implements Runnable {
                 }
                 session.inviteParticipants(participantsToBeInvited);
             }
-        } catch (PayloadException e) {
-            sLogger.error(
-                    "Exception occured while trying to invite queued participants to group chat with chatId "
-                            .concat(mChatId), e);
         } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
+        } catch (PayloadException e) {
+            sLogger.error(
+                    "Exception occured while trying to invite queued participants to group chat with chatId "
+                            .concat(mChatId), e);
         } catch (RuntimeException e) {
             /*
              * Normally we are not allowed to catch runtime exceptions as these are genuine bugs

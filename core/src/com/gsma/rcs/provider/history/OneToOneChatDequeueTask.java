@@ -17,14 +17,16 @@
 package com.gsma.rcs.provider.history;
 
 import com.gsma.rcs.core.Core;
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
+import com.gsma.rcs.core.ims.service.im.chat.SessionUnavailableException;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
+import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.MessageData;
@@ -197,7 +199,7 @@ public class OneToOneChatDequeueTask extends DequeueTask {
                         default:
                             break;
                     }
-                } catch (MsrpException e) {
+                } catch (SessionUnavailableException e) {
                     if (logActivated) {
                         mLogger.debug(new StringBuilder("Failed to dequeue one-one entry with id '")
                                 .append(id).append("' for contact '").append(contact)
@@ -246,9 +248,7 @@ public class OneToOneChatDequeueTask extends DequeueTask {
             setOneToOneChatEntryAsFailedDequeue(providerId, contact, id, mimeType);
 
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            CursorUtil.close(cursor);
         }
     }
 }

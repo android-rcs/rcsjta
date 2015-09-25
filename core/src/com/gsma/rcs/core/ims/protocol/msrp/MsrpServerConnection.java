@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.protocol.msrp;
 
 import java.io.IOException;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.platform.network.NetworkFactory;
 import com.gsma.rcs.platform.network.SocketConnection;
 import com.gsma.rcs.platform.network.SocketServerConnection;
@@ -66,25 +67,30 @@ public class MsrpServerConnection extends MsrpConnection {
      * Returns the socket connection
      * 
      * @return Socket
-     * @throws IOException
+     * @throws NetworkException
      */
-    public SocketConnection getSocketConnection() throws IOException {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Open server socket at " + mLocalPort);
-        }
-        mSocketServer = NetworkFactory.getFactory().createSocketServerConnection();
-        mSocketServer.open(mLocalPort);
+    public SocketConnection getSocketConnection() throws NetworkException {
+        try {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Open server socket at " + mLocalPort);
+            }
+            mSocketServer = NetworkFactory.getFactory().createSocketServerConnection();
+            mSocketServer.open(mLocalPort);
 
-        if (sLogger.isActivated()) {
-            sLogger.debug("Wait client connection");
-        }
+            if (sLogger.isActivated()) {
+                sLogger.debug("Wait client connection");
+            }
 
-        SocketConnection socket = mSocketServer.acceptConnection();
-        if (sLogger.isActivated()) {
-            sLogger.debug("Socket connected to " + socket.getRemoteAddress() + ":"
-                    + socket.getRemotePort());
+            SocketConnection socket = mSocketServer.acceptConnection();
+            if (sLogger.isActivated()) {
+                sLogger.debug("Socket connected to " + socket.getRemoteAddress() + ":"
+                        + socket.getRemotePort());
+            }
+            return socket;
+
+        } catch (IOException e) {
+            throw new NetworkException("Failed to get socket connection!", e);
         }
-        return socket;
     }
 
     /**

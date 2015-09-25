@@ -29,6 +29,7 @@ import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.rtp.core.RtpSource;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.platform.network.NetworkFactory;
+import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.NetworkAccessType;
 import com.gsma.rcs.service.LauncherUtils;
@@ -214,8 +215,9 @@ public class ImsConnectionManager implements Runnable {
      * 
      * @throws PayloadException
      * @throws NetworkException
+     * @throws ContactManagerException
      */
-    public void terminate() throws PayloadException, NetworkException {
+    public void terminate() throws PayloadException, NetworkException, ContactManagerException {
         if (sLogger.isActivated()) {
             sLogger.info("Terminate the IMS connection manager");
         }
@@ -246,6 +248,9 @@ public class ImsConnectionManager implements Runnable {
 
                     try {
                         connectionEvent(intent);
+                    } catch (ContactManagerException e) {
+                        sLogger.error("Unable to handle connection event for intent action : "
+                                .concat(intent.getAction()), e);
                     } catch (PayloadException e) {
                         sLogger.error("Unable to handle connection event for intent action : "
                                 .concat(intent.getAction()), e);
@@ -279,12 +284,13 @@ public class ImsConnectionManager implements Runnable {
      * @throws PayloadException
      * @throws CertificateException
      * @throws NetworkException
+     * @throws ContactManagerException
      */
     // @FIXME: This method is doing so many things at this moment and has become too complex thus
     // needs a complete refactor, However at this moment due to other prior tasks the refactoring
     // task has been kept in backlog.
     private void connectionEvent(Intent intent) throws PayloadException, CertificateException,
-            NetworkException {
+            NetworkException, ContactManagerException {
         try {
             if (mDisconnectedByBattery) {
                 return;
@@ -476,8 +482,10 @@ public class ImsConnectionManager implements Runnable {
      * 
      * @throws PayloadException
      * @throws NetworkException
+     * @throws ContactManagerException
      */
-    private void disconnectFromIms() throws PayloadException, NetworkException {
+    private void disconnectFromIms() throws PayloadException, NetworkException,
+            ContactManagerException {
         // Stop the IMS connection
         stopImsConnection(TerminationReason.TERMINATION_BY_CONNECTION_LOST);
 
@@ -508,9 +516,10 @@ public class ImsConnectionManager implements Runnable {
      * 
      * @throws PayloadException
      * @throws NetworkException
+     * @throws ContactManagerException
      */
     private synchronized void stopImsConnection(TerminationReason reasonCode)
-            throws PayloadException, NetworkException {
+            throws PayloadException, NetworkException, ContactManagerException {
         if (mImsPollingThreadId == -1) {
             return;
         }
@@ -596,6 +605,13 @@ public class ImsConnectionManager implements Runnable {
                             }
                         }
                     }
+                } catch (ContactManagerException e) {
+                    sLogger.error("Can't register to the IMS!", e);
+                    mCurrentNetworkInterface.getSipManager().closeStack();
+                    /* Increment number of failures */
+                    nbFailures++;
+                    /* Force to perform a new DNS lookup */
+                    mDnsResolvedFields = null;
                 } catch (PayloadException e) {
                     sLogger.error("Can't register to the IMS!", e);
                     mCurrentNetworkInterface.getSipManager().closeStack();
@@ -712,6 +728,9 @@ public class ImsConnectionManager implements Runnable {
                                 connectionEvent(new Intent(ConnectivityManager.CONNECTIVITY_ACTION));
                             }
                         }
+                    } catch (ContactManagerException e) {
+                        sLogger.error("Unable to handle connection event for intent action : "
+                                .concat(intent.getAction()), e);
                     } catch (PayloadException e) {
                         sLogger.error("Unable to handle connection event for intent action : "
                                 .concat(intent.getAction()), e);

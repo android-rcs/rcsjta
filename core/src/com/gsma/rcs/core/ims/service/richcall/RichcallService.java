@@ -25,6 +25,7 @@ package com.gsma.rcs.core.ims.service.richcall;
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.CoreException;
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.content.VideoContent;
@@ -660,6 +661,9 @@ public class RichcallService extends ImsService {
 
                     session.startSession();
 
+                } catch (FileAccessException e) {
+                    sLogger.error("Failed to receive image share invitation!", e);
+                    tryToSendErrorResponse(invite, Response.DECLINE);
                 } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug("Failed to receive image share invitation! ("
@@ -1084,7 +1088,7 @@ public class RichcallService extends ImsService {
 
     /**
      * Handles image sharing rejection
-     *
+     * 
      * @param remoteContact Remote contact
      * @param content Multimedia content
      * @param reasonCode Rejected reason code
@@ -1098,7 +1102,7 @@ public class RichcallService extends ImsService {
 
     /**
      * Handle the case of rejected video sharing
-     *
+     * 
      * @param remoteContact Remote contact
      * @param content Video content
      * @param reasonCode Rejected reason code
@@ -1112,7 +1116,7 @@ public class RichcallService extends ImsService {
 
     /**
      * Handle the case of rejected geoloc sharing
-     *
+     * 
      * @param remoteContact Remote contact
      * @param reasonCode Rejected reason code
      * @param timestamp Local timestamp when got geoloc sharing invitation
@@ -1135,7 +1139,7 @@ public class RichcallService extends ImsService {
     /**
      * Try to delete image sharing with a given contact from history and abort/reject any associated
      * ongoing session if such exists.
-     *
+     * 
      * @param contact
      */
     public void tryToDeleteImageSharings(ContactId contact) {
@@ -1146,7 +1150,7 @@ public class RichcallService extends ImsService {
     /**
      * Try to delete a image sharing by its sharing id from history and abort/reject any associated
      * ongoing session if such exists.
-     *
+     * 
      * @param sharingId
      */
     public void tryToDeleteImageSharing(String sharingId) {
@@ -1166,7 +1170,7 @@ public class RichcallService extends ImsService {
     /**
      * Try to delete video sharing with a given contact from history and abort/reject any associated
      * ongoing session if such exists.
-     *
+     * 
      * @param contact
      */
     public void tryToDeleteVideoSharings(ContactId contact) {
@@ -1177,7 +1181,7 @@ public class RichcallService extends ImsService {
     /**
      * Try to delete a video sharing by its sharing id from history and abort/reject any associated
      * ongoing session if such exists.
-     *
+     * 
      * @param sharingId
      */
     public void tryToDeleteVideoSharing(String sharingId) {
@@ -1197,7 +1201,7 @@ public class RichcallService extends ImsService {
     /**
      * Try to delete geoloc sharing with a given contact from history and abort/reject any
      * associated ongoing session if such exists.
-     *
+     * 
      * @param contact
      */
     public void tryToDeleteGeolocSharings(ContactId contact) {
@@ -1208,7 +1212,7 @@ public class RichcallService extends ImsService {
     /**
      * Try to delete a geoloc sharing by its sharing id from history and abort/reject any associated
      * ongoing session if such exists.
-     *
+     * 
      * @param sharingId
      */
     public void tryToDeleteGeolocSharing(String sharingId) {

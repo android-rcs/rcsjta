@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.capability;
 
 import com.gsma.rcs.addressbook.AddressBookEventListener;
 import com.gsma.rcs.addressbook.AddressBookManager;
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
@@ -253,6 +254,8 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
                     }
                 } catch (PayloadException e) {
                     sLogger.error("Failed to receive capability request!", e);
+                } catch (ContactManagerException e) {
+                    sLogger.error("Failed to receive capability request!", e);
                 } catch (RuntimeException e) {
                     /*
                      * Normally we are not allowed to catch runtime exceptions as these are genuine
@@ -278,11 +281,8 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
             public void run() {
                 try {
                     mAnonymousFetchManager.onNotificationReceived(notify);
-                } catch (NetworkException e) {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("Failed to receive capability notification! ("
-                                + e.getMessage() + ")");
-                    }
+                } catch (ContactManagerException e) {
+                    sLogger.error("Failed to receive capability notification!", e);
                 } catch (PayloadException e) {
                     sLogger.error("Failed to receive capability notification!", e);
                 } catch (RuntimeException e) {
@@ -326,9 +326,10 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      * @param contact Contact identifier
      * @throws PayloadException
      * @throws NetworkException
+     * @throws ContactManagerException
      */
     public void resetContactCapabilitiesForContentSharing(ContactId contact)
-            throws PayloadException, NetworkException {
+            throws PayloadException, NetworkException, ContactManagerException {
         try {
             Capabilities capabilities = mContactManager.getContactCapabilities(contact);
             if (capabilities == null
@@ -345,12 +346,8 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
 
             onReceivedCapabilities(contact, capabilities);
 
-        } catch (ContactManagerException e) {
+        } catch (FileAccessException e) {
             throw new PayloadException(
-                    "Failed to reset content share capabilities for contact : ".concat(contact
-                            .toString()), e);
-        } catch (IOException e) {
-            throw new NetworkException(
                     "Failed to reset content share capabilities for contact : ".concat(contact
                             .toString()), e);
         }

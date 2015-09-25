@@ -67,6 +67,7 @@ import static com.gsma.rcs.provider.contact.ContactData.TRUE_VALUE;
 
 import com.gsma.rcs.R;
 import com.gsma.rcs.addressbook.RcsAccountManager;
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.service.ContactInfo;
 import com.gsma.rcs.core.ims.service.ContactInfo.BlockingState;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
@@ -508,10 +509,10 @@ public final class ContactManager {
      * @param newInfo New contact info
      * @param oldInfo Old contact info
      * @throws ContactManagerException
-     * @throws IOException
+     * @throws FileAccessException
      */
     private void setContactInfoInternal(ContactInfo newInfo, ContactInfo oldInfo)
-            throws ContactManagerException, IOException {
+            throws ContactManagerException, FileAccessException {
         ContactId contact = newInfo.getContact();
         String contactNumber = contact.toString();
         boolean logActivated = sLogger.isActivated();
@@ -953,9 +954,9 @@ public final class ContactManager {
      * 
      * @param photoIcon
      * @param contact
-     * @throws IOException
+     * @throws FileAccessException
      */
-    private void savePhotoIcon(PhotoIcon photoIcon, ContactId contact) throws IOException {
+    private void savePhotoIcon(PhotoIcon photoIcon, ContactId contact) throws FileAccessException {
         byte photoContent[] = photoIcon.getContent();
         if (photoContent == null) {
             return;
@@ -966,6 +967,10 @@ public final class ContactManager {
             outstream = mLocalContentResolver.openContentOutputStream(photoUri);
             outstream.write(photoContent);
             outstream.flush();
+        } catch (IOException e) {
+            throw new FileAccessException("Failed to save photo icon for contact : ".concat(contact
+                    .toString()), e);
+
         } finally {
             CloseableUtils.tryToClose(outstream);
         }
@@ -1007,9 +1012,9 @@ public final class ContactManager {
      * 
      * @param contact Contact ID
      * @throws ContactManagerException exception thrown if update operation has failed
-     * @throws IOException
+     * @throws FileAccessException
      */
-    public void blockContact(ContactId contact) throws ContactManagerException, IOException {
+    public void blockContact(ContactId contact) throws ContactManagerException, FileAccessException {
         if (sLogger.isActivated()) {
             sLogger.info("Block contact ".concat(contact.toString()));
         }
@@ -1781,11 +1786,11 @@ public final class ContactManager {
      * 
      * @param contact Contact Id
      * @param capabilities Capabilities to set
-     * @throws IOException
+     * @throws FileAccessException
      * @throws ContactManagerException
      */
     public void setContactCapabilities(ContactId contact, Capabilities capabilities)
-            throws ContactManagerException, IOException {
+            throws ContactManagerException, FileAccessException {
         setContactCapabilities(contact, capabilities, getContactStatus(contact),
                 getRegistrationState(contact));
     }
@@ -1798,11 +1803,11 @@ public final class ContactManager {
      * @param contactType Contact type
      * @param registrationState Three possible values : online/offline/unknown
      * @throws ContactManagerException
-     * @throws IOException
+     * @throws FileAccessException
      */
     public void setContactCapabilities(ContactId contact, Capabilities capabilities,
             RcsStatus contactType, RegistrationState registrationState)
-            throws ContactManagerException, IOException {
+            throws ContactManagerException, FileAccessException {
         synchronized (mContactInfoCache) {
             /* Get the current information on this contact */
             ContactInfo oldInfo = getContactInfoInternal(contact);
@@ -1873,11 +1878,11 @@ public final class ContactManager {
      * @param registrationState
      * @param displayName
      * @throws ContactManagerException
-     * @throws IOException
+     * @throws FileAccessException
      */
     public void mergeContactCapabilities(ContactId contact, Capabilities capabilities,
             RcsStatus contactType, RegistrationState registrationState, String displayName)
-            throws ContactManagerException, IOException {
+            throws ContactManagerException, FileAccessException {
         synchronized (mContactInfoCache) {
             /* Get the current information on this contact */
             ContactInfo oldInfo = getContactInfoInternal(contact);
@@ -2950,10 +2955,10 @@ public final class ContactManager {
      * @param contact Contact ID
      * @param state Blocking state
      * @throws ContactManagerException exception thrown if update operation has failed
-     * @throws IOException
+     * @throws FileAccessException
      */
     public void setBlockingState(ContactId contact, BlockingState state)
-            throws ContactManagerException, IOException {
+            throws ContactManagerException, FileAccessException {
         synchronized (mContactInfoCache) {
             /* Get the current information on this contact */
             ContactInfo oldInfo = getContactInfoInternal(contact);
@@ -3036,10 +3041,10 @@ public final class ContactManager {
      * 
      * @param contactInfo contact to aggregate with RCS raw contact. The contact must be RCS.
      * @throws ContactManagerException thrown is contact information setting fails
-     * @throws IOException
+     * @throws FileAccessException
      */
     public void aggregateContactWithRcsRawContact(ContactInfo contactInfo)
-            throws ContactManagerException, IOException {
+            throws ContactManagerException, FileAccessException {
         synchronized (mContactInfoCache) {
             /*
              * if RCS contact does not exist, it will be created and RCS raw contact also. if RCS

@@ -22,6 +22,8 @@
 
 package com.gsma.rcs.core.ims.protocol.rtp.stream;
 
+import com.gsma.rcs.core.FileAccessException;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.rtp.core.RtcpPacketReceiver;
 import com.gsma.rcs.core.ims.protocol.rtp.core.RtcpPacketTransmitter;
 import com.gsma.rcs.core.ims.protocol.rtp.core.RtcpSession;
@@ -192,15 +194,10 @@ public class RtpOutputStream implements ProcessorOutputStream, RtcpEventListener
      * Write to the stream without blocking
      * 
      * @param buffer Input buffer
-     * @throws MediaException
+     * @throws NetworkException
      */
-    public void write(Buffer buffer) throws MediaException {
-        try {
-            mRtpTransmitter.sendRtpPacket(buffer);
-        } catch (IOException e) {
-            throw new MediaException("Unable to send RTP packet for input buffer : ".concat(buffer
-                    .toString()), e);
-        }
+    public void write(Buffer buffer) throws NetworkException {
+        mRtpTransmitter.sendRtpPacket(buffer);
     }
 
     @Override

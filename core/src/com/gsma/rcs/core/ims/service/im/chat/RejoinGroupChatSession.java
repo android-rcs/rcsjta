@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.service.im.chat;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
@@ -120,6 +121,9 @@ public class RejoinGroupChatSession extends GroupChatSession {
             handleError(new ChatError(ChatError.SESSION_REJOIN_FAILED, e));
         } catch (ParseException e) {
             mLogger.error("Unable to set authorization header for chat invite!", e);
+            handleError(new ChatError(ChatError.SESSION_REJOIN_FAILED, e));
+        } catch (FileAccessException e) {
+            mLogger.error("Unable to send 200OK response!", e);
             handleError(new ChatError(ChatError.SESSION_REJOIN_FAILED, e));
         } catch (PayloadException e) {
             mLogger.error("Unable to send 200OK response!", e);

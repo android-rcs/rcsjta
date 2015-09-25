@@ -188,7 +188,8 @@ public class ImdnManager extends Thread {
      */
     public void sendMessageDeliveryStatusImmediately(String chatId, ContactId remote, String msgId,
             String status, final String remoteInstanceId, long timestamp)
-            throws PayloadException, NetworkException {
+ throws PayloadException,
+            NetworkException {
         // Execute request in background
         final DeliveryStatus delivery = new DeliveryStatus(chatId, remote, msgId, status, timestamp);
         sendSipMessageDeliveryStatus(delivery, remoteInstanceId);

@@ -36,6 +36,7 @@ import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.terms.TermsConditionsService;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.provider.history.HistoryLog;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -131,8 +132,10 @@ public class Core {
      * 
      * @throws PayloadException
      * @throws NetworkException
+     * @throws ContactManagerException
      */
-    public synchronized static void terminateCore() throws PayloadException, NetworkException {
+    public synchronized static void terminateCore() throws PayloadException, NetworkException,
+            ContactManagerException {
         if (sInstance == null) {
             return;
         }
@@ -255,11 +258,12 @@ public class Core {
 
     /**
      * Stop the terminal core
-     *
+     * 
      * @throws PayloadException
      * @throws NetworkException
+     * @throws ContactManagerException
      */
-    private void stopCore() throws PayloadException, NetworkException {
+    private void stopCore() throws PayloadException, NetworkException, ContactManagerException {
         if (!mStarted) {
             return;
         }

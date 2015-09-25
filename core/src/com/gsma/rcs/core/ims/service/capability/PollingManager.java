@@ -25,6 +25,7 @@ package com.gsma.rcs.core.ims.service.capability;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PeriodicRefresher;
 import com.gsma.rcs.utils.logger.Logger;
@@ -90,8 +91,10 @@ public class PollingManager extends PeriodicRefresher {
      * 
      * @throws NetworkException
      * @throws PayloadException
+     * @throws ContactManagerException
      */
-    public void periodicProcessing() throws PayloadException, NetworkException {
+    public void periodicProcessing() throws PayloadException, NetworkException,
+            ContactManagerException {
         // Make a registration
         if (sLogger.isActivated()) {
             sLogger.info("Execute new capabilities update");
@@ -113,9 +116,10 @@ public class PollingManager extends PeriodicRefresher {
      * @param contact Contact identifier
      * @throws NetworkException
      * @throws PayloadException
+     * @throws ContactManagerException
      */
     private void requestContactCapabilities(ContactId contact) throws PayloadException,
-            NetworkException {
+            NetworkException, ContactManagerException {
         // Read capabilities from the database
         Capabilities capabilities = mContatManager.getContactCapabilities(contact);
         boolean locActivated = sLogger.isActivated();

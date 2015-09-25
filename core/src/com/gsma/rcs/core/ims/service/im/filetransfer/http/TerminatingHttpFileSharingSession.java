@@ -26,7 +26,6 @@ import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -206,12 +205,11 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
      * 
      * @param status Report status
      * @param timestamp Local timestamp
-     * @throws MsrpException
      * @throws NetworkException
      * @throws PayloadException
      */
-    protected void sendDeliveryReport(String status, long timestamp) throws MsrpException,
-            PayloadException, NetworkException {
+    protected void sendDeliveryReport(String status, long timestamp) throws PayloadException,
+            NetworkException {
         String msgId = getFileTransferId();
         if (sLogger.isActivated()) {
             sLogger.debug("Send delivery report ".concat(status));

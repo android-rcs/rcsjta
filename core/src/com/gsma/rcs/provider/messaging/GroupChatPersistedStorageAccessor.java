@@ -231,12 +231,12 @@ public class GroupChatPersistedStorageAccessor {
     }
 
     public void addIncomingGroupChatMessage(ChatMessage msg, boolean imdnDisplayedRequested)
-            throws PayloadException, IOException {
+            throws PayloadException {
         mMessagingLog.addIncomingGroupChatMessage(mChatId, msg, imdnDisplayedRequested);
     }
 
     public void addOutgoingGroupChatMessage(ChatMessage msg, Set<ContactId> recipients,
-            Status status, Content.ReasonCode reasonCode) throws PayloadException, IOException {
+            Status status, Content.ReasonCode reasonCode) throws PayloadException {
         mMessagingLog.addOutgoingGroupChatMessage(mChatId, msg, recipients, status, reasonCode);
     }
 

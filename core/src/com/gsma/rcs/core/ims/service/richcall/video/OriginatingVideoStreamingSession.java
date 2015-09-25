@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.richcall.video;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
@@ -132,6 +133,9 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
         } catch (RemoteException e) {
             sLogger.error("Failed initiate a new live video sharing session as originating!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (FileAccessException e) {
+            sLogger.error("Failed to send invite!", e);
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         } catch (PayloadException e) {
             sLogger.error("Failed to send invite!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
@@ -153,12 +157,10 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
     /**
      * Prepare media session
      * 
-     * @throws MediaException
      * @throws PayloadException
      * @throws NetworkException
      */
-    public void prepareMediaSession() throws MediaException, PayloadException,
-            NetworkException {
+    public void prepareMediaSession() throws PayloadException, NetworkException {
         // Parse the remote SDP part
         SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(UTF8));
         MediaDescription mediaVideo = parser.getMediaDescription("video");
@@ -197,7 +199,7 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
             // Set the video player remote info
             player.setRemoteInfo(selectedVideoCodec, remoteHost, remotePort, getOrientation());
         } catch (RemoteException e) {
-            throw new MediaException("Error when preparing the media session", e);
+            throw new IllegalArgumentException("Error when preparing the media session", e);
         }
     }
 

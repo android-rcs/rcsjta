@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.service.terms;
 
+import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.utils.logger.Logger;
 
 import org.xml.sax.Attributes;
@@ -57,6 +58,8 @@ public class TermsAckParser extends DefaultHandler {
 
     private String mText;
 
+    private final InputSource mInputSource;
+
     /**
      * The logger
      */
@@ -66,15 +69,32 @@ public class TermsAckParser extends DefaultHandler {
      * Constructor
      * 
      * @param inputSource Input source
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws IOException
+     * @param requestedLanguage
+     * @param rcsSettings
      */
-    public TermsAckParser(InputSource inputSource) throws ParserConfigurationException,
-            SAXException, IOException {
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-        SAXParser parser = factory.newSAXParser();
-        parser.parse(inputSource, this);
+    public TermsAckParser(InputSource inputSource) {
+        mInputSource = inputSource;
+    }
+
+    /**
+     * Parse the terms ack information
+     * 
+     * @return TermsAckParser
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws ParseFailureException
+     */
+    public TermsAckParser parse() throws ParserConfigurationException, SAXException,
+            ParseFailureException {
+        try {
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            SAXParser parser = factory.newSAXParser();
+            parser.parse(mInputSource, this);
+            return this;
+
+        } catch (IOException e) {
+            throw new ParseFailureException("Failed to parse input source!", e);
+        }
     }
 
     public String getId() {

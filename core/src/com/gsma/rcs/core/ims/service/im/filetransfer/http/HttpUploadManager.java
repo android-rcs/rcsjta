@@ -26,6 +26,7 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 import static com.gsma.rcs.utils.StringUtils.UTF8_STR;
 
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.http.HttpAuthenticationAgent;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
@@ -153,8 +154,9 @@ public class HttpUploadManager extends HttpTransferManager {
      * 
      * @return XML result or null if upload failed
      * @throws IOException
+     * @throws NetworkException
      */
-    public byte[] uploadFile() throws IOException {
+    public byte[] uploadFile() throws IOException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug("Upload file " + mContent.getUri() + " TID=" + mTId);
         }
@@ -236,8 +238,9 @@ public class HttpUploadManager extends HttpTransferManager {
      * 
      * @return byte[] the response containing the download file
      * @throws IOException
+     * @throws NetworkException
      */
-    private byte[] sendMultipartPost(URL url) throws IOException {
+    private byte[] sendMultipartPost(URL url) throws IOException, NetworkException {
         boolean httpTraceEnabled = isHttpTraceEnabled();
         DataOutputStream outputStream = null;
         HttpURLConnection connection = null;
@@ -506,8 +509,9 @@ public class HttpUploadManager extends HttpTransferManager {
      * 
      * @param is Input stream
      * @return Byte array
+     * @throws IOException
      */
-    private static byte[] convertStreamToString(InputStream is) {
+    private static byte[] convertStreamToString(InputStream is) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
         StringBuilder sb = new StringBuilder();
 
@@ -516,12 +520,11 @@ public class HttpUploadManager extends HttpTransferManager {
             while ((line = reader.readLine()) != null) {
                 sb.append(line);
             }
-        } catch (IOException e) {
-            // Nothing to do
+            return sb.toString().getBytes(UTF8);
+
         } finally {
             CloseableUtils.tryToClose(is);
         }
-        return sb.toString().getBytes(UTF8);
     }
 
     /**
@@ -530,8 +533,9 @@ public class HttpUploadManager extends HttpTransferManager {
      * @return byte[] contains the info to send to terminating side
      * @throws IOException
      * @throws PayloadException
+     * @throws NetworkException
      */
-    public byte[] resumeUpload() throws IOException, PayloadException {
+    public byte[] resumeUpload() throws IOException, PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug("User resumes transfer (TID=" + mTId + ")");
         }
@@ -583,9 +587,10 @@ public class HttpUploadManager extends HttpTransferManager {
      * @param resumeInfo info on already uploaded content
      * @return byte[] containing the server's response
      * @throws IOException
+     * @throws NetworkException
      */
     private byte[] sendPutForResumingUpload(FileTransferHttpResumeInfo resumeInfo)
-            throws IOException {
+            throws IOException, NetworkException {
         int endByte = resumeInfo.getEnd();
         long totalSize = mContent.getSize();
         if (sLogger.isActivated()) {
@@ -749,8 +754,10 @@ public class HttpUploadManager extends HttpTransferManager {
      *            with a authorization header
      * @return byte[] contains the response of the server or null (401 UNAUTHORIZED is hidden)
      * @throws IOException
+     * @throws NetworkException
      */
-    private byte[] sendGetInfo(String suffix, boolean authRequired) throws IOException {
+    private byte[] sendGetInfo(String suffix, boolean authRequired) throws IOException,
+            NetworkException {
         URL url = new URL(getHttpServerAddr().toString());
         String protocol = url.getProtocol();
         String host = url.getHost();
@@ -843,17 +850,11 @@ public class HttpUploadManager extends HttpTransferManager {
      * Send a request to get info on the upload for download purpose on terminating
      * 
      * @return byte[] contains the response of the server to the upload
+     * @throws NetworkException
+     * @throws IOException
      */
-    private byte[] sendGetDownloadInfo() {
-        try {
-            return sendGetInfo(DOWNLOAD_INFO_REQUEST, false);
-        } catch (IOException e) {
-            if (sLogger.isActivated()) {
-                sLogger.warn("Could not get upload information!", e);
-            }
-            getListener().httpTransferPausedBySystem();
-            return null;
-        }
+    private byte[] sendGetDownloadInfo() throws IOException, NetworkException {
+        return sendGetInfo(DOWNLOAD_INFO_REQUEST, false);
     }
 
     /**

@@ -22,9 +22,9 @@
 
 package com.gsma.rcs.service.api;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
@@ -40,6 +40,7 @@ import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSessionListener;
+import com.gsma.rcs.core.ims.service.im.chat.SessionNotEstablishedException;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.contact.ContactManagerException;
@@ -400,7 +401,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     }
 
     private void addOutgoingGroupChatMessage(ChatMessage msg, Status status,
-            Content.ReasonCode reasonCode) throws PayloadException, IOException {
+            Content.ReasonCode reasonCode) throws PayloadException {
         Set<ContactId> recipients = getRecipients();
         if (recipients == null) {
             throw new ServerApiPersistentStorageException(
@@ -999,7 +1000,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     }
 
     private void sendChatMessageWithinSession(final GroupChatSession session, final ChatMessage msg)
-            throws MsrpException {
+            throws NetworkException {
         session.sendChatMessage(msg);
     }
 
@@ -1025,12 +1026,12 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * Dequeue group chat message
      * 
      * @param msg
-     * @throws MsrpException
      * @throws NetworkException
      * @throws PayloadException
+     * @throws SessionNotEstablishedException
      */
-    public void dequeueGroupChatMessage(ChatMessage msg) throws MsrpException, PayloadException,
-            NetworkException {
+    public void dequeueGroupChatMessage(ChatMessage msg) throws PayloadException, NetworkException,
+            SessionNotEstablishedException {
         final GroupChatSession session = mImService.getGroupChatSession(mChatId);
         if (session == null) {
             mImService.rejoinGroupChatAsPartOfSendOperation(mChatId);
@@ -1045,7 +1046,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             }
             session.acceptSession();
         } else {
-            throw new MsrpException(new StringBuilder(
+            throw new SessionNotEstablishedException(new StringBuilder(
                     "The existing group chat session with chatId '").append(mChatId)
                     .append("' is not established right now!").toString());
         }
@@ -1059,14 +1060,14 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * @param displayedReportEnabled
      * @param deliveredReportEnabled
      * @param groupFileTransfer
-     * @throws MsrpException
      * @throws NetworkException
      * @throws PayloadException
+     * @throws SessionNotEstablishedException
      */
     public void dequeueGroupFileInfo(String fileTransferId, String fileInfo,
             boolean displayedReportEnabled, boolean deliveredReportEnabled,
-            GroupFileTransferImpl groupFileTransfer) throws MsrpException, PayloadException,
-            NetworkException {
+            GroupFileTransferImpl groupFileTransfer) throws PayloadException, NetworkException,
+            SessionNotEstablishedException {
         GroupChatSession session = mImService.getGroupChatSession(mChatId);
         if (session == null) {
             mImService.rejoinGroupChatAsPartOfSendOperation(mChatId);
@@ -1081,7 +1082,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             }
             session.acceptSession();
         } else {
-            throw new MsrpException(new StringBuilder(
+            throw new SessionNotEstablishedException(new StringBuilder(
                     "The existing group chat session with chatId '").append(mChatId)
                     .append("' is not established right now!").toString());
         }
@@ -1322,8 +1323,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                                 break;
                         }
                     }
-                } catch (MsrpException e) {
-                    mImService.addGroupChatComposingStatus(mChatId, status);
+                } catch (NetworkException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(e.getMessage());
+                    }
                 } catch (RuntimeException e) {
                     /*
                      * Normally we are not allowed to catch runtime exceptions as these are genuine
@@ -1473,16 +1476,13 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 try {
                     session.sendIsComposingStatus(composingStatus);
                     mImService.removeGroupChatComposingStatus(mChatId);
-                } catch (MsrpException e) {
+                } catch (NetworkException e) {
                     /*
                      * Nothing to be handled here as we are not able to send composing status for
                      * now, should try later and hence we don't remove it from the map.
                      */
                     if (loggerActivated) {
-                        sLogger.debug(new StringBuilder(
-                                "Failed to send isComposing command for chatId : ").append(mChatId)
-                                .append(" for isComposing status : ").append(composingStatus)
-                                .toString());
+                        sLogger.debug(e.getMessage());
                     }
                 }
             }
@@ -1556,8 +1556,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     }
 
     @Override
-    public void onMessageReceived(ChatMessage msg, boolean imdnDisplayedRequested)
-            throws PayloadException, NetworkException {
+    public void onMessageReceived(ChatMessage msg, boolean imdnDisplayedRequested) {
         String msgId = null;
         ContactId remote = null;
         try {
@@ -1579,90 +1578,120 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 mBroadcaster.broadcastMessageReceived(mimeType, msgId);
             }
         } catch (ContactManagerException e) {
-            throw new PayloadException(new StringBuilder("Failed to handle new IM with Id '")
-                    .append(msgId).append("' received from ").append(remote).toString(), e);
-
-        } catch (IOException e) {
-            throw new NetworkException(new StringBuilder("Failed to handle new IM with Id '")
-                    .append(msgId).append("' received from ").append(remote).toString(), e);
+            sLogger.error(new StringBuilder("Failed to handle new IM with Id '").append(msgId)
+                    .append("' received from ").append(remote).toString(), e);
+        } catch (FileAccessException e) {
+            sLogger.error(new StringBuilder("Failed to handle new IM with Id '").append(msgId)
+                    .append("' received from ").append(remote).toString(), e);
+        } catch (PayloadException e) {
+            sLogger.error(new StringBuilder("Failed to handle new IM with Id '").append(msgId)
+                    .append("' received from ").append(remote).toString(), e);
+        } catch (RuntimeException e) {
+            /*
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
+             */
+            sLogger.error(new StringBuilder("Failed to handle new IM with Id '").append(msgId)
+                    .append("' received from ").append(remote).toString(), e);
         }
     }
 
     @Override
-    public void onImError(ChatError error) throws PayloadException, NetworkException {
-        GroupChatSession session = mImService.getGroupChatSession(mChatId);
-        int chatErrorCode = error.getErrorCode();
-        if (session != null && session.isPendingForRemoval()) {
-            /*
-             * If there is an ongoing group chat session with same chatId, this session has to be
-             * silently aborted so after aborting the session we make sure to not call the rest of
-             * this method that would otherwise abort the "current" session also and the GroupChat
-             * as a whole which is of course not the intention here
-             */
+    public void onImError(ChatError error) {
+        try {
+            GroupChatSession session = mImService.getGroupChatSession(mChatId);
+            int chatErrorCode = error.getErrorCode();
+            if (session != null && session.isPendingForRemoval()) {
+                /*
+                 * If there is an ongoing group chat session with same chatId, this session has to
+                 * be silently aborted so after aborting the session we make sure to not call the
+                 * rest of this method that would otherwise abort the "current" session also and the
+                 * GroupChat as a whole which is of course not the intention here
+                 */
+                if (sLogger.isActivated()) {
+                    sLogger.info(new StringBuilder("Session marked pending for removal - Error ")
+                            .append(chatErrorCode).toString());
+                }
+                return;
+            }
             if (sLogger.isActivated()) {
-                sLogger.info(new StringBuilder("Session marked pending for removal - Error ")
-                        .append(chatErrorCode).toString());
+                sLogger.info(new StringBuilder("IM error ").append(chatErrorCode).toString());
             }
-            return;
-        }
-        if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("IM error ").append(chatErrorCode).toString());
-        }
-        synchronized (mLock) {
-            mChatService.removeGroupChat(mChatId);
-            int chatError = error.getErrorCode();
-            switch (chatError) {
-                case ChatError.SESSION_INITIATION_CANCELLED:
+            synchronized (mLock) {
+                mChatService.removeGroupChat(mChatId);
+                int chatError = error.getErrorCode();
+                switch (chatError) {
+                    case ChatError.SESSION_INITIATION_CANCELLED:
+                        /* Intentional fall through */
+                    case ChatError.SESSION_INITIATION_DECLINED:
+                        setStateAndReasonCode(State.REJECTED, ReasonCode.REJECTED_BY_REMOTE);
+                        mImService
+                                .tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(mChatId);
+                        break;
+                    case ChatError.SESSION_NOT_FOUND:
+                        if (mGroupChatRejoinedAsPartOfSendOperation) {
+                            handleGroupChatRejoinAsPartOfSendOperationFailed();
+                        }
+                        break;
+                    case ChatError.SESSION_INITIATION_FAILED:
+                        /* Intentional fall through */
+                    case ChatError.SESSION_RESTART_FAILED:
+                        /* Intentional fall through */
+                    case ChatError.SUBSCRIBE_CONFERENCE_FAILED:
+                        /* Intentional fall through */
+                    case ChatError.UNEXPECTED_EXCEPTION:
+                        setStateAndReasonCode(State.FAILED, ReasonCode.FAILED_INITIATION);
+                        mImService
+                                .tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(mChatId);
+                        break;
+                    /*
+                     * For cases where rejoin has failed or send response failed due to no ACK/200
+                     * OK response, we should not change Chat state.
+                     */
                     /* Intentional fall through */
-                case ChatError.SESSION_INITIATION_DECLINED:
-                    setStateAndReasonCode(State.REJECTED, ReasonCode.REJECTED_BY_REMOTE);
-                    mImService
-                            .tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(mChatId);
-                    break;
-                case ChatError.SESSION_NOT_FOUND:
-                    if (mGroupChatRejoinedAsPartOfSendOperation) {
-                        handleGroupChatRejoinAsPartOfSendOperationFailed();
-                    }
-                    break;
-                case ChatError.SESSION_INITIATION_FAILED:
-                    /* Intentional fall through */
-                case ChatError.SESSION_RESTART_FAILED:
-                    /* Intentional fall through */
-                case ChatError.SUBSCRIBE_CONFERENCE_FAILED:
-                    /* Intentional fall through */
-                case ChatError.UNEXPECTED_EXCEPTION:
-                    setStateAndReasonCode(State.FAILED, ReasonCode.FAILED_INITIATION);
-                    mImService
-                            .tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(mChatId);
-                    break;
-                /*
-                 * For cases where rejoin has failed or send response failed due to no ACK/200 OK
-                 * response, we should not change Chat state.
-                 */
-                /* Intentional fall through */
-                case ChatError.SESSION_REJOIN_FAILED:
-                    /* Intentional fall through */
-                case ChatError.SEND_RESPONSE_FAILED:
-                    break;
-                /*
-                 * This error is caused because of a network drop so the group chat is not set to
-                 * ABORTED state in this case as it will be auto-rejoined when network connection is
-                 * regained
-                 */
-                case ChatError.MEDIA_SESSION_FAILED:
-                case ChatError.MEDIA_SESSION_BROKEN:
-                    break;
-                default:
-                    throw new IllegalArgumentException(new StringBuilder(
-                            "Unknown reason; chatError=").append(chatError).append("!").toString());
+                    case ChatError.SESSION_REJOIN_FAILED:
+                        /* Intentional fall through */
+                    case ChatError.SEND_RESPONSE_FAILED:
+                        break;
+                    /*
+                     * This error is caused because of a network drop so the group chat is not set
+                     * to ABORTED state in this case as it will be auto-rejoined when network
+                     * connection is regained
+                     */
+                    case ChatError.MEDIA_SESSION_FAILED:
+                    case ChatError.MEDIA_SESSION_BROKEN:
+                        break;
+                    default:
+                        throw new IllegalArgumentException(new StringBuilder(
+                                "Unknown reason; chatError=").append(chatError).append("!")
+                                .toString());
+                }
             }
+            setRejoinedAsPartOfSendOperation(false);
+            /*
+             * Try to dequeue all one-one chat messages and file transfers as a chat session is torn
+             * down now.
+             */
+            mImService.tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers();
+        } catch (PayloadException e) {
+            sLogger.error(new StringBuilder("Failed to handle error").append(error).append("!")
+                    .toString(), e);
+        } catch (NetworkException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
+            }
+        } catch (RuntimeException e) {
+            /*
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
+             */
+            sLogger.error(new StringBuilder("Failed to handle error").append(error).append("!")
+                    .toString(), e);
         }
-        setRejoinedAsPartOfSendOperation(false);
-        /*
-         * Try to dequeue all one-one chat messages and file transfers as a chat session is torn
-         * down now.
-         */
-        mImService.tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers();
     }
 
     @Override

@@ -19,7 +19,6 @@
 package com.gsma.rcs.core.ims.protocol.msrp;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 /**
  * Data chunks
@@ -48,12 +47,8 @@ public class DataChunks {
      * 
      * @param data Data chunk
      */
-    public void addChunk(byte[] data) throws IOException, MsrpException {
-        try {
-            cache.write(data, 0, data.length);
-        } catch (OutOfMemoryError e) {
-            throw new MsrpException("Not enough memory to save data");
-        }
+    public void addChunk(byte[] data) {
+        cache.write(data, 0, data.length);
         currentSize += data.length;
     }
 
@@ -62,14 +57,8 @@ public class DataChunks {
      * 
      * @return Byte array
      */
-    public byte[] getReceivedData() throws IOException, MsrpException {
-        byte[] result = null;
-        try {
-            result = cache.toByteArray();
-        } catch (OutOfMemoryError e) {
-            throw new MsrpException("Not enough memory to copy data");
-        }
-        return result;
+    public byte[] getReceivedData() {
+        return cache.toByteArray();
     }
 
     /**

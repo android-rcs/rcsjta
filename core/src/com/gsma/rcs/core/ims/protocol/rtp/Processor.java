@@ -18,6 +18,7 @@
 
 package com.gsma.rcs.core.ims.protocol.rtp;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.rtp.codec.Codec;
 import com.gsma.rcs.core.ims.protocol.rtp.stream.ProcessorInputStream;
 import com.gsma.rcs.core.ims.protocol.rtp.stream.ProcessorOutputStream;
@@ -137,17 +138,17 @@ public class Processor extends Thread {
                     break;
                 }
             }
-        } catch (IOException e) {
-            if (!interrupted) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug(e.getMessage());
-                }
+        } catch (NetworkException e) {
+            interrupted = true;
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
             }
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
+            interrupted = true;
             sLogger.error("Unable to process codec chain!", e);
         }
     }

@@ -22,9 +22,9 @@
 
 package com.gsma.rcs.core.ims.protocol.rtp;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.rtp.codec.Codec;
 import com.gsma.rcs.core.ims.protocol.rtp.format.Format;
-import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.rtp.media.MediaInput;
 import com.gsma.rcs.core.ims.protocol.rtp.stream.MediaCaptureStream;
 import com.gsma.rcs.core.ims.protocol.rtp.stream.RtpInputStream;
@@ -84,10 +84,10 @@ public class MediaRtpSender {
      * @param player Media player
      * @param remoteAddress Remote address
      * @param remotePort Remote port
-     * @throws RtpException
+     * @throws NetworkException
      */
     public void prepareSession(MediaInput player, String remoteAddress, int remotePort,
-            RtpStreamListener rtpStreamListener) throws RtpException {
+            RtpStreamListener rtpStreamListener) throws NetworkException {
         try {
             if (logger.isActivated()) {
                 logger.debug("Prepare session");
@@ -122,7 +122,7 @@ public class MediaRtpSender {
                 logger.debug("Session has been prepared with success");
             }
         } catch (IOException e) {
-            throw new RtpException(new StringBuilder(
+            throw new NetworkException(new StringBuilder(
                     "Can't prepare resources correctly for remoteAddress : ").append(remoteAddress)
                     .append(" with remotePort : ").append(remotePort).append("!").toString(), e);
         }
@@ -134,10 +134,11 @@ public class MediaRtpSender {
      * @param player Media player
      * @param remoteAddress Remote address
      * @param remotePort Remote port
-     * @throws MediaException
+     * @throws NetworkException
      */
     public void prepareSession(MediaInput player, String remoteAddress, int remotePort,
-            RtpInputStream rtpStream, RtpStreamListener rtpStreamListener) throws MediaException {
+            RtpInputStream rtpStream, RtpStreamListener rtpStreamListener)
+            throws NetworkException {
         try {
             if (logger.isActivated()) {
                 logger.debug("Prepare session");
@@ -173,7 +174,9 @@ public class MediaRtpSender {
                 logger.debug("Session has been prepared with success");
             }
         } catch (IOException e) {
-            throw new MediaException("Can't prepare resources", e);
+            throw new NetworkException(new StringBuilder(
+                    "Can't prepare resources correctly for remoteAddress : ").append(remoteAddress)
+                    .append(" with remotePort : ").append(remotePort).append("!").toString(), e);
         }
     }
 

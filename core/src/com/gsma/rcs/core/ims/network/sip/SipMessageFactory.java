@@ -41,7 +41,7 @@ import gov2.nist.javax2.sip.Utils;
 import gov2.nist.javax2.sip.header.Subject;
 
 import java.text.ParseException;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
@@ -118,7 +118,7 @@ public class SipMessageFactory {
             ToHeader toHeader = SipUtils.HEADER_FACTORY.createToHeader(toAddress, null);
 
             // Insert "keep" flag to Via header (RFC6223 "Indication of Support for Keep-Alive")
-            ArrayList<ViaHeader> viaHeaders = dialog.getSipStack().getViaHeaders();
+            List<ViaHeader> viaHeaders = dialog.getSipStack().getViaHeaders();
             if (viaHeaders != null && !viaHeaders.isEmpty()) {
                 ViaHeader viaHeader = viaHeaders.get(0);
                 viaHeader.setParameter(new NameValue("keep", null, true));
@@ -568,7 +568,7 @@ public class SipMessageFactory {
             ToHeader toHeader = SipUtils.HEADER_FACTORY.createToHeader(toAddress, null);
 
             // Insert "keep" flag to Via header (RFC6223 "Indication of Support for Keep-Alive")
-            ArrayList<ViaHeader> viaHeaders = dialog.getSipStack().getViaHeaders();
+            List<ViaHeader> viaHeaders = dialog.getSipStack().getViaHeaders();
             if (viaHeaders != null && !viaHeaders.isEmpty()) {
                 ViaHeader viaHeader = viaHeaders.get(0);
                 viaHeader.setParameter(new NameValue("keep", null, true));
@@ -753,7 +753,7 @@ public class SipMessageFactory {
                     dialog.getRemoteTag());
 
             // Set the Via branch
-            ArrayList<ViaHeader> vias = dialog.getSipStack().getViaHeaders();
+            List<ViaHeader> vias = dialog.getSipStack().getViaHeaders();
             vias.get(0).setBranch(Utils.getInstance().generateBranchId());
 
             // Create the ACK request

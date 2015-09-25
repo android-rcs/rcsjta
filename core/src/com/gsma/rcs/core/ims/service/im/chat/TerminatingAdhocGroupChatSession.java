@@ -24,11 +24,11 @@ package com.gsma.rcs.core.ims.service.im.chat;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
@@ -53,7 +53,6 @@ import com.gsma.services.rcs.contact.ContactId;
 
 import android.net.Uri;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -83,12 +82,11 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
      * @param timestamp Local timestamp for the session
      * @param contactManager Contact manager accessor
      * @throws PayloadException Thrown if constructor fails to get information from payload
-     * @throws NetworkException
      */
     public TerminatingAdhocGroupChatSession(InstantMessagingService imService, SipRequest invite,
             ContactId contact, Map<ContactId, ParticipantStatus> participantsFromInvite,
             Uri remoteContact, RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
-            ContactManager contactManager) throws PayloadException, NetworkException {
+            ContactManager contactManager) throws PayloadException {
         super(imService, contact, remoteContact, participantsFromInvite, rcsSettings, messagingLog,
                 timestamp, contactManager);
 
@@ -117,9 +115,8 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
      * 
      * @return true if group chat session should be auto accepted
      * @throws PayloadException
-     * @throws NetworkException
      */
-    private boolean shouldBeAutoAccepted() throws PayloadException, NetworkException {
+    private boolean shouldBeAutoAccepted() throws PayloadException {
         /*
          * In case the invite contains a http file transfer info the chat session should be
          * auto-accepted so that the file transfer session can be started.
@@ -420,8 +417,6 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
                 /* No response received: timeout */
                 handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED));
             }
-        } catch (MsrpException e) {
-            handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
         } catch (PayloadException e) {
             sLogger.error("Unable to send 200OK response!", e);
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
@@ -429,8 +424,6 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
             if (logActivated) {
                 sLogger.debug(e.getMessage());
             }
-            handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
-        } catch (IOException e) {
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
         } catch (RuntimeException e) {
             /*

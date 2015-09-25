@@ -78,7 +78,7 @@ public class StoreAndForwardManager {
      * @throws NetworkException
      */
     public void receiveStoreAndForwardMessageInvitation(SipRequest invite, ContactId contact, long timestamp)
-            throws PayloadException, NetworkException {
+ throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug("Receive stored messages");
         }

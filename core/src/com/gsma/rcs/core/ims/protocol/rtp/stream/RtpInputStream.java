@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.protocol.rtp.stream;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.rtp.RtpUtils;
 import com.gsma.rcs.core.ims.protocol.rtp.core.RtcpPacketReceiver;
 import com.gsma.rcs.core.ims.protocol.rtp.core.RtcpPacketTransmitter;
@@ -198,15 +199,15 @@ public class RtpInputStream implements ProcessorInputStream {
      * Read from the input stream without blocking
      * 
      * @return Buffer
-     * @throws MediaException
+     * @throws NetworkException
      */
-    public Buffer read() throws MediaException {
+    public Buffer read() throws NetworkException {
         do {
             try {
                 /* Wait and read a RTP packet */
                 RtpPacket rtpPacket = mRtpReceiver.readRtpPacket();
                 if (rtpPacket == null) {
-                    throw new MediaException("Unable to read RTP packet!");
+                    throw new NetworkException("Unable to read RTP packet!");
                 }
 
                 mRtpPacketsBuffer.add(rtpPacket);
@@ -216,7 +217,7 @@ public class RtpInputStream implements ProcessorInputStream {
                         mRtpStreamListener.rtpStreamAborted();
                     }
                 }
-                throw new MediaException("RTP Packet reading timeout!", e);
+                throw new NetworkException("RTP Packet reading timeout!", e);
             }
         } while (mRtpPacketsBuffer.size() <= MAX_RTP_PACKETS);
 

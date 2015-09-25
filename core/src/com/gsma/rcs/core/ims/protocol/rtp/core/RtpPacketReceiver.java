@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.protocol.rtp.core;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.platform.network.DatagramConnection;
 import com.gsma.rcs.platform.network.NetworkFactory;
 import com.gsma.rcs.utils.CloseableUtils;
@@ -162,13 +163,7 @@ public class RtpPacketReceiver extends Thread implements Closeable {
                     }
                 }
             }
-        } catch (SocketTimeoutException e) {
-            if (!mInterrupted) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug(e.getMessage());
-                }
-            }
-        } catch (IOException e) {
+        } catch (NetworkException e) {
             if (!mInterrupted) {
                 if (sLogger.isActivated()) {
                     sLogger.debug(e.getMessage());

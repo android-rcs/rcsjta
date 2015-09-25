@@ -126,16 +126,13 @@ public class SipManager {
      * @param tcpFallback TCP fallback according to RFC3261 chapter 18.1.1
      * @param networkType type of network
      * @throws PayloadException
-     * @throws NetworkException
      */
     public synchronized void initStack(String localAddr, String proxyAddr, int proxyPort,
-            String protocol, boolean tcpFallback, int networkType) throws PayloadException,
-            NetworkException {
-
+            String protocol, boolean tcpFallback, int networkType) throws PayloadException {
         closeStack();
-
         sipstack = new SipInterface(localAddr, proxyAddr, proxyPort, protocol, tcpFallback,
                 networkType, mRcsSettings);
+        sipstack.initialize();
     }
 
     /**
@@ -159,8 +156,8 @@ public class SipManager {
      * @throws PayloadException
      * @throws NetworkException
      */
-    public SipTransactionContext sendSipMessageAndWait(SipMessage message)
-            throws PayloadException, NetworkException {
+    public SipTransactionContext sendSipMessageAndWait(SipMessage message) throws PayloadException,
+            NetworkException {
         return sendSipMessageAndWait(message, SipManager.sTimeout);
     }
 
@@ -202,8 +199,8 @@ public class SipManager {
      * @throws NetworkException
      */
     public SipTransactionContext sendSipMessageAndWait(SipMessage message, long timeout,
-            SipTransactionContext.INotifySipProvisionalResponse callback)
-            throws NetworkException, PayloadException {
+            SipTransactionContext.INotifySipProvisionalResponse callback) throws NetworkException,
+            PayloadException {
         SipTransactionContext ctx = sipstack.sendSipMessageAndWait(message, callback);
         ctx.waitResponse(timeout);
 
@@ -277,8 +274,8 @@ public class SipManager {
      * @throws NetworkException
      */
     public SipTransactionContext sendSipMessage(SipMessage message,
-            SipTransactionContext.INotifySipProvisionalResponse callback)
-            throws NetworkException, PayloadException {
+            SipTransactionContext.INotifySipProvisionalResponse callback) throws NetworkException,
+            PayloadException {
         SipTransactionContext ctx = sipstack.sendSipMessageAndWait(message, callback);
         return ctx;
     }

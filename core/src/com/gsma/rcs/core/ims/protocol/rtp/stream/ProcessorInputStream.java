@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.protocol.rtp.stream;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.rtp.util.Buffer;
 
@@ -48,7 +49,7 @@ public interface ProcessorInputStream {
      * Read from the input stream without blocking
      * 
      * @return Buffer
-     * @throws MediaException
+     * @throws NetworkException
      */
-    public Buffer read() throws MediaException;
+    public Buffer read() throws NetworkException;
 }

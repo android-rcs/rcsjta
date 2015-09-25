@@ -22,10 +22,10 @@
 
 package com.gsma.rcs.core.ims.service.im.chat;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
@@ -131,10 +131,10 @@ public abstract class OneToOneChatSession extends ChatSession {
      * Send a text message
      * 
      * @param msg Chat message
-     * @throws MsrpException
+     * @throws NetworkException
      */
     @Override
-    public void sendChatMessage(ChatMessage msg) throws MsrpException {
+    public void sendChatMessage(ChatMessage msg) throws NetworkException {
         String from = ChatUtils.ANONYMOUS_URI;
         String to = ChatUtils.ANONYMOUS_URI;
         String msgId = msg.getMessageId();
@@ -172,11 +172,11 @@ public abstract class OneToOneChatSession extends ChatSession {
      * @param fileInfo
      * @param displayedReportEnabled
      * @param deliveredReportEnabled
-     * @throws MsrpException
+     * @throws NetworkException
      */
     public void sendFileInfo(OneToOneFileTransferImpl fileTransfer, String fileTransferId,
             String fileInfo, boolean displayedReportEnabled, boolean deliveredReportEnabled)
-            throws MsrpException {
+            throws NetworkException {
         String networkContent;
         long timestamp = System.currentTimeMillis();
         /* For outgoing file transfer, timestampSent = timestamp */
@@ -205,9 +205,9 @@ public abstract class OneToOneChatSession extends ChatSession {
      * Send is composing status
      * 
      * @param status Status
-     * @throws MsrpException
+     * @throws NetworkException
      */
-    public void sendIsComposingStatus(boolean status) throws MsrpException {
+    public void sendIsComposingStatus(boolean status) throws NetworkException {
         String content = IsComposingInfo.buildIsComposingInfo(status);
         String msgId = IdGenerator.generateMessageID();
         sendDataChunks(msgId, content, IsComposingInfo.MIME_TYPE,
@@ -279,8 +279,10 @@ public abstract class OneToOneChatSession extends ChatSession {
      * @param resp 200 OK response
      * @throws PayloadException
      * @throws NetworkException
+     * @throws FileAccessException
      */
-    public void handle200OK(SipResponse resp) throws PayloadException, NetworkException {
+    public void handle200OK(SipResponse resp) throws PayloadException, NetworkException,
+            FileAccessException {
         super.handle200OK(resp);
         getActivityManager().start();
     }
@@ -310,13 +312,13 @@ public abstract class OneToOneChatSession extends ChatSession {
         ContactId remote = getRemoteContact();
         if (TypeMsrpChunk.MessageDeliveredReport.equals(typeMsrpChunk)) {
             for (ImsSessionListener listener : getListeners()) {
-                ((OneToOneChatSessionListener) listener).onDeliveryReportSendViaMsrpFailure(
-                        msgId, remote, typeMsrpChunk);
+                ((OneToOneChatSessionListener) listener).onDeliveryReportSendViaMsrpFailure(msgId,
+                        remote, typeMsrpChunk);
             }
         } else if (TypeMsrpChunk.MessageDisplayedReport.equals(typeMsrpChunk)) {
             for (ImsSessionListener listener : getListeners()) {
-                ((OneToOneChatSessionListener) listener).onDeliveryReportSendViaMsrpFailure(
-                        msgId, remote, typeMsrpChunk);
+                ((OneToOneChatSessionListener) listener).onDeliveryReportSendViaMsrpFailure(msgId,
+                        remote, typeMsrpChunk);
             }
         } else if ((msgId != null) && TypeMsrpChunk.TextMessage.equals(typeMsrpChunk)) {
             for (ImsSessionListener listener : getListeners()) {

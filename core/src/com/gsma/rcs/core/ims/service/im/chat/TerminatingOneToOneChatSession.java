@@ -24,11 +24,11 @@ package com.gsma.rcs.core.ims.service.im.chat;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
@@ -50,7 +50,6 @@ import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Vector;
 
@@ -75,11 +74,10 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
      * @param timestamp Local timestamp for the session
      * @param contactManager
      * @throws PayloadException
-     * @throws NetworkException
      */
     public TerminatingOneToOneChatSession(InstantMessagingService imService, SipRequest invite,
             ContactId contact, RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
-            ContactManager contactManager) throws PayloadException, NetworkException {
+            ContactManager contactManager) throws PayloadException {
         super(imService, contact, PhoneUtils.formatContactIdToUri(contact), ChatUtils
                 .getFirstMessage(invite, timestamp), rcsSettings, messagingLog, timestamp,
                 contactManager);
@@ -101,9 +99,8 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
      * 
      * @return true if one-to-one chat session should be auto accepted
      * @throws PayloadException
-     * @throws NetworkException
      */
-    private boolean shouldBeAutoAccepted() throws PayloadException, NetworkException {
+    private boolean shouldBeAutoAccepted() throws PayloadException {
         /*
          * In case the invite contains a http file transfer info the chat session should be
          * auto-accepted so that the file transfer session can be started.
@@ -367,8 +364,6 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
                 /* No response received: timeout */
                 handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED));
             }
-        } catch (MsrpException e) {
-            handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
         } catch (PayloadException e) {
             sLogger.error("Unable to send 200OK response!", e);
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
@@ -376,8 +371,6 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
             if (logActivated) {
                 sLogger.debug(e.getMessage());
             }
-            handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
-        } catch (IOException e) {
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
         } catch (RuntimeException e) {
             /*

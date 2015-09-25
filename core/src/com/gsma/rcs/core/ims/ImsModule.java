@@ -49,6 +49,7 @@ import com.gsma.rcs.core.ims.service.terms.TermsConditionsService;
 import com.gsma.rcs.core.ims.userprofile.UserProfile;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.provider.history.HistoryLog;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -217,8 +218,9 @@ public class ImsModule implements SipEventListener {
      * 
      * @throws NetworkException
      * @throws PayloadException
+     * @throws ContactManagerException
      */
-    public void stop() throws PayloadException, NetworkException {
+    public void stop() throws PayloadException, NetworkException, ContactManagerException {
         if (sLogger.isActivated()) {
             sLogger.info("Stop the IMS module");
         }
@@ -236,8 +238,10 @@ public class ImsModule implements SipEventListener {
      * 
      * @throws NetworkException
      * @throws PayloadException
+     * @throws ContactManagerException
      */
-    public void startImsServices() throws PayloadException, NetworkException {
+    public void startImsServices() throws PayloadException, NetworkException,
+            ContactManagerException {
         for (ImsService imsService : mServices.values()) {
             if (imsService.isActivated()) {
                 if (sLogger.isActivated()) {
@@ -255,9 +259,10 @@ public class ImsModule implements SipEventListener {
      * @param reasonCode The reason code
      * @throws PayloadException
      * @throws NetworkException
+     * @throws ContactManagerException
      */
     public void stopImsServices(TerminationReason reasonCode) throws PayloadException,
-            NetworkException {
+            NetworkException, ContactManagerException {
         // Terminate all pending sessions
         terminateAllSessions(reasonCode);
 

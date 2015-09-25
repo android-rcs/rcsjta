@@ -397,10 +397,9 @@ public class KeyStoreManager {
      * @param alias certificate alias
      * @return True if available
      * @throws KeyStoreException
-     * @throws IOException
      */
     // Changed by Deutsche Telekom
-    private static boolean isCertificateEntry(String alias) throws KeyStoreException, IOException {
+    private static boolean isCertificateEntry(String alias) throws KeyStoreException {
         return sKeyStore.isCertificateEntry(alias);
     }
 
@@ -527,10 +526,8 @@ public class KeyStoreManager {
      * @param rcsSettings
      * @return True if own certificates are used
      * @throws KeyStoreException
-     * @throws IOException
      */
-    public static boolean isOwnCertificateUsed(RcsSettings rcsSettings) throws KeyStoreException,
-            IOException {
+    public static boolean isOwnCertificateUsed(RcsSettings rcsSettings) throws KeyStoreException {
         String certRoot = rcsSettings.getTlsCertificateRoot();
         if (TextUtils.isEmpty(certRoot)) {
             return false;

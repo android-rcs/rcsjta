@@ -18,12 +18,13 @@
 package com.gsma.rcs.provider.history;
 
 import com.gsma.rcs.core.Core;
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
+import com.gsma.rcs.core.ims.service.im.chat.SessionNotEstablishedException;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.contact.ContactManager;
@@ -54,7 +55,8 @@ public class GroupChatDequeueTask extends DequeueTask {
 
     public GroupChatDequeueTask(Context ctx, Core core, MessagingLog messagingLog,
             ChatServiceImpl chatService, FileTransferServiceImpl fileTransferService,
-            RcsSettings rcsSettings, ContactManager contactManager, HistoryLog historyLog, String chatId) {
+            RcsSettings rcsSettings, ContactManager contactManager, HistoryLog historyLog,
+            String chatId) {
         super(ctx, core, contactManager, messagingLog, rcsSettings, chatService,
                 fileTransferService);
         mChatId = chatId;
@@ -194,14 +196,13 @@ public class GroupChatDequeueTask extends DequeueTask {
                             break;
                     }
 
-                } catch (MsrpException e) {
+                } catch (SessionNotEstablishedException e) {
                     if (logActivated) {
                         mLogger.debug(new StringBuilder(
                                 "Failed to dequeue group chat entry with id '").append(id)
                                 .append("' on group chat '").append(mChatId).append("' due to: ")
                                 .append(e.getMessage()).toString());
                     }
-
                 } catch (NetworkException e) {
                     if (logActivated) {
                         mLogger.debug(new StringBuilder(

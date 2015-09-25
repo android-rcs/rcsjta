@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.im.chat;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
@@ -61,15 +62,14 @@ public class ParticipantInfoUtils {
      * @param xml Resource-list document in XML
      * @param status Participant info status
      * @return the set of participants
-     * @throws NetworkException
      * @throws PayloadException
      */
     public static Map<ContactId, ParticipantStatus> parseResourceList(String xml,
-            ParticipantStatus status) throws NetworkException, PayloadException {
+            ParticipantStatus status) throws PayloadException {
         Map<ContactId, ParticipantStatus> participants = new HashMap<ContactId, ParticipantStatus>();
         try {
             InputSource pidfInput = new InputSource(new ByteArrayInputStream(xml.getBytes(UTF8)));
-            ResourceListParser listParser = new ResourceListParser(pidfInput);
+            ResourceListParser listParser = new ResourceListParser(pidfInput).parse();
             ResourceListDocument resList = listParser.getResourceList();
             if (resList != null) {
                 for (String entry : resList.getEntries()) {
@@ -86,13 +86,13 @@ public class ParticipantInfoUtils {
                     }
                 }
             }
-        } catch (IOException e) {
-            throw new NetworkException("Can't parse resource-list document!", e);
-
         } catch (ParserConfigurationException e) {
             throw new PayloadException("Can't parse resource-list document!", e);
 
         } catch (SAXException e) {
+            throw new PayloadException("Can't parse resource-list document!", e);
+
+        } catch (ParseFailureException e) {
             throw new PayloadException("Can't parse resource-list document!", e);
         }
         return participants;

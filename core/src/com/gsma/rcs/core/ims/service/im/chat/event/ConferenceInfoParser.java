@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.service.im.chat.event;
 
+import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.utils.logger.Logger;
 
 import org.xml.sax.Attributes;
@@ -88,19 +89,36 @@ public class ConferenceInfoParser extends DefaultHandler {
      */
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
+    private final InputSource mInputSource;
+
     /**
      * Constructor
      * 
      * @param inputSource Input source
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws IOException
      */
-    public ConferenceInfoParser(InputSource inputSource) throws ParserConfigurationException,
-            SAXException, IOException {
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-        SAXParser parser = factory.newSAXParser();
-        parser.parse(inputSource, this);
+    public ConferenceInfoParser(InputSource inputSource) {
+        mInputSource = inputSource;
+    }
+
+    /**
+     * Parse the Conference info input
+     * 
+     * @retunrn ConferenceInfoParser
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws ParseFailureException
+     */
+    public ConferenceInfoParser parse() throws ParserConfigurationException, SAXException,
+            ParseFailureException {
+        try {
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            SAXParser parser = factory.newSAXParser();
+            parser.parse(mInputSource, this);
+            return this;
+
+        } catch (IOException e) {
+            throw new ParseFailureException("Failed to parse input source!", e);
+        }
     }
 
     public ConferenceInfoDocument getConferenceInfo() {

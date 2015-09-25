@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.im.chat;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
@@ -153,6 +154,9 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
         } catch (ParseException e) {
             sLogger.error("Unable to set authorization header for chat invite!", e);
+            handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
+        } catch (FileAccessException e) {
+            sLogger.error("Unable to send 200OK response!", e);
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
         } catch (PayloadException e) {
             sLogger.error("Unable to send 200OK response!", e);

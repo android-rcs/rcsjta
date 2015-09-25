@@ -26,6 +26,7 @@ import static com.gsma.rcs.utils.StringUtils.UTF8_STR;
 
 import com.gsma.rcs.addressbook.AddressBookEventListener;
 import com.gsma.rcs.addressbook.AddressBookManager;
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
@@ -51,7 +52,6 @@ import android.content.Context;
 import android.content.OperationApplicationException;
 import android.os.RemoteException;
 
-import java.io.IOException;
 import java.util.Set;
 
 /**
@@ -218,10 +218,9 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * @param list of granted contacts
      * @param list of blocked contacts
      * @throws PayloadException
-     * @throws NetworkException
      */
     private void firstLaunchOrAccountChangedCheck(Set<ContactId> grantedContacts,
-            Set<ContactId> blockedContacts) throws PayloadException, NetworkException {
+            Set<ContactId> blockedContacts) throws PayloadException {
         final String publicUri = ImsModule.getImsUserProfile().getPublicUri();
         try {
             boolean logActivated = sLogger.isActivated();
@@ -271,11 +270,12 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         } catch (ContactManagerException e) {
             throw new PayloadException("Failed creating contact : ".concat(publicUri), e);
 
+        } catch (FileAccessException e) {
+            throw new PayloadException("Failed creating contact for URI : ".concat(publicUri), e);
+
         } catch (RemoteException e) {
             throw new PayloadException("Failed creating contact : ".concat(publicUri), e);
 
-        } catch (IOException e) {
-            throw new NetworkException("Failed creating contact : ".concat(publicUri), e);
         }
     }
 

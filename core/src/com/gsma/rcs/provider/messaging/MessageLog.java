@@ -45,7 +45,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -122,7 +121,7 @@ public class MessageLog implements IMessageLog {
     }
 
     private void addIncomingOneToOneMessage(ChatMessage msg, Status status, ReasonCode reasonCode)
-            throws PayloadException, IOException {
+            throws PayloadException {
         ContactId contact = msg.getRemoteContact();
         String msgId = msg.getMessageId();
         if (sLogger.isActivated()) {
@@ -160,12 +159,11 @@ public class MessageLog implements IMessageLog {
      * @param status Status
      * @param reasonCode Reason code
      * @param deliveryExpiration
-     * @throws IOException
      * @throws PayloadException
      */
     @Override
     public void addOutgoingOneToOneChatMessage(ChatMessage msg, Status status,
-            ReasonCode reasonCode, long deliveryExpiration) throws PayloadException, IOException {
+            ReasonCode reasonCode, long deliveryExpiration) throws PayloadException {
         ContactId contact = msg.getRemoteContact();
         String msgId = msg.getMessageId();
         if (sLogger.isActivated()) {
@@ -195,7 +193,7 @@ public class MessageLog implements IMessageLog {
     }
 
     @Override
-    public void addOneToOneSpamMessage(ChatMessage msg) throws PayloadException, IOException {
+    public void addOneToOneSpamMessage(ChatMessage msg) throws PayloadException {
         addIncomingOneToOneMessage(msg, Status.REJECTED, ReasonCode.REJECTED_SPAM);
     }
 
@@ -204,12 +202,11 @@ public class MessageLog implements IMessageLog {
      * 
      * @param msg Chat message
      * @param imdnDisplayedRequested Indicates whether IMDN display was requested
-     * @throws IOException
      * @throws PayloadException
      */
     @Override
     public void addIncomingOneToOneChatMessage(ChatMessage msg, boolean imdnDisplayedRequested)
-            throws PayloadException, IOException {
+            throws PayloadException {
         if (imdnDisplayedRequested) {
             addIncomingOneToOneMessage(msg, Status.DISPLAY_REPORT_REQUESTED, ReasonCode.UNSPECIFIED);
 
@@ -224,12 +221,11 @@ public class MessageLog implements IMessageLog {
      * @param chatId Chat ID
      * @param msg Chat message
      * @param imdnDisplayedRequested Indicates whether IMDN display was requested
-     * @throws IOException
      * @throws PayloadException
      */
     @Override
     public void addIncomingGroupChatMessage(String chatId, ChatMessage msg,
-            boolean imdnDisplayedRequested) throws PayloadException, IOException {
+            boolean imdnDisplayedRequested) throws PayloadException {
         Status chatMessageStatus = imdnDisplayedRequested ? Status.DISPLAY_REPORT_REQUESTED
                 : Status.RECEIVED;
         addGroupChatMessage(chatId, msg, Direction.INCOMING, null, chatMessageStatus,
@@ -249,7 +245,7 @@ public class MessageLog implements IMessageLog {
     @Override
     public void addOutgoingGroupChatMessage(String chatId, ChatMessage msg,
             Set<ContactId> recipients, Status status, ReasonCode reasonCode)
-            throws PayloadException, IOException {
+            throws PayloadException {
         addGroupChatMessage(chatId, msg, Direction.OUTGOING, recipients, status, reasonCode);
     }
 
@@ -262,11 +258,10 @@ public class MessageLog implements IMessageLog {
      * @param status Status
      * @param reasonCode Reason code
      * @throws PayloadException
-     * @throws IOException
      */
     private void addGroupChatMessage(String chatId, ChatMessage msg, Direction direction,
             Set<ContactId> recipients, Status status, ReasonCode reasonCode)
-            throws PayloadException, IOException {
+            throws PayloadException {
         String msgId = msg.getMessageId();
         ContactId contact = msg.getRemoteContact();
         if (sLogger.isActivated()) {

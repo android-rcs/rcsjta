@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.msrp;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.NetworkException;
@@ -32,7 +33,6 @@ import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpConstants;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
@@ -100,11 +100,11 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * @param timestampSent the remote timestamp sent in payload for the file sharing
      * @param contactManager
      * @throws PayloadException
-     * @throws NetworkException
+     * @throws FileAccessException
      */
     public TerminatingMsrpFileSharingSession(InstantMessagingService imService, SipRequest invite,
             ContactId remote, RcsSettings rcsSettings, long timestamp, long timestampSent,
-            ContactManager contactManager) throws PayloadException, NetworkException {
+            ContactManager contactManager) throws PayloadException, FileAccessException {
         super(imService, ContentManager.createMmContentFromSdp(invite, rcsSettings), remote,
                 FileTransferUtils.extractFileIcon(invite, rcsSettings), IdGenerator
                         .generateMessageID(), rcsSettings, timestamp, contactManager);
@@ -410,8 +410,6 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                 /* No response received: timeout */
                 handleError(new FileSharingError(FileSharingError.SEND_RESPONSE_FAILED));
             }
-        } catch (MsrpException e) {
-            handleError(new FileSharingError(FileSharingError.SEND_RESPONSE_FAILED, e));
         } catch (PayloadException e) {
             sLogger.error("Unable to send 200OK response!", e);
             handleError(new FileSharingError(FileSharingError.SEND_RESPONSE_FAILED, e));
@@ -419,8 +417,6 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
-            handleError(new FileSharingError(FileSharingError.SEND_RESPONSE_FAILED, e));
-        } catch (IOException e) {
             handleError(new FileSharingError(FileSharingError.SEND_RESPONSE_FAILED, e));
         } catch (RuntimeException e) {
             /*
@@ -448,7 +444,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * @param data Received data
      * @param mimeType Data mime-type
      */
-    public void msrpDataReceived(String msgId, byte[] data, String mimeType) {
+    public void receiveMsrpData(String msgId, byte[] data, String mimeType) {
         if (sLogger.isActivated()) {
             sLogger.info("Data received");
         }
@@ -464,7 +460,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                         FileTransferData.UNKNOWN_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION,
                         FileTransferProtocol.MSRP);
             }
-        } catch (IOException e) {
+        } catch (FileAccessException e) {
             deleteFile();
             for (ImsSessionListener listener : listeners) {
                 ((FileSharingSessionListener) listener).onTransferError(new FileSharingError(
@@ -503,7 +499,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                 ((FileSharingSessionListener) listener).onTransferProgress(contact,
                         currentSize, totalSize);
             }
-        } catch (IOException e) {
+        } catch (FileAccessException e) {
             deleteFile();
             for (ImsSessionListener listener : listeners) {
                 ((FileSharingSessionListener) listener).onTransferError(new FileSharingError(

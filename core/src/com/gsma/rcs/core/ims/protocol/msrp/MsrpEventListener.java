@@ -22,9 +22,11 @@
 
 package com.gsma.rcs.core.ims.protocol.msrp;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
+import com.gsma.rcs.provider.contact.ContactManagerException;
 
 /**
  * MSRP event listener
@@ -48,9 +50,10 @@ public interface MsrpEventListener {
      * @param mimeType Data mime-type
      * @throws PayloadException
      * @throws NetworkException
+     * @throws ContactManagerException
      */
-    public void msrpDataReceived(String msgId, byte[] data, String mimeType)
-            throws PayloadException, NetworkException;
+    public void receiveMsrpData(String msgId, byte[] data, String mimeType)
+            throws PayloadException, NetworkException, ContactManagerException;
 
     /**
      * Data transfer in progress

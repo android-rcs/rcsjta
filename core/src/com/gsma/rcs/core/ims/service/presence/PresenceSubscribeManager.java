@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.presence;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
@@ -48,7 +49,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.Vector;
 
@@ -144,7 +144,7 @@ public class PresenceSubscribeManager extends SubscribeManager {
             if (rlmiPart != null) {
                 InputSource rlmiInput = new InputSource(new ByteArrayInputStream(
                         rlmiPart.getBytes(UTF8)));
-                RlmiParser rlmiParser = new RlmiParser(rlmiInput);
+                RlmiParser rlmiParser = new RlmiParser(rlmiInput).parse();
                 RlmiDocument rlmiInfo = rlmiParser.getResourceInfo();
                 Vector<ResourceInstance> list = rlmiInfo.getResourceList();
                 for (ResourceInstance res : list) {
@@ -178,7 +178,7 @@ public class PresenceSubscribeManager extends SubscribeManager {
             String pidfPart = multi.getPart("application/pidf+xml");
             InputSource pidfInput = new InputSource(new ByteArrayInputStream(
                     pidfPart.getBytes(UTF8)));
-            PidfParser pidfParser = new PidfParser(pidfInput);
+            PidfParser pidfParser = new PidfParser(pidfInput).parse();
             PidfDocument presenceInfo = pidfParser.getPresence();
             String entity = presenceInfo.getEntity();
             PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(entity);
@@ -194,8 +194,8 @@ public class PresenceSubscribeManager extends SubscribeManager {
         } catch (SAXException e) {
             throw new PayloadException("Can't parse presence notification!", e);
 
-        } catch (IOException e) {
-            throw new NetworkException("Can't parse presence notification!", e);
+        } catch (ParseFailureException e) {
+            throw new PayloadException("Can't parse presence notification!", e);
         }
 
         SubscriptionStateHeader stateHeader = (SubscriptionStateHeader) notify

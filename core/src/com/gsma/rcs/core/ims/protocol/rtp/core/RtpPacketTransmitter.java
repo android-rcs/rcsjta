@@ -18,6 +18,8 @@
 
 package com.gsma.rcs.core.ims.protocol.rtp.core;
 
+import com.gsma.rcs.core.FileAccessException;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.rtp.util.Buffer;
 import com.gsma.rcs.core.ims.protocol.rtp.util.Packet;
 import com.gsma.rcs.platform.network.DatagramConnection;
@@ -137,9 +139,9 @@ public class RtpPacketTransmitter implements Closeable {
      * Send a RTP packet
      * 
      * @param buffer Input buffer
-     * @throws IOException
+     * @throws NetworkException
      */
-    public void sendRtpPacket(Buffer buffer) throws IOException {
+    public void sendRtpPacket(Buffer buffer) throws NetworkException {
         // Build a RTP packet
         RtpPacket packet = buildRtpPacket(buffer);
         if (packet == null) {
@@ -198,15 +200,19 @@ public class RtpPacketTransmitter implements Closeable {
      * Transmit a RTCP compound packet to the remote destination
      * 
      * @param packet RTP packet
-     * @throws IOException
+     * @throws NetworkException
      */
-    private void transmit(Packet packet) throws IOException {
+    private void transmit(Packet packet) throws NetworkException {
         byte[] data = packet.mData;
         if (packet.mOffset > 0) {
-            System.arraycopy(data, packet.mOffset, data = new byte[packet.mLength], 0, packet.mLength);
+            System.arraycopy(data, packet.mOffset, data = new byte[packet.mLength], 0,
+                    packet.mLength);
         }
         stats.numBytes += packet.mLength;
         stats.numPackets++;
+        if (data == null) {
+            return;
+        }
         /* Send data over UDP */
         datagramConnection.send(remoteAddress, remotePort, data);
         RtpSource s = rtcpSession.getMySource();

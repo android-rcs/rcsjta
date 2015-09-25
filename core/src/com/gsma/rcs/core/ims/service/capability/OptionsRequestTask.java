@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.service.capability;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
@@ -41,7 +42,6 @@ import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
-import java.io.IOException;
 import java.text.ParseException;
 
 import javax2.sip.InvalidArgumentException;
@@ -97,6 +97,9 @@ public class OptionsRequestTask implements Runnable {
     public void run() {
         try {
             sendOptions();
+        } catch (ContactManagerException e) {
+            sLogger.error("Options request failed for contact : ".concat(mContact.toString()), e);
+            handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, e));
         } catch (PayloadException e) {
             sLogger.error("Options request failed for contact : ".concat(mContact.toString()), e);
             handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, e));
@@ -139,7 +142,7 @@ public class OptionsRequestTask implements Runnable {
      * @throws ContactManagerException
      * @throws NetworkException
      */
-    private void sendOptions() throws PayloadException, NetworkException {
+    private void sendOptions() throws PayloadException, NetworkException, ContactManagerException {
         if (sLogger.isActivated()) {
             sLogger.info("Send an options request to ".concat(mContact.toString()));
         }
@@ -172,8 +175,8 @@ public class OptionsRequestTask implements Runnable {
      * @throws NetworkException
      * @throws ContactManagerException
      */
-    private void sendAndWaitOptions(SipRequest options) throws PayloadException,
-            NetworkException {
+    private void sendAndWaitOptions(SipRequest options) throws PayloadException, NetworkException,
+            ContactManagerException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info("Send OPTIONS");
@@ -211,11 +214,8 @@ public class OptionsRequestTask implements Runnable {
                         String.valueOf(statusCode)).append(' ').append(ctx.getReasonPhrase())
                         .toString()));
             }
-        } catch (ContactManagerException e) {
+        } catch (FileAccessException e) {
             throw new PayloadException("Failed to send OPTIONS!", e);
-
-        } catch (IOException e) {
-            throw new NetworkException("Failed to send OPTIONS!", e);
         }
     }
 
@@ -224,10 +224,10 @@ public class OptionsRequestTask implements Runnable {
      * 
      * @param ctx SIP transaction context
      * @throws ContactManagerException
-     * @throws IOException
+     * @throws FileAccessException
      */
     private void handleUserNotRegistered(SipTransactionContext ctx) throws ContactManagerException,
-            IOException {
+            FileAccessException {
         /* 408 or 480 response received */
         if (sLogger.isActivated()) {
             sLogger.info("User " + mContact + " is not registered");
@@ -257,10 +257,10 @@ public class OptionsRequestTask implements Runnable {
      * 
      * @param ctx SIP transaction context
      * @throws ContactManagerException
-     * @throws IOException
+     * @throws FileAccessException
      */
     private void handleUserNotFound(SipTransactionContext ctx) throws ContactManagerException,
-            IOException {
+            FileAccessException {
         /* 404 response received */
         if (sLogger.isActivated()) {
             sLogger.info("User " + mContact + " is not found");
@@ -277,9 +277,10 @@ public class OptionsRequestTask implements Runnable {
      * 
      * @param ctx SIP transaction context
      * @throws ContactManagerException
-     * @throws IOException
+     * @throws FileAccessException
      */
-    private void handle200OK(SipTransactionContext ctx) throws ContactManagerException, IOException {
+    private void handle200OK(SipTransactionContext ctx) throws ContactManagerException,
+            FileAccessException {
         if (sLogger.isActivated()) {
             sLogger.info("200 OK response received for " + mContact);
         }
@@ -320,9 +321,10 @@ public class OptionsRequestTask implements Runnable {
      * @param ctx SIP transaction context
      * @throws PayloadException
      * @throws NetworkException
+     * @throws ContactManagerException
      */
     private void handle407Authentication(SipTransactionContext ctx) throws PayloadException,
-            NetworkException {
+            NetworkException, ContactManagerException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info("407 response received");
@@ -383,10 +385,11 @@ public class OptionsRequestTask implements Runnable {
                     new StringBuilder("Failed to handle Options error for contact ")
                             .append(mContact).append(": ").append(error.getErrorCode())
                             .append(", reason=").append(error.getMessage()).toString(), e);
-        } catch (IOException e) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(e.getMessage());
-            }
+        } catch (FileAccessException e) {
+            sLogger.error(
+                    new StringBuilder("Failed to handle Options error for contact ")
+                            .append(mContact).append(": ").append(error.getErrorCode())
+                            .append(", reason=").append(error.getMessage()).toString(), e);
         }
     }
 

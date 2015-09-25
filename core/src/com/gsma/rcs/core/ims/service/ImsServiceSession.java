@@ -22,12 +22,14 @@
 
 package com.gsma.rcs.core.ims.service;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipManager;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
+import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
@@ -39,7 +41,6 @@ import com.gsma.services.rcs.contact.ContactId;
 
 import android.net.Uri;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -577,8 +578,7 @@ public abstract class ImsServiceSession extends Thread {
      * @throws NetworkException
      * @throws PayloadException
      */
-    public void closeSession(TerminationReason reason) throws PayloadException,
-            NetworkException {
+    public void closeSession(TerminationReason reason) throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug(new StringBuilder("Close the session (reason ").append(reason)
                     .append(")").toString());
@@ -676,8 +676,7 @@ public abstract class ImsServiceSession extends Thread {
      * @throws NetworkException
      * @throws PayloadException
      */
-    public void receiveReInvite(SipRequest reInvite) throws PayloadException,
-            NetworkException {
+    public void receiveReInvite(SipRequest reInvite) throws PayloadException, NetworkException {
         // Session refresh management
         mSessionTimer.receiveReInvite(reInvite);
     }
@@ -703,30 +702,28 @@ public abstract class ImsServiceSession extends Thread {
     /**
      * Prepare media session
      * 
-     * @throws IOException
      * @throws NetworkException
      * @throws PayloadException
      */
-    public abstract void prepareMediaSession() throws IOException, PayloadException,
-            NetworkException;
+    public abstract void prepareMediaSession() throws PayloadException, NetworkException;
 
     /**
      * Open media session
      * 
-     * @throws IOException
      * @throws PayloadException
+     * @throws NetworkException
      */
-    public abstract void openMediaSession() throws IOException, PayloadException;
+    public abstract void openMediaSession() throws PayloadException, NetworkException;
 
     /**
      * Start media transfer
      * 
-     * @throws IOException
      * @throws NetworkException
      * @throws PayloadException
+     * @throws FileAccessException
      */
-    public abstract void startMediaTransfer() throws IOException, PayloadException,
-            NetworkException;
+    public abstract void startMediaTransfer() throws PayloadException, NetworkException,
+            FileAccessException;
 
     /**
      * Close media session
@@ -801,28 +798,6 @@ public abstract class ImsServiceSession extends Thread {
                 .getSipManager()
                 .sendSipResponse(
                         SipMessageFactory.createResponse(request, localTag, Response.DECLINE));
-    }
-
-    /**
-     * Send a 403 "Forbidden" to the remote party
-     * 
-     * @param request SIP request
-     * @param localTag Local tag
-     * @param warning the warning message
-     * @throws PayloadException
-     * @throws NetworkException
-     */
-    private void send403Forbidden(SipRequest request, String localTag, String warning)
-            throws NetworkException, PayloadException {
-        if (sLogger.isActivated()) {
-            sLogger.info("Send 403 Forbidden (warning=" + warning + ")");
-        }
-        getImsService()
-                .getImsModule()
-                .getSipManager()
-                .sendSipResponse(
-                        SipMessageFactory.createResponse(request, localTag, Response.FORBIDDEN,
-                                warning));
     }
 
     /**
@@ -964,8 +939,10 @@ public abstract class ImsServiceSession extends Thread {
      * @param invite SIP INVITE
      * @throws PayloadException
      * @throws NetworkException
+     * @throws FileAccessException
      */
-    public void sendInvite(SipRequest invite) throws PayloadException, NetworkException {
+    public void sendInvite(SipRequest invite) throws PayloadException, NetworkException,
+            FileAccessException {
         // Send INVITE request
         SipTransactionContext ctx = getImsService()
                 .getImsModule()
@@ -1031,60 +1008,58 @@ public abstract class ImsServiceSession extends Thread {
     }
 
     /**
-     * Handle 200 0K response
+     * Perform next steps once 200 0K response is received
      * 
      * @param resp 200 OK response
      * @throws PayloadException
      * @throws NetworkException
+     * @throws FileAccessException
      */
-    public void handle200OK(SipResponse resp) throws PayloadException, NetworkException {
-        try {
-            if (sLogger.isActivated()) {
-                sLogger.info("200 OK response received");
-            }
-            getDialogPath().setSigEstablished();
-
-            getDialogPath().setRemoteTag(resp.getToTag());
-
-            getDialogPath().setTarget(resp.getContactURI());
-
-            /* Set the route path with the Record-Route header */
-            Vector<String> newRoute = SipUtils.routeProcessing(resp, true);
-            getDialogPath().setRoute(newRoute);
-
-            /* Set the remote SDP part */
-            getDialogPath().setRemoteContent(resp.getContent());
-
-            /* Set the remote SIP instance ID */
-            ContactHeader remoteContactHeader = (ContactHeader) resp.getHeader(ContactHeader.NAME);
-            if (remoteContactHeader != null) {
-                getDialogPath().setRemoteSipInstance(
-                        remoteContactHeader.getParameter(SipUtils.SIP_INSTANCE_PARAM));
-            }
-
-            prepareMediaSession();
-
-            if (sLogger.isActivated()) {
-                sLogger.info("Send ACK");
-            }
-            getImsService().getImsModule().getSipManager().sendSipAck(getDialogPath());
-
-            getDialogPath().setSessionEstablished();
-
-            openMediaSession();
-
-            for (ImsSessionListener listener : getListeners()) {
-                listener.onSessionStarted(mContact);
-            }
-
-            /* Start session timer */
-            if (mSessionTimer.isSessionTimerActivated(resp)) {
-                mSessionTimer.start(resp.getSessionTimerRefresher(), resp.getSessionTimerExpire());
-            }
-            startMediaTransfer();
-        } catch (IOException e) {
-            throw new NetworkException("Session initiation has failed!", e);
+    public void handle200OK(SipResponse resp) throws PayloadException,
+            NetworkException, FileAccessException {
+        if (sLogger.isActivated()) {
+            sLogger.info("200 OK response received");
         }
+        getDialogPath().setSigEstablished();
+
+        getDialogPath().setRemoteTag(resp.getToTag());
+
+        getDialogPath().setTarget(resp.getContactURI());
+
+        /* Set the route path with the Record-Route header */
+        Vector<String> newRoute = SipUtils.routeProcessing(resp, true);
+        getDialogPath().setRoute(newRoute);
+
+        /* Set the remote SDP part */
+        getDialogPath().setRemoteContent(resp.getContent());
+
+        /* Set the remote SIP instance ID */
+        ContactHeader remoteContactHeader = (ContactHeader) resp.getHeader(ContactHeader.NAME);
+        if (remoteContactHeader != null) {
+            getDialogPath().setRemoteSipInstance(
+                    remoteContactHeader.getParameter(SipUtils.SIP_INSTANCE_PARAM));
+        }
+
+        prepareMediaSession();
+
+        if (sLogger.isActivated()) {
+            sLogger.info("Send ACK");
+        }
+        getImsService().getImsModule().getSipManager().sendSipAck(getDialogPath());
+
+        getDialogPath().setSessionEstablished();
+
+        openMediaSession();
+
+        for (ImsSessionListener listener : getListeners()) {
+            listener.onSessionStarted(mContact);
+        }
+
+        /* Start session timer */
+        if (mSessionTimer.isSessionTimerActivated(resp)) {
+            mSessionTimer.start(resp.getSessionTimerRefresher(), resp.getSessionTimerExpire());
+        }
+        startMediaTransfer();
     }
 
     /**
@@ -1131,9 +1106,10 @@ public abstract class ImsServiceSession extends Thread {
      * @param resp 407 response
      * @throws NetworkException
      * @throws PayloadException
+     * @throws FileAccessException
      */
     public void handle407Authentication(SipResponse resp) throws PayloadException,
-            NetworkException {
+            NetworkException, FileAccessException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info("407 response received");
@@ -1174,9 +1150,10 @@ public abstract class ImsServiceSession extends Thread {
      * @param resp 422 response
      * @throws NetworkException
      * @throws PayloadException
+     * @throws FileAccessException
      */
     public void handle422SessionTooSmall(SipResponse resp) throws PayloadException,
-            NetworkException {
+            NetworkException, FileAccessException {
         try {
             // 422 response received
             if (sLogger.isActivated()) {

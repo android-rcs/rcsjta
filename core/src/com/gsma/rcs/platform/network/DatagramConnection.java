@@ -18,6 +18,8 @@
 
 package com.gsma.rcs.platform.network;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
+
 import java.io.Closeable;
 import java.io.IOException;
 
@@ -60,17 +62,17 @@ public interface DatagramConnection extends Closeable {
      * @param remoteAddr Remote address
      * @param remotePort Remote port
      * @param data Data as byte array
-     * @throws IOException
+     * @throws NetworkException
      */
-    public void send(String remoteAddr, int remotePort, byte[] data) throws IOException;
+    public void send(String remoteAddr, int remotePort, byte[] data) throws NetworkException;
 
     /**
      * Receive data
      * 
      * @return Byte array
-     * @throws IOException
+     * @throws NetworkException
      */
-    public byte[] receive() throws IOException;
+    public byte[] receive() throws NetworkException;
 
     /**
      * Returns the local address

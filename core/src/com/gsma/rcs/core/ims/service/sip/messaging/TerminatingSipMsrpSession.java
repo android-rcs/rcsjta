@@ -27,7 +27,6 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
@@ -50,7 +49,6 @@ import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.Intent;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Vector;
 
@@ -305,11 +303,6 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
                 sLogger.debug(e.getMessage());
             }
             handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
-        } catch (MsrpException e) {
-            handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
-        } catch (IOException e) {
-            handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
-
         } catch (RuntimeException e) {
             /**
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and

@@ -22,8 +22,7 @@
 
 package com.gsma.rcs.core.ims.protocol.msrp;
 
-import java.io.IOException;
-
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.platform.network.NetworkFactory;
 import com.gsma.rcs.platform.network.SocketConnection;
@@ -121,10 +120,10 @@ public class MsrpClientConnection extends MsrpConnection {
      * Returns the socket connection
      * 
      * @return Socket
-     * @throws IOException
+     * @throws NetworkException
      * @throws PayloadException
      */
-    public SocketConnection getSocketConnection() throws IOException, PayloadException {
+    public SocketConnection getSocketConnection() throws NetworkException, PayloadException {
         if (logger.isActivated()) {
             logger.debug("Open client socket to " + remoteAddress + ":" + remotePort);
         }
@@ -144,8 +143,7 @@ public class MsrpClientConnection extends MsrpConnection {
         }
         socket.open(remoteAddress, remotePort);
         if (logger.isActivated()) {
-            logger.debug("Socket connected to " + socket.getRemoteAddress() + ":"
-                    + socket.getRemotePort());
+            logger.debug("Socket connected to " + remoteAddress + ":" + remotePort);
         }
         return socket;
     }

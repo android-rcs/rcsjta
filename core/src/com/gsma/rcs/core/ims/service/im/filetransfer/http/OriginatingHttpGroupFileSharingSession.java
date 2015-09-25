@@ -28,7 +28,6 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
@@ -186,9 +185,9 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
     /**
      * Send the file transfer information
      * 
-     * @throws MsrpException
+     * @throws NetworkException
      */
-    private void sendFileTransferInfo() throws MsrpException {
+    private void sendFileTransferInfo() throws NetworkException {
         String from = ImsModule.getImsUserProfile().getPublicAddress();
         String networkContent;
         String msgId = getFileTransferId();
@@ -217,7 +216,6 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
      * @throws NetworkException
      */
     private void sendResultToContact(byte[] result) throws PayloadException, NetworkException {
-        try {
             if (mUploadManager.isCancelled()) {
                 return;
             }
@@ -271,10 +269,6 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                     }
                     mChatSession.acceptSession();
                 }
-            }
-        } catch (MsrpException e) {
-            throw new NetworkException(
-                    "Failed to send result chunks for transferId : ".concat(getFileTransferId()), e);
         }
     }
 

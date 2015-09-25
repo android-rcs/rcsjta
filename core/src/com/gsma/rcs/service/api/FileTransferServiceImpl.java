@@ -26,11 +26,11 @@ import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
+import com.gsma.rcs.core.ims.service.im.chat.SessionNotEstablishedException;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
@@ -809,12 +809,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param content
      * @param fileIcon
      * @param chatId
-     * @throws MsrpException
      * @throws PayloadException
      * @throws NetworkException
+     * @throws SessionNotEstablishedException
      */
     public void dequeueGroupFileTransfer(String chatId, String fileTransferId, MmContent content,
-            MmContent fileIcon) throws MsrpException, PayloadException, NetworkException {
+            MmContent fileIcon) throws PayloadException, NetworkException,
+            SessionNotEstablishedException {
         GroupChatSession groupChatSession = mImService.getGroupChatSession(chatId);
         if (groupChatSession == null) {
             mImService.rejoinGroupChatAsPartOfSendOperation(chatId);
@@ -838,7 +839,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             }
             groupChatSession.acceptSession();
         } else {
-            throw new MsrpException(new StringBuilder(
+            throw new SessionNotEstablishedException(new StringBuilder(
                     "The existing group chat session with chatId '").append(chatId)
                     .append("' is not established right now!").toString());
         }

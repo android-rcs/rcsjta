@@ -42,7 +42,6 @@ import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.Intent;
 
-import java.io.IOException;
 import java.util.Collection;
 
 /**
@@ -231,8 +230,6 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                 // No response received: timeout
                 handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED));
             }
-        } catch (IOException e) {
-            handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
         } catch (PayloadException e) {
             sLogger.error(
                     new StringBuilder("Session initiation has failed for CallId=")

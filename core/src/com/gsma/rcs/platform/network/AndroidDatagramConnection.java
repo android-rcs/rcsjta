@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +15,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.platform.network;
+
+import com.gsma.rcs.core.ims.network.NetworkException;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -99,19 +105,19 @@ public class AndroidDatagramConnection implements DatagramConnection {
      * Receive data with a specific buffer size
      * 
      * @return Byte array
-     * @throws IOException
+     * @throws NetworkException
      */
-    public byte[] receive() throws IOException {
-        if (connection != null) {
+    public byte[] receive() throws NetworkException {
+        try {
             packet.setLength(DatagramConnection.DEFAULT_DATAGRAM_SIZE);
             connection.receive(packet);
-
             int packetLength = packet.getLength();
             byte[] data = new byte[packetLength];
             System.arraycopy(packet.getData(), 0, data, 0, packetLength);
             return data;
+        } catch (IOException e) {
+            throw new NetworkException("Failed to receive datagram packet!", e);
         }
-        throw new IOException("Connection not opened");
     }
 
     /**
@@ -120,20 +126,18 @@ public class AndroidDatagramConnection implements DatagramConnection {
      * @param remoteAddr Remote address
      * @param remotePort Remote port
      * @param data Data as byte array
-     * @throws IOException
+     * @throws NetworkException
      */
-    public void send(String remoteAddr, int remotePort, byte[] data) throws IOException {
-        if (data == null) {
-            return;
-        }
-
-        if (connection != null) {
+    public void send(String remoteAddr, int remotePort, byte[] data) throws NetworkException {
+        try {
             InetAddress address = InetAddress.getByName(remoteAddr);
             DatagramPacket packet = new DatagramPacket(data, data.length, address, remotePort);
             connection.send(packet);
-        } else {
-            throw new IOException("Connection not opened");
+        } catch (IOException e) {
+            throw new NetworkException(
+                    "Failed to send data to remoteAddr : ".concat(remoteAddr), e);
         }
+
     }
 
     /**

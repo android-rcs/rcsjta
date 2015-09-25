@@ -26,6 +26,7 @@ import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.platform.AndroidFactory;
+import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.utils.logger.Logger;
 
 import android.app.AlarmManager;
@@ -76,8 +77,10 @@ public abstract class PeriodicRefresher {
      * 
      * @throws NetworkException
      * @throws PayloadException
+     * @throws ContactManagerException
      */
-    public abstract void periodicProcessing() throws PayloadException, NetworkException;
+    public abstract void periodicProcessing() throws PayloadException, NetworkException,
+            ContactManagerException;
 
     /**
      * Start the timer
@@ -148,6 +151,8 @@ public abstract class PeriodicRefresher {
                 public void run() {
                     try {
                         periodicProcessing();
+                    } catch (ContactManagerException e) {
+                        sLogger.error("IMS re-registration unsuccessful!", e);
                     } catch (PayloadException e) {
                         sLogger.error("IMS re-registration unsuccessful!", e);
                     } catch (NetworkException e) {

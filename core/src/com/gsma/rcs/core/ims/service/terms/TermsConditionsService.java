@@ -205,18 +205,10 @@ public class TermsConditionsService extends ImsService {
                 }
             }
 
-        } catch (IOException e) {
-            if (sLogger.isActivated()) {
-                sLogger.debug("Failed to receive terms request! (" + e.getMessage() + ")");
-            }
         } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug("Failed to receive terms request! (" + e.getMessage() + ")");
             }
-        } catch (ParserConfigurationException e) {
-            sLogger.error("Failed to receive terms request!", e);
-        } catch (SAXException e) {
-            sLogger.error("Failed to receive terms request!", e);
         } catch (PayloadException e) {
             sLogger.error("Failed to receive terms request!", e);
         } catch (RuntimeException e) {
@@ -238,8 +230,7 @@ public class TermsConditionsService extends ImsService {
      * @throws NetworkException
      * @throws PayloadException
      */
-    public void acceptTerms(String requestId, String pin) throws PayloadException,
-            NetworkException {
+    public void acceptTerms(String requestId, String pin) throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug("Send response for request ".concat(requestId));
         }
@@ -258,8 +249,7 @@ public class TermsConditionsService extends ImsService {
      * @throws NetworkException
      * @throws PayloadException
      */
-    public void rejectTerms(String requestId, String pin) throws PayloadException,
-            NetworkException {
+    public void rejectTerms(String requestId, String pin) throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug("Send response for request ".concat(requestId));
         }

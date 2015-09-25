@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.protocol.rtp.core;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.platform.network.DatagramConnection;
 import com.gsma.rcs.platform.network.NetworkFactory;
 import com.gsma.rcs.utils.logger.Logger;
@@ -188,7 +189,10 @@ public class RtcpPacketTransmitter extends Thread implements Closeable {
                             }
                         } else {
                             if (!mClosed) {
-                                transmit(assembleRtcpPacket());
+                                byte[] data = assembleRtcpPacket();
+                                if (data != null) {
+                                    transmit(assembleRtcpPacket());
+                                }
                                 if (mRtcpSession.isByeRequested && !mWaitingForByeBackoff) {
                                     // We have sent a BYE packet, so terminate
                                     terminate = true;
@@ -208,7 +212,7 @@ public class RtcpPacketTransmitter extends Thread implements Closeable {
                     mRtcpSession.isByeRequested = true;
                 }
             }
-        } catch (IOException e) {
+        } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
@@ -218,7 +222,6 @@ public class RtcpPacketTransmitter extends Thread implements Closeable {
              * eventually bring the whole system down, which is not intended.
              */
             sLogger.error("Can't send the RTCP packet", e);
-
         }
     }
 
@@ -386,9 +389,9 @@ public class RtcpPacketTransmitter extends Thread implements Closeable {
      * Transmit a RTCP compound packet to the remote destination
      * 
      * @param packet Compound packet to be sent
-     * @throws IOException
+     * @throws NetworkException
      */
-    private void transmit(RtcpCompoundPacket packet) throws IOException {
+    private void transmit(RtcpCompoundPacket packet) throws NetworkException {
         // Prepare data to be sent
         byte[] data = packet.mData;
         if (packet.mOffset > 0) {
@@ -402,6 +405,9 @@ public class RtcpPacketTransmitter extends Thread implements Closeable {
         mRtcpSession.updateavgrtcpsize(packet.mLength);
         mRtcpSession.timeOfLastRTCPSent = mRtcpSession.currentTime();
         // Send data over UDP
+        if (data == null) {
+            return;
+        }
         mDatagramConnection.send(mRemoteAddress, mRemotePort, data);
     }
 
@@ -409,9 +415,9 @@ public class RtcpPacketTransmitter extends Thread implements Closeable {
      * Transmit a RTCP compound packet to the remote destination
      * 
      * @param packet Compound packet to be sent
-     * @throws IOException
+     * @throws NetworkException
      */
-    private void transmit(byte packet[]) throws IOException {
+    private void transmit(byte packet[]) throws NetworkException {
         mStats.numBytes += packet.length;
         mStats.numPackets++;
         mRtcpSession.updateavgrtcpsize(packet.length);
@@ -432,22 +438,26 @@ public class RtcpPacketTransmitter extends Thread implements Closeable {
     /**
      * Send a SDES packet
      * 
-     * @throws IOException
+     * @throws NetworkException
      */
-    private void sendSdesPacket() throws IOException {
-        // Create a report
-        Vector<RtcpSdesPacket> repvec = makereports();
-        RtcpPacket packets[] = new RtcpPacket[repvec.size()];
-        repvec.copyInto(packets);
+    private void sendSdesPacket() throws NetworkException {
+        try {
+            // Create a report
+            Vector<RtcpSdesPacket> repvec = makereports();
+            RtcpPacket packets[] = new RtcpPacket[repvec.size()];
+            repvec.copyInto(packets);
 
-        // Create a RTCP compound packet
-        RtcpCompoundPacket cp = new RtcpCompoundPacket(packets);
+            // Create a RTCP compound packet
+            RtcpCompoundPacket cp = new RtcpCompoundPacket(packets);
 
-        // Assemble the RTCP packet
-        int i = cp.calcLength();
-        cp.assemble(i, false);
+            // Assemble the RTCP packet
+            int i = cp.calcLength();
+            cp.assemble(i, false);
 
-        // Send the RTCP packet
-        transmit(cp);
+            // Send the RTCP packet
+            transmit(cp);
+        } catch (IOException e) {
+            throw new NetworkException("Failed to send a SDES packet!", e);
+        }
     }
 }

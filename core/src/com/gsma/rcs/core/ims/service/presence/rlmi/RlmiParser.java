@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.service.presence.rlmi;
 
+import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.utils.logger.Logger;
 
 import org.xml.sax.Attributes;
@@ -52,6 +53,8 @@ public class RlmiParser extends DefaultHandler {
     private ResourceInstance resourceInstance = null;
     private RlmiDocument resourceInfo = null;
 
+    private final InputSource mInputSource;
+
     /**
      * The logger
      */
@@ -61,15 +64,30 @@ public class RlmiParser extends DefaultHandler {
      * Constructor
      * 
      * @param inputSource Input source
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws IOException
      */
-    public RlmiParser(InputSource inputSource) throws ParserConfigurationException, SAXException,
-            IOException {
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-        SAXParser parser = factory.newSAXParser();
-        parser.parse(inputSource, this);
+    public RlmiParser(InputSource inputSource) {
+        mInputSource = inputSource;
+    }
+
+    /**
+     * Parse the PIDF input
+     * 
+     * @return RlmiParser
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws ParseFailureException
+     */
+    public RlmiParser parse() throws ParserConfigurationException, SAXException,
+            ParseFailureException {
+        try {
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            SAXParser parser = factory.newSAXParser();
+            parser.parse(mInputSource, this);
+            return this;
+
+        } catch (IOException e) {
+            throw new ParseFailureException("Failed to parse input source!", e);
+        }
     }
 
     public RlmiDocument getResourceInfo() {

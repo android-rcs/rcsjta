@@ -90,8 +90,6 @@ public interface GroupChatSessionListener extends ChatSessionListener {
      * Handle IM error
      * 
      * @param error Error
-     * @throws NetworkException
-     * @throws PayloadException
      */
-    public void onImError(ChatError error) throws PayloadException, NetworkException;
+    public void onImError(ChatError error);
 }

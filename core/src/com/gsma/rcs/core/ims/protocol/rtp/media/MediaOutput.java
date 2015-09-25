@@ -40,7 +40,6 @@ public interface MediaOutput {
      * Write a media sample
      * 
      * @param sample Media sample
-     * @throws MediaException
      */
-    public void writeSample(MediaSample sample) throws MediaException;
+    public void writeSample(MediaSample sample);
 }

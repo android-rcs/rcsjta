@@ -24,13 +24,13 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.msrp;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
@@ -60,6 +60,7 @@ import com.gsma.services.rcs.contact.ContactId;
 import android.net.Uri;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -121,16 +122,21 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
         setContributionID(id);
     }
 
-    private byte[] getFileData(Uri file, int size) throws IOException {
+    private byte[] getFileData(Uri file, int size) throws NetworkException {
         FileInputStream fileInputStream = null;
         try {
             fileInputStream = (FileInputStream) AndroidFactory.getApplicationContext()
                     .getContentResolver().openInputStream(file);
             byte[] data = new byte[size];
             if (size != fileInputStream.read(data, 0, size)) {
-                throw new IOException("Unable to retrive data from ".concat(file.toString()));
+                throw new NetworkException("Unable to retrive data from ".concat(file.toString()));
             }
             return data;
+
+        } catch (IOException e) {
+            throw new NetworkException(
+                    "Failed to get file data for uri : ".concat(file.toString()), e);
+
         } finally {
             CloseableUtils.tryToClose(fileInputStream);
         }
@@ -247,11 +253,8 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
         } catch (ParseException e) {
             mLogger.error("Unable to set authorization header!", e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
-        } catch (IOException e) {
-            if (mLogger.isActivated()) {
-                mLogger.debug("Failed to initiate a file transfer session with fileTransferId "
-                        .concat(getFileTransferId()));
-            }
+        } catch (FileAccessException e) {
+            mLogger.error("Unable to set and send initial invite!", e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
         } catch (PayloadException e) {
             mLogger.error("Unable to set and send initial invite!", e);
@@ -273,10 +276,8 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
 
     /**
      * Prepare media session
-     * 
-     * @throws MsrpException
      */
-    public void prepareMediaSession() throws MsrpException {
+    public void prepareMediaSession() {
         // Changed by Deutsche Telekom
         // Get the remote SDP part
         byte[] sdp = getDialogPath().getRemoteContent().getBytes(UTF8);
@@ -295,25 +296,30 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
     /**
      * Open media session
      * 
-     * @throws IOException
      * @throws PayloadException
+     * @throws NetworkException
      */
-    public void openMediaSession() throws IOException, PayloadException {
+    public void openMediaSession() throws PayloadException, NetworkException {
         msrpMgr.openMsrpSession();
     }
 
     /**
      * Start media transfer
      * 
-     * @throws IOException
+     * @throws FileAccessException
+     * @throws NetworkException
      */
-    public void startMediaTransfer() throws IOException {
+    public void startMediaTransfer() throws NetworkException, FileAccessException {
         try {
             /* Start sending data chunks */
             InputStream stream = AndroidFactory.getApplicationContext().getContentResolver()
                     .openInputStream(getContent().getUri());
             msrpMgr.sendChunks(stream, IdGenerator.generateMessageID(), getContent().getEncoding(),
                     getContent().getSize(), TypeMsrpChunk.FileSharing);
+        } catch (FileNotFoundException e) {
+            throw new FileAccessException(
+                    "Failed to initiate media transfer for uri : ".concat(getContent().getUri()
+                            .toString()), e);
         } catch (SecurityException e) {
             mLogger.error("Session initiation has failed due to that the file is not accessible!",
                     e);
@@ -373,7 +379,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * @param data Received data
      * @param mimeType Data mime-type
      */
-    public void msrpDataReceived(String msgId, byte[] data, String mimeType) {
+    public void receiveMsrpData(String msgId, byte[] data, String mimeType) {
         // Not used in originating side
     }
 
@@ -437,8 +443,10 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * @param resp 200 OK response
      * @throws PayloadException
      * @throws NetworkException
+     * @throws FileAccessException
      */
-    public void handle200OK(SipResponse resp) throws PayloadException, NetworkException {
+    public void handle200OK(SipResponse resp) throws PayloadException, NetworkException,
+            FileAccessException {
         long timestamp = System.currentTimeMillis();
         mImService.receiveOneToOneFileDeliveryStatus(getRemoteContact(), new ImdnDocument(
                 getFileTransferId(), ImdnDocument.POSITIVE_DELIVERY,

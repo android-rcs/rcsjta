@@ -22,6 +22,8 @@
 
 package com.gsma.rcs.core.ims.protocol.rtp.stream;
 
+import com.gsma.rcs.core.FileAccessException;
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.rtp.util.Buffer;
 
@@ -47,7 +49,7 @@ public interface ProcessorOutputStream {
      * Write to the stream without blocking
      * 
      * @param buffer Input buffer
-     * @throws MediaException
+     * @throws NetworkException
      */
-    public void write(Buffer buffer) throws MediaException;
+    public void write(Buffer buffer) throws NetworkException;
 }

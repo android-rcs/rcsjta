@@ -18,6 +18,7 @@
 
 package com.gsma.rcs.core.ims.protocol.rtp;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.rtp.codec.Codec;
 import com.gsma.rcs.core.ims.protocol.rtp.format.Format;
 import com.gsma.rcs.core.ims.protocol.rtp.media.MediaOutput;
@@ -51,39 +52,39 @@ public class VideoRtpReceiver extends MediaRtpReceiver {
      * @param renderer Renderer
      * @param format Video format
      * @param rtpStreamListener RTP Stream listener
-     * @throws RtpException When an error occurs
+     * @throws NetworkException
      */
     public void prepareSession(String remoteAddress, int remotePort, int orientationHeaderId,
             MediaOutput renderer, Format format, RtpStreamListener rtpStreamListener)
-            throws RtpException {
+            throws NetworkException {
         try {
             // Create the input stream
-            inputStream = new RtpInputStream(remoteAddress, remotePort, localPort, format);
-            inputStream.setExtensionHeaderId(orientationHeaderId);
-            inputStream.addRtpStreamListener(rtpStreamListener);
-            inputStream.open();
-            if (logger.isActivated()) {
-                logger.debug("Input stream: " + inputStream.getClass().getName());
+            mInputStream = new RtpInputStream(remoteAddress, remotePort, mLocalPort, format);
+            mInputStream.setExtensionHeaderId(orientationHeaderId);
+            mInputStream.addRtpStreamListener(rtpStreamListener);
+            mInputStream.open();
+            if (sLogger.isActivated()) {
+                sLogger.debug("Input stream: " + mInputStream.getClass().getName());
             }
 
             // Create the output stream
             VideoRendererStream outputStream = new VideoRendererStream(renderer);
             outputStream.open();
-            if (logger.isActivated()) {
-                logger.debug("Output stream: " + outputStream.getClass().getName());
+            if (sLogger.isActivated()) {
+                sLogger.debug("Output stream: " + outputStream.getClass().getName());
             }
 
             // Create the codec chain
             Codec[] codecChain = MediaRegistry.generateDecodingCodecChain(format.getCodec());
 
             // Create the media processor
-            processor = new Processor(inputStream, outputStream, codecChain);
+            mProcessor = new Processor(mInputStream, outputStream, codecChain);
 
-            if (logger.isActivated()) {
-                logger.debug("Session has been prepared with success");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Session has been prepared with success");
             }
         } catch (IOException e) {
-            throw new RtpException(new StringBuilder(
+            throw new NetworkException(new StringBuilder(
                     "Can't prepare resources correctly for remoteAddress : ").append(remoteAddress)
                     .append(" with remotePort : ").append(remotePort)
                     .append(" orientationHeaderId : ").append(orientationHeaderId).append("!")

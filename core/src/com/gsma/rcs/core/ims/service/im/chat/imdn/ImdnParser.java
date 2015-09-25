@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.service.im.chat.imdn;
 
+import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.utils.DateUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -57,6 +58,8 @@ public class ImdnParser extends DefaultHandler {
 
     private long mDateTime;
 
+    private final InputSource mInputSource;
+
     /**
      * The logger
      */
@@ -66,15 +69,30 @@ public class ImdnParser extends DefaultHandler {
      * Constructor
      * 
      * @param inputSource Input source
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws IOException
      */
-    public ImdnParser(InputSource inputSource) throws SAXException, ParserConfigurationException,
-            IOException {
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-        SAXParser parser = factory.newSAXParser();
-        parser.parse(inputSource, this);
+    public ImdnParser(InputSource inputSource) {
+        mInputSource = inputSource;
+    }
+
+    /**
+     * Parse the imdn parser
+     * 
+     * @return ImdnParser
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws ParseFailureException
+     */
+    public ImdnParser parse() throws ParserConfigurationException, SAXException,
+            ParseFailureException {
+        try {
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            SAXParser parser = factory.newSAXParser();
+            parser.parse(mInputSource, this);
+            return this;
+
+        } catch (IOException e) {
+            throw new ParseFailureException("Failed to parse input source!", e);
+        }
     }
 
     public void startDocument() {

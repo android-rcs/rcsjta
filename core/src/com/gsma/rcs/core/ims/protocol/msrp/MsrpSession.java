@@ -24,8 +24,10 @@ package com.gsma.rcs.core.ims.protocol.msrp;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
+import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.IdGenerator;
@@ -360,30 +362,15 @@ public class MsrpSession {
      * @param contentType Content type to be sent
      * @param totalSize Total size of content
      * @param typeMsrpChunk Type of MSRP chunk
-     * @throws MsrpException
+     * @throws NetworkException
      */
     public void sendChunks(InputStream inputStream, String msgId, String contentType,
-            final long totalSize, TypeMsrpChunk typeMsrpChunk) throws MsrpException {
+            final long totalSize, TypeMsrpChunk typeMsrpChunk) throws NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Send content (" + contentType + " - MSRP chunk type: " + typeMsrpChunk
                     + ")");
         }
-
-        if (mFrom == null) {
-            throw new MsrpException("From not set");
-        }
-
-        if (mTo == null) {
-            throw new MsrpException("To not set");
-        }
-
-        if (connection == null) {
-            throw new MsrpException("No connection set");
-        }
-
         this.mTotalSize = totalSize;
-
-        // Send content over MSRP
         try {
             byte data[] = new byte[MsrpConstants.CHUNK_MAX_SIZE];
             long firstByte = 1;
@@ -517,7 +504,7 @@ public class MsrpSession {
                 mMsrpEventListener.msrpDataTransfered(msgId);
             }
         } catch (IOException e) {
-            throw new MsrpException("Send chunk failed for msgId : ".concat(msgId), e);
+            throw new NetworkException("Send chunk failed for msgId : ".concat(msgId), e);
 
         } finally {
             CloseableUtils.tryToClose(inputStream);
@@ -526,36 +513,14 @@ public class MsrpSession {
 
     /**
      * Send empty chunk
-     * 
-     * @throws MsrpException
      */
-    public void sendEmptyChunk() throws MsrpException {
+    public void sendEmptyChunk() {
         if (sLogger.isActivated()) {
             sLogger.info("Send an empty chunk");
         }
-
-        if (mFrom == null) {
-            throw new MsrpException("From not set");
-        }
-
-        if (mTo == null) {
-            throw new MsrpException("To not set");
-        }
-
-        if (connection == null) {
-            throw new MsrpException("No connection set");
-        }
-
-        // Send an empty chunk
-        try {
-            // Changed by Deutsche Telekom
-            String newTransactionId = generateTransactionId();
-            String newMsgId = generateTransactionId();
-            addMsrpTransactionInfo(newTransactionId, newMsgId, null, TypeMsrpChunk.EmptyChunk);
-            sendEmptyMsrpSendRequest(newTransactionId, mTo, mFrom, newMsgId);
-        } catch (IOException e) {
-            throw new MsrpException("Failed to send empty chunk!", e);
-        }
+        String newTransactionId = generateTransactionId();
+        String newMsgId = generateTransactionId();
+        addMsrpTransactionInfo(newTransactionId, newMsgId, null, TypeMsrpChunk.EmptyChunk);
     }
 
     /**
@@ -571,17 +536,17 @@ public class MsrpSession {
      * @param firstByte First byte range
      * @param lastByte Last byte range
      * @param totalSize Total size
-     * @throws IOException
-     * @throws MsrpException
+     * @throws NetworkException
      */
     // Changed by Deutsche Telekom
     private void sendMsrpSendRequest(String txId, String to, String from, String msrpMsgId,
             String contentType, int dataSize, byte data[], long firstByte, long lastByte,
-            long totalSize) throws MsrpException {
-        boolean isLastChunk = (lastByte == totalSize);
+            long totalSize) throws NetworkException {
+        ByteArrayOutputStream buffer = null;
         try {
+            boolean isLastChunk = (lastByte == totalSize);
             // Create request
-            ByteArrayOutputStream buffer = new ByteArrayOutputStream(4000);
+            buffer = new ByteArrayOutputStream(4000);
             buffer.reset();
             buffer.write(MsrpConstants.MSRP_HEADER.getBytes(UTF8));
             buffer.write(MsrpConstants.CHAR_SP);
@@ -657,7 +622,7 @@ public class MsrpSession {
                 if (mRequestTransaction != null) {
                     mRequestTransaction.waitResponse();
                     if (!mRequestTransaction.isResponseReceived()) {
-                        throw new MsrpException("timeout");
+                        throw new NetworkException("Failed to receive transaction response!");
                     }
                 }
             } else {
@@ -668,61 +633,10 @@ public class MsrpSession {
                 }
             }
         } catch (IOException e) {
-            throw new MsrpException("Failed to read chunk data!", e);
-        }
+            throw new NetworkException("Failed to read chunk data!", e);
 
-    }
-
-    /**
-     * Send an empty MSRP SEND request
-     * 
-     * @param txId Transaction ID
-     * @param to To header
-     * @param from From header
-     * @param msrpMsgId Message ID header
-     * @throws MsrpException
-     * @throws IOException
-     */
-    // Changed by Deutsche Telekom
-    private void sendEmptyMsrpSendRequest(String txId, String to, String from, String msrpMsgId)
-            throws MsrpException {
-        try {
-            // Create request
-            ByteArrayOutputStream buffer = new ByteArrayOutputStream(4000);
-            buffer.reset();
-            buffer.write(MsrpConstants.MSRP_HEADER.getBytes(UTF8));
-            buffer.write(MsrpConstants.CHAR_SP);
-            buffer.write(txId.getBytes(UTF8));
-            buffer.write((" " + MsrpConstants.METHOD_SEND).getBytes(UTF8));
-            buffer.write(NEW_LINE);
-
-            String toHeader = MsrpConstants.HEADER_TO_PATH + ": " + to + MsrpConstants.NEW_LINE;
-            buffer.write(toHeader.getBytes(UTF8));
-            String fromHeader = MsrpConstants.HEADER_FROM_PATH + ": " + from
-                    + MsrpConstants.NEW_LINE;
-            buffer.write(fromHeader.getBytes(UTF8));
-            // Changed by Deutsche Telekom
-            String msgIdHeader = MsrpConstants.HEADER_MESSAGE_ID + ": " + msrpMsgId
-                    + MsrpConstants.NEW_LINE;
-            buffer.write(msgIdHeader.getBytes(UTF8));
-
-            // Write end of request
-            buffer.write(MsrpConstants.END_MSRP_MSG.getBytes(UTF8));
-            buffer.write(txId.getBytes(UTF8));
-            // '$' -> last chunk
-            buffer.write(MsrpConstants.FLAG_LAST_CHUNK);
-            buffer.write(NEW_LINE);
-
-            // Send chunk
-            mRequestTransaction = new RequestTransaction(mRcsSettings);
-            connection.sendChunkImmediately(buffer.toByteArray());
-            buffer.close();
-            mRequestTransaction.waitResponse();
-            if (!mRequestTransaction.isResponseReceived()) {
-                throw new MsrpException("timeout");
-            }
-        } catch (IOException e) {
-            throw new MsrpException("Failed to send empty Msrp send request!", e);
+        } finally {
+            CloseableUtils.tryToClose(buffer);
         }
     }
 
@@ -732,12 +646,13 @@ public class MsrpSession {
      * @param code Response code
      * @param txId Transaction ID
      * @param headers MSRP headers
-     * @throws IOException
+     * @throws NetworkException
      */
     private void sendMsrpResponse(String code, String txId, Hashtable<String, String> headers)
-            throws MsrpException {
+            throws NetworkException {
+        ByteArrayOutputStream buffer = null;
         try {
-            ByteArrayOutputStream buffer = new ByteArrayOutputStream(4000);
+            buffer = new ByteArrayOutputStream(4000);
             buffer.write(MsrpConstants.MSRP_HEADER.getBytes(UTF8));
             buffer.write(MsrpConstants.CHAR_SP);
             buffer.write(txId.getBytes(UTF8));
@@ -763,9 +678,11 @@ public class MsrpSession {
             buffer.write(NEW_LINE);
 
             connection.sendChunk(buffer.toByteArray());
-            buffer.close();
         } catch (IOException e) {
-            throw new MsrpException("Failed to send Msrp response!", e);
+            throw new NetworkException("Failed to send Msrp response!", e);
+
+        } finally {
+            CloseableUtils.tryToClose(buffer);
         }
     }
 
@@ -774,14 +691,14 @@ public class MsrpSession {
      * 
      * @param txId Transaction ID
      * @param headers MSRP headers
-     * @throws MsrpException
-     * @throws IOException
+     * @throws NetworkException
      */
     private void sendMsrpReportRequest(String txId, Hashtable<String, String> headers,
-            long lastByte, long totalSize) throws MsrpException {
+            long lastByte, long totalSize) throws NetworkException {
+        ByteArrayOutputStream buffer = null;
         try {
             // Create request
-            ByteArrayOutputStream buffer = new ByteArrayOutputStream(4000);
+            buffer = new ByteArrayOutputStream(4000);
             buffer.reset();
             buffer.write(MsrpConstants.MSRP_HEADER.getBytes(UTF8));
             buffer.write(MsrpConstants.CHAR_SP);
@@ -829,9 +746,11 @@ public class MsrpSession {
             // Send request
             mRequestTransaction = new RequestTransaction(mRcsSettings);
             connection.sendChunk(buffer.toByteArray());
-            buffer.close();
         } catch (IOException e) {
-            throw new MsrpException("Failed to send Msrp report request!", e);
+            throw new NetworkException("Failed to send Msrp report request!", e);
+
+        } finally {
+            CloseableUtils.tryToClose(buffer);
         }
     }
 
@@ -845,88 +764,73 @@ public class MsrpSession {
      * @param totalSize Total size of the content
      * @throws NetworkException
      * @throws PayloadException
+     * @throws ContactManagerException
      */
     public void receiveMsrpSend(String txId, Hashtable<String, String> headers, int flag,
-            byte[] data, long totalSize) throws PayloadException, NetworkException {
-        try {
-            mIsEstablished = true;
-            if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder("SEND request received (flag=").append(flag)
-                        .append(", transaction=").append(txId).append(", totalSize=")
-                        .append(totalSize).append(")").toString());
-            }
-
-            String msgId = headers.get(MsrpConstants.HEADER_MESSAGE_ID);
-            boolean failureReportNeeded = true;
-            String failureHeader = headers.get(MsrpConstants.HEADER_FAILURE_REPORT);
-            if ((failureHeader != null) && failureHeader.equalsIgnoreCase("no")) {
-                failureReportNeeded = false;
-            }
-            if (failureReportNeeded) {
-                sendMsrpResponse(MsrpConstants.STATUS_200_OK, txId, headers);
-            }
-            if (data == null) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Empty chunk");
-                }
-                return;
-            }
-            mReceivedChunks.addChunk(data);
-
-            if (flag == MsrpConstants.FLAG_LAST_CHUNK) {
-                if (sLogger.isActivated()) {
-                    sLogger.info("Transfer terminated");
-                }
-                byte[] dataContent = mReceivedChunks.getReceivedData();
-                mReceivedChunks.resetCache();
-
-                String contentTypeHeader = headers.get(MsrpConstants.HEADER_CONTENT_TYPE);
-                mMsrpEventListener.msrpDataReceived(msgId, dataContent, contentTypeHeader);
-
-                boolean successReportNeeded = false;
-                String reportHeader = headers.get(MsrpConstants.HEADER_SUCCESS_REPORT);
-                if ((reportHeader != null) && reportHeader.equalsIgnoreCase("yes")) {
-                    successReportNeeded = true;
-                }
-
-                if (successReportNeeded) {
-                    try {
-                        sendMsrpReportRequest(txId, headers, dataContent.length, totalSize);
-                    } catch (MsrpException e) {
-                        if (sLogger.isActivated()) {
-                            sLogger.error("Can't send report", e);
-                        }
-                        // Changed by Deutsche Telekom
-                        mMsrpEventListener.msrpTransferError(msgId, e.getMessage(),
-                                TypeMsrpChunk.StatusReport);
-                    }
-                }
-            } else if (flag == MsrpConstants.FLAG_ABORT_CHUNK) {
-                if (sLogger.isActivated()) {
-                    sLogger.info("Transfer aborted");
-                }
-                mMsrpEventListener.msrpTransferAborted();
-            } else if (flag == MsrpConstants.FLAG_MORE_CHUNK) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Transfer in progress...");
-                }
-                byte[] dataContent = mReceivedChunks.getReceivedData();
-                boolean resetCache = mMsrpEventListener.msrpTransferProgress(
-                        mReceivedChunks.getCurrentSize(), totalSize, dataContent);
-
-                /*
-                 * Data are only consumed chunk by chunk in file transfer & image share. In a chat
-                 * session only the whole message is consumed after receiving the last chunk.
-                 */
-                if (resetCache) {
-                    mReceivedChunks.resetCache();
-                }
-            }
-        } catch (IOException e) {
-            throw new NetworkException(new StringBuilder(
-                    "Failed to SEND request for received (flag=").append(flag)
+            byte[] data, long totalSize) throws PayloadException, NetworkException,
+            ContactManagerException {
+        mIsEstablished = true;
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("SEND request received (flag=").append(flag)
                     .append(", transaction=").append(txId).append(", totalSize=").append(totalSize)
-                    .append(")").toString(), e);
+                    .append(")").toString());
+        }
+
+        String msgId = headers.get(MsrpConstants.HEADER_MESSAGE_ID);
+        boolean failureReportNeeded = true;
+        String failureHeader = headers.get(MsrpConstants.HEADER_FAILURE_REPORT);
+        if ((failureHeader != null) && failureHeader.equalsIgnoreCase("no")) {
+            failureReportNeeded = false;
+        }
+        if (failureReportNeeded) {
+            sendMsrpResponse(MsrpConstants.STATUS_200_OK, txId, headers);
+        }
+        if (data == null) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Empty chunk");
+            }
+            return;
+        }
+        mReceivedChunks.addChunk(data);
+
+        if (flag == MsrpConstants.FLAG_LAST_CHUNK) {
+            if (sLogger.isActivated()) {
+                sLogger.info("Transfer terminated");
+            }
+            byte[] dataContent = mReceivedChunks.getReceivedData();
+            mReceivedChunks.resetCache();
+
+            String contentTypeHeader = headers.get(MsrpConstants.HEADER_CONTENT_TYPE);
+            mMsrpEventListener.receiveMsrpData(msgId, dataContent, contentTypeHeader);
+
+            boolean successReportNeeded = false;
+            String reportHeader = headers.get(MsrpConstants.HEADER_SUCCESS_REPORT);
+            if ((reportHeader != null) && reportHeader.equalsIgnoreCase("yes")) {
+                successReportNeeded = true;
+            }
+            if (successReportNeeded) {
+                sendMsrpReportRequest(txId, headers, dataContent.length, totalSize);
+            }
+        } else if (flag == MsrpConstants.FLAG_ABORT_CHUNK) {
+            if (sLogger.isActivated()) {
+                sLogger.info("Transfer aborted");
+            }
+            mMsrpEventListener.msrpTransferAborted();
+        } else if (flag == MsrpConstants.FLAG_MORE_CHUNK) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Transfer in progress...");
+            }
+            byte[] dataContent = mReceivedChunks.getReceivedData();
+            boolean resetCache = mMsrpEventListener.msrpTransferProgress(
+                    mReceivedChunks.getCurrentSize(), totalSize, dataContent);
+
+            /*
+             * Data are only consumed chunk by chunk in file transfer & image share. In a chat
+             * session only the whole message is consumed after receiving the last chunk.
+             */
+            if (resetCache) {
+                mReceivedChunks.resetCache();
+            }
         }
     }
 
@@ -990,10 +894,11 @@ public class MsrpSession {
      * 
      * @param txId Transaction ID
      * @param headers MSRP headers
-     * @throws IOException
+     * @throws NetworkException
+     * @throws FileAccessException
      */
     public void receiveMsrpReport(String txId, Hashtable<String, String> headers)
-            throws IOException {
+            throws FileAccessException, NetworkException {
         // Changed by Deutsche Telekom
         // Example of an MSRP REPORT request:
         // MSRP b276bb5b0adb22f6 SEND

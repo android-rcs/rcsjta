@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.service.sip.streaming;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
@@ -105,6 +106,12 @@ public class OriginatingSipRtpSession extends GenericSipRtpSession {
                             .append(getRemoteContact()).toString(), e);
             handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED, e));
         } catch (ParseException e) {
+            sLogger.error(
+                    new StringBuilder("Session initiation has failed for CallId=")
+                            .append(getDialogPath().getCallId()).append(" ContactId=")
+                            .append(getRemoteContact()).toString(), e);
+            handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED, e));
+        } catch (FileAccessException e) {
             sLogger.error(
                     new StringBuilder("Session initiation has failed for CallId=")
                             .append(getDialogPath().getCallId()).append(" ContactId=")
