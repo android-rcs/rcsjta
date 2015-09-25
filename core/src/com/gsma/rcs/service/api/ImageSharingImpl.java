@@ -423,27 +423,34 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
      * @throws RemoteException
      */
     public void acceptInvitation() throws RemoteException {
-        try {
-            if (sLogger.isActivated()) {
-                sLogger.info("Accept session invitation");
-            }
-            final ImageTransferSession session = mRichcallService
-                    .getImageTransferSession(mSharingId);
-            if (session == null) {
-                throw new ServerApiGenericException(new StringBuilder("Session with sharing ID '")
-                        .append(mSharingId).append("' not available!").toString());
-            }
-            session.acceptSession();
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
+        mRichcallService.scheduleImageShareOperation(new Runnable() {
+            public void run() {
+                try {
+                    if (sLogger.isActivated()) {
+                        sLogger.info("Accept session invitation");
+                    }
+                    final ImageTransferSession session = mRichcallService
+                            .getImageTransferSession(mSharingId);
+                    if (session == null) {
+                        sLogger.debug("Cannot accept sharing: no session with ID="
+                                .concat(mSharingId));
+                        return;
+                    }
+                    session.acceptSession();
 
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error(
+                            "Failed to accept invitation with sharing ID: ".concat(mSharingId), e);
+                }
+            }
+        });
     }
 
     /**
@@ -452,27 +459,34 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
      * @throws RemoteException
      */
     public void rejectInvitation() throws RemoteException {
-        try {
-            if (sLogger.isActivated()) {
-                sLogger.info("Reject session invitation");
-            }
-            final ImageTransferSession session = mRichcallService
-                    .getImageTransferSession(mSharingId);
-            if (session == null) {
-                throw new ServerApiGenericException(new StringBuilder("Session with sharing ID '")
-                        .append(mSharingId).append("' not available!").toString());
-            }
-            session.rejectSession(InvitationStatus.INVITATION_REJECTED_DECLINE);
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
+        mRichcallService.scheduleImageShareOperation(new Runnable() {
+            public void run() {
+                try {
+                    if (sLogger.isActivated()) {
+                        sLogger.info("Reject session invitation");
+                    }
+                    final ImageTransferSession session = mRichcallService
+                            .getImageTransferSession(mSharingId);
+                    if (session == null) {
+                        sLogger.debug("Cannot reject sharing: no session with ID="
+                                .concat(mSharingId));
+                        return;
+                    }
+                    session.rejectSession(InvitationStatus.INVITATION_REJECTED_DECLINE);
 
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error(
+                            "Failed to reject invitation with sharing ID: ".concat(mSharingId), e);
+                }
+            }
+        });
     }
 
     /**
@@ -507,7 +521,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
                     }
                 } catch (SipPayloadException e) {
                     sLogger.error(
-                            "Failed to terminate session with sharingId : ".concat(mSharingId), e);
+                            "Failed to terminate session with sharing ID: ".concat(mSharingId), e);
                 } catch (RuntimeException e) {
                     /*
                      * Normally we are not allowed to catch runtime exceptions as these are genuine
@@ -517,7 +531,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
                      * which is not intended.
                      */
                     sLogger.error(
-                            "Failed to terminate session with sharingId : ".concat(mSharingId), e);
+                            "Failed to terminate session with sharing ID: ".concat(mSharingId), e);
                 }
             }
         });

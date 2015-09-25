@@ -297,32 +297,38 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
      * @param player Video player
      * @throws RemoteException
      */
-    public void acceptInvitation(IVideoPlayer player) throws RemoteException {
+    public void acceptInvitation(final IVideoPlayer player) throws RemoteException {
         if (player == null) {
             throw new ServerApiIllegalArgumentException("player must not be null!");
         }
-        if (sLogger.isActivated()) {
-            sLogger.info("Accept session invitation");
-        }
-        try {
-            final VideoStreamingSession session = mRichcallService
-                    .getVideoSharingSession(mSharingId);
-            if (session == null) {
-                throw new ServerApiGenericException(
-                        "No session with sharing ID:".concat(mSharingId));
-            }
-            session.setPlayer(player);
-            session.acceptSession();
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
+        mRichcallService.scheduleImageShareOperation(new Runnable() {
+            public void run() {
+                if (sLogger.isActivated()) {
+                    sLogger.info("Accept session invitation");
+                }
+                try {
+                    final VideoStreamingSession session = mRichcallService
+                            .getVideoSharingSession(mSharingId);
+                    if (session == null) {
+                        sLogger.debug("Cannot accept sharing: no session with ID="
+                                .concat(mSharingId));
+                    }
+                    session.setPlayer(player);
+                    session.acceptSession();
 
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error(
+                            "Failed to accept invitation with sharing ID: ".concat(mSharingId), e);
+                }
+            }
+        });
     }
 
     /**
@@ -331,27 +337,33 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
      * @throws RemoteException
      */
     public void rejectInvitation() throws RemoteException {
-        try {
-            if (sLogger.isActivated()) {
-                sLogger.info("Reject session invitation");
-            }
-            final VideoStreamingSession session = mRichcallService
-                    .getVideoSharingSession(mSharingId);
-            if (session == null) {
-                throw new ServerApiGenericException(
-                        "No session with sharing ID:".concat(mSharingId));
-            }
-            session.rejectSession(InvitationStatus.INVITATION_REJECTED_DECLINE);
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
+        mRichcallService.scheduleImageShareOperation(new Runnable() {
+            public void run() {
+                try {
+                    if (sLogger.isActivated()) {
+                        sLogger.info("Reject session invitation");
+                    }
+                    final VideoStreamingSession session = mRichcallService
+                            .getVideoSharingSession(mSharingId);
+                    if (session == null) {
+                        sLogger.debug("Cannot reject sharing: so session with ID="
+                                .concat(mSharingId));
+                    }
+                    session.rejectSession(InvitationStatus.INVITATION_REJECTED_DECLINE);
 
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error(
+                            "Failed to reject invitation with sharing ID: ".concat(mSharingId), e);
+                }
+            }
+        });
     }
 
     /**
@@ -381,7 +393,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
                     }
                 } catch (SipPayloadException e) {
                     sLogger.error(
-                            "Failed to terminate session with sharing ID : ".concat(mSharingId), e);
+                            "Failed to terminate session with sharing ID: ".concat(mSharingId), e);
                 } catch (RuntimeException e) {
                     /*
                      * Normally we are not allowed to catch runtime exceptions as these are genuine
@@ -391,7 +403,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
                      * which is not intended.
                      */
                     sLogger.error(
-                            "Failed to terminate session with sharing ID : ".concat(mSharingId), e);
+                            "Failed to terminate session with sharing ID: ".concat(mSharingId), e);
                 }
             }
         });
