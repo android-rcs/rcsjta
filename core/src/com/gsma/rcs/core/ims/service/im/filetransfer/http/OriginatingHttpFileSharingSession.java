@@ -273,9 +273,26 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
      */
     @Override
     public void onPause() {
-        fileTransferPaused();
-        interruptSession();
-        mUploadManager.pauseTransferByUser();
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    fileTransferPaused();
+                    interruptSession();
+                    mUploadManager.pauseTransferByUser();
+
+                } catch (RuntimeException e) {
+                    /*
+                     * Intentionally catch runtime exceptions as else it will abruptly end the
+                     * thread and eventually bring the whole system down, which is not intended.
+                     */
+                    sLogger.error(
+                            new StringBuilder("Failed to pause upload for sessionId : ")
+                                    .append(getSessionID()).append(" with fileTransferId : ")
+                                    .append(getFileTransferId()).toString(), e);
+                    handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
+                }
+            }
+        }).start();
     }
 
     /**
@@ -283,47 +300,51 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
      */
     @Override
     public void onResume() {
-        fileTransferResumed();
-        try {
-            FtHttpResumeUpload upload = mMessagingLog.retrieveFtHttpResumeUpload(mUploadManager
-                    .getTId());
-            if (upload != null) {
-                sendResultToContact(mUploadManager.resumeUpload());
-            } else {
-                sendResultToContact(null);
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    fileTransferResumed();
+                    FtHttpResumeUpload upload = mMessagingLog
+                            .retrieveFtHttpResumeUpload(mUploadManager.getTId());
+                    if (upload != null) {
+                        sendResultToContact(mUploadManager.resumeUpload());
+                    } else {
+                        sendResultToContact(null);
+                    }
+
+                } catch (SipNetworkException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(e.getMessage());
+                    }
+                    handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
+
+                } catch (IOException e) {
+                    sLogger.error(
+                            new StringBuilder("Failed to resume upload for sessionId : ")
+                                    .append(getSessionID()).append(" with fileTransferId : ")
+                                    .append(getFileTransferId()).toString(), e);
+                    handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
+
+                } catch (SipPayloadException e) {
+                    sLogger.error(
+                            new StringBuilder("Failed to resume upload for sessionId : ")
+                                    .append(getSessionID()).append(" with fileTransferId : ")
+                                    .append(getFileTransferId()).toString(), e);
+                    handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
+
+                } catch (RuntimeException e) {
+                    /*
+                     * Intentionally catch runtime exceptions as else it will abruptly end the
+                     * thread and eventually bring the whole system down, which is not intended.
+                     */
+                    sLogger.error(
+                            new StringBuilder("Failed to resume upload for sessionId : ")
+                                    .append(getSessionID()).append(" with fileTransferId : ")
+                                    .append(getFileTransferId()).toString(), e);
+                    handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
+                }
             }
-
-        } catch (SipNetworkException e) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(e.getMessage());
-            }
-            handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
-
-        } catch (IOException e) {
-            sLogger.error(
-                    new StringBuilder("Failed to resume upload for sessionId : ")
-                            .append(getSessionID()).append(" with fileTransferId : ")
-                            .append(getFileTransferId()).toString(), e);
-            handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
-
-        } catch (SipPayloadException e) {
-            sLogger.error(
-                    new StringBuilder("Failed to resume upload for sessionId : ")
-                            .append(getSessionID()).append(" with fileTransferId : ")
-                            .append(getFileTransferId()).toString(), e);
-            handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
-
-        } catch (RuntimeException e) {
-            /*
-             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
-             * eventually bring the whole system down, which is not intended.
-             */
-            sLogger.error(
-                    new StringBuilder("Failed to resume upload for sessionId : ")
-                            .append(getSessionID()).append(" with fileTransferId : ")
-                            .append(getFileTransferId()).toString(), e);
-            handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
-        }
+        }).start();
     }
 
     @Override

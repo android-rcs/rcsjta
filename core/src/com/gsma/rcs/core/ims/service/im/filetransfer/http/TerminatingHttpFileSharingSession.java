@@ -234,87 +234,101 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
     }
 
     /**
-     * Resume File Transfer
-     */
-    @Override
-    public void onResume() {
-        fileTransferResumed();
-        mDownloadManager.getListener().httpTransferResumed();
-
-        try {
-            /* Download file from the HTTP server */
-            mDownloadManager.resumeDownload();
-            if (sLogger.isActivated()) {
-                sLogger.debug("Download file with success");
-            }
-
-            /* Set filename */
-            getContent().setUri(mDownloadManager.getDownloadedFileUri());
-
-            handleFileTransfered();
-
-            if (mImdnManager.isSendOneToOneDeliveryDisplayedReportsEnabled()) {
-                sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
-                        System.currentTimeMillis());
-            }
-
-        } catch (SipNetworkException e) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(e.getMessage());
-            }
-            handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
-
-        } catch (FileNotFoundException e) {
-            /* Don't call handleError in case of Pause or Cancel */
-            if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
-                return;
-            }
-            sLogger.error("Download of file has failed for mRemoteInstanceId : "
-                    .concat(mRemoteInstanceId), e);
-            handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
-
-        } catch (FileNotDownloadedException e) {
-            /* Don't call handleError in case of Pause or Cancel */
-            if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
-                return;
-            }
-            sLogger.error("Download of file has failed for mRemoteInstanceId : "
-                    .concat(mRemoteInstanceId), e);
-            handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
-
-        } catch (IOException e) {
-            /* Don't call handleError in case of Pause or Cancel */
-            if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
-                return;
-            }
-            sLogger.error("Download of file has failed for mRemoteInstanceId : "
-                    .concat(mRemoteInstanceId), e);
-            handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
-
-        } catch (SipPayloadException e) {
-            sLogger.error("Download of file has failed for mRemoteInstanceId : "
-                    .concat(mRemoteInstanceId), e);
-            handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
-
-        } catch (RuntimeException e) {
-            /*
-             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
-             * eventually bring the whole system down, which is not intended.
-             */
-            sLogger.error("Download of file has failed for mRemoteInstanceId : "
-                    .concat(mRemoteInstanceId), e);
-            handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
-        }
-    }
-
-    /**
      * Pause File Transfer
      */
     @Override
     public void onPause() {
-        fileTransferPaused();
-        interruptSession();
-        mDownloadManager.pauseTransferByUser();
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    fileTransferPaused();
+                    interruptSession();
+                    mDownloadManager.pauseTransferByUser();
+
+                } catch (RuntimeException e) {
+                    /*
+                     * Intentionally catch runtime exceptions as else it will abruptly end the
+                     * thread and eventually bring the whole system down, which is not intended.
+                     */
+                    sLogger.error("Pause of download of file has failed for mRemoteInstanceId : "
+                            .concat(mRemoteInstanceId), e);
+                    handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
+                }
+            }
+        }).start();
+    }
+
+    /**
+     * Resume File Transfer
+     */
+    @Override
+    public void onResume() {
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    fileTransferResumed();
+                    mDownloadManager.getListener().httpTransferResumed();
+                    /* Download file from the HTTP server */
+                    mDownloadManager.resumeDownload();
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Download file with success");
+                    }
+                    getContent().setUri(mDownloadManager.getDownloadedFileUri());
+                    handleFileTransfered();
+                    if (mImdnManager.isSendOneToOneDeliveryDisplayedReportsEnabled()) {
+                        sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
+                                System.currentTimeMillis());
+                    }
+
+                } catch (SipNetworkException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(e.getMessage());
+                    }
+                    handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
+
+                } catch (FileNotFoundException e) {
+                    /* Don't call handleError in case of Pause or Cancel */
+                    if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
+                        return;
+                    }
+                    sLogger.error("Download of file has failed for mRemoteInstanceId : "
+                            .concat(mRemoteInstanceId), e);
+                    handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
+
+                } catch (FileNotDownloadedException e) {
+                    /* Don't call handleError in case of Pause or Cancel */
+                    if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
+                        return;
+                    }
+                    sLogger.error("Download of file has failed for mRemoteInstanceId : "
+                            .concat(mRemoteInstanceId), e);
+                    handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
+
+                } catch (IOException e) {
+                    /* Don't call handleError in case of Pause or Cancel */
+                    if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
+                        return;
+                    }
+                    sLogger.error("Download of file has failed for mRemoteInstanceId : "
+                            .concat(mRemoteInstanceId), e);
+                    handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
+
+                } catch (SipPayloadException e) {
+                    sLogger.error("Download of file has failed for mRemoteInstanceId : "
+                            .concat(mRemoteInstanceId), e);
+                    handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
+
+                } catch (RuntimeException e) {
+                    /*
+                     * Intentionally catch runtime exceptions as else it will abruptly end the
+                     * thread and eventually bring the whole system down, which is not intended.
+                     */
+                    sLogger.error("Download of file has failed for mRemoteInstanceId : "
+                            .concat(mRemoteInstanceId), e);
+                    handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
+                }
+            }
+        }).start();
     }
 
     @Override
