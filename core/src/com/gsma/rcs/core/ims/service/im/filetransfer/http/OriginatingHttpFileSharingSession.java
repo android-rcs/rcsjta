@@ -101,7 +101,6 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
         if (sLogger.isActivated()) {
             sLogger.debug("OriginatingHttpFileSharingSession contact=".concat(contact.toString()));
         }
-
         mUploadManager = new HttpUploadManager(getContent(), fileIcon, this, tId, rcsSettings);
     }
 
@@ -239,8 +238,8 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                 mImService.receiveOneOneChatSessionInitiation(chatSession);
             }
 
-            // File transfered
             handleFileTransfered();
+
         } catch (MsrpException e) {
             throw new SipNetworkException(
                     "Failed to send result chunks for transferId : ".concat(getFileTransferId()), e);

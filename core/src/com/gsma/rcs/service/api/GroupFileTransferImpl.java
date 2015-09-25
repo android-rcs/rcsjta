@@ -793,12 +793,19 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
         mImService.scheduleImOperation(new Runnable() {
             public void run() {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Pause session");
+                }
                 try {
-                    if (sLogger.isActivated()) {
-                        sLogger.info("Pause session");
+                    HttpFileTransferSession session = (HttpFileTransferSession) mImService
+                            .getFileSharingSession(mFileTransferId);
+                    if (session == null) {
+                        sLogger.error("Failed to pause file transfer with fileTransferId : "
+                                + mFileTransferId + "since no such session exists anymore.");
+                        return;
                     }
-                    FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
-                    ((HttpFileTransferSession) session).onPause();
+                    session.onPause();
+
                 } catch (RuntimeException e) {
                     /*
                      * Intentionally catch runtime exceptions as else it will abruptly end the
@@ -910,31 +917,37 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
         mImService.scheduleImOperation(new Runnable() {
             public void run() {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Resume session");
+                }
                 try {
-                    FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
-                    if (session == null) {
-                        FtHttpResume resume = mPersistedStorage.getFileTransferResumeInfo();
-                        if (resume == null) {
-                            sLogger.error("Unable to resume file with fileTransferId "
-                                    .concat(mFileTransferId));
-                        }
-                        if (Direction.OUTGOING == mPersistedStorage.getDirection()) {
-                            session = new ResumeUploadFileSharingSession(mImService, ContentManager
-                                    .createMmContent(resume.getFile(), resume.getSize(),
-                                            resume.getFileName()), (FtHttpResumeUpload) resume,
-                                    mRcsSettings, mMessagingLog, mContactManager);
-                        } else {
-                            session = new DownloadFromResumeFileSharingSession(mImService,
-                                    ContentManager.createMmContent(resume.getFile(),
-                                            resume.getSize(), resume.getFileName()),
-                                    (FtHttpResumeDownload) resume, mRcsSettings, mMessagingLog,
-                                    mContactManager);
-                        }
-                        session.addListener(GroupFileTransferImpl.this);
-                        session.startSession();
+                    HttpFileTransferSession session = (HttpFileTransferSession) mImService
+                            .getFileSharingSession(mFileTransferId);
+                    if (session != null) {
+                        session.onResume();
                         return;
                     }
-                    ((HttpFileTransferSession) session).onResume();
+                    FtHttpResume resume = mPersistedStorage.getFileTransferResumeInfo();
+                    if (resume == null) {
+                        sLogger.error("Unable to resume file with fileTransferId "
+                                + mFileTransferId
+                                + " since it no longer exists in persistent storage!");
+                        return;
+                    }
+                    if (Direction.OUTGOING == resume.getDirection()) {
+                        session = new ResumeUploadFileSharingSession(mImService, ContentManager
+                                .createMmContent(resume.getFile(), resume.getSize(),
+                                        resume.getFileName()), (FtHttpResumeUpload) resume,
+                                mRcsSettings, mMessagingLog, mContactManager);
+                    } else {
+                        session = new DownloadFromResumeFileSharingSession(mImService,
+                                ContentManager.createMmContent(resume.getFile(), resume.getSize(),
+                                        resume.getFileName()), (FtHttpResumeDownload) resume,
+                                mRcsSettings, mMessagingLog, mContactManager);
+                    }
+                    session.addListener(GroupFileTransferImpl.this);
+                    session.startSession();
+
                 } catch (RuntimeException e) {
                     /*
                      * Intentionally catch runtime exceptions as else it will abruptly end the
