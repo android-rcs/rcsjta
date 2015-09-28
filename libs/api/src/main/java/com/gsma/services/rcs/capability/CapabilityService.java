@@ -208,13 +208,11 @@ public final class CapabilityService extends RcsService {
     /**
      * Requests capabilities to a remote contact. This method initiates in background a new
      * capability request to the remote contact by sending a SIP OPTIONS. The result of the
-     * capability request is sent asynchronously via callback method of the capabilities listener. A
-     * capability refresh is only sent if the timestamp associated to the capability has expired
-     * (the expiration value is fixed via MNO provisioning). The parameter contact supports the
-     * following formats: MSISDN in national or international format, SIP address, SIP-URI or
-     * Tel-URI. If the format of the contact is not supported an exception is thrown. The result of
-     * the capability refresh request is provided to all the clients that have registered the
-     * listener for this event.
+     * capability request is sent asynchronously via callback method of the capabilities listener.
+     * The parameter contact supports the following formats: MSISDN in national or international
+     * format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not supported an
+     * exception is thrown. The result of the capability refresh request is provided to all the
+     * clients that have registered the listener for this event.
      * 
      * @param contact Contact Identifier
      * @throws RcsServiceNotRegisteredException
@@ -239,13 +237,11 @@ public final class CapabilityService extends RcsService {
     /**
      * Requests capabilities for a group of remote contacts. This method initiates in background new
      * capability requests to the remote contact by sending a SIP OPTIONS. The result of the
-     * capability request is sent asynchronously via callback method of the capabilities listener. A
-     * capability refresh is only sent if the timestamp associated to the capability has expired
-     * (the expiration value is fixed via MNO provisioning). The parameter contact supports the
-     * following formats: MSISDN in national or international format, SIP address, SIP-URI or
-     * Tel-URI. If the format of the contact is not supported an exception is thrown. The result of
-     * the capability refresh request is provided to all the clients that have registered the
-     * listener for this event.
+     * capability request is sent asynchronously via callback method of the capabilities listener.
+     * The parameter contacts supports the following formats: MSISDN in national or international
+     * format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not supported an
+     * exception is thrown. The result of the capability refresh request is provided to all the
+     * clients that have registered the listener for this event.
      * 
      * @param contacts Set of contact identifiers
      * @throws RcsServiceNotRegisteredException
@@ -265,10 +261,8 @@ public final class CapabilityService extends RcsService {
      * Requests capabilities for all contacts existing in the local address book. This method
      * initiates in background new capability requests for each contact of the address book by
      * sending SIP OPTIONS. The result of a capability request is sent asynchronously via callback
-     * method of the capabilities listener. A capability refresh is only sent if the timestamp
-     * associated to the capability has expired (the expiration value is fixed via MNO
-     * provisioning). The result of the capability refresh request is provided to all the clients
-     * that have registered the listener for this event.
+     * method of the capabilities listener. The result of the capability refresh request is provided
+     * to all the clients that have registered the listener for this event.
      * 
      * @throws RcsServiceNotRegisteredException
      * @throws RcsServiceNotAvailableException
