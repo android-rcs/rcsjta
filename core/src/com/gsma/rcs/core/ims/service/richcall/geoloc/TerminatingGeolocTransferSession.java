@@ -370,7 +370,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
             closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
 
             ContactId contact = getRemoteContact();
-            getCapabilityService().requestContactCapabilities(contact);
+            mCapabilityService.requestContactCapabilities(contact);
             removeSession();
 
             if (isGeolocTransferred()) {

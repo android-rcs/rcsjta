@@ -150,7 +150,7 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
         closeMediaSession();
         removeSession();
         ContactId contact = getRemoteContact();
-        getCapabilityService().requestContactCapabilities(contact);
+        mCapabilityService.requestContactCapabilities(contact);
         for (ImsSessionListener imsSessionListener : getListeners()) {
             ((VideoStreamingSessionListener) imsSessionListener).onSharingError(contact,
                     new ContentSharingError(error));
@@ -164,12 +164,12 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
 
     @Override
     public void startSession() {
-        getRichcallService().addSession(this);
+        mRichcallService.addSession(this);
         start();
     }
 
     @Override
     public void removeSession() {
-        getRichcallService().removeSession(this);
+        mRichcallService.removeSession(this);
     }
 }

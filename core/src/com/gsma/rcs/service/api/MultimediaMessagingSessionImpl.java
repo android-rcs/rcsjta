@@ -91,7 +91,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     private void handleSessionRejected(ReasonCode reasonCode, ContactId contact) {
         if (sLogger.isActivated()) {
-            sLogger.info("Session rejected; reasonCode=" + reasonCode + ".");
+            sLogger.debug("Session rejected; reasonCode=" + reasonCode + ".");
         }
         String sessionId = getSessionId();
         synchronized (mLock) {
@@ -273,7 +273,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
             public void run() {
                 try {
                     if (sLogger.isActivated()) {
-                        sLogger.info("Accept session invitation");
+                        sLogger.debug("Accept session invitation");
                     }
                     final GenericSipMsrpSession session = mSipService
                             .getGenericSipMsrpSession(mSessionId);
@@ -310,7 +310,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
             public void run() {
                 try {
                     if (sLogger.isActivated()) {
-                        sLogger.info("Reject session invitation");
+                        sLogger.debug("Reject session invitation");
                     }
                     final GenericSipMsrpSession session = mSipService
                             .getGenericSipMsrpSession(mSessionId);
@@ -347,7 +347,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
             public void run() {
                 try {
                     if (sLogger.isActivated()) {
-                        sLogger.info("Abort session");
+                        sLogger.debug("Abort session");
                     }
                     final GenericSipMsrpSession session = mSipService
                             .getGenericSipMsrpSession(mSessionId);
@@ -415,7 +415,8 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                     /* Do not consider max message size if null */
                     if (session.getMaxMessageSize() != 0
                             && content.length > session.getMaxMessageSize()) {
-                        throw new ServerApiGenericException("Max message length exceeded!");
+                        sLogger.error("Failed to send message: max length exceeded!");
+                        return;
                     }
                     session.sendMessage(content);
 
@@ -445,7 +446,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
     @Override
     public void onSessionStarted(ContactId contact) {
         if (sLogger.isActivated()) {
-            sLogger.info("Session started");
+            sLogger.debug("Session started");
         }
         synchronized (mLock) {
             setStateAndReason(contact, State.STARTED, ReasonCode.UNSPECIFIED);
@@ -455,7 +456,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
     @Override
     public void onSessionAborted(ContactId contact, TerminationReason reason) {
         if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Session aborted (terminationReason ").append(reason)
+            sLogger.debug(new StringBuilder("Session aborted (terminationReason ").append(reason)
                     .append(")").toString());
         }
         synchronized (mLock) {
@@ -486,7 +487,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
     @Override
     public void onSessionError(ContactId contact, SipSessionError error) {
         if (sLogger.isActivated()) {
-            sLogger.info("Session error " + error.getErrorCode());
+            sLogger.debug("Session error " + error.getErrorCode());
         }
         synchronized (mLock) {
             mMultimediaSessionService.removeMultimediaMessaging(mSessionId);
@@ -518,7 +519,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
     @Override
     public void onSessionAccepting(ContactId contact) {
         if (sLogger.isActivated()) {
-            sLogger.info("Accepting session");
+            sLogger.debug("Accepting session");
         }
         synchronized (mLock) {
             setStateAndReason(contact, State.ACCEPTING, ReasonCode.UNSPECIFIED);
@@ -551,7 +552,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
     @Override
     public void onInvitationReceived(ContactId contact, Intent sessionInvite) {
         if (sLogger.isActivated()) {
-            sLogger.info("Invited to multimedia messaging session");
+            sLogger.debug("Invited to multimedia messaging session");
         }
         mBroadcaster.broadcastInvitation(getSessionId(), sessionInvite);
     }

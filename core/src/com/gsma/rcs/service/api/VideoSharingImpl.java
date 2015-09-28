@@ -121,7 +121,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 
     private void handleSessionRejected(ReasonCode reasonCode, ContactId contact) {
         if (sLogger.isActivated()) {
-            sLogger.info("Session rejected; reasonCode=".concat(String.valueOf(reasonCode)));
+            sLogger.debug("Session rejected; reasonCode=".concat(String.valueOf(reasonCode)));
         }
         synchronized (mLock) {
             mVideoSharingService.removeVideoSharing(mSharingId);
@@ -304,7 +304,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         mRichcallService.scheduleImageShareOperation(new Runnable() {
             public void run() {
                 if (sLogger.isActivated()) {
-                    sLogger.info("Accept session invitation");
+                    sLogger.debug("Accept session invitation");
                 }
                 try {
                     final VideoStreamingSession session = mRichcallService
@@ -341,7 +341,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
             public void run() {
                 try {
                     if (sLogger.isActivated()) {
-                        sLogger.info("Reject session invitation");
+                        sLogger.debug("Reject session invitation");
                     }
                     final VideoStreamingSession session = mRichcallService
                             .getVideoSharingSession(mSharingId);
@@ -376,7 +376,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
             public void run() {
                 try {
                     if (sLogger.isActivated()) {
-                        sLogger.info("Abort session");
+                        sLogger.debug("Abort session");
                     }
                     final VideoStreamingSession session = mRichcallService
                             .getVideoSharingSession(mSharingId);
@@ -542,7 +542,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
     @Override
     public void onSessionStarted(ContactId contact) {
         if (sLogger.isActivated()) {
-            sLogger.info("Session started");
+            sLogger.debug("Session started");
         }
         synchronized (mLock) {
             setStateAndReasonCode(contact, State.STARTED, ReasonCode.UNSPECIFIED);
@@ -552,7 +552,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
     @Override
     public void onSessionAborted(ContactId contact, TerminationReason reason) {
         if (sLogger.isActivated()) {
-            sLogger.info("Session aborted, reason=".concat(String.valueOf(reason)));
+            sLogger.debug("Session aborted, reason=".concat(String.valueOf(reason)));
         }
         synchronized (mLock) {
             mVideoSharingService.removeVideoSharing(mSharingId);
@@ -580,7 +580,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
     @Override
     public void onSharingError(ContactId contact, ContentSharingError error) {
         if (sLogger.isActivated()) {
-            sLogger.info("Sharing error ".concat(String.valueOf(error.getErrorCode())));
+            sLogger.debug("Sharing error ".concat(String.valueOf(error.getErrorCode())));
         }
         VideoSharingStateAndReasonCode stateAndReasonCode = toStateAndReasonCode(error);
         State state = stateAndReasonCode.getState();
@@ -594,7 +594,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
     @Override
     public void onSessionAccepting(ContactId contact) {
         if (sLogger.isActivated()) {
-            sLogger.info("Accepting sharing");
+            sLogger.debug("Accepting sharing");
         }
         synchronized (mLock) {
             setStateAndReasonCode(contact, State.ACCEPTING, ReasonCode.UNSPECIFIED);
@@ -627,7 +627,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
     @Override
     public void onInvitationReceived(ContactId contact, MmContent content, long timestamp) {
         if (sLogger.isActivated()) {
-            sLogger.info("Invited to video sharing session");
+            sLogger.debug("Invited to video sharing session");
         }
         synchronized (mLock) {
             mPersistentStorage.addVideoSharing(contact, Direction.INCOMING, (VideoContent) content,

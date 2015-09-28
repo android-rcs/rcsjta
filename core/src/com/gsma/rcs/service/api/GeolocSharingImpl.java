@@ -296,7 +296,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
             public void run() {
                 try {
                     if (sLogger.isActivated()) {
-                        sLogger.info("Accept session invitation");
+                        sLogger.debug("Accept session invitation");
                     }
                     final GeolocTransferSession session = mRichcallService
                             .getGeolocTransferSession(mSharingId);
@@ -332,7 +332,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
             public void run() {
                 try {
                     if (sLogger.isActivated()) {
-                        sLogger.info("Reject session invitation");
+                        sLogger.debug("Reject session invitation");
                     }
                     final GeolocTransferSession session = mRichcallService
                             .getGeolocTransferSession(mSharingId);
@@ -368,7 +368,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
             public void run() {
                 try {
                     if (sLogger.isActivated()) {
-                        sLogger.info("Abort session");
+                        sLogger.debug("Abort session");
                     }
                     final GeolocTransferSession session = mRichcallService
                             .getGeolocTransferSession(mSharingId);
@@ -388,9 +388,11 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
                     if (sLogger.isActivated()) {
                         sLogger.debug(e.getMessage());
                     }
+
                 } catch (PayloadException e) {
                     sLogger.error(
                             "Failed to terminate session with sharing ID: ".concat(mSharingId), e);
+
                 } catch (RuntimeException e) {
                     /*
                      * Normally we are not allowed to catch runtime exceptions as these are genuine
@@ -443,7 +445,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 
     private void handleSessionRejected(ReasonCode reasonCode, ContactId contact) {
         if (sLogger.isActivated()) {
-            sLogger.info("Session rejected; reasonCode=" + reasonCode + ".");
+            sLogger.debug("Session rejected; reasonCode=" + reasonCode + ".");
         }
         synchronized (mLock) {
             mGeolocSharingService.removeGeolocSharing(mSharingId);
@@ -454,7 +456,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
     @Override
     public void onSessionStarted(ContactId contact) {
         if (sLogger.isActivated()) {
-            sLogger.info("Session started.");
+            sLogger.debug("Session started.");
         }
         synchronized (mLock) {
             setStateAndReasonCode(contact, State.STARTED, ReasonCode.UNSPECIFIED);
@@ -464,7 +466,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
     @Override
     public void onSessionAborted(ContactId contact, TerminationReason reason) {
         if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Session aborted; reason=").append(reason).append(".")
+            sLogger.debug(new StringBuilder("Session aborted; reason=").append(reason).append(".")
                     .toString());
         }
         synchronized (mLock) {
@@ -501,7 +503,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
     @Override
     public void onSharingError(ContactId contact, ContentSharingError error) {
         if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Sharing error ").append(error.getErrorCode())
+            sLogger.debug(new StringBuilder("Sharing error ").append(error.getErrorCode())
                     .append(".").toString());
         }
         GeolocSharingStateAndReasonCode stateAndReasonCode = toStateAndReasonCode(error);
@@ -516,7 +518,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
     @Override
     public void onContentTransferred(ContactId contact, Geoloc geoloc, boolean initiatedByRemote) {
         if (sLogger.isActivated()) {
-            sLogger.info("Geoloc transferred.");
+            sLogger.debug("Geoloc transferred.");
         }
         synchronized (mLock) {
             mGeolocSharingService.removeGeolocSharing(mSharingId);
@@ -538,7 +540,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
     @Override
     public void onSessionAccepting(ContactId contact) {
         if (sLogger.isActivated()) {
-            sLogger.info("Accepting sharing.");
+            sLogger.debug("Accepting sharing.");
         }
         synchronized (mLock) {
             setStateAndReasonCode(contact, State.ACCEPTING, ReasonCode.UNSPECIFIED);

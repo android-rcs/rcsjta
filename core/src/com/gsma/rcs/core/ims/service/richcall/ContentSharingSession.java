@@ -48,9 +48,9 @@ public abstract class ContentSharingSession extends ImsServiceSession {
      */
     private MmContent mContent;
 
-    private final RichcallService mRichcallService;
+    protected final RichcallService mRichcallService;
 
-    private final CapabilityService mCapabilityService;
+    protected final CapabilityService mCapabilityService;
 
     /**
      * Constructor
@@ -89,24 +89,6 @@ public abstract class ContentSharingSession extends ImsServiceSession {
      */
     public void setContent(MmContent content) {
         mContent = content;
-    }
-
-    /**
-     * Gets Richcall service
-     * 
-     * @return Richcall service
-     */
-    public RichcallService getRichcallService() {
-        return mRichcallService;
-    }
-
-    /**
-     * Gets Capability service
-     * 
-     * @return the mCapabilityService
-     */
-    public CapabilityService getCapabilityService() {
-        return mCapabilityService;
     }
 
     /**

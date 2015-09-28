@@ -119,14 +119,15 @@ public class ImsModule implements SipEventListener {
         mServices = new HashMap<ImsServiceType, ImsService>();
         mServices.put(ImsServiceType.TERMS_CONDITIONS,
                 new TermsConditionsService(this, rcsSettings));
-        mServices.put(ImsServiceType.CAPABILITY, new CapabilityService(this, rcsSettings,
-                contactManager, addressBookManager));
+        CapabilityService capabilityService = new CapabilityService(this, rcsSettings,
+                contactManager, addressBookManager);
+        mServices.put(ImsServiceType.CAPABILITY, capabilityService);
         mServices.put(ImsServiceType.INSTANT_MESSAGING, new InstantMessagingService(this,
                 rcsSettings, contactManager, messagingLog, historyLog, localContentResolver, ctx,
                 core));
         mServices.put(ImsServiceType.RICHCALL, new RichcallService(this, richCallHistory,
                 contactManager, rcsSettings, mCallManager, localContentResolver,
-                getCapabilityService()));
+                capabilityService));
         mServices.put(ImsServiceType.PRESENCE, new PresenceService(this, ctx, rcsSettings,
                 contactManager, addressBookManager));
         mServices.put(ImsServiceType.SIP, new SipService(this, contactManager, rcsSettings));

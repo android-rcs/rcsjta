@@ -378,7 +378,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
             closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
             closeMediaSession();
             ContactId contact = getRemoteContact();
-            getCapabilityService().requestContactCapabilities(contact);
+            mCapabilityService.requestContactCapabilities(contact);
             removeSession();
             for (ImsSessionListener listener : getListeners()) {
                 ((ImageTransferSessionListener) listener).onSharingError(contact,
@@ -388,7 +388,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
             sLogger.error(
                     new StringBuilder("Failed to handle msrp error").append(error)
                             .append(" for message ").append(msgId).toString(), e);
-            
+
         } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());

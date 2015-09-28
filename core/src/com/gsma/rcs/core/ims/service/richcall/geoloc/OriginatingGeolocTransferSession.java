@@ -296,7 +296,7 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
             closeMediaSession();
             closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
             ContactId contact = getRemoteContact();
-            getCapabilityService().requestContactCapabilities(contact);
+            mCapabilityService.requestContactCapabilities(contact);
             removeSession();
             for (ImsSessionListener listener : getListeners()) {
                 ((GeolocTransferSessionListener) listener).onSharingError(contact,

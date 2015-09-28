@@ -134,7 +134,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 
     private void handleSessionRejected(ReasonCode reasonCode, ContactId contact) {
         if (sLogger.isActivated()) {
-            sLogger.info("Session rejected; reasonCode=" + reasonCode + ".");
+            sLogger.debug("Session rejected; reasonCode=" + reasonCode + ".");
         }
         synchronized (mLock) {
             mImageSharingService.removeImageSharing(mSharingId);
@@ -427,7 +427,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
             public void run() {
                 try {
                     if (sLogger.isActivated()) {
-                        sLogger.info("Accept session invitation");
+                        sLogger.debug("Accept session invitation");
                     }
                     final ImageTransferSession session = mRichcallService
                             .getImageTransferSession(mSharingId);
@@ -463,7 +463,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
             public void run() {
                 try {
                     if (sLogger.isActivated()) {
-                        sLogger.info("Reject session invitation");
+                        sLogger.debug("Reject session invitation");
                     }
                     final ImageTransferSession session = mRichcallService
                             .getImageTransferSession(mSharingId);
@@ -499,7 +499,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
             public void run() {
                 try {
                     if (sLogger.isActivated()) {
-                        sLogger.info("Abort session");
+                        sLogger.debug("Abort session");
                     }
                     final ImageTransferSession session = mRichcallService
                             .getImageTransferSession(mSharingId);
@@ -519,9 +519,11 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
                     if (sLogger.isActivated()) {
                         sLogger.debug(e.getMessage());
                     }
+
                 } catch (PayloadException e) {
                     sLogger.error(
                             "Failed to terminate session with sharing ID: ".concat(mSharingId), e);
+
                 } catch (RuntimeException e) {
                     /*
                      * Normally we are not allowed to catch runtime exceptions as these are genuine
@@ -542,7 +544,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     @Override
     public void onSessionStarted(ContactId contact) {
         if (sLogger.isActivated()) {
-            sLogger.info("Session started");
+            sLogger.debug("Session started");
         }
         synchronized (mLock) {
             setStateAndReasonCode(contact, ImageSharing.State.STARTED, ReasonCode.UNSPECIFIED);
@@ -590,7 +592,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     @Override
     public void onSharingError(ContactId contact, ContentSharingError error) {
         if (sLogger.isActivated()) {
-            sLogger.info("Sharing error " + error.getErrorCode());
+            sLogger.debug("Sharing error " + error.getErrorCode());
         }
         ImageSharingStateAndReasonCode stateAndReasonCode = toStateAndReasonCode(error);
         State state = stateAndReasonCode.getState();
@@ -613,7 +615,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     @Override
     public void onContentTransferred(ContactId contact, Uri file) {
         if (sLogger.isActivated()) {
-            sLogger.info("Image transferred");
+            sLogger.debug("Image transferred");
         }
         synchronized (mLock) {
             mImageSharingService.removeImageSharing(mSharingId);
@@ -624,7 +626,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     @Override
     public void onSessionAccepting(ContactId contact) {
         if (sLogger.isActivated()) {
-            sLogger.info("Accepting sharing");
+            sLogger.debug("Accepting sharing");
         }
         synchronized (mLock) {
             setStateAndReasonCode(contact, ImageSharing.State.ACCEPTING, ReasonCode.UNSPECIFIED);
@@ -657,7 +659,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     @Override
     public void onInvitationReceived(ContactId contact, MmContent content, long timestamp) {
         if (sLogger.isActivated()) {
-            sLogger.info("Invited to image sharing session");
+            sLogger.debug("Invited to image sharing session");
         }
         synchronized (mLock) {
             mPersistentStorage.addImageSharing(contact, Direction.INCOMING, content,

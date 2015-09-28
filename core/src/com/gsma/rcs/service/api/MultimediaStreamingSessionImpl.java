@@ -276,7 +276,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
             public void run() {
                 try {
                     if (sLogger.isActivated()) {
-                        sLogger.info("Accept session invitation");
+                        sLogger.debug("Accept session invitation");
                     }
                     final GenericSipRtpSession session = mSipService
                             .getGenericSipRtpSession(mSessionId);
@@ -311,7 +311,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
             public void run() {
                 try {
                     if (sLogger.isActivated()) {
-                        sLogger.info("Reject session invitation");
+                        sLogger.debug("Reject session invitation");
                     }
                     final GenericSipRtpSession session = mSipService
                             .getGenericSipRtpSession(mSessionId);
@@ -346,7 +346,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
             public void run() {
                 try {
                     if (sLogger.isActivated()) {
-                        sLogger.info("Abort session");
+                        sLogger.debug("Abort session");
                     }
                     final GenericSipRtpSession session = mSipService
                             .getGenericSipRtpSession(mSessionId);
@@ -435,7 +435,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
     @Override
     public void onSessionStarted(ContactId contact) {
         if (sLogger.isActivated()) {
-            sLogger.info("Session started");
+            sLogger.debug("Session started");
         }
         synchronized (mLock) {
             setStateAndReason(contact, State.STARTED, ReasonCode.UNSPECIFIED);
@@ -445,7 +445,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
     @Override
     public void onSessionAborted(ContactId contact, TerminationReason reason) {
         if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Session aborted (terminationReason ").append(reason)
+            sLogger.debug(new StringBuilder("Session aborted (terminationReason ").append(reason)
                     .append(")").toString());
         }
         synchronized (mLock) {
@@ -473,7 +473,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
     @Override
     public void onSessionError(ContactId contact, SipSessionError error) {
         if (sLogger.isActivated()) {
-            sLogger.info("Session error " + error.getErrorCode());
+            sLogger.debug("Session error " + error.getErrorCode());
         }
         synchronized (mLock) {
             mMultimediaSessionService.removeMultimediaStreaming(mSessionId);
@@ -505,7 +505,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
     @Override
     public void onSessionAccepting(ContactId contact) {
         if (sLogger.isActivated()) {
-            sLogger.info("Accepting session");
+            sLogger.debug("Accepting session");
         }
         synchronized (mLock) {
             setStateAndReason(contact, State.ACCEPTING, ReasonCode.UNSPECIFIED);

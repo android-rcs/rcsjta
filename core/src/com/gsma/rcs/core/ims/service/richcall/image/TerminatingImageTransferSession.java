@@ -359,7 +359,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
             for (ImsSessionListener listener : getListeners()) {
                 ((ImageTransferSessionListener) listener).onContentTransferred(contact, image);
             }
-            
+
         } catch (FileAccessException e) {
             deleteFile();
             for (ImsSessionListener listener : getListeners()) {
@@ -383,7 +383,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                 ((ImageTransferSessionListener) listener).onSharingProgress(contact, currentSize,
                         totalSize);
             }
-            
+
         } catch (FileAccessException e) {
             deleteFile();
             for (ImsSessionListener listener : getListeners()) {
@@ -419,7 +419,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
             closeMediaSession();
 
             ContactId contact = getRemoteContact();
-            getCapabilityService().requestContactCapabilities(contact);
+            mCapabilityService.requestContactCapabilities(contact);
             removeSession();
 
             if (isImageTransferred()) {
@@ -429,7 +429,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                 ((ImageTransferSessionListener) listener).onSharingError(contact,
                         new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
             }
-            
+
         } catch (PayloadException e) {
             sLogger.error(
                     new StringBuilder("Failed to handle msrp error").append(error)

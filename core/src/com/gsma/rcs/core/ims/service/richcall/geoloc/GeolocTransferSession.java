@@ -149,12 +149,12 @@ public abstract class GeolocTransferSession extends ContentSharingSession {
 
     @Override
     public void startSession() {
-        getRichcallService().addSession(this);
+        mRichcallService.addSession(this);
         start();
     }
 
     @Override
     public void removeSession() {
-        getRichcallService().removeSession(this);
+        mRichcallService.removeSession(this);
     }
 }
