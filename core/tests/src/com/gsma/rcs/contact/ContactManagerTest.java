@@ -18,6 +18,7 @@
 
 package com.gsma.rcs.contact;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.service.ContactInfo;
 import com.gsma.rcs.core.ims.service.ContactInfo.BlockingState;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
@@ -37,7 +38,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.test.AndroidTestCase;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.Set;
@@ -83,7 +83,7 @@ public class ContactManagerTest extends AndroidTestCase {
         }
     }
 
-    public void testGetRcsContactInfo() throws ContactManagerException, IOException {
+    public void testGetRcsContactInfo() throws ContactManagerException, FileAccessException {
         CapabilitiesBuilder expectedCapa = createRcsContact();
         ContactInfo getInfo = mContactManager.getContactInfo(mContact);
         assertNotNull(getInfo);
@@ -112,7 +112,7 @@ public class ContactManagerTest extends AndroidTestCase {
         assertEquals(RegistrationState.ONLINE, getInfo.getRegistrationState());
     }
 
-    public void testGetContactCapabilities() throws ContactManagerException, IOException {
+    public void testGetContactCapabilities() throws ContactManagerException, FileAccessException {
         CapabilitiesBuilder expectedCapa = createRcsContact();
         Capabilities getCapa = mContactManager.getContactCapabilities(mContact);
         assertNotNull(getCapa);
@@ -135,7 +135,7 @@ public class ContactManagerTest extends AndroidTestCase {
         assertTrue(extensions.contains("MyRcsExtensionTag2"));
     }
 
-    public void testDisplayName() throws ContactManagerException, IOException {
+    public void testDisplayName() throws ContactManagerException, FileAccessException {
         createRcsContact();
         String displayName = UUID.randomUUID().toString();
         mContactManager.setContactDisplayName(mContact, displayName);
@@ -143,7 +143,7 @@ public class ContactManagerTest extends AndroidTestCase {
     }
 
     public void testUpdateCapabilitiesTimeLastRequest() throws InterruptedException,
-            ContactManagerException, IOException {
+            ContactManagerException, FileAccessException {
         createRcsContact();
         Capabilities oldCapa = mContactManager.getContactCapabilities(mContact);
         /*
@@ -157,7 +157,7 @@ public class ContactManagerTest extends AndroidTestCase {
     }
 
     public void testUpdateCapabilitiesTimeLastResponse() throws InterruptedException,
-            ContactManagerException, IOException {
+            ContactManagerException, FileAccessException {
         createRcsContact();
         Capabilities oldCapa = mContactManager.getContactCapabilities(mContact);
         /*
@@ -170,13 +170,13 @@ public class ContactManagerTest extends AndroidTestCase {
         assertTrue(newCapa.getTimestampOfLastResponse() > oldCapa.getTimestampOfLastResponse());
     }
 
-    public void testBlockedContact() throws ContactManagerException, IOException {
+    public void testBlockedContact() throws ContactManagerException, FileAccessException {
         createRcsContact();
         mContactManager.setBlockingState(mContact, BlockingState.BLOCKED);
         assertTrue(mContactManager.isBlockedForContact(mContact));
     }
 
-    public CapabilitiesBuilder createRcsContact() throws ContactManagerException, IOException {
+    public CapabilitiesBuilder createRcsContact() throws ContactManagerException, FileAccessException {
         long now = System.currentTimeMillis();
         CapabilitiesBuilder capaBuilder = new CapabilitiesBuilder();
         /*
@@ -207,7 +207,7 @@ public class ContactManagerTest extends AndroidTestCase {
         return capaBuilder;
     }
 
-    public void testDeleteRCSEntries() throws ContactManagerException, IOException {
+    public void testDeleteRCSEntries() throws ContactManagerException, FileAccessException {
         createRcsContact();
         Set<ContactId> contacts = mContactManager.getAllContactsFromRcsContactProvider();
         assertTrue(!contacts.isEmpty());

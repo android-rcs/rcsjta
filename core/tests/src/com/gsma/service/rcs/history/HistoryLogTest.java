@@ -8,7 +8,7 @@ package com.gsma.service.rcs.history;
 import com.gsma.rcs.core.content.FileContent;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.content.VideoContent;
-import com.gsma.rcs.core.ims.protocol.sip.SipPayloadException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactProvider;
@@ -330,7 +330,7 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     private void addOutgoingOneToOneChatMessages(String... ids)
-            throws RcsPermissionDeniedException, SipPayloadException, IOException {
+            throws RcsPermissionDeniedException, PayloadException, IOException {
         if (ids.length == 0) {
             ChatMessage msg = new ChatMessage(MESSAGE_ID, getRemoteContact(), TXT,
                     MimeType.TEXT_MESSAGE, mTimestamp++, mTimestampSent++, DISPLAY_NAME);
@@ -363,7 +363,7 @@ public class HistoryLogTest extends AndroidTestCase {
                 GeolocSharing.ReasonCode.UNSPECIFIED, mTimestamp++);
     }
 
-    private void addItems() throws RcsPermissionDeniedException, SipPayloadException, IOException {
+    private void addItems() throws RcsPermissionDeniedException, PayloadException, IOException {
         addOutgoingOneToOneChatMessages();
         addOutgoingFileTransferSharing();
         addOutgoingImageSharing();
@@ -448,7 +448,7 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     public void testQueryHistoryLogProviderWithoutProjection() throws RcsPermissionDeniedException,
-            SipPayloadException, IOException {
+            PayloadException, IOException {
         addItems();
         Uri historyUri = getUriWithAllInternalProviders();
         Cursor cursor = getContext().getContentResolver().query(historyUri, null, null, null, null);
@@ -457,7 +457,7 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     public void testQueryHistoryLogProviderWithProjection() throws RcsPermissionDeniedException,
-            SipPayloadException, IOException {
+            PayloadException, IOException {
         addItems();
         Uri historyUri = getUriWithAllInternalProviders();
         Cursor cursor = getContext().getContentResolver().query(historyUri, PROJECTION, null, null,
@@ -467,7 +467,7 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     public void testQueryHistoryLogProviderWithSelection() throws RcsPermissionDeniedException,
-            SipPayloadException, IOException {
+            PayloadException, IOException {
         addItems();
         Uri historyUri = getUriWithAllInternalProviders();
         Cursor cursor = getContext().getContentResolver().query(historyUri, null,
@@ -477,7 +477,7 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     public void testQueryHistoryLogProviderWithSelectionArgs() throws RcsPermissionDeniedException,
-            SipPayloadException, IOException {
+            PayloadException, IOException {
         addItems();
         Uri historyUri = getUriWithAllInternalProviders();
         Cursor cursor = getContext().getContentResolver().query(historyUri, null, SELECTION_ID,
@@ -487,7 +487,7 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     public void testQueryHistoryLogProviderWithSelectionEmpty()
-            throws RcsPermissionDeniedException, SipPayloadException, IOException {
+            throws RcsPermissionDeniedException, PayloadException, IOException {
         addItems();
         Uri historyUri = getUriWithAllInternalProviders();
         Cursor cursor = getContext().getContentResolver().query(historyUri, null, SELECTION_EMPTY,
@@ -497,7 +497,7 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     public void testQueryHistoryLogProviderWithSelectionNotEmpty()
-            throws RcsPermissionDeniedException, SipPayloadException, IOException {
+            throws RcsPermissionDeniedException, PayloadException, IOException {
         addItems();
         Uri historyUri = getUriWithAllInternalProviders();
         Cursor cursor = getContext().getContentResolver().query(historyUri, null,
@@ -507,7 +507,7 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     public void testQueryHistoryLogProviderWithSort() throws RcsPermissionDeniedException,
-            SipPayloadException, IOException {
+            PayloadException, IOException {
         addOutgoingOneToOneChatMessages();
         addOutgoingFileTransferSharing();
         Uri historyUri = getUriWithAllInternalProviders();
@@ -531,7 +531,7 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     public void testRegisterInvalidExtraHistoryLogMember_badproviderid()
-            throws RcsPermissionDeniedException, SipPayloadException, IOException {
+            throws RcsPermissionDeniedException, PayloadException, IOException {
         addItems();
         Map<String, String> columnMapping = new HashMap<String, String>();
         columnMapping.put(HistoryLog.PROVIDER_ID, String.valueOf(INVALID_EXTERNAL_PROVIDER_ID));
@@ -546,7 +546,7 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     public void testRegisterExtraHistoryLogMemberWithForbiddenDatabases()
-            throws RcsPermissionDeniedException, SipPayloadException, IOException {
+            throws RcsPermissionDeniedException, PayloadException, IOException {
         addItems();
         Map<String, String> columnMapping = new HashMap<String, String>();
         columnMapping.put(HistoryLog.PROVIDER_ID, String.valueOf(EXTERNAL_PROVIDER_ID));
@@ -569,7 +569,7 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     public void testRegisterExtraHistoryLogMemberWithMappingNull()
-            throws RcsPermissionDeniedException, SipPayloadException, IOException {
+            throws RcsPermissionDeniedException, PayloadException, IOException {
         addItems();
         Map<String, String> columnMapping = null;
 
@@ -591,7 +591,7 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     public void testSQLInjection_selection() throws RemoteException, RcsPermissionDeniedException,
-            SipPayloadException, IOException {
+            PayloadException, IOException {
         addItems(); // 5
 
         assertEquals(
@@ -615,7 +615,7 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     public void testSQLInjection_sort() throws RemoteException, RcsPermissionDeniedException,
-            SipPayloadException, IOException {
+            PayloadException, IOException {
         addItems(); // 5
 
         getContext().getContentResolver()
@@ -628,7 +628,7 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     public void testSQLInjection_tablename() throws RemoteException, RcsPermissionDeniedException,
-            SipPayloadException, IOException {
+            PayloadException, IOException {
         addItems(); // 5
 
         assertEquals(
