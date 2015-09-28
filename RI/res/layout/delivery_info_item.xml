@@ -13,7 +13,7 @@
         android:layout_marginRight="20dp"
         android:singleLine="true"
         android:text="@string/label_uninitialized_contact"
-        android:textColor="#FFFFFF"
+        android:textColor="@android:color/darker_gray"
         android:textSize="12sp" />
 
     <TextView
@@ -26,7 +26,7 @@
         android:layout_marginRight="20dp"
         android:singleLine="true"
         android:text="@string/label_uninitialized_date"
-        android:textColor="#FFFFFF"
+        android:textColor="@android:color/darker_gray"
         android:textSize="12sp" />
 
     <TextView
@@ -51,7 +51,7 @@
         android:layout_marginRight="20dp"
         android:singleLine="true"
         android:text="@string/label_group_delivery_unknown_status"
-        android:textColor="#FFFFFF"
+        android:textColor="@android:color/darker_gray"
         android:textSize="12sp" />
 
     <TextView

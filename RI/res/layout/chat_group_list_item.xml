@@ -62,7 +62,7 @@
             android:layout_marginRight="20dp"
             android:singleLine="true"
             android:text="@string/label_state_unknown"
-            android:textColor="#FFFFFF"
+            android:textColor="@android:color/darker_gray"
             android:textSize="12sp" />
 
         <TextView
@@ -84,7 +84,7 @@
             android:layout_marginRight="20dp"
             android:layout_below="@id/state"
             android:singleLine="true"
-            android:textColor="#FFFFFF"
+            android:textColor="@android:color/darker_gray"
             android:textSize="12sp" />
     </RelativeLayout>
 

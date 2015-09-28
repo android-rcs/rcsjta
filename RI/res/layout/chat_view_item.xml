@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:layout_alignLeft="@+id/contact_text"
             android:text="@string/label_uninitialized_text"
-            android:textColor="#888888" />
+            android:textColor="@android:color/black" />
 
         <TextView
             android:id="@id/contact_text"
@@ -46,7 +46,7 @@
             android:layout_marginRight="20dp"
             android:singleLine="true"
             android:text="@string/label_state_unknown"
-            android:textColor="#FFFFFF"
+            android:textColor="@android:color/darker_gray"
             android:textSize="12sp" />
 
         <TextView
