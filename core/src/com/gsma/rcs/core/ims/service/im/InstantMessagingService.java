@@ -1061,8 +1061,7 @@ public class InstantMessagingService extends ImsService {
                             mMessagingLog.addOneToOneSpamMessage(firstMsg);
                         }
 
-                        if (mImdnManager.isDeliveryDeliveredReportsEnabled()
-                                && ChatUtils.isImdnDeliveredRequested(invite)) {
+                        if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
                             String msgId = ChatUtils.getMessageId(invite);
                             if (msgId != null) {
                                 String remoteInstanceId = null;

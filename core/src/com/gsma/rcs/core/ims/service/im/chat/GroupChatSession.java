@@ -836,11 +836,9 @@ public abstract class GroupChatSession extends ChatSession {
             }
             // Process delivery request
             if (dispositionNotification != null) {
-                if (dispositionNotification.contains(ImdnDocument.POSITIVE_DELIVERY)) {
-                    // Positive delivery requested, send MSRP message with status "delivered"
-                    sendMsrpMessageDeliveryStatus(remoteId, cpimMsgId,
-                            ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
-                }
+                // Positive delivery requested, send MSRP message with status "delivered"
+                sendMsrpMessageDeliveryStatus(remoteId, cpimMsgId,
+                        ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
             }
         }
     }

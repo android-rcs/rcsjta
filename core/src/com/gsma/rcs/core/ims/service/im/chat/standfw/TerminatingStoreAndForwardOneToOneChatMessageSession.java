@@ -131,8 +131,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
             SipDialogPath dialogPath = getDialogPath();
 
             /* Send message delivery report if requested */
-            if (mImdnManager.isDeliveryDeliveredReportsEnabled()
-                    && ChatUtils.isImdnDeliveredRequested(dialogPath.getInvite())) {
+            if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
                 /* Check notification disposition */
                 String msgId = ChatUtils.getMessageId(dialogPath.getInvite());
                 if (msgId != null) {

@@ -584,10 +584,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                             ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
                 } else {
                     if (dispositionNotification != null) {
-                        if (dispositionNotification.contains(ImdnDocument.POSITIVE_DELIVERY)) {
-                            sendMsrpMessageDeliveryStatus(null, cpimMsgId,
-                                    ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
-                        }
+                        sendMsrpMessageDeliveryStatus(null, cpimMsgId,
+                                ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
                     }
                 }
             }

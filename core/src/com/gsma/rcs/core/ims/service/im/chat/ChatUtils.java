@@ -334,27 +334,6 @@ public class ChatUtils {
     }
 
     /**
-     * Is IMDN notification "delivered" requested
-     * 
-     * @param request Request
-     * @return Boolean
-     * @throws PayloadException
-     */
-    public static boolean isImdnDeliveredRequested(SipRequest request) throws PayloadException {
-        /* Read ID from multipart content */
-        String content = request.getContent();
-        SipUtils.assertContentIsNotNull(content, request);
-        int index = content.indexOf(ImdnUtils.HEADER_IMDN_DISPO_NOTIF);
-        if (index == -1) {
-            return false;
-        }
-        index = index + ImdnUtils.HEADER_IMDN_DISPO_NOTIF.length() + 1;
-        String part = content.substring(index);
-        String notif = part.substring(0, part.indexOf(CRLF));
-        return notif.indexOf(ImdnDocument.POSITIVE_DELIVERY) != -1;
-    }
-
-    /**
      * Is IMDN notification "displayed" requested
      * 
      * @param request Request
