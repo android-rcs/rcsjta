@@ -105,7 +105,7 @@ public class SdpOrientationExtension {
     /**
      * Creates a {@link SdpOrientationExtension} from the Video MediaDescription
      * 
-     * @param videoMediaDescriptionVideo media description
+     * @param videoMediaDescription Video media description
      * @return A new SdpOrientationExtension or null if invalid media description
      * @throws RuntimeException if videoMediaDescription is invalid.
      */

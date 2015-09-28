@@ -32,14 +32,13 @@ import com.gsma.rcs.core.ims.protocol.rtp.MediaRtpSender;
 import com.gsma.rcs.core.ims.protocol.rtp.RtpException;
 import com.gsma.rcs.core.ims.protocol.rtp.format.Format;
 import com.gsma.rcs.core.ims.protocol.rtp.format.data.DataFormat;
-import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.rtp.stream.RtpStreamListener;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.sip.GenericSipSession;
+import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.sip.SipSessionError;
 import com.gsma.rcs.core.ims.service.sip.SipSessionListener;
 import com.gsma.rcs.provider.contact.ContactManager;
@@ -47,8 +46,6 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
-
-import java.io.IOException;
 
 /**
  * Generic SIP RTP session
@@ -61,29 +58,14 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
      */
     private DataFormat mFormat = new DataFormat();
 
-    /**
-     * Local RTP port
-     */
     private int mLocalRtpPort = -1;
 
-    /**
-     * Data sender
-     */
     private DataSender mDataSender = new DataSender();
 
-    /**
-     * Data receiver
-     */
     private DataReceiver mDataReceiver = new DataReceiver(this);
 
-    /**
-     * RTP receiver
-     */
     private MediaRtpReceiver mRtpReceiver;
 
-    /**
-     * RTP sender
-     */
     private MediaRtpSender mRtpSender;
 
     /**
@@ -104,14 +86,14 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
      * @param timestamp Local timestamp for the session
      * @param contactManager
      */
-    public GenericSipRtpSession(ImsService parent, ContactId contact, String featureTag,
+    public GenericSipRtpSession(SipService parent, ContactId contact, String featureTag,
             RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
         super(parent, contact, featureTag, rcsSettings, timestamp, contactManager);
 
-        // Get local port
+        /* Get local port */
         mLocalRtpPort = NetworkRessourceManager.generateLocalRtpPort(rcsSettings);
 
-        // Create the RTP sender & receiver
+        /* Create the RTP sender & receiver */
         mRtpReceiver = new MediaRtpReceiver(mLocalRtpPort);
         mRtpSender = new MediaRtpSender(mFormat, mLocalRtpPort);
     }
@@ -170,11 +152,7 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
                 "a=sendrecv" + SipUtils.CRLF;
     }
 
-    /**
-     * Prepare media session
-     * 
-     * @throws NetworkException
-     */
+    @Override
     public void prepareMediaSession() throws NetworkException {
         SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(UTF8));
         MediaDescription mediaApp = parser.getMediaDescription("application");
@@ -186,32 +164,24 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
                 mRtpReceiver.getInputStream(), this);
     }
 
-    /**
-     * Open media session
-     */
+    @Override
     public void openMediaSession() {
         /* Not to be used here */
     }
 
-    /**
-     * Start media transfer
-     */
+    @Override
     public void startMediaTransfer() {
         synchronized (this) {
             mRtpReceiver.startSession();
             mRtpSender.startSession();
-
             mMediaSessionStarted = true;
         }
     }
 
-    /**
-     * Close media session
-     */
+    @Override
     public void closeMediaSession() {
         synchronized (this) {
             mMediaSessionStarted = false;
-
             mRtpSender.stopSession();
             mRtpReceiver.stopSession();
         }
@@ -230,9 +200,7 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
         mDataSender.addFrame(content, System.currentTimeMillis());
     }
 
-    /**
-     * Invoked when the RTP stream was aborted
-     */
+    @Override
     public void rtpStreamAborted() {
         try {
             if (isSessionInterrupted()) {
@@ -246,15 +214,18 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
             removeSession();
             ContactId contact = getRemoteContact();
             for (ImsSessionListener listener : getListeners()) {
-                ((SipSessionListener) listener).handleSessionError(contact, new SipSessionError(
+                ((SipSessionListener) listener).onSessionError(contact, new SipSessionError(
                         SipSessionError.MEDIA_FAILED));
             }
+
         } catch (PayloadException e) {
             sLogger.error("Failed to abort rtp stream!", e);
+
         } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
+
         } catch (RuntimeException e) {
             /*
              * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
@@ -273,19 +244,19 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
      */
     public void receiveData(byte[] data) {
         ContactId contact = getRemoteContact();
-        for (int j = 0; j < getListeners().size(); j++) {
-            ((SipSessionListener) getListeners().get(j)).onDataReceived(contact, data);
+        for (ImsSessionListener listener : getListeners()) {
+            ((SipSessionListener) listener).onDataReceived(contact, data);
         }
     }
 
     @Override
     public void startSession() {
-        getImsService().getImsModule().getSipService().addSession(this);
+        getSipService().addSession(this);
         start();
     }
 
     @Override
     public void removeSession() {
-        getImsService().getImsModule().getSipService().removeSession(this);
+        getSipService().removeSession(this);
     }
 }

@@ -36,9 +36,9 @@ import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
+import com.gsma.rcs.core.ims.service.capability.CapabilityService;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.provider.contact.ContactManager;
@@ -60,35 +60,29 @@ import java.util.Vector;
  */
 public class TerminatingVideoStreamingSession extends VideoStreamingSession {
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(TerminatingVideoStreamingSession.class
             .getName());
 
     /**
      * Constructor
      * 
-     * @param parent IMS service
+     * @param parent Richcall service
      * @param invite Initial INVITE request
      * @param contact Contact Id
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param capabilityService
      */
-    public TerminatingVideoStreamingSession(ImsService parent, SipRequest invite,
+    public TerminatingVideoStreamingSession(RichcallService parent, SipRequest invite,
             ContactId contact, RcsSettings rcsSettings, long timestamp,
-            ContactManager contactManager) {
+            ContactManager contactManager, CapabilityService capabilityService) {
         super(parent, ContentManager.createLiveVideoContentFromSdp(invite.getContentBytes()),
-                contact, rcsSettings, timestamp, contactManager);
-
-        // Create dialog path
+                contact, rcsSettings, timestamp, contactManager, capabilityService);
         createTerminatingDialogPath(invite);
     }
 
-    /**
-     * Background processing
-     */
+    @Override
     public void run() {
         try {
             if (sLogger.isActivated()) {
@@ -114,7 +108,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             MmContent content = getContent();
             long timestamp = getTimestamp();
             for (ImsSessionListener listener : listeners) {
-                ((VideoStreamingSessionListener) listener).handleSessionInvited(contact, content,
+                ((VideoStreamingSessionListener) listener).onInvitationReceived(contact, content,
                         timestamp);
             }
 
@@ -131,8 +125,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                     removeSession();
 
                     for (ImsSessionListener listener : listeners) {
-                        listener.onSessionRejected(contact,
-                                TerminationReason.TERMINATION_BY_USER);
+                        listener.onSessionRejected(contact, TerminationReason.TERMINATION_BY_USER);
                     }
                     return;
 
@@ -167,8 +160,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                     removeSession();
 
                     for (ImsSessionListener listener : listeners) {
-                        listener.onSessionRejected(contact,
-                                TerminationReason.TERMINATION_BY_REMOTE);
+                        listener.onSessionRejected(contact, TerminationReason.TERMINATION_BY_REMOTE);
                     }
                     return;
 
@@ -289,17 +281,21 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                 // No response received: timeout
                 handleError(new ContentSharingError(ContentSharingError.SEND_RESPONSE_FAILED));
             }
+
         } catch (RemoteException e) {
             sLogger.error("Failed to set remote info!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+
         } catch (PayloadException e) {
             sLogger.error("Failed to send 200OK response!", e);
             handleError(new ContentSharingError(ContentSharingError.SEND_RESPONSE_FAILED, e));
+
         } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
             handleError(new ContentSharingError(ContentSharingError.SEND_RESPONSE_FAILED, e));
+
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
@@ -319,50 +315,35 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
         if (isSessionInterrupted()) {
             return;
         }
-
-        // Error
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("Session error: ")
                     .append(String.valueOf(error.getErrorCode())).append(", reason=")
                     .append(error.getMessage()).toString());
         }
-
-        // Close media session
         closeMediaSession();
-
-        // Remove the current session
         removeSession();
-
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
-            ((VideoStreamingSessionListener) listener).handleSharingError(contact, error);
+            ((VideoStreamingSessionListener) listener).onSharingError(contact, error);
         }
     }
 
-    /**
-     * Prepare media session
-     */
+    @Override
     public void prepareMediaSession() {
         /* Nothing to do in case of external codec */
     }
 
-    /**
-     * Open media session
-     */
+    @Override
     public void openMediaSession() {
         /* Nothing to do in case of external codec */
     }
 
-    /**
-     * Start media transfer
-     */
+    @Override
     public void startMediaTransfer() {
         /* Nothing to do in case of external codec */
     }
 
-    /**
-     * Close media session
-     */
+    @Override
     public void closeMediaSession() {
         /* Nothing to do in case of external codec */
     }

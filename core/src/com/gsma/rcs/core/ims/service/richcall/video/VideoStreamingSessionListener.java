@@ -39,22 +39,14 @@ public interface VideoStreamingSessionListener extends ImsSessionListener {
      * @param contact Remote contact
      * @param error Error
      */
-    public void handleSharingError(ContactId contact, ContentSharingError error);
-
-    /**
-     * Video stream has been resized
-     * 
-     * @param width Video width
-     * @param height Video height
-     */
-    public void handleVideoResized(int width, int height);
+    public void onSharingError(ContactId contact, ContentSharingError error);
 
     /**
      * Destination user agent received INVITE, and is alerting user of call
      * 
      * @param contact Remote contact
      */
-    public void handle180Ringing(ContactId contact);
+    public void onSessionRinging(ContactId contact);
 
     /**
      * A session invitation has been received
@@ -63,5 +55,5 @@ public interface VideoStreamingSessionListener extends ImsSessionListener {
      * @param content
      * @param timestamp Local timestamp when got invitation
      */
-    public void handleSessionInvited(ContactId contact, MmContent content, long timestamp);
+    public void onInvitationReceived(ContactId contact, MmContent content, long timestamp);
 }

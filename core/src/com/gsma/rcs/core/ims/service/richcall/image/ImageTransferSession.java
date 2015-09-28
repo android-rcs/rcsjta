@@ -26,8 +26,9 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
+import com.gsma.rcs.core.ims.service.ImsSessionListener;
+import com.gsma.rcs.core.ims.service.capability.CapabilityService;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingSession;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
@@ -43,9 +44,7 @@ import com.gsma.services.rcs.contact.ContactId;
  * @author jexa7410
  */
 public abstract class ImageTransferSession extends ContentSharingSession {
-    /**
-     * Boundary tag
-     */
+
     private final static String BOUNDARY_TAG = "boundary1";
 
     /**
@@ -53,54 +52,45 @@ public abstract class ImageTransferSession extends ContentSharingSession {
      */
     public final static long DEFAULT_SO_TIMEOUT = 30000;
 
-    /**
-     * Image transfered
-     */
     private boolean mImageTransfered = false;
 
-    /**
-     * Thumbnail
-     */
-    MmContent mThumbnail;
+    private MmContent mThumbnail;
 
-    /**
-     * The logger
-     */
-    private static final Logger logger = Logger.getLogger(ImageTransferSession.class
+    private static final Logger sLogger = Logger.getLogger(ImageTransferSession.class
             .getSimpleName());
 
     /**
      * Constructor
      * 
-     * @param parent IMS service
+     * @param parent Richcall service
      * @param content Content to be shared
      * @param contact Remote contact Id
      * @param thumbnail The thumbnail content
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param capabilityService
      */
-    public ImageTransferSession(ImsService parent, MmContent content, ContactId contact,
+    public ImageTransferSession(RichcallService parent, MmContent content, ContactId contact,
             MmContent thumbnail, RcsSettings rcsSettings, long timestamp,
-            ContactManager contactManager) {
-        super(parent, content, contact, rcsSettings, timestamp, contactManager);
-
+            ContactManager contactManager, CapabilityService capabilityService) {
+        super(parent, content, contact, rcsSettings, timestamp, contactManager, capabilityService);
         mThumbnail = thumbnail;
     }
 
     /**
-     * Image has been transfered
+     * Sets image transferred
      */
-    public void imageTransfered() {
+    public void setImageTransferred() {
         mImageTransfered = true;
     }
 
     /**
-     * Is image transfered
+     * Is image transferred
      * 
      * @return Boolean
      */
-    public boolean isImageTransfered() {
+    public boolean isImageTransferred() {
         return mImageTransfered;
     }
 
@@ -121,7 +111,6 @@ public abstract class ImageTransferSession extends ContentSharingSession {
      * @throws PayloadException
      */
     public SipRequest createInvite() throws PayloadException {
-
         if (mThumbnail != null) {
             return SipMessageFactory.createMultipartInvite(getDialogPath(),
                     RichcallService.FEATURE_TAGS_IMAGE_SHARE, getDialogPath().getLocalContent(),
@@ -131,30 +120,20 @@ public abstract class ImageTransferSession extends ContentSharingSession {
                 RichcallService.FEATURE_TAGS_IMAGE_SHARE, getDialogPath().getLocalContent());
     }
 
-    /**
-     * Handle error
-     * 
-     * @param error Error
-     */
+    @Override
     public void handleError(ImsServiceError error) {
         if (isSessionInterrupted()) {
             return;
         }
-
-        // Error
-        if (logger.isActivated()) {
-            logger.info("Session error: " + error.getErrorCode() + ", reason=" + error.getMessage());
+        if (sLogger.isActivated()) {
+            sLogger.info("Session error: " + error.getErrorCode() + ", reason="
+                    + error.getMessage());
         }
-
-        // Close MSRP session
         closeMediaSession();
-
-        // Remove the current session
         removeSession();
-
         ContactId contact = getRemoteContact();
-        for (int j = 0; j < getListeners().size(); j++) {
-            ((ImageTransferSessionListener) getListeners().get(j)).handleSharingError(contact,
+        for (ImsSessionListener listener : getListeners()) {
+            ((ImageTransferSessionListener) listener).onSharingError(contact,
                     new ContentSharingError(error));
         }
     }
@@ -182,35 +161,33 @@ public abstract class ImageTransferSession extends ContentSharingSession {
         boolean storageIsTooSmall = (StorageUtils.getExternalStorageFreeSpace() > 0) ? imageSize > StorageUtils
                 .getExternalStorageFreeSpace() : false;
         if (fileIsToBig) {
-            if (logger.isActivated()) {
-                logger.warn("Image is too big, reject the image sharing");
+            if (sLogger.isActivated()) {
+                sLogger.warn("Image is too big, reject the image sharing");
             }
             return new ContentSharingError(ContentSharingError.MEDIA_SIZE_TOO_BIG);
         }
         if (storageIsTooSmall) {
-            if (logger.isActivated()) {
-                logger.warn("Not enough storage capacity, reject the image sharing");
+            if (sLogger.isActivated()) {
+                sLogger.warn("Not enough storage capacity, reject the image sharing");
             }
             return new ContentSharingError(ContentSharingError.NOT_ENOUGH_STORAGE_SPACE);
         }
         return null;
     }
 
-    /**
-     * Session inactivity event
-     */
+    @Override
     public void handleInactivityEvent() {
         /* Not need in this class */
     }
 
     @Override
     public void startSession() {
-        getImsService().getImsModule().getRichcallService().addSession(this);
+        getRichcallService().addSession(this);
         start();
     }
 
     @Override
     public void removeSession() {
-        getImsService().getImsModule().getRichcallService().removeSession(this);
+        getRichcallService().removeSession(this);
     }
 }

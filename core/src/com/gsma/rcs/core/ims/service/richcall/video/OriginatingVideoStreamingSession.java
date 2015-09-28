@@ -29,15 +29,14 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
-import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
+import com.gsma.rcs.core.ims.service.capability.CapabilityService;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.provider.contact.ContactManager;
@@ -60,9 +59,7 @@ import javax2.sip.InvalidArgumentException;
  * @author hlxn7157
  */
 public class OriginatingVideoStreamingSession extends VideoStreamingSession {
-    /**
-     * The logger
-     */
+
     private static final Logger sLogger = Logger.getLogger(OriginatingVideoStreamingSession.class
             .getName());
 
@@ -76,22 +73,17 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param capabilityService
      */
-    public OriginatingVideoStreamingSession(ImsService parent, IVideoPlayer player,
+    public OriginatingVideoStreamingSession(RichcallService parent, IVideoPlayer player,
             MmContent content, ContactId contact, RcsSettings rcsSettings, long timestamp,
-            ContactManager contactManager) {
-        super(parent, content, contact, rcsSettings, timestamp, contactManager);
-
-        // Create dialog path
+            ContactManager contactManager, CapabilityService capabilityService) {
+        super(parent, content, contact, rcsSettings, timestamp, contactManager, capabilityService);
         createOriginatingDialogPath();
-
-        // Set the video player
         setPlayer(player);
     }
 
-    /**
-     * Background processing
-     */
+    @Override
     public void run() {
         try {
             if (sLogger.isActivated()) {
@@ -124,26 +116,33 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
 
             // Send INVITE request
             sendInvite(invite);
+
         } catch (InvalidArgumentException e) {
             sLogger.error("Failed to send invite!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+
         } catch (ParseException e) {
             sLogger.error("Failed to send invite!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+
         } catch (RemoteException e) {
             sLogger.error("Failed initiate a new live video sharing session as originating!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+
         } catch (FileAccessException e) {
             sLogger.error("Failed to send invite!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+
         } catch (PayloadException e) {
             sLogger.error("Failed to send invite!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+
         } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+
         } catch (RuntimeException e) {
             /**
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
@@ -154,12 +153,7 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
         }
     }
 
-    /**
-     * Prepare media session
-     * 
-     * @throws PayloadException
-     * @throws NetworkException
-     */
+    @Override
     public void prepareMediaSession() throws PayloadException, NetworkException {
         // Parse the remote SDP part
         SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(UTF8));
@@ -198,28 +192,23 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
             }
             // Set the video player remote info
             player.setRemoteInfo(selectedVideoCodec, remoteHost, remotePort, getOrientation());
+
         } catch (RemoteException e) {
             throw new IllegalArgumentException("Error when preparing the media session", e);
         }
     }
 
-    /**
-     * Open media session
-     */
+    @Override
     public void openMediaSession() {
         /* Nothing to do in case of external codec */
     }
 
-    /**
-     * Start media transfer
-     */
+    @Override
     public void startMediaTransfer() {
         /* Nothing to do in case of external codec */
     }
 
-    /**
-     * Close media session
-     */
+    @Override
     public void closeMediaSession() {
         /* Nothing to do in case of external codec */
     }
@@ -236,7 +225,7 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
         }
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
-            ((VideoStreamingSessionListener) listener).handle180Ringing(contact);
+            ((VideoStreamingSessionListener) listener).onSessionRinging(contact);
         }
     }
 }

@@ -42,7 +42,7 @@ public interface ImageTransferSessionListener extends ImsSessionListener {
      * @param currentSize Data size transfered
      * @param totalSize Total size to be transfered
      */
-    public void handleSharingProgress(ContactId contact, long currentSize, long totalSize);
+    public void onSharingProgress(ContactId contact, long currentSize, long totalSize);
 
     /**
      * Content sharing error
@@ -50,22 +50,22 @@ public interface ImageTransferSessionListener extends ImsSessionListener {
      * @param contact Remote contact
      * @param error Error
      */
-    public void handleSharingError(ContactId contact, ContentSharingError error);
+    public void onSharingError(ContactId contact, ContentSharingError error);
 
     /**
-     * Content has been transfered
+     * Content has been transferred
      * 
      * @param contact Remote contact
      * @param file Uri of file associated to the received content
      */
-    public void handleContentTransfered(ContactId contact, Uri file);
+    public void onContentTransferred(ContactId contact, Uri file);
 
     /**
      * Destination user agent received INVITE, and is alerting user of call
      * 
      * @param contact Remote contact
      */
-    public void handle180Ringing(ContactId contact);
+    public void onSessionRinging(ContactId contact);
 
     /**
      * A session invitation has been received
@@ -74,5 +74,5 @@ public interface ImageTransferSessionListener extends ImsSessionListener {
      * @param content
      * @param timestamp Local timestamp when got invitation
      */
-    public void handleSessionInvited(ContactId contact, MmContent content, long timestamp);
+    public void onInvitationReceived(ContactId contact, MmContent content, long timestamp);
 }

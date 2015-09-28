@@ -35,13 +35,13 @@ public interface SipSessionListener extends ImsSessionListener {
      * @param contact Remote contact
      * @param error Error
      */
-    public void handleSessionError(ContactId contact, SipSessionError error);
+    public void onSessionError(ContactId contact, SipSessionError error);
 
     /**
      * Receive data
      * 
      * @param contact Remote contact
-     * @param error Error
+     * @param data Received data
      */
     public void onDataReceived(ContactId contact, byte[] data);
 
@@ -58,5 +58,5 @@ public interface SipSessionListener extends ImsSessionListener {
      * @param contact Remote contact
      * @param sessionInvite
      */
-    public void onSessionInvited(ContactId contact, Intent sessionInvite);
+    public void onInvitationReceived(ContactId contact, Intent sessionInvite);
 }

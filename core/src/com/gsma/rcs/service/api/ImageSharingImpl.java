@@ -306,7 +306,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
             if (session == null) {
                 return mPersistentStorage.getState().toInt();
             }
-            if (session.isImageTransfered()) {
+            if (session.isImageTransferred()) {
                 return ImageSharing.State.TRANSFERRED.toInt();
             }
             SipDialogPath dialogPath = session.getDialogPath();
@@ -508,7 +508,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
                                 + " is found so nothing to abort!");
                         return;
                     }
-                    if (session.isImageTransfered()) {
+                    if (session.isImageTransferred()) {
                         sLogger.debug("Session with sharing ID:" + mSharingId
                                 + " is already transferred so nothing to abort!");
                         return;
@@ -539,9 +539,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/
 
-    /**
-     * Session is started
-     */
+    @Override
     public void onSessionStarted(ContactId contact) {
         if (sLogger.isActivated()) {
             sLogger.info("Session started");
@@ -551,11 +549,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
         }
     }
 
-    /**
-     * * Session has been aborted
-     * 
-     * @param reason Termination reason
-     */
+    @Override
     public void onSessionAborted(ContactId contact, TerminationReason reason) {
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("Session aborted (terminationReason ").append(reason)
@@ -593,12 +587,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
         }
     }
 
-    /**
-     * Content sharing error
-     * 
-     * @param error Error
-     */
-    public void handleSharingError(ContactId contact, ContentSharingError error) {
+    @Override
+    public void onSharingError(ContactId contact, ContentSharingError error) {
         if (sLogger.isActivated()) {
             sLogger.info("Sharing error " + error.getErrorCode());
         }
@@ -611,13 +601,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
         }
     }
 
-    /**
-     * Content sharing progress
-     * 
-     * @param currentSize Data size transferred
-     * @param totalSize Total size to be transferred
-     */
-    public void handleSharingProgress(ContactId contact, long currentSize, long totalSize) {
+    @Override
+    public void onSharingProgress(ContactId contact, long currentSize, long totalSize) {
         synchronized (mLock) {
             if (mPersistentStorage.setProgress(currentSize)) {
                 mBroadcaster.broadcastProgressUpdate(contact, mSharingId, currentSize, totalSize);
@@ -625,13 +610,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
         }
     }
 
-    /**
-     * Content has been transferred
-     * 
-     * @param contact Remote contact
-     * @param file File URI associated to the received content
-     */
-    public void handleContentTransfered(ContactId contact, Uri file) {
+    @Override
+    public void onContentTransferred(ContactId contact, Uri file) {
         if (sLogger.isActivated()) {
             sLogger.info("Image transferred");
         }
@@ -675,7 +655,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     }
 
     @Override
-    public void handleSessionInvited(ContactId contact, MmContent content, long timestamp) {
+    public void onInvitationReceived(ContactId contact, MmContent content, long timestamp) {
         if (sLogger.isActivated()) {
             sLogger.info("Invited to image sharing session");
         }
@@ -688,7 +668,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     }
 
     @Override
-    public void handle180Ringing(ContactId contact) {
+    public void onSessionRinging(ContactId contact) {
         synchronized (mLock) {
             setStateAndReasonCode(contact, ImageSharing.State.RINGING, ReasonCode.UNSPECIFIED);
         }

@@ -40,9 +40,9 @@ import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
+import com.gsma.rcs.core.ims.service.capability.CapabilityService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
@@ -63,39 +63,34 @@ import java.util.Vector;
  */
 public class TerminatingGeolocTransferSession extends GeolocTransferSession implements
         MsrpEventListener {
-    /**
-     * MSRP manager
-     */
+
     private MsrpManager msrpMgr;
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(TerminatingGeolocTransferSession.class
             .getName());
 
     /**
      * Constructor
      * 
-     * @param parent IMS service
+     * @param parent Richcall service
      * @param invite Initial INVITE request
      * @param contact Contact Id
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param capabilityService
      * @throws PayloadException
      */
-    public TerminatingGeolocTransferSession(ImsService parent, SipRequest invite,
+    public TerminatingGeolocTransferSession(RichcallService parent, SipRequest invite,
             ContactId contact, RcsSettings rcsSettings, long timestamp,
-            ContactManager contactManager) throws PayloadException {
+            ContactManager contactManager, CapabilityService capabilityService)
+            throws PayloadException {
         super(parent, ContentManager.createMmContentFromSdp(invite, rcsSettings), contact,
-                rcsSettings, timestamp, contactManager);
+                rcsSettings, timestamp, contactManager, capabilityService);
         createTerminatingDialogPath(invite);
     }
 
-    /**
-     * Background processing
-     */
+    @Override
     public void run() {
         try {
             if (sLogger.isActivated()) {
@@ -117,7 +112,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
             ContactId contact = getRemoteContact();
             long timestamp = getTimestamp();
             for (ImsSessionListener listener : listeners) {
-                ((GeolocTransferSessionListener) listener).handleSessionInvited(contact, timestamp);
+                ((GeolocTransferSessionListener) listener).onInvitationReceived(contact, timestamp);
             }
 
             InvitationStatus answer = waitInvitationAnswer();
@@ -130,10 +125,8 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                     }
                     sendErrorResponse(dialogPath.getInvite(), dialogPath.getLocalTag(), answer);
                     removeSession();
-
                     for (ImsSessionListener listener : listeners) {
-                        listener.onSessionRejected(contact,
-                                TerminationReason.TERMINATION_BY_USER);
+                        listener.onSessionRejected(contact, TerminationReason.TERMINATION_BY_USER);
                     }
                     return;
 
@@ -141,12 +134,9 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                     if (sLogger.isActivated()) {
                         sLogger.debug("Session has been rejected on timeout");
                     }
-
                     // Ringing period timeout
                     send486Busy(dialogPath.getInvite(), dialogPath.getLocalTag());
-
                     removeSession();
-
                     for (ImsSessionListener listener : listeners) {
                         listener.onSessionRejected(contact,
                                 TerminationReason.TERMINATION_BY_TIMEOUT);
@@ -164,17 +154,14 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                     if (sLogger.isActivated()) {
                         sLogger.debug("Session has been rejected by remote");
                     }
-
                     removeSession();
-
                     for (ImsSessionListener listener : listeners) {
-                        listener.onSessionRejected(contact,
-                                TerminationReason.TERMINATION_BY_REMOTE);
+                        listener.onSessionRejected(contact, TerminationReason.TERMINATION_BY_REMOTE);
                     }
                     return;
+
                 case INVITATION_ACCEPTED:
                     setSessionAccepted();
-
                     for (ImsSessionListener listener : listeners) {
                         listener.onSessionAccepting(contact);
                     }
@@ -297,14 +284,17 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                 }
                 handleError(new ContentSharingError(ContentSharingError.SEND_RESPONSE_FAILED));
             }
+
         } catch (PayloadException e) {
             sLogger.error("Failed to send 200OK response!", e);
             handleError(new ContentSharingError(ContentSharingError.SEND_RESPONSE_FAILED, e));
+
         } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
             handleError(new ContentSharingError(ContentSharingError.SEND_RESPONSE_FAILED, e));
+
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
@@ -313,7 +303,6 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
             sLogger.error("Failed to initiate a new geoloc sharing session as terminating!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         }
-
         if (sLogger.isActivated()) {
             sLogger.debug("End of thread");
         }
@@ -326,25 +315,13 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
         msrpMgr.sendEmptyChunk();
     }
 
-    /**
-     * Data has been transfered
-     * 
-     * @param msgId Message ID
-     */
+    @Override
     public void msrpDataTransfered(String msgId) {
         // Not used in terminating side
     }
 
-    /**
-     * Data transfer has been received
-     * 
-     * @param msgId Message ID
-     * @param data Last received data chunk
-     * @param mimeType Data mime-type
-     * @throws PayloadException
-     */
-    public void receiveMsrpData(String msgId, byte[] data, String mimeType)
-            throws PayloadException {
+    @Override
+    public void receiveMsrpData(String msgId, byte[] data, String mimeType) throws PayloadException {
         if (sLogger.isActivated()) {
             sLogger.info("Data received");
         }
@@ -352,53 +329,33 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
         String geolocDoc = new String(data, UTF8);
         Geoloc geoloc = ChatUtils.parseGeolocDocument(geolocDoc);
         setGeoloc(geoloc);
-        geolocTransfered();
+        setGeolocTransferred();
         boolean initiatedByRemote = isInitiatedByRemote();
         for (ImsSessionListener listener : getListeners()) {
-            ((GeolocTransferSessionListener) listener).handleContentTransfered(contact, geoloc,
+            ((GeolocTransferSessionListener) listener).onContentTransferred(contact, geoloc,
                     initiatedByRemote);
         }
     }
 
-    /**
-     * Data transfer in progress
-     * 
-     * @param currentSize Current transfered size in bytes
-     * @param totalSize Total size in bytes
-     */
+    @Override
     public void msrpTransferProgress(long currentSize, long totalSize) {
         // Not used
     }
 
-    /**
-     * Data transfer in progress
-     * 
-     * @param currentSize Current transfered size in bytes
-     * @param totalSize Total size in bytes
-     * @param data received data chunk
-     * @return True if transfer in progress
-     */
+    @Override
     public boolean msrpTransferProgress(long currentSize, long totalSize, byte[] data) {
         // Not used for geolocation sharing
         return true;
     }
 
-    /**
-     * Data transfer has been aborted
-     */
+    @Override
     public void msrpTransferAborted() {
         if (sLogger.isActivated()) {
             sLogger.info("Data transfer aborted");
         }
     }
 
-    /**
-     * Data transfer error
-     * 
-     * @param msgId Message ID
-     * @param error Error code
-     * @param typeMsrpChunk Type of MSRP chunk
-     */
+    @Override
     public void msrpTransferError(String msgId, String error, TypeMsrpChunk typeMsrpChunk) {
         try {
             if (isSessionInterrupted()) {
@@ -413,25 +370,27 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
             closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
 
             ContactId contact = getRemoteContact();
-            getImsService().getImsModule().getCapabilityService()
-                    .requestContactCapabilities(contact);
+            getCapabilityService().requestContactCapabilities(contact);
             removeSession();
 
-            if (isGeolocTransfered()) {
+            if (isGeolocTransferred()) {
                 return;
             }
             for (ImsSessionListener listener : getListeners()) {
-                ((GeolocTransferSessionListener) listener).handleSharingError(contact,
+                ((GeolocTransferSessionListener) listener).onSharingError(contact,
                         new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
             }
+
         } catch (PayloadException e) {
             sLogger.error(
                     new StringBuilder("Failed to handle msrp error").append(error)
                             .append(" for message ").append(msgId).toString(), e);
+
         } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
+
         } catch (RuntimeException e) {
             /*
              * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
@@ -445,30 +404,22 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
         }
     }
 
-    /**
-     * Prepare media session
-     */
+    @Override
     public void prepareMediaSession() {
         /* Nothing to do in terminating side */
     }
 
-    /**
-     * Open media session
-     */
+    @Override
     public void openMediaSession() {
         /* Nothing to do in terminating side */
     }
 
-    /**
-     * Start media transfer
-     */
+    @Override
     public void startMediaTransfer() {
         /* Nothing to do in terminating side */
     }
 
-    /**
-     * Close media session
-     */
+    @Override
     public void closeMediaSession() {
         // Close the MSRP session
         if (msrpMgr != null) {

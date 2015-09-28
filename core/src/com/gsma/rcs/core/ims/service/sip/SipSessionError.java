@@ -42,9 +42,6 @@ public class SipSessionError extends ImsSessionBasedServiceError {
      * Constructor
      * 
      * @param error Error
-     * @deprecated <p>
-     *             Should use FileSharingError(int code, Throwable cause)
-     *             </p>
      */
     public SipSessionError(ImsServiceError error) {
         super(error.getErrorCode(), error.getMessage());
@@ -64,9 +61,6 @@ public class SipSessionError extends ImsSessionBasedServiceError {
      * 
      * @param code Error code
      * @param msg Detail message
-     * @deprecated <p>
-     *             Should use FileSharingError(int code, Throwable cause)
-     *             </p>
      */
     public SipSessionError(int code, String msg) {
         super(code, msg);

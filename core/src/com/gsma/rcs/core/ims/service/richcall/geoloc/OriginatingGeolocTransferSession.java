@@ -37,9 +37,10 @@ import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
+import com.gsma.rcs.core.ims.service.capability.CapabilityService;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
+import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
@@ -61,43 +62,33 @@ import javax2.sip.InvalidArgumentException;
  */
 public class OriginatingGeolocTransferSession extends GeolocTransferSession implements
         MsrpEventListener {
-    /**
-     * MSRP manager
-     */
+
     private MsrpManager msrpMgr;
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(OriginatingGeolocTransferSession.class
             .getName());
 
     /**
      * Constructor
      * 
-     * @param parent IMS service
+     * @param parent Richcall service
      * @param content Content to be shared
      * @param contact Remote contact Id
      * @param geoloc Geoloc info
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param capabilityService
      */
-    public OriginatingGeolocTransferSession(ImsService parent, MmContent content,
+    public OriginatingGeolocTransferSession(RichcallService parent, MmContent content,
             ContactId contact, Geoloc geoloc, RcsSettings rcsSettings, long timestamp,
-            ContactManager contactManager) {
-        super(parent, content, contact, rcsSettings, timestamp, contactManager);
-
-        // Create dialog path
+            ContactManager contactManager, CapabilityService capabilityService) {
+        super(parent, content, contact, rcsSettings, timestamp, contactManager, capabilityService);
         createOriginatingDialogPath();
-
-        // Set geoloc to be sent
         setGeoloc(geoloc);
     }
 
-    /**
-     * Background processing
-     */
+    @Override
     public void run() {
         try {
             if (sLogger.isActivated()) {
@@ -159,23 +150,29 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
 
             // Send INVITE request
             sendInvite(invite);
+
         } catch (InvalidArgumentException e) {
             sLogger.error("Failed initiate a new sharing session as originating!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+
         } catch (ParseException e) {
             sLogger.error("Failed initiate a new sharing session as originating!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+
         } catch (FileAccessException e) {
             sLogger.error("Failed initiate a new sharing session as originating!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+
         } catch (PayloadException e) {
             sLogger.error("Failed initiate a new sharing session as originating!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+
         } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+
         } catch (RuntimeException e) {
             /**
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
@@ -205,21 +202,12 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
         session.setSuccessReportOption(false);
     }
 
-    /**
-     * Open media session
-     * 
-     * @throws NetworkException
-     * @throws PayloadException
-     */
+    @Override
     public void openMediaSession() throws NetworkException, PayloadException {
         msrpMgr.openMsrpSession();
     }
 
-    /**
-     * Start media transfer
-     * 
-     * @throws NetworkException
-     */
+    @Override
     public void startMediaTransfer() throws NetworkException {
         /* Start sending data chunks */
         byte[] data = ((GeolocContent) getContent()).getData();
@@ -229,11 +217,8 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
 
     }
 
-    /**
-     * Close media session
-     */
+    @Override
     public void closeMediaSession() {
-        // Close the MSRP session
         if (msrpMgr != null) {
             msrpMgr.closeSession();
         }
@@ -242,17 +227,13 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
         }
     }
 
-    /**
-     * Data has been transfered
-     * 
-     * @param msgId Message ID
-     */
+    @Override
     public void msrpDataTransfered(String msgId) {
         try {
             if (sLogger.isActivated()) {
-                sLogger.info("Data transfered");
+                sLogger.info("Data transferred");
             }
-            geolocTransfered();
+            setGeolocTransferred();
             closeMediaSession();
             closeSession(TerminationReason.TERMINATION_BY_USER);
             removeSession();
@@ -260,7 +241,7 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
             Geoloc geoloc = getGeoloc();
             boolean initiatedByRemote = isInitiatedByRemote();
             for (ImsSessionListener listener : getListeners()) {
-                ((GeolocTransferSessionListener) listener).handleContentTransfered(contact, geoloc,
+                ((GeolocTransferSessionListener) listener).onContentTransferred(contact, geoloc,
                         initiatedByRemote);
             }
         } catch (PayloadException e) {
@@ -280,56 +261,30 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
         }
     }
 
-    /**
-     * Data transfer has been received
-     * 
-     * @param msgId Message ID
-     * @param data Received data
-     * @param mimeType Data mime-type
-     */
+    @Override
     public void receiveMsrpData(String msgId, byte[] data, String mimeType) {
         // Not used in originating side
     }
 
-    /**
-     * Data transfer in progress
-     * 
-     * @param currentSize Current transfered size in bytes
-     * @param totalSize Total size in bytes
-     */
+    @Override
     public void msrpTransferProgress(long currentSize, long totalSize) {
         // Not used for geolocation sharing
     }
 
-    /**
-     * Data transfer in progress
-     * 
-     * @param currentSize Current transfered size in bytes
-     * @param totalSize Total size in bytes
-     * @param data received data chunk
-     * @return True is transfer in progress
-     */
+    @Override
     public boolean msrpTransferProgress(long currentSize, long totalSize, byte[] data) {
         // Not used in originating side
         return false;
     }
 
-    /**
-     * Data transfer has been aborted
-     */
+    @Override
     public void msrpTransferAborted() {
         if (sLogger.isActivated()) {
             sLogger.info("Data transfer aborted");
         }
     }
 
-    /**
-     * Data transfer error
-     * 
-     * @param msgId Message ID
-     * @param error Error code
-     * @param typeMsrpChunk Type of MSRP chunk
-     */
+    @Override
     public void msrpTransferError(String msgId, String error, TypeMsrpChunk typeMsrpChunk) {
         try {
             if (isSessionInterrupted()) {
@@ -341,11 +296,10 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
             closeMediaSession();
             closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
             ContactId contact = getRemoteContact();
-            getImsService().getImsModule().getCapabilityService()
-                    .requestContactCapabilities(contact);
+            getCapabilityService().requestContactCapabilities(contact);
             removeSession();
             for (ImsSessionListener listener : getListeners()) {
-                ((GeolocTransferSessionListener) listener).handleSharingError(contact,
+                ((GeolocTransferSessionListener) listener).onSharingError(contact,
                         new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
             }
         } catch (PayloadException e) {
@@ -356,6 +310,7 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
+
         } catch (RuntimeException e) {
             /*
              * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
@@ -381,7 +336,7 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
         }
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
-            ((GeolocTransferSessionListener) listener).handle180Ringing(contact);
+            ((GeolocTransferSessionListener) listener).onSessionRinging(contact);
         }
     }
 }

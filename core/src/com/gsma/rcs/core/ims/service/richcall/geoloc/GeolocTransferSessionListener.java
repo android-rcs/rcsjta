@@ -39,7 +39,7 @@ public interface GeolocTransferSessionListener extends ImsSessionListener {
      * @param contact Remote contact
      * @param error Error
      */
-    public void handleSharingError(ContactId contact, ContentSharingError error);
+    public void onSharingError(ContactId contact, ContentSharingError error);
 
     /**
      * Content has been transfered
@@ -48,14 +48,14 @@ public interface GeolocTransferSessionListener extends ImsSessionListener {
      * @param geoloc Geolocation
      * @param initiatedByRemote
      */
-    public void handleContentTransfered(ContactId contact, Geoloc geoloc, boolean initiatedByRemote);
+    public void onContentTransferred(ContactId contact, Geoloc geoloc, boolean initiatedByRemote);
 
     /**
      * Destination user agent received INVITE, and is alerting user of call
      * 
      * @param contact Remote contact
      */
-    public void handle180Ringing(ContactId contact);
+    public void onSessionRinging(ContactId contact);
 
     /**
      * A session invitation has been received
@@ -63,5 +63,5 @@ public interface GeolocTransferSessionListener extends ImsSessionListener {
      * @param contact Remote contact
      * @param timestamp Local timestamp when got invitation
      */
-    public void handleSessionInvited(ContactId contact, long timestamp);
+    public void onInvitationReceived(ContactId contact, long timestamp);
 }

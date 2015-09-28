@@ -29,7 +29,6 @@ import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
@@ -42,7 +41,6 @@ import com.gsma.services.rcs.contact.ContactId;
 
 import gov2.nist.javax2.sip.header.ims.PPreferredServiceHeader;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.Set;
 
@@ -57,24 +55,25 @@ public abstract class GenericSipSession extends ImsServiceSession {
 
     private final String mFeatureTag;
 
+    private final SipService mSipService;
+
     private static final Logger sLogger = Logger.getLogger(GenericSipSession.class.getSimpleName());
 
     /**
      * Constructor
      * 
-     * @param parent IMS service
+     * @param parent SIP service
      * @param contact Remote contactId
      * @param featureTag Feature tag
      * @param rcsSettings RCS settings accessor
      * @param timestamp Local timestamp for the session
      * @param contactManager Contact manager accessor
      */
-    public GenericSipSession(ImsService parent, ContactId contact, String featureTag,
+    public GenericSipSession(SipService parent, ContactId contact, String featureTag,
             RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
         super(parent, contact, PhoneUtils.formatContactIdToUri(contact), rcsSettings, timestamp,
                 contactManager);
-
-        // Set the service feature tag
+        mSipService = parent;
         mFeatureTag = featureTag;
     }
 
@@ -115,6 +114,7 @@ public abstract class GenericSipSession extends ImsServiceSession {
             ExtensionHeader header = (ExtensionHeader) SipUtils.HEADER_FACTORY.createHeader(
                     PPreferredServiceHeader.NAME, FeatureTags.FEATURE_3GPP_SERVICE_EXTENSION);
             invite.getStackMessage().addHeader(header);
+
         } catch (ParseException e) {
             throw new PayloadException(
                     "Can't add SIP headertype ".concat(FeatureTags.FEATURE_3GPP_SERVICE_EXTENSION),
@@ -158,28 +158,18 @@ public abstract class GenericSipSession extends ImsServiceSession {
      */
     public abstract void closeMediaSession();
 
-    /**
-     * Handle error
-     * 
-     * @param error Error
-     */
+    @Override
     public void handleError(ImsServiceError error) {
         if (isSessionInterrupted()) {
             return;
         }
-
         sLogger.error(new StringBuilder("Session error: ").append(error.getErrorCode())
                 .append(", reason=").append(error.getMessage()).toString());
-
-        // Close media session
         closeMediaSession();
-
-        // Remove the current session
         removeSession();
-
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
-            ((SipSessionListener) listener).handleSessionError(contact, new SipSessionError(error));
+            ((SipSessionListener) listener).onSessionError(contact, new SipSessionError(error));
         }
     }
 
@@ -215,5 +205,14 @@ public abstract class GenericSipSession extends ImsServiceSession {
             }
         }
         return null;
+    }
+
+    /**
+     * Gets SIP service
+     * 
+     * @return SIP service
+     */
+    public SipService getSipService() {
+        return mSipService;
     }
 }

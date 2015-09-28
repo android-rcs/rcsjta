@@ -23,16 +23,17 @@
 
 package com.gsma.rcs.core.ims.service.sip.streaming;
 
+import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.core.ims.service.sip.GenericSipSession;
+import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.sip.SipSessionError;
 import com.gsma.rcs.core.ims.service.sip.SipSessionListener;
 import com.gsma.rcs.provider.contact.ContactManager;
@@ -56,31 +57,32 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
 
     private final Intent mSessionInvite;
 
+    private final ImsModule mImsModule;
+
     /**
      * Constructor
      * 
-     * @param parent IMS service
+     * @param parent SIP service
      * @param invite Initial INVITE request
+     * @param imsModule
      * @param contact
      * @param sessionInvite
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
      */
-    public TerminatingSipRtpSession(ImsService parent, SipRequest invite, ContactId contact,
-            Intent sessionInvite, RcsSettings rcsSettings, long timestamp,
+    public TerminatingSipRtpSession(SipService parent, SipRequest invite, ImsModule imsModule,
+            ContactId contact, Intent sessionInvite, RcsSettings rcsSettings, long timestamp,
             ContactManager contactManager) {
         super(parent, contact, GenericSipSession.getIariFeatureTag(invite.getFeatureTags()),
                 rcsSettings, timestamp, contactManager);
-
         mSessionInvite = sessionInvite;
-        // Create dialog path
+        mImsModule = imsModule;
+        /* Create dialog path */
         createTerminatingDialogPath(invite);
     }
 
-    /**
-     * Background processing
-     */
+    @Override
     public void run() {
         boolean logActivated = sLogger.isActivated();
         if (logActivated) {
@@ -93,7 +95,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
             Collection<ImsSessionListener> listeners = getListeners();
             ContactId contact = getRemoteContact();
             for (ImsSessionListener listener : listeners) {
-                ((SipSessionListener) listener).onSessionInvited(contact, mSessionInvite);
+                ((SipSessionListener) listener).onInvitationReceived(contact, mSessionInvite);
             }
 
             InvitationStatus answer = waitInvitationAnswer();
@@ -139,9 +141,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                     if (logActivated) {
                         sLogger.debug("Session has been canceled");
                     }
-
                     removeSession();
-
                     for (ImsSessionListener listener : listeners) {
                         listener.onSessionRejected(contact, TerminationReason.TERMINATION_BY_REMOTE);
                     }
@@ -149,7 +149,6 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
 
                 case INVITATION_ACCEPTED:
                     setSessionAccepted();
-
                     for (ImsSessionListener listener : listeners) {
                         listener.onSessionAccepting(contact);
                     }
@@ -168,13 +167,12 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                                     .valueOf(answer)));
             }
 
-            // Build SDP part
             String sdp = generateSdp();
 
-            // Set the local SDP part in the dialog path
+            /* Set the local SDP part in the dialog path */
             dialogPath.setLocalContent(sdp);
 
-            // Test if the session should be interrupted
+            /* Test if the session should be interrupted */
             if (isInterrupted()) {
                 if (logActivated) {
                     sLogger.debug("Session has been interrupted: end of processing");
@@ -182,46 +180,44 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                 return;
             }
 
-            // Prepare Media Session
+            /* Prepare Media Session */
             prepareMediaSession();
 
-            // Create a 200 OK response
+            /* Create a 200 OK response */
             if (logActivated) {
                 sLogger.info("Send 200 OK");
             }
             SipResponse resp = create200OKResponse();
 
-            // The signalisation is established
+            /* The signalisation is established */
             dialogPath.setSigEstablished();
 
-            // Send response
-            SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
-                    .sendSipMessageAndWait(resp);
+            /* Send response */
+            SipTransactionContext ctx = mImsModule.getSipManager().sendSipMessageAndWait(resp);
 
-            // Analyze the received response
+            /* Analyze the received response */
             if (ctx.isSipAck()) {
-                // ACK received
                 if (logActivated) {
                     sLogger.info("ACK request received");
                 }
 
-                // The session is established
+                /* The session is established */
                 dialogPath.setSessionEstablished();
 
                 /* Start Media transfer */
                 startMediaTransfer();
 
-                // Start session timer
+                /* Start session timer */
                 SessionTimerManager sessionTimerManager = getSessionTimerManager();
                 if (sessionTimerManager.isSessionTimerActivated(resp)) {
                     sessionTimerManager.start(SessionTimerManager.UAS_ROLE,
                             dialogPath.getSessionExpireTime());
                 }
 
-                // Notify listeners
-                for (int j = 0; j < getListeners().size(); j++) {
-                    getListeners().get(j).onSessionStarted(contact);
+                for (ImsSessionListener listener : getListeners()) {
+                    listener.onSessionStarted(contact);
                 }
+
             } else {
                 if (logActivated) {
                     sLogger.debug("No ACK received for INVITE");
@@ -230,17 +226,20 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                 // No response received: timeout
                 handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED));
             }
+
         } catch (PayloadException e) {
             sLogger.error(
                     new StringBuilder("Session initiation has failed for CallId=")
                             .append(getDialogPath().getCallId()).append(" ContactId=")
                             .append(getRemoteContact()).toString(), e);
             handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
+
         } catch (NetworkException e) {
             if (logActivated) {
                 sLogger.debug(e.getMessage());
             }
             handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
+
         } catch (RuntimeException e) {
             /**
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
@@ -259,9 +258,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
         return true;
     }
 
-    /**
-     * Session inactivity event
-     */
+    @Override
     public void handleInactivityEvent() {
         /* Not need in this class */
     }

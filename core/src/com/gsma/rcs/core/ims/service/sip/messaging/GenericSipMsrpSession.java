@@ -37,7 +37,7 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
-import com.gsma.rcs.core.ims.service.ImsService;
+import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionActivityManager;
 import com.gsma.rcs.core.ims.service.sip.GenericSipSession;
 import com.gsma.rcs.core.ims.service.sip.SipService;
@@ -59,50 +59,36 @@ import java.util.Vector;
  * @author jexa7410
  */
 public abstract class GenericSipMsrpSession extends GenericSipSession implements MsrpEventListener {
-    /**
-     * MIME type
-     */
+
     public final static String MIME_TYPE = "text/plain";
 
-    /**
-     * MSRP manager
-     */
     private MsrpManager mMsrpMgr;
 
-    /**
-     * Max message size
-     */
     private int mMaxMsgSize;
 
-    /**
-     * The logger
-     */
-    private final static Logger logger = Logger.getLogger(GenericSipMsrpSession.class
+    private final static Logger sLogger = Logger.getLogger(GenericSipMsrpSession.class
             .getSimpleName());
 
-    /**
-     * Session activity manager
-     */
     private final SessionActivityManager mActivityMgr;
 
     /**
      * Constructor
      * 
-     * @param parent IMS service
+     * @param parent SIP service
      * @param contact Remote contact Id
      * @param featureTag Feature tag
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
      */
-    public GenericSipMsrpSession(ImsService parent, ContactId contact, String featureTag,
+    public GenericSipMsrpSession(SipService parent, ContactId contact, String featureTag,
             RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
         super(parent, contact, featureTag, rcsSettings, timestamp, contactManager);
 
         mMaxMsgSize = rcsSettings.getMaxMsrpLengthForExtensions();
         mActivityMgr = new SessionActivityManager(this, rcsSettings);
 
-        // Create the MSRP manager
+        /* Create the MSRP manager */
         int localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort(rcsSettings);
         String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface()
                 .getNetworkAccess().getIpAddress();
@@ -115,7 +101,7 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
      * @return Max message size
      */
     public int getMaxMessageSize() {
-        return this.mMaxMsgSize;
+        return mMaxMsgSize;
     }
 
     /**
@@ -145,7 +131,7 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
     public String generateSdp(String setup) {
         int msrpPort;
         if ("active".equals(setup)) {
-            msrpPort = 9; // See RFC4145, Page 4
+            msrpPort = 9; /* See RFC4145, Page 4 */
         } else {
             msrpPort = getMsrpMgr().getLocalMsrpPort();
         }
@@ -163,11 +149,9 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
                 + GenericSipMsrpSession.MIME_TYPE + SipUtils.CRLF + "a=sendrecv" + SipUtils.CRLF;
     }
 
-    /**
-     * Prepare media session
-     */
+    @Override
     public void prepareMediaSession() {
-        // Parse the remote SDP part
+        /* Parse the remote SDP part */
         SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(UTF8));
         Vector<MediaDescription> media = parser.getMediaDescriptions();
         MediaDescription mediaDesc = media.elementAt(0);
@@ -176,72 +160,46 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
         String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
         int remotePort = mediaDesc.mPort;
 
-        // Create the MSRP session
+        /* Create the MSRP session */
         MsrpSession session = getMsrpMgr().createMsrpClientSession(remoteHost, remotePort,
                 remoteMsrpPath, this, null);
         session.setFailureReportOption(true);
         session.setSuccessReportOption(false);
     }
 
-    /**
-     * Start media transfer
-     */
+    @Override
     public void startMediaTransfer() {
         // Not to be used here
     }
 
-    /**
-     * Open media session
-     * 
-     * @throws NetworkException
-     * @throws PayloadException
-     */
+    @Override
     public void openMediaSession() throws NetworkException, PayloadException {
         getMsrpMgr().openMsrpSession();
     }
 
-    /**
-     * Close media session
-     */
+    @Override
     public void closeMediaSession() {
         getActivityManager().stop();
-
         if (mMsrpMgr != null) {
             mMsrpMgr.closeSession();
-            if (logger.isActivated()) {
-                logger.debug("MSRP session has been closed");
+            if (sLogger.isActivated()) {
+                sLogger.debug("MSRP session has been closed");
             }
         }
-
     }
 
-    /**
-     * Session inactivity event
-     * 
-     * @throws NetworkException
-     * @throws PayloadException
-     */
     @Override
     public void handleInactivityEvent() throws PayloadException, NetworkException {
-        if (logger.isActivated()) {
-            logger.debug("Session inactivity event");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Session inactivity event");
         }
-
         terminateSession(TerminationReason.TERMINATION_BY_INACTIVITY);
     }
 
-    /**
-     * Handle 200 0K response
-     * 
-     * @param resp 200 OK response
-     * @throws PayloadException
-     * @throws NetworkException
-     * @throws FileAccessException
-     */
+    @Override
     public void handle200OK(SipResponse resp) throws PayloadException, NetworkException,
             FileAccessException {
         super.handle200OK(resp);
-
         getActivityManager().start();
     }
 
@@ -258,109 +216,74 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
                 TypeMsrpChunk.Unknown);
     }
 
-    /**
-     * Data has been transfered
-     * 
-     * @param msgId Message ID
-     */
+    @Override
     public void msrpDataTransfered(String msgId) {
-        if (logger.isActivated()) {
-            logger.info("Data transfered");
+        if (sLogger.isActivated()) {
+            sLogger.info("Data transferred");
         }
-
         mActivityMgr.updateActivity();
     }
 
-    /**
-     * Data transfer has been received
-     * 
-     * @param msgId Message ID
-     * @param data Received data
-     * @param mimeType Data mime-type
-     */
+    @Override
     public void receiveMsrpData(String msgId, byte[] data, String mimeType) {
-        if (logger.isActivated()) {
-            logger.info("Data received (type " + mimeType + ")");
+        if (sLogger.isActivated()) {
+            sLogger.info("Data received (type " + mimeType + ")");
         }
-
         mActivityMgr.updateActivity();
-
         if ((data == null) || (data.length == 0)) {
             // By-pass empty data
-            if (logger.isActivated()) {
-                logger.debug("By-pass received empty data");
+            if (sLogger.isActivated()) {
+                sLogger.debug("By-pass received empty data");
             }
             return;
         }
-
         ContactId contact = getRemoteContact();
-        for (int i = 0; i < getListeners().size(); i++) {
-            ((SipSessionListener) getListeners().get(i)).onDataReceived(contact, data);
+        for (ImsSessionListener listener : getListeners()) {
+            ((SipSessionListener) listener).onDataReceived(contact, data);
         }
     }
 
-    /**
-     * Data transfer in progress
-     * 
-     * @param currentSize Current transfered size in bytes
-     * @param totalSize Total size in bytes
-     */
+    @Override
     public void msrpTransferProgress(long currentSize, long totalSize) {
         // Not used here
     }
 
-    /**
-     * Data transfer in progress
-     * 
-     * @param currentSize Current transfered size in bytes
-     * @param totalSize Total size in bytes
-     * @param data received data chunk
-     * @return true if data are processed and can be delete in cache. If false, so data were stored
-     *         in MsrpSession cache until msrpDataReceived is called.
-     */
+    @Override
     public boolean msrpTransferProgress(long currentSize, long totalSize, byte[] data) {
         // Not used here
         return false;
     }
 
-    /**
-     * Data transfer has been aborted
-     */
+    @Override
     public void msrpTransferAborted() {
         // Not used here
     }
 
-    /**
-     * Data transfer error
-     * 
-     * @param msgId Message ID
-     * @param error Error code
-     * @param typeMsrpChunk Type of MSRP chunk
-     */
+    @Override
     public void msrpTransferError(String msgId, String error, TypeMsrpChunk typeMsrpChunk) {
         if (isSessionInterrupted()) {
             return;
         }
 
-        if (logger.isActivated()) {
-            logger.info("Data transfer error " + error);
+        if (sLogger.isActivated()) {
+            sLogger.info("Data transfer error " + error);
         }
 
         ContactId contact = getRemoteContact();
-        for (int i = 0; i < getListeners().size(); i++) {
-            ((SipSessionListener) getListeners().get(i)).handleSessionError(contact,
-                    new SipSessionError(SipSessionError.MEDIA_FAILED, error));
+        for (ImsSessionListener listener : getListeners()) {
+            ((SipSessionListener) listener).onSessionError(contact, new SipSessionError(
+                    SipSessionError.MEDIA_FAILED, error));
         }
     }
 
     @Override
     public void startSession() {
-        getImsService().getImsModule().getSipService().addSession(this);
+        getSipService().addSession(this);
         start();
     }
 
     @Override
     public void removeSession() {
-        getImsService().getImsModule().getSipService().removeSession(this);
+        getSipService().removeSession(this);
     }
 }

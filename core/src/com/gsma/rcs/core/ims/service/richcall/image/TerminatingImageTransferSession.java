@@ -44,9 +44,9 @@ import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
+import com.gsma.rcs.core.ims.service.capability.CapabilityService;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
@@ -69,43 +69,36 @@ import java.util.Vector;
  */
 public class TerminatingImageTransferSession extends ImageTransferSession implements
         MsrpEventListener {
-    /**
-     * MSRP manager
-     */
+
     private MsrpManager msrpMgr;
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(TerminatingImageTransferSession.class
             .getName());
 
     /**
      * Constructor
      * 
-     * @param parent IMS service
+     * @param parent Richcall service
      * @param invite Initial INVITE request
      * @param contact Contact ID
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param capabilityService
      * @throws PayloadException
      * @throws FileAccessException
      */
-    public TerminatingImageTransferSession(ImsService parent, SipRequest invite, ContactId contact,
-            RcsSettings rcsSettings, long timestamp, ContactManager contactManager)
+    public TerminatingImageTransferSession(RichcallService parent, SipRequest invite,
+            ContactId contact, RcsSettings rcsSettings, long timestamp,
+            ContactManager contactManager, CapabilityService capabilityService)
             throws PayloadException, FileAccessException {
         super(parent, ContentManager.createMmContentFromSdp(invite, rcsSettings), contact,
                 FileTransferUtils.extractFileIcon(invite, rcsSettings), rcsSettings, timestamp,
-                contactManager);
-
-        // Create dialog path
+                contactManager, capabilityService);
         createTerminatingDialogPath(invite);
     }
 
-    /**
-     * Background processing
-     */
+    @Override
     public void run() {
         try {
             if (sLogger.isActivated()) {
@@ -128,7 +121,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
             MmContent content = getContent();
             long timestamp = getTimestamp();
             for (ImsSessionListener listener : listeners) {
-                ((ImageTransferSessionListener) listener).handleSessionInvited(contact, content,
+                ((ImageTransferSessionListener) listener).onInvitationReceived(contact, content,
                         timestamp);
             }
 
@@ -314,14 +307,17 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                 }
                 handleError(new ContentSharingError(ContentSharingError.SEND_RESPONSE_FAILED));
             }
+
         } catch (PayloadException e) {
             sLogger.error("Failed to send 200OK response!", e);
             handleError(new ContentSharingError(ContentSharingError.SEND_RESPONSE_FAILED, e));
+
         } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
             handleError(new ContentSharingError(ContentSharingError.SEND_RESPONSE_FAILED, e));
+
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
@@ -343,102 +339,72 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
         msrpMgr.sendEmptyChunk();
     }
 
-    /**
-     * Data has been transfered
-     * 
-     * @param msgId Message ID
-     */
+    @Override
     public void msrpDataTransfered(String msgId) {
         // Not used in terminating side
     }
 
-    /**
-     * Data transfer has been received
-     * 
-     * @param msgId Message ID
-     * @param data Last received data chunk
-     * @param mimeType Data mime-type
-     */
+    @Override
     public void receiveMsrpData(String msgId, byte[] data, String mimeType) {
         if (sLogger.isActivated()) {
             sLogger.info("Data received");
         }
-        imageTransfered();
-
+        setImageTransferred();
         ContactId contact = getRemoteContact();
         try {
             getContent().writeData2File(data);
             getContent().closeFile();
 
             Uri image = getContent().getUri();
-            for (int j = 0; j < getListeners().size(); j++) {
-                ((ImageTransferSessionListener) getListeners().get(j)).handleContentTransfered(
-                        contact, image);
+            for (ImsSessionListener listener : getListeners()) {
+                ((ImageTransferSessionListener) listener).onContentTransferred(contact, image);
             }
+            
         } catch (FileAccessException e) {
             deleteFile();
-            for (int j = 0; j < getListeners().size(); j++) {
-                ((ImageTransferSessionListener) getListeners().get(j)).handleSharingError(contact,
+            for (ImsSessionListener listener : getListeners()) {
+                ((ImageTransferSessionListener) listener).onSharingError(contact,
                         new ContentSharingError(ContentSharingError.MEDIA_SAVING_FAILED));
             }
         }
     }
 
-    /**
-     * Data transfer in progress
-     * 
-     * @param currentSize Current transfered size in bytes
-     * @param totalSize Total size in bytes
-     */
+    @Override
     public void msrpTransferProgress(long currentSize, long totalSize) {
         // Not used
     }
 
-    /**
-     * Data transfer in progress
-     * 
-     * @param currentSize Current transfered size in bytes
-     * @param totalSize Total size in bytes
-     * @param data received data chunk
-     * @return always true TODO
-     */
+    @Override
     public boolean msrpTransferProgress(long currentSize, long totalSize, byte[] data) {
         ContactId contact = getRemoteContact();
         try {
             getContent().writeData2File(data);
-            for (int j = 0; j < getListeners().size(); j++) {
-                ((ImageTransferSessionListener) getListeners().get(j)).handleSharingProgress(
-                        contact, currentSize, totalSize);
+            for (ImsSessionListener listener : getListeners()) {
+                ((ImageTransferSessionListener) listener).onSharingProgress(contact, currentSize,
+                        totalSize);
             }
+            
         } catch (FileAccessException e) {
             deleteFile();
-            for (int j = 0; j < getListeners().size(); j++) {
-                ((ImageTransferSessionListener) getListeners().get(j)).handleSharingError(contact,
+            for (ImsSessionListener listener : getListeners()) {
+                ((ImageTransferSessionListener) listener).onSharingError(contact,
                         new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
             }
         }
         return true;
     }
 
-    /**
-     * Data transfer has been aborted
-     */
+    @Override
     public void msrpTransferAborted() {
         if (sLogger.isActivated()) {
             sLogger.info("Data transfer aborted");
         }
-        if (!isImageTransfered()) {
+        if (!isImageTransferred()) {
             deleteFile();
         }
     }
 
-    /**
-     * Data transfer error
-     * 
-     * @param msgId Message ID
-     * @param error Error code
-     * @param typeMsrpChunk Type of MSRP chunk
-     */
+    @Override
     public void msrpTransferError(String msgId, String error, TypeMsrpChunk typeMsrpChunk) {
         try {
             if (isSessionInterrupted() || isInterrupted() || getDialogPath().isSessionTerminated()) {
@@ -453,25 +419,27 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
             closeMediaSession();
 
             ContactId contact = getRemoteContact();
-            getImsService().getImsModule().getCapabilityService()
-                    .requestContactCapabilities(contact);
+            getCapabilityService().requestContactCapabilities(contact);
             removeSession();
 
-            if (isImageTransfered()) {
+            if (isImageTransferred()) {
                 return;
             }
             for (ImsSessionListener listener : getListeners()) {
-                ((ImageTransferSessionListener) listener).handleSharingError(contact,
+                ((ImageTransferSessionListener) listener).onSharingError(contact,
                         new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
             }
+            
         } catch (PayloadException e) {
             sLogger.error(
                     new StringBuilder("Failed to handle msrp error").append(error)
                             .append(" for message ").append(msgId).toString(), e);
+
         } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
+
         } catch (RuntimeException e) {
             /*
              * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
@@ -485,30 +453,22 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
         }
     }
 
-    /**
-     * Prepare media session
-     */
+    @Override
     public void prepareMediaSession() {
         /* Nothing to do in terminating side */
     }
 
-    /**
-     * Open media session
-     */
+    @Override
     public void openMediaSession() {
         /* Nothing to do in terminating side */
     }
 
-    /**
-     * Start media transfer
-     */
+    @Override
     public void startMediaTransfer() {
         /* Nothing to do in terminating side */
     }
 
-    /**
-     * Close media session
-     */
+    @Override
     public void closeMediaSession() {
         if (msrpMgr != null) {
             msrpMgr.closeSession();
@@ -516,7 +476,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
         if (sLogger.isActivated()) {
             sLogger.debug("MSRP session has been closed");
         }
-        if (!isImageTransfered()) {
+        if (!isImageTransferred()) {
             deleteFile();
         }
     }

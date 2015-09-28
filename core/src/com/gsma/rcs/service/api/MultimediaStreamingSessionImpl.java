@@ -22,6 +22,9 @@
 
 package com.gsma.rcs.service.api;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
+import com.gsma.rcs.core.ims.protocol.rtp.RtpException;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.InvitationStatus;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
@@ -160,6 +163,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
             SipDialogPath dialogPath = session.getDialogPath();
             if (dialogPath != null && dialogPath.isSessionEstablished()) {
                 return State.STARTED.toInt();
+
             } else if (session.isInitiatedByRemote()) {
                 if (session.isSessionAccepted()) {
                     return State.ACCEPTING.toInt();
@@ -268,27 +272,33 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
      * @throws RemoteException
      */
     public void acceptInvitation() throws RemoteException {
-        try {
-            if (sLogger.isActivated()) {
-                sLogger.info("Accept session invitation");
-            }
-            final GenericSipRtpSession session = mSipService.getGenericSipRtpSession(mSessionId);
-            if (session == null) {
-                throw new ServerApiGenericException(new StringBuilder("Session with session ID '")
-                        .append(mSessionId).append("' not available!").toString());
-            }
-            ServerApiUtils.testApiExtensionPermission(session.getServiceId());
-            session.acceptSession();
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
+        mSipService.scheduleMultimediaStreamingOperation(new Runnable() {
+            public void run() {
+                try {
+                    if (sLogger.isActivated()) {
+                        sLogger.info("Accept session invitation");
+                    }
+                    final GenericSipRtpSession session = mSipService
+                            .getGenericSipRtpSession(mSessionId);
+                    if (session == null) {
+                        sLogger.debug("Cannot accept: no session ID=".concat(mSessionId));
+                        return;
+                    }
+                    ServerApiUtils.testApiExtensionPermission(session.getServiceId());
+                    session.acceptSession();
 
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error("Failed to accept session with ID: ".concat(mSessionId), e);
+                }
+            }
+        });
     }
 
     /**
@@ -297,27 +307,33 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
      * @throws RemoteException
      */
     public void rejectInvitation() throws RemoteException {
-        try {
-            if (sLogger.isActivated()) {
-                sLogger.info("Reject session invitation");
-            }
-            final GenericSipRtpSession session = mSipService.getGenericSipRtpSession(mSessionId);
-            if (session == null) {
-                throw new ServerApiGenericException(new StringBuilder("Session with session ID '")
-                        .append(mSessionId).append("' not available!").toString());
-            }
-            ServerApiUtils.testApiExtensionPermission(session.getServiceId());
-            session.rejectSession(InvitationStatus.INVITATION_REJECTED_DECLINE);
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
+        mSipService.scheduleMultimediaStreamingOperation(new Runnable() {
+            public void run() {
+                try {
+                    if (sLogger.isActivated()) {
+                        sLogger.info("Reject session invitation");
+                    }
+                    final GenericSipRtpSession session = mSipService
+                            .getGenericSipRtpSession(mSessionId);
+                    if (session == null) {
+                        sLogger.debug("Cannot reject: no session ID=".concat(mSessionId));
+                        return;
+                    }
+                    ServerApiUtils.testApiExtensionPermission(session.getServiceId());
+                    session.rejectSession(InvitationStatus.INVITATION_REJECTED_DECLINE);
 
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error("Failed to reject session with ID: ".concat(mSessionId), e);
+                }
+            }
+        });
     }
 
     /**
@@ -326,33 +342,47 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
      * @throws RemoteException
      */
     public void abortSession() throws RemoteException {
-        try {
-            if (sLogger.isActivated()) {
-                sLogger.info("Abort session");
-            }
-            final GenericSipRtpSession session = mSipService.getGenericSipRtpSession(mSessionId);
-            if (session == null) {
-                sLogger.debug("No ongoing session with id:" + mSessionId
-                        + " is found so nothing to abort!");
-                return;
-            }
-            if (session.isSessionInterrupted()) {
-                sLogger.debug("Session with sharing ID:" + mSessionId + " is already aborted!");
-                return;
-            }
-            ServerApiUtils.testApiExtensionPermission(session.getServiceId());
-            session.terminateSession(TerminationReason.TERMINATION_BY_USER);
+        mSipService.scheduleMultimediaStreamingOperation(new Runnable() {
+            public void run() {
+                try {
+                    if (sLogger.isActivated()) {
+                        sLogger.info("Abort session");
+                    }
+                    final GenericSipRtpSession session = mSipService
+                            .getGenericSipRtpSession(mSessionId);
+                    if (session == null) {
+                        sLogger.debug("No ongoing session with id:" + mSessionId
+                                + " is found so nothing to abort!");
+                        return;
+                    }
+                    if (session.isSessionInterrupted()) {
+                        sLogger.debug("Session with sharing ID:" + mSessionId
+                                + " is already aborted!");
+                        return;
+                    }
+                    ServerApiUtils.testApiExtensionPermission(session.getServiceId());
+                    session.terminateSession(TerminationReason.TERMINATION_BY_USER);
 
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
+                } catch (PayloadException e) {
+                    sLogger.error("Failed to abort session with ID: ".concat(mSessionId), e);
 
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
+                } catch (NetworkException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.error("Failed to abort session with ID: ".concat(mSessionId), e);
+                    }
+
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error("Failed to abort session with ID: ".concat(mSessionId), e);
+                }
+            }
+        });
     }
 
     /**
@@ -361,35 +391,48 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
      * @param content Payload content
      * @throws RemoteException
      */
-    public void sendPayload(byte[] content) throws RemoteException {
+    public void sendPayload(final byte[] content) throws RemoteException {
         if (content == null || content.length == 0) {
             throw new ServerApiIllegalArgumentException("content must not be null or empty!");
         }
-        try {
-            GenericSipRtpSession session = mSipService.getGenericSipRtpSession(mSessionId);
-            if (session == null) {
-                throw new ServerApiGenericException(new StringBuilder("Session with session ID '")
-                        .append(mSessionId).append("' not available!").toString());
-            }
-            ServerApiUtils.testApiExtensionPermission(session.getServiceId());
-            session.sendPlayload(content);
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
+        mSipService.scheduleMultimediaStreamingOperation(new Runnable() {
+            public void run() {
+                try {
+                    GenericSipRtpSession session = mSipService.getGenericSipRtpSession(mSessionId);
+                    if (session == null) {
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("Session with session ID '" + mSessionId
+                                    + "' not available!");
+                        }
+                        return;
+                    }
+                    ServerApiUtils.testApiExtensionPermission(session.getServiceId());
+                    session.sendPlayload(content);
 
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
+                } catch (RtpException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.warn("Failed to send payload within session with ID: "
+                                .concat(mSessionId), e);
+                    }
+
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error(
+                            "Failed to send payload within session with ID: ".concat(mSessionId), e);
+                }
+            }
+        });
     }
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/
 
-    /**
-     * Session is started
-     */
+    @Override
     public void onSessionStarted(ContactId contact) {
         if (sLogger.isActivated()) {
             sLogger.info("Session started");
@@ -399,11 +442,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
         }
     }
 
-    /**
-     * Session has been aborted
-     * 
-     * @param reason Termination reason
-     */
+    @Override
     public void onSessionAborted(ContactId contact, TerminationReason reason) {
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("Session aborted (terminationReason ").append(reason)
@@ -431,13 +470,8 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
         }
     }
 
-    /**
-     * Session error
-     * 
-     * @param contact Remote contact
-     * @param error Error
-     */
-    public void handleSessionError(ContactId contact, SipSessionError error) {
+    @Override
+    public void onSessionError(ContactId contact, SipSessionError error) {
         if (sLogger.isActivated()) {
             sLogger.info("Session error " + error.getErrorCode());
         }
@@ -461,12 +495,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
         }
     }
 
-    /**
-     * Receive data
-     * 
-     * @param data Data
-     * @param contact
-     */
+    @Override
     public void onDataReceived(ContactId contact, byte[] data) {
         synchronized (mLock) {
             mBroadcaster.broadcastPayloadReceived(contact, mSessionId, data);
@@ -507,7 +536,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
     }
 
     @Override
-    public void onSessionInvited(ContactId contact, Intent sessionInvite) {
+    public void onInvitationReceived(ContactId contact, Intent sessionInvite) {
         if (sLogger.isActivated()) {
             sLogger.info("Invited to multimedia streaming session");
         }

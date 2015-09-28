@@ -97,9 +97,12 @@ public class ImsModule implements SipEventListener {
      * 
      * @param core Core
      * @param ctx The context this module is part of
+     * @param localContentResolver
      * @param rcsSettings RCSsettings instance
      * @param contactManager Contact manager accessor
      * @param messagingLog Messaging log accessor
+     * @param historyLog
+     * @param richCallHistory
      * @param addressBookManager The address book manager instance
      */
     public ImsModule(Core core, Context ctx, LocalContentResolver localContentResolver,
@@ -122,7 +125,8 @@ public class ImsModule implements SipEventListener {
                 rcsSettings, contactManager, messagingLog, historyLog, localContentResolver, ctx,
                 core));
         mServices.put(ImsServiceType.RICHCALL, new RichcallService(this, richCallHistory,
-                contactManager, rcsSettings, mCallManager, localContentResolver));
+                contactManager, rcsSettings, mCallManager, localContentResolver,
+                getCapabilityService()));
         mServices.put(ImsServiceType.PRESENCE, new PresenceService(this, ctx, rcsSettings,
                 contactManager, addressBookManager));
         mServices.put(ImsServiceType.SIP, new SipService(this, contactManager, rcsSettings));
@@ -439,7 +443,7 @@ public class ImsModule implements SipEventListener {
     /**
      * Gets IMS user profile
      * 
-     * @return
+     * @return IMS user profile
      */
     public static UserProfile getImsUserProfile() {
         return sImsUserProfile;

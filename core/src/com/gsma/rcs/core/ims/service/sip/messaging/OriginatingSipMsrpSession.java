@@ -27,8 +27,8 @@ import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
+import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.sip.SipSessionError;
 import com.gsma.rcs.core.ims.service.sip.SipSessionListener;
 import com.gsma.rcs.provider.contact.ContactManager;
@@ -46,94 +46,91 @@ import javax2.sip.InvalidArgumentException;
  * @author jexa7410
  */
 public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
-    /**
-     * The logger
-     */
+
     private static final Logger sLogger = Logger.getLogger(OriginatingSipMsrpSession.class
             .getSimpleName());
 
     /**
      * Constructor
      * 
-     * @param parent IMS service
+     * @param parent SIP service
      * @param contact Remote contact Id
      * @param featureTag Feature tag
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
      */
-    public OriginatingSipMsrpSession(ImsService parent, ContactId contact, String featureTag,
+    public OriginatingSipMsrpSession(SipService parent, ContactId contact, String featureTag,
             RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
         super(parent, contact, featureTag, rcsSettings, timestamp, contactManager);
-
-        // Create dialog path
         createOriginatingDialogPath();
     }
 
-    /**
-     * Background processing
-     */
+    @Override
     public void run() {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info("Initiate a new MSRP session as originating");
             }
 
-            // Set setup mode
+            /* Set setup mode */
             String localSetup = createMobileToMobileSetupOffer();
             if (sLogger.isActivated()) {
                 sLogger.debug("Local setup attribute is ".concat(localSetup));
             }
 
-            // Build SDP offer
+            /* Build SDP offer */
             String sdp = generateSdp(localSetup);
 
-            // Set the local SDP part in the dialog path
+            /* Set the local SDP part in the dialog path */
             getDialogPath().setLocalContent(sdp);
 
-            // Create an INVITE request
             if (sLogger.isActivated()) {
                 sLogger.info("Send INVITE");
             }
             SipRequest invite = createInvite();
 
-            // Set the Authorization header
             getAuthenticationAgent().setAuthorizationHeader(invite);
 
-            // Set initial request in the dialog path
+            /* Set initial request in the dialog path */
             getDialogPath().setInvite(invite);
 
-            // Send INVITE request
             sendInvite(invite);
+
         } catch (InvalidArgumentException e) {
             sLogger.error(
                     new StringBuilder("Session initiation has failed for CallId=")
                             .append(getDialogPath().getCallId()).append(" ContactId=")
                             .append(getRemoteContact()).toString(), e);
             handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED, e));
+
         } catch (ParseException e) {
             sLogger.error(
                     new StringBuilder("Session initiation has failed for CallId=")
                             .append(getDialogPath().getCallId()).append(" ContactId=")
                             .append(getRemoteContact()).toString(), e);
             handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED, e));
+
         } catch (FileAccessException e) {
             sLogger.error(
                     new StringBuilder("Session initiation has failed for CallId=")
                             .append(getDialogPath().getCallId()).append(" ContactId=")
                             .append(getRemoteContact()).toString(), e);
             handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED, e));
+
         } catch (PayloadException e) {
             sLogger.error(
                     new StringBuilder("Session initiation has failed for CallId=")
                             .append(getDialogPath().getCallId()).append(" ContactId=")
                             .append(getRemoteContact()).toString(), e);
             handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED, e));
+
         } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
             handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED, e));
+
         } catch (RuntimeException e) {
             /**
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and

@@ -26,8 +26,9 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
+import com.gsma.rcs.core.ims.service.ImsSessionListener;
+import com.gsma.rcs.core.ims.service.capability.CapabilityService;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingSession;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
@@ -48,35 +49,28 @@ public abstract class GeolocTransferSession extends ContentSharingSession {
      */
     public final static long DEFAULT_SO_TIMEOUT = 30000;
 
-    /**
-     * Geoloc transfered
-     */
     private boolean mGeolocTransferred = false;
 
-    /**
-     * Geoloc info
-     */
     private Geoloc mGeoloc;
 
-    /**
-     * The logger
-     */
-    private static final Logger logger = Logger.getLogger(GeolocTransferSession.class
+    private static final Logger sLogger = Logger.getLogger(GeolocTransferSession.class
             .getSimpleName());
 
     /**
      * Constructor
      * 
-     * @param parent IMS service
+     * @param parent Richcall service
      * @param content Content to be shared
      * @param contact Remote contact Id
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param capabilityService
      */
-    public GeolocTransferSession(ImsService parent, MmContent content, ContactId contact,
-            RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
-        super(parent, content, contact, rcsSettings, timestamp, contactManager);
+    public GeolocTransferSession(RichcallService parent, MmContent content, ContactId contact,
+            RcsSettings rcsSettings, long timestamp, ContactManager contactManager,
+            CapabilityService capabilityService) {
+        super(parent, content, contact, rcsSettings, timestamp, contactManager, capabilityService);
     }
 
     /**
@@ -98,18 +92,18 @@ public abstract class GeolocTransferSession extends ContentSharingSession {
     }
 
     /**
-     * Geoloc has been transfered
+     * Sets Geoloc transferred
      */
-    public void geolocTransfered() {
-        this.mGeolocTransferred = true;
+    public void setGeolocTransferred() {
+        mGeolocTransferred = true;
     }
 
     /**
-     * Is geoloc transfered
+     * Is geoloc transferred
      * 
      * @return Boolean
      */
-    public boolean isGeolocTransfered() {
+    public boolean isGeolocTransferred() {
         return mGeolocTransferred;
     }
 
@@ -140,33 +134,27 @@ public abstract class GeolocTransferSession extends ContentSharingSession {
         if (isSessionInterrupted()) {
             return;
         }
-
-        // Error
-        if (logger.isActivated()) {
-            logger.info("Session error: " + error.getErrorCode() + ", reason=" + error.getMessage());
+        if (sLogger.isActivated()) {
+            sLogger.info("Session error: " + error.getErrorCode() + ", reason="
+                    + error.getMessage());
         }
-
-        // Close MSRP session
         closeMediaSession();
-
-        // Remove the current session
         removeSession();
-
         ContactId contact = getRemoteContact();
-        for (int j = 0; j < getListeners().size(); j++) {
-            ((GeolocTransferSessionListener) getListeners().get(j)).handleSharingError(contact,
+        for (ImsSessionListener listener : getListeners()) {
+            ((GeolocTransferSessionListener) listener).onSharingError(contact,
                     new ContentSharingError(error));
         }
     }
 
     @Override
     public void startSession() {
-        getImsService().getImsModule().getRichcallService().addSession(this);
+        getRichcallService().addSession(this);
         start();
     }
 
     @Override
     public void removeSession() {
-        getImsService().getImsModule().getRichcallService().removeSession(this);
+        getRichcallService().removeSession(this);
     }
 }

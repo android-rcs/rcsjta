@@ -43,6 +43,8 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.Intent;
+import android.os.Handler;
+import android.os.HandlerThread;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -55,9 +57,11 @@ import javax2.sip.message.Response;
  * @author Jean-Marc AUFFRET
  */
 public class SipService extends ImsService {
-    /**
-     * The logger
-     */
+
+    private static final String MM_MESSAGING_OPERATION_THREAD_NAME = "MmmOperations";
+
+    private static final String MM_STREAMING_OPERATION_THREAD_NAME = "MmsOperations";
+
     private final static Logger sLogger = Logger.getLogger(SipService.class.getSimpleName());
 
     /**
@@ -81,6 +85,9 @@ public class SipService extends ImsService {
 
     private MultimediaSessionServiceImpl mMmSessionService;
 
+    private final Handler mMultimediaMessagingOperationHandler;
+    private final Handler mMultimediaStreamingOperationHandler;
+
     /**
      * Constructor
      * 
@@ -90,9 +97,16 @@ public class SipService extends ImsService {
      */
     public SipService(ImsModule parent, ContactManager contactManager, RcsSettings rcsSettings) {
         super(parent, true);
-
         mContactManager = contactManager;
         mRcsSettings = rcsSettings;
+        mMultimediaMessagingOperationHandler = allocateBgHandler(MM_MESSAGING_OPERATION_THREAD_NAME);
+        mMultimediaStreamingOperationHandler = allocateBgHandler(MM_STREAMING_OPERATION_THREAD_NAME);
+    }
+
+    private Handler allocateBgHandler(String threadName) {
+        HandlerThread thread = new HandlerThread(threadName);
+        thread.start();
+        return new Handler(thread.getLooper());
     }
 
     public void register(MultimediaSessionServiceImpl service) {
@@ -100,6 +114,14 @@ public class SipService extends ImsService {
             sLogger.debug(service.getClass().getName() + " registered ok.");
         }
         mMmSessionService = service;
+    }
+
+    public void scheduleMultimediaMessagingOperation(Runnable runnable) {
+        mMultimediaMessagingOperationHandler.post(runnable);
+    }
+
+    public void scheduleMultimediaStreamingOperation(Runnable runnable) {
+        mMultimediaStreamingOperationHandler.post(runnable);
     }
 
     /**
@@ -141,13 +163,8 @@ public class SipService extends ImsService {
         if (sLogger.isActivated()) {
             sLogger.info("Initiate a MSRP session with contact " + contact);
         }
-
-        // Create a new session
-        long timestamp = System.currentTimeMillis();
-        OriginatingSipMsrpSession session = new OriginatingSipMsrpSession(this, contact,
-                featureTag, mRcsSettings, timestamp, mContactManager);
-
-        return session;
+        return new OriginatingSipMsrpSession(this, contact, featureTag, mRcsSettings,
+                System.currentTimeMillis(), mContactManager);
     }
 
     /**
@@ -156,10 +173,8 @@ public class SipService extends ImsService {
      * @param sessionInvite Resolved intent
      * @param invite Initial invite
      * @param timestamp Local timestamp when got SipRequest
-     * @throws NetworkException
-     * @throws PayloadException
      */
-    public void onMsrpSessionInvitationReceived(Intent sessionInvite, SipRequest invite,
+    public void onMsrpSessionInvitationReceived(final Intent sessionInvite, SipRequest invite,
             long timestamp) {
         try {
             PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(SipUtils
@@ -185,20 +200,39 @@ public class SipService extends ImsService {
                 return;
             }
 
-            TerminatingSipMsrpSession session = new TerminatingSipMsrpSession(this, invite, remote,
-                    sessionInvite, mRcsSettings, timestamp, mContactManager);
+            final TerminatingSipMsrpSession session = new TerminatingSipMsrpSession(this, invite,
+                    getImsModule(), remote, sessionInvite, mRcsSettings, timestamp, mContactManager);
 
-            mMmSessionService.receiveSipMsrpSessionInvitation(sessionInvite, session);
+            mMultimediaMessagingOperationHandler.post(new Runnable() {
 
-            session.startSession();
+                @Override
+                public void run() {
+                    try {
+                        mMmSessionService.receiveSipMsrpSessionInvitation(sessionInvite, session);
+                        session.startSession();
+
+                    } catch (RuntimeException e) {
+                        /*
+                         * Normally we are not allowed to catch runtime exceptions as these are
+                         * genuine bugs which should be handled/fixed within the code. However the
+                         * cases when we are executing operations on a thread unhandling such
+                         * exceptions will eventually lead to exit the system and thus can bring the
+                         * whole system down, which is not intended.
+                         */
+                        sLogger.error("Failed to receive generic MSRP session invitation!", e);
+                    }
+                }
+            });
 
         } catch (NetworkException e) {
             if (sLogger.isActivated()) {
-                sLogger.debug("Failed to receive generic msrp session invitation! ("
+                sLogger.debug("Failed to receive generic MSRP session invitation! ("
                         + e.getMessage() + ")");
             }
+
         } catch (PayloadException e) {
-            sLogger.error("Failed to receive generic msrp session invitation!", e);
+            sLogger.error("Failed to receive generic MSRP session invitation!", e);
+
         } catch (RuntimeException e) {
             /*
              * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
@@ -206,7 +240,7 @@ public class SipService extends ImsService {
              * executing operations on a thread unhandling such exceptions will eventually lead to
              * exit the system and thus can bring the whole system down, which is not intended.
              */
-            sLogger.error("Failed to receive generic msrp session invitation!", e);
+            sLogger.error("Failed to receive generic MSRP session invitation!", e);
         }
     }
 
@@ -221,13 +255,8 @@ public class SipService extends ImsService {
         if (sLogger.isActivated()) {
             sLogger.info("Initiate a RTP session with contact " + contact);
         }
-
-        // Create a new session
-        long timestamp = System.currentTimeMillis();
-        OriginatingSipRtpSession session = new OriginatingSipRtpSession(this, contact, featureTag,
-                mRcsSettings, timestamp, mContactManager);
-
-        return session;
+        return new OriginatingSipRtpSession(this, contact, featureTag, mRcsSettings,
+                System.currentTimeMillis(), mContactManager);
     }
 
     /**
@@ -236,10 +265,8 @@ public class SipService extends ImsService {
      * @param sessionInvite Resolved intent
      * @param invite Initial invite
      * @param timestamp Local timestamp when got SipRequest
-     * @throws NetworkException
-     * @throws PayloadException
      */
-    public void onRtpSessionInvitationReceived(Intent sessionInvite, SipRequest invite,
+    public void onRtpSessionInvitationReceived(final Intent sessionInvite, SipRequest invite,
             long timestamp) {
         try {
             PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(SipUtils
@@ -265,20 +292,39 @@ public class SipService extends ImsService {
                 return;
             }
 
-            TerminatingSipRtpSession session = new TerminatingSipRtpSession(this, invite, remote,
-                    sessionInvite, mRcsSettings, timestamp, mContactManager);
+            final TerminatingSipRtpSession session = new TerminatingSipRtpSession(this, invite,
+                    getImsModule(), remote, sessionInvite, mRcsSettings, timestamp, mContactManager);
 
-            mMmSessionService.receiveSipRtpSessionInvitation(sessionInvite, session);
+            mMultimediaStreamingOperationHandler.post(new Runnable() {
 
-            session.startSession();
+                @Override
+                public void run() {
+                    try {
+                        mMmSessionService.receiveSipRtpSessionInvitation(sessionInvite, session);
+                        session.startSession();
+
+                    } catch (RuntimeException e) {
+                        /*
+                         * Normally we are not allowed to catch runtime exceptions as these are
+                         * genuine bugs which should be handled/fixed within the code. However the
+                         * cases when we are executing operations on a thread unhandling such
+                         * exceptions will eventually lead to exit the system and thus can bring the
+                         * whole system down, which is not intended.
+                         */
+                        sLogger.error("Failed to receive generic RTP session invitation!", e);
+                    }
+                }
+            });
 
         } catch (NetworkException e) {
             if (sLogger.isActivated()) {
-                sLogger.debug("Failed to receive generic rtp session invitation! (" + e.getMessage()
-                        + ")");
+                sLogger.debug("Failed to receive generic RTP session invitation! ("
+                        + e.getMessage() + ")");
             }
+
         } catch (PayloadException e) {
-            sLogger.error("Failed to receive generic rtp session invitation!", e);
+            sLogger.error("Failed to receive generic RTP session invitation!", e);
+
         } catch (RuntimeException e) {
             /*
              * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
@@ -286,7 +332,7 @@ public class SipService extends ImsService {
              * executing operations on a thread unhandling such exceptions will eventually lead to
              * exit the system and thus can bring the whole system down, which is not intended.
              */
-            sLogger.error("Failed to receive generic rtp session invitation!", e);
+            sLogger.error("Failed to receive generic RTP session invitation!", e);
         }
     }
 

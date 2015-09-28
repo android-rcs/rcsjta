@@ -539,9 +539,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/
 
-    /**
-     * Session is started
-     */
+    @Override
     public void onSessionStarted(ContactId contact) {
         if (sLogger.isActivated()) {
             sLogger.info("Session started");
@@ -551,12 +549,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         }
     }
 
-    /**
-     * Session has been aborted
-     * 
-     * @param reason Termination reason
-     */
-
+    @Override
     public void onSessionAborted(ContactId contact, TerminationReason reason) {
         if (sLogger.isActivated()) {
             sLogger.info("Session aborted, reason=".concat(String.valueOf(reason)));
@@ -584,13 +577,8 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         }
     }
 
-    /**
-     * Content sharing error
-     * 
-     * @param contact Remote contact
-     * @param error Error
-     */
-    public void handleSharingError(ContactId contact, ContentSharingError error) {
+    @Override
+    public void onSharingError(ContactId contact, ContentSharingError error) {
         if (sLogger.isActivated()) {
             sLogger.info("Sharing error ".concat(String.valueOf(error.getErrorCode())));
         }
@@ -611,16 +599,6 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         synchronized (mLock) {
             setStateAndReasonCode(contact, State.ACCEPTING, ReasonCode.UNSPECIFIED);
         }
-    }
-
-    /**
-     * Video stream has been resized
-     * 
-     * @param width Video width
-     * @param height Video height
-     */
-    public void handleVideoResized(int width, int height) {
-        // Not used
     }
 
     @Override
@@ -647,7 +625,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
     }
 
     @Override
-    public void handleSessionInvited(ContactId contact, MmContent content, long timestamp) {
+    public void onInvitationReceived(ContactId contact, MmContent content, long timestamp) {
         if (sLogger.isActivated()) {
             sLogger.info("Invited to video sharing session");
         }
@@ -659,7 +637,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
     }
 
     @Override
-    public void handle180Ringing(ContactId contact) {
+    public void onSessionRinging(ContactId contact) {
         synchronized (mLock) {
             setStateAndReasonCode(contact, State.RINGING, ReasonCode.UNSPECIFIED);
         }

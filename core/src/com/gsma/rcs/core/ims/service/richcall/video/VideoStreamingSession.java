@@ -26,9 +26,9 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
-import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
+import com.gsma.rcs.core.ims.service.capability.CapabilityService;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingSession;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
@@ -59,16 +59,18 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
     /**
      * Constructor
      * 
-     * @param parent IMS service
+     * @param parent Richcall service
      * @param content Content to be shared
      * @param contact Remote contact Id
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param capabilityService
      */
-    public VideoStreamingSession(ImsService parent, MmContent content, ContactId contact,
-            RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
-        super(parent, content, contact, rcsSettings, timestamp, contactManager);
+    public VideoStreamingSession(RichcallService parent, MmContent content, ContactId contact,
+            RcsSettings rcsSettings, long timestamp, ContactManager contactManager,
+            CapabilityService capabilityService) {
+        super(parent, content, contact, rcsSettings, timestamp, contactManager, capabilityService);
     }
 
     /**
@@ -136,11 +138,7 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
                 RichcallService.FEATURE_TAGS_VIDEO_SHARE, getDialogPath().getLocalContent());
     }
 
-    /**
-     * Handle error
-     * 
-     * @param error Error
-     */
+    @Override
     public void handleError(ImsServiceError error) {
         if (isSessionInterrupted()) {
             return;
@@ -150,35 +148,28 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
                     .append(", reason=").append(error.getMessage()).toString());
         }
         closeMediaSession();
-
         removeSession();
-
         ContactId contact = getRemoteContact();
-
-        /* Request capabilities to the remote */
-        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(contact);
-
+        getCapabilityService().requestContactCapabilities(contact);
         for (ImsSessionListener imsSessionListener : getListeners()) {
-            ((VideoStreamingSessionListener) imsSessionListener).handleSharingError(contact,
+            ((VideoStreamingSessionListener) imsSessionListener).onSharingError(contact,
                     new ContentSharingError(error));
         }
     }
 
-    /**
-     * Session inactivity event
-     */
+    @Override
     public void handleInactivityEvent() {
         /* Not need in this class */
     }
 
     @Override
     public void startSession() {
-        getImsService().getImsModule().getRichcallService().addSession(this);
+        getRichcallService().addSession(this);
         start();
     }
 
     @Override
     public void removeSession() {
-        getImsService().getImsModule().getRichcallService().removeSession(this);
+        getRichcallService().removeSession(this);
     }
 }

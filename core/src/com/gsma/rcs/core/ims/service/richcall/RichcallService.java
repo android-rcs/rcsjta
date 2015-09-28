@@ -38,6 +38,7 @@ import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
+import com.gsma.rcs.core.ims.service.capability.CapabilityService;
 import com.gsma.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.gsma.rcs.core.ims.service.richcall.geoloc.OriginatingGeolocTransferSession;
 import com.gsma.rcs.core.ims.service.richcall.geoloc.TerminatingGeolocTransferSession;
@@ -165,25 +166,29 @@ public class RichcallService extends ImsService {
 
     private GeolocSharingServiceImpl mGeolocSharingService;
 
+    private final CapabilityService mCapabilityService;
+
     /**
      * Constructor
      * 
      * @param parent IMS module
-     * @param core The Core instance
+     * @param richCallHistory RichCallHistory
      * @param contactsManager ContactManager
      * @param rcsSettings
      * @param callManager
-     * @param ipCallService
+     * @param localContentResolver
+     * @param capabilityService
      */
     public RichcallService(ImsModule parent, RichCallHistory richCallHistory,
             ContactManager contactsManager, RcsSettings rcsSettings, CallManager callManager,
-            LocalContentResolver localContentResolver) {
+            LocalContentResolver localContentResolver, CapabilityService capabilityService) {
         super(parent, true);
         mContactManager = contactsManager;
         mRcsSettings = rcsSettings;
         mCallManager = callManager;
         mRichCallHistory = richCallHistory;
         mLocalContentResolver = localContentResolver;
+        mCapabilityService = capabilityService;
 
         mImageSharingOperationHandler = allocateBgHandler(ISH_OPERATION_THREAD_NAME);
         mImageSharingDeleteOperationHandler = allocateBgHandler(ISH_DELETE_OPERATION_THREAD_NAME);
@@ -530,7 +535,8 @@ public class RichcallService extends ImsService {
 
         // Create a new session
         OriginatingImageTransferSession session = new OriginatingImageTransferSession(this,
-                content, contact, thumbnail, mRcsSettings, timestamp, mContactManager);
+                content, contact, thumbnail, mRcsSettings, timestamp, mContactManager,
+                mCapabilityService);
 
         return session;
     }
@@ -655,7 +661,7 @@ public class RichcallService extends ImsService {
 
                     ImageTransferSession session = new TerminatingImageTransferSession(
                             richCallService, invite, contact, mRcsSettings, timestamp,
-                            mContactManager);
+                            mContactManager, mCapabilityService);
 
                     mImageSharingService.receiveImageSharingInvitation(session);
 
@@ -753,7 +759,7 @@ public class RichcallService extends ImsService {
         // Create a new session
         OriginatingVideoStreamingSession session = new OriginatingVideoStreamingSession(this,
                 player, ContentManager.createGenericLiveVideoContent(), contact, mRcsSettings,
-                timestamp, mContactManager);
+                timestamp, mContactManager, mCapabilityService);
 
         return session;
     }
@@ -859,7 +865,7 @@ public class RichcallService extends ImsService {
                     // Create a new session
                     VideoStreamingSession session = new TerminatingVideoStreamingSession(
                             richCallService, invite, contact, mRcsSettings, timestamp,
-                            mContactManager);
+                            mContactManager, mCapabilityService);
 
                     mVideoSharingService.receiveVideoSharingInvitation(session);
 
@@ -871,9 +877,11 @@ public class RichcallService extends ImsService {
                                 + e.getMessage() + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
+
                 } catch (PayloadException e) {
                     sLogger.error("Failed to receive video share invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
+
                 } catch (RuntimeException e) {
                     /*
                      * Normally we are not allowed to catch runtime exceptions as these are genuine
@@ -918,7 +926,8 @@ public class RichcallService extends ImsService {
 
         // Create a new session
         OriginatingGeolocTransferSession session = new OriginatingGeolocTransferSession(this,
-                content, contact, geoloc, mRcsSettings, timestamp, mContactManager);
+                content, contact, geoloc, mRcsSettings, timestamp, mContactManager,
+                mCapabilityService);
 
         return session;
     }
@@ -928,8 +937,6 @@ public class RichcallService extends ImsService {
      * 
      * @param invite Initial invite
      * @param timestamp Local timestamp when got SipRequest
-     * @throws PayloadException
-     * @throws NetworkException
      */
     public void onGeolocSharingInvitationReceived(final SipRequest invite, final long timestamp) {
         final RichcallService richCallService = this;
@@ -1022,7 +1029,7 @@ public class RichcallService extends ImsService {
                     // Create a new session
                     GeolocTransferSession session = new TerminatingGeolocTransferSession(
                             richCallService, invite, contact, mRcsSettings, timestamp,
-                            mContactManager);
+                            mContactManager, mCapabilityService);
 
                     mGeolocSharingService.receiveGeolocSharingInvitation(session);
 
@@ -1034,9 +1041,11 @@ public class RichcallService extends ImsService {
                                 + e.getMessage() + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
+
                 } catch (PayloadException e) {
                     sLogger.error("Failed to receive geoloc share invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
+
                 } catch (RuntimeException e) {
                     /*
                      * Normally we are not allowed to catch runtime exceptions as these are genuine

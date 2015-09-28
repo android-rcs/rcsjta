@@ -175,7 +175,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
             if (session == null) {
                 return mPersistentStorage.getState().toInt();
             }
-            if (session.isGeolocTransfered()) {
+            if (session.isGeolocTransferred()) {
                 return State.TRANSFERRED.toInt();
             }
             SipDialogPath dialogPath = session.getDialogPath();
@@ -377,7 +377,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
                                 + " is found so nothing to abort!");
                         return;
                     }
-                    if (session.isGeolocTransfered()) {
+                    if (session.isGeolocTransferred()) {
                         sLogger.debug("Session with sharing ID:" + mSharingId
                                 + " is already transferred so nothing to abort!");
                         return;
@@ -451,9 +451,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
         }
     }
 
-    /**
-     * Session is started
-     */
+    @Override
     public void onSessionStarted(ContactId contact) {
         if (sLogger.isActivated()) {
             sLogger.info("Session started.");
@@ -463,12 +461,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
         }
     }
 
-    /**
-     * Session has been aborted
-     * 
-     * @param contact
-     * @param reason Termination reason
-     */
+    @Override
     public void onSessionAborted(ContactId contact, TerminationReason reason) {
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("Session aborted; reason=").append(reason).append(".")
@@ -505,13 +498,8 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
         }
     }
 
-    /**
-     * Content sharing error
-     * 
-     * @param contact Remote contact
-     * @param error Error
-     */
-    public void handleSharingError(ContactId contact, ContentSharingError error) {
+    @Override
+    public void onSharingError(ContactId contact, ContentSharingError error) {
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("Sharing error ").append(error.getErrorCode())
                     .append(".").toString());
@@ -525,14 +513,8 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
         }
     }
 
-    /**
-     * Content has been transfered
-     * 
-     * @param contact Remote contact
-     * @param geoloc Geolocation
-     * @param initiatedByRemote
-     */
-    public void handleContentTransfered(ContactId contact, Geoloc geoloc, boolean initiatedByRemote) {
+    @Override
+    public void onContentTransferred(ContactId contact, Geoloc geoloc, boolean initiatedByRemote) {
         if (sLogger.isActivated()) {
             sLogger.info("Geoloc transferred.");
         }
@@ -587,7 +569,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
     }
 
     @Override
-    public void handleSessionInvited(ContactId contact, long timestamp) {
+    public void onInvitationReceived(ContactId contact, long timestamp) {
         synchronized (mLock) {
             mPersistentStorage.addIncomingGeolocSharing(contact, State.INVITED,
                     ReasonCode.UNSPECIFIED, timestamp);
@@ -596,7 +578,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
     }
 
     @Override
-    public void handle180Ringing(ContactId contact) {
+    public void onSessionRinging(ContactId contact) {
         synchronized (mLock) {
             setStateAndReasonCode(contact, State.RINGING, ReasonCode.UNSPECIFIED);
         }
