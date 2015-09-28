@@ -47,4 +47,4 @@ Note: the cryptography API comes from Legion of the [Bouncy Castle Inc] (https:/
 ##More docs:
 
 - see [Wiki](https://github.com/android-rcs/rcsjta/wiki).
-
+- and more docs availbale online
