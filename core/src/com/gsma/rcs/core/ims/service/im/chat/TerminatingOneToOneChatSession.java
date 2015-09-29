@@ -122,7 +122,6 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
             }
             ContactId remote = getRemoteContact();
             SipDialogPath dialogPath = getDialogPath();
-            /* Send message delivery report if requested */
             if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
                 /* Check notification disposition */
                 String msgId = ChatUtils.getMessageId(dialogPath.getInvite());

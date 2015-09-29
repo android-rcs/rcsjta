@@ -791,7 +791,6 @@ public abstract class GroupChatSession extends ChatSession {
             }
 
             if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
-                // Process delivery request
                 sendMsrpMessageDeliveryStatus(remoteId, cpimMsgId,
                         ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
             }
@@ -834,9 +833,7 @@ public abstract class GroupChatSession extends ChatSession {
                     }
                 }
             }
-            // Process delivery request
             if (dispositionNotification != null) {
-                // Positive delivery requested, send MSRP message with status "delivered"
                 sendMsrpMessageDeliveryStatus(remoteId, cpimMsgId,
                         ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
             }
