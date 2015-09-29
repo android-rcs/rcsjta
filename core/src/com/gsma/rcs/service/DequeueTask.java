@@ -41,6 +41,8 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Process;
 
+import java.io.IOException;
+
 public abstract class DequeueTask implements Runnable {
 
     private final Core mCore;
@@ -61,8 +63,8 @@ public abstract class DequeueTask implements Runnable {
 
     protected final Logger mLogger = Logger.getLogger(getClass().getName());
 
-    public DequeueTask(Context ctx, Core core, ContactManager contactManager, MessagingLog messagingLog,
-            RcsSettings rcsSettings, ChatServiceImpl chatService,
+    public DequeueTask(Context ctx, Core core, ContactManager contactManager,
+            MessagingLog messagingLog, RcsSettings rcsSettings, ChatServiceImpl chatService,
             FileTransferServiceImpl fileTransferService) {
         mCtx = ctx;
         mCore = core;
@@ -230,8 +232,23 @@ public abstract class DequeueTask implements Runnable {
      * @return
      */
     private boolean isReadFromUriAllowed(Uri file) {
-        return PackageManager.PERMISSION_GRANTED == mCtx.checkUriPermission(file, Process.myPid(),
-                Process.myUid(), Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        try {
+            if (PackageManager.PERMISSION_GRANTED == mCtx.checkUriPermission(file, Process.myPid(),
+                    Process.myUid(), Intent.FLAG_GRANT_READ_URI_PERMISSION)) {
+                return true;
+            }
+
+            mCtx.getContentResolver().openInputStream(file).read();
+            return true;
+
+        } catch (SecurityException e) {
+            mLogger.error("Failed to read uri :".concat(file.toString()), e);
+            return false;
+
+        } catch (IOException e) {
+            mLogger.error("Failed to read uri :".concat(file.toString()), e);
+            return false;
+        }
     }
 
     /**
@@ -364,7 +381,7 @@ public abstract class DequeueTask implements Runnable {
 
     /**
      * Is Core shutting down right now or already stopped
-     *
+     * 
      * @return boolean
      */
     protected boolean isShuttingDownOrStopped() {
