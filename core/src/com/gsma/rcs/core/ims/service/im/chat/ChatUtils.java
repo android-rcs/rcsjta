@@ -27,7 +27,6 @@ import static com.gsma.rcs.utils.StringUtils.UTF8_STR;
 
 import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.core.ims.ImsModule;
-import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
@@ -71,7 +70,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
-
 import javax2.sip.header.ContactHeader;
 import javax2.sip.header.ExtensionHeader;
 
@@ -952,8 +950,7 @@ public class ChatUtils {
      * @return Persisted content
      * @throws PayloadException
      */
-    public static String networkContentToPersistedContent(ChatMessage msg)
-            throws PayloadException {
+    public static String networkContentToPersistedContent(ChatMessage msg) throws PayloadException {
         /*
          * Geolocation chat messages does not have the same mimetype in the payload as in the TAPI.
          * Text chat messages do.

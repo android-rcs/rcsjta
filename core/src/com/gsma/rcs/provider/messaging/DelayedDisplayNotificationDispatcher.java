@@ -16,7 +16,6 @@
 
 package com.gsma.rcs.provider.messaging;
 
-import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.LocalContentResolver;
@@ -86,8 +85,7 @@ public class DelayedDisplayNotificationDispatcher implements Runnable {
                 ContactId contact = ContactUtil.createContactIdFromTrustedData(contactNumber);
 
                 if (chatId.equals(contactNumber)) {
-                    mChatApi.sendOne2OneDisplayedDeliveryReport(msgId, contact,
-                            timestampDisplayed);
+                    mChatApi.sendOne2OneDisplayedDeliveryReport(msgId, contact, timestampDisplayed);
                 } else {
                     mChatApi.sendGroupChatDisplayedDeliveryReport(msgId, contact,
                             timestampDisplayed, chatId);

@@ -17,7 +17,6 @@
 package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.core.Core;
-import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;

@@ -46,14 +46,10 @@ import android.net.Uri;
 import android.text.TextUtils;
 
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.Locale;
-
-import javax.xml.parsers.ParserConfigurationException;
 
 import javax2.sip.InvalidArgumentException;
 import javax2.sip.message.Response;

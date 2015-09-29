@@ -31,7 +31,6 @@ import com.gsma.rcs.utils.logger.Logger;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.util.concurrent.TimeoutException;
 
 /**

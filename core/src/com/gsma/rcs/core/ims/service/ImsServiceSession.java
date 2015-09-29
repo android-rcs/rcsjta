@@ -29,7 +29,6 @@ import com.gsma.rcs.core.ims.network.sip.SipManager;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
-import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
@@ -1015,8 +1014,8 @@ public abstract class ImsServiceSession extends Thread {
      * @throws NetworkException
      * @throws FileAccessException
      */
-    public void handle200OK(SipResponse resp) throws PayloadException,
-            NetworkException, FileAccessException {
+    public void handle200OK(SipResponse resp) throws PayloadException, NetworkException,
+            FileAccessException {
         if (sLogger.isActivated()) {
             sLogger.info("200 OK response received");
         }

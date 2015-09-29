@@ -22,8 +22,6 @@
 
 package com.gsma.rcs.core.ims.service.im.chat;
 
-import com.gsma.rcs.core.ims.network.NetworkException;
-import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
@@ -43,7 +41,8 @@ public interface GroupChatSessionListener extends ChatSessionListener {
      * @param status ParticipantStatus for the contact
      * @param timestamp Local timestamp when got notification
      */
-    public void onConferenceEventReceived(ContactId contact, ParticipantStatus status, long timestamp);
+    public void onConferenceEventReceived(ContactId contact, ParticipantStatus status,
+            long timestamp);
 
     /**
      * A session invitation has been received

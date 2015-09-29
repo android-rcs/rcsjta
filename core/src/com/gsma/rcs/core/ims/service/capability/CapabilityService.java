@@ -42,7 +42,6 @@ import com.gsma.services.rcs.contact.ContactId;
 import android.os.Handler;
 import android.os.HandlerThread;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -87,7 +86,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
 
     /**
      * Constructor
-     *
+     * 
      * @param parent IMS module
      * @param core The core instance
      * @param rcsSettings RCS settings accessor
@@ -272,7 +271,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
 
     /**
      * Receive a notification (anonymous fetch procedure)
-     *
+     * 
      * @param notify Received notify
      */
     public void onNotificationReceived(final SipRequest notify) {
@@ -355,7 +354,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
 
     /**
      * Capabilities update notification has been received
-     *
+     * 
      * @param contact Contact identifier
      * @param capabilities Capabilities
      */

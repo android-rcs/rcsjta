@@ -25,8 +25,6 @@ import com.gsma.rcs.core.ims.protocol.rtp.stream.ProcessorOutputStream;
 import com.gsma.rcs.core.ims.protocol.rtp.util.Buffer;
 import com.gsma.rcs.utils.logger.Logger;
 
-import java.io.IOException;
-
 /**
  * Media processor. A processor receives an input stream, use a codec chain to filter the data
  * before to send it to the output stream.

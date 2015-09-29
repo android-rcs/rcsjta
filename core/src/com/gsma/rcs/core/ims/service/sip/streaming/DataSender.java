@@ -22,7 +22,6 @@
 
 package com.gsma.rcs.core.ims.service.sip.streaming;
 
-import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.rtp.media.MediaInput;
 import com.gsma.rcs.core.ims.protocol.rtp.media.MediaSample;
 import com.gsma.rcs.utils.FifoBuffer;

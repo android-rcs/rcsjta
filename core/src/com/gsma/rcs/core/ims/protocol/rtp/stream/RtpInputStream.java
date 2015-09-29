@@ -32,7 +32,6 @@ import com.gsma.rcs.core.ims.protocol.rtp.core.RtpPacket;
 import com.gsma.rcs.core.ims.protocol.rtp.core.RtpPacketReceiver;
 import com.gsma.rcs.core.ims.protocol.rtp.format.Format;
 import com.gsma.rcs.core.ims.protocol.rtp.format.video.VideoOrientation;
-import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.rtp.util.Buffer;
 import com.gsma.rcs.utils.CloseableUtils;
 

@@ -18,13 +18,12 @@
 
 package com.gsma.rcs.core.ims.protocol.rtp.core;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.rtp.util.Packet;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-
-import com.gsma.rcs.core.FileAccessException;
-import com.gsma.rcs.core.ims.network.NetworkException;
-import com.gsma.rcs.core.ims.protocol.rtp.util.Packet;
 
 /**
  * Abstract RTP packet

@@ -18,7 +18,6 @@
 
 package com.gsma.rcs.core.ims.protocol.rtp.core;
 
-import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.rtp.util.Buffer;
 import com.gsma.rcs.core.ims.protocol.rtp.util.Packet;

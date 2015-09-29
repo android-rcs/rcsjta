@@ -20,7 +20,6 @@ package com.gsma.rcs.core.ims.protocol.rtp.stream;
 
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.rtp.format.Format;
-import com.gsma.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.gsma.rcs.core.ims.protocol.rtp.media.MediaInput;
 import com.gsma.rcs.core.ims.protocol.rtp.media.VideoSample;
 import com.gsma.rcs.core.ims.protocol.rtp.util.Buffer;

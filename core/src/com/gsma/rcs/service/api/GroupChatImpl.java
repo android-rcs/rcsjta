@@ -70,7 +70,6 @@ import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;

@@ -28,7 +28,6 @@ import com.gsma.rcs.platform.network.SocketConnection;
 import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 

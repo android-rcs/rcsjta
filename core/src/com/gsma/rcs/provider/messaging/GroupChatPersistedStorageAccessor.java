@@ -33,7 +33,6 @@ import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
 import android.database.Cursor;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 

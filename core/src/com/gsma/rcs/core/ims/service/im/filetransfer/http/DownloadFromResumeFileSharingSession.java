@@ -22,7 +22,6 @@ w * Software Name : RCS IMS Stack
 
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
-import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
