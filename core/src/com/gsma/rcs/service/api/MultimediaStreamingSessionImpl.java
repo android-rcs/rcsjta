@@ -24,10 +24,10 @@ package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
-import com.gsma.rcs.core.ims.protocol.rtp.RtpException;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.InvitationStatus;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
+import com.gsma.rcs.core.ims.service.SessionNotEstablishedException;
 import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.sip.SipSessionError;
 import com.gsma.rcs.core.ims.service.sip.SipSessionListener;
@@ -409,12 +409,13 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
                     ServerApiUtils.testApiExtensionPermission(session.getServiceId());
                     session.sendPlayload(content);
 
-                } catch (RtpException e) {
+                } catch (SessionNotEstablishedException e) {
                     if (sLogger.isActivated()) {
-                        sLogger.warn("Failed to send payload within session with ID: "
-                                .concat(mSessionId), e);
+                        sLogger.debug(new StringBuilder(
+                                "Failed to send payload within session with ID '")
+                                .append(mSessionId).append("' due to: ").append(e.getMessage())
+                                .toString());
                     }
-
                 } catch (RuntimeException e) {
                     /*
                      * Normally we are not allowed to catch runtime exceptions as these are genuine

@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.gsma.rcs.core.ims.service.im.chat;
+package com.gsma.rcs.core.ims.service;
 
 /**
  * To be thrown when the session is not yet established.

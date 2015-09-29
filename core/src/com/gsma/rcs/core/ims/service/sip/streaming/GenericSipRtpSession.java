@@ -29,7 +29,6 @@ import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.rtp.MediaRtpReceiver;
 import com.gsma.rcs.core.ims.protocol.rtp.MediaRtpSender;
-import com.gsma.rcs.core.ims.protocol.rtp.RtpException;
 import com.gsma.rcs.core.ims.protocol.rtp.format.Format;
 import com.gsma.rcs.core.ims.protocol.rtp.format.data.DataFormat;
 import com.gsma.rcs.core.ims.protocol.rtp.stream.RtpStreamListener;
@@ -37,6 +36,7 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
+import com.gsma.rcs.core.ims.service.SessionNotEstablishedException;
 import com.gsma.rcs.core.ims.service.sip.GenericSipSession;
 import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.sip.SipSessionError;
@@ -191,11 +191,11 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
      * Sends a payload in real time
      * 
      * @param content Payload content
-     * @throws RtpException
+     * @throws SessionNotEstablishedException
      */
-    public void sendPlayload(byte[] content) throws RtpException {
+    public void sendPlayload(byte[] content) throws SessionNotEstablishedException {
         if (!mMediaSessionStarted) {
-            throw new RtpException("unable to send payload!");
+            throw new SessionNotEstablishedException("Unable to send payload!");
         }
         mDataSender.addFrame(content, System.currentTimeMillis());
     }
