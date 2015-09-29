@@ -245,18 +245,29 @@ public class FileUtils {
                 return true;
 
             } catch (SecurityException e) {
-                sLogger.error("Failed to read uri :".concat(file.toString()), e);
+                sLogger.error("Failed to read from uri :".concat(file.toString()), e);
                 return false;
 
             } catch (IOException e) {
-                sLogger.error("Failed to read uri :".concat(file.toString()), e);
+                sLogger.error("Failed to read from uri :".concat(file.toString()), e);
                 return false;
 
             } finally {
                 CloseableUtils.tryToClose(stream);
             }
         } else if (ContentResolver.SCHEME_FILE.equals(scheme)) {
-            return new File(file.getPath()).canRead();
+            String path = file.getPath();
+            if (path == null) {
+                sLogger.error("Failed to read from uri :".concat(file.toString()));
+                return false;
+            }
+            try {
+                return new File(path).canRead();
+
+            } catch (SecurityException e) {
+                sLogger.error("Failed to read from uri :".concat(file.toString()), e);
+                return false;
+            }
 
         } else {
             throw new IllegalArgumentException("Unsupported URI scheme '" + scheme + "'!");
