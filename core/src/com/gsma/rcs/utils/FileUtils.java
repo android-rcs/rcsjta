@@ -23,11 +23,15 @@
 package com.gsma.rcs.utils;
 
 import com.gsma.rcs.provider.CursorUtil;
+import com.gsma.rcs.utils.logger.Logger;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Process;
 import android.provider.OpenableColumns;
 
 import java.io.File;
@@ -35,6 +39,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * File utilities
@@ -42,6 +47,8 @@ import java.io.IOException;
  * @author YPLO6403
  */
 public class FileUtils {
+
+    private static final Logger sLogger = Logger.getLogger(FileUtils.class.getSimpleName());
 
     /**
      * Copy a file to a directory
@@ -159,15 +166,16 @@ public class FileUtils {
     /**
      * Fetch the file name from URI
      * 
-     * @param context Context
+     * @param ctx Context
      * @param file URI
      * @return fileName String
      */
-    public static String getFileName(Context context, Uri file) {
+    public static String getFileName(Context ctx, Uri file) {
+        String scheme = file.getScheme();
         Cursor cursor = null;
         try {
-            cursor = context.getContentResolver().query(file, null, null, null, null);
-            if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
+            cursor = ctx.getContentResolver().query(file, null, null, null, null);
+            if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
                 if (cursor != null && cursor.moveToFirst()) {
                     String displayName = cursor.getString(cursor
                             .getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME));
@@ -175,10 +183,11 @@ public class FileUtils {
                 }
                 throw new IllegalArgumentException("Error in retrieving file name from the URI");
 
-            } else if (ContentResolver.SCHEME_FILE.equals(file.getScheme())) {
+            } else if (ContentResolver.SCHEME_FILE.equals(scheme)) {
                 return file.getLastPathSegment();
+
             } else {
-                throw new IllegalArgumentException("Unsupported URI scheme");
+                throw new IllegalArgumentException("Unsupported URI scheme '" + scheme + "'!");
             }
         } finally {
             CursorUtil.close(cursor);
@@ -188,15 +197,16 @@ public class FileUtils {
     /**
      * Fetch the file size from URI
      * 
-     * @param context Context
+     * @param ctx Context
      * @param file URI
      * @return fileSize long
      */
-    public static long getFileSize(Context context, Uri file) {
+    public static long getFileSize(Context ctx, Uri file) {
+        String scheme = file.getScheme();
         Cursor cursor = null;
         try {
-            cursor = context.getContentResolver().query(file, null, null, null, null);
-            if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
+            cursor = ctx.getContentResolver().query(file, null, null, null, null);
+            if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
                 if (cursor != null && cursor.moveToFirst()) {
                     return Long.valueOf(
                             cursor.getString(cursor.getColumnIndexOrThrow(OpenableColumns.SIZE)))
@@ -204,14 +214,52 @@ public class FileUtils {
                 }
                 throw new IllegalArgumentException("Error in retrieving file size form the URI");
 
-            } else if (ContentResolver.SCHEME_FILE.equals(file.getScheme())) {
+            } else if (ContentResolver.SCHEME_FILE.equals(scheme)) {
                 return (new File(file.getPath())).length();
+
             } else {
-                throw new IllegalArgumentException("Unsupported URI scheme");
+                throw new IllegalArgumentException("Unsupported URI scheme '" + scheme + "'!");
             }
         } finally {
             CursorUtil.close(cursor);
         }
     }
 
+    /**
+     * Test if the stack can read data from this Uri.
+     * 
+     * @param file
+     * @return
+     */
+    public static boolean isReadFromUriPossible(Context ctx, Uri file) {
+        String scheme = file.getScheme();
+        if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
+            InputStream stream = null;
+            try {
+                if (PackageManager.PERMISSION_GRANTED == ctx.checkUriPermission(file,
+                        Process.myPid(), Process.myUid(), Intent.FLAG_GRANT_READ_URI_PERMISSION)) {
+                    return true;
+                }
+                stream = ctx.getContentResolver().openInputStream(file);
+                stream.read();
+                return true;
+
+            } catch (SecurityException e) {
+                sLogger.error("Failed to read uri :".concat(file.toString()), e);
+                return false;
+
+            } catch (IOException e) {
+                sLogger.error("Failed to read uri :".concat(file.toString()), e);
+                return false;
+
+            } finally {
+                CloseableUtils.tryToClose(stream);
+            }
+        } else if (ContentResolver.SCHEME_FILE.equals(scheme)) {
+            return new File(file.getPath()).canRead();
+
+        } else {
+            throw new IllegalArgumentException("Unsupported URI scheme '" + scheme + "'!");
+        }
+    }
 }

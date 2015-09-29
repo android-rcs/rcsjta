@@ -46,6 +46,7 @@ import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.service.broadcaster.GroupFileTransferBroadcaster;
 import com.gsma.rcs.service.broadcaster.OneToOneFileTransferBroadcaster;
 import com.gsma.rcs.service.broadcaster.RcsServiceRegistrationEventBroadcaster;
+import com.gsma.rcs.utils.FileUtils;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.MimeManager;
 import com.gsma.rcs.utils.logger.Logger;
@@ -68,6 +69,7 @@ import com.gsma.services.rcs.filetransfer.IGroupFileTransferListener;
 import com.gsma.services.rcs.filetransfer.IOneToOneFileTransferListener;
 import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
+import android.content.Context;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.text.TextUtils;
@@ -101,6 +103,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     private final ContactManager mContactManager;
 
+    private final Context mCtx;
+
     private final Map<String, OneToOneFileTransferImpl> mOneToOneFileTransferCache = new HashMap<String, OneToOneFileTransferImpl>();
 
     private final Map<String, GroupFileTransferImpl> mGroupFileTransferCache = new HashMap<String, GroupFileTransferImpl>();
@@ -130,7 +134,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      */
     public FileTransferServiceImpl(InstantMessagingService imService, ChatServiceImpl chatService,
             MessagingLog messagingLog, RcsSettings rcsSettings, ContactManager contactManager,
-            LocalContentResolver localContentResolver) {
+            LocalContentResolver localContentResolver, Context ctx) {
         if (sLogger.isActivated()) {
             sLogger.info("File transfer service API is loaded");
         }
@@ -140,6 +144,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         mMessagingLog = messagingLog;
         mRcsSettings = rcsSettings;
         mContactManager = contactManager;
+        mCtx = ctx;
     }
 
     private ReasonCode imdnToFileTransferFailedReasonCode(ImdnDocument imdn) {
@@ -685,6 +690,10 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         if (file == null) {
             throw new ServerApiIllegalArgumentException("file must not be null!");
         }
+        if (!FileUtils.isReadFromUriPossible(mCtx, file)) {
+            throw new ServerApiIllegalArgumentException("file '" + file.toString()
+                    + "' must refer to a file that exists and that is readable by stack!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Transfer file " + file + " to " + contact + " (fileicon="
                     + attachfileIcon + ")");
@@ -863,6 +872,10 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         }
         if (file == null) {
             throw new ServerApiIllegalArgumentException("file must not be null!");
+        }
+        if (!FileUtils.isReadFromUriPossible(mCtx, file)) {
+            throw new ServerApiIllegalArgumentException("file '" + file.toString()
+                    + "' must refer to a file that exists and that is readable by stack!");
         }
         if (!isAllowedToTransferFileToGroupChat(chatId)) {
             throw new ServerApiPermissionDeniedException(

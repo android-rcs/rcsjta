@@ -27,6 +27,7 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
 import com.gsma.rcs.service.api.ServerApiUtils;
+import com.gsma.rcs.utils.FileUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
@@ -34,14 +35,8 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 
-import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Process;
-
-import java.io.IOException;
 
 public abstract class DequeueTask implements Runnable {
 
@@ -226,40 +221,14 @@ public abstract class DequeueTask implements Runnable {
     }
 
     /**
-     * Does the stack process have permissions to read the Uri
-     * 
-     * @param file
-     * @return
-     */
-    private boolean isReadFromUriAllowed(Uri file) {
-        try {
-            if (PackageManager.PERMISSION_GRANTED == mCtx.checkUriPermission(file, Process.myPid(),
-                    Process.myUid(), Intent.FLAG_GRANT_READ_URI_PERMISSION)) {
-                return true;
-            }
-
-            mCtx.getContentResolver().openInputStream(file).read();
-            return true;
-
-        } catch (SecurityException e) {
-            mLogger.error("Failed to read uri :".concat(file.toString()), e);
-            return false;
-
-        } catch (IOException e) {
-            mLogger.error("Failed to read uri :".concat(file.toString()), e);
-            return false;
-        }
-    }
-
-    /**
      * Check if it is possible to dequeue file transfer
      * 
      * @return boolean
      */
     private boolean isPossibleToDequeueFileTransfer(Uri file, long size) {
-        if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme()) && !isReadFromUriAllowed(file)) {
+        if (!FileUtils.isReadFromUriPossible(mCtx, file)) {
             if (mLogger.isActivated()) {
-                mLogger.debug("Cannot dequeue file as there is no Uri permission available for file "
+                mLogger.debug("Cannot dequeue file as file data can not be read from Uri "
                         .concat(file.toString()));
             }
             return false;
