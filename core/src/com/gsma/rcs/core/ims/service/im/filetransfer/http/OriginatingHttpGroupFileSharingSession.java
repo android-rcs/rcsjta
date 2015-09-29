@@ -29,7 +29,6 @@ import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
-import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
@@ -59,9 +58,6 @@ import java.io.IOException;
 public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSession implements
         HttpUploadTransferEventListener {
 
-    /**
-     * HTTP upload manager
-     */
     private HttpUploadManager mUploadManager;
 
     /**
@@ -82,9 +78,6 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 
     private InstantMessagingService mImService;
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger
             .getLogger(OriginatingHttpGroupFileSharingSession.class.getName());
 
@@ -117,14 +110,10 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                 contactManager);
         mImService = imService;
         mTimestampSent = timestampSent;
-
-        // Instantiate the upload manager
         mUploadManager = new HttpUploadManager(getContent(), fileIcon, this, tId, rcsSettings);
     }
 
-    /**
-     * Background processing
-     */
+    @Override
     public void run() {
         if (sLogger.isActivated()) {
             sLogger.info("Initiate a new HTTP group file transfer session as originating");
@@ -134,23 +123,12 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
             sendResultToContact(result);
 
         } catch (NetworkException e) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(e.getMessage());
-            }
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
 
         } catch (IOException e) {
-            sLogger.error(
-                    new StringBuilder("Failed to initiate file transfer session for sessionId : ")
-                            .append(getSessionID()).append(" with fileTransferId : ")
-                            .append(getFileTransferId()).toString(), e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
 
         } catch (PayloadException e) {
-            sLogger.error(
-                    new StringBuilder("Failed to initiate file transfer session for sessionId : ")
-                            .append(getSessionID()).append(" with fileTransferId : ")
-                            .append(getFileTransferId()).toString(), e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
 
         } catch (RuntimeException e) {
@@ -158,22 +136,8 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
-            sLogger.error(
-                    new StringBuilder("Failed to initiate file transfer session for sessionId : ")
-                            .append(getSessionID()).append(" with fileTransferId : ")
-                            .append(getFileTransferId()).toString(), e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
         }
-    }
-
-    @Override
-    public void handleError(ImsServiceError error) {
-        super.handleError(error);
-    }
-
-    @Override
-    public void handleFileTransfered() {
-        super.handleFileTransfered();
     }
 
     @Override
@@ -216,65 +180,59 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
      * @throws NetworkException
      */
     private void sendResultToContact(byte[] result) throws PayloadException, NetworkException {
-            if (mUploadManager.isCancelled()) {
-                return;
-            }
-            FileTransferHttpInfoDocument infoDocument;
-            boolean logActivated = sLogger.isActivated();
-            if (result == null
-                    || (infoDocument = FileTransferUtils.parseFileTransferHttpDocument(result,
-                            mRcsSettings)) == null) {
-                if (logActivated) {
-                    sLogger.debug("Upload has failed");
-                }
-                handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED));
-                return;
+        if (mUploadManager.isCancelled()) {
+            return;
+        }
+        FileTransferHttpInfoDocument infoDocument;
+        boolean logActivated = sLogger.isActivated();
+        if (result == null
+                || (infoDocument = FileTransferUtils.parseFileTransferHttpDocument(result,
+                        mRcsSettings)) == null) {
+            handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED));
+            return;
+        }
+        mFileInfo = new String(result, UTF8);
+        if (logActivated) {
+            sLogger.debug("Upload done with success: ".concat(mFileInfo.toString()));
+        }
+        setFileExpiration(infoDocument.getExpiration());
+        FileTransferHttpThumbnail thumbnail = infoDocument.getFileThumbnail();
+        if (thumbnail != null) {
+            setIconExpiration(thumbnail.getExpiration());
+        } else {
+            setIconExpiration(FileTransferData.UNKNOWN_EXPIRATION);
+        }
 
-            }
-            mFileInfo = new String(result, UTF8);
+        String chatId = getContributionID();
+        mChatSession = mImService.getGroupChatSession(chatId);
+        if (mChatSession != null && mChatSession.isMediaEstablished()) {
             if (logActivated) {
-                sLogger.debug("Upload done with success: ".concat(mFileInfo.toString()));
+                sLogger.debug("Send file transfer info via an existing chat session");
             }
-            setFileExpiration(infoDocument.getExpiration());
-            FileTransferHttpThumbnail thumbnail = infoDocument.getFileThumbnail();
-            if (thumbnail != null) {
-                setIconExpiration(thumbnail.getExpiration());
-            } else {
-                setIconExpiration(FileTransferData.UNKNOWN_EXPIRATION);
-            }
+            sendFileTransferInfo();
+            handleFileTransfered();
 
-            String chatId = getContributionID();
-            mChatSession = mImService.getGroupChatSession(chatId);
-            if (mChatSession != null && mChatSession.isMediaEstablished()) {
+        } else {
+            mMessagingLog.setFileTransferDownloadInfo(getFileTransferId(), infoDocument);
+            removeSession();
+            /*
+             * If group chat session does not exist, try to rejoin group chat and on success dequeue
+             * the file transfer message
+             */
+            if (mChatSession == null) {
+                mImService.rejoinGroupChatAsPartOfSendOperation(chatId);
+
+            } else if (!mChatSession.isMediaEstablished() && mChatSession.isInitiatedByRemote()) {
                 if (logActivated) {
-                    sLogger.debug("Send file transfer info via an existing chat session");
+                    sLogger.debug(new StringBuilder("Group chat session with chatId '")
+                            .append(chatId).append("' is pending for acceptance, accept it.")
+                            .toString());
                 }
-                sendFileTransferInfo();
-                handleFileTransfered();
-
-            } else {
-                mMessagingLog.setFileTransferDownloadInfo(getFileTransferId(), infoDocument);
-                removeSession();
-                /*
-                 * If group chat session does not exist, try to rejoin group chat and on success
-                 * dequeue the file transfer message
-                 */
-                if (mChatSession == null) {
-                    mImService.rejoinGroupChatAsPartOfSendOperation(chatId);
-                } else if (!mChatSession.isMediaEstablished() && mChatSession.isInitiatedByRemote()) {
-                    if (logActivated) {
-                        sLogger.debug(new StringBuilder("Group chat session with chatId '")
-                                .append(chatId).append("' is pending for acceptance, accept it.")
-                                .toString());
-                    }
-                    mChatSession.acceptSession();
-                }
+                mChatSession.acceptSession();
+            }
         }
     }
 
-    /**
-     * Pausing the transfer
-     */
     @Override
     public void onPause() {
         new Thread(new Runnable() {
@@ -289,19 +247,12 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                      * Intentionally catch runtime exceptions as else it will abruptly end the
                      * thread and eventually bring the whole system down, which is not intended.
                      */
-                    sLogger.error(
-                            new StringBuilder("Failed to pause upload for sessionId : ")
-                                    .append(getSessionID()).append(" with fileTransferId : ")
-                                    .append(getFileTransferId()).toString(), e);
                     handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
                 }
             }
         }).start();
     }
 
-    /**
-     * Resuming the transfer
-     */
     @Override
     public void onResume() {
         new Thread(new Runnable() {
@@ -316,23 +267,12 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                     }
 
                 } catch (NetworkException e) {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug(e.getMessage());
-                    }
                     handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
 
                 } catch (IOException e) {
-                    sLogger.error(
-                            new StringBuilder("Failed to resume upload for sessionId : ")
-                                    .append(getSessionID()).append(" with fileTransferId : ")
-                                    .append(getFileTransferId()).toString(), e);
                     handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
 
                 } catch (PayloadException e) {
-                    sLogger.error(
-                            new StringBuilder("Failed to resume upload for sessionId : ")
-                                    .append(getSessionID()).append(" with fileTransferId : ")
-                                    .append(getFileTransferId()).toString(), e);
                     handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
 
                 } catch (RuntimeException e) {
@@ -340,10 +280,6 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                      * Intentionally catch runtime exceptions as else it will abruptly end the
                      * thread and eventually bring the whole system down, which is not intended.
                      */
-                    sLogger.error(
-                            new StringBuilder("Failed to resume upload for sessionId : ")
-                                    .append(getSessionID()).append(" with fileTransferId : ")
-                                    .append(getFileTransferId()).toString(), e);
                     handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
                 }
             }

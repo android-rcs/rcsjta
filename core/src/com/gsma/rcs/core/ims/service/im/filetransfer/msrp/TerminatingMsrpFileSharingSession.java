@@ -71,9 +71,7 @@ import java.util.Vector;
  */
 public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession implements
         MsrpEventListener {
-    /**
-     * MSRP manager
-     */
+
     private MsrpManager msrpMgr;
 
     /**
@@ -83,9 +81,6 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
      */
     private long mTimestampSent;
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(TerminatingMsrpFileSharingSession.class
             .getName());
 
@@ -146,9 +141,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
         return mRcsSettings.isFileTransferAutoAccepted();
     }
 
-    /**
-     * Background processing
-     */
+    @Override
     public void run() {
         try {
             if (sLogger.isActivated()) {
@@ -169,8 +162,8 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 
                 for (ImsSessionListener listener : listeners) {
 
-                    ((FileSharingSessionListener) listener).onSessionAutoAccepted(contact,
-                            file, fileIcon, timestamp, mTimestampSent,
+                    ((FileSharingSessionListener) listener).onSessionAutoAccepted(contact, file,
+                            fileIcon, timestamp, mTimestampSent,
                             FileTransferData.UNKNOWN_EXPIRATION,
                             FileTransferData.UNKNOWN_EXPIRATION);
                 }
@@ -410,40 +403,28 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                 /* No response received: timeout */
                 handleError(new FileSharingError(FileSharingError.SEND_RESPONSE_FAILED));
             }
+
         } catch (PayloadException e) {
-            sLogger.error("Unable to send 200OK response!", e);
             handleError(new FileSharingError(FileSharingError.SEND_RESPONSE_FAILED, e));
+
         } catch (NetworkException e) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(e.getMessage());
-            }
             handleError(new FileSharingError(FileSharingError.SEND_RESPONSE_FAILED, e));
+
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
-            sLogger.error("Failed to initiate chat session as terminating!", e);
             handleError(new FileSharingError(FileSharingError.SEND_RESPONSE_FAILED, e));
         }
     }
 
-    /**
-     * Data has been transfered
-     * 
-     * @param msgId Message ID
-     */
+    @Override
     public void msrpDataTransfered(String msgId) {
         // Not used in terminating side
     }
 
-    /**
-     * Data transfer has been received
-     * 
-     * @param msgId Message ID
-     * @param data Received data
-     * @param mimeType Data mime-type
-     */
+    @Override
     public void receiveMsrpData(String msgId, byte[] data, String mimeType) {
         if (sLogger.isActivated()) {
             sLogger.info("Data received");
@@ -469,24 +450,12 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
         }
     }
 
-    /**
-     * Data transfer in progress
-     * 
-     * @param currentSize Current transfered size in bytes
-     * @param totalSize Total size in bytes
-     */
+    @Override
     public void msrpTransferProgress(long currentSize, long totalSize) {
         // Not used
     }
 
-    /**
-     * Data transfer in progress
-     * 
-     * @param currentSize Current transfered size in bytes
-     * @param totalSize Total size in bytes
-     * @param data received data chunk
-     * @return always true TODO
-     */
+    @Override
     public boolean msrpTransferProgress(long currentSize, long totalSize, byte[] data) {
         if (isSessionInterrupted() || isInterrupted()) {
             return true;
@@ -496,8 +465,8 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
         try {
             getContent().writeData2File(data);
             for (ImsSessionListener listener : listeners) {
-                ((FileSharingSessionListener) listener).onTransferProgress(contact,
-                        currentSize, totalSize);
+                ((FileSharingSessionListener) listener).onTransferProgress(contact, currentSize,
+                        totalSize);
             }
         } catch (FileAccessException e) {
             deleteFile();
@@ -509,9 +478,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
         return true;
     }
 
-    /**
-     * Data transfer has been aborted
-     */
+    @Override
     public void msrpTransferAborted() {
         if (sLogger.isActivated()) {
             sLogger.info("Data transfer aborted");
@@ -521,30 +488,22 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
         }
     }
 
-    /**
-     * Prepare media session
-     */
+    @Override
     public void prepareMediaSession() {
         /* Nothing to do in terminating side */
     }
 
-    /**
-     * Open media session
-     */
+    @Override
     public void openMediaSession() {
         /* Nothing to do in terminating side */
     }
 
-    /**
-     * Start media transfer
-     */
+    @Override
     public void startMediaTransfer() {
         /* Nothing to do in terminating side */
     }
 
-    /**
-     * Close media session
-     */
+    @Override
     public void closeMediaSession() {
         if (msrpMgr != null) {
             msrpMgr.closeSession();

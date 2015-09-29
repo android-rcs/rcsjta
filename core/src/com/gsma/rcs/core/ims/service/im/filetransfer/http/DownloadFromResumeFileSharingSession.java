@@ -45,7 +45,8 @@ import java.io.IOException;
  */
 public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSharingSession {
 
-    private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
+    private static final Logger sLogger = Logger
+            .getLogger(DownloadFromResumeFileSharingSession.class.getSimpleName());
 
     private final FtHttpResumeDownload mResume;
 
@@ -85,13 +86,11 @@ public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSha
         setSessionAccepted();
     }
 
-    /**
-     * Background processing
-     */
+    @Override
     public void run() {
-        final boolean logActivated = mLogger.isActivated();
+        final boolean logActivated = sLogger.isActivated();
         if (logActivated) {
-            mLogger.info("Resume a HTTP file transfer session as terminating");
+            sLogger.info("Resume a HTTP file transfer session as terminating");
         }
         try {
             httpTransferStarted();
@@ -99,7 +98,7 @@ public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSha
             /* Resume download file from the HTTP server */
             mDownloadManager.resumeDownload();
             if (logActivated) {
-                mLogger.debug("Resume download success for ".concat(mResume.toString()));
+                sLogger.debug("Resume download success for ".concat(mResume.toString()));
             }
             /* Set file URL */
             getContent().setUri(mDownloadManager.getDownloadedFileUri());
@@ -112,40 +111,39 @@ public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSha
                 sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
                         System.currentTimeMillis());
             }
+
         } catch (FileNotFoundException e) {
             /* Don't call handleError in case of Pause or Cancel */
             if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
                 return;
             }
-            mLogger.error("Resume Download file has failed for ".concat(mResume.toString()), e);
             handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
+
         } catch (FileNotDownloadedException e) {
             /* Don't call handleError in case of Pause or Cancel */
             if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
                 return;
             }
-            mLogger.error("Resume Download file has failed for ".concat(mResume.toString()), e);
             handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
+
         } catch (IOException e) {
             /* Don't call handleError in case of Pause or Cancel */
             if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
                 return;
             }
             handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
+
         } catch (PayloadException e) {
-            mLogger.error("Resume Download file has failed for ".concat(mResume.toString()), e);
             handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
+
         } catch (NetworkException e) {
-            if (mLogger.isActivated()) {
-                mLogger.debug(e.getMessage());
-            }
             handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
+
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
-            mLogger.error("Resume Download file has failed for ".concat(mResume.toString()), e);
             handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
         }
     }

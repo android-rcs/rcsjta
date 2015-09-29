@@ -82,14 +82,12 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      */
     private final static String BOUNDARY_TAG = "boundary1";
 
-    /**
-     * MSRP manager
-     */
     private MsrpManager msrpMgr;
 
     private final InstantMessagingService mImService;
 
-    private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(OriginatingMsrpFileSharingSession.class
+            .getSimpleName());
 
     /**
      * Constructor
@@ -109,8 +107,8 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
         super(imService, content, contact, fileIcon, fileTransferId, rcsSettings, timestamp,
                 contactManager);
 
-        if (mLogger.isActivated()) {
-            mLogger.debug(new StringBuilder("OriginatingFileSharingSession contact=")
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("OriginatingFileSharingSession contact=")
                     .append(contact).append(" filename=").append(content.getName()).toString());
         }
         mImService = imService;
@@ -142,19 +140,17 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
         }
     }
 
-    /**
-     * Background processing
-     */
+    @Override
     public void run() {
         try {
-            if (mLogger.isActivated()) {
-                mLogger.info("Initiate a file transfer session as originating");
+            if (sLogger.isActivated()) {
+                sLogger.info("Initiate a file transfer session as originating");
             }
 
             /* Set setup mode */
             String localSetup = createSetupOffer();
-            if (mLogger.isActivated()) {
-                mLogger.debug("Local setup attribute is ".concat(localSetup));
+            if (sLogger.isActivated()) {
+                sLogger.debug("Local setup attribute is ".concat(localSetup));
             }
 
             /* Set local port */
@@ -234,8 +230,8 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
             }
 
             /* Create an INVITE request */
-            if (mLogger.isActivated()) {
-                mLogger.info("Send INVITE");
+            if (sLogger.isActivated()) {
+                sLogger.info("Send INVITE");
             }
             SipRequest invite = createInvite();
 
@@ -247,36 +243,32 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
 
             /* Send INVITE request */
             sendInvite(invite);
+
         } catch (InvalidArgumentException e) {
-            mLogger.error("Unable to set authorization header!", e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
+
         } catch (ParseException e) {
-            mLogger.error("Unable to set authorization header!", e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
+
         } catch (FileAccessException e) {
-            mLogger.error("Unable to set and send initial invite!", e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
+
         } catch (PayloadException e) {
-            mLogger.error("Unable to set and send initial invite!", e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
+
         } catch (NetworkException e) {
-            if (mLogger.isActivated()) {
-                mLogger.debug(e.getMessage());
-            }
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
+
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
-            mLogger.error("Failed to initiate a file transfer session!", e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
         }
     }
 
-    /**
-     * Prepare media session
-     */
+    @Override
     public void prepareMediaSession() {
         // Changed by Deutsche Telekom
         // Get the remote SDP part
@@ -293,22 +285,12 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
         session.setMapMsgIdFromTransationId(false);
     }
 
-    /**
-     * Open media session
-     * 
-     * @throws PayloadException
-     * @throws NetworkException
-     */
+    @Override
     public void openMediaSession() throws PayloadException, NetworkException {
         msrpMgr.openMsrpSession();
     }
 
-    /**
-     * Start media transfer
-     * 
-     * @throws FileAccessException
-     * @throws NetworkException
-     */
+    @Override
     public void startMediaTransfer() throws NetworkException, FileAccessException {
         try {
             /* Start sending data chunks */
@@ -321,7 +303,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
                     "Failed to initiate media transfer for uri : ".concat(getContent().getUri()
                             .toString()), e);
         } catch (SecurityException e) {
-            mLogger.error("Session initiation has failed due to that the file is not accessible!",
+            sLogger.error("Session initiation has failed due to that the file is not accessible!",
                     e);
             ContactId contact = getRemoteContact();
             for (ImsSessionListener listener : getListeners()) {
@@ -330,15 +312,11 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
         }
     }
 
-    /**
-     * Data has been transfered
-     * 
-     * @param msgId Message ID
-     */
+    @Override
     public void msrpDataTransfered(String msgId) {
         try {
-            if (mLogger.isActivated()) {
-                mLogger.info("Data transfered");
+            if (sLogger.isActivated()) {
+                sLogger.info("Data transfered");
             }
             long timestamp = System.currentTimeMillis();
             fileTransfered();
@@ -356,11 +334,13 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
                     getFileTransferId(), ImdnDocument.DISPLAY,
                     ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp));
         } catch (PayloadException e) {
-            mLogger.error("Failed to notify msrp data transfered for msgId : ".concat(msgId), e);
+            sLogger.error("Failed to notify msrp data transfered for msgId : ".concat(msgId), e);
+
         } catch (NetworkException e) {
-            if (mLogger.isActivated()) {
-                mLogger.debug(e.getMessage());
+            if (sLogger.isActivated()) {
+                sLogger.debug(e.getMessage());
             }
+
         } catch (RuntimeException e) {
             /*
              * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
@@ -368,27 +348,16 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
              * executing operations on a thread unhandling such exceptions will eventually lead to
              * exit the system and thus can bring the whole system down, which is not intended.
              */
-            mLogger.error("Failed to notify msrp data transfered for msgId : ".concat(msgId), e);
+            sLogger.error("Failed to notify msrp data transfered for msgId : ".concat(msgId), e);
         }
     }
 
-    /**
-     * Data transfer has been received
-     * 
-     * @param msgId Message ID
-     * @param data Received data
-     * @param mimeType Data mime-type
-     */
+    @Override
     public void receiveMsrpData(String msgId, byte[] data, String mimeType) {
         // Not used in originating side
     }
 
-    /**
-     * Data transfer in progress
-     * 
-     * @param currentSize Current transfered size in bytes
-     * @param totalSize Total size in bytes
-     */
+    @Override
     public void msrpTransferProgress(long currentSize, long totalSize) {
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
@@ -397,38 +366,27 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
         }
     }
 
-    /**
-     * Data transfer in progress
-     * 
-     * @param currentSize Current transfered size in bytes
-     * @param totalSize Total size in bytes
-     * @param data received data chunk
-     * @return always false TODO
-     */
+    @Override
     public boolean msrpTransferProgress(long currentSize, long totalSize, byte[] data) {
         // Not used in originating side
         return false;
     }
 
-    /**
-     * Data transfer has been aborted
-     */
+    @Override
     public void msrpTransferAborted() {
-        if (mLogger.isActivated()) {
-            mLogger.info("Data transfer aborted");
+        if (sLogger.isActivated()) {
+            sLogger.info("Data transfer aborted");
         }
     }
 
-    /**
-     * Close media session
-     */
+    @Override
     public void closeMediaSession() {
         // Close MSRP session
         if (msrpMgr != null) {
             msrpMgr.closeSession();
         }
-        if (mLogger.isActivated()) {
-            mLogger.debug("MSRP session has been closed");
+        if (sLogger.isActivated()) {
+            sLogger.debug("MSRP session has been closed");
         }
     }
 
@@ -437,14 +395,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
         return false;
     }
 
-    /**
-     * Handle 200 0K response
-     * 
-     * @param resp 200 OK response
-     * @throws PayloadException
-     * @throws NetworkException
-     * @throws FileAccessException
-     */
+    @Override
     public void handle200OK(SipResponse resp) throws PayloadException, NetworkException,
             FileAccessException {
         long timestamp = System.currentTimeMillis();
