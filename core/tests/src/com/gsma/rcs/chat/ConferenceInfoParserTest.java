@@ -18,6 +18,7 @@
 
 package com.gsma.rcs.chat;
 
+import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.core.ims.service.im.chat.event.ConferenceInfoDocument;
 import com.gsma.rcs.core.ims.service.im.chat.event.ConferenceInfoParser;
 import com.gsma.rcs.utils.logger.Logger;
@@ -73,7 +74,7 @@ public class ConferenceInfoParserTest extends AndroidTestCase {
     // @formatter:on
 
     public void testGetConferenceInfo() throws ParserConfigurationException, SAXException,
-            IOException {
+            IOException, ParseFailureException {
         StringBuffer sb = new StringBuffer("<?xml version=\"1.08\" encoding=\"UTF-8\"?>");
         sb.append(CRLF);
         sb.append("<conference-info xmlns=\"urn:ietf:params:xml:ns:conference-info\" entity=\"sips:conf233@example.com\" state=\"full\" version=\"1\">");
@@ -114,7 +115,9 @@ public class ConferenceInfoParserTest extends AndroidTestCase {
 
         InputSource inputso = new InputSource(new ByteArrayInputStream(xml.getBytes()));
         ConferenceInfoParser parser = new ConferenceInfoParser(inputso);
+        parser.parse();
         ConferenceInfoDocument confInfoDoc = parser.getConferenceInfo();
+
         if (logger.isActivated()) {
             logger.info("conference info URI = " + confInfoDoc.getEntity());
             logger.info("conference info state = " + confInfoDoc.getState());

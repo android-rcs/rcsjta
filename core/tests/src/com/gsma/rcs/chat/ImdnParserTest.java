@@ -18,6 +18,7 @@
 
 package com.gsma.rcs.chat;
 
+import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnParser;
 import com.gsma.rcs.utils.logger.Logger;
@@ -55,7 +56,7 @@ public class ImdnParserTest extends AndroidTestCase {
     }
 
     public void testGetImdnDocument() throws SAXException, ParserConfigurationException,
-            IOException {
+            IOException, ParseFailureException {
         /**
          * Parse a delivery report
          * 
@@ -81,6 +82,7 @@ public class ImdnParserTest extends AndroidTestCase {
 
         InputSource inputso = new InputSource(new ByteArrayInputStream(xml.getBytes()));
         ImdnParser parser = new ImdnParser(inputso);
+        parser.parse();
         ImdnDocument imdnDoc = parser.getImdnDocument();
         if (logger.isActivated()) {
             logger.info("MsgId=" + imdnDoc.getMsgId() + "  status=" + imdnDoc.getStatus());

@@ -18,6 +18,7 @@
 
 package com.gsma.rcs.chat;
 
+import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
 import com.gsma.rcs.core.ims.service.im.chat.iscomposing.IsComposingParser;
 import com.gsma.rcs.utils.logger.Logger;
@@ -54,7 +55,7 @@ public class IsComposingParserTest extends AndroidTestCase {
     }
 
     public void testIsComposingParser() throws ParserConfigurationException, SAXException,
-            IOException {
+            IOException, ParseFailureException {
         StringBuffer sb = new StringBuffer("<?xml version=\"1.08\" encoding=\"UTF-8\"?>");
         sb.append("<isComposing xmlns=\"urn:ietf:params:xml:ns:im-isComposing\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ");
         sb.append("xsi:schemaLocation=\"urn:ietf:params:xml:ns:im-composing iscomposing.xsd\">");
@@ -65,6 +66,7 @@ public class IsComposingParserTest extends AndroidTestCase {
 
         InputSource inputso = new InputSource(new ByteArrayInputStream(xml.getBytes()));
         IsComposingParser parser = new IsComposingParser(inputso);
+        parser.parse();
         IsComposingInfo isInfo = parser.getIsComposingInfo();
         assertEquals(isInfo.getContentType(), "audio");
         assertEquals(isInfo.isStateActive(), false);

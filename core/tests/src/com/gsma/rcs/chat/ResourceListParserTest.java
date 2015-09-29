@@ -18,6 +18,7 @@
 
 package com.gsma.rcs.chat;
 
+import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.core.ims.service.im.chat.resourcelist.ResourceListDocument;
 import com.gsma.rcs.core.ims.service.im.chat.resourcelist.ResourceListParser;
 import com.gsma.rcs.utils.logger.Logger;
@@ -46,7 +47,7 @@ public class ResourceListParserTest extends AndroidTestCase {
     }
 
     public void testGetResourceListDocument() throws ParserConfigurationException, SAXException,
-            IOException {
+            IOException, ParseFailureException {
         // @formatter:off
         /*
          * Resource-List SAMPLE: <?xml version="1.0" encoding="UTF-8"?> <resource-lists
@@ -76,6 +77,7 @@ public class ResourceListParserTest extends AndroidTestCase {
 
         InputSource inputso = new InputSource(new ByteArrayInputStream(xml.getBytes()));
         ResourceListParser parser = new ResourceListParser(inputso);
+        parser.parse();
         ResourceListDocument rlistDoc = parser.getResourceList();
         if (logger.isActivated()) {
             if (rlistDoc.getEntries() != null) {
