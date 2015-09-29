@@ -52,9 +52,6 @@ public class PresenceError extends ImsServiceError {
      * 
      * @param code Error code
      * @param msg Detail message
-     * @deprecated <p>
-     *             PresenceError(int code, Throwable cause)
-     *             </p>
      */
     public PresenceError(int code, String msg) {
         super(code, msg);

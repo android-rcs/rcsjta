@@ -82,9 +82,6 @@ public class ChatError extends ImsSessionBasedServiceError {
      * 
      * @param code Error code
      * @param msg Detail message
-     * @deprecated <p>
-     *             Should use ChatError(int code, Throwable cause)
-     *             </p>
      */
     public ChatError(int code, String msg) {
         super(code, msg);

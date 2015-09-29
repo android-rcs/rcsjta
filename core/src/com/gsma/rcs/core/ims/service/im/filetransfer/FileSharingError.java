@@ -72,9 +72,6 @@ public class FileSharingError extends ImsSessionBasedServiceError {
      * Constructor
      * 
      * @param error Error
-     * @deprecated <p>
-     *             Should use FileSharingError(int code, Throwable cause)
-     *             </p>
      */
     public FileSharingError(ImsServiceError error) {
         super(error.getErrorCode(), error.getMessage());
@@ -94,9 +91,6 @@ public class FileSharingError extends ImsSessionBasedServiceError {
      * 
      * @param code Error code
      * @param msg Detail message
-     * @deprecated <p>
-     *             Should use FileSharingError(int code, Throwable cause)
-     *             </p>
      */
     public FileSharingError(int code, String msg) {
         super(code, msg);

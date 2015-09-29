@@ -67,9 +67,6 @@ public class ImsServiceError extends Error {
      * 
      * @param code Error code
      * @param msg Detail message
-     * @deprecated <p>
-     *             Should use ImsServiceError(int code, Throwable cause)
-     *             </p>
      */
     public ImsServiceError(int code, String msg) {
         super(msg);

@@ -47,9 +47,6 @@ public class CapabilityError extends ImsServiceError {
      * 
      * @param code Error code
      * @param msg Detail message
-     * @deprecated <p>
-     *             CapabilityError(int code, Throwable cause)
-     *             </p>
      */
     public CapabilityError(int code, String msg) {
         super(code, msg);

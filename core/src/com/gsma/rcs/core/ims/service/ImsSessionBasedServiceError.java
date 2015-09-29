@@ -95,9 +95,6 @@ public class ImsSessionBasedServiceError extends ImsServiceError {
      * 
      * @param code Error code
      * @param msg Detail message
-     * @deprecated <p>
-     *             Should use ImsSessionBasedServiceError(int code, Throwable cause)
-     *             </p>
      */
     public ImsSessionBasedServiceError(int code, String msg) {
         super(code, msg);
