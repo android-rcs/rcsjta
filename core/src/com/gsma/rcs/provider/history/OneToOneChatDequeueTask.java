@@ -144,8 +144,7 @@ public class OneToOneChatDequeueTask extends DequeueTask {
                             String content = cursor.getString(contentIdx);
                             long timestamp = System.currentTimeMillis();
                             /* For outgoing message, timestampSent = timestamp */
-                            ChatMessage msg = ChatUtils.createChatMessage(id,
-                                    ChatUtils.apiMimeTypeToNetworkMimeType(mimeType), content,
+                            ChatMessage msg = ChatUtils.createChatMessage(id, mimeType, content,
                                     contact, null, timestamp, timestamp);
                             oneToOneChat.dequeueOneToOneChatMessage(msg);
                             break;
