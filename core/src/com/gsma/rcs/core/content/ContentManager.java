@@ -55,21 +55,23 @@ public class ContentManager {
      */
     public static Uri generateUriForReceivedContent(String fileName, String mime,
             RcsSettings rcsSettings) {
-        // Generate a file path
+        /* Generate a file path */
         String path;
         if (MimeManager.isImageType(mime)) {
             path = rcsSettings.getPhotoRootDirectory();
+
+        } else if (MimeManager.isVideoType(mime)) {
+            path = rcsSettings.getVideoRootDirectory();
+
         } else {
-            if (MimeManager.isVideoType(mime)) {
-                path = rcsSettings.getVideoRootDirectory();
-            } else {
-                path = rcsSettings.getFileRootDirectory();
-            }
+            path = rcsSettings.getFileRootDirectory();
         }
 
-        // Check that the fileName will not overwrite existing file
-        // We modify it if a file of the same name exists, by appending _1 before the extension
-        // For example if image.jpeg exists, next file will be image_1.jpeg, then image_2.jpeg etc
+        /*
+         * Check that the fileName will not overwrite existing file We modify it if a file of the
+         * same name exists, by appending _1 before the extension For example if image.jpeg exists,
+         * next file will be image_1.jpeg, then image_2.jpeg etc.
+         */
         StringBuilder extension = new StringBuilder("");
         if ((fileName != null) && (fileName.indexOf('.') != -1)) {
             // if extension is present, split it
@@ -85,7 +87,7 @@ public class ContentManager {
             i++;
         }
 
-        // Return free destination uri
+        /* Return free destination URI */
         return Uri.fromFile(new File(new StringBuilder(path).append(destination).append(extension)
                 .toString()));
     }
@@ -102,10 +104,6 @@ public class ContentManager {
         String extension = MimeManager.getFileExtension(fileName);
         String mime = MimeManager.getInstance().getMimeType(extension);
         if (size < 0 || fileName == null || mime == null) {
-            /*
-             * TODO : Proper exception handling will be added here as part of the CR037
-             * implementation
-             */
             throw new IllegalArgumentException(new StringBuilder("Invalid file, size ")
                     .append(size).append(" fileName ").append(fileName).append(" mimeType ")
                     .append(mime).append(" unable to create MmContent.").toString());
@@ -125,27 +123,21 @@ public class ContentManager {
     public static MmContent createMmContentFromMime(Uri uri, String mime, long size, String fileName) {
         if (mime != null) {
             if (MimeManager.isImageType(mime)) {
-                // Photo content
                 return new PhotoContent(uri, mime, size, fileName);
             }
             if (MimeManager.isVideoType(mime)) {
-                // Video content
                 return new VideoContent(uri, mime, size, fileName);
             }
             if (MimeManager.isAudioType(mime)) {
-                // Audio content
                 return new AudioContent(uri, mime, size, fileName);
             }
             if (MimeManager.isVCardType(mime)) {
-                // Visit Card content
                 return new VisitCardContent(uri, mime, size, fileName);
             }
             if (MimeManager.isGeolocType(mime)) {
-                // Geoloc content
                 return new GeolocContent(uri, size, fileName);
             }
         }
-        // File content
         return new FileContent(uri, size, fileName);
     }
 
@@ -199,21 +191,26 @@ public class ContentManager {
      * @return Content instance
      */
     public static LiveVideoContent createLiveVideoContentFromSdp(byte[] sdp) {
-        // Parse the remote SDP part
+        /* Parse the remote SDP part */
         SdpParser parser = new SdpParser(sdp);
         Vector<MediaDescription> media = parser.getMediaDescriptions();
-        if (media.size() == 0) { // there is no media in SDP
+        if (media.size() == 0) { /* there is no media in SDP */
             return null;
         }
         MediaDescription desc = media.elementAt(0);
-        if (media.size() == 1) { // if only one media in SDP, test if 'video', if not then return
-                                 // null
+        if (media.size() == 1) {
+            /*
+             * if only one media in SDP, test if 'video', if not then return null.
+             */
             if (!desc.mName.equals("video")) {
                 return null;
             }
         }
-        if (media.size() == 2) { // if two media in SDP, test if first 'video', if not then choose
-                                 // second and test if video, if not return null
+        if (media.size() == 2) {
+            /*
+             * if two media in SDP, test if first 'video', if not then choose second and test if
+             * video, if not return null.
+             */
             if (!desc.mName.equals("video")) {
                 desc = media.elementAt(1);
                 if (!desc.mName.equals("video")) {
@@ -223,17 +220,16 @@ public class ContentManager {
         }
 
         String rtpmap = desc.getMediaAttribute("rtpmap").getValue();
-
-        // Extract the video encoding
-        String encoding = rtpmap
-                .substring(rtpmap.indexOf(desc.mPayload) + desc.mPayload.length() + 1);
+        /* Extract the video encoding */
+        String encoding = rtpmap.substring(rtpmap.indexOf(desc.mPayload) + desc.mPayload.length()
+                + 1);
         String codec = encoding.toLowerCase().trim();
         int index = encoding.indexOf("/");
         if (index != -1) {
             codec = encoding.substring(0, index);
         }
 
-        // Extract video size
+        /* Extract video size */
         MediaAttribute frameSize = desc.getMediaAttribute("framesize");
         int width = 0;
         int height = 0;
@@ -248,7 +244,7 @@ public class ContentManager {
                     height = Integer.parseInt(value.substring(separator + 1));
                 }
             } catch (NumberFormatException e) {
-                // Use default value
+                /* Use default value */
                 width = H264Config.QCIF_WIDTH;
                 height = H264Config.QCIF_WIDTH;
             }
@@ -264,7 +260,7 @@ public class ContentManager {
      * @return Content instance
      */
     public static LiveAudioContent createLiveAudioContentFromSdp(byte[] sdp) {
-        // Parse the remote SDP part
+        /* Parse the remote SDP part */
         SdpParser parser = new SdpParser(sdp);
         Vector<MediaDescription> media = parser.getMediaDescriptions(); // TODO replace with
                                                                         // getMediaDescriptions(audio)
@@ -272,14 +268,19 @@ public class ContentManager {
             return null;
         }
         MediaDescription desc = media.elementAt(0);
-        if (media.size() == 1) { // if only one media in SDP, test if 'audio', if not then return
-                                 // null
+        if (media.size() == 1) {
+            /*
+             * if only one media in SDP, test if 'audio', if not then return null.
+             */
             if (!desc.mName.equals("audio")) {
                 return null;
             }
         }
-        if (media.size() == 2) { // if two media in SDP, test if first 'audio', if not then choose
-                                 // second and test if 'audio', if not return null
+        if (media.size() == 2) {
+            /*
+             * if two media in SDP, test if first 'audio', if not then choose second and test if
+             * 'audio', if not return null.
+             */
             if (!desc.mName.equals("audio")) {
                 desc = media.elementAt(1);
                 if (!desc.mName.equals("audio")) {
@@ -292,9 +293,9 @@ public class ContentManager {
         }
         String rtpmap = desc.getMediaAttribute("rtpmap").getValue();
 
-        // Extract the audio encoding
-        String encoding = rtpmap
-                .substring(rtpmap.indexOf(desc.mPayload) + desc.mPayload.length() + 1);
+        /* Extract the audio encoding */
+        String encoding = rtpmap.substring(rtpmap.indexOf(desc.mPayload) + desc.mPayload.length()
+                + 1);
         String codec = encoding.toLowerCase().trim();
         int index = encoding.indexOf("/");
         if (index != -1) {

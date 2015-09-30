@@ -50,6 +50,7 @@ public class UpdateVideoSharingStateAfterUngracefulTerminationTask implements Ru
         mVideoService = videoService;
     }
 
+    @Override
     public void run() {
         if (sLogger.isActivated()) {
             sLogger.debug("initiating.");
@@ -57,7 +58,6 @@ public class UpdateVideoSharingStateAfterUngracefulTerminationTask implements Ru
         Cursor cursor = null;
         try {
             cursor = mRichCallHistory.getInterruptedVideoSharings();
-            /* TODO: Handle cursor when null. */
             int sharingIdx = cursor.getColumnIndexOrThrow(VideoSharingData.KEY_SHARING_ID);
             int contactIdx = cursor.getColumnIndexOrThrow(VideoSharingData.KEY_CONTACT);
             int stateIdx = cursor.getColumnIndexOrThrow(VideoSharingData.KEY_STATE);

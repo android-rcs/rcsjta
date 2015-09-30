@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.history.HistoryMemberBaseIdCreator;
 import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.DatabaseUtils;
@@ -254,7 +255,7 @@ public class FileTransferProvider extends ContentProvider {
                     SQLiteDatabase db = mOpenHelper.getReadableDatabase();
                     cursor = db
                             .query(TABLE, projection, selection, selectionArgs, null, null, sort);
-                    /* TODO: Handle cursor when null. */
+                    CursorUtil.assertCursorIsNotNull(cursor, uri);
                     cursor.setNotificationUri(getContext().getContentResolver(),
                             Uri.withAppendedPath(FileTransferLog.CONTENT_URI, ftId));
                     return cursor;
@@ -263,7 +264,7 @@ public class FileTransferProvider extends ContentProvider {
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db
                             .query(TABLE, projection, selection, selectionArgs, null, null, sort);
-                    /* TODO: Handle cursor when null. */
+                    CursorUtil.assertCursorIsNotNull(cursor, uri);
                     cursor.setNotificationUri(getContext().getContentResolver(),
                             FileTransferLog.CONTENT_URI);
                     return cursor;
@@ -279,7 +280,7 @@ public class FileTransferProvider extends ContentProvider {
                     cursor = db.query(TABLE,
                             restrictProjectionToExternallyDefinedColumns(projection), selection,
                             selectionArgs, null, null, sort);
-                    /* TODO: Handle cursor when null. */
+                    CursorUtil.assertCursorIsNotNull(cursor, uri);
                     cursor.setNotificationUri(getContext().getContentResolver(), uri);
                     return cursor;
 
@@ -288,11 +289,10 @@ public class FileTransferProvider extends ContentProvider {
                             .append(uri).append("!").toString());
 
             }
-        }
-        /*
-         * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
-         * exception.
-         */
+        } /*
+           * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
+           * exception.
+           */
         catch (RuntimeException e) {
             if (cursor != null) {
                 cursor.close();

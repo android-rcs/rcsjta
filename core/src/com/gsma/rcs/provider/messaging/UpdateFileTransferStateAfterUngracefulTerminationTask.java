@@ -41,6 +41,7 @@ public class UpdateFileTransferStateAfterUngracefulTerminationTask implements Ru
         mFileTransferService = fileTransferService;
     }
 
+    @Override
     public void run() {
         if (sLogger.isActivated()) {
             sLogger.debug("initiating.");
@@ -48,7 +49,6 @@ public class UpdateFileTransferStateAfterUngracefulTerminationTask implements Ru
         Cursor cursor = null;
         try {
             cursor = mMessagingLog.getInterruptedFileTransfers();
-            /* TODO: Handle cursor when null. */
             int chatIdIdx = cursor.getColumnIndex(FileTransferData.KEY_CHAT_ID);
             int contactIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_CONTACT);
             int fileTransferIdIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FT_ID);
@@ -69,7 +69,7 @@ public class UpdateFileTransferStateAfterUngracefulTerminationTask implements Ru
                 boolean groupFileTransfer = !chatId.equals(contactNumber);
                 if (cursor.getString(downloadUriIdx) == null
                         && cursor.getString(uploadIdIdx) == null) {
-                    /* Msrp file transfer */
+                    /* MSRP file transfer */
                     switch (state) {
                         case INITIATING:
                             if (groupFileTransfer) {
@@ -121,7 +121,7 @@ public class UpdateFileTransferStateAfterUngracefulTerminationTask implements Ru
                             break;
                     }
                 } else {
-                    /* Http file transfer */
+                    /* HTTP file transfer */
                     switch (state) {
                         case INITIATING:
                             if (groupFileTransfer) {

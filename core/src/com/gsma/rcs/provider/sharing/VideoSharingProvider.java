@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.provider.sharing;
 
+import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.history.HistoryMemberBaseIdCreator;
 import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.DatabaseUtils;
@@ -197,7 +198,7 @@ public class VideoSharingProvider extends ContentProvider {
                     SQLiteDatabase db = mOpenHelper.getReadableDatabase();
                     cursor = db
                             .query(TABLE, projection, selection, selectionArgs, null, null, sort);
-                    /* TODO: Handle cursor when null. */
+                    CursorUtil.assertCursorIsNotNull(cursor, uri);
                     cursor.setNotificationUri(getContext().getContentResolver(),
                             Uri.withAppendedPath(VideoSharingLog.CONTENT_URI, sharingId));
                     return cursor;
@@ -206,7 +207,7 @@ public class VideoSharingProvider extends ContentProvider {
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db
                             .query(TABLE, projection, selection, selectionArgs, null, null, sort);
-                    /* TODO: Handle cursor when null. */
+                    CursorUtil.assertCursorIsNotNull(cursor, uri);
                     cursor.setNotificationUri(getContext().getContentResolver(),
                             VideoSharingLog.CONTENT_URI);
                     return cursor;
@@ -221,7 +222,7 @@ public class VideoSharingProvider extends ContentProvider {
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db
                             .query(TABLE, projection, selection, selectionArgs, null, null, sort);
-                    /* TODO: Handle cursor when null. */
+                    CursorUtil.assertCursorIsNotNull(cursor, uri);
                     cursor.setNotificationUri(getContext().getContentResolver(), uri);
                     return cursor;
 

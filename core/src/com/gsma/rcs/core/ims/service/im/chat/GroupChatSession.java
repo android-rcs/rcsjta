@@ -316,21 +316,13 @@ public abstract class GroupChatSession extends ChatSession {
         return mConferenceSubscriber;
     }
 
-    /**
-     * Close media session
-     */
+    @Override
     public void closeMediaSession() {
         // Close MSRP session
         closeMsrpSession();
     }
 
-    /**
-     * Close session
-     * 
-     * @param reason Reason
-     * @throws NetworkException
-     * @throws PayloadException
-     */
+    @Override
     public void closeSession(TerminationReason reason) throws PayloadException, NetworkException {
         mConferenceSubscriber.terminate();
         super.closeSession(reason);
@@ -356,16 +348,9 @@ public abstract class GroupChatSession extends ChatSession {
         }
     }
 
-    /**
-     * Receive CANCEL request
-     * 
-     * @param cancel CANCEL request
-     * @throws PayloadException
-     * @throws NetworkException
-     */
+    @Override
     public void receiveCancel(SipRequest cancel) throws NetworkException, PayloadException {
         mConferenceSubscriber.terminate();
-
         super.receiveCancel(cancel);
     }
 
@@ -407,12 +392,6 @@ public abstract class GroupChatSession extends ChatSession {
         }
     }
 
-    /**
-     * Send is composing status
-     * 
-     * @param status Status on is-composing event
-     * @throws NetworkException
-     */
     @Override
     public void sendIsComposingStatus(boolean status) throws NetworkException {
         String from = ImsModule.getImsUserProfile().getPublicUri();
@@ -643,32 +622,18 @@ public abstract class GroupChatSession extends ChatSession {
         }
     }
 
-    /**
-     * Reject the session invitation
-     */
+    @Override
     public void rejectSession() {
         rejectSession(InvitationStatus.INVITATION_REJECTED_DECLINE);
     }
 
-    /**
-     * Create an INVITE request
-     * 
-     * @return the INVITE request
-     * @throws PayloadException
-     */
+    @Override
     public SipRequest createInvite() throws PayloadException {
         // Nothing to do in terminating side
         return null;
     }
 
-    /**
-     * Handle 200 0K response
-     * 
-     * @param resp 200 OK response
-     * @throws PayloadException
-     * @throws NetworkException
-     * @throws FileAccessException
-     */
+    @Override
     public void handle200OK(SipResponse resp) throws PayloadException, NetworkException,
             FileAccessException {
         super.handle200OK(resp);
@@ -682,11 +647,6 @@ public abstract class GroupChatSession extends ChatSession {
                         .contains(ImdnDocument.DISPLAY));
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.ims.service.im.chat.ChatSession#msrpDataReceived(java.lang.String,
-     * byte[], java.lang.String)
-     */
     @Override
     public void receiveMsrpData(String msgId, byte[] data, String mimeType)
             throws PayloadException, NetworkException, ContactManagerException {
@@ -950,6 +910,7 @@ public abstract class GroupChatSession extends ChatSession {
             for (ImsSessionListener listener : getListeners()) {
                 ((GroupChatSessionListener) listener).onImError(chatError);
             }
+
         } catch (RuntimeException e) {
             /*
              * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
@@ -963,11 +924,6 @@ public abstract class GroupChatSession extends ChatSession {
         }
     }
 
-    /**
-     * Handle error
-     * 
-     * @param error Error
-     */
     @Override
     public void handleError(ImsServiceError error) {
         try {
@@ -979,13 +935,12 @@ public abstract class GroupChatSession extends ChatSession {
                         .append(", reason=").append(error.getMessage()).toString());
             }
             closeMediaSession();
-
             removeSession();
-
             ChatError chatError = new ChatError(error);
             for (ImsSessionListener listener : getListeners()) {
                 ((GroupChatSessionListener) listener).onImError(chatError);
             }
+
         } catch (RuntimeException e) {
             /*
              * Normally we are not allowed to catch runtime exceptions as these are genuine bugs

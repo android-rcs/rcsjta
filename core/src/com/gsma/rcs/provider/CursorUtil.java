@@ -30,6 +30,12 @@ public class CursorUtil {
         }
     }
 
+    public static void assertCursorIsNotNull(Cursor cursor, String queriedTable) {
+        if (cursor == null) {
+            throw new ServerApiPersistentStorageException("Query failed: ".concat(queriedTable));
+        }
+    }
+
     public static final void close(Cursor cursor) {
         if (cursor != null) {
             cursor.close();

@@ -48,10 +48,9 @@ import javax2.sip.header.SubjectHeader;
  * @author Jean-Marc AUFFRET
  */
 public class RejoinGroupChatSession extends GroupChatSession {
-    /**
-     * The logger
-     */
-    private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
+
+    private final static Logger sLogger = Logger.getLogger(RejoinGroupChatSession.class
+            .getSimpleName());
 
     /**
      * Constructor
@@ -72,24 +71,20 @@ public class RejoinGroupChatSession extends GroupChatSession {
         if (!TextUtils.isEmpty(groupChatInfo.getSubject())) {
             setSubject(groupChatInfo.getSubject());
         }
-
         createOriginatingDialogPath();
-
         setContributionID(groupChatInfo.getContributionId());
     }
 
-    /**
-     * Background processing
-     */
+    @Override
     public void run() {
         try {
-            if (mLogger.isActivated()) {
-                mLogger.info("Rejoin an existing group chat session");
+            if (sLogger.isActivated()) {
+                sLogger.info("Rejoin an existing group chat session");
             }
 
             String localSetup = createSetupOffer();
-            if (mLogger.isActivated()) {
-                mLogger.debug("Local setup attribute is ".concat(localSetup));
+            if (sLogger.isActivated()) {
+                sLogger.debug("Local setup attribute is ".concat(localSetup));
             }
 
             int localMsrpPort;
@@ -106,8 +101,8 @@ public class RejoinGroupChatSession extends GroupChatSession {
 
             getDialogPath().setLocalContent(sdp);
 
-            if (mLogger.isActivated()) {
-                mLogger.info("Send INVITE");
+            if (sLogger.isActivated()) {
+                sLogger.info("Send INVITE");
             }
             SipRequest invite = createInviteRequest(sdp);
 
@@ -116,29 +111,27 @@ public class RejoinGroupChatSession extends GroupChatSession {
             getDialogPath().setInvite(invite);
 
             sendInvite(invite);
+
         } catch (InvalidArgumentException e) {
-            mLogger.error("Unable to set authorization header for chat invite!", e);
             handleError(new ChatError(ChatError.SESSION_REJOIN_FAILED, e));
+
         } catch (ParseException e) {
-            mLogger.error("Unable to set authorization header for chat invite!", e);
             handleError(new ChatError(ChatError.SESSION_REJOIN_FAILED, e));
+
         } catch (FileAccessException e) {
-            mLogger.error("Unable to send 200OK response!", e);
             handleError(new ChatError(ChatError.SESSION_REJOIN_FAILED, e));
+
         } catch (PayloadException e) {
-            mLogger.error("Unable to send 200OK response!", e);
             handleError(new ChatError(ChatError.SESSION_REJOIN_FAILED, e));
+
         } catch (NetworkException e) {
-            if (mLogger.isActivated()) {
-                mLogger.debug(e.getMessage());
-            }
             handleError(new ChatError(ChatError.SESSION_REJOIN_FAILED, e));
+
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
-            mLogger.error("Failed to rejoin a chat session!", e);
             handleError(new ChatError(ChatError.SESSION_REJOIN_FAILED, e));
         }
     }
@@ -166,30 +159,13 @@ public class RejoinGroupChatSession extends GroupChatSession {
         }
     }
 
-    /**
-     * Create an INVITE request
-     * 
-     * @return the INVITE request
-     * @throws PayloadException
-     */
+    @Override
     public SipRequest createInvite() throws PayloadException {
         return createInviteRequest(getDialogPath().getLocalContent());
     }
 
-    /**
-     * Handle 404 Session Not Found
-     * 
-     * @param resp 404 response
-     */
+    @Override
     public void handle404SessionNotFound(SipResponse resp) {
-        // Rejoin session has failed, we update the database with status terminated by remote
-
-        // TODO Once after CR18 is implemented we will check if this callback is
-        // really required and act accordingly
-
-        // MessagingLog.getInstance().updateGroupChatStatus(getContributionID(),
-        // GroupChat.State.TERMINATED, GroupChat.ReasonCode.NONE);
-
         handleError(new ChatError(ChatError.SESSION_NOT_FOUND, resp.getReasonPhrase()));
     }
 

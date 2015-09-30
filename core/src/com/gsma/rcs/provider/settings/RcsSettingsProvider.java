@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.provider.settings;
 
+import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.utils.DatabaseUtils;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -412,7 +413,7 @@ public class RcsSettingsProvider extends ContentProvider {
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int currentVersion) {
             /* Get old data before deleting the table */
             Cursor oldDataCursor = db.query(TABLE, null, null, null, null, null, null);
-            /* TODO: Handle cursor when null. */
+            CursorUtil.assertCursorIsNotNull(oldDataCursor, TABLE);
 
             /*
              * Get all the pairs key/value of the old table to insert them back after update
@@ -509,7 +510,7 @@ public class RcsSettingsProvider extends ContentProvider {
                     SQLiteDatabase database = mOpenHelper.getReadableDatabase();
                     cursor = database.query(TABLE, projection, selection, selectionArgs, null,
                             null, sort);
-                    /* TODO: Handle cursor when null. */
+                    CursorUtil.assertCursorIsNotNull(cursor, uri);
                     cursor.setNotificationUri(getContext().getContentResolver(), uri);
                     return cursor;
 

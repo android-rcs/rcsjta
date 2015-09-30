@@ -50,6 +50,7 @@ public class UpdateImageSharingStateAfterUngracefulTerminationTask implements Ru
         mImageService = imageService;
     }
 
+    @Override
     public void run() {
         if (sLogger.isActivated()) {
             sLogger.debug("initiating.");
@@ -57,7 +58,6 @@ public class UpdateImageSharingStateAfterUngracefulTerminationTask implements Ru
         Cursor cursor = null;
         try {
             cursor = mRichCallHistory.getInterruptedImageSharings();
-            /* TODO: Handle cursor when null. */
             int sharingIdx = cursor.getColumnIndexOrThrow(ImageSharingData.KEY_SHARING_ID);
             int contactIdx = cursor.getColumnIndexOrThrow(ImageSharingData.KEY_CONTACT);
             int stateIdx = cursor.getColumnIndexOrThrow(ImageSharingData.KEY_STATE);
@@ -89,6 +89,7 @@ public class UpdateImageSharingStateAfterUngracefulTerminationTask implements Ru
                         break;
                 }
             }
+
         } catch (RuntimeException e) {
             /*
              * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
