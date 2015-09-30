@@ -963,16 +963,16 @@ public class ChatUtils {
     }
 
     /**
-     * Create a chat message
+     * Create a chat message either text or geolocation.
      * 
      * @param msgId
-     * @param apiMimeType
+     * @param apiMimeType The mime-type as exposed to client applications
      * @param content
      * @param contact
      * @param displayName
      * @param timestamp
      * @param timestampSent
-     * @return ChatMessgae
+     * @return ChatMessage
      */
     public static ChatMessage createChatMessage(String msgId, String apiMimeType, String content,
             ContactId contact, String displayName, long timestamp, long timestampSent) {
