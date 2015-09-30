@@ -109,9 +109,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     private final Map<String, GroupFileTransferImpl> mGroupFileTransferCache = new HashMap<String, GroupFileTransferImpl>();
 
-    /**
-     * The sLogger
-     */
     private static final Logger sLogger = Logger.getLogger(FileTransferServiceImpl.class
             .getSimpleName());
 
@@ -238,21 +235,12 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         mGroupFileTransferCache.remove(fileTransferId);
     }
 
-    /**
-     * Returns true if the service is registered to the platform, else returns false
-     * 
-     * @return Returns true if registered else returns false
-     */
     @Override
     public boolean isServiceRegistered() {
         return ServerApiUtils.isImsConnected();
     }
 
-    /**
-     * Return the reason code for IMS service registration
-     * 
-     * @return the reason code for IMS service registration
-     */
+    @Override
     public int getServiceRegistrationReasonCode() {
         return ServerApiUtils.getServiceRegistrationReasonCode().toInt();
     }
@@ -297,11 +285,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         return oneToOneFileTransfer;
     }
 
-    /**
-     * Registers a listener on service registration events
-     * 
-     * @param listener Service registration listener
-     */
     @Override
     public void addEventListener(IRcsServiceRegistrationListener listener) {
         if (sLogger.isActivated()) {
@@ -312,11 +295,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         }
     }
 
-    /**
-     * Unregisters a listener on service registration events
-     * 
-     * @param listener Service registration listener
-     */
     @Override
     public void removeEventListener(IRcsServiceRegistrationListener listener) {
         if (sLogger.isActivated()) {
@@ -331,7 +309,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * Notifies registration event
      */
     public void notifyRegistration() {
-        // Notify listeners
         synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.broadcastServiceRegistered();
         }
@@ -343,7 +320,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param reasonCode for unregistration
      */
     public void notifyUnRegistration(RcsServiceRegistration.ReasonCode reasonCode) {
-        // Notify listeners
         synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.broadcastServiceUnRegistered(reasonCode);
         }
@@ -537,7 +513,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         long timestampSent = timestamp;
         FileTransferProtocol ftProtocol = getFileTransferProtocolForOneToOneFileTransfer(contact);
         if (ftProtocol == null) {
-            /* Throw proper exception as part of CR037 */
             throw new ServerApiGenericException(
                     new StringBuilder(
                             "No valid file transfer protocol could be determined for dequeueing file with fileTransferId '")
@@ -589,7 +564,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 timestamp, timestampSent);
         FileTransferProtocol ftProtocol = getFileTransferProtocolForOneToOneFileTransfer(contact);
         if (ftProtocol == null) {
-            /* Throw proper exception as part of CR037 */
             throw new ServerApiGenericException(
                     new StringBuilder(
                             "No valid file transfer protocol could be determined for resending file with fileTransferId '")

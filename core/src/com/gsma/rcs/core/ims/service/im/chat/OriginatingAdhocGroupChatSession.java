@@ -61,9 +61,6 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
      */
     private final static String BOUNDARY_TAG = "boundary1";
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(OriginatingAdhocGroupChatSession.class
             .getName());
 
@@ -96,9 +93,7 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
         setContributionID(id);
     }
 
-    /**
-     * Background processing
-     */
+    @Override
     public void run() {
         try {
             if (sLogger.isActivated()) {
@@ -149,29 +144,27 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
             getDialogPath().setInvite(invite);
 
             sendInvite(invite);
+
         } catch (InvalidArgumentException e) {
-            sLogger.error("Unable to set authorization header for chat invite!", e);
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
+
         } catch (ParseException e) {
-            sLogger.error("Unable to set authorization header for chat invite!", e);
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
+
         } catch (FileAccessException e) {
-            sLogger.error("Unable to send 200OK response!", e);
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
+
         } catch (PayloadException e) {
-            sLogger.error("Unable to send 200OK response!", e);
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
+
         } catch (NetworkException e) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(e.getMessage());
-            }
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
+
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
-            sLogger.error("Failed initiating chat session!", e);
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
         }
     }
@@ -199,12 +192,7 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
         }
     }
 
-    /**
-     * Create an INVITE request
-     * 
-     * @return the INVITE request
-     * @throws PayloadException
-     */
+    @Override
     public SipRequest createInvite() throws PayloadException {
         return createInviteRequest(getDialogPath().getLocalContent());
     }

@@ -303,12 +303,10 @@ public class MessageLog implements IMessageLog {
                             msgId, deliveryStatus, GroupDeliveryInfo.ReasonCode.UNSPECIFIED, 0, 0);
                 }
             } catch (Exception e) {
-                // TODO CR037 we should not do such rollback nor catch exception at all?
                 mLocalContentResolver.delete(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
                         null, null);
                 mLocalContentResolver.delete(
                         Uri.withAppendedPath(GroupDeliveryInfoData.CONTENT_URI, msgId), null, null);
-                /* TODO: Throw exception */
                 if (sLogger.isActivated()) {
                     sLogger.warn("Group chat message with msgId '" + msgId
                             + "' could not be added to database!");
@@ -357,7 +355,6 @@ public class MessageLog implements IMessageLog {
 
         if (mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
                 values, null, null) < 1) {
-            /* TODO: Throw exception */
             if (sLogger.isActivated()) {
                 sLogger.warn("There was no message with msgId '" + msgId + "' to mark as read.");
             }

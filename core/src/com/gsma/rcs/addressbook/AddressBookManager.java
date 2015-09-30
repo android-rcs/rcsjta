@@ -24,6 +24,7 @@ package com.gsma.rcs.addressbook;
 
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
+import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.utils.logger.Logger;
@@ -121,7 +122,7 @@ public class AddressBookManager {
 
             mContactsContractCursor = mContentResolver.query(Phone.CONTENT_URI, null, null, null,
                     null);
-            /* TODO: Handle mContactsContractCursor when null. */
+            CursorUtil.assertCursorIsNotNull(mContactsContractCursor, Phone.CONTENT_URI);
 
             mContactsContractCursor.registerContentObserver(mContactsContractObserver);
             mObserverIsRegistered = true;

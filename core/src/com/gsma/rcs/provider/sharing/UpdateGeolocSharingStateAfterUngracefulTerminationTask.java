@@ -50,6 +50,7 @@ public class UpdateGeolocSharingStateAfterUngracefulTerminationTask implements R
         mGeolocService = geolocService;
     }
 
+    @Override
     public void run() {
         if (sLogger.isActivated()) {
             sLogger.debug("initiating.");
@@ -57,7 +58,6 @@ public class UpdateGeolocSharingStateAfterUngracefulTerminationTask implements R
         Cursor cursor = null;
         try {
             cursor = mRichCallHistory.getInterruptedGeolocSharings();
-            /* TODO: Handle cursor when null. */
             int sharingIdx = cursor.getColumnIndexOrThrow(GeolocSharingData.KEY_SHARING_ID);
             int contactIdx = cursor.getColumnIndexOrThrow(GeolocSharingData.KEY_CONTACT);
             int stateIdx = cursor.getColumnIndexOrThrow(GeolocSharingData.KEY_STATE);
@@ -89,6 +89,7 @@ public class UpdateGeolocSharingStateAfterUngracefulTerminationTask implements R
                         break;
                 }
             }
+
         } catch (RuntimeException e) {
             /*
              * Normally we are not allowed to catch runtime exceptions as these are genuine bugs

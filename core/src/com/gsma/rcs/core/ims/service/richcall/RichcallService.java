@@ -252,31 +252,25 @@ public class RichcallService extends ImsService {
                 mRichCallHistory, mGeolocSharingService));
     }
 
-    /**
-     * Start the IMS service
-     */
+    @Override
     public synchronized void start() {
         if (isServiceStarted()) {
-            // Already started
+            /* Already started */
             return;
         }
         setServiceStarted(true);
     }
 
-    /**
-     * Stop the IMS service
-     */
+    @Override
     public synchronized void stop() {
         if (!isServiceStarted()) {
-            // Already stopped
+            /* Already stopped */
             return;
         }
         setServiceStarted(false);
     }
 
-    /**
-     * Check the IMS service
-     */
+    @Override
     public void check() {
     }
 
@@ -308,10 +302,6 @@ public class RichcallService extends ImsService {
             if (sLogger.isActivated()) {
                 sLogger.error(errorMessage);
             }
-            /*
-             * TODO : Proper exception handling will be added here as part of the CR037
-             * implementation
-             */
             throw new CoreException(errorMessage);
         }
     }
@@ -487,25 +477,20 @@ public class RichcallService extends ImsService {
             sLogger.info("Initiate image sharing session with contact " + contact + ", file "
                     + content.toString());
         }
-
-        // Test if call is established
+        /* Test if call is established */
         if (!isCallConnectedWith(contact)) {
             if (sLogger.isActivated()) {
                 sLogger.debug("Rich call not established: cancel the initiation");
             }
-            /*
-             * TODO : Proper exception handling will be added here as part of the CR037
-             * implementation
-             */
             throw new CoreException("Call not established");
         }
 
         assertMaximumImageTransferSize(content.getSize(), "File exceeds max size.");
 
-        // Reject if there are already 2 bidirectional sessions with a given contact
+        /* Reject if there are already 2 bidirectional sessions with a given contact */
         boolean rejectInvitation = false;
         if (isCurrentlyImageSharingBiDirectional()) {
-            // Already a bidirectional session
+            /* Already a bidirectional session */
             if (sLogger.isActivated()) {
                 sLogger.debug("Max sessions reached");
             }
@@ -513,13 +498,13 @@ public class RichcallService extends ImsService {
         } else if (isCurrentlyImageSharingUniDirectional()) {
             ImageTransferSession currentSession = getUnidirectionalImageSharingSession();
             if (isSessionOriginating(currentSession)) {
-                // Originating session already used
+                /* Originating session already used */
                 if (sLogger.isActivated()) {
                     sLogger.debug("Max originating sessions reached");
                 }
                 rejectInvitation = true;
             } else if (contact == null || !contact.equals(currentSession.getRemoteContact())) {
-                // Not the same contact
+                /* Not the same contact */
                 if (sLogger.isActivated()) {
                     sLogger.debug("Only bidirectional session with same contact authorized");
                 }
@@ -532,13 +517,8 @@ public class RichcallService extends ImsService {
             }
             throw new CoreException("Max content sharing sessions achieved");
         }
-
-        // Create a new session
-        OriginatingImageTransferSession session = new OriginatingImageTransferSession(this,
-                content, contact, thumbnail, mRcsSettings, timestamp, mContactManager,
-                mCapabilityService);
-
-        return session;
+        return new OriginatingImageTransferSession(this, content, contact, thumbnail, mRcsSettings,
+                timestamp, mContactManager, mCapabilityService);
     }
 
     /**
@@ -573,7 +553,7 @@ public class RichcallService extends ImsService {
                     mContactManager.setContactDisplayName(contact,
                             SipUtils.getDisplayNameFromUri(invite.getFrom()));
 
-                    // Test if call is established
+                    /* Test if call is established */
                     if (!isCallConnectedWith(contact)) {
                         if (logActivated) {
                             sLogger.debug("Rich call not established: reject the invitation");
@@ -582,7 +562,7 @@ public class RichcallService extends ImsService {
                         return;
                     }
 
-                    // Test if the contact is blocked
+                    /* Test if the contact is blocked */
                     if (mContactManager.isBlockedForContact(contact)) {
                         if (logActivated) {
                             sLogger.debug("Contact " + contact
@@ -597,10 +577,10 @@ public class RichcallService extends ImsService {
                     }
 
                     MmContent content = ContentManager.createMmContentFromSdp(invite, mRcsSettings);
-                    // Reject if there are already 2 bidirectional sessions with a given contact
+                    /* Reject if there are already 2 bidirectional sessions with a given contact */
                     boolean rejectInvitation = false;
                     if (isCurrentlyImageSharingBiDirectional()) {
-                        // Already a bidirectional session
+                        /* Already a bidirectional session */
                         if (logActivated) {
                             sLogger.debug("Max sessions reached");
                         }
@@ -610,14 +590,14 @@ public class RichcallService extends ImsService {
                     } else if (isCurrentlyImageSharingUniDirectional()) {
                         ImageTransferSession currentSession = getUnidirectionalImageSharingSession();
                         if (isSessionTerminating(currentSession)) {
-                            // Terminating session already used
+                            /* Terminating session already used */
                             if (logActivated) {
                                 sLogger.debug("Max terminating sessions reached");
                             }
                             rejectInvitation = true;
                         } else if (contact == null
                                 || !contact.equals(currentSession.getRemoteContact())) {
-                            // Not the same contact
+                            /* Not the same contact */
                             if (logActivated) {
                                 sLogger.debug("Only bidirectional session with same contact authorized");
                             }
@@ -635,7 +615,7 @@ public class RichcallService extends ImsService {
                         return;
                     }
 
-                    // Auto reject if file too big or if storage capacity is too small
+                    /* Auto reject if file too big or if storage capacity is too small */
                     ContentSharingError error = ImageTransferSession.isImageCapacityAcceptable(
                             content.getSize(), mRcsSettings);
                     if (error != null) {
@@ -670,15 +650,18 @@ public class RichcallService extends ImsService {
                 } catch (FileAccessException e) {
                     sLogger.error("Failed to receive image share invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
+
                 } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug("Failed to receive image share invitation! ("
                                 + e.getMessage() + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
+
                 } catch (PayloadException e) {
                     sLogger.error("Failed to receive image share invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
+
                 } catch (RuntimeException e) {
                     /*
                      * Normally we are not allowed to catch runtime exceptions as these are genuine
@@ -709,36 +692,34 @@ public class RichcallService extends ImsService {
             sLogger.info("Initiate a live video sharing session");
         }
 
-        // Test if call is established
+        /* Test if call is established */
         if (!isCallConnectedWith(contact)) {
             if (sLogger.isActivated()) {
                 sLogger.debug("Rich call not established: cancel the initiation");
             }
-            /*
-             * TODO : Proper exception handling will be added here as part of the CR037
-             * implementation
-             */
             throw new CoreException("Call not established");
         }
 
-        // Reject if there are already 2 bidirectional sessions with a given contact
+        /* Reject if there are already 2 bidirectional sessions with a given contact */
         boolean rejectInvitation = false;
         if (isCurrentlyVideoSharingBiDirectional()) {
-            // Already a bidirectional session
+            /* Already a bidirectional session */
             if (sLogger.isActivated()) {
                 sLogger.debug("Max sessions reached");
             }
             rejectInvitation = true;
+
         } else if (isCurrentlyVideoSharingUniDirectional()) {
             VideoStreamingSession currentSession = getUnidirectionalVideoSharingSession();
             if (isSessionOriginating(currentSession)) {
-                // Originating session already used
+                /* Originating session already used */
                 if (sLogger.isActivated()) {
                     sLogger.debug("Max originating sessions reached");
                 }
                 rejectInvitation = true;
+
             } else if (contact == null || !contact.equals(currentSession.getRemoteContact())) {
-                // Not the same contact
+                /* Not the same contact */
                 if (sLogger.isActivated()) {
                     sLogger.debug("Only bidirectional session with same contact authorized");
                 }
@@ -749,19 +730,11 @@ public class RichcallService extends ImsService {
             if (sLogger.isActivated()) {
                 sLogger.debug("The max number of sharing sessions is achieved: cancel the initiation");
             }
-            /*
-             * TODO : Proper exception handling will be added here as part of the CR037
-             * implementation
-             */
             throw new CoreException("Max content sharing sessions achieved");
         }
-
-        // Create a new session
-        OriginatingVideoStreamingSession session = new OriginatingVideoStreamingSession(this,
-                player, ContentManager.createGenericLiveVideoContent(), contact, mRcsSettings,
-                timestamp, mContactManager, mCapabilityService);
-
-        return session;
+        return new OriginatingVideoStreamingSession(this, player,
+                ContentManager.createGenericLiveVideoContent(), contact, mRcsSettings, timestamp,
+                mContactManager, mCapabilityService);
     }
 
     /**
@@ -795,7 +768,7 @@ public class RichcallService extends ImsService {
                     mContactManager.setContactDisplayName(contact,
                             SipUtils.getDisplayNameFromUri(invite.getFrom()));
 
-                    // Test if call is established
+                    /* Test if call is established */
                     if (!isCallConnectedWith(contact)) {
                         if (logActivated) {
                             sLogger.debug("Rich call not established: reject the invitation");
@@ -809,7 +782,7 @@ public class RichcallService extends ImsService {
                     VideoContent content = ContentManager.createLiveVideoContentFromSdp(remoteSdp
                             .getBytes(UTF8));
 
-                    // Test if the contact is blocked
+                    /* Test if the contact is blocked */
                     if (mContactManager.isBlockedForContact(contact)) {
                         if (logActivated) {
                             sLogger.debug("Contact " + contact
@@ -821,16 +794,17 @@ public class RichcallService extends ImsService {
                         return;
                     }
 
-                    // Reject if there are already 2 bidirectional sessions with a given contact
+                    /* Reject if there are already 2 bidirectional sessions with a given contact */
                     boolean rejectInvitation = false;
                     if (isCurrentlyVideoSharingBiDirectional()) {
-                        // Already a bidirectional session
+                        /* Already a bidirectional session */
                         if (logActivated) {
                             sLogger.debug("Max sessions reached");
                         }
                         rejectInvitation = true;
                         addVideoSharingInvitationRejected(contact, content,
                                 VideoSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS, timestamp);
+
                     } else if (isCurrentlyVideoSharingUniDirectional()) {
                         VideoStreamingSession currentSession = getUnidirectionalVideoSharingSession();
                         if (isSessionTerminating(currentSession)) {
@@ -842,6 +816,7 @@ public class RichcallService extends ImsService {
                             addVideoSharingInvitationRejected(contact, content,
                                     VideoSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS,
                                     timestamp);
+
                         } else if (contact == null
                                 || !contact.equals(currentSession.getRemoteContact())) {
                             // Not the same contact
@@ -862,7 +837,7 @@ public class RichcallService extends ImsService {
                         return;
                     }
 
-                    // Create a new session
+                    /* Create a new session */
                     VideoStreamingSession session = new TerminatingVideoStreamingSession(
                             richCallService, invite, contact, mRcsSettings, timestamp,
                             mContactManager, mCapabilityService);
@@ -917,19 +892,10 @@ public class RichcallService extends ImsService {
             if (sLogger.isActivated()) {
                 sLogger.debug("Rich call not established: cancel the initiation.");
             }
-            /*
-             * TODO : Proper exception handling will be added here as part of the CR037
-             * implementation
-             */
             throw new CoreException("Call not established");
         }
-
-        // Create a new session
-        OriginatingGeolocTransferSession session = new OriginatingGeolocTransferSession(this,
-                content, contact, geoloc, mRcsSettings, timestamp, mContactManager,
-                mCapabilityService);
-
-        return session;
+        return new OriginatingGeolocTransferSession(this, content, contact, geoloc, mRcsSettings,
+                timestamp, mContactManager, mCapabilityService);
     }
 
     /**
@@ -964,7 +930,7 @@ public class RichcallService extends ImsService {
                     mContactManager.setContactDisplayName(contact,
                             SipUtils.getDisplayNameFromUri(invite.getFrom()));
 
-                    // Test if call is established
+                    /* Test if call is established */
                     if (!isCallConnectedWith(contact)) {
                         if (logActivated) {
                             sLogger.debug("Rich call not established: reject the invitation");
@@ -973,7 +939,7 @@ public class RichcallService extends ImsService {
                         return;
                     }
 
-                    // Test if the contact is blocked
+                    /* Test if the contact is blocked */
                     if (mContactManager.isBlockedForContact(contact)) {
                         if (logActivated) {
                             sLogger.debug("Contact " + contact
@@ -985,20 +951,21 @@ public class RichcallService extends ImsService {
                         return;
                     }
 
-                    // Reject if there are already 2 bidirectional sessions with a given contact
+                    /* Reject if there are already 2 bidirectional sessions with a given contact */
                     boolean rejectInvitation = false;
                     if (isCurrentlyGeolocSharingBiDirectional()) {
-                        // Already a bidirectional session
+                        /* Already a bidirectional session */
                         if (logActivated) {
                             sLogger.debug("Max sessions reached");
                         }
                         addGeolocSharingInvitationRejected(contact,
                                 GeolocSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS, timestamp);
                         rejectInvitation = true;
+
                     } else if (isCurrentlyGeolocSharingUniDirectional()) {
                         GeolocTransferSession currentSession = getUnidirectionalGeolocSharingSession();
                         if (isSessionTerminating(currentSession)) {
-                            // Terminating session already used
+                            /* Terminating session already used */
                             if (logActivated) {
                                 sLogger.debug("Max terminating sessions reached");
                             }
@@ -1006,9 +973,10 @@ public class RichcallService extends ImsService {
                                     GeolocSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS,
                                     timestamp);
                             rejectInvitation = true;
+
                         } else if (contact == null
                                 || !contact.equals(currentSession.getRemoteContact())) {
-                            // Not the same contact
+                            /* Not the same contact */
                             if (logActivated) {
                                 sLogger.debug("Only bidirectional session with same contact authorized");
                             }
@@ -1026,7 +994,7 @@ public class RichcallService extends ImsService {
                         return;
                     }
 
-                    // Create a new session
+                    /* Create a new session */
                     GeolocTransferSession session = new TerminatingGeolocTransferSession(
                             richCallService, invite, contact, mRcsSettings, timestamp,
                             mContactManager, mCapabilityService);

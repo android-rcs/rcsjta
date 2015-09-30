@@ -115,7 +115,8 @@ public class PresenceUtils {
             cursor = context.getContentResolver().query(
                     ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                     PROJECTION_CONTACTID_NUMBER, null, null, null);
-            /* TODO: Handle cursor when null. */
+            CursorUtil.assertCursorIsNotNull(cursor,
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
             if (!cursor.moveToNext()) {
                 return INVALID_CONTACT_ID;
             }
@@ -135,6 +136,7 @@ public class PresenceUtils {
                     return cursor.getInt(columnIdxContactId);
                 }
             } while (cursor.moveToNext());
+
         } finally {
             CursorUtil.close(cursor);
         }
@@ -189,11 +191,12 @@ public class PresenceUtils {
         try {
             c = mResolver.query(Data.CONTENT_URI, PROJECTION_DATA_CONTACTID, WHERE_DATA_ID,
                     whereArgs, null);
-            /* TODO: Handle cursor when null. */
+            CursorUtil.assertCursorIsNotNull(c, Data.CONTENT_URI);
             if (c.moveToFirst()) {
                 int columnIdxContactId = c.getColumnIndexOrThrow(Data.CONTACT_ID);
                 contactId = c.getLong(columnIdxContactId);
             }
+
         } finally {
             if (c != null) {
                 c.close();
@@ -247,7 +250,7 @@ public class PresenceUtils {
         try {
             cur = contentResolver.query(Data.CONTENT_URI, PROJECTION_RAW_CONTACT_ID,
                     SELECTION_LOOSE, selectionArgs, Data.RAW_CONTACT_ID);
-            /* TODO: Handle cursor when null. */
+            CursorUtil.assertCursorIsNotNull(cur, Data.CONTENT_URI);
             /* We found at least one data with this number */
             if (cur.getCount() > 0) {
                 return true;
@@ -266,7 +269,7 @@ public class PresenceUtils {
         try {
             cur = contentResolver.query(Data.CONTENT_URI, PROJECTION_RAW_CONTACT_ID,
                     SELECTION_STRICT, selectionArgsStrict, Data.RAW_CONTACT_ID);
-            /* TODO: Handle cursor when null. */
+            CursorUtil.assertCursorIsNotNull(cur, Data.CONTENT_URI);
             /* We found at least one data with this number */
             if (cur.getCount() > 0) {
                 return true;

@@ -170,9 +170,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
         return contactsToBeInvited;
     }
 
-    /**
-     * Background processing
-     */
+    @Override
     public void run() {
         final boolean logActivated = sLogger.isActivated();
         try {
@@ -409,27 +407,21 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
                             dialogPath.getSessionExpireTime());
                 }
             } else {
-                if (logActivated) {
-                    sLogger.debug("No ACK received for INVITE");
-                }
-
                 /* No response received: timeout */
                 handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED));
             }
+
         } catch (PayloadException e) {
-            sLogger.error("Unable to send 200OK response!", e);
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
+
         } catch (NetworkException e) {
-            if (logActivated) {
-                sLogger.debug(e.getMessage());
-            }
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
+
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
-            sLogger.error("Failed to initiate chat session as terminating!", e);
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
         }
     }

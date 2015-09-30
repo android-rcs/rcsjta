@@ -51,6 +51,7 @@ public class GroupChatTerminalExceptionTask implements Runnable {
         mHistoryLog = historyLog;
     }
 
+    @Override
     public void run() {
         boolean logActivated = sLogger.isActivated();
         if (logActivated) {
@@ -59,32 +60,31 @@ public class GroupChatTerminalExceptionTask implements Runnable {
         }
         Cursor cursor = null;
         try {
-                cursor = mHistoryLog.getQueuedGroupChatMessagesAndGroupFileTransfers(mChatId);
-                /* TODO: Handle cursor when null. */
-                int providerIdIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_PROVIDER_ID);
-                int idIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_ID);
-                int mimeTypeIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_MIME_TYPE);
+            cursor = mHistoryLog.getQueuedGroupChatMessagesAndGroupFileTransfers(mChatId);
+            int providerIdIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_PROVIDER_ID);
+            int idIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_ID);
+            int mimeTypeIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_MIME_TYPE);
 
-                while (cursor.moveToNext()) {
-                    int providerId = cursor.getInt(providerIdIdx);
-                    String id = cursor.getString(idIdx);
-                    String mimeType = cursor.getString(mimeTypeIdx);
-                    switch (providerId) {
-                        case MessageData.HISTORYLOG_MEMBER_ID:
-                            mChatService.setGroupChatMessageStatusAndReasonCode(id, mimeType,
-                                    mChatId, Status.FAILED, Content.ReasonCode.FAILED_SEND);
-                            break;
-                        case FileTransferData.HISTORYLOG_MEMBER_ID:
-                            mFileTransferService.setGroupFileTransferStateAndReasonCode(id,
-                                    mChatId, State.FAILED,
-                                    FileTransfer.ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
-                            break;
-                        default:
-                            throw new IllegalArgumentException(new StringBuilder(
-                                    "Not expecting to handle provider id '").append(providerId)
-                                    .append("'!").toString());
-                    }
+            while (cursor.moveToNext()) {
+                int providerId = cursor.getInt(providerIdIdx);
+                String id = cursor.getString(idIdx);
+                String mimeType = cursor.getString(mimeTypeIdx);
+                switch (providerId) {
+                    case MessageData.HISTORYLOG_MEMBER_ID:
+                        mChatService.setGroupChatMessageStatusAndReasonCode(id, mimeType, mChatId,
+                                Status.FAILED, Content.ReasonCode.FAILED_SEND);
+                        break;
+                    case FileTransferData.HISTORYLOG_MEMBER_ID:
+                        mFileTransferService.setGroupFileTransferStateAndReasonCode(id, mChatId,
+                                State.FAILED, FileTransfer.ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
+                        break;
+                    default:
+                        throw new IllegalArgumentException(new StringBuilder(
+                                "Not expecting to handle provider id '").append(providerId)
+                                .append("'!").toString());
                 }
+            }
+
         } catch (RuntimeException e) {
             /*
              * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
@@ -93,7 +93,7 @@ public class GroupChatTerminalExceptionTask implements Runnable {
              * exit the system and thus can bring the whole system down, which is not intended.
              */
             sLogger.error(
-                        "Exception occured while trying to mark queued group chat messages and group file transfers as failed with chatId "
+                    "Exception occured while trying to mark queued group chat messages and group file transfers as failed with chatId "
                             .concat(mChatId), e);
         } finally {
             if (cursor != null) {

@@ -19,6 +19,7 @@ package com.gsma.rcs.provider.history;
 import static com.gsma.rcs.provider.history.HistoryConstants.INTERNAL_MEMBERS;
 import static com.gsma.rcs.provider.history.HistoryConstants.INTERNAL_MEMBER_IDS;
 
+import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.service.api.ServerApiIllegalArgumentException;
 
 import android.content.ContentProvider;
@@ -124,15 +125,13 @@ import java.util.Set;
             if (memberDatabase.isAttached()) {
                 return;
             }
-
+            Uri requestedUri = memberDatabase.getContentProviderUri();
             Cursor cursor = null;
             try {
-                cursor = getContext().getContentResolver().query(
-                        memberDatabase.getContentProviderUri(), new String[] {
-                            MAX_PROJECTION
-                        }, null, null, null);
-
-                /* TODO: Handle cursor when null. */
+                cursor = getContext().getContentResolver().query(requestedUri, new String[] {
+                    MAX_PROJECTION
+                }, null, null, null);
+                CursorUtil.assertCursorIsNotNull(cursor, requestedUri);
                 if (cursor.moveToNext()) {
                     memberDatabase.setMaxId(cursor.getLong(0));
                 }
@@ -221,7 +220,6 @@ import java.util.Set;
     public void registerDatabase(int providerId, Uri contentProviderUri, Uri databaseUri,
             String tableName, Map<String, String> columnMapping) throws IOException {
         if (mHistoryMemberDatabases.get(providerId) != null) {
-            /* TODO: This exception handling will be changed with CR037. */
             throw new IllegalArgumentException(new StringBuilder(
                     "Cannot register external database for already registered provider id ")
                     .append(providerId).append("!").toString());
@@ -229,7 +227,6 @@ import java.util.Set;
 
         String canonicalPath = new File(databaseUri.getPath()).getCanonicalPath();
         if (mForbiddenCanonicalPaths.contains(canonicalPath)) {
-            /* TODO: This exception handling will be changed with CR037. */
             throw new IllegalArgumentException(new StringBuilder("Forbidden to add '")
                     .append(databaseUri).append("'").append(" as a history log member!").toString());
         }

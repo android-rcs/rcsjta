@@ -27,10 +27,10 @@ import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.service.SessionNotEstablishedException;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
+import com.gsma.rcs.core.ims.service.SessionNotEstablishedException;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.capability.Capabilities.CapabilitiesBuilder;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -117,9 +117,6 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      */
     private final Object mLock = new Object();
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(GroupChatImpl.class.getName());
 
     /**
@@ -939,12 +936,13 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                                 rejoinGroupChat();
                             }
                         }
+
                     } catch (PayloadException e) {
-                        sLogger.error("Failed to invite participants for group chat!", e);
                         session.handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
+
                     } catch (NetworkException e) {
-                        sLogger.error("Failed to invite participants for group chat!", e);
                         session.handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
+
                     } catch (RuntimeException e) {
                         /*
                          * Normally we are not allowed to catch runtime exceptions as these are
@@ -953,7 +951,6 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                          * exceptions will eventually lead to exit the system and thus can bring the
                          * whole system down, which is not intended.
                          */
-                        sLogger.error("Failed to invite participants for group chat!", e);
                         session.handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
                     }
                 }
@@ -1269,7 +1266,6 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * @param status
      * @throws RemoteException
      */
-    @Override
     public void setComposingStatus(final boolean status) throws RemoteException {
         mImService.scheduleImOperation(new Runnable() {
             public void run() {
@@ -1379,13 +1375,6 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         return this;
     }
 
-    /**
-     * open the chat conversation. Note: if its an incoming pending chat session and the parameter
-     * IM SESSION START is 0 then the session is accepted now.
-     * 
-     * @see ImSessionStartMode
-     * @throws RemoteException
-     */
     @Override
     public void openChat() throws RemoteException {
         mImService.scheduleImOperation(new Runnable() {
@@ -1576,15 +1565,19 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 String mimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
                 mBroadcaster.broadcastMessageReceived(mimeType, msgId);
             }
+
         } catch (ContactManagerException e) {
             sLogger.error(new StringBuilder("Failed to handle new IM with Id '").append(msgId)
                     .append("' received from ").append(remote).toString(), e);
+
         } catch (FileAccessException e) {
             sLogger.error(new StringBuilder("Failed to handle new IM with Id '").append(msgId)
                     .append("' received from ").append(remote).toString(), e);
+
         } catch (PayloadException e) {
             sLogger.error(new StringBuilder("Failed to handle new IM with Id '").append(msgId)
                     .append("' received from ").append(remote).toString(), e);
+
         } catch (RuntimeException e) {
             /*
              * Normally we are not allowed to catch runtime exceptions as these are genuine bugs

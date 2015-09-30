@@ -6,6 +6,7 @@
 package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.provider.ContentProviderBaseIdCreator;
+import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.DatabaseUtils;
 import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfoLog;
@@ -165,7 +166,7 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
                     SQLiteDatabase db = mOpenHelper.getReadableDatabase();
                     cursor = db.query(DATABASE_TABLE, projection, selection, selectionArgs, null,
                             null, sort);
-                    /* TODO: Handle cursor when null. */
+                    CursorUtil.assertCursorIsNotNull(cursor, uri);
                     cursor.setNotificationUri(getContext().getContentResolver(),
                             Uri.withAppendedPath(GroupDeliveryInfoLog.CONTENT_URI, appendedId));
                     return cursor;
@@ -174,7 +175,7 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db.query(DATABASE_TABLE, projection, selection, selectionArgs, null,
                             null, sort);
-                    /* TODO: Handle cursor when null. */
+                    CursorUtil.assertCursorIsNotNull(cursor, uri);
                     cursor.setNotificationUri(getContext().getContentResolver(),
                             GroupDeliveryInfoLog.CONTENT_URI);
                     return cursor;
@@ -189,7 +190,7 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db.query(DATABASE_TABLE, projection, selection, selectionArgs, null,
                             null, sort);
-                    /* TODO: Handle cursor when null. */
+                    CursorUtil.assertCursorIsNotNull(cursor, uri);
                     cursor.setNotificationUri(getContext().getContentResolver(), uri);
                     return cursor;
 
