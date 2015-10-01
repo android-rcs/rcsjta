@@ -557,12 +557,20 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                     } else {
                         // TODO : else return error to Originating side
                     }
+                    if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
+                        sendMsrpMessageDeliveryStatus(null, cpimMsgId,
+                                ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
+                    }
                 } else {
                     if (ChatUtils.isTextPlainType(contentType)) {
                         ChatMessage msg = new ChatMessage(cpimMsgId, contact,
                                 cpimMsg.getMessageContent(), MimeType.TEXT_MESSAGE, timestamp,
                                 timestampSent, null);
                         receive(msg, imdnDisplayedRequested);
+                        if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
+                            sendMsrpMessageDeliveryStatus(null, cpimMsgId,
+                                    ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
+                        }
                     } else if (ChatUtils.isApplicationIsComposingType(contentType)) {
                         receiveIsComposing(contact, cpimMsg.getMessageContent().getBytes(UTF8));
                     } else if (ChatUtils.isMessageImdnType(contentType)) {
@@ -572,20 +580,10 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                                 cpimMsg.getMessageContent(), GeolocInfoDocument.MIME_TYPE,
                                 timestamp, timestampSent, null);
                         receive(msg, imdnDisplayedRequested);
-                    }
-                }
-
-                if (!mImdnManager.isDeliveryDeliveredReportsEnabled()) {
-                    return;
-                }
-
-                if (isFToHTTP) {
-                    sendMsrpMessageDeliveryStatus(null, cpimMsgId,
-                            ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
-                } else {
-                    if (dispositionNotification != null) {
-                        sendMsrpMessageDeliveryStatus(null, cpimMsgId,
-                                ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
+                        if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
+                            sendMsrpMessageDeliveryStatus(null, cpimMsgId,
+                                    ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
+                        }
                     }
                 }
             }
