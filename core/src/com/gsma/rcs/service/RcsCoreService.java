@@ -292,7 +292,7 @@ public class RcsCoreService extends Service implements CoreListener {
             mChatApi = new ChatServiceImpl(imService, mMessagingLog, mHistoryLog, mRcsSettings,
                     mContactManager);
             mFtApi = new FileTransferServiceImpl(imService, mChatApi, mMessagingLog, mRcsSettings,
-                    mContactManager, mLocalContentResolver, mCtx);
+                    mContactManager, mCtx);
             mVshApi = new VideoSharingServiceImpl(richCallService, mRichCallHistory, mRcsSettings);
             mIshApi = new ImageSharingServiceImpl(richCallService, mRichCallHistory, mRcsSettings);
             mGshApi = new GeolocSharingServiceImpl(richCallService, mRichCallHistory, mRcsSettings);

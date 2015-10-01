@@ -226,7 +226,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/
 
-    private void setState(String uploadId, FileUpload.State state) {
+    private void setState(FileUpload.State state) {
         mPersistedStorage.setState(state);
         mBroadcaster.broadcastStateChanged(mUploadId, state);
     }
@@ -239,7 +239,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
             mLogger.debug("File upload started");
         }
         synchronized (mLock) {
-            setState(mUploadId, FileUpload.State.STARTED);
+            setState(FileUpload.State.STARTED);
         }
     }
 
@@ -258,7 +258,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
     private void setStateAndInfoThenBroadcast(String uploadId, FileUpload.State state,
             FileUploadInfo info) {
         mPersistedStorage.setInfo(info);
-        setState(uploadId, state);
+        setState(state);
         mBroadcaster.broadcastUploaded(uploadId, info);
     }
 
@@ -290,7 +290,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
         }
         synchronized (mLock) {
             mFileUploadService.removeFileUpload(mUploadId);
-            setState(mUploadId, FileUpload.State.FAILED);
+            setState(FileUpload.State.FAILED);
         }
     }
 
@@ -303,7 +303,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
         }
         synchronized (mLock) {
             mFileUploadService.removeFileUpload(mUploadId);
-            setState(mUploadId, FileUpload.State.ABORTED);
+            setState(FileUpload.State.ABORTED);
         }
     }
 
@@ -314,7 +314,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
         }
         synchronized (mLock) {
             mFileUploadService.removeFileUpload(mUploadId);
-            setState(mUploadId, FileUpload.State.FAILED);
+            setState(FileUpload.State.FAILED);
         }
     }
 }

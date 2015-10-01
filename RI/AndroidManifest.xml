@@ -528,6 +528,22 @@
         <activity
             android:name="com.orangelabs.rcs.ri.history.sharing.SharingDetailView"
             android:label="@string/title_history_log_item" />
+        
+         <receiver
+            android:name="com.orangelabs.rcs.ri.messaging.chat.single.UndeliveredMessageReceiver"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="com.gsma.services.rcs.chat.action.MESSAGE_DELIVERY_EXPIRED" />
+            </intent-filter>
+        </receiver>
+        
+         <receiver
+            android:name="com.orangelabs.rcs.ri.messaging.messaging.filetransfer.UndeliveredFileReceiver"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="com.gsma.services.rcs.filetransfer.action.FILE_TRANSFER_DELIVERY_EXPIRED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

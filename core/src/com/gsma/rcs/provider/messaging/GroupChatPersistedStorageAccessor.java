@@ -222,8 +222,7 @@ public class GroupChatPersistedStorageAccessor {
                 direction, timestamp);
     }
 
-    public void addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent.Status status,
-            long timestamp) {
+    public void addGroupChatEvent(ContactId contact, GroupChatEvent.Status status, long timestamp) {
         mContact = contact;
         mTimestamp = timestamp;
         mMessagingLog.addGroupChatEvent(mChatId, contact, status, timestamp);

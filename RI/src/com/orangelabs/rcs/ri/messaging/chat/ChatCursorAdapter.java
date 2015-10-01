@@ -26,7 +26,6 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.ContactUtil;
-import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.SmileyParser;
 import com.orangelabs.rcs.ri.utils.Smileys;
@@ -36,10 +35,10 @@ import android.database.Cursor;
 import android.support.v4.widget.CursorAdapter;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -69,8 +68,6 @@ public class ChatCursorAdapter extends CursorAdapter {
 
     private Smileys mSmileyResources;
 
-    private static final String LOGTAG = LogUtils.getTag(ChatCursorAdapter.class.getSimpleName());
-
     /**
      * Constructor
      * 
@@ -96,15 +93,10 @@ public class ChatCursorAdapter extends CursorAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
         final ViewHolder holder = (ViewHolder) view.getTag();
 
-        // Set the type of message
         Direction direction = Direction.valueOf(cursor.getInt(holder.columnDirection));
-        // Set the date/time field
         long date = cursor.getLong(holder.columnTimestamp);
-        // Set the status text
         int status = cursor.getInt(holder.columnMessageStatus);
-        // Set image if any
         String data = cursor.getString(holder.columnContent);
-        // Set display name
         String displayName = null;
         if (!mIsSingleChat && Direction.OUTGOING != direction) {
             String number = cursor.getString(holder.columnContact);
@@ -127,20 +119,25 @@ public class ChatCursorAdapter extends CursorAdapter {
 
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        // Retrieve layout elements
+        /* Retrieve layout elements */
         switch (direction) {
             case OUTGOING:
+                boolean undeliveredExpiration = cursor.getInt(holder.columnExpiredDelivery) == 1;
+                holder.undeliveredIcon.setVisibility(undeliveredExpiration ? View.VISIBLE
+                        : View.GONE);
                 lp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-                // Set background
+                /* Set background bubble for outgoing */
                 holder.chatItemLayout.setBackgroundDrawable(context.getResources().getDrawable(
                         R.drawable.msg_item_left));
                 holder.chatText.setText(formatDataToText(context, mimeType, data));
                 holder.contactText.setVisibility(View.GONE);
                 holder.statusText.setVisibility(View.VISIBLE);
                 break;
+
             case INCOMING:
+                holder.undeliveredIcon.setVisibility(View.GONE);
                 lp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-                // Set background
+                /* Set background for incoming */
                 holder.chatItemLayout.setBackgroundDrawable(context.getResources().getDrawable(
                         R.drawable.msg_item_right));
                 holder.chatText.setText(formatDataToText(context, mimeType, data));
@@ -152,7 +149,9 @@ public class ChatCursorAdapter extends CursorAdapter {
                 }
                 holder.statusText.setVisibility(View.VISIBLE);
                 break;
+
             case IRRELEVANT:
+                holder.undeliveredIcon.setVisibility(View.GONE);
                 if (ChatLog.Message.MimeType.GROUPCHAT_EVENT.equals(mimeType)) {
                     lp.addRule(RelativeLayout.CENTER_IN_PARENT);
                     holder.chatItemLayout.setBackgroundDrawable(null);
@@ -187,29 +186,20 @@ public class ChatCursorAdapter extends CursorAdapter {
 
         }
         if (ChatLog.Message.MimeType.GEOLOC_MESSAGE.equals(mimeType)) {
-            try {
-                Geoloc geoloc = new Geoloc(data);
-                StringBuilder result = new StringBuilder(
-                        context.getString(R.string.label_geolocation_msg)).append("\n");
-                String label = geoloc.getLabel();
-                if (label != null) {
-                    result.append(context.getString(R.string.label_location)).append(" ")
-                            .append(geoloc.getLabel()).append("\n");
-                }
-                return result.append(context.getString(R.string.label_latitude)).append(" ")
-                        .append(geoloc.getLatitude()).append("\n")
-                        .append(context.getString(R.string.label_longitude)).append(" ")
-                        .append(geoloc.getLongitude()).append("\n")
-                        .append(context.getString(R.string.label_accuracy)).append(" ")
-                        .append(geoloc.getAccuracy()).toString();
-
-            } catch (Exception e) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "Invalid geoloc message:".concat(data));
-                }
-                return data;
-
+            Geoloc geoloc = new Geoloc(data);
+            StringBuilder result = new StringBuilder(
+                    context.getString(R.string.label_geolocation_msg)).append("\n");
+            String label = geoloc.getLabel();
+            if (label != null) {
+                result.append(context.getString(R.string.label_location)).append(" ")
+                        .append(geoloc.getLabel()).append("\n");
             }
+            return result.append(context.getString(R.string.label_latitude)).append(" ")
+                    .append(geoloc.getLatitude()).append("\n")
+                    .append(context.getString(R.string.label_longitude)).append(" ")
+                    .append(geoloc.getLongitude()).append("\n")
+                    .append(context.getString(R.string.label_accuracy)).append(" ")
+                    .append(geoloc.getAccuracy()).toString();
         }
         return null;
     }
@@ -229,6 +219,8 @@ public class ChatCursorAdapter extends CursorAdapter {
 
         TextView contactText;
 
+        ImageView undeliveredIcon;
+
         int columnDirection;
 
         int columnTimestamp;
@@ -241,6 +233,8 @@ public class ChatCursorAdapter extends CursorAdapter {
 
         int columnMimetype;
 
+        int columnExpiredDelivery;
+
         /**
          * Constructor
          * 
@@ -248,19 +242,21 @@ public class ChatCursorAdapter extends CursorAdapter {
          * @param cursor
          */
         ViewHolder(View base, Cursor cursor) {
-            // Save column indexes
+            /* Save column indexes */
             columnDirection = cursor.getColumnIndexOrThrow(ChatLog.Message.DIRECTION);
             columnTimestamp = cursor.getColumnIndexOrThrow(ChatLog.Message.TIMESTAMP);
             columnContent = cursor.getColumnIndexOrThrow(ChatLog.Message.CONTENT);
             columnMessageStatus = cursor.getColumnIndexOrThrow(ChatLog.Message.STATUS);
             columnContact = cursor.getColumnIndexOrThrow(ChatLog.Message.CONTACT);
             columnMimetype = cursor.getColumnIndexOrThrow(ChatLog.Message.MIME_TYPE);
-            // Save children views
+            columnExpiredDelivery = cursor.getColumnIndexOrThrow(ChatLog.Message.EXPIRED_DELIVERY);
+            /* Save children views */
             chatItemLayout = (RelativeLayout) base.findViewById(R.id.msg_item);
             chatText = (TextView) base.findViewById(R.id.chat_text);
             statusText = (TextView) base.findViewById(R.id.status_text);
             dateText = (TextView) base.findViewById(R.id.date_text);
             contactText = (TextView) base.findViewById(R.id.contact_text);
+            undeliveredIcon = (ImageView) base.findViewById(R.id.undelivered);
         }
 
     }

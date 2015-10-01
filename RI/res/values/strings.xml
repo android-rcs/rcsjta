@@ -61,6 +61,7 @@
     <string name="label_uninitialized_filesize">filesize</string>
     <string name="label_uninitialized_direction">direction</string>
     <string name="error_api_permission_denied">RCS API permission denied</string>
+    <string name="label_todo">Feature not yet implemented</string>
 
     <!-- About menu -->
     <string name="label_about_title">Reference Implementation</string>
