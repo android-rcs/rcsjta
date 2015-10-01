@@ -30,8 +30,10 @@ public class ChatMessage {
 
     private final String mDisplayName;
 
+    // TODO should be the API representation
     private final String mContent;
 
+    // TODO should be the API representation
     private final String mMimeType;
 
     /**

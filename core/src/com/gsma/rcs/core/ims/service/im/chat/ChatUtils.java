@@ -604,6 +604,10 @@ public class ChatUtils {
     public static String buildGeolocDocument(Geoloc geoloc, String contact, String msgId,
             long timestamp) {
         String expire = DateUtils.encodeDate(geoloc.getExpiration());
+        String label = geoloc.getLabel();
+        if (label == null) {
+            label = "";
+        }
         return new StringBuilder("<?xml version=\"1.0\" encoding=\"").append(UTF8_STR)
                 .append("\"?>").append(CRLF)
                 .append("<rcsenvelope xmlns=\"urn:gsma:params:xml:ns:rcs:rcs:geolocation\"")
@@ -612,7 +616,7 @@ public class ChatUtils {
                 .append(" xmlns:gml=\"http://www.opengis.net/gml\"")
                 .append(" xmlns:gs=\"http://www.opengis.net/pidflo/1.0\"").append(" entity=\"")
                 .append(contact).append("\">").append(CRLF).append("<rcspushlocation id=\"")
-                .append(msgId).append("\" label=\"").append(geoloc.getLabel()).append("\" >")
+                .append(msgId).append("\" label=\"").append(label).append("\" >")
                 .append("<rpid:place-type rpid:until=\"").append(expire).append("\">")
                 .append("</rpid:place-type>").append(CRLF)
                 .append("<rpid:time-offset rpid:until=\"").append(expire)
@@ -651,6 +655,7 @@ public class ChatUtils {
                     geolocDocument.getLongitude(), geolocDocument.getExpiration(),
                     geolocDocument.getRadius());
             return geoloc;
+
         } catch (ParserConfigurationException e) {
             throw new PayloadException("Unable to parse geoloc document!", e);
 
@@ -705,6 +710,8 @@ public class ChatUtils {
      */
     public static ChatMessage createFileTransferMessage(ContactId remote, String fileInfo,
             String msgId, long timestamp, long timestampSent) {
+        // TODO the mimeype should not be the network representation but the API one.
+        // Conversion to network representation should only be done when sending the data.
         return new ChatMessage(msgId, remote, fileInfo, FileTransferHttpInfoDocument.MIME_TYPE,
                 timestamp, timestampSent, null);
     }
@@ -720,6 +727,9 @@ public class ChatUtils {
      */
     public static ChatMessage createGeolocMessage(ContactId remote, Geoloc geoloc, long timestamp,
             long timestampSent) {
+        // TODO the mimeype and content should not be the network representation but the API one.
+        // Conversion to network representation should only be done when sending the data.
+        // This would avoid converting content when accessing geolocation from the provider.
         String msgId = IdGenerator.generateMessageID();
         String geolocContent = buildGeolocDocument(geoloc, ImsModule.getImsUserProfile()
                 .getPublicUri(), msgId, timestamp);
@@ -968,7 +978,7 @@ public class ChatUtils {
      * @param msgId
      * @param apiMimeType The mime-type as exposed to client applications
      * @param content
-     * @param contact
+     * @param contact The remote contact
      * @param displayName
      * @param timestamp
      * @param timestampSent

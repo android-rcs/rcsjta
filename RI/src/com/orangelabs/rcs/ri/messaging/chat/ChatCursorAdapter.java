@@ -189,10 +189,14 @@ public class ChatCursorAdapter extends CursorAdapter {
         if (ChatLog.Message.MimeType.GEOLOC_MESSAGE.equals(mimeType)) {
             try {
                 Geoloc geoloc = new Geoloc(data);
-                return new StringBuilder(context.getString(R.string.label_geolocation_msg))
-                        .append("\n").append(context.getString(R.string.label_location))
-                        .append(" ").append(geoloc.getLabel()).append("\n")
-                        .append(context.getString(R.string.label_latitude)).append(" ")
+                StringBuilder result = new StringBuilder(
+                        context.getString(R.string.label_geolocation_msg)).append("\n");
+                String label = geoloc.getLabel();
+                if (label != null) {
+                    result.append(context.getString(R.string.label_location)).append(" ")
+                            .append(geoloc.getLabel()).append("\n");
+                }
+                return result.append(context.getString(R.string.label_latitude)).append(" ")
                         .append(geoloc.getLatitude()).append("\n")
                         .append(context.getString(R.string.label_longitude)).append(" ")
                         .append(geoloc.getLongitude()).append("\n")
