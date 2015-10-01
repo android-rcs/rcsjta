@@ -1266,6 +1266,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * @param status
      * @throws RemoteException
      */
+    @Override
     public void setComposingStatus(final boolean status) throws RemoteException {
         mImService.scheduleImOperation(new Runnable() {
             public void run() {

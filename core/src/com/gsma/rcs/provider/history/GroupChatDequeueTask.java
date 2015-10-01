@@ -19,6 +19,7 @@ package com.gsma.rcs.provider.history;
 
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.SessionNotEstablishedException;
@@ -36,6 +37,8 @@ import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
 import com.gsma.rcs.service.api.GroupChatImpl;
 import com.gsma.rcs.service.api.GroupFileTransferImpl;
+import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 
 import android.content.Context;
@@ -77,6 +80,7 @@ public class GroupChatDequeueTask extends DequeueTask {
         }
     }
 
+    @Override
     public void run() {
         boolean logActivated = mLogger.isActivated();
         if (logActivated) {
@@ -140,13 +144,20 @@ public class GroupChatDequeueTask extends DequeueTask {
                                 setGroupChatMessageAsFailedDequeue(mChatId, id, mimeType);
                                 continue;
                             }
-                            String content = cursor.getString(contentIdx);
                             long timestamp = System.currentTimeMillis();
+                            String content = cursor.getString(contentIdx);
+                            if (MimeType.GEOLOC_MESSAGE.equals(mimeType)) {
+                                Geoloc geoloc = new Geoloc(content);
+                                content = ChatUtils.buildGeolocDocument(geoloc, ImsModule
+                                        .getImsUserProfile().getPublicUri(), id, timestamp);
+                            }
+
                             /* For outgoing message, timestampSent = timestamp */
                             ChatMessage message = ChatUtils.createChatMessage(id, mimeType,
                                     content, null, null, timestamp, timestamp);
                             groupChat.dequeueGroupChatMessage(message);
                             break;
+
                         case FileTransferData.HISTORYLOG_MEMBER_ID:
                             Uri file = Uri.parse(cursor.getString(contentIdx));
                             if (!isPossibleToDequeueGroupFileTransfer(mChatId, file,
