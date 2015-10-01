@@ -36,7 +36,6 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.platform.file.FileDescription;
 import com.gsma.rcs.platform.file.FileFactory;
-import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.FileTransferPersistedStorageAccessor;
@@ -126,12 +125,11 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param contactManager ContactManager
      * @param core Core
      * @param imDeleteOperationHandler
-     * @param mLocalContentResolver
      * @param oneToOneUndeliveredImManager
      */
     public FileTransferServiceImpl(InstantMessagingService imService, ChatServiceImpl chatService,
             MessagingLog messagingLog, RcsSettings rcsSettings, ContactManager contactManager,
-            LocalContentResolver localContentResolver, Context ctx) {
+            Context ctx) {
         if (sLogger.isActivated()) {
             sLogger.info("File transfer service API is loaded");
         }

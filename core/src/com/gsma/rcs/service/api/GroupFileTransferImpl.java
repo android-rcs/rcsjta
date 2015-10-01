@@ -125,7 +125,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         return State.INITIATING;
     }
 
-    private ReasonCode getRcsReasonCode(FileSharingSession session) {
+    private ReasonCode getRcsReasonCode() {
         if (isSessionPaused()) {
             /*
              * If session is paused and still established it must have been paused by user
@@ -513,7 +513,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             if (session == null) {
                 return mPersistedStorage.getReasonCode().toInt();
             }
-            return getRcsReasonCode(session).toInt();
+            return getRcsReasonCode().toInt();
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -845,7 +845,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             ReasonCode reasonCode;
             FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
             if (session != null) {
-                reasonCode = getRcsReasonCode(session);
+                reasonCode = getRcsReasonCode();
             } else {
                 reasonCode = mPersistedStorage.getReasonCode();
             }
@@ -1074,7 +1074,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
-    private void handleSessionRejected(ReasonCode reasonCode, ContactId contact) {
+    private void handleSessionRejected(ReasonCode reasonCode) {
         if (sLogger.isActivated()) {
             sLogger.info("Session rejected; reasonCode=" + reasonCode + ".");
         }
@@ -1289,18 +1289,18 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
     public void onSessionRejected(ContactId contact, TerminationReason reason) {
         switch (reason) {
             case TERMINATION_BY_USER:
-                handleSessionRejected(ReasonCode.REJECTED_BY_USER, contact);
+                handleSessionRejected(ReasonCode.REJECTED_BY_USER);
                 break;
             case TERMINATION_BY_SYSTEM:
                 /* Intentional fall through */
             case TERMINATION_BY_CONNECTION_LOST:
-                handleSessionRejected(ReasonCode.REJECTED_BY_SYSTEM, contact);
+                handleSessionRejected(ReasonCode.REJECTED_BY_SYSTEM);
                 break;
             case TERMINATION_BY_TIMEOUT:
-                handleSessionRejected(ReasonCode.REJECTED_BY_TIMEOUT, contact);
+                handleSessionRejected(ReasonCode.REJECTED_BY_TIMEOUT);
                 break;
             case TERMINATION_BY_REMOTE:
-                handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE, contact);
+                handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE);
                 break;
             default:
                 throw new IllegalArgumentException(new StringBuilder(

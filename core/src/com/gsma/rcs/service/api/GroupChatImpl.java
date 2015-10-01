@@ -1739,11 +1739,12 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         }
         synchronized (mLock) {
             if (ParticipantStatus.CONNECTED.equals(status)) {
-                mPersistedStorage.addGroupChatEvent(mChatId, contact, GroupChatEvent.Status.JOINED,
+                mPersistedStorage.addGroupChatEvent(contact, GroupChatEvent.Status.JOINED,
                         timestamp);
+
             } else if (ParticipantStatus.DEPARTED.equals(status)) {
-                mPersistedStorage.addGroupChatEvent(mChatId, contact,
-                        GroupChatEvent.Status.DEPARTED, timestamp);
+                mPersistedStorage.addGroupChatEvent(contact, GroupChatEvent.Status.DEPARTED,
+                        timestamp);
             }
         }
     }

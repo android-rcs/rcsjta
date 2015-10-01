@@ -64,9 +64,33 @@ public class FileTransferIntentService extends IntentService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        // We want this service to stop running if forced stop
-        // so return not sticky.
+        /*
+         * We want this service to stop running if forced stop so return not sticky.
+         */
         return START_NOT_STICKY;
+    }
+
+    private void handleUndeliveredFile(Intent intent) {
+        /* Gets data from the incoming Intent */
+        String fileId = intent.getStringExtra(FileTransferIntent.EXTRA_TRANSFER_ID);
+        if (fileId == null) {
+            if (LogUtils.isActive) {
+                Log.e(LOGTAG, "Cannot read file ID");
+            }
+            return;
+        }
+        ContactId contact = intent.getParcelableExtra(FileTransferIntent.EXTRA_CONTACT);
+        if (contact == null) {
+            if (LogUtils.isActive) {
+                Log.e(LOGTAG, "Cannot read contact");
+            }
+            return;
+        }
+        if (LogUtils.isActive) {
+            Log.e(LOGTAG, "Undelivered file ID=" + fileId + " for contact " + contact);
+        }
+        // TODO implement CR019 undelivered file transfer
+        Utils.displayLongToast(this, getString(R.string.label_todo));
     }
 
     @Override
@@ -75,15 +99,22 @@ public class FileTransferIntentService extends IntentService {
         if ((action = intent.getAction()) == null) {
             return;
         }
-        // Check action from incoming intent
+        /* Check action from incoming intent */
         if (!FileTransferIntent.ACTION_NEW_INVITATION.equals(action)
-                && !FileTransferResumeReceiver.ACTION_FT_RESUME.equals(action)) {
+                && !FileTransferResumeReceiver.ACTION_FT_RESUME.equals(action)
+                && !UndeliveredFileReceiver.ACTION_UNDELIVERED_FILE.equals(action)) {
             if (LogUtils.isActive) {
                 Log.e(LOGTAG, "Unknown action ".concat(action));
             }
             return;
         }
-        // Gets data from the incoming Intent
+
+        if (UndeliveredFileReceiver.ACTION_UNDELIVERED_FILE.equals(action)) {
+            handleUndeliveredFile(intent);
+            return;
+        }
+
+        /* Gets data from the incoming Intent */
         String transferId = intent.getStringExtra(FileTransferIntent.EXTRA_TRANSFER_ID);
         if (transferId == null) {
             if (LogUtils.isActive) {
@@ -94,7 +125,7 @@ public class FileTransferIntentService extends IntentService {
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "onHandleIntent file transfer with ID ".concat(transferId));
         }
-        // Get File Transfer from provider
+        /* Get File Transfer from provider */
         FileTransferDAO ftDao = FileTransferDAO.getFileTransferDAO(this, transferId);
         if (ftDao == null) {
             return;
@@ -102,7 +133,7 @@ public class FileTransferIntentService extends IntentService {
         /* Check if a Group CHAT session exists for this file transfer */
         intent.putExtra(EXTRA_GROUP_FILE, GroupChatDAO.isGroupChat(this, ftDao.getChatId()));
 
-        // Check if file transfer is already rejected
+        /* Check if file transfer is already rejected */
         if (FileTransfer.State.REJECTED == ftDao.getState()) {
             if (LogUtils.isActive) {
                 Log.e(LOGTAG, "File transfer already rejected. Id=".concat(transferId));
@@ -110,7 +141,7 @@ public class FileTransferIntentService extends IntentService {
             return;
         }
 
-        // Save FileTransferDAO into intent
+        /* Save FileTransferDAO into intent */
         Bundle bundle = new Bundle();
         bundle.putParcelable(BUNDLE_FTDAO_ID, ftDao);
         intent.putExtras(bundle);

@@ -40,7 +40,7 @@ import android.util.Log;
 import android.util.LruCache;
 
 /**
- * File transfer intent service
+ * Single chat intent service
  * 
  * @author YPLO6403
  */
@@ -90,8 +90,7 @@ public class SingleChatIntentService extends IntentService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        // We want this service to stop running if forced stop
-        // so return not sticky.
+        /* We want this service to stop running if forced stop so return not sticky. */
         return START_NOT_STICKY;
     }
 
@@ -103,11 +102,38 @@ public class SingleChatIntentService extends IntentService {
         }
         if (SingleChatInvitationReceiver.ACTION_NEW_121_CHAT_MSG.equals(action)) {
             handleNewOneToOneChatMessage(intent);
+
+        } else if (UndeliveredMessageReceiver.ACTION_UNDELIVERED_MESSAGE.equals(action)) {
+            handleUndeliveredMessage(intent);
+
         } else {
             if (LogUtils.isActive) {
                 Log.e(LOGTAG, "Unknown action ".concat(action));
             }
         }
+    }
+
+    private void handleUndeliveredMessage(Intent intent) {
+        /* Gets data from the incoming Intent */
+        String msgId = intent.getStringExtra(OneToOneChatIntent.EXTRA_MESSAGE_ID);
+        if (msgId == null) {
+            if (LogUtils.isActive) {
+                Log.e(LOGTAG, "Cannot read message ID");
+            }
+            return;
+        }
+        ContactId contact = intent.getParcelableExtra(OneToOneChatIntent.EXTRA_CONTACT);
+        if (contact == null) {
+            if (LogUtils.isActive) {
+                Log.e(LOGTAG, "Cannot read contact");
+            }
+            return;
+        }
+        if (LogUtils.isActive) {
+            Log.e(LOGTAG, "Undelivered message ID=" + msgId + " for contact " + contact);
+        }
+        // TODO implement CR019 undelivered messages
+        Utils.displayLongToast(this, getString(R.string.label_todo));
     }
 
     /**
@@ -116,7 +142,7 @@ public class SingleChatIntentService extends IntentService {
      * @param messageIntent intent with chat message
      */
     private void handleNewOneToOneChatMessage(Intent messageIntent) {
-        // Gets data from the incoming Intent
+        /* Gets data from the incoming Intent */
         String msgId = messageIntent.getStringExtra(OneToOneChatIntent.EXTRA_MESSAGE_ID);
         if (msgId == null) {
             if (LogUtils.isActive) {
@@ -131,7 +157,7 @@ public class SingleChatIntentService extends IntentService {
             }
             return;
         }
-        // Read message from provider
+        /* Read message from provider */
         ChatMessageDAO msgDAO = ChatMessageDAO.getChatMessageDAO(this, msgId);
         if (msgDAO == null) {
             return;
@@ -188,11 +214,11 @@ public class SingleChatIntentService extends IntentService {
             PendingIntent contentIntent = PendingIntent.getActivity(context, uniqueId, intent,
                     PendingIntent.FLAG_UPDATE_CURRENT);
             String displayName = RcsContactUtil.getInstance(this).getDisplayName(contact);
-            String title = context.getString(R.string.title_recv_chat, displayName);
+            String title = getString(R.string.title_recv_chat, displayName);
             String mimeType = message.getMimeType();
             String msg;
             if (ChatLog.Message.MimeType.GEOLOC_MESSAGE.equals(mimeType)) {
-                msg = context.getString(R.string.label_geoloc_msg);
+                msg = getString(R.string.label_geoloc_msg);
             } else if (ChatLog.Message.MimeType.TEXT_MESSAGE.equals(mimeType)) {
                 msg = content;
             } else {
@@ -201,10 +227,7 @@ public class SingleChatIntentService extends IntentService {
                 }
                 return;
             }
-            // Create notification
             Notification notif = buildNotification(contentIntent, title, msg);
-
-            // Send notification
             mNotifManager.notify(uniqueId, notif);
         }
     }
@@ -218,7 +241,6 @@ public class SingleChatIntentService extends IntentService {
      * @return the notification
      */
     private Notification buildNotification(PendingIntent invitation, String title, String message) {
-        // Create notification
         NotificationCompat.Builder notif = new NotificationCompat.Builder(this);
         notif.setContentIntent(invitation);
         notif.setSmallIcon(R.drawable.ri_notif_chat_icon);

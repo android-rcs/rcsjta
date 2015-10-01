@@ -67,14 +67,14 @@ public class DeliveryExpirationManager {
         mAlarmManager = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
     }
 
-    private void cancelTimeOutAlarm(String msgId, PendingIntent pendingIntent) {
+    private void cancelTimeOutAlarm(PendingIntent pendingIntent) {
         mAlarmManager.cancel(pendingIntent);
     }
 
     public void cleanup() {
         synchronized (mUndeliveredImAlarms) {
             for (String msgId : mUndeliveredImAlarms.keySet()) {
-                cancelTimeOutAlarm(msgId, mUndeliveredImAlarms.get(msgId));
+                cancelTimeOutAlarm(mUndeliveredImAlarms.get(msgId));
             }
             mUndeliveredImAlarms.clear();
         }
@@ -129,7 +129,7 @@ public class DeliveryExpirationManager {
         synchronized (mUndeliveredImAlarms) {
             PendingIntent undeliveredMessageAlarm = mUndeliveredImAlarms.remove(id);
             if (undeliveredMessageAlarm != null) {
-                cancelTimeOutAlarm(id, undeliveredMessageAlarm);
+                cancelTimeOutAlarm(undeliveredMessageAlarm);
             }
         }
     }

@@ -226,12 +226,9 @@
         <activity android:name=".provisioning.local.ServiceProvisioning" />
         <activity android:name=".provisioning.local.LoggerProvisioning" />
 
-        <service android:name="com.gsma.rcs.service.api.OneToOneDeliveryExpirationService" >
-            <intent-filter>
-                <action android:name="com.gsma.rcs.action.ONE_TO_ONE_CHAT_MESSAGE_DELIVERY_TIMEOUT" />
-                <action android:name="com.gsma.rcs.action.ONE_TO_ONE_FILE_TRANSFER_DELIVERY_TIMEOUT" />
-            </intent-filter>
-        </service>
+        <service
+            android:name="com.gsma.rcs.service.api.OneToOneDeliveryExpirationService"
+            android:exported="false" />
     </application>
 
 </manifest>

@@ -148,7 +148,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         return State.INITIATING;
     }
 
-    private ReasonCode getRcsReasonCode(FileSharingSession session) {
+    private ReasonCode getRcsReasonCode() {
         if (isSessionPaused()) {
             /*
              * If session is paused and still established it must have been paused by user
@@ -436,7 +436,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             if (session == null) {
                 return mPersistentStorage.getReasonCode().toInt();
             }
-            return getRcsReasonCode(session).toInt();
+            return getRcsReasonCode().toInt();
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -908,7 +908,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             ReasonCode reasonCode;
             FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
             if (session != null) {
-                reasonCode = getRcsReasonCode(session);
+                reasonCode = getRcsReasonCode();
             } else {
                 reasonCode = mPersistentStorage.getReasonCode();
             }

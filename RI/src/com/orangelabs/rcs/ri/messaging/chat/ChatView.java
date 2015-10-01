@@ -127,7 +127,8 @@ public abstract class ChatView extends FragmentActivity implements
         Message.TIMESTAMP,
         Message.STATUS, 
         Message.DIRECTION, 
-        Message.CONTACT
+        Message.CONTACT,
+        Message.EXPIRED_DELIVERY
     };
     // @formatter:on
 
