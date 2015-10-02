@@ -25,16 +25,13 @@ import android.content.Intent;
 /**
  * Image sharing invitation receiver
  * 
- * @author Jean-Marc AUFFRET
  * @author YPLO6403
  */
 public class ImageSharingInvitationReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Intent receiverIntent = new Intent(context, ImageSharingIntentService.class);
-        receiverIntent.putExtras(intent);
-        receiverIntent.setAction(intent.getAction());
-        context.startService(receiverIntent);
+        intent.setClass(context, ImageSharingIntentService.class);
+        context.startService(intent);
     }
 }

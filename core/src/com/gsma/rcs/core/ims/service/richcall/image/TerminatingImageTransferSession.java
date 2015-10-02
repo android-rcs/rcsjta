@@ -351,9 +351,10 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
         }
         setImageTransferred();
         ContactId contact = getRemoteContact();
+        MmContent content = getContent();
         try {
-            getContent().writeData2File(data);
-            getContent().closeFile();
+            content.writeData2File(data);
+            content.closeFile();
 
             Uri image = getContent().getUri();
             for (ImsSessionListener listener : getListeners()) {

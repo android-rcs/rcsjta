@@ -29,16 +29,9 @@ import android.content.Intent;
  */
 public class GroupChatMessageReceiver extends BroadcastReceiver {
 
-    /**
-     * Action New Group CHAT Message
-     */
-    /* package private */static final String ACTION_NEW_GC_MSG = "NEW_GC_MSG";
-
     @Override
     public void onReceive(Context context, Intent intent) {
-        Intent receiverIntent = new Intent(context, GroupChatIntentService.class);
-        receiverIntent.putExtras(intent);
-        receiverIntent.setAction(ACTION_NEW_GC_MSG);
-        context.startService(receiverIntent);
+        intent.setClass(context, GroupChatIntentService.class);
+        context.startService(intent);
     }
 }

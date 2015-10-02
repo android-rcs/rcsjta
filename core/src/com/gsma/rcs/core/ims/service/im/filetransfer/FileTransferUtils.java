@@ -159,7 +159,9 @@ public class FileTransferUtils {
 
         } finally {
             CloseableUtils.tryToClose(in);
-            fileIcon.closeFile();
+            if (fileIcon != null) {
+                fileIcon.closeFile();
+            }
         }
     }
 
@@ -218,7 +220,9 @@ public class FileTransferUtils {
             return result;
 
         } finally {
-            result.closeFile();
+            if (result != null) {
+                result.closeFile();
+            }
         }
 
     }

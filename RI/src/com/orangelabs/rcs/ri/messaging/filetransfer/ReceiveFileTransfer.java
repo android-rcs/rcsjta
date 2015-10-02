@@ -23,6 +23,7 @@ import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.services.rcs.filetransfer.FileTransferIntent;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.filetransfer.GroupFileTransferListener;
@@ -191,7 +192,7 @@ public class ReceiveFileTransfer extends Activity {
         }
 
         // Get invitation info
-        mResuming = intent.getAction().equals(FileTransferResumeReceiver.ACTION_FT_RESUME);
+        mResuming = intent.getAction().equals(FileTransferIntent.ACTION_RESUME);
         mGgroupFileTransfer = (intent.getBooleanExtra(FileTransferIntentService.EXTRA_GROUP_FILE,
                 false));
 

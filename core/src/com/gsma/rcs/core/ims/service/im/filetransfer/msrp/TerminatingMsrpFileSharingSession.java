@@ -434,8 +434,8 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
         MmContent file = getContent();
         Collection<ImsSessionListener> listeners = getListeners();
         try {
-            getContent().writeData2File(data);
-            getContent().closeFile();
+            file.writeData2File(data);
+            file.closeFile();
             for (ImsSessionListener listener : listeners) {
                 ((FileSharingSessionListener) listener).onFileTransfered(file, contact,
                         FileTransferData.UNKNOWN_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION,

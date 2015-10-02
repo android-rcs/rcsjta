@@ -101,15 +101,15 @@ public class FileTransferIntentService extends IntentService {
         }
         /* Check action from incoming intent */
         if (!FileTransferIntent.ACTION_NEW_INVITATION.equals(action)
-                && !FileTransferResumeReceiver.ACTION_FT_RESUME.equals(action)
-                && !UndeliveredFileReceiver.ACTION_UNDELIVERED_FILE.equals(action)) {
+                && !FileTransferIntent.ACTION_RESUME.equals(action)
+                && !FileTransferIntent.ACTION_FILE_TRANSFER_DELIVERY_EXPIRED.equals(action)) {
             if (LogUtils.isActive) {
                 Log.e(LOGTAG, "Unknown action ".concat(action));
             }
             return;
         }
 
-        if (UndeliveredFileReceiver.ACTION_UNDELIVERED_FILE.equals(action)) {
+        if (FileTransferIntent.ACTION_FILE_TRANSFER_DELIVERY_EXPIRED.equals(action)) {
             handleUndeliveredFile(intent);
             return;
         }
@@ -163,7 +163,7 @@ public class FileTransferIntentService extends IntentService {
             }
             intentLocal.addFlags(Intent.FLAG_FROM_BACKGROUND);
             intentLocal.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intentLocal.setAction(FileTransferResumeReceiver.ACTION_FT_RESUME);
+            intentLocal.setAction(FileTransferIntent.ACTION_RESUME);
             startActivity(intentLocal);
         }
 

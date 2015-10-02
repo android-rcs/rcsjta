@@ -31,9 +31,7 @@ public class GeolocSharingInvitationReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Intent receiverIntent = new Intent(context, GeolocSharingIntentService.class);
-        receiverIntent.putExtras(intent);
-        receiverIntent.setAction(intent.getAction());
-        context.startService(receiverIntent);
+        intent.setClass(context, GeolocSharingIntentService.class);
+        context.startService(intent);
     }
 }

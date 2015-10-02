@@ -100,10 +100,10 @@ public class SingleChatIntentService extends IntentService {
         if ((action = intent.getAction()) == null) {
             return;
         }
-        if (SingleChatInvitationReceiver.ACTION_NEW_121_CHAT_MSG.equals(action)) {
+        if (OneToOneChatIntent.ACTION_NEW_ONE_TO_ONE_CHAT_MESSAGE.equals(action)) {
             handleNewOneToOneChatMessage(intent);
 
-        } else if (UndeliveredMessageReceiver.ACTION_UNDELIVERED_MESSAGE.equals(action)) {
+        } else if (OneToOneChatIntent.ACTION_MESSAGE_DELIVERY_EXPIRED.equals(action)) {
             handleUndeliveredMessage(intent);
 
         } else {
