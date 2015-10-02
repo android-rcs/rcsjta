@@ -25,17 +25,14 @@ import android.content.Intent;
 /**
  * Video sharing invitation receiver
  * 
- * @author Jean-Marc AUFFRET
  * @author YPLO6403
  */
 public class VideoSharingInvitationReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Intent receiverIntent = new Intent(context, VideoSharingIntentService.class);
-        receiverIntent.putExtras(intent);
-        receiverIntent.setAction(intent.getAction());
-        context.startService(receiverIntent);
+        intent.setClass(context, VideoSharingIntentService.class);
+        context.startService(intent);
     }
 
 }

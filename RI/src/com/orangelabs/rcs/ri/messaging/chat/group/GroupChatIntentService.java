@@ -103,7 +103,7 @@ public class GroupChatIntentService extends IntentService {
         if ((action = intent.getAction()) == null) {
             return;
         }
-        if (GroupChatMessageReceiver.ACTION_NEW_GC_MSG.equals(action)) {
+        if (GroupChatIntent.ACTION_NEW_GROUP_CHAT_MESSAGE.equals(action)) {
             // Gets message ID from the incoming Intent
             String messageId = intent.getStringExtra(GroupChatIntent.EXTRA_MESSAGE_ID);
             if (messageId == null) {
@@ -121,8 +121,8 @@ public class GroupChatIntentService extends IntentService {
             }
             handleNewGroupChatMessage(messageId);
         } else {
-            if (GroupChatInvitationReceiver.ACTION_NEW_GC.equals(action)) {
-                // Gets chat ID from the incoming Intent
+            if (GroupChatIntent.ACTION_NEW_INVITATION.equals(action)) {
+                /* Gets chat ID from the incoming Intent */
                 String chatId = intent.getStringExtra(GroupChatIntent.EXTRA_CHAT_ID);
                 if (chatId != null) {
                     handleNewGroupChatInvitation(chatId);

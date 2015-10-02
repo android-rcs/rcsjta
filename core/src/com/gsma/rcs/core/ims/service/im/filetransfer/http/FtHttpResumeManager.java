@@ -140,16 +140,14 @@ public class FtHttpResumeManager implements Runnable {
             case OUTGOING:
                 // TODO : only managed for 1-1 FToHTTP
                 FtHttpResumeUpload uploadInfo = (FtHttpResumeUpload) mFtHttpResume;
-                if (!mFtHttpResume.isGroupTransfer()) {
-                    MmContent uploadContent = ContentManager.createMmContent(uploadInfo.getFile(),
-                            uploadInfo.getSize(), uploadInfo.getFileName());
-                    final ResumeUploadFileSharingSession resumeUpload = new ResumeUploadFileSharingSession(
-                            mImsService, uploadContent, uploadInfo, mRcsSettings, mMessagingLog,
-                            mContactManager);
-                    resumeUpload.addListener(getFileSharingSessionListener());
-                    mImsService.resumeOutgoingFileTransfer(resumeUpload, false);
-                    resumeUpload.startSession();
-                }
+                MmContent uploadContent = ContentManager.createMmContent(uploadInfo.getFile(),
+                        uploadInfo.getSize(), uploadInfo.getFileName());
+                final ResumeUploadFileSharingSession resumeUpload = new ResumeUploadFileSharingSession(
+                        mImsService, uploadContent, uploadInfo, mRcsSettings, mMessagingLog,
+                        mContactManager);
+                resumeUpload.addListener(getFileSharingSessionListener());
+                mImsService.resumeOutgoingFileTransfer(resumeUpload, false);
+                resumeUpload.startSession();
                 break;
 
             default:
@@ -194,8 +192,8 @@ public class FtHttpResumeManager implements Runnable {
             }
 
             @Override
-            public void onFileTransfered(MmContent content, ContactId contact,
-                    long fileExpiration, long fileIconExpiration, FileTransferProtocol ftProtocol) {
+            public void onFileTransfered(MmContent content, ContactId contact, long fileExpiration,
+                    long fileIconExpiration, FileTransferProtocol ftProtocol) {
                 if (fired.compareAndSet(false, true)) {
                     processNext();
                 }

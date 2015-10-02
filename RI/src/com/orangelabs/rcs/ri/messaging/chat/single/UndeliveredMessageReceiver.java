@@ -29,17 +29,10 @@ import android.content.Intent;
  */
 public class UndeliveredMessageReceiver extends BroadcastReceiver {
 
-    /**
-     * Action Undelivered One to One Chat Message
-     */
-    static final String ACTION_UNDELIVERED_MESSAGE = "ACTION_UNDELIVERED_MESSAGE";
-
     @Override
     public void onReceive(Context context, Intent intent) {
-        Intent receiverIntent = new Intent(context, SingleChatIntentService.class);
-        receiverIntent.putExtras(intent);
-        receiverIntent.setAction(ACTION_UNDELIVERED_MESSAGE);
-        context.startService(receiverIntent);
+        intent.setClass(context, SingleChatIntentService.class);
+        context.startService(intent);
     }
 
 }

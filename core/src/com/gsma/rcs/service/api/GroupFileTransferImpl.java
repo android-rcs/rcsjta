@@ -112,10 +112,11 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
     private State getRcsState(FileSharingSession session) {
         HttpFileTransferSession.State state = ((HttpFileTransferSession) session).getSessionState();
         if (HttpFileTransferSession.State.ESTABLISHED == state) {
-            if (isSessionPaused()) {
+            if (isSessionPaused(session)) {
                 return State.PAUSED;
             }
             return State.STARTED;
+
         } else if (session.isInitiatedByRemote()) {
             if (session.isSessionAccepted()) {
                 return State.ACCEPTING;
@@ -125,8 +126,8 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         return State.INITIATING;
     }
 
-    private ReasonCode getRcsReasonCode() {
-        if (isSessionPaused()) {
+    private ReasonCode getRcsReasonCode(FileSharingSession session) {
+        if (isSessionPaused(session)) {
             /*
              * If session is paused and still established it must have been paused by user
              */
@@ -135,12 +136,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         return ReasonCode.UNSPECIFIED;
     }
 
-    /**
-     * Returns the chat ID of the group chat
-     * 
-     * @return Chat ID
-     * @throws RemoteException
-     */
     @Override
     public String getChatId() throws RemoteException {
         try {
@@ -161,12 +156,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
-    /**
-     * Returns the file transfer ID of the file transfer
-     * 
-     * @return Transfer ID
-     * @throws RemoteException
-     */
     @Override
     public String getTransferId() throws RemoteException {
         try {
@@ -184,12 +173,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
-    /**
-     * Returns the remote contact
-     * 
-     * @return Contact
-     * @throws RemoteException
-     */
     @Override
     public ContactId getRemoteContact() throws RemoteException {
         try {
@@ -211,12 +194,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
-    /**
-     * Returns the complete filename including the path of the file to be transferred
-     * 
-     * @return Filename
-     * @throws RemoteException
-     */
     @Override
     public String getFileName() throws RemoteException {
         try {
@@ -238,12 +215,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
-    /**
-     * Returns the Uri of the file to be transferred
-     * 
-     * @return Uri
-     * @throws RemoteException
-     */
     @Override
     public Uri getFile() throws RemoteException {
         try {
@@ -265,12 +236,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
-    /**
-     * Returns the size of the file to be transferred
-     * 
-     * @return Size in bytes
-     * @throws RemoteException
-     */
     @Override
     public long getFileSize() throws RemoteException {
         try {
@@ -292,12 +257,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
-    /**
-     * Returns the MIME type of the file to be transferred
-     * 
-     * @return Type
-     * @throws RemoteException
-     */
     @Override
     public String getMimeType() throws RemoteException {
         try {
@@ -319,12 +278,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
-    /**
-     * Returns the Uri of the file icon
-     * 
-     * @return Uri
-     * @throws RemoteException
-     */
     @Override
     public Uri getFileIcon() throws RemoteException {
         try {
@@ -347,12 +300,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
-    /**
-     * Returns the Mime type of file icon
-     * 
-     * @return Mime type
-     * @throws RemoteException
-     */
     @Override
     public String getFileIconMimeType() throws RemoteException {
         try {
@@ -375,14 +322,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
-    /**
-     * Returns the local timestamp of when the file transfer was initiated and/or queued for
-     * outgoing file transfers or the local timestamp of when the file transfer invitation was
-     * received for incoming file transfers
-     * 
-     * @return long
-     * @throws RemoteException
-     */
     @Override
     public long getTimestamp() throws RemoteException {
         try {
@@ -400,14 +339,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
-    /**
-     * Returns the local timestamp of when the file transfer was initiated and /or queued for
-     * outgoing file transfers or the remote timestamp of when the file transfer was initiated for
-     * incoming file transfers
-     * 
-     * @return long
-     * @throws RemoteException
-     */
     @Override
     public long getTimestampSent() throws RemoteException {
         try {
@@ -425,13 +356,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
-    /**
-     * Returns the local timestamp of when the file transfer was delivered for outgoing file
-     * transfers or 0 for incoming file transfers or it was not yet displayed
-     * 
-     * @return long
-     * @throws RemoteException
-     */
     @Override
     public long getTimestampDelivered() throws RemoteException {
         try {
@@ -449,13 +373,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
-    /**
-     * Returns the local timestamp of when the file transfer was displayed for outgoing file
-     * transfers or 0 for incoming file transfers or it was not yet displayed
-     * 
-     * @return long
-     * @throws RemoteException
-     */
     @Override
     public long getTimestampDisplayed() throws RemoteException {
         try {
@@ -473,12 +390,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
-    /**
-     * Returns the state of the file transfer
-     * 
-     * @return State
-     * @throws RemoteException
-     */
     @Override
     public int getState() throws RemoteException {
         try {
@@ -500,12 +411,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
-    /**
-     * Returns the reason code of the state of the file transfer
-     * 
-     * @return ReasonCode
-     * @throws RemoteException
-     */
     @Override
     public int getReasonCode() throws RemoteException {
         try {
@@ -513,7 +418,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             if (session == null) {
                 return mPersistedStorage.getReasonCode().toInt();
             }
-            return getRcsReasonCode().toInt();
+            return getRcsReasonCode(session).toInt();
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -527,13 +432,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
-    /**
-     * Returns the direction of the transfer (incoming or outgoing)
-     * 
-     * @return Direction
-     * @throws RemoteException
-     * @see Direction
-     */
     @Override
     public int getDirection() throws RemoteException {
         try {
@@ -558,11 +456,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
-    /**
-     * Accepts file transfer invitation
-     * 
-     * @throws RemoteException
-     */
     @Override
     public void acceptInvitation() throws RemoteException {
         mImService.scheduleImOperation(new Runnable() {
@@ -632,11 +525,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         });
     }
 
-    /**
-     * Rejects file transfer invitation
-     * 
-     * @throws RemoteException
-     */
     @Override
     public void rejectInvitation() throws RemoteException {
         mImService.scheduleImOperation(new Runnable() {
@@ -665,11 +553,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         });
     }
 
-    /**
-     * Aborts the file transfer
-     * 
-     * @throws RemoteException
-     */
     @Override
     public void abortTransfer() throws RemoteException {
         mImService.scheduleImOperation(new Runnable() {
@@ -737,14 +620,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         return true;
     }
 
-    /**
-     * Returns true if it is possible to pause this file transfer right now, else returns false. If
-     * this filetransfer corresponds to a file transfer that is no longer present in the persistent
-     * storage false will be returned (this is no error)
-     * 
-     * @return boolean
-     * @throws RemoteException
-     */
     @Override
     public boolean isAllowedToPauseTransfer() throws RemoteException {
         try {
@@ -781,11 +656,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
-    /**
-     * Pauses the file transfer (only for HTTP transfer)
-     * 
-     * @throws RemoteException
-     */
     @Override
     public void pauseTransfer() throws RemoteException {
         if (!isAllowedToPauseTransfer()) {
@@ -821,8 +691,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
     /**
      * Is session paused (only for HTTP transfer)
      */
-    private boolean isSessionPaused() {
-        FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+    private boolean isSessionPaused(FileSharingSession session) {
         if (session == null) {
             throw new ServerApiGenericException(new StringBuilder(
                     "Unable to check if transfer is paused since session with file transfer ID '")
@@ -831,21 +700,13 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         return ((HttpFileTransferSession) session).isFileTransferPaused();
     }
 
-    /**
-     * Returns true if it is possible to resume this file transfer right now, else return false. If
-     * this filetransfer corresponds to a file transfer that is no longer present in the persistent
-     * storage false will be returned.
-     * 
-     * @return boolean
-     * @throws RemoteException
-     */
     @Override
     public boolean isAllowedToResumeTransfer() throws RemoteException {
         try {
             ReasonCode reasonCode;
             FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
             if (session != null) {
-                reasonCode = getRcsReasonCode();
+                reasonCode = getRcsReasonCode(session);
             } else {
                 reasonCode = mPersistedStorage.getReasonCode();
             }
@@ -905,11 +766,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
-    /**
-     * Resume the session (only for HTTP transfer)
-     * 
-     * @throws RemoteException
-     */
     @Override
     public void resumeTransfer() throws RemoteException {
         if (!isAllowedToResumeTransfer()) {
@@ -960,24 +816,12 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         });
     }
 
-    /**
-     * Returns whether you can resend the transfer.
-     * 
-     * @return boolean
-     * @throws RemoteException
-     */
     @Override
     public boolean isAllowedToResendTransfer() throws RemoteException {
         /* Resend file transfer is supported only for one-to-one transfers */
         return false;
     }
 
-    /**
-     * Returns true if file transfer has been marked as read
-     * 
-     * @return boolean
-     * @throws RemoteException
-     */
     @Override
     public boolean isRead() throws RemoteException {
         try {
@@ -995,12 +839,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
-    /**
-     * Resend a file transfer which was previously failed. This only for 1-1 file transfer, an
-     * exception is thrown in case of a file transfer to group.
-     * 
-     * @throws RemoteException
-     */
     @Override
     public void resendTransfer() throws RemoteException {
         throw new ServerApiUnsupportedOperationException(
@@ -1010,11 +848,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/
 
-    /**
-     * Session is started
-     * 
-     * @param contact
-     */
+    @Override
     public void onSessionStarted(ContactId contact) {
         if (sLogger.isActivated()) {
             sLogger.info("Session started");
@@ -1092,12 +926,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
-    /**
-     * Session has been aborted
-     * 
-     * @param contact
-     * @param reason Termination reason
-     */
+    @Override
     public void onSessionAborted(ContactId contact, TerminationReason reason) {
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("Session aborted (reason ").append(reason).append(")")
@@ -1159,12 +988,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         mImService.tryToDequeueFileTransfers();
     }
 
-    /**
-     * File transfer error
-     * 
-     * @param error Error
-     * @param contact
-     */
+    @Override
     public void onTransferError(FileSharingError error, ContactId contact) {
         if (sLogger.isActivated()) {
             sLogger.info("Sharing error " + error.getErrorCode());
@@ -1179,13 +1003,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         mImService.tryToDequeueFileTransfers();
     }
 
-    /**
-     * File transfer progress
-     * 
-     * @param contact
-     * @param currentSize Data size transferred
-     * @param totalSize Total size to be transferred
-     */
+    @Override
     public void onTransferProgress(ContactId contact, long currentSize, long totalSize) {
         synchronized (mLock) {
             if (mPersistedStorage.setProgress(currentSize)) {
@@ -1195,9 +1013,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
-    /**
-     * File transfer not allowed to send
-     */
     @Override
     public void onTransferNotAllowedToSend(ContactId contact) {
         synchronized (mLock) {
@@ -1206,17 +1021,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         mImService.tryToDequeueFileTransfers();
     }
 
-    /**
-     * File has been transfered
-     * 
-     * @param content MmContent associated to the received file
-     * @param contact
-     * @param fileExpiration the time when the file on the content server is no longer valid to
-     *            download.
-     * @param fileIconExpiration the time when the file icon on the content server is no longer
-     *            valid to download.
-     * @param ftProtocol
-     */
+    @Override
     public void onFileTransfered(MmContent content, ContactId contact, long fileExpiration,
             long fileIconExpiration, FileTransferProtocol ftProtocol) {
         if (sLogger.isActivated()) {
@@ -1234,9 +1039,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         mImService.tryToDequeueFileTransfers();
     }
 
-    /**
-     * File transfer has been paused by user
-     */
     @Override
     public void onFileTransferPausedByUser(ContactId contact) {
         if (sLogger.isActivated()) {
@@ -1247,9 +1049,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
-    /**
-     * File transfer has been paused by system
-     */
     @Override
     public void onFileTransferPausedBySystem(ContactId contact) {
         if (sLogger.isActivated()) {
@@ -1261,11 +1060,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
-    /**
-     * File transfer has been resumed
-     * 
-     * @param contact
-     */
+    @Override
     public void onFileTransferResumed(ContactId contact) {
         if (sLogger.isActivated()) {
             sLogger.info("Transfer resumed");

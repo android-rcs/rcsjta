@@ -22,6 +22,7 @@ import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.services.rcs.filetransfer.FileTransferIntent;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
@@ -149,7 +150,7 @@ public class InitiateFileTransfer extends Activity {
 
         ContactId remoteContact = null;
         if (getIntent().getAction() != null) {
-            mResuming = getIntent().getAction().equals(FileTransferResumeReceiver.ACTION_FT_RESUME);
+            mResuming = getIntent().getAction().equals(FileTransferIntent.ACTION_RESUME);
         }
 
         // Set layout

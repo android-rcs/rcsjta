@@ -122,7 +122,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             HttpFileTransferSession.State state = ((HttpFileTransferSession) session)
                     .getSessionState();
             if (HttpFileTransferSession.State.ESTABLISHED == state) {
-                if (isSessionPaused()) {
+                if (isSessionPaused(session)) {
                     return State.PAUSED;
                 }
 
@@ -148,8 +148,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         return State.INITIATING;
     }
 
-    private ReasonCode getRcsReasonCode() {
-        if (isSessionPaused()) {
+    private ReasonCode getRcsReasonCode(FileSharingSession session) {
+        if (isSessionPaused(session)) {
             /*
              * If session is paused and still established it must have been paused by user
              */
@@ -158,12 +158,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         return ReasonCode.UNSPECIFIED;
     }
 
-    /**
-     * Returns the chat ID of the file transfer
-     * 
-     * @return Transfer ID
-     * @throws RemoteException
-     */
     @Override
     public String getChatId() throws RemoteException {
         try {
@@ -182,12 +176,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
     }
 
-    /**
-     * Returns the file transfer ID of the file transfer
-     * 
-     * @return Transfer ID
-     * @throws RemoteException
-     */
     @Override
     public String getTransferId() throws RemoteException {
         try {
@@ -205,12 +193,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
     }
 
-    /**
-     * Returns the remote contact identifier
-     * 
-     * @return ContactId
-     * @throws RemoteException
-     */
     @Override
     public ContactId getRemoteContact() throws RemoteException {
         try {
@@ -232,12 +214,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
     }
 
-    /**
-     * Returns the complete filename including the path of the file to be transferred
-     * 
-     * @return Filename
-     * @throws RemoteException
-     */
     @Override
     public String getFileName() throws RemoteException {
         try {
@@ -259,12 +235,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
     }
 
-    /**
-     * Returns the Uri of the file to be transferred
-     * 
-     * @return Filename
-     * @throws RemoteException
-     */
     @Override
     public Uri getFile() throws RemoteException {
         try {
@@ -286,12 +256,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
     }
 
-    /**
-     * Returns the size of the file to be transferred
-     * 
-     * @return Size in bytes
-     * @throws RemoteException
-     */
     @Override
     public long getFileSize() throws RemoteException {
         try {
@@ -313,12 +277,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
     }
 
-    /**
-     * Returns the MIME type of the file to be transferred
-     * 
-     * @return Type
-     * @throws RemoteException
-     */
     @Override
     public String getMimeType() throws RemoteException {
         try {
@@ -340,12 +298,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
     }
 
-    /**
-     * Returns the Uri of the file icon
-     * 
-     * @return Uri
-     * @throws RemoteException
-     */
     @Override
     public Uri getFileIcon() throws RemoteException {
         try {
@@ -368,12 +320,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
     }
 
-    /**
-     * Returns the Mime type of file icon
-     * 
-     * @return Mime type
-     * @throws RemoteException
-     */
     @Override
     public String getFileIconMimeType() throws RemoteException {
         try {
@@ -396,12 +342,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
     }
 
-    /**
-     * Returns the state of the file transfer
-     * 
-     * @return State
-     * @throws RemoteException
-     */
     @Override
     public int getState() throws RemoteException {
         try {
@@ -423,12 +363,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
     }
 
-    /**
-     * Returns the reason code of the state of the file transfer
-     * 
-     * @return ReasonCode
-     * @throws RemoteException
-     */
     @Override
     public int getReasonCode() throws RemoteException {
         try {
@@ -436,7 +370,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             if (session == null) {
                 return mPersistentStorage.getReasonCode().toInt();
             }
-            return getRcsReasonCode().toInt();
+            return getRcsReasonCode(session).toInt();
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -450,13 +384,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
     }
 
-    /**
-     * Returns the direction of the transfer (incoming or outgoing)
-     * 
-     * @return Direction
-     * @throws RemoteException
-     * @see Direction
-     */
     @Override
     public int getDirection() throws RemoteException {
         try {
@@ -481,14 +408,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
     }
 
-    /**
-     * Returns the local timestamp of when the file transfer was initiated and/or queued for
-     * outgoing file transfers or the local timestamp of when the file transfer invitation was
-     * received for incoming file transfers
-     * 
-     * @return long
-     * @throws RemoteException
-     */
     @Override
     public long getTimestamp() throws RemoteException {
         try {
@@ -506,14 +425,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
     }
 
-    /**
-     * Returns the local timestamp of when the file transfer was initiated and /or queued for
-     * outgoing file transfers or the remote timestamp of when the file transfer was initiated for
-     * incoming file transfers
-     * 
-     * @return long
-     * @throws RemoteException
-     */
     @Override
     public long getTimestampSent() throws RemoteException {
         try {
@@ -531,13 +442,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
     }
 
-    /**
-     * Returns the local timestamp of when the file transfer was delivered for outgoing file
-     * transfers or 0 for incoming file transfers or it was not yet displayed
-     * 
-     * @return long
-     * @throws RemoteException
-     */
     @Override
     public long getTimestampDelivered() throws RemoteException {
         try {
@@ -555,13 +459,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
     }
 
-    /**
-     * Returns the local timestamp of when the file transfer was displayed for outgoing file
-     * transfers or 0 for incoming file transfers or it was not yet displayed
-     * 
-     * @return long
-     * @throws RemoteException
-     */
     @Override
     public long getTimestampDisplayed() throws RemoteException {
         try {
@@ -579,11 +476,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
     }
 
-    /**
-     * Accepts file transfer invitation
-     * 
-     * @throws RemoteException
-     */
     @Override
     public void acceptInvitation() throws RemoteException {
         mImService.scheduleImOperation(new Runnable() {
@@ -653,11 +545,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         });
     }
 
-    /**
-     * Rejects file transfer invitation
-     * 
-     * @throws RemoteException
-     */
     @Override
     public void rejectInvitation() throws RemoteException {
         mImService.scheduleImOperation(new Runnable() {
@@ -708,11 +595,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         });
     }
 
-    /**
-     * Aborts the file transfer
-     * 
-     * @throws RemoteException
-     */
     @Override
     public void abortTransfer() throws RemoteException {
         mImService.scheduleImOperation(new Runnable() {
@@ -784,14 +666,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         return session.isHttpTransfer();
     }
 
-    /**
-     * Returns true if it is possible to pause this file transfer right now, else returns false. If
-     * this filetransfer corresponds to a file transfer that is no longer present in the persistent
-     * storage false will be returned (this is no error)
-     * 
-     * @return boolean
-     * @throws RemoteException
-     */
     @Override
     public boolean isAllowedToPauseTransfer() throws RemoteException {
         try {
@@ -836,11 +710,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
     }
 
-    /**
-     * Pauses the file transfer (only for HTTP transfer)
-     * 
-     * @throws RemoteException
-     */
     @Override
     public void pauseTransfer() throws RemoteException {
         if (!isAllowedToPauseTransfer()) {
@@ -873,13 +742,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         });
     }
 
-    /**
-     * Checks if transfer is paused (only for HTTP transfer)
-     * 
-     * @return True if transfer is paused
-     */
-    public boolean isSessionPaused() {
-        FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+    private boolean isSessionPaused(FileSharingSession session) {
         if (session == null) {
             throw new ServerApiGenericException(new StringBuilder(
                     "Unable to check if transfer is paused since session with file transfer ID '")
@@ -894,21 +757,13 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         return ((HttpFileTransferSession) session).isFileTransferPaused();
     }
 
-    /**
-     * Returns true if it is possible to resume this file transfer right now, else return false. If
-     * this filetransfer corresponds to a file transfer that is no longer present in the persistent
-     * storage false will be returned.
-     * 
-     * @return boolean
-     * @throws RemoteException
-     */
     @Override
     public boolean isAllowedToResumeTransfer() throws RemoteException {
         try {
             ReasonCode reasonCode;
             FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
             if (session != null) {
-                reasonCode = getRcsReasonCode();
+                reasonCode = getRcsReasonCode(session);
             } else {
                 reasonCode = mPersistentStorage.getReasonCode();
             }
@@ -968,11 +823,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
     }
 
-    /**
-     * Resume the session (only for HTTP transfer)
-     * 
-     * @throws RemoteException
-     */
     @Override
     public void resumeTransfer() throws RemoteException {
         if (!isAllowedToResumeTransfer()) {
@@ -1023,12 +873,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         });
     }
 
-    /**
-     * Returns whether you can resend the transfer.
-     * 
-     * @return boolean
-     * @throws RemoteException
-     */
     @Override
     public boolean isAllowedToResendTransfer() throws RemoteException {
         try {
@@ -1100,12 +944,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
     }
 
-    /**
-     * Resend a file transfer which was previously failed. This only for 1-1 file transfer, an
-     * exception is thrown in case of a file transfer to group.
-     * 
-     * @throws RemoteException
-     */
     @Override
     public void resendTransfer() throws RemoteException {
         if (!isAllowedToResendTransfer()) {
@@ -1138,12 +976,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         });
     }
 
-    /**
-     * Returns true if file transfer has been marked as read
-     * 
-     * @return boolean
-     * @throws RemoteException
-     */
+    @Override
     public boolean isRead() throws RemoteException {
         try {
             return mPersistentStorage.isRead();

@@ -29,19 +29,10 @@ import android.content.Intent;
  */
 public class UndeliveredFileReceiver extends BroadcastReceiver {
 
-    /**
-     * Action Undelivered file
-     */
-    static final String ACTION_UNDELIVERED_FILE = "ACTION_UNDELIVERED_FILE";
-
     @Override
     public void onReceive(Context context, Intent intent) {
-        // Send intent to service
-
-        Intent receiverIntent = new Intent(context, FileTransferIntentService.class);
-        receiverIntent.putExtras(intent);
-        receiverIntent.setAction(ACTION_UNDELIVERED_FILE);
-        context.startService(receiverIntent);
+        intent.setClass(context, FileTransferIntentService.class);
+        context.startService(intent);
     }
 
 }
