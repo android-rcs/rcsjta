@@ -73,14 +73,8 @@ public abstract class ImsServiceSession extends Thread {
 
     private final static int SESSION_INTERVAL_TOO_SMALL = 422;
 
-    /**
-     * IMS service
-     */
     private final ImsService mImsService;
 
-    /**
-     * Session ID
-     */
     private String mSessionId = SessionIdGenerator.getNewId();
 
     /**
@@ -93,14 +87,8 @@ public abstract class ImsServiceSession extends Thread {
      */
     private Uri mRemoteId;
 
-    /**
-     * Remote display name
-     */
     private String mRemoteDisplayName;
 
-    /**
-     * Dialog path
-     */
     private SipDialogPath mDialogPath;
 
     /**
@@ -118,9 +106,6 @@ public abstract class ImsServiceSession extends Thread {
      */
     protected Object mWaitUserAnswer = new Object();
 
-    /**
-     * Session listeners
-     */
     private List<ImsSessionListener> mListeners = new ArrayList<ImsSessionListener>();
 
     /**
@@ -219,40 +204,19 @@ public abstract class ImsServiceSession extends Thread {
      * @param invite Incoming invite
      */
     public void createTerminatingDialogPath(SipRequest invite) {
-        // Set the call-id
         String callId = invite.getCallId();
-
-        // Set target
         String target = invite.getContactURI();
-
-        // Set local party
         String localParty = invite.getTo();
-
-        // Set remote party
         String remoteParty = invite.getFrom();
-
-        // Get the CSeq value
         long cseq = invite.getCSeq();
-
-        // Set the route path with the Record-Route
         Vector<String> route = SipUtils.routeProcessing(invite, false);
 
-        // Create a dialog path
         mDialogPath = new SipDialogPath(getImsService().getImsModule().getSipManager()
                 .getSipStack(), callId, cseq, target, localParty, remoteParty, route, mRcsSettings);
-
-        // Set the INVITE request
         mDialogPath.setInvite(invite);
-
-        // Set the remote tag
         mDialogPath.setRemoteTag(invite.getFromTag());
-
-        // Set the remote content part
         mDialogPath.setRemoteContent(invite.getContent());
-
-        // Set the session timer expire
         mDialogPath.setSessionExpireTime(invite.getSessionTimerExpire());
-
         if (remoteParty != null) {
             mRemoteDisplayName = SipUtils.getDisplayNameFromUri(remoteParty);
         }
@@ -459,7 +423,7 @@ public abstract class ImsServiceSession extends Thread {
         if (sLogger.isActivated()) {
             sLogger.debug("Wait session invitation answer delay=".concat(Long.toString(timeout)));
         }
-        // Wait until received response or received timeout
+        /* Wait until received response or received timeout */
         try {
             synchronized (mWaitUserAnswer) {
                 long waitTime = 0;
@@ -470,7 +434,7 @@ public abstract class ImsServiceSession extends Thread {
                 }
                 long startTime = System.currentTimeMillis();
                 mWaitUserAnswer.wait(waitTime);
-                if (System.currentTimeMillis() - startTime <= waitTime) {
+                if (System.currentTimeMillis() - startTime < waitTime) {
                     return mInvitationStatus;
                 }
                 return InvitationStatus.INVITATION_TIMEOUT;
