@@ -192,7 +192,7 @@ public class ReceiveFileTransfer extends Activity {
         }
 
         // Get invitation info
-        mResuming = intent.getAction().equals(FileTransferIntent.ACTION_RESUME);
+        mResuming = FileTransferIntent.ACTION_RESUME.equals(intent.getAction());
         mGgroupFileTransfer = (intent.getBooleanExtra(FileTransferIntentService.EXTRA_GROUP_FILE,
                 false));
 

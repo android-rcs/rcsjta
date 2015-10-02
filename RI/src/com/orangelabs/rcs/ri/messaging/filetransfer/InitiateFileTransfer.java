@@ -101,9 +101,6 @@ public class InitiateFileTransfer extends Activity {
      */
     private long mFilesize = -1;
 
-    /**
-     * File transfer
-     */
     private FileTransfer mFileTransfer;
 
     /**
@@ -121,9 +118,6 @@ public class InitiateFileTransfer extends Activity {
      */
     private ConnectionManager mCnxManager;
 
-    /**
-     * The log tag for this class
-     */
     private static final String LOGTAG = LogUtils
             .getTag(InitiateFileTransfer.class.getSimpleName());
 
@@ -149,9 +143,8 @@ public class InitiateFileTransfer extends Activity {
         super.onCreate(savedInstanceState);
 
         ContactId remoteContact = null;
-        if (getIntent().getAction() != null) {
-            mResuming = getIntent().getAction().equals(FileTransferIntent.ACTION_RESUME);
-        }
+        Intent intent = getIntent();
+        mResuming = FileTransferIntent.ACTION_RESUME.equals(intent.getAction());
 
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -193,7 +186,7 @@ public class InitiateFileTransfer extends Activity {
             fileTransferService.addEventListener(ftListener);
             if (mResuming) {
                 // Get resuming info
-                FileTransferDAO ftdao = (FileTransferDAO) (getIntent().getExtras()
+                FileTransferDAO ftdao = (FileTransferDAO) (intent.getExtras()
                         .getSerializable(FileTransferIntentService.BUNDLE_FTDAO_ID));
                 if (ftdao == null) {
                     if (LogUtils.isActive) {
