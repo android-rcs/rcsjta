@@ -544,8 +544,8 @@ public abstract class ImsServiceSession extends Thread {
      */
     public void closeSession(TerminationReason reason) throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Close the session (reason ").append(reason).append(")")
-                    .toString());
+            sLogger.debug(new StringBuilder("Close the session (reason ").append(reason)
+                    .append(")").toString());
         }
         if ((mDialogPath == null) || mDialogPath.isSessionTerminated()) {
             return;
@@ -559,6 +559,13 @@ public abstract class ImsServiceSession extends Thread {
         /* Unblock semaphore (used for terminating side only) */
         synchronized (mWaitUserAnswer) {
             mWaitUserAnswer.notifyAll();
+        }
+        if (TerminationReason.TERMINATION_BY_CONNECTION_LOST == reason) {
+            /*
+             * Since connection is lost , we should not even try to send a BYE or CANCEL as we will
+             * anyway fail , Hence return from this point.
+             */
+            return;
         }
         /* Close the session */
         if (mDialogPath.isSigEstablished()) {

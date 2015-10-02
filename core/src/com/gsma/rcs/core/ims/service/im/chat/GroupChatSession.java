@@ -324,7 +324,16 @@ public abstract class GroupChatSession extends ChatSession {
 
     @Override
     public void closeSession(TerminationReason reason) throws PayloadException, NetworkException {
-        mConferenceSubscriber.terminate();
+        if (TerminationReason.TERMINATION_BY_CONNECTION_LOST == reason) {
+            /*
+             * As there is no connection, So we should not even make an attempt to send un-subscribe
+             * as it will anyway fail , However we should still do the cleanup , like : Stopping
+             * periodic subscription timer
+             */
+            mConferenceSubscriber.stopTimer();
+        } else {
+            mConferenceSubscriber.terminate();
+        }
         super.closeSession(reason);
     }
 

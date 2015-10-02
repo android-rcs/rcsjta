@@ -903,7 +903,7 @@ public class SipInterface implements SipListener {
             throw new PayloadException("Unable to instantiate SIP transaction!", e);
 
         } catch (SipException e) {
-            throw new PayloadException("Can't send SIP message!", e);
+            throw new NetworkException("Can't send SIP message!", e);
         }
     }
 

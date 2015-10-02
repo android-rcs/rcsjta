@@ -387,7 +387,8 @@ public class HttpUploadManager extends HttpTransferManager {
                 if (!isPaused() && !isCancelled()) {
                     pauseTransferBySystem();
                 }
-                return null;
+                throw e;
+
             } catch (SecurityException e) {
                 /*
                  * Note! This is needed since this can be called during dequeuing.
