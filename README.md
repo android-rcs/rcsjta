@@ -23,19 +23,15 @@ Note: the cryptography API comes from Legion of the [Bouncy Castle Inc] (https:/
 
 ##Project:
 
-- see [Project reporting](https://rawgit.com/android-rcs/rcsjta/master/docs/RCSJTA_API_reporting.ppt).
-
 - see [Project management](https://rawgit.com/android-rcs/rcsjta/master/docs/RCSJTA_open_source.ppt).
 
 - see [GIT branches](https://github.com/android-rcs/rcsjta/blob/wiki/Branches.md).
 
 ##RCS API definition:
 
-- see [TAPI 1.5.1 specification](https://rawgit.com/android-rcs/rcsjta/master/docs/CR/CR_blackbird_5.2/RCC.53_v3.0_1.5.1-r1.docx) and [Change Requests reporting](https://rawgit.com/android-rcs/rcsjta/master/docs/CR/CR_blackbird_5.2/CR_reporting.htm).
+- see [TAPI 1.5.1 specification](https://rawgit.com/android-rcs/rcsjta/master/docs/tapi/RCC.53_v3.0_1.5.1-r1.docx).
 
-- see [TAPI 1.5.1 Javadoc] (https://rawgit.com/android-rcs/rcsjta.javadoc/javadoc1.5/index.html) (Blackbird release under implementation, see [integration](https://github.com/android-rcs/rcsjta/tree/integration) branch).
-
-- see [TAPI 1.0 Javadoc] (https://rawgit.com/android-rcs/rcsjta.javadoc/javadoc1.0/index.html) (deprecated).
+- see [TAPI 1.5.1 Javadoc] (https://rawgit.com/android-rcs/rcsjta.javadoc/javadoc1.5/index.html).
 
 ##SDK nightly builds:
 - the latest SDK for the integration branch is available [here](https://github.com/android-rcs/rcsjta.build/tree/integration).
