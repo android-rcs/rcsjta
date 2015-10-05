@@ -37,3 +37,8 @@
   * First TAPI
   * [Go to branch.](https://github.com/android-rcs/rcsjta/tree/tapi_0.9.0)
 <br>
+
+**`crane`** contains the Crane pre release.
+  * RCS Blackbird scope: RCS 5.2 specifications
+  * [Go to branch.](https://github.com/android-rcs/rcsjta/tree/crane)
+<br>
