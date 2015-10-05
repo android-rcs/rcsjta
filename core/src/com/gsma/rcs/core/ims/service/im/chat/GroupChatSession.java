@@ -691,7 +691,9 @@ public abstract class GroupChatSession extends ChatSession {
              */
             ChatMessage msg = new ChatMessage(msgId, getRemoteContact(), new String(data, UTF8),
                     MimeType.TEXT_MESSAGE, timestamp, timestamp, null);
-            receive(msg, false);
+            boolean imdnDisplayedRequested = false;
+            boolean msgSupportsImdnReport = false;
+            receive(msg, null, msgSupportsImdnReport, imdnDisplayedRequested, null, timestamp);
             return;
 
         } else if (!ChatUtils.isMessageCpimType(mimeType)) {
@@ -742,6 +744,7 @@ public abstract class GroupChatSession extends ChatSession {
         }
 
         String dispositionNotification = cpimMsg.getHeader(ImdnUtils.HEADER_IMDN_DISPO_NOTIF);
+        boolean msgSupportsImdnReport = true;
 
         /**
          * Set message's timestamp to the System.currentTimeMillis, not the session's itself
@@ -764,15 +767,13 @@ public abstract class GroupChatSession extends ChatSession {
                 // TODO : else return error to Originating side
             }
 
-            if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
-                sendMsrpMessageDeliveryStatus(remoteId, cpimMsgId,
-                        ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
-            }
+
         } else {
             if (ChatUtils.isTextPlainType(contentType)) {
                 ChatMessage msg = new ChatMessage(cpimMsgId, remoteId, cpimMsg.getMessageContent(),
                         MimeType.TEXT_MESSAGE, timestamp, timestampSent, pseudo);
-                receive(msg, shouldSendDisplayReport(dispositionNotification));
+                receive(msg, remoteId, msgSupportsImdnReport,
+                        shouldSendDisplayReport(dispositionNotification), cpimMsgId, timestamp);
             } else {
                 if (ChatUtils.isApplicationIsComposingType(contentType)) {
                     // Is composing event
@@ -803,14 +804,12 @@ public abstract class GroupChatSession extends ChatSession {
                                     ChatUtils.networkGeolocContentToPersistedGeolocContent(cpimMsg
                                             .getMessageContent()), MimeType.GEOLOC_MESSAGE,
                                     timestamp, timestampSent, pseudo);
-                            receive(msg, shouldSendDisplayReport(dispositionNotification));
+                            receive(msg, remoteId, msgSupportsImdnReport,
+                                    shouldSendDisplayReport(dispositionNotification), cpimMsgId,
+                                    timestamp);
                         }
                     }
                 }
-            }
-            if (dispositionNotification != null) {
-                sendMsrpMessageDeliveryStatus(remoteId, cpimMsgId,
-                        ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
             }
         }
     }

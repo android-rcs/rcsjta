@@ -160,11 +160,15 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * Receive chat message
      * 
      * @param msg Chat message
+     * @param msgSupportsImdnReport True if the message type supports imdn reports
      * @param imdnDisplayedRequested Indicates whether display report was requested
+     * @param cpimMsgId Cpim message Id
+     * @param timestamp Message receive time
      * @throws PayloadException
      * @throws NetworkException
      */
-    protected void receive(ChatMessage msg, boolean imdnDisplayedRequested)
+    protected void receive(ChatMessage msg, ContactId remoteId, boolean msgSupportsImdnReport,
+            boolean imdnDisplayedRequested, String cpimMsgId, long timestamp)
             throws PayloadException, NetworkException {
         if (mMessagingLog.isMessagePersisted(msg.getMessageId())) {
             // Message already received
@@ -173,6 +177,11 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 
         // Is composing event is reset
         mIsComposingMgr.receiveIsComposingEvent(msg.getRemoteContact(), false);
+
+        if (msgSupportsImdnReport && mImdnManager.isDeliveryDeliveredReportsEnabled()) {
+            sendMsrpMessageDeliveryStatus(remoteId, cpimMsgId,
+                    ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
+        }
 
         for (ImsSessionListener listener : getListeners()) {
             ((ChatSessionListener) listener).onMessageReceived(msg, imdnDisplayedRequested);
@@ -505,7 +514,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             ChatMessage msg = new ChatMessage(msgId, getRemoteContact(), new String(data, UTF8),
                     MimeType.TEXT_MESSAGE, timestamp, timestamp, null);
             boolean imdnDisplayedRequested = false;
-            receive(msg, imdnDisplayedRequested);
+            boolean msgSupportsImdnReport = false;
+            receive(msg, null, msgSupportsImdnReport, imdnDisplayedRequested, null, timestamp);
             return;
         }
         if (ChatUtils.isMessageCpimType(mimeType)) {
@@ -524,6 +534,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                  */
 
                 boolean imdnDisplayedRequested = false;
+                boolean msgSupportsImdnReport = true;
 
                 String dispositionNotification = cpimMsg
                         .getHeader(ImdnUtils.HEADER_IMDN_DISPO_NOTIF);
@@ -556,12 +567,14 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                     } else {
                         // TODO : else return error to Originating side
                     }
+
                 } else {
                     if (ChatUtils.isTextPlainType(contentType)) {
                         ChatMessage msg = new ChatMessage(cpimMsgId, contact,
                                 cpimMsg.getMessageContent(), MimeType.TEXT_MESSAGE, timestamp,
                                 timestampSent, null);
-                        receive(msg, imdnDisplayedRequested);
+                        receive(msg, null, msgSupportsImdnReport, imdnDisplayedRequested,
+                                cpimMsgId, timestamp);
                     } else if (ChatUtils.isApplicationIsComposingType(contentType)) {
                         receiveIsComposing(contact, cpimMsg.getMessageContent().getBytes(UTF8));
                     } else if (ChatUtils.isMessageImdnType(contentType)) {
@@ -571,21 +584,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                                 ChatUtils.networkGeolocContentToPersistedGeolocContent(cpimMsg
                                         .getMessageContent()), MimeType.GEOLOC_MESSAGE, timestamp,
                                 timestampSent, null);
-                        receive(msg, imdnDisplayedRequested);
-                    }
-                }
-
-                if (!mImdnManager.isDeliveryDeliveredReportsEnabled()) {
-                    return;
-                }
-
-                if (isFToHTTP) {
-                    sendMsrpMessageDeliveryStatus(null, cpimMsgId,
-                            ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
-                } else {
-                    if (dispositionNotification != null) {
-                        sendMsrpMessageDeliveryStatus(null, cpimMsgId,
-                                ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
+                        receive(msg, null, msgSupportsImdnReport, imdnDisplayedRequested,
+                                cpimMsgId, timestamp);
                     }
                 }
             }
@@ -672,10 +672,11 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param timestampSent Remote timestamp sent in payload for receiving a HttpFileTransfer
      * @throws PayloadException
      * @throws ContactManagerException
+     * @throws NetworkException
      */
     protected void receiveHttpFileTransfer(ContactId contact, String displayName,
             FileTransferHttpInfoDocument fileTransferInfo, String msgId, long timestamp,
-            long timestampSent) throws PayloadException, ContactManagerException {
+            long timestampSent) throws PayloadException, ContactManagerException, NetworkException {
         try {
             /*
              * Update the remote contact's capabilities to include at least HTTP FT and IM session
@@ -804,6 +805,12 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                 mImService.receiveFileTransferInvitation(fileSession, isGroupChat(), contact,
                         displayName, fileTransferInfo.getExpiration());
             }
+
+            if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
+                sendMsrpMessageDeliveryStatus(contact, msgId,
+                        ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
+            }
+
             fileSession.startSession();
 
         } catch (FileAccessException e) {
