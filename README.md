@@ -29,7 +29,7 @@ Note: the cryptography API comes from Legion of the [Bouncy Castle Inc] (https:/
 
 ##RCS API definition:
 
-- see [TAPI 1.5.1 specification](https://rawgit.com/android-rcs/rcsjta/master/docs/tapi/RCC.53_v3.0_1.5.1-r1).
+- see [TAPI 1.5.1 specification](https://rawgit.com/android-rcs/rcsjta/master/docs/tapi/RCC.53_v3.0_1.5.1-r1.docx).
 
 - see [TAPI 1.5.1 Javadoc] (https://rawgit.com/android-rcs/rcsjta.javadoc/javadoc1.5/index.html) (Blackbird release under implementation, see [integration](https://github.com/android-rcs/rcsjta/tree/integration) branch).
 
