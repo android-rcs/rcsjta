@@ -34,17 +34,19 @@ import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 
+import android.net.Uri;
+
 import java.io.IOException;
 
 /**
- * Resuming session of OriginatingHttpFileSharingSession
+ * Resuming session of OriginatingHttpGroupFileSharingSession
  * 
- * @author Benoit JOGUET
+ * @author Philippe LEMORDANT
  */
-public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSession {
+public class ResumeUploadGroupFileSharingSession extends OriginatingHttpGroupFileSharingSession {
 
-    private final static Logger sLogger = Logger.getLogger(ResumeUploadFileSharingSession.class
-            .getSimpleName());
+    private final static Logger sLogger = Logger
+            .getLogger(ResumeUploadGroupFileSharingSession.class.getSimpleName());
 
     /**
      * Constructor create instance of session object to resume download
@@ -55,19 +57,26 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
      * @param rcsSettings
      * @param messagingLog
      * @param contactManager
+     * @param conferenceId
+     * @param chatSessionId
+     * @param chatContributionId
      */
-    public ResumeUploadFileSharingSession(InstantMessagingService imService, MmContent content,
-            FtHttpResumeUpload resumeUpload, RcsSettings rcsSettings, MessagingLog messagingLog,
-            ContactManager contactManager) {
+    public ResumeUploadGroupFileSharingSession(InstantMessagingService imService,
+            MmContent content, FtHttpResumeUpload resumeUpload, RcsSettings rcsSettings,
+            MessagingLog messagingLog, ContactManager contactManager, Uri conferenceId,
+            String chatSessionId, String chatContributionId) {
         // @formatter:off
         super(imService, 
-                resumeUpload.getFileTransferId(), 
-                content, resumeUpload.getContact(),
+                resumeUpload.getFileTransferId(),
+                content,
                 resumeUpload.getFileicon() != null ? FileTransferUtils.createMmContent(resumeUpload.getFileicon()) : null, 
+                conferenceId, 
+                chatSessionId, 
+                chatContributionId,
                 resumeUpload.getTId(), 
+                rcsSettings, 
                 messagingLog, 
-                rcsSettings,
-                resumeUpload.getTimestamp(), 
+                resumeUpload.getTimestamp(),
                 resumeUpload.getTimestampSent(), 
                 contactManager);
         // @formatter:on

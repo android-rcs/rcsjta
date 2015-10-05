@@ -221,7 +221,7 @@ public class HttpDownloadManager extends HttpTransferManager {
             int num;
             while ((num = input.read(buffer)) != -1 && !isCancelled() && !isPaused()) {
                 receivedBytes += num;
-                getListener().httpTransferProgress(receivedBytes, mContent.getSize());
+                getListener().onHttpTransferProgress(receivedBytes, mContent.getSize());
                 mFileDownloadStream.write(buffer, 0, num);
             }
 

@@ -32,6 +32,7 @@ import com.orangelabs.rcs.ri.utils.Smileys;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.support.v4.widget.CursorAdapter;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -130,6 +131,7 @@ public class ChatCursorAdapter extends CursorAdapter {
                 holder.chatItemLayout.setBackgroundDrawable(context.getResources().getDrawable(
                         R.drawable.msg_item_left));
                 holder.chatText.setText(formatDataToText(context, mimeType, data));
+                holder.chatText.setTextColor(Color.BLACK);
                 holder.contactText.setVisibility(View.GONE);
                 holder.statusText.setVisibility(View.VISIBLE);
                 break;
@@ -141,6 +143,7 @@ public class ChatCursorAdapter extends CursorAdapter {
                 holder.chatItemLayout.setBackgroundDrawable(context.getResources().getDrawable(
                         R.drawable.msg_item_right));
                 holder.chatText.setText(formatDataToText(context, mimeType, data));
+                holder.chatText.setTextColor(Color.BLACK);
                 if (displayName != null) {
                     holder.contactText.setVisibility(View.VISIBLE);
                     holder.contactText.setText(displayName);
@@ -158,6 +161,7 @@ public class ChatCursorAdapter extends CursorAdapter {
                     String event = RiApplication.sGroupChatEvents[status];
                     holder.chatText.setText(context
                             .getString(R.string.label_groupchat_event, event));
+                    holder.chatText.setTextColor(Color.WHITE);
                     if (displayName != null) {
                         holder.contactText.setVisibility(View.VISIBLE);
                         holder.contactText.setText(displayName);

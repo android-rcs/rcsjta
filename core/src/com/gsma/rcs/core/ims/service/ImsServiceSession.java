@@ -186,10 +186,9 @@ public abstract class ImsServiceSession extends Thread {
 
         // @FIXME: This method should take mRemoteId param as an URI instead of String
         // Create a dialog path
-        mDialogPath = new SipDialogPath(
-                getImsService().getImsModule().getSipManager().getSipStack(), callId, 1,
-                mRemoteId.toString(), ImsModule.getImsUserProfile().getPublicAddress(),
-                mRemoteId.toString(), route, mRcsSettings);
+        mDialogPath = new SipDialogPath(getImsService().getImsModule().getSipManager()
+                .getSipStack(), callId, 1, mRemoteId.toString(), ImsModule.getImsUserProfile()
+                .getPublicAddress(), mRemoteId.toString(), route, mRcsSettings);
 
         // Set the authentication agent in the dialog path
         mDialogPath.setAuthenticationAgent(getAuthenticationAgent());
@@ -212,9 +211,8 @@ public abstract class ImsServiceSession extends Thread {
         long cseq = invite.getCSeq();
         Vector<String> route = SipUtils.routeProcessing(invite, false);
 
-        mDialogPath = new SipDialogPath(
-                getImsService().getImsModule().getSipManager().getSipStack(), callId, cseq, target,
-                localParty, remoteParty, route, mRcsSettings);
+        mDialogPath = new SipDialogPath(getImsService().getImsModule().getSipManager()
+                .getSipStack(), callId, cseq, target, localParty, remoteParty, route, mRcsSettings);
         mDialogPath.setInvite(invite);
         mDialogPath.setRemoteTag(invite.getFromTag());
         mDialogPath.setRemoteContent(invite.getContent());
@@ -328,8 +326,7 @@ public abstract class ImsServiceSession extends Thread {
     /**
      * Set the session ID
      * 
-     * @param sessionId
-     *            <p>
+     * @param sessionId <p>
      *            <b>Be Careful:</b><br />
      *            Should only be called to resume session (like for FT HTTP).
      *            </p>
@@ -472,9 +469,9 @@ public abstract class ImsServiceSession extends Thread {
         if (!isSessionInterrupted()) {
             mSessionInterrupted = true;
             interrupt();
-        }
-        if (sLogger.isActivated()) {
-            sLogger.debug("Session has been interrupted");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Session has been interrupted");
+            }
         }
     }
 
@@ -487,8 +484,8 @@ public abstract class ImsServiceSession extends Thread {
      * @throws NetworkException
      * @throws PayloadException
      */
-    public void terminateSession(TerminationReason reason)
-            throws PayloadException, NetworkException {
+    public void terminateSession(TerminationReason reason) throws PayloadException,
+            NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Terminate the session ".concat(reason.toString()));
         }
@@ -618,8 +615,7 @@ public abstract class ImsServiceSession extends Thread {
         }
         if (getDialogPath().isSigEstablished()) {
             if (sLogger.isActivated()) {
-                sLogger.info(
-                        "Ignore the received CANCEL message from the remote (session already established)");
+                sLogger.info("Ignore the received CANCEL message from the remote (session already established)");
             }
             return;
         }
@@ -628,9 +624,12 @@ public abstract class ImsServiceSession extends Thread {
         if (sLogger.isActivated()) {
             sLogger.info("Send 487 Request terminated");
         }
-        getImsService().getImsModule().getSipManager()
-                .sendSipResponse(SipMessageFactory.createResponse(getDialogPath().getInvite(),
-                        getDialogPath().getLocalTag(), Response.REQUEST_TERMINATED));
+        getImsService()
+                .getImsModule()
+                .getSipManager()
+                .sendSipResponse(
+                        SipMessageFactory.createResponse(getDialogPath().getInvite(),
+                                getDialogPath().getLocalTag(), Response.REQUEST_TERMINATED));
         removeSession();
         mInvitationStatus = InvitationStatus.INVITATION_CANCELED;
         synchronized (mWaitUserAnswer) {
@@ -691,8 +690,8 @@ public abstract class ImsServiceSession extends Thread {
      * @throws PayloadException
      * @throws FileAccessException
      */
-    public abstract void startMediaTransfer()
-            throws PayloadException, NetworkException, FileAccessException;
+    public abstract void startMediaTransfer() throws PayloadException, NetworkException,
+            FileAccessException;
 
     /**
      * Close media session
@@ -707,10 +706,13 @@ public abstract class ImsServiceSession extends Thread {
      * @throws PayloadException
      * @throws NetworkException
      */
-    public void send180Ringing(SipRequest request, String localTag)
-            throws NetworkException, PayloadException {
-        getImsService().getImsModule().getSipManager().sendSipResponse(
-                SipMessageFactory.createResponse(request, localTag, Response.RINGING));
+    public void send180Ringing(SipRequest request, String localTag) throws NetworkException,
+            PayloadException {
+        getImsService()
+                .getImsModule()
+                .getSipManager()
+                .sendSipResponse(
+                        SipMessageFactory.createResponse(request, localTag, Response.RINGING));
     }
 
     /**
@@ -725,8 +727,8 @@ public abstract class ImsServiceSession extends Thread {
     public void sendErrorResponse(SipRequest request, String localTag, InvitationStatus status)
             throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
-            sLogger.info(
-                    new StringBuilder("Send ").append(status).append(" error response").toString());
+            sLogger.info(new StringBuilder("Send ").append(status).append(" error response")
+                    .toString());
         }
         SipResponse resp;
         switch (status) {
@@ -740,8 +742,8 @@ public abstract class ImsServiceSession extends Thread {
                 resp = SipMessageFactory.createResponse(request, localTag, Response.FORBIDDEN);
                 break;
             default:
-                throw new IllegalArgumentException(
-                        "Unknown InvitationStatus ".concat(status.toString()));
+                throw new IllegalArgumentException("Unknown InvitationStatus ".concat(status
+                        .toString()));
         }
         getImsService().getImsModule().getSipManager().sendSipResponse(resp);
     }
@@ -754,13 +756,16 @@ public abstract class ImsServiceSession extends Thread {
      * @throws PayloadException
      * @throws NetworkException
      */
-    public void send603Decline(SipRequest request, String localTag)
-            throws NetworkException, PayloadException {
+    public void send603Decline(SipRequest request, String localTag) throws NetworkException,
+            PayloadException {
         if (sLogger.isActivated()) {
             sLogger.info("Send 603 Decline");
         }
-        getImsService().getImsModule().getSipManager().sendSipResponse(
-                SipMessageFactory.createResponse(request, localTag, Response.DECLINE));
+        getImsService()
+                .getImsModule()
+                .getSipManager()
+                .sendSipResponse(
+                        SipMessageFactory.createResponse(request, localTag, Response.DECLINE));
     }
 
     /**
@@ -771,13 +776,16 @@ public abstract class ImsServiceSession extends Thread {
      * @throws PayloadException
      * @throws NetworkException
      */
-    public void send486Busy(SipRequest request, String localTag)
-            throws NetworkException, PayloadException {
+    public void send486Busy(SipRequest request, String localTag) throws NetworkException,
+            PayloadException {
         if (sLogger.isActivated()) {
             sLogger.info("Send 486 Busy");
         }
-        getImsService().getImsModule().getSipManager().sendSipResponse(
-                SipMessageFactory.createResponse(request, localTag, Response.BUSY_HERE));
+        getImsService()
+                .getImsModule()
+                .getSipManager()
+                .sendSipResponse(
+                        SipMessageFactory.createResponse(request, localTag, Response.BUSY_HERE));
     }
 
     /**
@@ -792,8 +800,11 @@ public abstract class ImsServiceSession extends Thread {
             sLogger.info("Send 415 Unsupported Media Type");
         }
         // TODO: set Accept-Encoding header
-        getImsService().getImsModule().getSipManager().sendSipResponse(
-                SipMessageFactory.createResponse(request, Response.UNSUPPORTED_MEDIA_TYPE));
+        getImsService()
+                .getImsModule()
+                .getSipManager()
+                .sendSipResponse(
+                        SipMessageFactory.createResponse(request, Response.UNSUPPORTED_MEDIA_TYPE));
     }
 
     /**
@@ -898,10 +909,12 @@ public abstract class ImsServiceSession extends Thread {
      * @throws NetworkException
      * @throws FileAccessException
      */
-    public void sendInvite(SipRequest invite)
-            throws PayloadException, NetworkException, FileAccessException {
+    public void sendInvite(SipRequest invite) throws PayloadException, NetworkException,
+            FileAccessException {
         // Send INVITE request
-        SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
+        SipTransactionContext ctx = getImsService()
+                .getImsModule()
+                .getSipManager()
                 .sendSipMessageAndWait(invite, getResponseTimeout(),
                         new SipTransactionContext.INotifySipProvisionalResponse() {
                             public void handle180Ringing(SipResponse response) {
@@ -970,8 +983,8 @@ public abstract class ImsServiceSession extends Thread {
      * @throws NetworkException
      * @throws FileAccessException
      */
-    public void handle200OK(SipResponse resp)
-            throws PayloadException, NetworkException, FileAccessException {
+    public void handle200OK(SipResponse resp) throws PayloadException, NetworkException,
+            FileAccessException {
         if (sLogger.isActivated()) {
             sLogger.info("200 OK response received");
         }
@@ -1033,8 +1046,8 @@ public abstract class ImsServiceSession extends Thread {
     public void handleDefaultError(SipResponse resp) {
         // Default handle
         handleError(new ImsSessionBasedServiceError(
-                ImsSessionBasedServiceError.SESSION_INITIATION_FAILED,
-                resp.getStatusCode() + " " + resp.getReasonPhrase()));
+                ImsSessionBasedServiceError.SESSION_INITIATION_FAILED, resp.getStatusCode() + " "
+                        + resp.getReasonPhrase()));
     }
 
     /**
@@ -1063,8 +1076,8 @@ public abstract class ImsServiceSession extends Thread {
      * @throws PayloadException
      * @throws FileAccessException
      */
-    public void handle407Authentication(SipResponse resp)
-            throws PayloadException, NetworkException, FileAccessException {
+    public void handle407Authentication(SipResponse resp) throws PayloadException,
+            NetworkException, FileAccessException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info("407 response received");
@@ -1107,8 +1120,8 @@ public abstract class ImsServiceSession extends Thread {
      * @throws PayloadException
      * @throws FileAccessException
      */
-    public void handle422SessionTooSmall(SipResponse resp)
-            throws PayloadException, NetworkException, FileAccessException {
+    public void handle422SessionTooSmall(SipResponse resp) throws PayloadException,
+            NetworkException, FileAccessException {
         try {
             // 422 response received
             if (sLogger.isActivated()) {
@@ -1183,8 +1196,8 @@ public abstract class ImsServiceSession extends Thread {
      */
     public void handle487Cancel(SipResponse resp) {
         handleError(new ImsSessionBasedServiceError(
-                ImsSessionBasedServiceError.SESSION_INITIATION_CANCELLED,
-                resp.getStatusCode() + " " + resp.getReasonPhrase()));
+                ImsSessionBasedServiceError.SESSION_INITIATION_CANCELLED, resp.getStatusCode()
+                        + " " + resp.getReasonPhrase()));
     }
 
     /**
@@ -1194,8 +1207,8 @@ public abstract class ImsServiceSession extends Thread {
      */
     public void handle603Declined(SipResponse resp) {
         handleError(new ImsSessionBasedServiceError(
-                ImsSessionBasedServiceError.SESSION_INITIATION_DECLINED,
-                resp.getStatusCode() + " " + resp.getReasonPhrase()));
+                ImsSessionBasedServiceError.SESSION_INITIATION_DECLINED, resp.getStatusCode() + " "
+                        + resp.getReasonPhrase()));
     }
 
     /**
@@ -1212,8 +1225,7 @@ public abstract class ImsServiceSession extends Thread {
      * @param code InvitationStatus
      * @param requestType
      */
-    public void handleReInviteResponse(InvitationStatus code, SipResponse response,
-            int requestType) {
+    public void handleReInviteResponse(InvitationStatus code, SipResponse response, int requestType) {
     }
 
     /**

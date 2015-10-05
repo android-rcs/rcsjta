@@ -31,22 +31,22 @@ public interface HttpTransferEventListener {
     /**
      * HTTP transfer started
      */
-    public void httpTransferStarted();
+    public void onHttpTransferStarted();
 
     /**
      * HTTP transfer paused by user
      */
-    public void httpTransferPausedByUser();
+    public void onHttpTransferPausedByUser();
 
     /**
      * HTTP transfer paused by system
      */
-    public void httpTransferPausedBySystem();
+    public void onHttpTransferPausedBySystem();
 
     /**
      * HTTP transfer resumed
      */
-    public void httpTransferResumed();
+    public void onHttpTransferResumed();
 
     /**
      * HTTP transfer progress
@@ -54,10 +54,10 @@ public interface HttpTransferEventListener {
      * @param currentSize Current transfered size in bytes
      * @param totalSize Total size in bytes
      */
-    public void httpTransferProgress(long currentSize, long totalSize);
+    public void onHttpTransferProgress(long currentSize, long totalSize);
 
     /**
      * HTTP transfer not allowed to send
      */
-    public void httpTransferNotAllowedToSend();
+    public void onHttpTransferNotAllowedToSend();
 }

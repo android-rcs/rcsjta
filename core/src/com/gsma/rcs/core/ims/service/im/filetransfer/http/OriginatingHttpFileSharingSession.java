@@ -218,7 +218,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
             chatSession.startSession();
             mImService.receiveOneOneChatSessionInitiation(chatSession);
         }
-        handleFileTransfered();
+        handleFileTransferred();
     }
 
     @Override

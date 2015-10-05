@@ -294,7 +294,7 @@ public class FileTransferLog implements IFileTransferLog {
     public boolean setFileTransferStateAndReasonCode(String fileTransferId, State state,
             ReasonCode reasonCode) {
         if (logger.isActivated()) {
-            logger.debug(new StringBuilder("updateFileTransferStatus: fileTransferId=")
+            logger.debug(new StringBuilder("setFileTransferStateAndReasonCode: fileTransferId=")
                     .append(fileTransferId).append(", state=").append(state)
                     .append(", reasonCode=").append(reasonCode).toString());
         }
@@ -787,7 +787,7 @@ public class FileTransferLog implements IFileTransferLog {
     public boolean setFileTransferStateAndTimestamp(String fileTransferId, State state,
             ReasonCode reasonCode, long timestamp, long timestampSent) {
         if (logger.isActivated()) {
-            logger.debug(new StringBuilder("updateFileTransfer: fileTransferId=")
+            logger.debug(new StringBuilder("setFileTransferStateAndTimestamp: fileTransferId=")
                     .append(fileTransferId).append(", state=").append(state)
                     .append(", reasonCode=").append(reasonCode).append(", timestamp=")
                     .append(timestamp).append(", timestampSent=").append(timestampSent).toString());

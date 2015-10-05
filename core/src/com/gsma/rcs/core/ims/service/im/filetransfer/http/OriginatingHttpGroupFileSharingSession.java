@@ -58,16 +58,13 @@ import java.io.IOException;
 public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSession implements
         HttpUploadTransferEventListener {
 
-    private HttpUploadManager mUploadManager;
+    protected HttpUploadManager mUploadManager;
 
     /**
      * File information to send via chat
      */
     private String mFileInfo;
 
-    /**
-     * Chat session used to send file info
-     */
     private ChatSession mChatSession;
 
     /**
@@ -183,7 +180,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
      * @throws PayloadException
      * @throws NetworkException
      */
-    private void sendResultToContact(byte[] result) throws PayloadException, NetworkException {
+    protected void sendResultToContact(byte[] result) throws PayloadException, NetworkException {
         if (mUploadManager.isCancelled()) {
             return;
         }
@@ -214,7 +211,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                 sLogger.debug("Send file transfer info via an existing chat session");
             }
             sendFileTransferInfo();
-            handleFileTransfered();
+            handleFileTransferred();
 
         } else {
             mMessagingLog.setFileTransferDownloadInfo(getFileTransferId(), infoDocument);
@@ -262,6 +259,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
         new Thread(new Runnable() {
             public void run() {
                 try {
+                    fileTransferResumed();
                     FtHttpResumeUpload upload = mMessagingLog
                             .retrieveFtHttpResumeUpload(mUploadManager.getTId());
                     if (upload != null) {
@@ -292,6 +290,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 
     @Override
     public void uploadStarted() {
+        mMessagingLog.setFileUploadTId(getFileTransferId(), mUploadManager.getTId());
     }
 
     @Override

@@ -93,8 +93,7 @@ public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSha
             sLogger.info("Resume a HTTP file transfer session as terminating");
         }
         try {
-            httpTransferStarted();
-
+            onHttpTransferStarted();
             /* Resume download file from the HTTP server */
             mDownloadManager.resumeDownload();
             if (logActivated) {
@@ -102,10 +101,7 @@ public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSha
             }
             /* Set file URL */
             getContent().setUri(mDownloadManager.getDownloadedFileUri());
-
-            /* File transfered */
-            handleFileTransfered();
-
+            handleFileTransferred();
             if (mImdnManager.isSendOneToOneDeliveryDisplayedReportsEnabled()) {
                 /* Send delivery report "displayed" */
                 sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,

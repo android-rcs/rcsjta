@@ -222,7 +222,7 @@ public class HttpUploadManager extends HttpTransferManager {
                 return null;
             }
             // Notify listener
-            getListener().httpTransferStarted();
+            getListener().onHttpTransferStarted();
 
             // Send a second POST request
             return sendMultipartPost(url);
@@ -396,7 +396,7 @@ public class HttpUploadManager extends HttpTransferManager {
                 if (sLogger.isActivated()) {
                     sLogger.error("Upload has failed due to that the file is not accessible!", e);
                 }
-                getListener().httpTransferNotAllowedToSend();
+                getListener().onHttpTransferNotAllowedToSend();
                 return null;
             }
         } finally {
@@ -492,7 +492,7 @@ public class HttpUploadManager extends HttpTransferManager {
                 progress += bytesRead;
                 outputStream.write(buffer, 0, bytesRead);
                 bytesAvailable = fileInputStream.available();
-                getListener().httpTransferProgress(progress, fileSize);
+                getListener().onHttpTransferProgress(progress, fileSize);
                 bufferSize = Math.min(bytesAvailable, CHUNK_MAX_SIZE);
                 buffer = new byte[bufferSize];
                 bytesRead = fileInputStream.read(buffer, 0, bufferSize);
@@ -695,7 +695,7 @@ public class HttpUploadManager extends HttpTransferManager {
              * Note! This is needed since this can be called during dequeuing.
              */
             sLogger.error("Upload reasume has failed due to that the file is not accessible!", e);
-            getListener().httpTransferNotAllowedToSend();
+            getListener().onHttpTransferNotAllowedToSend();
             return null;
         } finally {
             CloseableUtils.tryToClose(outputStream);
@@ -736,7 +736,7 @@ public class HttpUploadManager extends HttpTransferManager {
                 progress += bytesRead;
                 outputStream.write(buffer, 0, bytesRead);
                 bytesAvailable = fileInputStream.available();
-                getListener().httpTransferProgress(progress, mContent.getSize());
+                getListener().onHttpTransferProgress(progress, mContent.getSize());
                 bufferSize = Math.min(bytesAvailable, CHUNK_MAX_SIZE);
                 buffer = new byte[bufferSize];
                 bytesRead = fileInputStream.read(buffer, 0, bufferSize);
