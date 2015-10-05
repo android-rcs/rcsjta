@@ -78,6 +78,10 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
             sendResultToContact(result);
 
         } catch (IOException e) {
+            /* Don't call handleError in case of Pause or Cancel */
+            if (mUploadManager.isCancelled() || mUploadManager.isPaused()) {
+                return;
+            }
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
 
         } catch (PayloadException e) {
