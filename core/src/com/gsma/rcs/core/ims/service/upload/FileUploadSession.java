@@ -273,7 +273,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
     /**
      * HTTP transfer started
      */
-    public void httpTransferStarted() {
+    public void onHttpTransferStarted() {
         // Notify listener
         mListener.handleUploadStarted();
     }
@@ -281,14 +281,14 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
     /**
      * HTTP transfer paused by user
      */
-    public void httpTransferPausedByUser() {
+    public void onHttpTransferPausedByUser() {
         // Not used
     }
 
     /**
      * HTTP transfer paused by system
      */
-    public void httpTransferPausedBySystem() {
+    public void onHttpTransferPausedBySystem() {
         /*
          * Paused by system will be called for generic exceptions occurring in the lower layers and
          * in the scope of file upload this corresponds to failure since pause/resume does not exist
@@ -307,7 +307,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
     /**
      * HTTP transfer resumed
      */
-    public void httpTransferResumed() {
+    public void onHttpTransferResumed() {
         // Not used
     }
 
@@ -317,13 +317,13 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
      * @param currentSize Current transfered size in bytes
      * @param totalSize Total size in bytes
      */
-    public void httpTransferProgress(long currentSize, long totalSize) {
+    public void onHttpTransferProgress(long currentSize, long totalSize) {
         // Notify listener
         mListener.handleUploadProgress(currentSize, totalSize);
     }
 
     @Override
-    public void httpTransferNotAllowedToSend() {
+    public void onHttpTransferNotAllowedToSend() {
         removeSession();
         mListener.handleUploadNotAllowedToSend();
     }

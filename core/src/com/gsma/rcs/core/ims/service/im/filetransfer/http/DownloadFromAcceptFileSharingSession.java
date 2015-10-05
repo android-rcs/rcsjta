@@ -82,7 +82,7 @@ public class DownloadFromAcceptFileSharingSession extends TerminatingHttpFileSha
             sLogger.info("Accept HTTP file transfer session");
         }
         try {
-            httpTransferStarted();
+            onHttpTransferStarted();
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and

@@ -158,7 +158,7 @@ public abstract class HttpTransferManager {
             sLogger.warn("User is pausing transfer");
         }
         mIsPaused = true;
-        getListener().httpTransferPausedByUser();
+        getListener().onHttpTransferPausedByUser();
     }
 
     /**
@@ -169,7 +169,7 @@ public abstract class HttpTransferManager {
             sLogger.warn("System is pausing transfer");
         }
         mIsPaused = true;
-        getListener().httpTransferPausedBySystem();
+        getListener().onHttpTransferPausedBySystem();
     }
 
     /**
@@ -178,6 +178,7 @@ public abstract class HttpTransferManager {
     public void resetParamForResume() {
         mIsCancelled = false;
         mIsPaused = false;
+        getListener().onHttpTransferResumed();
     }
 
     /**

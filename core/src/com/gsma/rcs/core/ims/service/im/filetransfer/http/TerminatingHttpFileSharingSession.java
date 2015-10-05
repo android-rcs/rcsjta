@@ -49,8 +49,7 @@ import java.io.IOException;
  * 
  * @author vfml3370
  */
-public abstract class TerminatingHttpFileSharingSession extends HttpFileTransferSession implements
-        HttpTransferEventListener {
+public abstract class TerminatingHttpFileSharingSession extends HttpFileTransferSession {
 
     protected final HttpDownloadManager mDownloadManager;
 
@@ -111,8 +110,7 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
     @Override
     public void run() {
         try {
-            httpTransferStarted();
-
+            onHttpTransferStarted();
             Uri file = mDownloadManager.getDownloadedFileUri();
             /* Download file from the HTTP server */
             mDownloadManager.downloadFile();
@@ -120,7 +118,7 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
                 sLogger.debug("Download file with success");
             }
             getContent().setUri(file);
-            handleFileTransfered();
+            handleFileTransferred();
             if (mImdnManager.isSendOneToOneDeliveryDisplayedReportsEnabled()) {
                 sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
                         System.currentTimeMillis());
@@ -225,14 +223,14 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
             public void run() {
                 try {
                     fileTransferResumed();
-                    mDownloadManager.getListener().httpTransferResumed();
+                    mDownloadManager.getListener().onHttpTransferResumed();
                     /* Download file from the HTTP server */
                     mDownloadManager.resumeDownload();
                     if (sLogger.isActivated()) {
                         sLogger.debug("Download file with success");
                     }
                     getContent().setUri(mDownloadManager.getDownloadedFileUri());
-                    handleFileTransfered();
+                    handleFileTransferred();
                     if (mImdnManager.isSendOneToOneDeliveryDisplayedReportsEnabled()) {
                         sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
                                 System.currentTimeMillis());

@@ -22,6 +22,7 @@ import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransferIntent;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
@@ -74,9 +75,7 @@ import java.util.Set;
  * @author Philippe LEMORDANT
  */
 public class InitiateFileTransfer extends Activity {
-    /**
-     * Activity result constants
-     */
+
     private final static int SELECT_IMAGE = 0;
 
     private final static int SELECT_TEXT_FILE = 1;
@@ -108,14 +107,8 @@ public class InitiateFileTransfer extends Activity {
      */
     private LockAccess mExitOnce = new LockAccess();
 
-    /**
-     * Progress dialog
-     */
     private Dialog mProgressDialog;
 
-    /**
-     * API connection manager
-     */
     private ConnectionManager mCnxManager;
 
     private static final String LOGTAG = LogUtils
@@ -138,6 +131,14 @@ public class InitiateFileTransfer extends Activity {
 
     private boolean mTransferred = false;
 
+    private Button mResumeBtn;
+
+    private Button mPauseBtn;
+
+    private Button mInviteBtn;
+
+    private Button mSelectBtn;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -154,20 +155,20 @@ public class InitiateFileTransfer extends Activity {
         mSpinner = (Spinner) findViewById(R.id.contact);
 
         // Set buttons callback
-        Button inviteBtn = (Button) findViewById(R.id.invite_btn);
-        inviteBtn.setOnClickListener(btnInviteListener);
-        inviteBtn.setEnabled(false);
-        Button selectBtn = (Button) findViewById(R.id.select_btn);
-        selectBtn.setOnClickListener(btnSelectListener);
-        selectBtn.setEnabled(false);
+        mInviteBtn = (Button) findViewById(R.id.invite_btn);
+        mInviteBtn.setOnClickListener(btnInviteListener);
+        mInviteBtn.setEnabled(false);
+        mSelectBtn = (Button) findViewById(R.id.select_btn);
+        mSelectBtn.setOnClickListener(btnSelectListener);
+        mSelectBtn.setEnabled(false);
 
-        Button pauseBtn = (Button) findViewById(R.id.pause_btn);
-        pauseBtn.setOnClickListener(btnPauseListener);
-        pauseBtn.setEnabled(false);
+        mPauseBtn = (Button) findViewById(R.id.pause_btn);
+        mPauseBtn.setOnClickListener(btnPauseListener);
+        mPauseBtn.setEnabled(false);
 
-        Button resumeBtn = (Button) findViewById(R.id.resume_btn);
-        resumeBtn.setOnClickListener(btnResumeListener);
-        resumeBtn.setEnabled(false);
+        mResumeBtn = (Button) findViewById(R.id.resume_btn);
+        mResumeBtn.setOnClickListener(btnResumeListener);
+        mResumeBtn.setEnabled(false);
 
         TableRow expiration = (TableRow) findViewById(R.id.expiration);
         expiration.setVisibility(View.GONE);
@@ -215,7 +216,6 @@ public class InitiateFileTransfer extends Activity {
                             getString(R.string.label_transfer_session_has_expired), mExitOnce);
                     return;
                 }
-                pauseBtn.setEnabled(true);
                 if (LogUtils.isActive) {
                     Log.d(LOGTAG, "onCreate (file=" + mFilename + ") (size=" + mFilesize
                             + ") (contact=" + remoteContact + ")");
@@ -224,14 +224,16 @@ public class InitiateFileTransfer extends Activity {
                 mSpinner.setAdapter(ContactListAdapter.createRcsContactListAdapter(this));
                 // Enable button if contact available
                 if (mSpinner.getAdapter().getCount() != 0) {
-                    selectBtn.setEnabled(true);
+                    mSelectBtn.setEnabled(true);
                 }
                 if (LogUtils.isActive) {
                     Log.d(LOGTAG, "onCreate");
                 }
             }
+
         } catch (RcsServiceNotAvailableException e) {
             Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce, e);
+
         } catch (RcsServiceException e) {
             Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
         }
@@ -306,15 +308,11 @@ public class InitiateFileTransfer extends Activity {
             /* Only take persistable permission for content Uris */
             FileUtils.tryToTakePersistableContentUriPermission(getApplicationContext(), mFile);
 
-            // Initiate transfer
+            /* Initiate transfer */
             mFileTransfer = mCnxManager.getFileTransferApi().transferFile(remote, mFile,
                     tryToSendFileicon);
             mFtId = mFileTransfer.getTransferId();
 
-            Button pauseBtn = (Button) findViewById(R.id.pause_btn);
-            pauseBtn.setEnabled(true);
-
-            // Display a progress dialog
             mProgressDialog = Utils.showProgressDialog(this,
                     getString(R.string.label_command_in_progress));
             mProgressDialog.setOnCancelListener(new OnCancelListener() {
@@ -329,12 +327,11 @@ public class InitiateFileTransfer extends Activity {
             // Disable UI
             mSpinner.setEnabled(false);
 
-            // Hide buttons
-            Button inviteBtn = (Button) findViewById(R.id.invite_btn);
-            inviteBtn.setVisibility(View.INVISIBLE);
-            Button selectBtn = (Button) findViewById(R.id.select_btn);
-            selectBtn.setVisibility(View.INVISIBLE);
+            /* Hide buttons */
+            mInviteBtn.setVisibility(View.INVISIBLE);
+            mSelectBtn.setVisibility(View.INVISIBLE);
             ftThumb.setVisibility(View.INVISIBLE);
+
         } catch (Exception e) {
             hideProgressDialog();
             Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce,
@@ -387,7 +384,6 @@ public class InitiateFileTransfer extends Activity {
         mFile = data.getData();
         TextView uriEdit = (TextView) findViewById(R.id.uri);
         TextView sizeEdit = (TextView) findViewById(R.id.size);
-        Button inviteBtn = (Button) findViewById(R.id.invite_btn);
         switch (requestCode) {
             case SELECT_IMAGE:
             case SELECT_TEXT_FILE:
@@ -414,8 +410,7 @@ public class InitiateFileTransfer extends Activity {
                     sizeEdit.setText("Unknown");
                     uriEdit.setText("Unknown");
                 }
-                // Enable invite button
-                inviteBtn.setEnabled(true);
+                mInviteBtn.setEnabled(true);
                 break;
         }
     }
@@ -500,12 +495,14 @@ public class InitiateFileTransfer extends Activity {
      */
     private OnClickListener btnPauseListener = new OnClickListener() {
         public void onClick(View v) {
-            Button resumeBtn = (Button) findViewById(R.id.resume_btn);
-            resumeBtn.setEnabled(true);
-            Button pauseBtn = (Button) findViewById(R.id.pause_btn);
-            pauseBtn.setEnabled(false);
             try {
-                mFileTransfer.pauseTransfer();
+                if (mFileTransfer.isAllowedToPauseTransfer()) {
+                    mFileTransfer.pauseTransfer();
+                } else {
+                    mPauseBtn.setEnabled(false);
+                    Utils.showMessage(InitiateFileTransfer.this,
+                            getString(R.string.label_pause_ft_not_allowed));
+                }
             } catch (RcsServiceException e) {
                 hideProgressDialog();
                 Utils.showMessageAndExit(InitiateFileTransfer.this,
@@ -519,12 +516,14 @@ public class InitiateFileTransfer extends Activity {
      */
     private OnClickListener btnResumeListener = new OnClickListener() {
         public void onClick(View v) {
-            Button resumeBtn = (Button) findViewById(R.id.resume_btn);
-            resumeBtn.setEnabled(false);
-            Button pauseBtn = (Button) findViewById(R.id.pause_btn);
-            pauseBtn.setEnabled(true);
             try {
-                mFileTransfer.resumeTransfer();
+                if (mFileTransfer.isAllowedToResumeTransfer()) {
+                    mFileTransfer.resumeTransfer();
+                } else {
+                    mResumeBtn.setEnabled(false);
+                    Utils.showMessage(InitiateFileTransfer.this,
+                            getString(R.string.label_resume_ft_not_allowed));
+                }
             } catch (RcsServiceException e) {
                 hideProgressDialog();
                 Utils.showMessageAndExit(InitiateFileTransfer.this,
@@ -575,16 +574,24 @@ public class InitiateFileTransfer extends Activity {
                     TextView statusView = (TextView) findViewById(R.id.progress_status);
                     switch (state) {
                         case STARTED:
-                            // Session is well established : hide progress
-                            // dialog
+                            /* Session is well established : hide progress dialog */
                             hideProgressDialog();
-                            // Display session status
+                            /* Display session status */
                             statusView.setText(_state);
+                            mPauseBtn.setEnabled(true);
+                            mResumeBtn.setEnabled(true);
+                            break;
+
+                        case PAUSED:
+                            statusView.setText(_state);
+                            mPauseBtn.setEnabled(false);
+                            if (ReasonCode.PAUSED_BY_USER == reasonCode) {
+                                mResumeBtn.setEnabled(true);
+                            }
                             break;
 
                         case ABORTED:
-                            // Session is aborted: hide progress dialog then
-                            // exit
+                            /* Session is aborted: hide progress dialog then exit */
                             hideProgressDialog();
                             Utils.showMessageAndExit(InitiateFileTransfer.this,
                                     getString(R.string.label_transfer_aborted, _reasonCode),
@@ -592,8 +599,7 @@ public class InitiateFileTransfer extends Activity {
                             break;
 
                         case REJECTED:
-                            // Session is rejected: hide progress dialog then
-                            // exit
+                            /* Session is rejected: hide progress dialog then exit */
                             hideProgressDialog();
                             Utils.showMessageAndExit(InitiateFileTransfer.this,
                                     getString(R.string.label_transfer_rejected, _reasonCode),
@@ -601,7 +607,7 @@ public class InitiateFileTransfer extends Activity {
                             break;
 
                         case FAILED:
-                            // Session failed: hide progress dialog then exit
+                            /* Session failed: hide progress dialog then exit */
                             hideProgressDialog();
                             Utils.showMessageAndExit(InitiateFileTransfer.this,
                                     getString(R.string.label_transfer_failed, _reasonCode),
@@ -609,15 +615,12 @@ public class InitiateFileTransfer extends Activity {
                             break;
 
                         case TRANSFERRED:
-                            // Hide progress dialog
                             hideProgressDialog();
-                            // Display transfer progress
+                            /* Display transfer progress */
                             statusView.setText(_state);
-                            // Hide buttons Pause and Resume
-                            Button pauseBtn = (Button) findViewById(R.id.pause_btn);
-                            pauseBtn.setVisibility(View.INVISIBLE);
-                            Button resumeBtn = (Button) findViewById(R.id.resume_btn);
-                            resumeBtn.setVisibility(View.INVISIBLE);
+                            /* Hide buttons Pause and Resume */
+                            mPauseBtn.setVisibility(View.INVISIBLE);
+                            mResumeBtn.setVisibility(View.INVISIBLE);
                             mTransferred = true;
 
                             try {
