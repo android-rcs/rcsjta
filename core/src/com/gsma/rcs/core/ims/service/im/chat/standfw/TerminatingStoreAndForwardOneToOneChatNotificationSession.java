@@ -373,8 +373,10 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
 
     /**
      * Send an empty data chunk
+     * 
+     * @throws NetworkException
      */
-    public void sendEmptyDataChunk() {
+    public void sendEmptyDataChunk() throws NetworkException {
         mMsrpMgr.sendEmptyChunk();
     }
 

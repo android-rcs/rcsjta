@@ -640,8 +640,10 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 
     /**
      * Send an empty data chunk
+     * 
+     * @throws NetworkException
      */
-    public void sendEmptyDataChunk() {
+    public void sendEmptyDataChunk() throws NetworkException {
         mMsrpMgr.sendEmptyChunk();
     }
 
