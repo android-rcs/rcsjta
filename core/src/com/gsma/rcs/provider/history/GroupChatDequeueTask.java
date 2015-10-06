@@ -140,7 +140,7 @@ public class GroupChatDequeueTask extends DequeueTask {
                     mimeType = cursor.getString(mimeTypeIdx);
                     switch (providerId) {
                         case MessageData.HISTORYLOG_MEMBER_ID:
-                            if (!isPossibleToDequeueGroupChatMessage(mChatId)) {
+                            if (!isPossibleToDequeueGroupChatMessagesAndGroupFileTransfers(mChatId)) {
                                 setGroupChatMessageAsFailedDequeue(mChatId, id, mimeType);
                                 continue;
                             }
@@ -166,6 +166,10 @@ public class GroupChatDequeueTask extends DequeueTask {
                                 continue;
                             }
                             State state = State.valueOf(cursor.getInt(statusIdx));
+                            if (logActivated) {
+                                mLogger.debug("Dequeue chatId=" + mChatId + " in state=" + state
+                                        + " file=" + file);
+                            }
                             switch (state) {
                                 case QUEUED:
                                     if (!isAllowedToDequeueGroupFileTransfer()) {
@@ -183,7 +187,7 @@ public class GroupChatDequeueTask extends DequeueTask {
                                             fileContent, fileIconContent);
                                     break;
                                 case STARTED:
-                                    if (!isPossibleToDequeueGroupChatMessage(mChatId)) {
+                                    if (!isPossibleToDequeueGroupChatMessagesAndGroupFileTransfers(mChatId)) {
                                         setGroupFileTransferAsFailedDequeue(mChatId, id);
                                         continue;
                                     }

@@ -175,7 +175,10 @@ public abstract class HttpTransferManager {
     /**
      * Resuming upload so resetting cancelled boolean
      */
-    public void resetParamForResume() {
+    public void resumeTransfer() {
+        if (sLogger.isActivated()) {
+            sLogger.warn("Transfer is resuming");
+        }
         mIsCancelled = false;
         mIsPaused = false;
         getListener().onHttpTransferResumed();

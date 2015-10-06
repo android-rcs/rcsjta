@@ -115,8 +115,8 @@ public class SendGroupFile extends SendFile {
                             hideProgressDialog();
                             /* Display transfer state started */
                             statusView.setText(_state);
-                            mPauseBtn.setVisibility(View.VISIBLE);
-                            mResumeBtn.setVisibility(View.INVISIBLE);
+                            mPauseBtn.setEnabled(true);
+                            mResumeBtn.setEnabled(false);
                             break;
 
                         case PAUSED:
