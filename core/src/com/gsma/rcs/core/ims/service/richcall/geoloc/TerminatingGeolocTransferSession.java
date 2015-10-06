@@ -310,8 +310,10 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
 
     /**
      * Send an empty data chunk
+     * 
+     * @throws NetworkException
      */
-    public void sendEmptyDataChunk() {
+    public void sendEmptyDataChunk() throws NetworkException {
         msrpMgr.sendEmptyChunk();
     }
 

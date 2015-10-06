@@ -513,14 +513,17 @@ public class MsrpSession {
 
     /**
      * Send empty chunk
+     * 
+     * @throws NetworkException
      */
-    public void sendEmptyChunk() {
+    public void sendEmptyChunk() throws NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Send an empty chunk");
         }
         String newTransactionId = generateTransactionId();
         String newMsgId = generateTransactionId();
         addMsrpTransactionInfo(newTransactionId, newMsgId, null, TypeMsrpChunk.EmptyChunk);
+        sendEmptyMsrpSendRequest(newTransactionId, mTo, mFrom, newMsgId);
     }
 
     /**
@@ -634,6 +637,60 @@ public class MsrpSession {
             }
         } catch (IOException e) {
             throw new NetworkException("Failed to read chunk data!", e);
+
+        } finally {
+            CloseableUtils.tryToClose(buffer);
+        }
+    }
+
+    /**
+     * Send an empty MSRP SEND request
+     * 
+     * @param txId Transaction ID
+     * @param to To header
+     * @param from From header
+     * @param msrpMsgId Message ID header
+     * @throws NetworkException
+     */
+    // Changed by Deutsche Telekom
+    private void sendEmptyMsrpSendRequest(String txId, String to, String from, String msrpMsgId)
+            throws NetworkException {
+        ByteArrayOutputStream buffer = null;
+        try {
+            buffer = new ByteArrayOutputStream(4000);
+            buffer.reset();
+            buffer.write(MsrpConstants.MSRP_HEADER.getBytes(UTF8));
+            buffer.write(MsrpConstants.CHAR_SP);
+            buffer.write(txId.getBytes(UTF8));
+            buffer.write((" " + MsrpConstants.METHOD_SEND).getBytes(UTF8));
+            buffer.write(NEW_LINE);
+
+            String toHeader = MsrpConstants.HEADER_TO_PATH + ": " + to + MsrpConstants.NEW_LINE;
+            buffer.write(toHeader.getBytes(UTF8));
+            String fromHeader = MsrpConstants.HEADER_FROM_PATH + ": " + from
+                    + MsrpConstants.NEW_LINE;
+            buffer.write(fromHeader.getBytes(UTF8));
+            // Changed by Deutsche Telekom
+            String msgIdHeader = MsrpConstants.HEADER_MESSAGE_ID + ": " + msrpMsgId
+                    + MsrpConstants.NEW_LINE;
+            buffer.write(msgIdHeader.getBytes(UTF8));
+
+            /* Write end of request */
+            buffer.write(MsrpConstants.END_MSRP_MSG.getBytes(UTF8));
+            buffer.write(txId.getBytes(UTF8));
+            /* '$' -> last chunk */
+            buffer.write(MsrpConstants.FLAG_LAST_CHUNK);
+            buffer.write(NEW_LINE);
+
+            mRequestTransaction = new RequestTransaction(mRcsSettings);
+            connection.sendChunkImmediately(buffer.toByteArray());
+
+            mRequestTransaction.waitResponse();
+            if (!mRequestTransaction.isResponseReceived()) {
+                throw new NetworkException("Failed to receive transaction response!");
+            }
+        } catch (IOException e) {
+            throw new NetworkException("Failed to send empty Msrp send request!", e);
 
         } finally {
             CloseableUtils.tryToClose(buffer);

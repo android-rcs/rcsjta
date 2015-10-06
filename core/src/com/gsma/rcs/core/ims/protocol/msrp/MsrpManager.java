@@ -310,8 +310,10 @@ public class MsrpManager {
 
     /**
      * Send an empty chunk
+     * 
+     * @throws NetworkException
      */
-    public void sendEmptyChunk() {
+    public void sendEmptyChunk() throws NetworkException {
         mMsrpSession.sendEmptyChunk();
     }
 
