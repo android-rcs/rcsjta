@@ -132,9 +132,6 @@ public abstract class ImsNetworkInterface {
         }
     }
 
-    /**
-     * IMS module
-     */
     private ImsModule mImsModule;
 
     /**
@@ -142,14 +139,8 @@ public abstract class ImsNetworkInterface {
      */
     private int mType;
 
-    /**
-     * Network access
-     */
     private NetworkAccess mAccess;
 
-    /**
-     * SIP manager
-     */
     private final SipManager mSip;
 
     /**
@@ -157,19 +148,10 @@ public abstract class ImsNetworkInterface {
      */
     protected AuthenticationProcedure mImsAuthentMode;
 
-    /**
-     * IMS proxy protocol
-     */
     protected String mImsProxyProtocol;
 
-    /**
-     * IMS proxy address
-     */
     private String mImsProxyAddr;
 
-    /**
-     * IMS proxy port
-     */
     private int mImsProxyPort;
 
     /**
@@ -587,8 +569,7 @@ public abstract class ImsNetworkInterface {
                 } else if (ListeningPoint.TLS.equals(mImsProxyProtocol)) {
                     service = DNS_SIP_TLS_SERVICE;
                 } else {
-                    throw new PayloadException(
-                            "Unkown SIP protocol : ".concat(mImsProxyProtocol));
+                    throw new PayloadException("Unkown SIP protocol : ".concat(mImsProxyProtocol));
                 }
 
                 boolean resolved = false;
@@ -708,7 +689,8 @@ public abstract class ImsNetworkInterface {
             mRegistration.register();
 
             if (sLogger.isActivated()) {
-                sLogger.debug("IMS registration successful");
+                sLogger.debug("IMS registered: ".concat(Boolean.toString(mRegistration
+                        .isRegistered())));
             }
 
             /**

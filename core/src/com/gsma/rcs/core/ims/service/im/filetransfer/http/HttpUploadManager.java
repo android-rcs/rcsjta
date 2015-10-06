@@ -288,7 +288,7 @@ public class HttpUploadManager extends HttpTransferManager {
             try {
                 /* Add File */
                 writeFileMultipart(outputStream, mContent.getUri());
-                if (!isCancelled()) {
+                if (!isCancelled() && !isPaused()) {
                     /*
                      * if the upload is cancelled, we don't send the last boundary to get bad
                      * request
@@ -488,7 +488,7 @@ public class HttpUploadManager extends HttpTransferManager {
             int bytesRead = fileInputStream.read(buffer, 0, bufferSize);
             int progress = 0;
 
-            while (bytesRead > 0 && !isCancelled()) {
+            while (bytesRead > 0 && !isCancelled() && !isPaused()) {
                 progress += bytesRead;
                 outputStream.write(buffer, 0, bytesRead);
                 bytesAvailable = fileInputStream.available();
@@ -542,7 +542,7 @@ public class HttpUploadManager extends HttpTransferManager {
         }
         /* Try to get upload info */
         byte[] resp = sendGetInfo(UPLOAD_INFO_REQUEST, false);
-        resetParamForResume();
+        resumeTransfer();
 
         if (resp == null) {
             if (sLogger.isActivated()) {
@@ -732,7 +732,7 @@ public class HttpUploadManager extends HttpTransferManager {
                         + progress);
             }
             // Send remaining bytes
-            while (bytesRead > 0 && !isCancelled()) {
+            while (bytesRead > 0 && !isCancelled() && !isPaused()) {
                 progress += bytesRead;
                 outputStream.write(buffer, 0, bytesRead);
                 bytesAvailable = fileInputStream.available();

@@ -38,6 +38,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
 import java.util.Set;
@@ -117,8 +118,8 @@ public class SendSingleFile extends SendFile {
                             hideProgressDialog();
                             /* Display transfer state transferred */
                             statusView.setText(_state);
-                            mPauseBtn.setEnabled(false);
-                            mResumeBtn.setEnabled(false);
+                            mPauseBtn.setVisibility(View.INVISIBLE);
+                            mResumeBtn.setVisibility(View.INVISIBLE);
                             break;
 
                         case ABORTED:

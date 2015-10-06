@@ -162,7 +162,7 @@ public class FileTransferDequeueTask extends DequeueTask {
                             break;
                         case STARTED:
                             if (groupFile) {
-                                if (!isPossibleToDequeueGroupChatMessage(chatId)) {
+                                if (!isPossibleToDequeueGroupChatMessagesAndGroupFileTransfers(chatId)) {
                                     setGroupFileTransferAsFailedDequeue(chatId, id);
                                     continue;
                                 }

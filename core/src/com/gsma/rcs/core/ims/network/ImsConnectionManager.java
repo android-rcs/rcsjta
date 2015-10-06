@@ -575,10 +575,11 @@ public class ImsConnectionManager implements Runnable {
                             }
                             break;
                         }
-                        if (sLogger.isActivated()) {
-                            sLogger.debug("Registered to the IMS with success: start IMS services");
-                        }
+
                         if (mImsModule.isInitializationFinished() && !mImsServicesStarted) {
+                            if (sLogger.isActivated()) {
+                                sLogger.debug("Registered to the IMS with success: start IMS services");
+                            }
                             mImsModule.startImsServices();
                             mImsServicesStarted = true;
                         }

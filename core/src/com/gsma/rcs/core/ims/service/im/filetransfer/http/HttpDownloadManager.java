@@ -278,7 +278,7 @@ public class HttpDownloadManager extends HttpTransferManager {
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException(
                     "Failed to download thumbnail for uri : ".concat(iconUri.toString()), e);
-            
+
         } finally {
             CloseableUtils.tryToClose(baos);
             if (fileIcon != null) {
@@ -346,13 +346,13 @@ public class HttpDownloadManager extends HttpTransferManager {
         if (mFileDownloadStream == null) {
             mFileDownloadStream = openStreamForFile(mFile);
         }
-        resetParamForResume();
+        resumeTransfer();
         Uri serverAddress = getHttpServerAddr();
         if (sLogger.isActivated()) {
             sLogger.debug("Resume Download file " + serverAddress + " from byte " + mFile.length());
         }
 
-        // Send GET request
+        /* Send GET request */
         long downloadedLength = mFile.length();
         long completeSize = mContent.getSize();
         Map<String, String> properties = new HashMap<String, String>();

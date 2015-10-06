@@ -165,7 +165,7 @@ public abstract class DequeueTask implements Runnable {
      * @param chatId
      * @return boolean
      */
-    private boolean isPossibleToDequeueGroupChatMessagesAndGroupFileTransfers(String chatId) {
+    protected boolean isPossibleToDequeueGroupChatMessagesAndGroupFileTransfers(String chatId) {
         if (!mRcsSettings.isGroupChatActivated()) {
             if (mLogger.isActivated()) {
                 mLogger.debug("Cannot dequeue group chat messages and file transfers right now as group chat feature is not activated!");
@@ -208,16 +208,6 @@ public abstract class DequeueTask implements Runnable {
             }
         }
         return true;
-    }
-
-    /**
-     * Check if dequeuing and sending of group chat messages to specified chatId is possible
-     * 
-     * @param chatId
-     * @return boolean
-     */
-    protected boolean isPossibleToDequeueGroupChatMessage(String chatId) {
-        return isPossibleToDequeueGroupChatMessagesAndGroupFileTransfers(chatId);
     }
 
     /**

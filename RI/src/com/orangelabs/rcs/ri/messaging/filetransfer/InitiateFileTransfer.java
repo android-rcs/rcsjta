@@ -579,7 +579,7 @@ public class InitiateFileTransfer extends Activity {
                             /* Display session status */
                             statusView.setText(_state);
                             mPauseBtn.setEnabled(true);
-                            mResumeBtn.setEnabled(true);
+                            mResumeBtn.setEnabled(false);
                             break;
 
                         case PAUSED:

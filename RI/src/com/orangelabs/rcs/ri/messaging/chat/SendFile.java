@@ -336,6 +336,7 @@ public abstract class SendFile extends Activity implements ISendFile {
                 if (mFileTransfer.isAllowedToPauseTransfer()) {
                     mFileTransfer.pauseTransfer();
                 } else {
+                    mPauseBtn.setVisibility(View.VISIBLE);
                     mPauseBtn.setEnabled(false);
                     Utils.showMessage(SendFile.this, getString(R.string.label_pause_ft_not_allowed));
                 }
