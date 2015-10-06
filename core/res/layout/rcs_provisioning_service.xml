@@ -397,7 +397,23 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dip"
                 android:layout_marginRight="5dip"
-                android:text="@string/Auto_accept_file_transfer_invitation" />
+                android:text="@string/Auto_accept_file_transfer" />
+            
+            <CheckBox
+                android:id="@+id/AutoAcceptFileTransferInRoaming"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:text="@string/Auto_accept_file_transfer_in_roaming" />
+            
+            <CheckBox
+                android:id="@+id/AutoAcceptFileTransferChangeable"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:text="@string/Auto_accept_file_transfer_changeable" />
 
             <CheckBox
                 android:id="@+id/AutoAcceptChat"

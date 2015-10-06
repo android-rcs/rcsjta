@@ -84,7 +84,9 @@
     <string name="Directory_path_to_store_files">Directory path to store files:</string>
     <string name="SMS_fallback_service">SMS fallback service</string>
     <string name="Store_and_Forward_service_warning">Store and Forward service warning</string>
-    <string name="Auto_accept_file_transfer_invitation">Auto-accept file transfer invitation</string>
+    <string name="Auto_accept_file_transfer">Auto-accept file transfer</string>
+    <string name="Auto_accept_file_transfer_in_roaming">Auto-accept file transfer in roaming</string>
+    <string name="Auto_accept_file_transfer_changeable">Auto-accept file transfer changeable</string>
     <string name="Auto_accept_chat_invitation">Auto-accept chat invitation</string>
     <string name="Auto_accept_group_chat_invitation">Auto-accept group chat invitation</string>
     <!-- rcs_provisioning_stack.xml -->
