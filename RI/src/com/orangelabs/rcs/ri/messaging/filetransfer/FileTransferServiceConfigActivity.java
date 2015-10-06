@@ -40,6 +40,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.Spinner;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 /**
@@ -49,9 +50,6 @@ import android.widget.TextView;
  */
 public class FileTransferServiceConfigActivity extends Activity {
 
-    /**
-     * API connection manager
-     */
     private ConnectionManager mCnxManager;
 
     private FileTransferServiceConfiguration mConfig;
@@ -67,9 +65,6 @@ public class FileTransferServiceConfigActivity extends Activity {
      */
     private LockAccess mExitOnce = new LockAccess();
 
-    /**
-     * The log tag for this class
-     */
     private static final String LOGTAG = LogUtils.getTag(FileTransferServiceConfigActivity.class
             .getSimpleName());
 
@@ -82,11 +77,10 @@ public class FileTransferServiceConfigActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.filetransfer_service_config);
 
-        // Register to API connection manager
+        /* Register to API connection manager */
         mCnxManager = ConnectionManager.getInstance();
         if (!mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
@@ -142,6 +136,14 @@ public class FileTransferServiceConfigActivity extends Activity {
                 Boolean autoAccept = mCheckBoxIsAutoAccept.isChecked();
                 try {
                     mConfig.setAutoAccept(autoAccept);
+                    TableRow tableRow = (TableRow) findViewById(R.id.isAutoAcceptInRoaming);
+                    if (autoAccept) {
+                        tableRow.setVisibility(View.VISIBLE);
+                        mCheckBoxIsAutoAcceptInRoaming.setChecked(mConfig
+                                .isAutoAcceptInRoamingEnabled());
+                    } else {
+                        tableRow.setVisibility(View.GONE);
+                    }
                     if (LogUtils.isActive) {
                         Log.d(LOGTAG, "onClick isAutoAccept ".concat(autoAccept.toString()));
                     }
@@ -199,17 +201,29 @@ public class FileTransferServiceConfigActivity extends Activity {
         textView = (TextView) findViewById(R.id.ft_MaxSize);
         textView.setText(Long.valueOf(mConfig.getMaxSize()).toString());
 
-        mCheckBoxIsAutoAccept.setChecked(mConfig.isAutoAcceptEnabled());
-
-        CheckBox checkBox = (CheckBox) findViewById(R.id.ft_isAutoAcceptModeChangeable);
-        checkBox.setChecked(mConfig.isAutoAcceptModeChangeable());
-
-        mCheckBoxIsAutoAcceptInRoaming.setChecked(mConfig.isAutoAcceptInRoamingEnabled());
+        if (mConfig.isAutoAcceptModeChangeable()) {
+            TableRow tableRow = (TableRow) findViewById(R.id.isAutoAccept);
+            tableRow.setVisibility(View.VISIBLE);
+            boolean autoAcceptEnabled = mConfig.isAutoAcceptEnabled();
+            mCheckBoxIsAutoAccept.setChecked(autoAcceptEnabled);
+            tableRow = (TableRow) findViewById(R.id.isAutoAcceptInRoaming);
+            if (autoAcceptEnabled) {
+                tableRow.setVisibility(View.VISIBLE);
+                mCheckBoxIsAutoAcceptInRoaming.setChecked(mConfig.isAutoAcceptInRoamingEnabled());
+            } else {
+                tableRow.setVisibility(View.GONE);
+            }
+        } else {
+            TableRow tableRow = (TableRow) findViewById(R.id.isAutoAccept);
+            tableRow.setVisibility(View.GONE);
+            tableRow = (TableRow) findViewById(R.id.isAutoAcceptInRoaming);
+            tableRow.setVisibility(View.GONE);
+        }
 
         textView = (TextView) findViewById(R.id.MaxFileTransfers);
         textView.setText(Integer.valueOf(mConfig.getMaxFileTransfers()).toString());
 
-        checkBox = (CheckBox) findViewById(R.id.GroupFileTransferSupported); // TODO
+        CheckBox checkBox = (CheckBox) findViewById(R.id.GroupFileTransferSupported); // TODO
         checkBox.setChecked(true);
 
         mSpinnerImageResizeOption.setSelection(mConfig.getImageResizeOption().toInt());
