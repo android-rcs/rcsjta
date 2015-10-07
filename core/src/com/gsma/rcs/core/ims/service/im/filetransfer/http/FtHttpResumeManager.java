@@ -148,7 +148,12 @@ public class FtHttpResumeManager implements Runnable {
                     mImsService.resumeOutgoingFileTransfer(resumeUpload, false);
                     resumeUpload.startSession();
                 } else {
-                    // TODO : implement for group FToHTTP
+                    final ResumeUploadGroupFileSharingSession resumeUpload = new ResumeUploadGroupFileSharingSession(
+                            mImsService, uploadContent, uploadInfo, mRcsSettings, mMessagingLog,
+                            mContactManager);
+                    resumeUpload.addListener(getFileSharingSessionListener());
+                    mImsService.resumeOutgoingFileTransfer(resumeUpload, true);
+                    resumeUpload.startSession();
                 }
                 break;
 
