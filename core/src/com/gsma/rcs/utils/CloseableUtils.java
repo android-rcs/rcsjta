@@ -29,9 +29,6 @@ import java.io.IOException;
 
 public class CloseableUtils {
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(CloseableUtils.class.getName());
 
     /**
