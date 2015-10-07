@@ -23,13 +23,11 @@
 package com.gsma.rcs.core.content;
 
 import com.gsma.rcs.core.FileAccessException;
-import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.utils.CloseableUtils;
 
 import android.content.ContentResolver;
 import android.net.Uri;
-import android.os.ParcelFileDescriptor;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -48,9 +46,6 @@ public abstract class MmContent {
      */
     private Uri mFile;
 
-    /**
-     * The filename
-     */
     private String mFileName;
 
     /**
@@ -58,17 +53,12 @@ public abstract class MmContent {
      */
     private long mSize;
 
-    /**
-     * Encoding
-     */
     private String mEncoding;
 
     /**
      * Stream to write received data direct to file.
      */
     private BufferedOutputStream mOut;
-
-    private ParcelFileDescriptor mPfd;
 
     /**
      * Constructor
@@ -220,11 +210,10 @@ public abstract class MmContent {
     public void writeData2File(byte[] data) throws FileAccessException {
         try {
             if (mOut == null) {
-                mPfd = AndroidFactory.getApplicationContext().getContentResolver()
-                        .openFileDescriptor(mFile, "w");
-                // To optimize I/O set buffer size to 8kBytes
-                mOut = new BufferedOutputStream(new FileOutputStream(mPfd.getFileDescriptor()),
-                        8 * 1024);
+                File destination = new File(mFile.getPath());
+                FileOutputStream fos = new FileOutputStream(destination);
+                /* To optimize I/O set buffer size to 8 kBytes */
+                mOut = new BufferedOutputStream(fos, 8 * 1024);
             }
             mOut.write(data);
         } catch (IOException e) {
@@ -240,7 +229,6 @@ public abstract class MmContent {
             FileFactory.getFactory().updateMediaStorage(getUri().getEncodedPath());
         } finally {
             CloseableUtils.tryToClose(mOut);
-            CloseableUtils.tryToClose(mPfd);
         }
     }
 
