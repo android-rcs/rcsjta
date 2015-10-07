@@ -170,6 +170,7 @@ public class GroupChatDequeueTask extends DequeueTask {
                                 mLogger.debug("Dequeue chatId=" + mChatId + " in state=" + state
                                         + " file=" + file);
                             }
+                            GroupFileTransferImpl groupFileTransfer;
                             switch (state) {
                                 case QUEUED:
                                     if (!isAllowedToDequeueGroupFileTransfer()) {
@@ -186,12 +187,13 @@ public class GroupChatDequeueTask extends DequeueTask {
                                     mFileTransferService.dequeueGroupFileTransfer(mChatId, id,
                                             fileContent, fileIconContent);
                                     break;
+
                                 case STARTED:
                                     if (!isPossibleToDequeueGroupChatMessagesAndGroupFileTransfers(mChatId)) {
                                         setGroupFileTransferAsFailedDequeue(mChatId, id);
                                         continue;
                                     }
-                                    GroupFileTransferImpl groupFileTransfer = mFileTransferService
+                                    groupFileTransfer = mFileTransferService
                                             .getOrCreateGroupFileTransfer(mChatId, id);
                                     String fileInfo = FileTransferUtils
                                             .createHttpFileTransferXml(mMessagingLog
@@ -201,6 +203,17 @@ public class GroupChatDequeueTask extends DequeueTask {
                                             groupFileTransfer);
 
                                     break;
+
+                                case PAUSED:
+                                    if (!isPossibleToDequeueGroupChatMessagesAndGroupFileTransfers(mChatId)) {
+                                        setGroupFileTransferAsFailedDequeue(mChatId, id);
+                                        continue;
+                                    }
+                                    groupFileTransfer = mFileTransferService
+                                            .getOrCreateGroupFileTransfer(mChatId, id);
+                                    // TODO groupFileTransfer.resumeTransfer();
+                                    break;
+
                                 default:
                                     break;
                             }

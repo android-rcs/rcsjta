@@ -696,6 +696,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                 }
                 return false;
             }
+            // TODO it should not be possible to pause if file size equals transferred size
             return true;
 
         } catch (ServerApiBaseException e) {

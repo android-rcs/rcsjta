@@ -81,15 +81,13 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
     /**
      * Constructor
      * 
-     * @param fileTransferId File transfer Id
      * @param imService InstantMessagingService
+     * @param fileTransferId File transfer Id
      * @param content The file content to share
      * @param fileIcon Content of fileicon
      * @param conferenceId Conference ID
-     * @param chatSessionId Chat session ID
      * @param chatContributionId Chat contribution Id
      * @param tId TID of the upload
-     * @param core Core
      * @param rcsSettings
      * @param messagingLog
      * @param timestamp Local timestamp for the session
@@ -98,13 +96,24 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
      */
     public OriginatingHttpGroupFileSharingSession(InstantMessagingService imService,
             String fileTransferId, MmContent content, MmContent fileIcon, Uri conferenceId,
-            String chatSessionId, String chatContributionId, String tId, RcsSettings rcsSettings,
+            String chatContributionId, String tId, RcsSettings rcsSettings,
             MessagingLog messagingLog, long timestamp, long timestampSent,
             ContactManager contactManager) {
-        super(imService, content, null, conferenceId, fileIcon, chatSessionId, chatContributionId,
-                fileTransferId, rcsSettings, messagingLog, timestamp,
-                FileTransferData.UNKNOWN_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION,
+        // @formatter:off
+        super(imService, 
+                content, 
+                null, 
+                conferenceId, 
+                fileIcon, 
+                chatContributionId,
+                fileTransferId, 
+                rcsSettings, 
+                messagingLog, 
+                timestamp,
+                FileTransferData.UNKNOWN_EXPIRATION, 
+                FileTransferData.UNKNOWN_EXPIRATION,
                 contactManager);
+        // @formatter:ofn
         mImService = imService;
         mTimestampSent = timestampSent;
         mUploadManager = new HttpUploadManager(getContent(), fileIcon, this, tId, rcsSettings);

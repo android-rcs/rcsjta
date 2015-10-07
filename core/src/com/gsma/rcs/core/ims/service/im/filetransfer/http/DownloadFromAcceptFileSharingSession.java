@@ -62,7 +62,6 @@ public class DownloadFromAcceptFileSharingSession extends TerminatingHttpFileSha
                 resume.getFileicon() != null ? FileTransferUtils.createMmContent(resume.getFileicon()) : null,
                 resume.getFileicon() != null ? resume.getIconExpiration() : FileTransferData.UNKNOWN_EXPIRATION,
                 resume.getContact(),
-                null,
                 resume.getChatId(),
                 resume.getFileTransferId(),
                 resume.isGroupTransfer(),
