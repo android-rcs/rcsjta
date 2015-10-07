@@ -201,17 +201,6 @@ public class GroupChatDequeueTask extends DequeueTask {
                                     groupChat.dequeueGroupFileInfo(id, fileInfo,
                                             displayedReportEnabled, deliveryReportEnabled,
                                             groupFileTransfer);
-
-                                    break;
-
-                                case PAUSED:
-                                    if (!isPossibleToDequeueGroupChatMessagesAndGroupFileTransfers(mChatId)) {
-                                        setGroupFileTransferAsFailedDequeue(mChatId, id);
-                                        continue;
-                                    }
-                                    groupFileTransfer = mFileTransferService
-                                            .getOrCreateGroupFileTransfer(mChatId, id);
-                                    // TODO groupFileTransfer.resumeTransfer();
                                     break;
 
                                 default:

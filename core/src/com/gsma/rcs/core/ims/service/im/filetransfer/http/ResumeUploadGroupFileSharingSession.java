@@ -79,7 +79,7 @@ public class ResumeUploadGroupFileSharingSession extends OriginatingHttpGroupFil
     public void run() {
         boolean logActivated = sLogger.isActivated();
         if (logActivated) {
-            sLogger.info("Resume a HTTP file transfer session as originating");
+            sLogger.info("Resume a HTTP group file transfer upload");
         }
         try {
             onHttpTransferStarted();
