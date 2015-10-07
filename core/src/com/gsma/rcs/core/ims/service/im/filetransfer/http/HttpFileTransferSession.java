@@ -65,8 +65,6 @@ public abstract class HttpFileTransferSession extends FileSharingSession impleme
         ESTABLISHED;
     }
 
-    private String mChatSessionId;
-
     private State mSessionState;
 
     protected long mFileExpiration;
@@ -86,25 +84,22 @@ public abstract class HttpFileTransferSession extends FileSharingSession impleme
      * @param contact Remote contact identifier
      * @param remoteContact the remote contact URI
      * @param fileIcon Content of file icon
-     * @param chatSessionId Chat session ID
      * @param chatContributionId Chat contribution Id
      * @param fileTransferId File transfer Id
      * @param rcsSettings
-     * @param fileExpiration
-     * @param iconExpiration
      * @param messagingLog
      * @param timestamp Local timestamp for the session
+     * @param fileExpiration
+     * @param iconExpiration
      * @param contactManager
      */
     public HttpFileTransferSession(InstantMessagingService imService, MmContent content,
-            ContactId contact, Uri remoteContact, MmContent fileIcon, String chatSessionId,
-            String chatContributionId, String fileTransferId, RcsSettings rcsSettings,
-            MessagingLog messagingLog, long timestamp, long fileExpiration, long iconExpiration,
-            ContactManager contactManager) {
+            ContactId contact, Uri remoteContact, MmContent fileIcon, String chatContributionId,
+            String fileTransferId, RcsSettings rcsSettings, MessagingLog messagingLog,
+            long timestamp, long fileExpiration, long iconExpiration, ContactManager contactManager) {
         super(imService, content, contact, remoteContact, fileIcon, fileTransferId, rcsSettings,
                 timestamp, contactManager);
 
-        mChatSessionId = chatSessionId;
         setContributionID(chatContributionId);
         mSessionState = State.PENDING;
         mFileExpiration = fileExpiration;
@@ -115,24 +110,6 @@ public abstract class HttpFileTransferSession extends FileSharingSession impleme
     @Override
     public boolean isHttpTransfer() {
         return true;
-    }
-
-    /**
-     * Returns the chat session ID associated to the transfer
-     * 
-     * @return the chatSessionID
-     */
-    public String getChatSessionID() {
-        return mChatSessionId;
-    }
-
-    /**
-     * Set the chatSessionId
-     * 
-     * @param chatSessionID
-     */
-    public void setChatSessionID(String chatSessionID) {
-        mChatSessionId = chatSessionID;
     }
 
     /**

@@ -805,8 +805,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             /* For outgoing file transfer, timestampSent = timestamp */
             long timestampSent = timestamp;
             FileSharingSession session = mImService.createGroupFileTransferSession(fileTransferId,
-                    content, fileIcon, chatId, groupChatSession.getSessionID(), timestamp,
-                    timestampSent);
+                    content, fileIcon, chatId, timestamp, timestampSent);
             GroupFileTransferImpl groupFileTransfer = getOrCreateGroupFileTransfer(chatId,
                     fileTransferId);
             session.addListener(groupFileTransfer);

@@ -85,7 +85,6 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
                 fileTransferInfo.getFileThumbnail() == null ? null : fileTransferInfo.getFileThumbnail().getLocalMmContent(fileTransferId),
                 getFileIconExpiration(fileTransferInfo.getFileThumbnail()),
                 contact,
-                chatSession.getSessionID(),
                 chatSession.getContributionID(),
                 fileTransferId,
                 chatSession.isGroupChat(),

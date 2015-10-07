@@ -20,6 +20,7 @@
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -30,8 +31,6 @@ import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
-
-import android.net.Uri;
 
 import java.io.IOException;
 
@@ -54,22 +53,19 @@ public class ResumeUploadGroupFileSharingSession extends OriginatingHttpGroupFil
      * @param rcsSettings
      * @param messagingLog
      * @param contactManager
-     * @param conferenceId
      * @param chatSessionId
      * @param chatContributionId
      */
     public ResumeUploadGroupFileSharingSession(InstantMessagingService imService,
             MmContent content, FtHttpResumeUpload resumeUpload, RcsSettings rcsSettings,
-            MessagingLog messagingLog, ContactManager contactManager, Uri conferenceId,
-            String chatSessionId, String chatContributionId) {
+            MessagingLog messagingLog, ContactManager contactManager) {
         // @formatter:off
         super(imService, 
                 resumeUpload.getFileTransferId(),
                 content,
                 resumeUpload.getFileicon() != null ? FileTransferUtils.createMmContent(resumeUpload.getFileicon()) : null, 
-                conferenceId, 
-                chatSessionId, 
-                chatContributionId,
+                ImsModule.getImsUserProfile().getImConferenceUri(), 
+                resumeUpload.getChatId(),
                 resumeUpload.getTId(), 
                 rcsSettings, 
                 messagingLog, 
