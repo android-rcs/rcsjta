@@ -17,7 +17,6 @@
 package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.core.Core;
-import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
@@ -29,8 +28,6 @@ import com.gsma.rcs.service.DequeueTask;
 import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
 import com.gsma.rcs.service.api.OneToOneChatImpl;
-import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.Context;
@@ -109,11 +106,6 @@ public class OneToOneChatMessageDequeueTask extends DequeueTask {
                     }
                     String content = cursor.getString(contentIdx);
                     long timestamp = System.currentTimeMillis();
-                    if (MimeType.GEOLOC_MESSAGE.equals(mimeType)) {
-                        Geoloc geoloc = new Geoloc(content);
-                        content = ChatUtils.buildGeolocDocument(geoloc, ImsModule
-                                .getImsUserProfile().getPublicUri(), id, timestamp);
-                    }
 
                     /* For outgoing message, timestampSent = timestamp */
                     ChatMessage msg = ChatUtils.createChatMessage(id, mimeType, content, mContact,

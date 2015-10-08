@@ -70,6 +70,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
+
 import javax2.sip.header.ContactHeader;
 import javax2.sip.header.ExtensionHeader;
 
@@ -710,8 +711,6 @@ public class ChatUtils {
      */
     public static ChatMessage createFileTransferMessage(ContactId remote, String fileInfo,
             String msgId, long timestamp, long timestampSent) {
-        // TODO the mimeype should not be the network representation but the API one.
-        // Conversion to network representation should only be done when sending the data.
         return new ChatMessage(msgId, remote, fileInfo, FileTransferHttpInfoDocument.MIME_TYPE,
                 timestamp, timestampSent, null);
     }
@@ -727,13 +726,8 @@ public class ChatUtils {
      */
     public static ChatMessage createGeolocMessage(ContactId remote, Geoloc geoloc, long timestamp,
             long timestampSent) {
-        // TODO the mimeype and content should not be the network representation but the API one.
-        // Conversion to network representation should only be done when sending the data.
-        // This would avoid converting content when accessing geolocation from the provider.
         String msgId = IdGenerator.generateMessageID();
-        String geolocContent = buildGeolocDocument(geoloc, ImsModule.getImsUserProfile()
-                .getPublicUri(), msgId, timestamp);
-        return new ChatMessage(msgId, remote, geolocContent, GeolocInfoDocument.MIME_TYPE,
+        return new ChatMessage(msgId, remote, geoloc.toString(), MimeType.GEOLOC_MESSAGE,
                 timestamp, timestampSent, null);
     }
 
@@ -803,8 +797,9 @@ public class ChatUtils {
             return null;
         }
         if (isGeolocType(mime)) {
-            return new ChatMessage(msgId, remote, content, GeolocInfoDocument.MIME_TYPE, timestamp,
-                    timestampSent, null);
+            return new ChatMessage(msgId, remote,
+                    ChatUtils.networkGeolocContentToPersistedGeolocContent(content),
+                    MimeType.GEOLOC_MESSAGE, timestamp, timestampSent, null);
         } else if (FileTransferUtils.isFileTransferHttpType(mime)) {
             return new ChatMessage(msgId, remote, content, FileTransferHttpInfoDocument.MIME_TYPE,
                     timestamp, timestampSent, null);
@@ -915,27 +910,6 @@ public class ChatUtils {
     /**
      * Generate persisted MIME-type from network pay-load
      * 
-     * @param message ChatMessage
-     * @return API MIME-type
-     */
-    public static String networkMimeTypeToApiMimeType(ChatMessage message) {
-        String mimeType = message.getMimeType();
-        /*
-         * Geolocation chat messages does not have the same mimetype in the payload as in the TAPI.
-         * Text chat messages do.
-         */
-        if (isGeolocType(mimeType)) {
-            return MimeType.GEOLOC_MESSAGE;
-        } else if (isTextPlainType(mimeType)) {
-            return MimeType.TEXT_MESSAGE;
-        }
-        throw new IllegalArgumentException(
-                "Unsupported input mimetype detected : ".concat(mimeType));
-    }
-
-    /**
-     * Generate persisted MIME-type from network pay-load
-     * 
      * @param networkMimeType Network pay-load MIME-type
      * @return API MIME-type
      */
@@ -948,6 +922,8 @@ public class ChatUtils {
             return GeolocInfoDocument.MIME_TYPE;
         } else if (isTextPlainType(apiMimeType)) {
             return MimeType.TEXT_MESSAGE;
+        } else if (apiMimeType.startsWith(FileTransferHttpInfoDocument.MIME_TYPE)) {
+            return FileTransferHttpInfoDocument.MIME_TYPE;
         }
         throw new IllegalArgumentException(
                 "Unsupported input mimetype detected : ".concat(apiMimeType));
@@ -960,16 +936,25 @@ public class ChatUtils {
      * @return Persisted content
      * @throws PayloadException
      */
-    public static String networkContentToPersistedContent(ChatMessage msg) throws PayloadException {
-        /*
-         * Geolocation chat messages does not have the same mimetype in the payload as in the TAPI.
-         * Text chat messages do.
-         */
-        if (isGeolocType(msg.getMimeType())) {
-            Geoloc geoloc = parseGeolocDocument(msg.getContent());
-            return geoloc.toString();
-        }
-        return msg.getContent();
+    public static String networkGeolocContentToPersistedGeolocContent(String content)
+            throws PayloadException {
+        Geoloc geoloc = parseGeolocDocument(content);
+        return geoloc.toString();
+    }
+
+    /**
+     * Generate network pay-load content from persisted content
+     * 
+     * @param content
+     * @param msgId
+     * @param timestamp
+     * @return Network payload content
+     */
+    public static String persistedGeolocContentToNetworkGeolocContent(String content, String msgId,
+            long timestamp) {
+        Geoloc geoloc = new Geoloc(content);
+        return ChatUtils.buildGeolocDocument(geoloc, ImsModule.getImsUserProfile().getPublicUri(),
+                msgId, timestamp);
     }
 
     /**
@@ -990,8 +975,8 @@ public class ChatUtils {
             return new ChatMessage(msgId, contact, content, MimeType.TEXT_MESSAGE, timestamp,
                     timestampSent, displayName);
         } else if (MimeType.GEOLOC_MESSAGE.equals(apiMimeType)) {
-            return new ChatMessage(msgId, contact, content, GeolocInfoDocument.MIME_TYPE,
-                    timestamp, timestampSent, displayName);
+            return new ChatMessage(msgId, contact, content, MimeType.GEOLOC_MESSAGE, timestamp,
+                    timestampSent, displayName);
         }
         throw new IllegalArgumentException(
                 "Unable to create message, Invalid mimetype ".concat(apiMimeType));

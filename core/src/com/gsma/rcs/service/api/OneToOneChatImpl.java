@@ -123,7 +123,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         final OneToOneChatSession newSession = mImService.createOneToOneChatSession(mContact, msg);
         newSession.addListener(OneToOneChatImpl.this);
         newSession.startSession();
-        onMessageSent(msg.getMessageId(), ChatUtils.networkMimeTypeToApiMimeType(msg));
+        onMessageSent(msg.getMessageId(), msg.getMimeType());
     }
 
     private void sendChatMessageWithinSession(final OneToOneChatSession session,
@@ -344,9 +344,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         synchronized (mLock) {
             if (mMessagingLog.setChatMessageStatusAndTimestamp(msgId, status,
                     ReasonCode.UNSPECIFIED, msg.getTimestamp(), msg.getTimestampSent())) {
-                String mimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
-                mBroadcaster.broadcastMessageStatusChanged(mContact, mimeType, msgId, status,
-                        ReasonCode.UNSPECIFIED);
+                mBroadcaster.broadcastMessageStatusChanged(mContact, msg.getMimeType(), msgId,
+                        status, ReasonCode.UNSPECIFIED);
             }
         }
     }
@@ -382,7 +381,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                     timestamp);
             ChatMessagePersistedStorageAccessor persistedStorage = new ChatMessagePersistedStorageAccessor(
                     mMessagingLog, msg.getMessageId(), msg.getRemoteContact(), message,
-                    MimeType.TEXT_MESSAGE, mContact.toString(), Direction.OUTGOING);
+                    msg.getMimeType(), mContact.toString(), Direction.OUTGOING);
             /* Always insert message with status QUEUED */
             addOutgoingChatMessage(msg, Status.QUEUED);
 
@@ -430,13 +429,14 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         try {
             long timestamp = System.currentTimeMillis();
             /** For outgoing message, timestampSent = timestamp */
-            final ChatMessage msg = ChatUtils.createGeolocMessage(mContact, geoloc, timestamp,
+            final ChatMessage geolocMsg = ChatUtils.createGeolocMessage(mContact, geoloc, timestamp,
                     timestamp);
             ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
-                    mMessagingLog, msg.getMessageId(), msg.getRemoteContact(), msg.toString(),
-                    MimeType.GEOLOC_MESSAGE, mContact.toString(), Direction.OUTGOING);
+                    mMessagingLog, geolocMsg.getMessageId(), geolocMsg.getRemoteContact(),
+                    geolocMsg.getContent(), geolocMsg.getMimeType(), mContact.toString(),
+                    Direction.OUTGOING);
             /* Always insert message with status QUEUED */
-            addOutgoingChatMessage(msg, Status.QUEUED);
+            addOutgoingChatMessage(geolocMsg, Status.QUEUED);
 
             mImService.tryToDequeueOneToOneChatMessages(mContact);
             return new ChatMessageImpl(persistentStorage);
@@ -766,8 +766,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             public void run() {
                 ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
                         mMessagingLog, msgId);
-                final String mimeType = ChatUtils.apiMimeTypeToNetworkMimeType(persistentStorage
-                        .getMimeType());
+                final String mimeType = persistentStorage.getMimeType();
                 /* Set new timestamp for resend message */
                 long timestamp = System.currentTimeMillis();
                 /* For outgoing message, timestampSent = timestamp */
@@ -867,7 +866,6 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                         sLogger.info(new StringBuilder("New IM with messageId '").append(msgId)
                                 .append("' received from ").append(mContact).append(".").toString());
                     }
-                    String mimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
                     synchronized (mLock) {
                         if (mContactManager.isBlockedForContact(mContact)) {
                             if (sLogger.isActivated()) {
@@ -881,11 +879,11 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                                 session.terminateSession(TerminationReason.TERMINATION_BY_USER);
                             }
                             mMessagingLog.addOneToOneSpamMessage(msg);
-                            mBroadcaster.broadcastMessageReceived(mimeType, msgId);
+                            mBroadcaster.broadcastMessageReceived(msg.getMimeType(), msgId);
                             return;
                         }
                         mMessagingLog.addIncomingOneToOneChatMessage(msg, imdnDisplayedRequested);
-                        mBroadcaster.broadcastMessageReceived(mimeType, msgId);
+                        mBroadcaster.broadcastMessageReceived(msg.getMimeType(), msgId);
                     }
                 } catch (NetworkException e) {
                     if (sLogger.isActivated()) {

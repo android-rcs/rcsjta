@@ -58,7 +58,6 @@ import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent;
-import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
@@ -1012,9 +1011,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         synchronized (mLock) {
             if (mMessagingLog.setChatMessageStatusAndTimestamp(msgId, status,
                     Content.ReasonCode.UNSPECIFIED, msg.getTimestamp(), msg.getTimestampSent())) {
-                String mimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
-                mBroadcaster.broadcastMessageStatusChanged(mChatId, mimeType, msg.getMessageId(),
-                        Status.SENDING, Content.ReasonCode.UNSPECIFIED);
+                mBroadcaster.broadcastMessageStatusChanged(mChatId, msg.getMimeType(),
+                        msg.getMessageId(), Status.SENDING, Content.ReasonCode.UNSPECIFIED);
             }
         }
     }
@@ -1173,7 +1171,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             final ChatMessage msg = ChatUtils.createTextMessage(null, text, timestamp, timestamp);
             ChatMessagePersistedStorageAccessor persistedStorage = new ChatMessagePersistedStorageAccessor(
                     mMessagingLog, msg.getMessageId(), msg.getRemoteContact(), text,
-                    MimeType.TEXT_MESSAGE, mChatId, Direction.OUTGOING);
+                    msg.getMimeType(), mChatId, Direction.OUTGOING);
             /* Always insert message with status QUEUED */
             addOutgoingGroupChatMessage(msg, Content.Status.QUEUED, Content.ReasonCode.UNSPECIFIED);
             if (!mChatService.isGroupChatActive(mChatId)) {
@@ -1233,7 +1231,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     timestamp);
             ChatMessagePersistedStorageAccessor persistedStorage = new ChatMessagePersistedStorageAccessor(
                     mMessagingLog, geolocMsg.getMessageId(), geolocMsg.getRemoteContact(),
-                    geolocMsg.toString(), MimeType.GEOLOC_MESSAGE, mChatId, Direction.OUTGOING);
+                    geolocMsg.getContent(), geolocMsg.getMimeType(), mChatId, Direction.OUTGOING);
             addOutgoingGroupChatMessage(geolocMsg, Content.Status.QUEUED,
                     Content.ReasonCode.UNSPECIFIED);
             if (!mChatService.isGroupChatActive(mChatId)) {
@@ -1562,8 +1560,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                             .build(), RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE,
                             msg.getDisplayName());
                 }
-                String mimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
-                mBroadcaster.broadcastMessageReceived(mimeType, msgId);
+                mBroadcaster.broadcastMessageReceived(msg.getMimeType(), msgId);
             }
 
         } catch (ContactManagerException e) {

@@ -37,7 +37,6 @@ import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.core.ims.service.im.chat.geoloc.GeolocInfoDocument;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
-import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
@@ -138,29 +137,35 @@ public abstract class OneToOneChatSession extends ChatSession {
         String from = ChatUtils.ANONYMOUS_URI;
         String to = ChatUtils.ANONYMOUS_URI;
         String msgId = msg.getMessageId();
-        String networkContent;
         String mimeType = msg.getMimeType();
+        String networkMimeType = ChatUtils.apiMimeTypeToNetworkMimeType(mimeType);
+        long timestampSent = msg.getTimestampSent();
+        String networkContent = msg.getContent();
+        String data;
+        if (MimeType.GEOLOC_MESSAGE.equals(mimeType)) {
+            networkContent = ChatUtils.persistedGeolocContentToNetworkGeolocContent(networkContent,
+                    msgId, timestampSent);
+        }
         if (mImdnManager.isRequestOneToOneDeliveryDisplayedReportsEnabled()) {
-            networkContent = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, msg.getContent(),
-                    mimeType, msg.getTimestampSent());
+            data = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, networkContent,
+                    networkMimeType, timestampSent);
         } else if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
-            networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from, to, msgId,
-                    msg.getContent(), mimeType, msg.getTimestampSent());
+            data = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from, to, msgId, networkContent,
+                    networkMimeType, timestampSent);
         } else {
-            networkContent = ChatUtils.buildCpimMessage(from, to, msg.getContent(), mimeType,
-                    msg.getTimestampSent());
+            data = ChatUtils.buildCpimMessage(from, to, networkContent, networkMimeType,
+                    timestampSent);
         }
 
-        if (ChatUtils.isGeolocType(mimeType)) {
-            sendDataChunks(IdGenerator.generateMessageID(), networkContent, CpimMessage.MIME_TYPE,
+        if (ChatUtils.isGeolocType(networkMimeType)) {
+            sendDataChunks(IdGenerator.generateMessageID(), data, CpimMessage.MIME_TYPE,
                     TypeMsrpChunk.GeoLocation);
         } else {
-            sendDataChunks(IdGenerator.generateMessageID(), networkContent, CpimMessage.MIME_TYPE,
+            sendDataChunks(IdGenerator.generateMessageID(), data, CpimMessage.MIME_TYPE,
                     TypeMsrpChunk.TextMessage);
         }
-        String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
         for (ImsSessionListener listener : getListeners()) {
-            ((ChatSessionListener) listener).onMessageSent(msgId, apiMimeType);
+            ((ChatSessionListener) listener).onMessageSent(msgId, mimeType);
         }
     }
 
@@ -414,14 +419,8 @@ public abstract class OneToOneChatSession extends ChatSession {
      */
     private void handleError(ChatMessage msg, ChatError error) {
         String msgId = msg.getMessageId();
-        String apiMimeType;
-        if (FileTransferUtils.isFileTransferHttpType(msg.getMimeType())) {
-            apiMimeType = FileTransferHttpInfoDocument.MIME_TYPE;
-        } else {
-            apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg);
-        }
         for (ImsSessionListener listener : getListeners()) {
-            ((OneToOneChatSessionListener) listener).onImError(error, msgId, apiMimeType);
+            ((OneToOneChatSessionListener) listener).onImError(error, msgId, msg.getMimeType());
         }
     }
 }
