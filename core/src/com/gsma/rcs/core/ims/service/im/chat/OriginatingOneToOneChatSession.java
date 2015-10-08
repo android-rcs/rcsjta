@@ -38,6 +38,7 @@ import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.contact.ContactId;
 
 import java.text.ParseException;
@@ -123,17 +124,24 @@ public class OriginatingOneToOneChatSession extends OneToOneChatSession {
                 String to = ChatUtils.ANONYMOUS_URI;
 
                 String cpim;
+                String mimeType = chatMessage.getMimeType();
+                String networkMimeType = ChatUtils.apiMimeTypeToNetworkMimeType(mimeType);
+                String networkContent = chatMessage.getContent();
+                String msgId = chatMessage.getMessageId();
+                long timestampSent = chatMessage.getTimestampSent();
+                if (MimeType.GEOLOC_MESSAGE.equals(mimeType)) {
+                    networkContent = ChatUtils.persistedGeolocContentToNetworkGeolocContent(
+                            networkContent, msgId, timestampSent);
+                }
                 if (mImdnManager.isRequestOneToOneDeliveryDisplayedReportsEnabled()) {
-                    cpim = ChatUtils.buildCpimMessageWithImdn(from, to, chatMessage.getMessageId(),
-                            chatMessage.getContent(), chatMessage.getMimeType(),
-                            chatMessage.getTimestampSent());
+                    cpim = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, networkContent,
+                            networkMimeType, timestampSent);
                 } else if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
-                    cpim = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from, to,
-                            chatMessage.getMessageId(), chatMessage.getContent(),
-                            chatMessage.getMimeType(), chatMessage.getTimestampSent());
+                    cpim = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from, to, msgId,
+                            networkContent, networkMimeType, timestampSent);
                 } else {
-                    cpim = ChatUtils.buildCpimMessage(from, to, chatMessage.getContent(),
-                            chatMessage.getMimeType(), chatMessage.getTimestampSent());
+                    cpim = ChatUtils.buildCpimMessage(from, to, networkContent, networkMimeType,
+                            timestampSent);
                 }
 
                 String multipart = new StringBuilder(Multipart.BOUNDARY_DELIMITER)

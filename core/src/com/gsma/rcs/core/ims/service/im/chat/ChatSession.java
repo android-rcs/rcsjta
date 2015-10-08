@@ -45,7 +45,6 @@ import com.gsma.rcs.core.ims.service.capability.Capabilities.CapabilitiesBuilder
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimParser;
-import com.gsma.rcs.core.ims.service.im.chat.geoloc.GeolocInfoDocument;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnUtils;
@@ -569,8 +568,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                         onDeliveryStatusReceived(contact, cpimMsg.getMessageContent());
                     } else if (ChatUtils.isGeolocType(contentType)) {
                         ChatMessage msg = new ChatMessage(cpimMsgId, contact,
-                                cpimMsg.getMessageContent(), GeolocInfoDocument.MIME_TYPE,
-                                timestamp, timestampSent, null);
+                                ChatUtils.networkGeolocContentToPersistedGeolocContent(cpimMsg
+                                        .getMessageContent()), MimeType.GEOLOC_MESSAGE, timestamp,
+                                timestampSent, null);
                         receive(msg, imdnDisplayedRequested);
                     }
                 }

@@ -27,7 +27,6 @@ import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
-import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
@@ -50,7 +49,6 @@ import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
-import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.chat.GroupChat.State;
@@ -291,23 +289,8 @@ public class ChatServiceImpl extends IChatService.Stub {
 
         ChatMessage firstMessage = session.getFirstMessage();
         if (firstMessage != null) {
-            String mimeType = firstMessage.getMimeType();
-            if (ChatUtils.isGeolocType(mimeType)) {
-                mOneToOneChatEventBroadcaster.broadcastMessageReceived(MimeType.GEOLOC_MESSAGE,
-                        firstMessage.getMessageId());
-            } else if (ChatUtils.isTextPlainType(mimeType)) {
-                mOneToOneChatEventBroadcaster.broadcastMessageReceived(MimeType.TEXT_MESSAGE,
-                        firstMessage.getMessageId());
-            } else {
-                /*
-                 * Only geolocation and text messages are valid parameters into this method. Thus it
-                 * is certain at this point that it can only be a text message.
-                 */
-                throw new IllegalArgumentException(new StringBuilder("The mimetype '")
-                        .append(mimeType)
-                        .append("' is not supported by this chat service implementation!")
-                        .toString());
-            }
+            mOneToOneChatEventBroadcaster.broadcastMessageReceived(firstMessage.getMimeType(),
+                    firstMessage.getMessageId());
         }
     }
 
