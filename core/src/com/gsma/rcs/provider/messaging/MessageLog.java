@@ -44,7 +44,9 @@ import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.text.TextUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -86,9 +88,6 @@ public class MessageLog implements IMessageLog {
     private static final String SELECTION_ALL_QUEUED_ONETOONE_CHAT_MESSAGES = new StringBuilder(
             MessageData.KEY_CHAT_ID).append("=").append(MessageData.KEY_CONTACT).append(" AND ")
             .append(MessageData.KEY_STATUS).append("=").append(Status.QUEUED.toInt()).toString();
-
-    private static final String SELECTION_BY_MULTIPLE_MSG_IDS = new StringBuilder(
-            MessageData.KEY_MESSAGE_ID).append(" IN(").append("=?)").toString();
 
     private static final int CHAT_MESSAGE_DELIVERY_EXPIRED = 1;
 
@@ -677,13 +676,17 @@ public class MessageLog implements IMessageLog {
 
     @Override
     public void clearMessageDeliveryExpiration(List<String> msgIds) {
-        String[] selectionArgs = new String[msgIds.size()];
-        selectionArgs = msgIds.toArray(selectionArgs);
         ContentValues values = new ContentValues();
         values.put(MessageData.KEY_DELIVERY_EXPIRATION, 0);
         values.put(MessageData.KEY_EXPIRED_DELIVERY, 0);
-        mLocalContentResolver.update(MessageData.CONTENT_URI, values,
-                SELECTION_BY_MULTIPLE_MSG_IDS, selectionArgs);
+        List<String> parameters = new ArrayList<String>();
+        for (int i = 0; i < msgIds.size(); i++) {
+            parameters.add("?");
+        }
+        String selection = new StringBuilder(MessageData.KEY_MESSAGE_ID).append(" IN (")
+                .append(TextUtils.join(",", parameters)).append(")").toString();
+        mLocalContentResolver.update(MessageData.CONTENT_URI, values, selection,
+                msgIds.toArray(new String[msgIds.size()]));
     }
 
     @Override

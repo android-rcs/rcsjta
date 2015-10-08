@@ -130,10 +130,9 @@ public class SingleChatIntentService extends IntentService {
             return;
         }
         if (LogUtils.isActive) {
-            Log.e(LOGTAG, "Undelivered message ID=" + msgId + " for contact " + contact);
+            Log.d(LOGTAG, "Undelivered message ID=" + msgId + " for contact " + contact);
         }
-        // TODO implement CR019 undelivered messages
-        Utils.displayLongToast(this, getString(R.string.label_todo));
+        forwardUndeliveredMessage2UI(intent, contact, msgId);
     }
 
     /**
@@ -165,33 +164,25 @@ public class SingleChatIntentService extends IntentService {
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "One to one chat message ".concat(msgDAO.toString()));
         }
-        forwardSingleChatMessage2UI(this, msgDAO);
+        forwardSingleChatMessage2UI(messageIntent, msgDAO);
     }
 
     /**
      * Forward one to one chat message to view activity
      * 
-     * @param context Context
+     * @param ctx Context
      * @param message the chat message DAO
      */
-    private void forwardSingleChatMessage2UI(Context context, ChatMessageDAO message) {
+    private void forwardSingleChatMessage2UI(Intent messageIntent, ChatMessageDAO message) {
         ContactId contact = message.getContact();
-        if (contact == null) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "Contact is null");
-            }
-            return;
-        }
         String content = message.getContent();
-        Intent intent = SingleChatView.forgeIntentToStart(context, contact);
+        Intent intent = SingleChatView.forgeIntentOnStackEvent(this, contact, messageIntent);
         /*
          * Do not display notification if activity is on foreground for this contact
          */
         if (SingleChatView.isDisplayed() && contact.equals(SingleChatView.contactOnForeground)) {
             if (LogUtils.isActive) {
-                Log.d(LOGTAG,
-                        new StringBuilder("New message '").append(content).append("' for contact ")
-                                .append(contact.toString()).toString());
+                Log.d(LOGTAG, "New message '" + content + "' for contact " + contact);
             }
             Integer pendingIntentId = sContactMessagePendingNotificationIdCache.get(contact);
             if (pendingIntentId != null) {
@@ -200,36 +191,76 @@ public class SingleChatIntentService extends IntentService {
             }
             /* This will trigger onNewIntent for the target activity */
             startActivity(intent);
-        } else {
-            /*
-             * If the PendingIntent has the same operation, action, data, categories, components,
-             * and flags it will be replaced. Invitation should be notified individually so we use a
-             * random generator to provide a unique request code and reuse it for the notification.
-             */
-            Integer uniqueId = sContactMessagePendingNotificationIdCache.get(contact);
-            if (uniqueId == null) {
-                uniqueId = Utils.getUniqueIdForPendingIntent();
-                sContactMessagePendingNotificationIdCache.put(contact, uniqueId);
-            }
-            PendingIntent contentIntent = PendingIntent.getActivity(context, uniqueId, intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT);
-            String displayName = RcsContactUtil.getInstance(this).getDisplayName(contact);
-            String title = getString(R.string.title_recv_chat, displayName);
-            String mimeType = message.getMimeType();
-            String msg;
-            if (ChatLog.Message.MimeType.GEOLOC_MESSAGE.equals(mimeType)) {
-                msg = getString(R.string.label_geoloc_msg);
-            } else if (ChatLog.Message.MimeType.TEXT_MESSAGE.equals(mimeType)) {
-                msg = content;
-            } else {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "Discard message type '".concat(mimeType));
-                }
-                return;
-            }
-            Notification notif = buildNotification(contentIntent, title, msg);
-            mNotifManager.notify(uniqueId, notif);
+            return;
         }
+        /*
+         * If the PendingIntent has the same operation, action, data, categories, components, and
+         * flags it will be replaced. Invitation should be notified individually so we use a random
+         * generator to provide a unique request code and reuse it for the notification.
+         */
+        Integer uniqueId = sContactMessagePendingNotificationIdCache.get(contact);
+        if (uniqueId == null) {
+            uniqueId = Utils.getUniqueIdForPendingIntent();
+            sContactMessagePendingNotificationIdCache.put(contact, uniqueId);
+        }
+        PendingIntent contentIntent = PendingIntent.getActivity(this, uniqueId, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        String displayName = RcsContactUtil.getInstance(this).getDisplayName(contact);
+        String title = getString(R.string.title_recv_chat, displayName);
+        String mimeType = message.getMimeType();
+        String msg;
+        if (ChatLog.Message.MimeType.GEOLOC_MESSAGE.equals(mimeType)) {
+            msg = getString(R.string.label_geoloc_msg);
+        } else if (ChatLog.Message.MimeType.TEXT_MESSAGE.equals(mimeType)) {
+            msg = content;
+        } else {
+            if (LogUtils.isActive) {
+                Log.e(LOGTAG, "Discard message type '".concat(mimeType));
+            }
+            return;
+        }
+        Notification notif = buildNotification(contentIntent, title, msg);
+        mNotifManager.notify(uniqueId, notif);
+    }
+
+    private void forwardUndeliveredMessage2UI(Intent undeliveredMessageIntent, ContactId contact,
+            String msgId) {
+        Intent intent = SingleChatView.forgeIntentOnStackEvent(this, contact,
+                undeliveredMessageIntent);
+        /*
+         * Do not display notification if activity is on foreground for this contact
+         */
+        if (SingleChatView.isDisplayed() && contact.equals(SingleChatView.contactOnForeground)) {
+            if (LogUtils.isActive) {
+                Log.d(LOGTAG,
+                        "Undelivered message '" + msgId + "' for contact " + contact.toString());
+            }
+            Integer pendingIntentId = sContactMessagePendingNotificationIdCache.get(contact);
+            if (pendingIntentId != null) {
+                sContactMessagePendingNotificationIdCache.remove(contact);
+                mNotifManager.cancel(pendingIntentId);
+            }
+            /* This will trigger onNewIntent for the target activity */
+            startActivity(intent);
+            return;
+        }
+        /*
+         * If the PendingIntent has the same operation, action, data, categories, components, and
+         * flags it will be replaced. Invitation should be notified individually so we use a random
+         * generator to provide a unique request code and reuse it for the notification.
+         */
+        Integer uniqueId = sContactMessagePendingNotificationIdCache.get(contact);
+        if (uniqueId == null) {
+            uniqueId = Utils.getUniqueIdForPendingIntent();
+            sContactMessagePendingNotificationIdCache.put(contact, uniqueId);
+        }
+        PendingIntent contentIntent = PendingIntent.getActivity(this, uniqueId, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        String displayName = RcsContactUtil.getInstance(this).getDisplayName(contact);
+        String title = getString(R.string.title_undelivered_message);
+        String msg = getString(R.string.label_undelivered_message, displayName);
+        Notification notif = buildNotification(contentIntent, title, msg);
+        mNotifManager.notify(uniqueId, notif);
     }
 
     /**
