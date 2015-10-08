@@ -49,19 +49,17 @@ public class InitiateSingleChat extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.chat_initiate_single);
 
-        // Set contact selector
+        /* Set contact selector */
         mSpinner = (Spinner) findViewById(R.id.contact);
         mSpinner.setAdapter(ContactListAdapter.createRcsContactListAdapter(this));
 
-        // Set button callback
         Button inviteBtn = (Button) findViewById(R.id.invite_btn);
         inviteBtn.setOnClickListener(btnInviteListener);
 
-        // Disable button if no contact available
+        /* Disable button if no contact available */
         if (mSpinner.getAdapter().getCount() == 0) {
             inviteBtn.setEnabled(false);
         }
@@ -73,15 +71,12 @@ public class InitiateSingleChat extends Activity {
 
     private OnClickListener btnInviteListener = new OnClickListener() {
         public void onClick(View v) {
-            // get selected phone number
+            /* get selected phone number */
             ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
-            // Format phone number to contactId
             ContactId contact = ContactUtil.formatContact(phoneNumber);
-            // start chat view activity
-            startActivity(SingleChatView.forgeIntentToStart(InitiateSingleChat.this, contact));
-
-            // Exit activity
+            startActivity(SingleChatView.forgeIntentToOpenConversation(InitiateSingleChat.this, contact));
+            /* Exit activity */
             finish();
         }
     };

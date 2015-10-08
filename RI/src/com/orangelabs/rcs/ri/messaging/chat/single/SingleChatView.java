@@ -19,18 +19,22 @@
 package com.orangelabs.rcs.ri.messaging.chat.single;
 
 import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.RcsServiceNotRegisteredException;
 import com.gsma.services.rcs.capability.CapabilityService;
+import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.chat.ChatServiceConfiguration;
 import com.gsma.services.rcs.chat.OneToOneChat;
+import com.gsma.services.rcs.chat.OneToOneChatIntent;
 import com.gsma.services.rcs.chat.OneToOneChatListener;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -44,7 +48,12 @@ import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Smileys;
 import com.orangelabs.rcs.ri.utils.Utils;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -71,6 +80,10 @@ import java.util.Set;
 public class SingleChatView extends ChatView {
 
     private final static String EXTRA_CONTACT = "contact";
+
+    private final static String[] PROJ_UNDELIVERED_MSG = new String[] {
+        ChatLog.Message.MESSAGE_ID
+    };
 
     private ContactId mContact;
 
@@ -111,51 +124,23 @@ public class SingleChatView extends ChatView {
         Message.MESSAGE_ID
     };
 
-    /**
-     * Single Chat listener
-     */
-    private OneToOneChatListener mListener = new OneToOneChatListener() {
+    private static final String OPEN_ONE_TO_ONE_CHAT_CONVERSATION = "open_one_to_one_conversation";
 
-        // Callback called when an Is-composing event has been received
-        @Override
-        public void onComposingEvent(ContactId contact, boolean status) {
-            // Discard event if not for current contact
-            if (!mContact.equals(contact)) {
-                return;
+    private static final String SEL_UNDELIVERED_MESSAGES = new StringBuilder(
+            ChatLog.Message.CHAT_ID).append("=? AND ").append(ChatLog.Message.EXPIRED_DELIVERY)
+            .append("='1'").toString();
 
-            }
-            if (LogUtils.isActive) {
-                Log.d(LOGTAG,
-                        new StringBuilder("onComposingEvent contact=").append(contact.toString())
-                                .append(" status=").append(status).toString());
-            }
-            displayComposingEvent(contact, status);
-        }
-
-        @Override
-        public void onMessageStatusChanged(ContactId contact, String mimeType, String msgId,
-                Content.Status status, Content.ReasonCode reasonCode) {
-            if (LogUtils.isActive) {
-                Log.d(LOGTAG,
-                        new StringBuilder("onMessageStatusChanged contact=")
-                                .append(contact.toString()).append(" mime-type=").append(mimeType)
-                                .append(" msgId=").append(msgId).append(" status=").append(status)
-                                .toString());
-            }
-        }
-
-        @Override
-        public void onMessagesDeleted(ContactId contact, Set<String> msgIds) {
-            if (LogUtils.isActive) {
-                Log.d(LOGTAG,
-                        "onMessagesDeleted contact=" + contact + " for message IDs="
-                                + Arrays.toString(msgIds.toArray()));
-            }
-        }
-
-    };
+    private OneToOneChatListener mChatListener;
 
     private CapabilityService mCapabilityService;
+
+    private AlertDialog mClearUndeliveredAlertDialog;
+
+    private OnCancelListener mClearUndeliveredMessageCancelListener;
+
+    private OnClickListener mClearUndeliveredMessageClickListener;
+
+    private String mDisplayName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -177,6 +162,7 @@ public class SingleChatView extends ChatView {
             // Instantiate the composing manager
             mComposingManager = new IsComposingManager(configuration.getIsComposingTimeout(),
                     getNotifyComposing());
+
         } catch (RcsServiceNotAvailableException e) {
             Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce, e);
         } catch (RcsServiceException e) {
@@ -195,7 +181,7 @@ public class SingleChatView extends ChatView {
         if (mChat != null) {
             try {
                 mChat.setComposingStatus(false);
-            } catch (Exception e) {
+            } catch (RcsGenericException e) {
                 if (LogUtils.isActive) {
                     Log.e(LOGTAG, "onComposing failed", e);
                 }
@@ -206,51 +192,21 @@ public class SingleChatView extends ChatView {
     }
 
     @Override
-    public boolean processIntent() {
+    public boolean processIntent(Intent intent) {
         if (LogUtils.isActive) {
-            Log.d(LOGTAG, "processIntent");
+            Log.d(LOGTAG, "processIntent ".concat(intent.getAction()));
         }
-        // Open chat
-        ContactId newContact = (ContactId) getIntent().getParcelableExtra(EXTRA_CONTACT);
+        ContactId newContact = (ContactId) intent.getParcelableExtra(EXTRA_CONTACT);
         if (newContact == null) {
             if (LogUtils.isActive) {
                 Log.w(LOGTAG, "Cannot process intent: contact is null");
             }
             return false;
-
         }
         try {
             if (!newContact.equals(mContact) || mChat == null) {
-                boolean firstLoad = (mChat == null);
-                /* Save contact ID */
-                mContact = newContact;
-                /*
-                 * Open chat so that if the parameter IM SESSION START is 0 then the session is
-                 * accepted now.
-                 */
-                mChat = mChatService.getOneToOneChat(mContact);
-                if (firstLoad) {
-                    /*
-                     * Initialize the Loader with id '1' and callbacks 'mCallbacks'.
-                     */
-                    getSupportLoaderManager().initLoader(LOADER_ID, null, this);
-                } else {
-                    /* We switched from one contact to another: reload history since */
-                    getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
-                }
-                if (mCapabilityService == null) {
-
-                    mCapabilityService = mCnxManager.getCapabilityApi();
-
-                }
-                try {
-                    /* Request options for this new contact */
-                    mCapabilityService.requestContactCapabilities(mContact);
-                } catch (RcsServiceNotRegisteredException e) {
-                    if (LogUtils.isActive) {
-                        Log.w(LOGTAG, "RcsServiceNotRegisteredException: " + e.getMessage());
-                    }
-                }
+                /* Either it is the first conversation loading or switch to another conversation */
+                loadConversation(newContact);
             }
             /*
              * Open chat to accept session if the parameter IM SESSION START is 0. Client
@@ -259,23 +215,70 @@ public class SingleChatView extends ChatView {
              */
             mChat.openChat();
 
-            contactOnForeground = mContact;
-            // Set activity title with display name
-            String from = RcsContactUtil.getInstance(this).getDisplayName(mContact);
-            setTitle(getString(R.string.title_chat, from));
-            // Mark as read messages if required
+            /* Set activity title with display name */
+            mDisplayName = RcsContactUtil.getInstance(this).getDisplayName(mContact);
+            setTitle(getString(R.string.title_chat, mDisplayName));
+            /* Mark as read messages if required */
             Set<String> msgIdUnreads = getUnreadMessageIds(mContact);
             for (String msgId : msgIdUnreads) {
                 mChatService.markMessageAsRead(msgId);
+            }
+            if (OneToOneChatIntent.ACTION_MESSAGE_DELIVERY_EXPIRED.equals(intent.getAction())) {
+                processUndeliveredMessages(mDisplayName);
             }
             return true;
 
         } catch (RcsServiceNotAvailableException e) {
             Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce, e);
+            return false;
+
         } catch (RcsServiceException e) {
             Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+            return false;
         }
-        return false;
+    }
+
+    private void processUndeliveredMessages(String displayName) {
+        /* Do not propose to clear undelivered if a dialog is already opened */
+        if (mClearUndeliveredAlertDialog == null) {
+            mClearUndeliveredAlertDialog = popUpToClearMessageDeliveryExpiration(this,
+                    getString(R.string.title_undelivered_message),
+                    getString(R.string.label_undelivered_message, displayName),
+                    mClearUndeliveredMessageClickListener, mClearUndeliveredMessageCancelListener);
+        }
+    }
+
+    private void loadConversation(ContactId newContact) throws RcsServiceNotAvailableException,
+            RcsGenericException {
+        boolean firstLoad = (mChat == null);
+        /* Save contact ID */
+        mContact = newContact;
+        /*
+         * Open chat so that if the parameter IM SESSION START is 0 then the session is accepted
+         * now.
+         */
+        mChat = mChatService.getOneToOneChat(mContact);
+        if (firstLoad) {
+            /*
+             * Initialize the Loader with id '1' and callbacks 'mCallbacks'.
+             */
+            getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+        } else {
+            /* We switched from one contact to another: reload history since */
+            getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
+        }
+        contactOnForeground = mContact;
+        if (mCapabilityService == null) {
+            mCapabilityService = mCnxManager.getCapabilityApi();
+        }
+        try {
+            /* Request options for this new contact */
+            mCapabilityService.requestContactCapabilities(mContact);
+        } catch (RcsServiceNotRegisteredException e) {
+            if (LogUtils.isActive) {
+                Log.w(LOGTAG, "RcsServiceNotRegisteredException: " + e.getMessage());
+            }
+        }
     }
 
     @Override
@@ -365,8 +368,24 @@ public class SingleChatView extends ChatView {
      * @param contact The contact ID
      * @return intent
      */
-    public static Intent forgeIntentToStart(Context context, ContactId contact) {
+    public static Intent forgeIntentToOpenConversation(Context context, ContactId contact) {
         Intent intent = new Intent(context, SingleChatView.class);
+        intent.setAction(OPEN_ONE_TO_ONE_CHAT_CONVERSATION);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(EXTRA_CONTACT, (Parcelable) contact);
+        return intent;
+    }
+
+    /**
+     * Forge intent to start SingleChatView activity
+     * 
+     * @param ctx The context
+     * @param contact The contact ID
+     * @param intent
+     * @return intent
+     */
+    public static Intent forgeIntentOnStackEvent(Context ctx, ContactId contact, Intent intent) {
+        intent.setClass(ctx, SingleChatView.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(EXTRA_CONTACT, (Parcelable) contact);
         return intent;
@@ -383,7 +402,6 @@ public class SingleChatView extends ChatView {
         String[] where_args = new String[] {
             contact.toString()
         };
-
         Cursor cursor = null;
         try {
             cursor = getContentResolver().query(Message.CONTENT_URI, PROJECTION_MSG_ID,
@@ -409,10 +427,9 @@ public class SingleChatView extends ChatView {
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "sendTextMessage: ".concat(message));
         }
-        // Send text message
         try {
-            // Send the text to remote
             return mChat.sendMessage(message);
+
         } catch (Exception e) {
             if (LogUtils.isActive) {
                 Log.e(LOGTAG, "sendTextMessage failed", e);
@@ -426,10 +443,9 @@ public class SingleChatView extends ChatView {
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "sendGeolocMessage: ".concat(geoloc.toString()));
         }
-        // Send geoloc message
         try {
-            // Send the text to remote
             return mChat.sendMessage(geoloc);
+
         } catch (Exception e) {
             if (LogUtils.isActive) {
                 Log.e(LOGTAG, "sendMessage failed", e);
@@ -440,12 +456,12 @@ public class SingleChatView extends ChatView {
 
     @Override
     public void addChatEventListener(ChatService chatService) throws RcsServiceException {
-        mChatService.addEventListener(mListener);
+        mChatService.addEventListener(mChatListener);
     }
 
     @Override
     public void removeChatEventListener(ChatService chatService) throws RcsServiceException {
-        mChatService.removeEventListener(mListener);
+        mChatService.removeEventListener(mChatListener);
     }
 
     @Override
@@ -507,5 +523,109 @@ public class SingleChatView extends ChatView {
     @Override
     public boolean isSingleChat() {
         return true;
+    }
+
+    private Set<String> getUndeliveredMessages(ContactId contact) {
+        Set<String> messageIds = new HashSet<String>();
+        Cursor cursor = null;
+        try {
+            cursor = this.getContentResolver().query(ChatLog.Message.CONTENT_URI,
+                    PROJ_UNDELIVERED_MSG, SEL_UNDELIVERED_MESSAGES, new String[] {
+                        contact.toString()
+                    }, null);
+            if (!cursor.moveToFirst()) {
+                return messageIds;
+            }
+            int messageIdColumnIdx = cursor.getColumnIndexOrThrow(ChatLog.Message.MESSAGE_ID);
+            do {
+                messageIds.add(cursor.getString(messageIdColumnIdx));
+            } while (cursor.moveToNext());
+            return messageIds;
+
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    private AlertDialog popUpToClearMessageDeliveryExpiration(Activity activity, String title,
+            String msg, OnClickListener onClickiLstener, OnCancelListener onCancelListener) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setMessage(msg);
+        builder.setTitle(title);
+        builder.setOnCancelListener(onCancelListener);
+        builder.setPositiveButton(activity.getString(R.string.label_ok), onClickiLstener);
+        AlertDialog alert = builder.create();
+        alert.show();
+        return alert;
+    }
+
+    @Override
+    public void initialize() {
+        mClearUndeliveredMessageClickListener = new OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                try {
+                    Set<String> msgIds = SingleChatView.this.getUndeliveredMessages(mContact);
+                    mChatService.clearMessageDeliveryExpiration(msgIds);
+                    if (LogUtils.isActive) {
+                        Log.d(LOGTAG, "clearMessageDeliveryExpiration ".concat(msgIds.toString()));
+                    }
+                } catch (RcsServiceNotAvailableException e) {
+                    Utils.displayToast(SingleChatView.this, e);
+                } catch (RcsPersistentStorageException e) {
+                    Utils.displayToast(SingleChatView.this, e);
+                } catch (RcsGenericException e) {
+                    Utils.displayToast(SingleChatView.this, e);
+                } finally {
+                    mClearUndeliveredAlertDialog = null;
+                }
+
+            }
+        };
+        mClearUndeliveredMessageCancelListener = new OnCancelListener() {
+
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                mClearUndeliveredAlertDialog = null;
+            }
+        };
+
+        mChatListener = new OneToOneChatListener() {
+
+            /* Callback called when an Is-composing event has been received */
+            @Override
+            public void onComposingEvent(ContactId contact, boolean status) {
+                /* Discard event if not for current contact */
+                if (!mContact.equals(contact)) {
+                    return;
+
+                }
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "onComposingEvent contact=" + contact + " status=" + status);
+                }
+                displayComposingEvent(contact, status);
+            }
+
+            @Override
+            public void onMessageStatusChanged(ContactId contact, String mimeType, String msgId,
+                    Content.Status status, Content.ReasonCode reasonCode) {
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "onMessageStatusChanged contact=" + contact + " mime-type="
+                            + mimeType + " msgId=" + msgId + " status=" + status);
+                }
+            }
+
+            @Override
+            public void onMessagesDeleted(ContactId contact, Set<String> msgIds) {
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "onMessagesDeleted contact=" + contact + " for message IDs="
+                            + Arrays.toString(msgIds.toArray()));
+                }
+            }
+
+        };
     }
 }

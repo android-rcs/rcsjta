@@ -309,7 +309,7 @@ public class SingleChatList extends FragmentActivity implements
             case CHAT_MENU_ITEM_OPEN:
                 if (mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
                     /* Open one-to-one chat view */
-                    startActivity(SingleChatView.forgeIntentToStart(this, contact));
+                    startActivity(SingleChatView.forgeIntentToOpenConversation(this, contact));
                 } else {
                     Utils.showMessage(this, getString(R.string.label_continue_chat_failed));
                 }
