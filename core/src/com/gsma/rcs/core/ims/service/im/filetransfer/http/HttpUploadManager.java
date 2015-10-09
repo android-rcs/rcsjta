@@ -222,7 +222,7 @@ public class HttpUploadManager extends HttpTransferManager {
                 return null;
             }
             // Notify listener
-            getListener().httpTransferStarted();
+            getListener().onHttpTransferStarted();
 
             // Send a second POST request
             return sendMultipartPost(url);
@@ -288,7 +288,7 @@ public class HttpUploadManager extends HttpTransferManager {
             try {
                 /* Add File */
                 writeFileMultipart(outputStream, mContent.getUri());
-                if (!isCancelled()) {
+                if (!isCancelled() && !isPaused()) {
                     /*
                      * if the upload is cancelled, we don't send the last boundary to get bad
                      * request
@@ -396,7 +396,7 @@ public class HttpUploadManager extends HttpTransferManager {
                 if (sLogger.isActivated()) {
                     sLogger.error("Upload has failed due to that the file is not accessible!", e);
                 }
-                getListener().httpTransferNotAllowedToSend();
+                getListener().onHttpTransferNotAllowedToSend();
                 return null;
             }
         } finally {
@@ -488,11 +488,11 @@ public class HttpUploadManager extends HttpTransferManager {
             int bytesRead = fileInputStream.read(buffer, 0, bufferSize);
             int progress = 0;
 
-            while (bytesRead > 0 && !isCancelled()) {
+            while (bytesRead > 0 && !isCancelled() && !isPaused()) {
                 progress += bytesRead;
                 outputStream.write(buffer, 0, bytesRead);
                 bytesAvailable = fileInputStream.available();
-                getListener().httpTransferProgress(progress, fileSize);
+                getListener().onHttpTransferProgress(progress, fileSize);
                 bufferSize = Math.min(bytesAvailable, CHUNK_MAX_SIZE);
                 buffer = new byte[bufferSize];
                 bytesRead = fileInputStream.read(buffer, 0, bufferSize);
@@ -542,7 +542,7 @@ public class HttpUploadManager extends HttpTransferManager {
         }
         /* Try to get upload info */
         byte[] resp = sendGetInfo(UPLOAD_INFO_REQUEST, false);
-        resetParamForResume();
+        resumeTransfer();
 
         if (resp == null) {
             if (sLogger.isActivated()) {
@@ -695,7 +695,7 @@ public class HttpUploadManager extends HttpTransferManager {
              * Note! This is needed since this can be called during dequeuing.
              */
             sLogger.error("Upload reasume has failed due to that the file is not accessible!", e);
-            getListener().httpTransferNotAllowedToSend();
+            getListener().onHttpTransferNotAllowedToSend();
             return null;
         } finally {
             CloseableUtils.tryToClose(outputStream);
@@ -732,11 +732,11 @@ public class HttpUploadManager extends HttpTransferManager {
                         + progress);
             }
             // Send remaining bytes
-            while (bytesRead > 0 && !isCancelled()) {
+            while (bytesRead > 0 && !isCancelled() && !isPaused()) {
                 progress += bytesRead;
                 outputStream.write(buffer, 0, bytesRead);
                 bytesAvailable = fileInputStream.available();
-                getListener().httpTransferProgress(progress, mContent.getSize());
+                getListener().onHttpTransferProgress(progress, mContent.getSize());
                 bufferSize = Math.min(bytesAvailable, CHUNK_MAX_SIZE);
                 buffer = new byte[bufferSize];
                 bytesRead = fileInputStream.read(buffer, 0, bufferSize);

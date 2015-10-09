@@ -51,7 +51,7 @@
                 android:paddingTop="10dip" />
         </TableRow>
 
-        <TableRow android:paddingTop="5dip" >
+        <TableRow android:paddingTop="5dip" android:id="@+id/isAutoAccept">
 
             <TextView
                 android:layout_width="fill_parent"
@@ -72,30 +72,7 @@
                 android:paddingTop="10dip" />
         </TableRow>
 
-        <TableRow android:paddingTop="5dip" >
-
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
-                android:gravity="left"
-                android:paddingTop="10dip"
-                android:text="@string/label_ft_isAutoAcceptModeChangeable" />
-
-            <CheckBox
-                android:id="@+id/ft_isAutoAcceptModeChangeable"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
-                android:clickable="false"
-                android:enabled="false"
-                android:gravity="left"
-                android:paddingTop="10dip" />
-        </TableRow>
-
-        <TableRow android:paddingTop="5dip" >
+        <TableRow android:paddingTop="5dip" android:id="@+id/isAutoAcceptInRoaming">
 
             <TextView
                 android:layout_width="fill_parent"

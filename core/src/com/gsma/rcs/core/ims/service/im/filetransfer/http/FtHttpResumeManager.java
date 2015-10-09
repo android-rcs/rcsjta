@@ -47,9 +47,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * File Transfer HTTP resume manager
  */
 public class FtHttpResumeManager implements Runnable {
-    /**
-     * IMS service
-     */
     private InstantMessagingService mImsService;
 
     /**
@@ -96,6 +93,7 @@ public class FtHttpResumeManager implements Runnable {
                 mListOfFtHttpResume = new LinkedList<FtHttpResume>(transfersToResume);
                 processNext();
             }
+
         } catch (ServerApiPersistentStorageException e) {
             /*
              * No state change in case we havn't able to find any resumable file transfer sessions ,
@@ -103,6 +101,7 @@ public class FtHttpResumeManager implements Runnable {
              * fetch such sessions then we will retry later to fetch them.
              */
             mLogger.error("Error retrieving resumable sessions!", e);
+
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
@@ -138,16 +137,24 @@ public class FtHttpResumeManager implements Runnable {
                 break;
 
             case OUTGOING:
-                // TODO : only managed for 1-1 FToHTTP
                 FtHttpResumeUpload uploadInfo = (FtHttpResumeUpload) mFtHttpResume;
                 MmContent uploadContent = ContentManager.createMmContent(uploadInfo.getFile(),
                         uploadInfo.getSize(), uploadInfo.getFileName());
-                final ResumeUploadFileSharingSession resumeUpload = new ResumeUploadFileSharingSession(
-                        mImsService, uploadContent, uploadInfo, mRcsSettings, mMessagingLog,
-                        mContactManager);
-                resumeUpload.addListener(getFileSharingSessionListener());
-                mImsService.resumeOutgoingFileTransfer(resumeUpload, false);
-                resumeUpload.startSession();
+                if (!mFtHttpResume.isGroupTransfer()) {
+                    final ResumeUploadFileSharingSession resumeUpload = new ResumeUploadFileSharingSession(
+                            mImsService, uploadContent, uploadInfo, mRcsSettings, mMessagingLog,
+                            mContactManager);
+                    resumeUpload.addListener(getFileSharingSessionListener());
+                    mImsService.resumeOutgoingFileTransfer(resumeUpload, false);
+                    resumeUpload.startSession();
+                } else {
+                    final ResumeUploadGroupFileSharingSession resumeUpload = new ResumeUploadGroupFileSharingSession(
+                            mImsService, uploadContent, uploadInfo, mRcsSettings, mMessagingLog,
+                            mContactManager);
+                    resumeUpload.addListener(getFileSharingSessionListener());
+                    mImsService.resumeOutgoingFileTransfer(resumeUpload, true);
+                    resumeUpload.startSession();
+                }
                 break;
 
             default:
@@ -230,11 +237,5 @@ public class FtHttpResumeManager implements Runnable {
                     long fileIconExpiration) {
             }
         };
-    }
-
-    /**
-     * Terminates
-     */
-    public void terminate() {
     }
 }

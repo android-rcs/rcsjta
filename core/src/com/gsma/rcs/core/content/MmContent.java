@@ -23,13 +23,11 @@
 package com.gsma.rcs.core.content;
 
 import com.gsma.rcs.core.FileAccessException;
-import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.utils.CloseableUtils;
 
 import android.content.ContentResolver;
 import android.net.Uri;
-import android.os.ParcelFileDescriptor;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -43,32 +41,18 @@ import java.io.IOException;
  */
 public abstract class MmContent {
 
-    /**
-     * Content uri
-     */
-    private Uri mFile;
+    private Uri mUri;
 
-    /**
-     * The filename
-     */
     private String mFileName;
 
-    /**
-     * Content size in bytes
-     */
     private long mSize;
 
-    /**
-     * Encoding
-     */
     private String mEncoding;
 
     /**
-     * Stream to write received data direct to file.
+     * Stream to write received data directly to file.
      */
     private BufferedOutputStream mOut;
-
-    private ParcelFileDescriptor mPfd;
 
     /**
      * Constructor
@@ -102,7 +86,7 @@ public abstract class MmContent {
      * @param fileName File name
      */
     public MmContent(Uri file, String encoding, long size, String fileName) {
-        mFile = file;
+        mUri = file;
         mEncoding = encoding;
         mSize = size;
         mFileName = fileName;
@@ -114,7 +98,7 @@ public abstract class MmContent {
      * @return uri
      */
     public Uri getUri() {
-        return mFile;
+        return mUri;
     }
 
     /**
@@ -122,8 +106,8 @@ public abstract class MmContent {
      * 
      * @param file Uri
      */
-    public void setUri(Uri file) {
-        mFile = file;
+    public void setUri(Uri uri) {
+        mUri = uri;
     }
 
     /**
@@ -208,7 +192,7 @@ public abstract class MmContent {
      * @return String
      */
     public String toString() {
-        return mFile + " (" + mSize + " bytes)";
+        return mUri + " (" + mSize + " bytes)";
     }
 
     /**
@@ -220,11 +204,10 @@ public abstract class MmContent {
     public void writeData2File(byte[] data) throws FileAccessException {
         try {
             if (mOut == null) {
-                mPfd = AndroidFactory.getApplicationContext().getContentResolver()
-                        .openFileDescriptor(mFile, "w");
-                // To optimize I/O set buffer size to 8kBytes
-                mOut = new BufferedOutputStream(new FileOutputStream(mPfd.getFileDescriptor()),
-                        8 * 1024);
+                File destination = new File(mUri.getPath());
+                FileOutputStream fos = new FileOutputStream(destination);
+                /* To optimize I/O set buffer size to 8 kBytes */
+                mOut = new BufferedOutputStream(fos, 8 * 1024);
             }
             mOut.write(data);
         } catch (IOException e) {
@@ -240,7 +223,6 @@ public abstract class MmContent {
             FileFactory.getFactory().updateMediaStorage(getUri().getEncodedPath());
         } finally {
             CloseableUtils.tryToClose(mOut);
-            CloseableUtils.tryToClose(mPfd);
         }
     }
 

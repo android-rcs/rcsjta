@@ -62,7 +62,6 @@ public class DownloadFromAcceptFileSharingSession extends TerminatingHttpFileSha
                 resume.getFileicon() != null ? FileTransferUtils.createMmContent(resume.getFileicon()) : null,
                 resume.getFileicon() != null ? resume.getIconExpiration() : FileTransferData.UNKNOWN_EXPIRATION,
                 resume.getContact(),
-                null,
                 resume.getChatId(),
                 resume.getFileTransferId(),
                 resume.isGroupTransfer(),
@@ -82,7 +81,7 @@ public class DownloadFromAcceptFileSharingSession extends TerminatingHttpFileSha
             sLogger.info("Accept HTTP file transfer session");
         }
         try {
-            httpTransferStarted();
+            onHttpTransferStarted();
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and

@@ -90,10 +90,21 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
             String fileTransferId, MmContent content, ContactId contact, MmContent fileIcon,
             String tId, MessagingLog messagingLog, RcsSettings rcsSettings, long timestamp,
             long timestampSent, ContactManager contactManager) {
-        super(imService, content, contact, PhoneUtils.formatContactIdToUri(contact), fileIcon,
-                null, null, fileTransferId, rcsSettings, messagingLog, timestamp,
-                FileTransferData.UNKNOWN_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION,
+        // @formatter:off
+        super(imService, 
+                content,
+                contact,
+                PhoneUtils.formatContactIdToUri(contact),
+                fileIcon,
+                null,
+                fileTransferId,
+                rcsSettings,
+                messagingLog,
+                timestamp,
+                FileTransferData.UNKNOWN_EXPIRATION,
+                FileTransferData.UNKNOWN_EXPIRATION,
                 contactManager);
+        // @formatter:ofn
         mImService = imService;
         mTimestampSent = timestampSent;
         if (sLogger.isActivated()) {
@@ -119,6 +130,10 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
 
         } catch (IOException e) {
+            /* Don't call handleError in case of Pause or Cancel */
+            if (mUploadManager.isCancelled() || mUploadManager.isPaused()) {
+                return;
+            }
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
 
         } catch (PayloadException e) {
@@ -172,7 +187,6 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
             if (logActivated) {
                 sLogger.debug("Send file transfer info via an existing chat session");
             }
-            setChatSessionID(chatSession.getSessionID());
             setContributionID(chatSession.getContributionID());
 
             String networkContent;
@@ -208,13 +222,12 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                 return;
             }
             chatSession = mImService.createOneToOneChatSession(getRemoteContact(), firstMsg);
-            setChatSessionID(chatSession.getSessionID());
             setContributionID(chatSession.getContributionID());
 
             chatSession.startSession();
             mImService.receiveOneOneChatSessionInitiation(chatSession);
         }
-        handleFileTransfered();
+        handleFileTransferred();
     }
 
     @Override

@@ -158,7 +158,7 @@ public abstract class HttpTransferManager {
             sLogger.warn("User is pausing transfer");
         }
         mIsPaused = true;
-        getListener().httpTransferPausedByUser();
+        getListener().onHttpTransferPausedByUser();
     }
 
     /**
@@ -169,15 +169,19 @@ public abstract class HttpTransferManager {
             sLogger.warn("System is pausing transfer");
         }
         mIsPaused = true;
-        getListener().httpTransferPausedBySystem();
+        getListener().onHttpTransferPausedBySystem();
     }
 
     /**
      * Resuming upload so resetting cancelled boolean
      */
-    public void resetParamForResume() {
+    public void resumeTransfer() {
+        if (sLogger.isActivated()) {
+            sLogger.warn("Transfer is resuming");
+        }
         mIsCancelled = false;
         mIsPaused = false;
+        getListener().onHttpTransferResumed();
     }
 
     /**

@@ -20,6 +20,7 @@ package com.orangelabs.rcs.ri.messaging.chat;
 
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.services.rcs.filetransfer.FileTransferIntent;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
 
 import com.orangelabs.rcs.api.connection.ConnectionManager;
@@ -58,9 +59,6 @@ import android.widget.Toast;
  */
 public abstract class SendFile extends Activity implements ISendFile {
 
-    /**
-     * Activity result constants
-     */
     private final static int SELECT_IMAGE = 0;
 
     /**
@@ -68,9 +66,6 @@ public abstract class SendFile extends Activity implements ISendFile {
      */
     protected final Handler handler = new Handler();
 
-    /**
-     * Transfer Id
-     */
     protected String mTransferId;
 
     /**
@@ -88,19 +83,10 @@ public abstract class SendFile extends Activity implements ISendFile {
      */
     protected long filesize = -1;
 
-    /**
-     * API connection manager
-     */
     protected ConnectionManager mCnxManager;
 
-    /**
-     * File transfer
-     */
     protected FileTransfer mFileTransfer;
 
-    /**
-     * Progress dialog
-     */
     private Dialog progressDialog;
 
     /**
@@ -108,20 +94,39 @@ public abstract class SendFile extends Activity implements ISendFile {
      */
     protected LockAccess mExitOnce = new LockAccess();
 
+    protected Button mResumeBtn;
+
+    protected Button mPauseBtn;
+
+    private boolean mResuming = false;
+
+    private Button mInviteBtn;
+
+    private Button mSelectBtn;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Set layout
+        mResuming = FileTransferIntent.ACTION_RESUME.equals(getIntent().getAction());
+
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.chat_send_file);
 
-        // Set buttons callback
-        Button inviteBtn = (Button) findViewById(R.id.invite_btn);
-        inviteBtn.setOnClickListener(btnInviteListener);
-        inviteBtn.setEnabled(false);
-        Button selectBtn = (Button) findViewById(R.id.select_btn);
-        selectBtn.setOnClickListener(btnSelectListener);
+        mInviteBtn = (Button) findViewById(R.id.invite_btn);
+        mInviteBtn.setOnClickListener(btnInviteListener);
+        mInviteBtn.setEnabled(false);
+
+        mSelectBtn = (Button) findViewById(R.id.select_btn);
+        mSelectBtn.setOnClickListener(btnSelectListener);
+
+        mPauseBtn = (Button) findViewById(R.id.pause_btn);
+        mPauseBtn.setOnClickListener(btnPauseListener);
+        mPauseBtn.setEnabled(false);
+
+        mResumeBtn = (Button) findViewById(R.id.resume_btn);
+        mResumeBtn.setOnClickListener(btnResumeListener);
+        mResumeBtn.setEnabled(false);
 
         // Register to API connection manager
         mCnxManager = ConnectionManager.getInstance();
@@ -205,11 +210,9 @@ public abstract class SendFile extends Activity implements ISendFile {
                 }
             });
 
-            // Hide buttons
-            Button inviteBtn = (Button) findViewById(R.id.invite_btn);
-            inviteBtn.setVisibility(View.INVISIBLE);
-            Button selectBtn = (Button) findViewById(R.id.select_btn);
-            selectBtn.setVisibility(View.INVISIBLE);
+            /* Hide buttons */
+            mInviteBtn.setVisibility(View.INVISIBLE);
+            mSelectBtn.setVisibility(View.INVISIBLE);
             ftThumb.setVisibility(View.INVISIBLE);
         }
     }
@@ -250,9 +253,7 @@ public abstract class SendFile extends Activity implements ISendFile {
                         filesize = -1;
                         uriEdit.setText("Unknown");
                     }
-                    // Show invite button
-                    Button inviteBtn = (Button) findViewById(R.id.invite_btn);
-                    inviteBtn.setEnabled(true);
+                    mInviteBtn.setEnabled(true);
                 }
                 break;
         }
@@ -328,5 +329,41 @@ public abstract class SendFile extends Activity implements ISendFile {
         }
         return true;
     }
+
+    private OnClickListener btnPauseListener = new OnClickListener() {
+        public void onClick(View v) {
+            try {
+                if (mFileTransfer.isAllowedToPauseTransfer()) {
+                    mFileTransfer.pauseTransfer();
+                } else {
+                    mPauseBtn.setVisibility(View.VISIBLE);
+                    mPauseBtn.setEnabled(false);
+                    Utils.showMessage(SendFile.this, getString(R.string.label_pause_ft_not_allowed));
+                }
+            } catch (RcsServiceException e) {
+                hideProgressDialog();
+                Utils.showMessageAndExit(SendFile.this, getString(R.string.label_pause_failed),
+                        mExitOnce, e);
+            }
+        }
+    };
+
+    private OnClickListener btnResumeListener = new OnClickListener() {
+        public void onClick(View v) {
+            try {
+                if (mFileTransfer.isAllowedToResumeTransfer()) {
+                    mFileTransfer.resumeTransfer();
+                } else {
+                    mResumeBtn.setEnabled(false);
+                    Utils.showMessage(SendFile.this,
+                            getString(R.string.label_resume_ft_not_allowed));
+                }
+            } catch (RcsServiceException e) {
+                hideProgressDialog();
+                Utils.showMessageAndExit(SendFile.this, getString(R.string.label_resume_failed),
+                        mExitOnce, e);
+            }
+        }
+    };
 
 }

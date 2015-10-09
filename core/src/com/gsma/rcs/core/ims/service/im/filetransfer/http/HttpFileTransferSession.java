@@ -46,7 +46,8 @@ import android.net.Uri;
  * 
  * @author jexa7410
  */
-public abstract class HttpFileTransferSession extends FileSharingSession {
+public abstract class HttpFileTransferSession extends FileSharingSession implements
+        HttpTransferEventListener {
 
     /**
      * HttpFileTransferSession state
@@ -63,8 +64,6 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
          */
         ESTABLISHED;
     }
-
-    private String mChatSessionId;
 
     private State mSessionState;
 
@@ -85,25 +84,22 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * @param contact Remote contact identifier
      * @param remoteContact the remote contact URI
      * @param fileIcon Content of file icon
-     * @param chatSessionId Chat session ID
      * @param chatContributionId Chat contribution Id
      * @param fileTransferId File transfer Id
      * @param rcsSettings
-     * @param fileExpiration
-     * @param iconExpiration
      * @param messagingLog
      * @param timestamp Local timestamp for the session
+     * @param fileExpiration
+     * @param iconExpiration
      * @param contactManager
      */
     public HttpFileTransferSession(InstantMessagingService imService, MmContent content,
-            ContactId contact, Uri remoteContact, MmContent fileIcon, String chatSessionId,
-            String chatContributionId, String fileTransferId, RcsSettings rcsSettings,
-            MessagingLog messagingLog, long timestamp, long fileExpiration, long iconExpiration,
-            ContactManager contactManager) {
+            ContactId contact, Uri remoteContact, MmContent fileIcon, String chatContributionId,
+            String fileTransferId, RcsSettings rcsSettings, MessagingLog messagingLog,
+            long timestamp, long fileExpiration, long iconExpiration, ContactManager contactManager) {
         super(imService, content, contact, remoteContact, fileIcon, fileTransferId, rcsSettings,
                 timestamp, contactManager);
 
-        mChatSessionId = chatSessionId;
         setContributionID(chatContributionId);
         mSessionState = State.PENDING;
         mFileExpiration = fileExpiration;
@@ -114,24 +110,6 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
     @Override
     public boolean isHttpTransfer() {
         return true;
-    }
-
-    /**
-     * Returns the chat session ID associated to the transfer
-     * 
-     * @return the chatSessionID
-     */
-    public String getChatSessionID() {
-        return mChatSessionId;
-    }
-
-    /**
-     * Set the chatSessionId
-     * 
-     * @param chatSessionID
-     */
-    public void setChatSessionID(String chatSessionID) {
-        mChatSessionId = chatSessionID;
     }
 
     /**
@@ -166,31 +144,20 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
     protected void closeHttpSession(TerminationReason reason) throws PayloadException,
             NetworkException {
         interruptSession();
-
         closeSession(reason);
-
         removeSession();
     }
 
-    /**
-     * Handle error
-     * 
-     * @param error Error
-     */
+    @Override
     public void handleError(ImsServiceError error) {
         if (isSessionInterrupted()) {
             return;
         }
-
-        // Error
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("Transfer error: ").append(error.getErrorCode())
                     .append(", reason=").append(error.getMessage()).toString());
         }
-
-        // Remove the current session
         removeSession();
-
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
             ((FileSharingSessionListener) listener).onTransferError(new FileSharingError(error),
@@ -198,30 +165,22 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
         }
     }
 
-    /**
-     * Prepare media session
-     */
+    @Override
     public void prepareMediaSession() {
         /* Not used here */
     }
 
-    /**
-     * Open media session
-     */
+    @Override
     public void openMediaSession() {
         /* Not used here */
     }
 
-    /**
-     * Start media transfer
-     */
+    @Override
     public void startMediaTransfer() {
         /* Not used here */
     }
 
-    /**
-     * Close media session
-     */
+    @Override
     public void closeMediaSession() {
         /* Not used here */
     }
@@ -231,11 +190,8 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * the file, but in case of file transfer over HTTP, only the content server has received the
      * file.
      */
-    public void handleFileTransfered() {
-        // File has been transfered
+    public void handleFileTransferred() {
         fileTransfered();
-
-        // Remove the current session
         removeSession();
 
         ContactId contact = getRemoteContact();
@@ -248,13 +204,8 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
         }
     }
 
-    /**
-     * HTTP transfer progress HttpTransferEventListener implementation
-     * 
-     * @param currentSize Current transfered size in bytes
-     * @param totalSize Total size in bytes
-     */
-    public void httpTransferProgress(long currentSize, long totalSize) {
+    @Override
+    public void onHttpTransferProgress(long currentSize, long totalSize) {
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
             ((FileSharingSessionListener) listener).onTransferProgress(contact, currentSize,
@@ -262,20 +213,16 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
         }
     }
 
-    /**
-     * HTTP not allowed to send
-     */
-    public void httpTransferNotAllowedToSend() {
+    @Override
+    public void onHttpTransferNotAllowedToSend() {
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
             ((FileSharingSessionListener) listener).onTransferNotAllowedToSend(contact);
         }
     }
 
-    /**
-     * HTTP transfer started HttpTransferEventListener implementation
-     */
-    public void httpTransferStarted() {
+    @Override
+    public void onHttpTransferStarted() {
         mSessionState = State.ESTABLISHED;
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
@@ -283,30 +230,24 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
         }
     }
 
-    /**
-     * Handle file transfer paused by user
-     */
-    public void httpTransferPausedByUser() {
+    @Override
+    public void onHttpTransferPausedByUser() {
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
             ((FileSharingSessionListener) listener).onFileTransferPausedByUser(contact);
         }
     }
 
-    /**
-     * Handle file transfer paused by system
-     */
-    public void httpTransferPausedBySystem() {
+    @Override
+    public void onHttpTransferPausedBySystem() {
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
             ((FileSharingSessionListener) listener).onFileTransferPausedBySystem(contact);
         }
     }
 
-    /**
-     * Handle file transfer paused
-     */
-    public void httpTransferResumed() {
+    @Override
+    public void onHttpTransferResumed() {
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
             ((FileSharingSessionListener) listener).onFileTransferResumed(contact);

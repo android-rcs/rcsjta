@@ -152,6 +152,10 @@ public class ServiceProvisioning extends Activity {
         setCheckBoxParam(R.id.StoreForwardServiceWarning, RcsSettingsData.WARN_SF_SERVICE, helper);
         setCheckBoxParam(R.id.AutoAcceptFileTransfer, RcsSettingsData.AUTO_ACCEPT_FILE_TRANSFER,
                 helper);
+        setCheckBoxParam(R.id.AutoAcceptFileTransferInRoaming,
+                RcsSettingsData.AUTO_ACCEPT_FT_IN_ROAMING, helper);
+        setCheckBoxParam(R.id.AutoAcceptFileTransferChangeable,
+                RcsSettingsData.AUTO_ACCEPT_FT_CHANGEABLE, helper);
         setCheckBoxParam(R.id.AutoAcceptChat, RcsSettingsData.AUTO_ACCEPT_CHAT, helper);
         setCheckBoxParam(R.id.AutoAcceptGroupChat, RcsSettingsData.AUTO_ACCEPT_GROUP_CHAT, helper);
     }
@@ -220,6 +224,10 @@ public class ServiceProvisioning extends Activity {
         saveCheckBoxParam(R.id.StoreForwardServiceWarning, RcsSettingsData.WARN_SF_SERVICE, helper);
         saveCheckBoxParam(R.id.AutoAcceptFileTransfer, RcsSettingsData.AUTO_ACCEPT_FILE_TRANSFER,
                 helper);
+        saveCheckBoxParam(R.id.AutoAcceptFileTransferInRoaming,
+                RcsSettingsData.AUTO_ACCEPT_FT_IN_ROAMING, helper);
+        saveCheckBoxParam(R.id.AutoAcceptFileTransferChangeable,
+                RcsSettingsData.AUTO_ACCEPT_FT_CHANGEABLE, helper);
         saveCheckBoxParam(R.id.AutoAcceptChat, RcsSettingsData.AUTO_ACCEPT_CHAT, helper);
         saveCheckBoxParam(R.id.AutoAcceptGroupChat, RcsSettingsData.AUTO_ACCEPT_GROUP_CHAT, helper);
     }

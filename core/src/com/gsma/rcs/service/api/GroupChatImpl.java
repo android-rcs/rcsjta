@@ -36,11 +36,12 @@ import com.gsma.rcs.core.ims.service.capability.Capabilities.CapabilitiesBuilder
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatError;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
-import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSessionListener;
+import com.gsma.rcs.core.ims.service.im.chat.RejoinGroupChatSession;
+import com.gsma.rcs.core.ims.service.im.chat.RestartGroupChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.contact.ContactManagerException;
@@ -1341,39 +1342,35 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     /**
      * Rejoins an existing group chat from its unique chat ID
      * 
-     * @return Group chat
      * @throws NetworkException
      * @throws PayloadException
      */
-    public IGroupChat rejoinGroupChat() throws PayloadException, NetworkException {
+    public void rejoinGroupChat() throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Rejoin group chat session related to the conversation " + mChatId);
         }
         ServerApiUtils.testIms();
-        final ChatSession session = mImService.rejoinGroupChatSession(mChatId);
+        RejoinGroupChatSession session = mImService.rejoinGroupChatSession(mChatId);
         session.addListener(this);
         mChatService.addGroupChat(this);
         session.startSession();
-        return this;
     }
 
     /**
      * Restarts a previous group chat from its unique chat ID
      * 
-     * @return Group chat
      * @throws NetworkException
      * @throws PayloadException
      */
-    public IGroupChat restartGroupChat() throws PayloadException, NetworkException {
+    public void restartGroupChat() throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Restart group chat session related to the conversation " + mChatId);
         }
         ServerApiUtils.testIms();
-        final GroupChatSession session = mImService.restartGroupChatSession(mChatId);
+        RestartGroupChatSession session = mImService.restartGroupChatSession(mChatId);
         session.addListener(this);
         mChatService.addGroupChat(this);
         session.startSession();
-        return this;
     }
 
     @Override

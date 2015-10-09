@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2014 Sony Mobile Communications Inc.
+ * Copyright (C) 2010 France Telecom S.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -29,7 +30,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.DownloadFromAcceptFileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.DownloadFromResumeFileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
-import com.gsma.rcs.core.ims.service.im.filetransfer.http.ResumeUploadFileSharingSession;
+import com.gsma.rcs.core.ims.service.im.filetransfer.http.ResumeUploadGroupFileSharingSession;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
@@ -52,7 +53,7 @@ import android.net.Uri;
 import android.os.RemoteException;
 
 /**
- * File transfer implementation
+ * Group file transfer implementation
  */
 public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSharingSessionListener {
 
@@ -642,6 +643,8 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                 }
                 return false;
             }
+            // TODO it should not be possible to pause file transfer if file size equals transferred
+            // size
             return true;
 
         } catch (ServerApiBaseException e) {
@@ -790,16 +793,16 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                                 + " since it no longer exists in persistent storage!");
                         return;
                     }
+                    MmContent content = ContentManager.createMmContent(resume.getFile(),
+                            resume.getSize(), resume.getFileName());
                     if (Direction.OUTGOING == resume.getDirection()) {
-                        session = new ResumeUploadFileSharingSession(mImService, ContentManager
-                                .createMmContent(resume.getFile(), resume.getSize(),
-                                        resume.getFileName()), (FtHttpResumeUpload) resume,
-                                mRcsSettings, mMessagingLog, mContactManager);
+                        session = new ResumeUploadGroupFileSharingSession(mImService, content,
+                                (FtHttpResumeUpload) resume, mRcsSettings, mMessagingLog,
+                                mContactManager);
                     } else {
-                        session = new DownloadFromResumeFileSharingSession(mImService,
-                                ContentManager.createMmContent(resume.getFile(), resume.getSize(),
-                                        resume.getFileName()), (FtHttpResumeDownload) resume,
-                                mRcsSettings, mMessagingLog, mContactManager);
+                        session = new DownloadFromResumeFileSharingSession(mImService, content,
+                                (FtHttpResumeDownload) resume, mRcsSettings, mMessagingLog,
+                                mContactManager);
                     }
                     session.addListener(GroupFileTransferImpl.this);
                     session.startSession();

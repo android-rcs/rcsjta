@@ -42,7 +42,6 @@ import com.gsma.rcs.core.ims.service.ImsServiceSession.InvitationStatus;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.capability.Capabilities.CapabilitiesBuilder;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
-import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatAutoRejoinTask;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
@@ -311,12 +310,9 @@ public class InstantMessagingService extends ImsService {
                 SipMessageFactory.createResponse(request, null, Response.FORBIDDEN, warning));
     }
 
-    /**
-     * Start the IMS service
-     */
+    @Override
     public synchronized void start() {
         if (isServiceStarted()) {
-            // Already started
             return;
         }
         setServiceStarted(true);
@@ -342,12 +338,9 @@ public class InstantMessagingService extends ImsService {
         }
     }
 
-    /**
-     * Stop the IMS service
-     */
+    @Override
     public synchronized void stop() {
         if (!isServiceStarted()) {
-            // Already stopped
             return;
         }
         setServiceStarted(false);
@@ -356,9 +349,7 @@ public class InstantMessagingService extends ImsService {
         mImdnManager.interrupt();
     }
 
-    /**
-     * Check the IMS service
-     */
+    @Override
     public void check() {
     }
 
@@ -778,22 +769,20 @@ public class InstantMessagingService extends ImsService {
      * @param content The file content to be sent
      * @param fileIcon Content of fileicon
      * @param groupChatId Chat contribution ID
-     * @param groupChatSessionId GroupChatSession Id
      * @param timestamp the local timestamp when initiating the file transfer
      * @param timestampSent the timestamp sent in payload for the file transfer
      * @return File transfer session
      */
     public FileSharingSession createGroupFileTransferSession(String fileTransferId,
-            MmContent content, MmContent fileIcon, String groupChatId, String groupChatSessionId,
-            long timestamp, long timestampSent) {
+            MmContent content, MmContent fileIcon, String groupChatId, long timestamp,
+            long timestampSent) {
         if (sLogger.isActivated()) {
             sLogger.info("Send file " + content.toString() + " to " + groupChatId);
         }
         FileSharingSession session = new OriginatingHttpGroupFileSharingSession(this,
                 fileTransferId, content, fileIcon, ImsModule.getImsUserProfile()
-                        .getImConferenceUri(), groupChatSessionId, groupChatId, UUID.randomUUID()
-                        .toString(), mRcsSettings, mMessagingLog, timestamp, timestampSent,
-                mContactManager);
+                        .getImConferenceUri(), groupChatId, UUID.randomUUID().toString(),
+                mRcsSettings, mMessagingLog, timestamp, timestampSent, mContactManager);
         return session;
     }
 
@@ -926,15 +915,19 @@ public class InstantMessagingService extends ImsService {
                                 + e.getMessage() + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
+
                 } catch (FileAccessException e) {
                     sLogger.error("Failed to receive msrp file transfer invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
+
                 } catch (ContactManagerException e) {
                     sLogger.error("Failed to receive msrp file transfer invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
+
                 } catch (PayloadException e) {
                     sLogger.error("Failed to receive msrp file transfer invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
+
                 } catch (RuntimeException e) {
                     /*
                      * Normally we are not allowed to catch runtime exceptions as these are genuine
@@ -1116,15 +1109,19 @@ public class InstantMessagingService extends ImsService {
                                 + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
+
                 } catch (FileAccessException e) {
                     sLogger.error("Failed to receive o2o chat invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
+
                 } catch (ContactManagerException e) {
                     sLogger.error("Failed to receive o2o chat invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
+
                 } catch (PayloadException e) {
                     sLogger.error("Failed to receive o2o chat invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
+
                 } catch (RuntimeException e) {
                     /*
                      * Normally we are not allowed to catch runtime exceptions as these are genuine
@@ -1153,14 +1150,11 @@ public class InstantMessagingService extends ImsService {
         if (sLogger.isActivated()) {
             sLogger.info("Initiate an ad-hoc group chat session");
         }
-
         Map<ContactId, ParticipantStatus> participants = ChatUtils.getParticipants(contacts,
                 ParticipantStatus.INVITING);
-
         OriginatingAdhocGroupChatSession session = new OriginatingAdhocGroupChatSession(this,
                 ImsModule.getImsUserProfile().getImConferenceUri(), subject, participants,
                 mRcsSettings, mMessagingLog, timestamp, mContactManager);
-
         return session;
     }
 
@@ -1258,15 +1252,19 @@ public class InstantMessagingService extends ImsService {
                                 + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
+
                 } catch (FileAccessException e) {
                     sLogger.error("Failed to receive group chat invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
+
                 } catch (ContactManagerException e) {
                     sLogger.error("Failed to receive group chat invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
+
                 } catch (PayloadException e) {
                     sLogger.error("Failed to receive group chat invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
+
                 } catch (RuntimeException e) {
                     /*
                      * Normally we are not allowed to catch runtime exceptions as these are genuine
@@ -1286,32 +1284,31 @@ public class InstantMessagingService extends ImsService {
      * Rejoin a group chat session
      * 
      * @param chatId Chat ID
-     * @return IM session
+     * @return RejoinGroupChat session
      */
-    public ChatSession rejoinGroupChatSession(String chatId) {
-        if (sLogger.isActivated()) {
+    public RejoinGroupChatSession rejoinGroupChatSession(String chatId) {
+        boolean logActivated = sLogger.isActivated();
+        if (logActivated) {
             sLogger.info("Rejoin group chat session");
         }
-
         assertAvailableChatSession("Max chat sessions reached");
 
-        // Get the group chat info from database
+        /* Get the group chat info from database */
         GroupChatInfo groupChat = mMessagingLog.getGroupChatInfo(chatId);
         if (groupChat == null) {
-            if (sLogger.isActivated()) {
+            if (logActivated) {
                 sLogger.warn("Group chat " + chatId + " can't be rejoined: conversation not found");
             }
             throw new ServerApiPersistentStorageException(
                     "Group chat conversation not found in database");
         }
         if (groupChat.getRejoinId() == null) {
-            if (sLogger.isActivated()) {
+            if (logActivated) {
                 sLogger.warn("Group chat " + chatId + " can't be rejoined: rejoin ID not found");
             }
             throw new ServerApiPersistentStorageException("Rejoin ID not found in database");
         }
-
-        if (sLogger.isActivated()) {
+        if (logActivated) {
             sLogger.debug("Rejoin group chat: " + groupChat.toString());
         }
         long timestamp = groupChat.getTimestamp();
@@ -1323,32 +1320,29 @@ public class InstantMessagingService extends ImsService {
      * Restart a group chat session
      * 
      * @param chatId Chat ID
-     * @return IM session
+     * @return RestartGroupChat session
      */
-    public GroupChatSession restartGroupChatSession(String chatId) {
-        if (sLogger.isActivated()) {
+    public RestartGroupChatSession restartGroupChatSession(String chatId) {
+        boolean logActivated = sLogger.isActivated();
+        if (logActivated) {
             sLogger.info("Restart group chat session");
         }
-
         assertAvailableChatSession("Max chat sessions reached");
-
-        // Get the group chat info from database
+        /* Get the group chat info from database */
         GroupChatInfo groupChat = mMessagingLog.getGroupChatInfo(chatId);
         if (groupChat == null) {
-            if (sLogger.isActivated()) {
+            if (logActivated) {
                 sLogger.warn("Group chat " + chatId + " can't be restarted: conversation not found");
             }
             throw new ServerApiPersistentStorageException(
                     "Group chat conversation not found in database");
         }
-        if (sLogger.isActivated()) {
+        if (logActivated) {
             sLogger.debug("Restart group chat: " + groupChat.toString());
         }
-
         Map<ContactId, ParticipantStatus> storedParticipants = groupChat.getParticipants();
-
         if (storedParticipants.isEmpty()) {
-            if (sLogger.isActivated()) {
+            if (logActivated) {
                 sLogger.warn("Group chat " + chatId + " can't be restarted: participants not found");
             }
             throw new ServerApiPersistentStorageException(
@@ -1377,8 +1371,10 @@ public class InstantMessagingService extends ImsService {
                         session.getConferenceEventSubscriber().receiveNotification(notify,
                                 timestamp);
                     }
+
                 } catch (PayloadException e) {
                     sLogger.error("Failed to receive group conference notification!", e);
+
                 } catch (RuntimeException e) {
                     sLogger.error("Failed to receive group conference notification!", e);
                 }

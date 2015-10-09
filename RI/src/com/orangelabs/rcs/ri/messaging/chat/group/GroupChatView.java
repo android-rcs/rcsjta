@@ -133,121 +133,180 @@ public class GroupChatView extends ChatView {
 
     private static final String LOGTAG = LogUtils.getTag(GroupChatView.class.getSimpleName());
 
-    /**
-     * Group chat listener
-     */
-    private GroupChatListener mListener = new GroupChatListener() {
+    private GroupChatListener mChatListener;
 
-        @Override
-        public void onMessageStatusChanged(String chatId, String mimeType, String msgId,
-                Content.Status status, Content.ReasonCode reasonCode) {
-            if (LogUtils.isActive) {
-                Log.i(LOGTAG, new StringBuilder("onMessageStatusChanged chatId=").append(chatId)
-                        .append(" mime-type=").append(mimeType).append(" msgId=").append(msgId)
-                        .append(" status=").append(status).append(" reason=").append(reasonCode)
-                        .toString());
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (mExitOnce.isLocked()) {
+            return;
+        }
+        try {
+            addChatEventListener(mChatService);
+            ChatServiceConfiguration configuration = mChatService.getConfiguration();
+            /* Set max label length */
+            int maxMsgLength = configuration.getGroupChatMessageMaxLength();
+            if (maxMsgLength > 0) {
+                // Set the message composer max length
+                InputFilter[] filterArray = new InputFilter[1];
+                filterArray[0] = new InputFilter.LengthFilter(maxMsgLength);
+                mComposeText.setFilters(filterArray);
+            }
+            mComposingManager = new IsComposingManager(configuration.getIsComposingTimeout(),
+                    getNotifyComposing());
+
+        } catch (RcsServiceNotAvailableException e) {
+            Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce);
+
+        } catch (RcsServiceException e) {
+            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+        }
+        if (LogUtils.isActive) {
+            Log.d(LOGTAG, "onCreate");
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        if (LogUtils.isActive) {
+            Log.d(LOGTAG, "onDestroy");
+        }
+        if (mGroupChat != null) {
+            try {
+                mGroupChat.setComposingStatus(false);
+            } catch (RcsServiceException e) {
+                Utils.displayToast(this, e);
             }
         }
+        super.onDestroy();
+        chatIdOnForeground = null;
+    }
 
-        // Callback called when an Is-composing event has been received
-        public void onComposingEvent(String chatId, ContactId contact, boolean status) {
-            // Discard event if not for current chatId
-            if (!mChatId.equals(chatId)) {
-                return;
-
-            }
-            displayComposingEvent(contact, status);
+    @Override
+    public boolean processIntent(Intent intent) {
+        if (LogUtils.isActive) {
+            Log.d(LOGTAG, "processIntent ".concat(intent.getAction()));
         }
+        try {
+            switch ((GroupChatMode) intent.getSerializableExtra(EXTRA_MODE)) {
+                case OUTGOING:
+                    /* Initiate a Group Chat: Get subject */
+                    mSubject = intent.getStringExtra(GroupChatView.EXTRA_SUBJECT);
+                    updateGroupChatViewTitle(mSubject);
 
-        @Override
-        public void onParticipantStatusChanged(String chatId, ContactId contact,
-                ParticipantStatus status) {
-            if (LogUtils.isActive) {
-                Log.d(LOGTAG, "onParticipantStatusChanged chatId=" + chatId + " contact=" + contact
-                        + " status=" + status);
-            }
-        }
-
-        @Override
-        public void onMessageGroupDeliveryInfoChanged(String chatId, ContactId contact,
-                String mimeType, String msgId, GroupDeliveryInfo.Status status,
-                GroupDeliveryInfo.ReasonCode reasonCode) {
-            if (LogUtils.isActive) {
-                Log.d(LOGTAG,
-                        new StringBuilder("onMessageGroupDeliveryInfoChanged chatId=")
-                                .append(chatId).append(" contact=").append(contact)
-                                .append(" msgId=").append(msgId).append(" status=").append(status)
-                                .append(" reason=").append(reasonCode).toString());
-            }
-        }
-
-        @Override
-        public void onStateChanged(String chatId, final GroupChat.State state,
-                GroupChat.ReasonCode reasonCode) {
-            if (LogUtils.isActive) {
-                Log.d(LOGTAG,
-                        new StringBuilder("onStateChanged chatId=").append(chatId)
-                                .append(" state=").append(state).append(" reason=")
-                                .append(reasonCode).toString());
-            }
-            /* Discard event if not for current chatId */
-            if (mChatId == null || !mChatId.equals(chatId)) {
-                return;
-
-            }
-            final String _reasonCode = RiApplication.sGroupChatReasonCodes[reasonCode.toInt()];
-            mHandler.post(new Runnable() {
-                public void run() {
-                    switch (state) {
-                        case STARTED:
-                            /* Session is well established : hide progress dialog. */
-                            hideProgressDialog();
-                            break;
-
-                        case ABORTED:
-                            /* Session is aborted: hide progress dialog then exit. */
-                            hideProgressDialog();
-                            Utils.showMessageAndExit(GroupChatView.this,
-                                    getString(R.string.label_chat_aborted, _reasonCode), mExitOnce);
-                            break;
-
-                        case REJECTED:
-                            /* Session is rejected: hide progress dialog then exit. */
-                            hideProgressDialog();
-                            Utils.showMessageAndExit(GroupChatView.this,
-                                    getString(R.string.label_chat_rejected, _reasonCode), mExitOnce);
-                            break;
-
-                        case FAILED:
-                            /* Session is failed: hide progress dialog then exit. */
-                            hideProgressDialog();
-                            Utils.showMessageAndExit(GroupChatView.this,
-                                    getString(R.string.label_chat_failed, _reasonCode), mExitOnce);
-                            break;
-
-                        default:
+                    /* Get the list of participants */
+                    ContactUtil contactUtil = ContactUtil.getInstance(this);
+                    List<String> contacts = intent
+                            .getStringArrayListExtra(GroupChatView.EXTRA_PARTICIPANTS);
+                    if (contacts == null || contacts.isEmpty()) {
+                        Utils.showMessageAndExit(this, getString(R.string.label_invalid_contacts),
+                                mExitOnce);
+                        return false;
                     }
-                }
-            });
-        }
+                    for (String contact : contacts) {
+                        mParticipants.add(contactUtil.formatContact(contact));
+                    }
+                    if (mParticipants.isEmpty()) {
+                        Utils.showMessageAndExit(this, getString(R.string.label_invalid_contacts),
+                                mExitOnce);
+                        return false;
+                    }
+                    return initiateGroupChat();
 
-        @Override
-        public void onDeleted(Set<String> chatIds) {
-            if (LogUtils.isActive) {
-                Log.i(LOGTAG, "onDeleted chatIds=".concat(Arrays.toString(chatIds.toArray())));
+                case OPEN:
+                    // Open an existing session from the history log
+                    mChatId = intent.getStringExtra(GroupChatView.EXTRA_CHAT_ID);
+
+                    // Get chat session
+                    mGroupChat = mChatService.getGroupChat(mChatId);
+                    if (mGroupChat == null) {
+                        if (LogUtils.isActive) {
+                            Log.e(LOGTAG,
+                                    "processIntent session not found for chatId=".concat(mChatId));
+                        }
+                        Utils.showMessageAndExit(this, getString(R.string.label_session_not_found),
+                                mExitOnce);
+                        return false;
+                    }
+                    getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+
+                    chatIdOnForeground = mChatId;
+
+                    // Get subject
+                    mSubject = mGroupChat.getSubject();
+                    updateGroupChatViewTitle(mSubject);
+
+                    // Set list of participants
+                    mParticipants = mGroupChat.getParticipants().keySet();
+                    if (LogUtils.isActive) {
+                        if (mParticipants == null) {
+                            Log.e(LOGTAG, "processIntent chatId=" + mChatId + " subject='"
+                                    + mSubject + "'");
+                        }
+                    }
+                    return true;
+
+                case INCOMING:
+                    ChatMessageDAO message = (ChatMessageDAO) (intent.getExtras()
+                            .getParcelable(BUNDLE_CHATMESSAGE_DAO_ID));
+                    if (message != null) {
+                        /*
+                         * New message: check if it belongs to the displayed conversation.
+                         */
+                        if (message.getChatId().equals(mChatId) || mChatId == null) {
+                            // Mark the message as read
+                            mChatService.markMessageAsRead(message.getMsgId());
+                            if (mChatId != null) {
+                                return true;
+                            }
+                            mChatId = message.getChatId();
+                        } else {
+                            /*
+                             * Ignore message if it does not belong to current conversation.
+                             */
+                            if (LogUtils.isActive) {
+                                Log.d(LOGTAG,
+                                        "processIntent discard chat message " + message.getMsgId()
+                                                + " for chatId " + message.getChatId());
+                            }
+                            return true;
+                        }
+                    } else {
+                        /* New GC invitation */
+                        mChatId = intent.getStringExtra(GroupChatIntent.EXTRA_CHAT_ID);
+                    }
+                    mGroupChat = mChatService.getGroupChat(mChatId);
+                    if (mGroupChat == null) {
+                        Utils.showMessageAndExit(this, getString(R.string.label_session_not_found),
+                                mExitOnce);
+                        return false;
+                    }
+                    getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+                    chatIdOnForeground = mChatId;
+                    // Get remote contact
+                    ContactId contact = null; // mGroupChat.getRemoteContact();
+                    // Get subject
+                    mSubject = mGroupChat.getSubject();
+                    updateGroupChatViewTitle(mSubject);
+                    // Set list of participants
+                    mParticipants = mGroupChat.getParticipants().keySet();
+                    // Display accept/reject dialog
+                    if (GroupChat.State.INVITED == mGroupChat.getState()) {
+                        displayAcceptRejectDialog(contact);
+                    }
+                    if (LogUtils.isActive) {
+                        Log.d(LOGTAG, "New group chat for chatId ".concat(mChatId));
+                    }
+                    return true;
             }
-        }
+        } catch (RcsServiceNotAvailableException e) {
+            Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce, e);
 
-        @Override
-        public void onMessagesDeleted(String chatId, Set<String> msgIds) {
-            if (LogUtils.isActive) {
-                Log.i(LOGTAG,
-                        "onMessagesDeleted chatId=" + chatId + " msgIds="
-                                + Arrays.toString(msgIds.toArray()));
-            }
+        } catch (RcsServiceException e) {
+            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
         }
-
-    };
+        return false;
+    }
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
@@ -289,185 +348,6 @@ public class GroupChatView extends ChatView {
         }
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (mExitOnce.isLocked()) {
-            return;
-        }
-        try {
-            addChatEventListener(mChatService);
-            ChatServiceConfiguration configuration = mChatService.getConfiguration();
-            // Set max label length
-            int maxMsgLength = configuration.getGroupChatMessageMaxLength();
-            if (maxMsgLength > 0) {
-                // Set the message composer max length
-                InputFilter[] filterArray = new InputFilter[1];
-                filterArray[0] = new InputFilter.LengthFilter(maxMsgLength);
-                mComposeText.setFilters(filterArray);
-            }
-            // Instantiate the composing manager
-            mComposingManager = new IsComposingManager(configuration.getIsComposingTimeout(),
-                    getNotifyComposing());
-        } catch (RcsServiceNotAvailableException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce);
-        } catch (RcsServiceException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
-        }
-        if (LogUtils.isActive) {
-            Log.d(LOGTAG, "onCreate");
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-        if (LogUtils.isActive) {
-            Log.d(LOGTAG, "onDestroy");
-        }
-        if (mGroupChat != null) {
-            try {
-                mGroupChat.setComposingStatus(false);
-            } catch (RcsServiceException e) {
-                Utils.displayToast(this, e);
-            }
-        }
-        super.onDestroy();
-        chatIdOnForeground = null;
-    }
-
-    @Override
-    public boolean processIntent() {
-        if (LogUtils.isActive) {
-            Log.d(LOGTAG, "processIntent");
-        }
-        try {
-            switch ((GroupChatMode) getIntent().getSerializableExtra(EXTRA_MODE)) {
-                case OUTGOING:
-                    /* Initiate a Group Chat: Get subject */
-                    mSubject = getIntent().getStringExtra(GroupChatView.EXTRA_SUBJECT);
-                    updateGroupChatViewTitle(mSubject);
-
-                    /* Get the list of participants */
-                    ContactUtil contactUtil = ContactUtil.getInstance(this);
-                    List<String> contacts = getIntent().getStringArrayListExtra(
-                            GroupChatView.EXTRA_PARTICIPANTS);
-                    if (contacts == null || contacts.isEmpty()) {
-                        Utils.showMessageAndExit(this, getString(R.string.label_invalid_contacts),
-                                mExitOnce);
-                        return false;
-
-                    }
-                    for (String contact : contacts) {
-                        mParticipants.add(contactUtil.formatContact(contact));
-                    }
-                    if (mParticipants.isEmpty()) {
-                        Utils.showMessageAndExit(this, getString(R.string.label_invalid_contacts),
-                                mExitOnce);
-                        return false;
-
-                    }
-                    return initiateGroupChat();
-
-                case OPEN:
-                    // Open an existing session from the history log
-                    mChatId = getIntent().getStringExtra(GroupChatView.EXTRA_CHAT_ID);
-
-                    // Get chat session
-                    mGroupChat = mChatService.getGroupChat(mChatId);
-                    if (mGroupChat == null) {
-                        if (LogUtils.isActive) {
-                            Log.e(LOGTAG,
-                                    "processIntent session not found for chatId=".concat(mChatId));
-                        }
-                        Utils.showMessageAndExit(this, getString(R.string.label_session_not_found),
-                                mExitOnce);
-                        return false;
-
-                    }
-                    getSupportLoaderManager().initLoader(LOADER_ID, null, this);
-
-                    chatIdOnForeground = mChatId;
-
-                    // Get subject
-                    mSubject = mGroupChat.getSubject();
-                    updateGroupChatViewTitle(mSubject);
-
-                    // Set list of participants
-                    mParticipants = mGroupChat.getParticipants().keySet();
-                    if (LogUtils.isActive) {
-                        if (mParticipants == null) {
-                            Log.e(LOGTAG,
-                                    new StringBuilder("processIntent chatId=").append(mChatId)
-                                            .append(" subject='").append(mSubject).append("'")
-                                            .toString());
-                        }
-                    }
-                    return true;
-
-                case INCOMING:
-                    ChatMessageDAO message = (ChatMessageDAO) (getIntent().getExtras()
-                            .getParcelable(BUNDLE_CHATMESSAGE_DAO_ID));
-                    if (message != null) {
-                        /*
-                         * New message: check if it belongs to the displayed conversation.
-                         */
-                        if (message.getChatId().equals(mChatId) || mChatId == null) {
-                            // Mark the message as read
-                            mChatService.markMessageAsRead(message.getMsgId());
-                            if (mChatId != null) {
-                                return true;
-                            }
-                            mChatId = message.getChatId();
-                        } else {
-                            /*
-                             * Ignore message if it does not belong to current conversation.
-                             */
-                            if (LogUtils.isActive) {
-                                Log.d(LOGTAG,
-                                        new StringBuilder("processIntent discard chat message ")
-                                                .append(message.getMsgId()).append(" for chatId ")
-                                                .append(message.getChatId()).toString());
-                            }
-                            return true;
-
-                        }
-                    } else {
-                        /* New GC invitation */
-                        mChatId = getIntent().getStringExtra(GroupChatIntent.EXTRA_CHAT_ID);
-                    }
-                    mGroupChat = mChatService.getGroupChat(mChatId);
-                    if (mGroupChat == null) {
-                        Utils.showMessageAndExit(this, getString(R.string.label_session_not_found),
-                                mExitOnce);
-                        return false;
-
-                    }
-                    getSupportLoaderManager().initLoader(LOADER_ID, null, this);
-                    chatIdOnForeground = mChatId;
-                    // Get remote contact
-                    ContactId contact = null; // mGroupChat.getRemoteContact();
-                    // Get subject
-                    mSubject = mGroupChat.getSubject();
-                    updateGroupChatViewTitle(mSubject);
-                    // Set list of participants
-                    mParticipants = mGroupChat.getParticipants().keySet();
-                    // Display accept/reject dialog
-                    if (GroupChat.State.INVITED == mGroupChat.getState()) {
-                        displayAcceptRejectDialog(contact);
-                    }
-                    if (LogUtils.isActive) {
-                        Log.d(LOGTAG, "New group chat for chatId ".concat(mChatId));
-                    }
-                    return true;
-            }
-        } catch (RcsServiceNotAvailableException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce, e);
-        } catch (RcsServiceException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
-        }
-        return false;
-    }
-
     /**
      * Update the view title
      *
@@ -476,8 +356,7 @@ public class GroupChatView extends ChatView {
     private void updateGroupChatViewTitle(String subject) {
         // Set title
         if (!TextUtils.isEmpty(subject)) {
-            setTitle(new StringBuilder(getString(R.string.title_group_chat)).append(" '")
-                    .append(mSubject).append("'").toString());
+            setTitle(getString(R.string.title_group_chat) + " '" + mSubject + "'");
         }
     }
 
@@ -583,7 +462,6 @@ public class GroupChatView extends ChatView {
      * Quit the group chat session
      */
     private void quitSession() {
-        /* Stop session */
         try {
             /* check if the session is not already stopped */
             if (mGroupChat != null) {
@@ -593,7 +471,6 @@ public class GroupChatView extends ChatView {
             Utils.displayToast(this, "Fail to leave group chat", e);
         }
         mGroupChat = null;
-        /* Exit activity */
         finish();
     }
 
@@ -893,12 +770,12 @@ public class GroupChatView extends ChatView {
 
     @Override
     public void addChatEventListener(ChatService chatService) throws RcsServiceException {
-        mChatService.addEventListener(mListener);
+        mChatService.addEventListener(mChatListener);
     }
 
     @Override
     public void removeChatEventListener(ChatService chatService) throws RcsServiceException {
-        mChatService.removeEventListener(mListener);
+        mChatService.removeEventListener(mChatListener);
     }
 
     @Override
@@ -924,6 +801,120 @@ public class GroupChatView extends ChatView {
             }
         };
         return notifyComposing;
+    }
+
+    @Override
+    public void initialize() {
+        mChatListener = new GroupChatListener() {
+
+            @Override
+            public void onMessageStatusChanged(String chatId, String mimeType, String msgId,
+                    Content.Status status, Content.ReasonCode reasonCode) {
+                if (LogUtils.isActive) {
+                    Log.i(LOGTAG, "onMessageStatusChanged chatId=" + chatId + " mime-type="
+                            + mimeType + " msgId=" + msgId + " status=" + status + " reason="
+                            + reasonCode);
+                }
+            }
+
+            // Callback called when an Is-composing event has been received
+            public void onComposingEvent(String chatId, ContactId contact, boolean status) {
+                // Discard event if not for current chatId
+                if (!mChatId.equals(chatId)) {
+                    return;
+
+                }
+                displayComposingEvent(contact, status);
+            }
+
+            @Override
+            public void onParticipantStatusChanged(String chatId, ContactId contact,
+                    ParticipantStatus status) {
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "onParticipantStatusChanged chatId=" + chatId + " contact="
+                            + contact + " status=" + status);
+                }
+            }
+
+            @Override
+            public void onMessageGroupDeliveryInfoChanged(String chatId, ContactId contact,
+                    String mimeType, String msgId, GroupDeliveryInfo.Status status,
+                    GroupDeliveryInfo.ReasonCode reasonCode) {
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "onMessageGroupDeliveryInfoChanged chatId=" + chatId
+                            + " contact=" + contact + " msgId=" + msgId + " status=" + status
+                            + " reason=" + reasonCode);
+                }
+            }
+
+            @Override
+            public void onStateChanged(String chatId, final GroupChat.State state,
+                    GroupChat.ReasonCode reasonCode) {
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "onStateChanged chatId=" + chatId + " state=" + state
+                            + " reason=" + reasonCode);
+                }
+                /* Discard event if not for current chatId */
+                if (mChatId == null || !mChatId.equals(chatId)) {
+                    return;
+
+                }
+                final String _reasonCode = RiApplication.sGroupChatReasonCodes[reasonCode.toInt()];
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        switch (state) {
+                            case STARTED:
+                                /* Session is well established : hide progress dialog. */
+                                hideProgressDialog();
+                                break;
+
+                            case ABORTED:
+                                /* Session is aborted: hide progress dialog then exit. */
+                                hideProgressDialog();
+                                Utils.showMessageAndExit(GroupChatView.this,
+                                        getString(R.string.label_chat_aborted, _reasonCode),
+                                        mExitOnce);
+                                break;
+
+                            case REJECTED:
+                                /* Session is rejected: hide progress dialog then exit. */
+                                hideProgressDialog();
+                                Utils.showMessageAndExit(GroupChatView.this,
+                                        getString(R.string.label_chat_rejected, _reasonCode),
+                                        mExitOnce);
+                                break;
+
+                            case FAILED:
+                                /* Session is failed: hide progress dialog then exit. */
+                                hideProgressDialog();
+                                Utils.showMessageAndExit(GroupChatView.this,
+                                        getString(R.string.label_chat_failed, _reasonCode),
+                                        mExitOnce);
+                                break;
+
+                            default:
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onDeleted(Set<String> chatIds) {
+                if (LogUtils.isActive) {
+                    Log.i(LOGTAG, "onDeleted chatIds=".concat(Arrays.toString(chatIds.toArray())));
+                }
+            }
+
+            @Override
+            public void onMessagesDeleted(String chatId, Set<String> msgIds) {
+                if (LogUtils.isActive) {
+                    Log.i(LOGTAG,
+                            "onMessagesDeleted chatId=" + chatId + " msgIds="
+                                    + Arrays.toString(msgIds.toArray()));
+                }
+            }
+
+        };
     }
 
 }

@@ -49,8 +49,7 @@ import java.io.IOException;
  * 
  * @author vfml3370
  */
-public abstract class TerminatingHttpFileSharingSession extends HttpFileTransferSession implements
-        HttpTransferEventListener {
+public abstract class TerminatingHttpFileSharingSession extends HttpFileTransferSession {
 
     protected final HttpDownloadManager mDownloadManager;
 
@@ -74,7 +73,6 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
      * @param fileExpiration
      * @param fileIcon
      * @param iconExpiration
-     * @param chatSessionId
      * @param chatContributionId
      * @param isGroup
      * @param httpServerAddress
@@ -86,13 +84,24 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
      */
     public TerminatingHttpFileSharingSession(InstantMessagingService imService, MmContent content,
             long fileExpiration, MmContent fileIcon, long iconExpiration, ContactId remote,
-            String chatSessionId, String chatContributionId, String fileTransferId,
-            boolean isGroup, Uri httpServerAddress, RcsSettings rcsSettings,
-            MessagingLog messagingLog, long timestamp, String remoteInstanceId,
-            ContactManager contactManager) {
-        super(imService, content, remote, PhoneUtils.formatContactIdToUri(remote), fileIcon,
-                chatSessionId, chatContributionId, fileTransferId, rcsSettings, messagingLog,
-                timestamp, fileExpiration, iconExpiration, contactManager);
+            String chatContributionId, String fileTransferId, boolean isGroup,
+            Uri httpServerAddress, RcsSettings rcsSettings, MessagingLog messagingLog,
+            long timestamp, String remoteInstanceId, ContactManager contactManager) {
+        // @formatter:off
+        super(imService,
+                content,
+                remote,
+                PhoneUtils.formatContactIdToUri(remote),
+                fileIcon,
+                chatContributionId,
+                fileTransferId,
+                rcsSettings,
+                messagingLog,
+                timestamp,
+                fileExpiration,
+                iconExpiration,
+                contactManager);
+        // @formatter:on
         mGroupFileTransfer = isGroup;
         mRemoteInstanceId = remoteInstanceId;
         mDownloadManager = new HttpDownloadManager(content, this, httpServerAddress, rcsSettings);
@@ -111,8 +120,7 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
     @Override
     public void run() {
         try {
-            httpTransferStarted();
-
+            onHttpTransferStarted();
             Uri file = mDownloadManager.getDownloadedFileUri();
             /* Download file from the HTTP server */
             mDownloadManager.downloadFile();
@@ -120,7 +128,7 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
                 sLogger.debug("Download file with success");
             }
             getContent().setUri(file);
-            handleFileTransfered();
+            handleFileTransferred();
             if (mImdnManager.isSendOneToOneDeliveryDisplayedReportsEnabled()) {
                 sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
                         System.currentTimeMillis());
@@ -225,14 +233,14 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
             public void run() {
                 try {
                     fileTransferResumed();
-                    mDownloadManager.getListener().httpTransferResumed();
+                    mDownloadManager.getListener().onHttpTransferResumed();
                     /* Download file from the HTTP server */
                     mDownloadManager.resumeDownload();
                     if (sLogger.isActivated()) {
                         sLogger.debug("Download file with success");
                     }
                     getContent().setUri(mDownloadManager.getDownloadedFileUri());
-                    handleFileTransfered();
+                    handleFileTransferred();
                     if (mImdnManager.isSendOneToOneDeliveryDisplayedReportsEnabled()) {
                         sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
                                 System.currentTimeMillis());

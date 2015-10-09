@@ -21,6 +21,7 @@ package com.orangelabs.rcs.ri.messaging.chat.group;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.filetransfer.GroupFileTransferListener;
 import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
@@ -37,6 +38,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
 import java.util.Set;
@@ -53,14 +55,8 @@ public class SendGroupFile extends SendFile {
      */
     private final static String EXTRA_CHAT_ID = "chat_id";
 
-    /**
-     * Chat ID
-     */
     private String mChatId;
 
-    /**
-     * The log tag for this class
-     */
     private static final String LOGTAG = LogUtils.getTag(SendGroupFile.class.getSimpleName());
 
     /**
@@ -97,7 +93,7 @@ public class SendGroupFile extends SendFile {
 
         @Override
         public void onStateChanged(String chatId, String transferId,
-                final FileTransfer.State state, FileTransfer.ReasonCode reasonCode) {
+                final FileTransfer.State state, final FileTransfer.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG,
                         new StringBuilder("onStateChanged chatId=").append(chatId)
@@ -116,16 +112,32 @@ public class SendGroupFile extends SendFile {
                     TextView statusView = (TextView) findViewById(R.id.progress_status);
                     switch (state) {
                         case STARTED:
-                        case TRANSFERRED:
-                            // hide progress dialog
                             hideProgressDialog();
-                            // Display transfer state started
+                            /* Display transfer state started */
                             statusView.setText(_state);
+                            mPauseBtn.setEnabled(true);
+                            mResumeBtn.setEnabled(false);
+                            break;
+
+                        case PAUSED:
+                            statusView.setText(_state);
+                            mPauseBtn.setEnabled(false);
+                            if (ReasonCode.PAUSED_BY_USER == reasonCode) {
+                                mResumeBtn.setEnabled(true);
+                            }
+                            break;
+
+                        case TRANSFERRED:
+                            hideProgressDialog();
+                            /* Display transfer state started */
+                            statusView.setText(_state);
+                            /* Hide buttons Pause and Resume */
+                            mPauseBtn.setVisibility(View.INVISIBLE);
+                            mResumeBtn.setVisibility(View.INVISIBLE);
                             break;
 
                         case ABORTED:
-                            // Transfer is aborted: hide progress dialog then
-                            // exit
+                            /* Transfer is aborted: hide progress dialog then exit. */
                             hideProgressDialog();
                             Utils.showMessageAndExit(SendGroupFile.this,
                                     getString(R.string.label_transfer_aborted, _reasonCode),
@@ -133,8 +145,7 @@ public class SendGroupFile extends SendFile {
                             break;
 
                         case REJECTED:
-                            // Transfer is rejected: hide progress dialog then
-                            // exit
+                            /* Transfer is rejected: hide progress dialog then exit */
                             hideProgressDialog();
                             Utils.showMessageAndExit(SendGroupFile.this,
                                     getString(R.string.label_transfer_rejected, _reasonCode),
@@ -142,7 +153,7 @@ public class SendGroupFile extends SendFile {
                             break;
 
                         case FAILED:
-                            // Transfer failed: hide progress dialog then exit
+                            /* Transfer failed: hide progress dialog then exit */
                             hideProgressDialog();
                             Utils.showMessageAndExit(SendGroupFile.this,
                                     getString(R.string.label_transfer_failed, _reasonCode),

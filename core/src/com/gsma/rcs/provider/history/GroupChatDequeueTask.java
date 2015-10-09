@@ -140,7 +140,7 @@ public class GroupChatDequeueTask extends DequeueTask {
                     mimeType = cursor.getString(mimeTypeIdx);
                     switch (providerId) {
                         case MessageData.HISTORYLOG_MEMBER_ID:
-                            if (!isPossibleToDequeueGroupChatMessage(mChatId)) {
+                            if (!isPossibleToDequeueGroupChatMessagesAndGroupFileTransfers(mChatId)) {
                                 setGroupChatMessageAsFailedDequeue(mChatId, id, mimeType);
                                 continue;
                             }
@@ -166,6 +166,11 @@ public class GroupChatDequeueTask extends DequeueTask {
                                 continue;
                             }
                             State state = State.valueOf(cursor.getInt(statusIdx));
+                            if (logActivated) {
+                                mLogger.debug("Dequeue chatId=" + mChatId + " in state=" + state
+                                        + " file=" + file);
+                            }
+                            GroupFileTransferImpl groupFileTransfer;
                             switch (state) {
                                 case QUEUED:
                                     if (!isAllowedToDequeueGroupFileTransfer()) {
@@ -182,12 +187,13 @@ public class GroupChatDequeueTask extends DequeueTask {
                                     mFileTransferService.dequeueGroupFileTransfer(mChatId, id,
                                             fileContent, fileIconContent);
                                     break;
+
                                 case STARTED:
-                                    if (!isPossibleToDequeueGroupChatMessage(mChatId)) {
+                                    if (!isPossibleToDequeueGroupChatMessagesAndGroupFileTransfers(mChatId)) {
                                         setGroupFileTransferAsFailedDequeue(mChatId, id);
                                         continue;
                                     }
-                                    GroupFileTransferImpl groupFileTransfer = mFileTransferService
+                                    groupFileTransfer = mFileTransferService
                                             .getOrCreateGroupFileTransfer(mChatId, id);
                                     String fileInfo = FileTransferUtils
                                             .createHttpFileTransferXml(mMessagingLog
@@ -195,8 +201,8 @@ public class GroupChatDequeueTask extends DequeueTask {
                                     groupChat.dequeueGroupFileInfo(id, fileInfo,
                                             displayedReportEnabled, deliveryReportEnabled,
                                             groupFileTransfer);
-
                                     break;
+
                                 default:
                                     break;
                             }

@@ -18,11 +18,11 @@
 
 package com.orangelabs.rcs.ri.messaging.filetransfer;
 
-import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransferIntent;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
@@ -446,11 +446,13 @@ public class ReceiveFileTransfer extends Activity {
     private android.view.View.OnClickListener btnPauseListener = new android.view.View.OnClickListener() {
         @Override
         public void onClick(View arg0) {
-            mPauseBtn.setEnabled(false);
             try {
-                mFileTransfer.pauseTransfer();
-                if (mFileTransfer.isAllowedToResumeTransfer()) {
-                    mResumeBtn.setEnabled(true);
+                if (mFileTransfer.isAllowedToPauseTransfer()) {
+                    mFileTransfer.pauseTransfer();
+                } else {
+                    mPauseBtn.setEnabled(false);
+                    Utils.showMessage(ReceiveFileTransfer.this,
+                            getString(R.string.label_pause_ft_not_allowed));
                 }
             } catch (RcsServiceException e) {
                 Utils.showMessageAndExit(ReceiveFileTransfer.this,
@@ -467,9 +469,12 @@ public class ReceiveFileTransfer extends Activity {
         public void onClick(View arg0) {
             mResumeBtn.setEnabled(false);
             try {
-                mFileTransfer.resumeTransfer();
-                if (mFileTransfer.isAllowedToPauseTransfer()) {
-                    mPauseBtn.setEnabled(true);
+                if (mFileTransfer.isAllowedToResumeTransfer()) {
+                    mFileTransfer.resumeTransfer();
+                } else {
+                    mResumeBtn.setEnabled(false);
+                    Utils.showMessage(ReceiveFileTransfer.this,
+                            getString(R.string.label_resume_ft_not_allowed));
                 }
             } catch (RcsServiceException e) {
                 Utils.showMessageAndExit(ReceiveFileTransfer.this,
@@ -571,7 +576,7 @@ public class ReceiveFileTransfer extends Activity {
      * @param reasonCode
      */
     private void onTransferStateChangedUpdateUI(String transferId, final FileTransfer.State state,
-            FileTransfer.ReasonCode reasonCode) {
+            final FileTransfer.ReasonCode reasonCode) {
         final String _reasonCode = RiApplication.sFileTransferReasonCodes[reasonCode.toInt()];
         final String _state = RiApplication.sFileTransferStates[state.toInt()];
 
@@ -586,15 +591,17 @@ public class ReceiveFileTransfer extends Activity {
                 TextView statusView = (TextView) findViewById(R.id.progress_status);
                 switch (state) {
                     case STARTED:
-                        // Session is well established display session status
+                        /* Session is well established display session status */
                         statusView.setText(_state);
-                        try {
-                            if (mFileTransfer.isAllowedToPauseTransfer()) {
-                                mPauseBtn.setEnabled(true);
-                            }
-                        } catch (RcsGenericException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
+                        mPauseBtn.setEnabled(true);
+                        mResumeBtn.setEnabled(false);
+                        break;
+
+                    case PAUSED:
+                        statusView.setText(_state);
+                        mPauseBtn.setEnabled(false);
+                        if (ReasonCode.PAUSED_BY_USER == reasonCode) {
+                            mResumeBtn.setEnabled(true);
                         }
                         break;
 

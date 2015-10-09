@@ -153,6 +153,8 @@
     <string name="label_ft_not_allowed">Not allowed to transfer file(s)</string>
     <string name="title_multi_file_transfer">Multiple file transfer</string>
     <string name="label_delete_ft_failed">Failed to delete the file transfer</string>
+    <string name="label_pause_ft_not_allowed">Cannot pause HTTP file transfer</string>
+    <string name="label_resume_ft_not_allowed">Cannot resume HTTP file transfer</string>
 
     <!-- Chat menu -->
     <string name="menu_initiate_chat">Initiate single chat</string>
@@ -214,6 +216,8 @@
     <string name="label_GeolocExpireTime">Geoloc Expire Timeout:</string>
     <string name="label_GroupChatSupported">GC supported:</string>
     <string name="label_NotAllowedToInitiateGroupChat">Not allowed to initiate Group Chat</string>
+    <string name="title_undelivered_message">Undelivered messages!</string>
+    <string name="label_undelivered_message">(%1$s) did not receive your messages</string>
 
     <!-- Sharing menu -->
     <string name="menu_sharing">Sharing</string>

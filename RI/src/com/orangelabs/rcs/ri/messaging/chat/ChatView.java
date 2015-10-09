@@ -31,7 +31,6 @@ import com.orangelabs.rcs.api.connection.utils.LockAccess;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.geoloc.EditGeoloc;
 import com.orangelabs.rcs.ri.messaging.geoloc.SelectGeoloc;
-import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -48,7 +47,6 @@ import android.support.v4.content.Loader;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -93,14 +91,8 @@ public abstract class ChatView extends FragmentActivity implements
      */
     protected LockAccess mExitOnce = new LockAccess();
 
-    /**
-     * Activity displayed status
-     */
     private static boolean sActivityDisplayed = false;
 
-    /**
-     * API connection manager
-     */
     protected ConnectionManager mCnxManager;
 
     /**
@@ -108,12 +100,7 @@ public abstract class ChatView extends FragmentActivity implements
      */
     protected Handler mHandler = new Handler();
 
-    /**
-     * The chat service instance
-     */
     protected ChatService mChatService;
-
-    private static final String LOGTAG = LogUtils.getTag(ChatView.class.getSimpleName());
 
     /**
      * Chat message projection
@@ -144,6 +131,8 @@ public abstract class ChatView extends FragmentActivity implements
         /* Set layout */
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.chat_view);
+
+        initialize();
 
         /* Register to API connection manager */
         mCnxManager = ConnectionManager.getInstance();
@@ -220,7 +209,7 @@ public abstract class ChatView extends FragmentActivity implements
         mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.CHAT,
                 RcsServiceName.CONTACT, RcsServiceName.CAPABILITY);
         mChatService = mCnxManager.getChatApi();
-        processIntent();
+        processIntent(getIntent());
     }
 
     @Override
@@ -259,15 +248,11 @@ public abstract class ChatView extends FragmentActivity implements
 
     @Override
     protected void onNewIntent(Intent intent) {
-        if (LogUtils.isActive) {
-            Log.d(LOGTAG, "onNewIntent");
-        }
         super.onNewIntent(intent);
         // Replace the value of intent
         setIntent(intent);
-
         if (mCnxManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACT)) {
-            processIntent();
+            processIntent(intent);
         }
     }
 
@@ -303,13 +288,12 @@ public abstract class ChatView extends FragmentActivity implements
         if (TextUtils.isEmpty(text)) {
             return;
         }
-        // Send text message
         ChatMessage message = sendMessage(text);
         if (message == null) {
             Utils.showMessage(this, getString(R.string.label_send_im_failed));
             return;
         }
-        // Warn the composing manager that the message was sent
+        /* Warn the composing manager that the message was sent */
         mComposingManager.messageWasSent();
         mComposeText.setText(null);
     }
@@ -320,7 +304,6 @@ public abstract class ChatView extends FragmentActivity implements
      * @param geoloc
      */
     private void sendGeoloc(Geoloc geoloc) {
-        // Send text message
         ChatMessage message = sendMessage(geoloc);
         if (message == null) {
             Utils.showMessage(this, getString(R.string.label_send_im_failed));
@@ -363,13 +346,10 @@ public abstract class ChatView extends FragmentActivity implements
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != RESULT_OK) {
             return;
-
         }
         switch (requestCode) {
             case SELECT_GEOLOCATION:
-                // Get selected geoloc
                 Geoloc geoloc = data.getParcelableExtra(EditGeoloc.EXTRA_GEOLOC);
-                // Send geoloc
                 sendGeoloc(geoloc);
                 break;
         }

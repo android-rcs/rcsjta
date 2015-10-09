@@ -334,8 +334,10 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 
     /**
      * Send an empty data chunk
+     * 
+     * @throws NetworkException
      */
-    public void sendEmptyDataChunk() {
+    public void sendEmptyDataChunk() throws NetworkException {
         msrpMgr.sendEmptyChunk();
     }
 

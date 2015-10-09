@@ -25,10 +25,17 @@ import com.gsma.services.rcs.chat.ChatService;
 
 import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager.INotifyComposing;
 
+import android.content.Intent;
+
 /**
  * @author YPLO6403
  */
 public interface IChatView {
+    
+    /**
+     * Initialize
+     */
+    void initialize();
 
     /**
      * Send text message
@@ -49,9 +56,10 @@ public interface IChatView {
     /**
      * Process intent
      * 
+     * @param intent to process
      * @return True if operation is successful
      */
-    boolean processIntent();
+    boolean processIntent(Intent intent);
 
     /**
      * Add chat listener
