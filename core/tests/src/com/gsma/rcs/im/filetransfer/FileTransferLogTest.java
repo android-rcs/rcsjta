@@ -20,6 +20,7 @@ package com.gsma.rcs.im.filetransfer;
 
 import com.gsma.rcs.core.content.FileContent;
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
@@ -42,8 +43,10 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.test.AndroidTestCase;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -64,7 +67,7 @@ public class FileTransferLogTest extends AndroidTestCase {
     private static final String IMAGE_FILENAME = "image1.jpg";
     private static final String IMAGE_URI = "content://file/image1.jpg";
     private static final long IMAGE_FILESIZE = 1234567;
-    private static final MmContent CONTENT = new FileContent(Uri.parse(IMAGE_URI), IMAGE_FILESIZE,
+    private final MmContent mContent = new FileContent(Uri.parse(IMAGE_URI), IMAGE_FILESIZE,
             IMAGE_FILENAME);
 
     private static final String IMAGE_ICON_FILENAME = "icon1.jpg";
@@ -97,7 +100,7 @@ public class FileTransferLogTest extends AndroidTestCase {
     public void testAddFileTransfer() {
         // Add entry
         mMessagingLog.addOneToOneFileTransfer(mFileTransferId, mContact, Direction.OUTGOING,
-                CONTENT, null, State.INITIATING, ReasonCode.UNSPECIFIED, mTimestamp,
+                mContent, null, State.INITIATING, ReasonCode.UNSPECIFIED, mTimestamp,
                 mTimestampSent, mFileExpiration, FileTransferLog.UNKNOWN_EXPIRATION);
         // Read entry
         Uri uri = Uri.withAppendedPath(FileTransferLog.CONTENT_URI, mFileTransferId);
@@ -170,8 +173,9 @@ public class FileTransferLogTest extends AndroidTestCase {
         recipients.add(mContact);
         mMessagingLog.addGroupChat(mChatId, null, null, participants, GroupChat.State.INITIATING,
                 GroupChat.ReasonCode.UNSPECIFIED, Direction.OUTGOING, mTimestamp);
-        mMessagingLog.addOutgoingGroupFileTransfer(mFileTransferId, mChatId, CONTENT, ICON_CONTENT,
-                recipients, State.INITIATING, ReasonCode.UNSPECIFIED, mTimestamp, mTimestampSent);
+        mMessagingLog.addOutgoingGroupFileTransfer(mFileTransferId, mChatId, mContent,
+                ICON_CONTENT, recipients, State.INITIATING, ReasonCode.UNSPECIFIED, mTimestamp,
+                mTimestampSent);
         // Read entry
         Uri uri = Uri.withAppendedPath(FileTransferLog.CONTENT_URI, mFileTransferId);
         Cursor cursor = mContentResolver.query(uri, null, null, null, null);
@@ -237,7 +241,7 @@ public class FileTransferLogTest extends AndroidTestCase {
     public void testAddIncomingGroupFileTransfer() {
         long fileIconExpiration = mRandom.nextLong();
         // Add entry
-        mMessagingLog.addIncomingGroupFileTransfer(mFileTransferId, mChatId, mContact, CONTENT,
+        mMessagingLog.addIncomingGroupFileTransfer(mFileTransferId, mChatId, mContact, mContent,
                 ICON_CONTENT, State.ACCEPTING, ReasonCode.UNSPECIFIED, mTimestamp, mTimestampSent,
                 mFileExpiration, fileIconExpiration);
         // Read entry
@@ -300,5 +304,46 @@ public class FileTransferLogTest extends AndroidTestCase {
         mLocalContentResolver.delete(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, mFileTransferId), null, null);
         assertEquals(false, mMessagingLog.isFileTransfer(mFileTransferId));
+    }
+
+    public void testFileTransferDeliveryExpiration() {
+        mMessagingLog.addOneToOneFileTransfer(mFileTransferId, mContact, Direction.OUTGOING,
+                mContent, null, State.INITIATING, ReasonCode.UNSPECIFIED, mTimestamp,
+                mTimestampSent, mFileExpiration, FileTransferLog.UNKNOWN_EXPIRATION);
+        assertFalse(mMessagingLog.isFileTransferExpiredDelivery(mFileTransferId));
+        mMessagingLog.setFileTransferDeliveryExpired(mFileTransferId);
+        assertTrue(mMessagingLog.isFileTransferExpiredDelivery(mFileTransferId));
+    }
+
+    private void verifyFileTransferLogEntries(Cursor cursor, List<String> fileTransferIds) {
+        if (!cursor.moveToFirst()) {
+            fail("Cursor should not be empty!");
+        }
+        int ftIdIdx = cursor.getColumnIndexOrThrow(FileTransferLog.FT_ID);
+        do {
+            String filetransferId = cursor.getString(ftIdIdx);
+            assertTrue(fileTransferIds.contains(filetransferId));
+        } while (cursor.moveToNext());
+    }
+
+    public void testClearFileTransferDeliveryExpiration() {
+        List<String> fileTransferIds = new ArrayList<String>();
+        for (int i = 0; i < 4; i++) {
+            fileTransferIds.add(Long.toString(mRandom.nextLong()));
+        }
+        for (String fileTransferId : fileTransferIds) {
+            mMessagingLog.addOneToOneFileTransfer(fileTransferId, mContact, Direction.OUTGOING,
+                    mContent, null, State.INITIATING, ReasonCode.UNSPECIFIED, mTimestamp,
+                    mTimestampSent, mFileExpiration, FileTransferLog.UNKNOWN_EXPIRATION);
+            mMessagingLog.setFileInfoDequeued(fileTransferId, System.currentTimeMillis());
+        }
+        Cursor cursor = mMessagingLog.getUnDeliveredOneToOneFileTransfers();
+        assertEquals(4, cursor.getCount());
+        verifyFileTransferLogEntries(cursor, fileTransferIds);
+        CursorUtil.close(cursor);
+        mMessagingLog.clearFileTransferDeliveryExpiration(fileTransferIds);
+        cursor = mMessagingLog.getUnDeliveredOneToOneFileTransfers();
+        assertEquals(0, cursor.getCount());
+        CursorUtil.close(cursor);
     }
 }

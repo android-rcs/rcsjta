@@ -23,6 +23,7 @@ import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.userprofile.UserProfile;
+import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.messaging.MessageData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
@@ -32,6 +33,8 @@ import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.Message;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
@@ -43,6 +46,8 @@ import android.net.Uri;
 import android.test.AndroidTestCase;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class ChatMessageTest extends AndroidTestCase {
@@ -89,7 +94,6 @@ public class ChatMessageTest extends AndroidTestCase {
         ChatMessage msg = new ChatMessage(msgId, mContact, mText, MimeType.TEXT_MESSAGE,
                 mTimestamp, mTimestampSent, "display");
 
-        // Add entry
         mMessagingLog.addOutgoingOneToOneChatMessage(msg, Message.Content.Status.SENT,
                 Message.Content.ReasonCode.UNSPECIFIED, 0);
 
@@ -97,7 +101,6 @@ public class ChatMessageTest extends AndroidTestCase {
         String[] whereArgs = new String[] {
             msgId
         };
-        // Read entry
         Cursor cursor = mContentResolver.query(Message.CONTENT_URI, SELECTION, where, whereArgs,
                 Message.TIMESTAMP + " ASC");
         assertEquals(cursor.getCount(), 1);
@@ -176,5 +179,48 @@ public class ChatMessageTest extends AndroidTestCase {
     private Uri formatSipUri(String path) {
         return path.startsWith(PhoneUtils.SIP_URI_HEADER) ? Uri.parse(path) : Uri
                 .parse(new StringBuilder(PhoneUtils.SIP_URI_HEADER).append(path).toString());
+    }
+
+    public void testChatMessageDeliveryExpiration() throws PayloadException {
+        String msgId = Long.toString(mRandom.nextLong());
+        ChatMessage msg = new ChatMessage(msgId, mContact, mText, MimeType.TEXT_MESSAGE,
+                mTimestamp, mTimestampSent, "display");
+        mMessagingLog.addOutgoingOneToOneChatMessage(msg, Status.SENDING, ReasonCode.UNSPECIFIED,
+                System.currentTimeMillis() + 30000L);
+        assertFalse(mMessagingLog.isChatMessageExpiredDelivery(msgId));
+        mMessagingLog.setChatMessageDeliveryExpired(msgId);
+        assertTrue(mMessagingLog.isChatMessageExpiredDelivery(msgId));
+    }
+
+    private void verifyMessageLogEntries(Cursor cursor, List<String> msgIds) {
+        if (!cursor.moveToFirst()) {
+            fail("Cursor should not be empty!");
+        }
+        int msgIdIdx = cursor.getColumnIndexOrThrow(Message.MESSAGE_ID);
+        while (cursor.moveToNext()) {
+            String msgId = cursor.getString(msgIdIdx);
+            assertTrue(msgIds.contains(msgId));
+        }
+    }
+
+    public void testClearChatMessageDeliveryExpiration() throws PayloadException {
+        List<String> msgIds = new ArrayList<String>();
+        for (int i = 0; i < 4; i++) {
+            msgIds.add(Long.toString(mRandom.nextLong()));
+        }
+        for (String msgId : msgIds) {
+            ChatMessage msg = new ChatMessage(msgId, mContact, mText, MimeType.TEXT_MESSAGE,
+                    mTimestamp, mTimestampSent, "display");
+            mMessagingLog.addOutgoingOneToOneChatMessage(msg, Status.SENDING,
+                    ReasonCode.UNSPECIFIED, System.currentTimeMillis() + 30000L);
+        }
+        Cursor cursor = mMessagingLog.getUndeliveredOneToOneChatMessages();
+        assertEquals(4, cursor.getCount());
+        verifyMessageLogEntries(cursor, msgIds);
+        CursorUtil.close(cursor);
+        mMessagingLog.clearMessageDeliveryExpiration(msgIds);
+        cursor = mMessagingLog.getUndeliveredOneToOneChatMessages();
+        assertEquals(0, cursor.getCount());
+        CursorUtil.close(cursor);
     }
 }
