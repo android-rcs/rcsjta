@@ -21,24 +21,20 @@ package com.orangelabs.rcs.ri.messaging.chat.group;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.GroupChat;
-
-import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
+import com.gsma.services.rcs.chat.GroupChat.State;
 
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.net.Uri;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.util.Log;
 
 /**
  * Group CHAT Data Object
  * 
  * @author YPLO6403
  */
-public class GroupChatDAO implements Parcelable {
+public class GroupChatDAO {
 
     private final String mChatId;
 
@@ -55,8 +51,6 @@ public class GroupChatDAO implements Parcelable {
     private static ContentResolver sContentResolver;
 
     private final GroupChat.ReasonCode mReasonCode;
-
-    private static final String LOGTAG = LogUtils.getTag(GroupChatDAO.class.getSimpleName());
 
     private static final String[] PROJECTION_CHAT_ID = new String[] {
         ChatLog.GroupChat.CHAT_ID
@@ -90,82 +84,16 @@ public class GroupChatDAO implements Parcelable {
         return mReasonCode;
     }
 
-    /**
-     * Constructor
-     * 
-     * @param source Parcelable source
-     */
-    public GroupChatDAO(Parcel source) {
-        mChatId = source.readString();
-        mState = GroupChat.State.valueOf(source.readInt());
-        mDirection = Direction.valueOf(source.readInt());
-        mTimestamp = source.readLong();
-        mSubject = source.readString();
-        mParticipants = source.readString();
-        mReasonCode = GroupChat.ReasonCode.valueOf(source.readInt());
+    private GroupChatDAO(String chatId, Direction direction, String participants, State state,
+            String subject, long timestamp, ReasonCode reasonCode) {
+        mChatId = chatId;
+        mDirection = direction;
+        mParticipants = participants;
+        mState = state;
+        mSubject = subject;
+        mTimestamp = timestamp;
+        mReasonCode = reasonCode;
     }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mChatId);
-        dest.writeInt(mState.toInt());
-        dest.writeInt(mDirection.toInt());
-        dest.writeLong(mTimestamp);
-        dest.writeString(mSubject);
-        dest.writeString(mParticipants);
-        dest.writeInt(mReasonCode.toInt());
-    };
-
-    /**
-     * Construct the Group CHAT data object from the provider
-     * <p>
-     * Note: to change with CR025 (enums)
-     * 
-     * @param resolver
-     * @param chatId
-     */
-    private GroupChatDAO(ContentResolver resolver, String chatId) {
-        Cursor cursor = null;
-        try {
-            cursor = resolver.query(Uri.withAppendedPath(ChatLog.GroupChat.CONTENT_URI, chatId),
-                    null, null, null, null);
-            if (!cursor.moveToFirst()) {
-                throw new SQLException("Failed to find group chat with ID: ".concat(chatId));
-            }
-            mChatId = chatId;
-            mSubject = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.SUBJECT));
-            mState = GroupChat.State.valueOf(cursor.getInt(cursor
-                    .getColumnIndexOrThrow(ChatLog.GroupChat.STATE)));
-            mDirection = Direction.valueOf(cursor.getInt(cursor
-                    .getColumnIndexOrThrow(ChatLog.GroupChat.DIRECTION)));
-            mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.TIMESTAMP));
-            mParticipants = cursor.getString(cursor
-                    .getColumnIndexOrThrow(ChatLog.GroupChat.PARTICIPANTS));
-            mReasonCode = GroupChat.ReasonCode.valueOf(cursor.getInt(cursor
-                    .getColumnIndexOrThrow(ChatLog.GroupChat.REASON_CODE)));
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    public static final Parcelable.Creator<GroupChatDAO> CREATOR = new Parcelable.Creator<GroupChatDAO>() {
-        @Override
-        public GroupChatDAO createFromParcel(Parcel in) {
-            return new GroupChatDAO(in);
-        }
-
-        @Override
-        public GroupChatDAO[] newArray(int size) {
-            return new GroupChatDAO[size];
-        }
-    };
 
     @Override
     public String toString() {
@@ -176,21 +104,40 @@ public class GroupChatDAO implements Parcelable {
     /**
      * Gets instance of Group Chat from RCS provider
      * 
-     * @param context
+     * @param ctx
      * @param chatId
      * @return instance or null if entry not found
      */
-    public static GroupChatDAO getGroupChatDao(Context context, String chatId) {
+    public static GroupChatDAO getGroupChatDao(Context ctx, String chatId) {
         if (sContentResolver == null) {
-            sContentResolver = context.getContentResolver();
+            sContentResolver = ctx.getContentResolver();
         }
+        Cursor cursor = null;
         try {
-            return new GroupChatDAO(sContentResolver, chatId);
-        } catch (SQLException e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, e.getMessage());
+            cursor = sContentResolver.query(
+                    Uri.withAppendedPath(ChatLog.GroupChat.CONTENT_URI, chatId), null, null, null,
+                    null);
+            if (!cursor.moveToFirst()) {
+                return null;
             }
-            return null;
+            String subject = cursor.getString(cursor
+                    .getColumnIndexOrThrow(ChatLog.GroupChat.SUBJECT));
+            State state = GroupChat.State.valueOf(cursor.getInt(cursor
+                    .getColumnIndexOrThrow(ChatLog.GroupChat.STATE)));
+            Direction dir = Direction.valueOf(cursor.getInt(cursor
+                    .getColumnIndexOrThrow(ChatLog.GroupChat.DIRECTION)));
+            long timestamp = cursor.getLong(cursor
+                    .getColumnIndexOrThrow(ChatLog.GroupChat.TIMESTAMP));
+            String participants = cursor.getString(cursor
+                    .getColumnIndexOrThrow(ChatLog.GroupChat.PARTICIPANTS));
+            ReasonCode reasonCode = GroupChat.ReasonCode.valueOf(cursor.getInt(cursor
+                    .getColumnIndexOrThrow(ChatLog.GroupChat.REASON_CODE)));
+            return new GroupChatDAO(chatId, dir, participants, state, subject, timestamp,
+                    reasonCode);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
     }
 

@@ -26,7 +26,6 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.chat.group.GroupChatList;
-import com.orangelabs.rcs.ri.messaging.chat.group.GroupChatView;
 import com.orangelabs.rcs.ri.messaging.chat.group.InitiateGroupChat;
 import com.orangelabs.rcs.ri.messaging.chat.single.InitiateSingleChat;
 import com.orangelabs.rcs.ri.messaging.chat.single.SingleChatList;
@@ -59,7 +58,7 @@ public class TestChatApi extends ListActivity {
         CapabilitiesLog.CONTACT
     };
 
-    private static final String LOGTAG = LogUtils.getTag(GroupChatView.class.getSimpleName());
+    private static final String LOGTAG = LogUtils.getTag(TestChatApi.class.getSimpleName());
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

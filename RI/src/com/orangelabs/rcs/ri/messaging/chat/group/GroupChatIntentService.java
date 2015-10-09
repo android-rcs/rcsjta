@@ -119,82 +119,65 @@ public class GroupChatIntentService extends IntentService {
                 }
                 return;
             }
-            handleNewGroupChatMessage(messageId);
+            handleNewGroupChatMessage(intent, messageId);
+
+        } else if (GroupChatIntent.ACTION_NEW_INVITATION.equals(action)) {
+            /* Gets chat ID from the incoming Intent */
+            String chatId = intent.getStringExtra(GroupChatIntent.EXTRA_CHAT_ID);
+            if (chatId != null) {
+                handleNewGroupChatInvitation(intent, chatId);
+            }
+
         } else {
-            if (GroupChatIntent.ACTION_NEW_INVITATION.equals(action)) {
-                /* Gets chat ID from the incoming Intent */
-                String chatId = intent.getStringExtra(GroupChatIntent.EXTRA_CHAT_ID);
-                if (chatId != null) {
-                    handleNewGroupChatInvitation(chatId);
-                }
-            } else {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "Unknown action ".concat(action));
-                }
+            if (LogUtils.isActive) {
+                Log.e(LOGTAG, "Unknown action ".concat(action));
             }
         }
     }
 
-    /**
-     * Handle Group chat invitation
-     * 
-     * @param invitation
-     */
-    private void handleNewGroupChatInvitation(String chatId) {
-        // Get Chat from provider
+    private void handleNewGroupChatInvitation(Intent invitation, String chatId) {
+        /* Get Chat from provider */
         GroupChatDAO groupChatDAO = GroupChatDAO.getGroupChatDao(this, chatId);
         if (groupChatDAO == null) {
+            Log.e(LOGTAG, "Cannot find group chat with ID=".concat(chatId));
             return;
         }
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "Group chat invitation =".concat(groupChatDAO.toString()));
         }
-
-        // Check if it's a spam
+        /* Check if it's a spam */
         if (groupChatDAO.getReasonCode() == GroupChat.ReasonCode.REJECTED_SPAM) {
             if (LogUtils.isActive) {
                 Log.e(LOGTAG, "Do nothing on a spam");
             }
             return;
         }
-        forwardGCInvitation2UI(chatId, groupChatDAO);
+        forwardGCInvitation2UI(invitation, chatId, groupChatDAO);
     }
 
-    /**
-     * Handle new group chat message
-     * 
-     * @param messageIntent intent with chat message
-     */
-    private void handleNewGroupChatMessage(String messageId) {
-        // Get ChatMessage from provider
+    private void handleNewGroupChatMessage(Intent newGroupChatMessage, String messageId) {
+        /* Get ChatMessage from provider */
         ChatMessageDAO messageDAO = ChatMessageDAO.getChatMessageDAO(this, messageId);
         if (messageDAO == null) {
+            Log.e(LOGTAG, "Cannot find group chat message with ID=".concat(messageId));
             return;
         }
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "Group chat message =".concat(messageDAO.toString()));
         }
-        forwardGCMessage2UI(messageDAO);
+        forwardGCMessage2UI(newGroupChatMessage, messageDAO);
     }
 
-    /**
-     * Forward Group Chat message to view activity
-     * 
-     * @param message message
-     */
-    private void forwardGCMessage2UI(ChatMessageDAO message) {
-        Intent intent = GroupChatView.forgeIntentNewMessage(this, message);
+    private void forwardGCMessage2UI(Intent newGroupChatMessage, ChatMessageDAO message) {
         String chatId = message.getChatId();
+        Intent intent = GroupChatView.forgeIntentNewMessage(this, newGroupChatMessage, chatId);
         String content = message.getContent();
-
         /*
          * Do not display notification if activity is on foreground for this ChatID.
          */
         if (GroupChatView.isDisplayed() && chatId.equals(GroupChatView.chatIdOnForeground)) {
             if (LogUtils.isActive) {
-                Log.d(LOGTAG,
-                        new StringBuilder("New message '").append(content).append("' for chatId ")
-                                .append(chatId).toString());
+                Log.d(LOGTAG, "New message '" + content + "' for chatId " + chatId);
             }
             Integer uniqueId = sChatIdMessagePendingNotificationIdCache.get(chatId);
             if (uniqueId != null) {
@@ -226,32 +209,26 @@ public class GroupChatIntentService extends IntentService {
             String msg;
             if (ChatLog.Message.MimeType.GEOLOC_MESSAGE.equals(mimeType)) {
                 msg = getString(R.string.label_geoloc_msg);
+
             } else if (ChatLog.Message.MimeType.TEXT_MESSAGE.equals(mimeType)) {
                 msg = content;
+
             } else {
                 /* If the GC message does not convey user content then discards */
                 if (LogUtils.isActive) {
-                    Log.w(LOGTAG, new StringBuilder("Discard message of type '").append(mimeType)
-                            .append("' for chatId ").append(chatId).toString());
+                    Log.w(LOGTAG, "Discard message of type '" + mimeType + "' for chatId " + chatId);
                 }
                 return;
             }
             Notification notif = buildNotification(contentIntent, title, msg);
-
             /* Send notification */
             mNotifManager.notify(uniqueId, notif);
         }
     }
 
-    /**
-     * Forward Group chat invitation to View Activity
-     * 
-     * @param chatId the Chat ID
-     * @param groupChat Group Chat DAO
-     */
-    public void forwardGCInvitation2UI(String chatId, GroupChatDAO groupChat) {
+    private void forwardGCInvitation2UI(Intent invitation, String chatId, GroupChatDAO groupChat) {
         /* Create pending intent */
-        Intent intent = GroupChatView.forgeIntentInvitation(this, chatId, groupChat);
+        Intent intent = GroupChatView.forgeIntentInvitation(this, invitation);
         /*
          * If the PendingIntent has the same operation, action, data, categories, components, and
          * flags it will be replaced. Invitation should be notified individually so we use a random
@@ -264,7 +241,6 @@ public class GroupChatIntentService extends IntentService {
         }
         PendingIntent contentIntent = PendingIntent.getActivity(this, uniqueId, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
-
         /* Create notification */
         String title = getString(R.string.title_group_chat);
         /* Try to retrieve display name of remote contact */
@@ -274,12 +250,10 @@ public class GroupChatIntentService extends IntentService {
         }
         String subject = groupChat.getSubject();
         if (TextUtils.isEmpty(subject)) {
-            subject = new StringBuilder("<").append(getString(R.string.label_no_subject))
-                    .append(">").toString();
+            subject = "<" + getString(R.string.label_no_subject) + ">";
         }
         String msg = getString(R.string.label_subject_notif, subject);
         Notification notif = buildNotification(contentIntent, title, msg);
-
         /* Send notification */
         mNotifManager.notify(uniqueId, notif);
     }

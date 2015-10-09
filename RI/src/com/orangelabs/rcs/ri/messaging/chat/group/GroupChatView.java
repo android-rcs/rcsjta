@@ -41,7 +41,6 @@ import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.messaging.GroupDeliveryInfoList;
-import com.orangelabs.rcs.ri.messaging.chat.ChatMessageDAO;
 import com.orangelabs.rcs.ri.messaging.chat.ChatView;
 import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager;
 import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager.INotifyComposing;
@@ -86,12 +85,6 @@ public class GroupChatView extends ChatView {
     /**
      * Intent parameters
      */
-    private static final String BUNDLE_CHATMESSAGE_DAO_ID = "ChatMessageDao";
-
-    private static final String BUNDLE_GROUPCHAT_DAO_ID = "GroupChatDao";
-
-    private final static String EXTRA_CHAT_ID = "chat_id";
-
     private final static String EXTRA_PARTICIPANTS = "participants";
 
     private final static String EXTRA_SUBJECT = "subject";
@@ -132,6 +125,10 @@ public class GroupChatView extends ChatView {
     /* package private */static String chatIdOnForeground;
 
     private static final String LOGTAG = LogUtils.getTag(GroupChatView.class.getSimpleName());
+
+    private static final String OPEN_GROUPCHAT = "OPEN_GROUPCHAT";
+
+    private static final String INTITIATE_GROUPCHAT = "INTITIATE_GROUPCHAT";
 
     private GroupChatListener mChatListener;
 
@@ -182,18 +179,31 @@ public class GroupChatView extends ChatView {
         chatIdOnForeground = null;
     }
 
+    void setCursorLoader(boolean firstLoad) {
+        if (firstLoad) {
+            /*
+             * Initialize the Loader with id '1' and callbacks 'mCallbacks'.
+             */
+            getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+        } else {
+            /* We switched from one contact to another: reload history since */
+            getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
+        }
+    }
+
     @Override
     public boolean processIntent(Intent intent) {
+        String action = intent.getAction();
         if (LogUtils.isActive) {
-            Log.d(LOGTAG, "processIntent ".concat(intent.getAction()));
+            Log.d(LOGTAG, "processIntent: " + action);
         }
+        String oldChatId = mChatId;
         try {
             switch ((GroupChatMode) intent.getSerializableExtra(EXTRA_MODE)) {
                 case OUTGOING:
                     /* Initiate a Group Chat: Get subject */
                     mSubject = intent.getStringExtra(GroupChatView.EXTRA_SUBJECT);
                     updateGroupChatViewTitle(mSubject);
-
                     /* Get the list of participants */
                     ContactUtil contactUtil = ContactUtil.getInstance(this);
                     List<String> contacts = intent
@@ -211,32 +221,25 @@ public class GroupChatView extends ChatView {
                                 mExitOnce);
                         return false;
                     }
-                    return initiateGroupChat();
+                    return initiateGroupChat(oldChatId == null);
 
                 case OPEN:
-                    // Open an existing session from the history log
-                    mChatId = intent.getStringExtra(GroupChatView.EXTRA_CHAT_ID);
-
-                    // Get chat session
+                    /* Open an existing session from the history log */
+                    mChatId = intent.getStringExtra(GroupChatIntent.EXTRA_CHAT_ID);
                     mGroupChat = mChatService.getGroupChat(mChatId);
                     if (mGroupChat == null) {
                         if (LogUtils.isActive) {
-                            Log.e(LOGTAG,
-                                    "processIntent session not found for chatId=".concat(mChatId));
+                            Log.e(LOGTAG, "Groupchat not found for Id=".concat(mChatId));
                         }
                         Utils.showMessageAndExit(this, getString(R.string.label_session_not_found),
                                 mExitOnce);
                         return false;
                     }
-                    getSupportLoaderManager().initLoader(LOADER_ID, null, this);
-
+                    setCursorLoader(oldChatId == null);
                     chatIdOnForeground = mChatId;
-
-                    // Get subject
                     mSubject = mGroupChat.getSubject();
                     updateGroupChatViewTitle(mSubject);
-
-                    // Set list of participants
+                    /* Set list of participants */
                     mParticipants = mGroupChat.getParticipants().keySet();
                     if (LogUtils.isActive) {
                         if (mParticipants == null) {
@@ -247,50 +250,25 @@ public class GroupChatView extends ChatView {
                     return true;
 
                 case INCOMING:
-                    ChatMessageDAO message = (ChatMessageDAO) (intent.getExtras()
-                            .getParcelable(BUNDLE_CHATMESSAGE_DAO_ID));
-                    if (message != null) {
-                        /*
-                         * New message: check if it belongs to the displayed conversation.
-                         */
-                        if (message.getChatId().equals(mChatId) || mChatId == null) {
-                            // Mark the message as read
-                            mChatService.markMessageAsRead(message.getMsgId());
-                            if (mChatId != null) {
-                                return true;
-                            }
-                            mChatId = message.getChatId();
-                        } else {
-                            /*
-                             * Ignore message if it does not belong to current conversation.
-                             */
-                            if (LogUtils.isActive) {
-                                Log.d(LOGTAG,
-                                        "processIntent discard chat message " + message.getMsgId()
-                                                + " for chatId " + message.getChatId());
-                            }
-                            return true;
-                        }
-                    } else {
-                        /* New GC invitation */
-                        mChatId = intent.getStringExtra(GroupChatIntent.EXTRA_CHAT_ID);
+                    String rxChatId = intent.getStringExtra(GroupChatIntent.EXTRA_CHAT_ID);
+                    if (GroupChatIntent.ACTION_NEW_GROUP_CHAT_MESSAGE.equals(action)) {
+                        String rxMsgId = intent.getStringExtra(GroupChatIntent.EXTRA_MESSAGE_ID);
+                        mChatService.markMessageAsRead(rxMsgId);
                     }
+                    mChatId = rxChatId;
                     mGroupChat = mChatService.getGroupChat(mChatId);
                     if (mGroupChat == null) {
                         Utils.showMessageAndExit(this, getString(R.string.label_session_not_found),
                                 mExitOnce);
                         return false;
                     }
-                    getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+                    setCursorLoader(oldChatId == null);
                     chatIdOnForeground = mChatId;
-                    // Get remote contact
-                    ContactId contact = null; // mGroupChat.getRemoteContact();
-                    // Get subject
+                    ContactId contact = mGroupChat.getRemoteContact();
                     mSubject = mGroupChat.getSubject();
                     updateGroupChatViewTitle(mSubject);
-                    // Set list of participants
                     mParticipants = mGroupChat.getParticipants().keySet();
-                    // Display accept/reject dialog
+                    /* Display accept/reject dialog */
                     if (GroupChat.State.INVITED == mGroupChat.getState()) {
                         displayAcceptRejectDialog(contact);
                     }
@@ -354,7 +332,6 @@ public class GroupChatView extends ChatView {
      * @param subject the group chat subject or null
      */
     private void updateGroupChatViewTitle(String subject) {
-        // Set title
         if (!TextUtils.isEmpty(subject)) {
             setTitle(getString(R.string.title_group_chat) + " '" + mSubject + "'");
         }
@@ -362,7 +339,7 @@ public class GroupChatView extends ChatView {
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle arg) {
-        // Create a new CursorLoader with the following query parameters.
+        /* Create a new CursorLoader with the following query parameters. */
         CursorLoader loader = new CursorLoader(this, Message.CONTENT_URI, PROJ_CHAT_MSG,
                 WHERE_CLAUSE, new String[] {
                     mChatId
@@ -376,7 +353,7 @@ public class GroupChatView extends ChatView {
      * @param remote remote contact
      */
     private void displayAcceptRejectDialog(ContactId remote) {
-        // Manual accept
+        /* Manual accept */
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.title_group_chat);
         String from = RcsContactUtil.getInstance(this).getDisplayName(remote);
@@ -390,7 +367,7 @@ public class GroupChatView extends ChatView {
                 new android.content.DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         try {
-                            // Accept the invitation
+                            /* Accept the invitation */
                             mGroupChat.openChat();
                         } catch (RcsServiceException e) {
                             Utils.showMessageAndExit(GroupChatView.this,
@@ -401,8 +378,9 @@ public class GroupChatView extends ChatView {
         builder.setNegativeButton(getString(R.string.label_decline),
                 new android.content.DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        // Let session die by timeout
-                        // Exit activity
+                        /*
+                         * Let session die by timeout. Exit activity
+                         */
                         finish();
                     }
                 });
@@ -431,13 +409,13 @@ public class GroupChatView extends ChatView {
      *
      * @return True if successful
      */
-    private boolean initiateGroupChat() {
+    private boolean initiateGroupChat(boolean firstLoad) {
         /* Initiate the group chat session in background */
         try {
             mGroupChat = mChatService.initiateGroupChat(new HashSet<ContactId>(mParticipants),
                     mSubject);
             mChatId = mGroupChat.getChatId();
-            getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+            setCursorLoader(firstLoad);
             chatIdOnForeground = mChatId;
         } catch (RcsServiceException e) {
             Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce,
@@ -492,14 +470,12 @@ public class GroupChatView extends ChatView {
             Utils.displayToast(this, "Failed to check permission for group chat participants", e);
             return;
         }
-
         /* Check if some participants are available */
         if (availableParticipants.size() == 0) {
             Utils.showMessage(this, getString(R.string.label_no_participant_found));
             return;
         }
-
-        // Display contacts
+        /* Display contacts */
         final List<String> selectedParticipants = new ArrayList<String>();
         final CharSequence[] items = new CharSequence[availableParticipants.size()];
         int i = 0;
@@ -675,69 +651,65 @@ public class GroupChatView extends ChatView {
     /**
      * Initiate a new Group Chat
      *
-     * @param context context
+     * @param ctx context
      * @param subject subject
      * @param participants list of participants
      */
-    public static void initiateGroupChat(Context context, String subject,
-            ArrayList<String> participants) {
-        Intent intent = new Intent(context, GroupChatView.class);
+    public static void initiateGroupChat(Context ctx, String subject, ArrayList<String> participants) {
+        Intent intent = new Intent(ctx, GroupChatView.class);
+        intent.setAction(INTITIATE_GROUPCHAT);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putStringArrayListExtra(GroupChatView.EXTRA_PARTICIPANTS, participants);
         intent.putExtra(GroupChatView.EXTRA_MODE, GroupChatMode.OUTGOING);
         intent.putExtra(GroupChatView.EXTRA_SUBJECT, subject);
-        context.startActivity(intent);
+        ctx.startActivity(intent);
     }
 
     /**
      * Open a Group Chat
      *
-     * @param context The context.
+     * @param ctx The context.
      * @param chatId The chat ID.
      */
-    public static void openGroupChat(Context context, String chatId) {
-        Intent intent = new Intent(context, GroupChatView.class);
+    public static void openGroupChat(Context ctx, String chatId) {
+        Intent intent = new Intent(ctx, GroupChatView.class);
+        intent.setAction(OPEN_GROUPCHAT);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putExtra(GroupChatView.EXTRA_MODE, GroupChatMode.OPEN);
-        intent.putExtra(GroupChatView.EXTRA_CHAT_ID, chatId);
-        context.startActivity(intent);
+        intent.putExtra(GroupChatIntent.EXTRA_CHAT_ID, chatId);
+        ctx.startActivity(intent);
     }
 
     /**
      * Forge intent to notify Group Chat message
      *
-     * @param context The context.
-     * @param chatMessageDAO The chat message from provider.
+     * @param ctx The context.
+     * @param newgroupChatMessage The original intent.
+     * @param chatId
      * @return intent
      */
-    public static Intent forgeIntentNewMessage(Context context, ChatMessageDAO chatMessageDAO) {
-        Intent intent = new Intent(context, GroupChatView.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(GroupChatView.EXTRA_MODE, GroupChatMode.INCOMING);
-        Bundle bundle = new Bundle();
-        bundle.putParcelable(BUNDLE_CHATMESSAGE_DAO_ID, chatMessageDAO);
-        intent.putExtras(bundle);
-        return intent;
+    public static Intent forgeIntentNewMessage(Context ctx, Intent newgroupChatMessage,
+            String chatId) {
+        newgroupChatMessage.setClass(ctx, GroupChatView.class);
+        newgroupChatMessage
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        newgroupChatMessage.putExtra(GroupChatView.EXTRA_MODE, GroupChatMode.INCOMING);
+        newgroupChatMessage.putExtra(GroupChatIntent.EXTRA_CHAT_ID, chatId);
+        return newgroupChatMessage;
     }
 
     /**
      * Forge intent to notify new Group Chat
      *
-     * @param context The context.
-     * @param chatId The chat ID.
-     * @param groupChatDAO The Group Chat session from provider.
+     * @param ctx The context.
+     * @param invitation The original intent.
      * @return intent
      */
-    public static Intent forgeIntentInvitation(Context context, String chatId,
-            GroupChatDAO groupChatDAO) {
-        Intent intent = new Intent(context, GroupChatView.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(GroupChatView.EXTRA_MODE, GroupChatMode.INCOMING);
-        intent.putExtra(GroupChatIntent.EXTRA_CHAT_ID, chatId);
-        Bundle bundle = new Bundle();
-        bundle.putParcelable(BUNDLE_GROUPCHAT_DAO_ID, groupChatDAO);
-        intent.putExtras(bundle);
-        return intent;
+    public static Intent forgeIntentInvitation(Context ctx, Intent invitation) {
+        invitation.setClass(ctx, GroupChatView.class);
+        invitation.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        invitation.putExtra(GroupChatView.EXTRA_MODE, GroupChatMode.INCOMING);
+        return invitation;
     }
 
     @Override

@@ -159,6 +159,7 @@ public class SingleChatIntentService extends IntentService {
         /* Read message from provider */
         ChatMessageDAO msgDAO = ChatMessageDAO.getChatMessageDAO(this, msgId);
         if (msgDAO == null) {
+            Log.e(LOGTAG, "Cannot find group chat message with ID=".concat(msgId));
             return;
         }
         if (LogUtils.isActive) {
