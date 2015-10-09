@@ -217,7 +217,7 @@
     <string name="label_GroupChatSupported">GC supported:</string>
     <string name="label_NotAllowedToInitiateGroupChat">Not allowed to initiate Group Chat</string>
     <string name="title_undelivered_message">Undelivered messages!</string>
-    <string name="label_undelivered_message">(%1$s) did not receive your messages</string>
+    <string name="label_undelivered_message">%1$s did not receive your messages</string>
 
     <!-- Sharing menu -->
     <string name="menu_sharing">Sharing</string>

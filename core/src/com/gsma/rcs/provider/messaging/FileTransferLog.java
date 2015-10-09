@@ -45,6 +45,7 @@ import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -78,9 +79,6 @@ public class FileTransferLog implements IFileTransferLog {
             .append("','").append(State.INVITED.toInt()).append("','")
             .append(State.ACCEPTING.toInt()).append("','").append(State.INITIATING.toInt())
             .append("')").toString();
-
-    private static final String SELECTION_BY_MULTIPLE_FT_IDS = new StringBuilder(
-            FileTransferData.KEY_FT_ID).append(" IN(").append("=?)").toString();
 
     private static final String SELECTION_BY_NOT_DISPLAYED = new StringBuilder(
             FileTransferData.KEY_STATE).append("<>").append(State.DISPLAYED.toInt()).toString();
@@ -845,10 +843,14 @@ public class FileTransferLog implements IFileTransferLog {
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_EXPIRED_DELIVERY, 0);
         values.put(FileTransferData.KEY_DELIVERY_EXPIRATION, 0);
-        String[] selectionArgs = new String[fileTransferIds.size()];
-        selectionArgs = fileTransferIds.toArray(selectionArgs);
-        mLocalContentResolver.update(FileTransferData.CONTENT_URI, values,
-                SELECTION_BY_MULTIPLE_FT_IDS, selectionArgs);
+        List<String> parameters = new ArrayList<String>();
+        for (int i = 0; i < fileTransferIds.size(); i++) {
+            parameters.add("?");
+        }
+        String selection = new StringBuilder(FileTransferData.KEY_FT_ID).append(" IN (")
+                .append(TextUtils.join(",", parameters)).append(")").toString();
+        mLocalContentResolver.update(FileTransferData.CONTENT_URI, values, selection,
+                fileTransferIds.toArray(new String[fileTransferIds.size()]));
     }
 
     @Override
