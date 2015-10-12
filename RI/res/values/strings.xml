@@ -290,7 +290,7 @@
     <string name="label_mm_from_id">From: %1$s\nService ID: %2$s</string>
 
     <!-- Geolocation push -->
-    <string name="label_select_geoloc">Select from a map</string>
+    <string name="label_select_geoloc">Select from google map\n(Internet connectivity required)</string>
     <string name="menu_showus_map">Show us in a map</string>
     <string name="menu_send_geoloc">Send geoloc</string>
     <string name="title_display_geoloc">Show a geoloc</string>
