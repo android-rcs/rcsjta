@@ -231,9 +231,10 @@ public class StartService extends Service {
                         retryPollingTelephonyManagerPooling(config.mcc,
                                 mRcsSettings.getMobileNetworkCode());
                     }
+
                 } catch (IOException e) {
-                    sLogger.error(
-                            "Failed to start the service for intent: ".concat(intent.toString()), e);
+                    logIOException(intent.getAction(), e);
+
                 } catch (RcsAccountException e) {
                     /**
                      * This is a non revocable use-case as the RCS account itself was not created,
@@ -242,6 +243,7 @@ public class StartService extends Service {
                     sLogger.error(
                             "Failed to start the service for intent: ".concat(intent.toString()), e);
                     stopSelf();
+
                 } catch (RuntimeException e) {
                     /*
                      * Normally we are not allowed to catch runtime exceptions as these are genuine
@@ -632,9 +634,10 @@ public class StartService extends Service {
                                 retryPollingTelephonyManagerPooling(config.mcc,
                                         mRcsSettings.getMobileNetworkCode());
                             }
+
                         } catch (IOException e) {
-                            sLogger.error("Failed to start the service for intent action : "
-                                    .concat(intent.getAction()), e);
+                            logIOException(intent.getAction(), e);
+
                         } catch (RcsAccountException e) {
                             /**
                              * This is a non revocable use-case as the RCS account itself was not
@@ -643,6 +646,7 @@ public class StartService extends Service {
                             sLogger.error("Failed to start the service for intent action : "
                                     .concat(intent.getAction()), e);
                             stopSelf();
+
                         } catch (RuntimeException e) {
                             /*
                              * Normally we are not allowed to catch runtime exceptions as these are
@@ -673,6 +677,19 @@ public class StartService extends Service {
     private boolean isMobileNetworkCodeDefined() {
         int mnc = mRcsSettings.getMobileNetworkCode();
         return mnc != MNC_UNDEFINED;
+    }
+
+    private void logIOException(String action, IOException e) {
+        String message = e.getMessage();
+        if (action == null) {
+            action = "";
+        }
+        if (message == null) {
+            sLogger.warn("Failed to start the service for action: ".concat(action), e);
+        } else {
+            sLogger.warn("Failed to start the service for action: " + action + ". Message="
+                    + message);
+        }
     }
 
 }
