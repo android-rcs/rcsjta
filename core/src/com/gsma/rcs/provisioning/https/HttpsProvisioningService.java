@@ -221,6 +221,7 @@ public class HttpsProvisioningService extends Service {
                             // If the UpdateConfig has NOT been done:
                             mHttpsProvisioningMng.registerNetworkStateListener();
                         }
+
                     } catch (RcsAccountException e) {
                         /**
                          * This is a non revocable use-case as the RCS account itself was not
@@ -228,6 +229,7 @@ public class HttpsProvisioningService extends Service {
                          */
                         sLogger.error("Failed to handle connection event!", e);
                         stopSelf();
+
                     } catch (RuntimeException e) {
                         /*
                          * Normally we are not allowed to catch runtime exceptions as these are
@@ -237,8 +239,15 @@ public class HttpsProvisioningService extends Service {
                          * whole system down, which is not intended.
                          */
                         sLogger.error("Unable to handle connection event!", e);
+
                     } catch (IOException e) {
-                        sLogger.error("Unable to handle connection event!", e);
+                        String message = e.getMessage();
+                        if (message == null) {
+                            sLogger.warn("Unable to handle connection event!", e);
+                        } else {
+                            sLogger.warn("Unable to handle connection event! Message="
+                                    .concat(message));
+                        }
                         /* Start the RCS service */
                         if (mHttpsProvisioningMng.isFirstProvisioningAfterBoot()) {
                             /* Reason: No configuration present */
@@ -329,6 +338,7 @@ public class HttpsProvisioningService extends Service {
                 public void run() {
                     try {
                         mHttpsProvisioningMng.updateConfig();
+
                     } catch (RcsAccountException e) {
                         sLogger.error("Failed to update configuration!", e);
 
@@ -338,8 +348,14 @@ public class HttpsProvisioningService extends Service {
                          * thread and eventually bring the whole system down, which is not intended.
                          */
                         sLogger.error("Failed to update configuration!", e);
+
                     } catch (IOException e) {
-                        sLogger.error("Unable to update configuration!", e);
+                        String message = e.getMessage();
+                        if (message == null) {
+                            sLogger.warn("Unable to handle connection event!", e);
+                        } else {
+                            sLogger.warn("Unable to handle connection event! ".concat(message));
+                        }
                         /* Start the RCS service */
                         if (mHttpsProvisioningMng.isFirstProvisioningAfterBoot()) {
                             /* Reason: No configuration present */

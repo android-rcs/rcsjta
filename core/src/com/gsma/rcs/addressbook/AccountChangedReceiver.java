@@ -30,7 +30,6 @@ import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.LauncherUtils;
-import com.gsma.rcs.service.ServiceUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
 import android.accounts.Account;
@@ -74,29 +73,23 @@ public class AccountChangedReceiver extends BroadcastReceiver {
                     if (mAccount == null) {
                         boolean logActivated = sLogger.isActivated();
                         if (logActivated) {
-                            sLogger.debug("RCS account has been deleted");
+                            sLogger.debug("RCS account has been deleted: stop services");
                         }
                         /* Set the user account manually deleted flag */
                         if (rcsSettings.isUserProfileConfigured()) {
                             setAccountResetByEndUser(true);
                         }
+                        /*
+                         * RCS account was deleted. Warn the user we stop the service. The account
+                         * will be recreated when the service will be restarted.
+                         */
+                        Toast.makeText(
+                                context,
+                                context.getString(R.string.rcs_core_account_stopping_after_deletion),
+                                Toast.LENGTH_LONG).show();
 
-                        if (ServiceUtils.isServiceStarted(context)) {
-                            if (logActivated) {
-                                sLogger.debug("RCS service is running, we stop it");
-                            }
-                            /*
-                             * RCS account was deleted. Warn the user we stop the service. The
-                             * account will be recreated when the service will be restarted.
-                             */
-                            Toast.makeText(
-                                    context,
-                                    context.getString(R.string.rcs_core_account_stopping_after_deletion),
-                                    Toast.LENGTH_LONG).show();
-
-                            /* Stop the service */
-                            LauncherUtils.stopRcsService(context);
-                        }
+                        /* Stop the service */
+                        LauncherUtils.stopRcsService(context);
                     } else {
                         /* Set the user account manually deleted flag */
                         setAccountResetByEndUser(false);
