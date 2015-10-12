@@ -30,7 +30,6 @@ import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.api.connection.utils.LockAccess;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.geoloc.EditGeoloc;
-import com.orangelabs.rcs.ri.messaging.geoloc.SelectGeoloc;
 import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -333,7 +332,7 @@ public abstract class ChatView extends FragmentActivity implements
      */
     protected void getGeoLoc() {
         // Start a new activity to send a geolocation
-        startActivityForResult(new Intent(this, SelectGeoloc.class), SELECT_GEOLOCATION);
+        startActivityForResult(new Intent(this, EditGeoloc.class), SELECT_GEOLOCATION);
     }
 
     /**

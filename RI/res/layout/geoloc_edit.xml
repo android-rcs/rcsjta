@@ -10,12 +10,6 @@
         android:stretchColumns="1" >
 
         <Button
-            android:id="@+id/validate_btn"
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip"
-            android:text="@string/label_ok" />
-
-        <Button
             android:id="@+id/select_geoloc_btn"
             android:layout_marginLeft="5dip"
             android:layout_marginRight="5dip"
@@ -86,6 +80,12 @@
             android:lines="1"
             android:maxLength="8"
             android:text="@string/label_gsh_default_accuracy" />
+
+        <Button
+            android:id="@+id/validate_btn"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/label_ok" />
     </TableLayout>
 
 </ScrollView>
