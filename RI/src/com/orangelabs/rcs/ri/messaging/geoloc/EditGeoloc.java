@@ -49,30 +49,15 @@ public class EditGeoloc extends Activity {
      */
     public final static String EXTRA_GEOLOC = "geoloc";
 
-    /**
-     * Location label editor
-     */
-    private EditText locationEdit;
+    private EditText mLocationEdit;
 
-    /**
-     * Latitude editor
-     */
-    private EditText latitudeEdit;
+    private EditText mLatitudeEdit;
 
-    /**
-     * Longitude editor
-     */
-    private EditText longitudeEdit;
+    private EditText mLongitudeEdit;
 
-    /**
-     * Accuracy editor
-     */
-    private EditText accuracyEdit;
+    private EditText mAccuracyEdit;
 
-    /**
-     * Activity result constant
-     */
-    public final static int SELECT_GEOLOCATION = 0;
+    private final static int REQUEST_CODE_SELECT_GEOLOC = 0;
 
     private long geolocExpirationTime = 0;
 
@@ -81,21 +66,17 @@ public class EditGeoloc extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Set layout
         setContentView(R.layout.geoloc_edit);
+        /* Create editors */
+        mLocationEdit = (EditText) findViewById(R.id.location);
+        mLatitudeEdit = (EditText) findViewById(R.id.latitude);
+        mLongitudeEdit = (EditText) findViewById(R.id.longitude);
+        mAccuracyEdit = (EditText) findViewById(R.id.accuracy);
 
-        // Create editors
-        locationEdit = (EditText) findViewById(R.id.location);
-        latitudeEdit = (EditText) findViewById(R.id.latitude);
-        longitudeEdit = (EditText) findViewById(R.id.longitude);
-        accuracyEdit = (EditText) findViewById(R.id.accuracy);
-
-        // Set button callback
+        /* Set button callback */
         Button validateBtn = (Button) findViewById(R.id.validate_btn);
         validateBtn.setOnClickListener(btnValidateListener);
 
-        // Set button callback
         Button selectBtn = (Button) findViewById(R.id.select_geoloc_btn);
         selectBtn.setOnClickListener(btnSelectListener);
 
@@ -116,7 +97,7 @@ public class EditGeoloc extends Activity {
         }
         if (geolocLabelMaxLength > 0) {
             InputFilter maxLengthFilter = new InputFilter.LengthFilter(geolocLabelMaxLength);
-            locationEdit.setFilters(new InputFilter[] {
+            mLocationEdit.setFilters(new InputFilter[] {
                 maxLengthFilter
             });
         }
@@ -137,9 +118,9 @@ public class EditGeoloc extends Activity {
 
         Location lastKnownLoc = lm.getLastKnownLocation(bestProvider);
         if (lastKnownLoc != null) {
-            latitudeEdit.setText(String.valueOf(lastKnownLoc.getLatitude()));
-            longitudeEdit.setText(String.valueOf(lastKnownLoc.getLongitude()));
-            accuracyEdit.setText(String.valueOf(lastKnownLoc.getAccuracy()));
+            mLatitudeEdit.setText(String.valueOf(lastKnownLoc.getLatitude()));
+            mLongitudeEdit.setText(String.valueOf(lastKnownLoc.getLongitude()));
+            mAccuracyEdit.setText(String.valueOf(lastKnownLoc.getAccuracy()));
         }
         super.onResume();
     }
@@ -149,23 +130,20 @@ public class EditGeoloc extends Activity {
      */
     private OnClickListener btnValidateListener = new OnClickListener() {
         public void onClick(View v) {
-            String lat = latitudeEdit.getText().toString().trim();
+            String lat = mLatitudeEdit.getText().toString().trim();
             if (lat.length() == 0) {
-                latitudeEdit.setText("0.0");
+                mLatitudeEdit.setText("0.0");
             }
-
-            String lon = longitudeEdit.getText().toString().trim();
+            String lon = mLongitudeEdit.getText().toString().trim();
             if (lon.length() == 0) {
-                longitudeEdit.setText("0.0");
+                mLongitudeEdit.setText("0.0");
             }
-
-            String acc = accuracyEdit.getText().toString().trim();
+            String acc = mAccuracyEdit.getText().toString().trim();
             if (acc.length() == 0) {
-                accuracyEdit.setText("0");
+                mAccuracyEdit.setText("0");
             }
-
             long expiration = System.currentTimeMillis() + geolocExpirationTime;
-            Geoloc geoloc = new Geoloc(locationEdit.getText().toString(), Double.parseDouble(lat),
+            Geoloc geoloc = new Geoloc(mLocationEdit.getText().toString(), Double.parseDouble(lat),
                     Double.parseDouble(lon), expiration, Float.parseFloat(acc));
             Intent in = new Intent();
             in.putExtra(EXTRA_GEOLOC, (Parcelable) geoloc);
@@ -181,7 +159,7 @@ public class EditGeoloc extends Activity {
         public void onClick(View v) {
             // Start a new activity to send a geolocation
             Intent geolocSelectIntent = new Intent(EditGeoloc.this, SelectGeoloc.class);
-            startActivityForResult(geolocSelectIntent, SELECT_GEOLOCATION);
+            startActivityForResult(geolocSelectIntent, REQUEST_CODE_SELECT_GEOLOC);
         }
     };
 
@@ -190,17 +168,11 @@ public class EditGeoloc extends Activity {
         if (resultCode != RESULT_OK) {
             return;
         }
-
         switch (requestCode) {
-            case SELECT_GEOLOCATION: {
-                // Get selected geoloc
-                double latitude = data.getDoubleExtra("latitude", 0.0);
-                double longitude = data.getDoubleExtra("longitude", 0.0);
-
-                // Display geoloc
-                latitudeEdit.setText(String.valueOf(latitude));
-                longitudeEdit.setText(String.valueOf(longitude));
-            }
+            case REQUEST_CODE_SELECT_GEOLOC:
+                Geoloc geoloc = data.getParcelableExtra(EXTRA_GEOLOC);
+                mLatitudeEdit.setText(String.valueOf(geoloc.getLatitude()));
+                mLongitudeEdit.setText(String.valueOf(geoloc.getLongitude()));
                 break;
         }
     }

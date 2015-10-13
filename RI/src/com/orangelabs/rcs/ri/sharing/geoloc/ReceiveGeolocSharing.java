@@ -32,7 +32,7 @@ import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.api.connection.utils.LockAccess;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.messaging.geoloc.DisplayGeoloc;
+import com.orangelabs.rcs.ri.messaging.geoloc.ShowGeoloc;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -65,14 +65,8 @@ public class ReceiveGeolocSharing extends Activity {
      */
     private final Handler handler = new Handler();
 
-    /**
-     * Sharing ID
-     */
     private String mSharingId;
 
-    /**
-     * Remote Contact
-     */
     private ContactId mRemoteContact;
 
     /**
@@ -85,16 +79,10 @@ public class ReceiveGeolocSharing extends Activity {
      */
     private LockAccess mExitOnce = new LockAccess();
 
-    /**
-     * API connection manager
-     */
     private ConnectionManager mCnxManager;
 
     private Geoloc mGeoloc;
 
-    /**
-     * The log tag for this class
-     */
     private static final String LOGTAG = LogUtils
             .getTag(ReceiveGeolocSharing.class.getSimpleName());
 
@@ -167,7 +155,7 @@ public class ReceiveGeolocSharing extends Activity {
 
                             try {
                                 mGeoloc = mGeolocSharing.getGeoloc();
-                                DisplayGeoloc.showContactOnMap(ReceiveGeolocSharing.this, contact,
+                                ShowGeoloc.ShowGeolocForContact(ReceiveGeolocSharing.this, contact,
                                         mGeoloc);
                             } catch (RcsServiceException e) {
                                 if (LogUtils.isActive) {

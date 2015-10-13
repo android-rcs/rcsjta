@@ -33,11 +33,6 @@ import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.Enumeration;
 import java.util.Random;
 import java.util.Set;
 
@@ -115,7 +110,8 @@ public class Utils {
      * @param e exception to log
      */
     public static void displayToast(Context context, String message, Exception e) {
-        Log.w(LOGTAG, message, e);
+        Log.w(LOGTAG, message);
+        Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
         displayLongToast(context, message.concat(": see Logcat!"));
     }
 
@@ -160,7 +156,8 @@ public class Utils {
         }
 
         if (e != null) {
-            Log.e(LOGTAG, "Exception enforces exit of activity!", e);
+            Log.e(LOGTAG, "Exception enforces exit of activity!");
+            Log.e(LOGTAG, ExceptionUtil.getFullStackTrace(e));
         } else {
             if (LogUtils.isActive) {
                 Log.w(LOGTAG,
@@ -214,19 +211,13 @@ public class Utils {
         if (activity.isFinishing()) {
             return;
         }
-        try {
-            String filename = FileUtils.getFileName(activity, uri);
-            Toast.makeText(activity, activity.getString(R.string.label_receive_image, filename),
-                    Toast.LENGTH_LONG).show();
-            Intent intent = new Intent();
-            intent.setAction(android.content.Intent.ACTION_VIEW);
-            intent.setDataAndType(uri, "image/*");
-            activity.startActivity(intent);
-        } catch (Exception e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "showPictureAndExit", e);
-            }
-        }
+        String filename = FileUtils.getFileName(activity, uri);
+        Toast.makeText(activity, activity.getString(R.string.label_receive_image, filename),
+                Toast.LENGTH_LONG).show();
+        Intent intent = new Intent();
+        intent.setAction(android.content.Intent.ACTION_VIEW);
+        intent.setDataAndType(uri, "image/*");
+        activity.startActivity(intent);
     }
 
     /**
@@ -240,7 +231,6 @@ public class Utils {
         if (activity.isFinishing()) {
             return;
         }
-
         CharSequence[] chars = items.toArray(new CharSequence[items.size()]);
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(title);
@@ -266,57 +256,6 @@ public class Utils {
         dlg.setCanceledOnTouchOutside(false);
         dlg.show();
         return dlg;
-    }
-
-    /**
-     * Format a date to string
-     * 
-     * @param d Date
-     * @return String
-     */
-    public static String formatDateToString(long d) {
-        if (d > 0L) {
-            Date df = new Date(d);
-            return DateFormat.getDateInstance().format(df);
-        } else {
-            return "";
-        }
-    }
-
-    /**
-     * Construct an NTP time from a date in milliseconds
-     * 
-     * @param date Date in milliseconds
-     * @return NTP time in string format
-     */
-    public static String constructNTPtime(long date) {
-        long ntpTime = 2208988800L;
-        long startTime = (date / 1000) + ntpTime;
-        return String.valueOf(startTime);
-    }
-
-    /**
-     * Returns the local IP address
-     * 
-     * @return IP address
-     */
-    public static String getLocalIpAddress() {
-        try {
-            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en
-                    .hasMoreElements();) {
-                NetworkInterface intf = (NetworkInterface) en.nextElement();
-                for (Enumeration<InetAddress> addr = intf.getInetAddresses(); addr
-                        .hasMoreElements();) {
-                    InetAddress inetAddress = (InetAddress) addr.nextElement();
-                    if (!inetAddress.isLoopbackAddress() && !inetAddress.isLinkLocalAddress()) {
-                        return inetAddress.getHostAddress().toString();
-                    }
-                }
-            }
-            return null;
-        } catch (Exception e) {
-            return null;
-        }
     }
 
     /**

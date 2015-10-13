@@ -311,6 +311,9 @@
             android:label="@string/menu_send_geoloc"
             android:windowSoftInputMode="stateHidden" />
         <activity
+            android:name=".messaging.geoloc.ShowGeoloc"
+            android:label="@string/title_display_geoloc" />
+        <activity
             android:name=".messaging.geoloc.SelectGeoloc"
             android:label="@string/label_select_geoloc" />
         <activity
