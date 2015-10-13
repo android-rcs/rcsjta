@@ -643,8 +643,14 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                 }
                 return false;
             }
-            // TODO it should not be possible to pause file transfer if file size equals transferred
-            // size
+            if (mPersistedStorage.getFileTransferProgress() == mPersistedStorage.getFileSize()) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(new StringBuilder("Cannot pause transfer with file transfer Id '")
+                            .append(mFileTransferId).append("' as full content is transferred")
+                            .toString());
+                }
+                return false;
+            }
             return true;
 
         } catch (ServerApiBaseException e) {

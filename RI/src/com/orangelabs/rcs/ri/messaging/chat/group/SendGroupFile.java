@@ -21,7 +21,6 @@ package com.orangelabs.rcs.ri.messaging.chat.group;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
-import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.filetransfer.GroupFileTransferListener;
 import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
@@ -38,7 +37,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.TextView;
 
 import java.util.Set;
@@ -108,32 +106,30 @@ public class SendGroupFile extends SendFile {
             final String _reasonCode = RiApplication.sFileTransferReasonCodes[reasonCode.toInt()];
             final String _state = RiApplication.sFileTransferStates[state.toInt()];
             handler.post(new Runnable() {
+
                 public void run() {
+                    if (mFileTransfer != null) {
+                        try {
+                            mResumeBtn.setEnabled(mFileTransfer.isAllowedToResumeTransfer());
+                        } catch (RcsServiceException e) {
+                            mResumeBtn.setEnabled(false);
+                            Utils.displayToast(SendGroupFile.this, e);
+                        }
+                        try {
+                            mPauseBtn.setEnabled(mFileTransfer.isAllowedToPauseTransfer());
+                        } catch (RcsServiceException e) {
+                            mPauseBtn.setEnabled(false);
+                            Utils.displayToast(SendGroupFile.this, e);
+                        }
+                    }
                     TextView statusView = (TextView) findViewById(R.id.progress_status);
                     switch (state) {
                         case STARTED:
-                            hideProgressDialog();
-                            /* Display transfer state started */
-                            statusView.setText(_state);
-                            mPauseBtn.setEnabled(true);
-                            mResumeBtn.setEnabled(false);
-                            break;
-
-                        case PAUSED:
-                            statusView.setText(_state);
-                            mPauseBtn.setEnabled(false);
-                            if (ReasonCode.PAUSED_BY_USER == reasonCode) {
-                                mResumeBtn.setEnabled(true);
-                            }
-                            break;
-
+                            //$FALL-THROUGH$
                         case TRANSFERRED:
                             hideProgressDialog();
                             /* Display transfer state started */
                             statusView.setText(_state);
-                            /* Hide buttons Pause and Resume */
-                            mPauseBtn.setVisibility(View.INVISIBLE);
-                            mResumeBtn.setVisibility(View.INVISIBLE);
                             break;
 
                         case ABORTED:

@@ -696,7 +696,14 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                 }
                 return false;
             }
-            // TODO it should not be possible to pause if file size equals transferred size
+            if (mPersistentStorage.getFileTransferProgress() == mPersistentStorage.getFileSize()) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(new StringBuilder("Cannot pause transfer with file transfer Id '")
+                            .append(mFileTransferId).append("' as full content is transferred")
+                            .toString());
+                }
+                return false;
+            }
             return true;
 
         } catch (ServerApiBaseException e) {
@@ -838,6 +845,11 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                     HttpFileTransferSession session = (HttpFileTransferSession) mImService
                             .getFileSharingSession(mFileTransferId);
                     if (session != null) {
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("Resume file transfer from existing session: interrupted "
+                                    + session.isInterrupted() + " state=" + session.getState());
+                        }
+
                         session.onResume();
                         return;
                     }
@@ -860,6 +872,9 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                                 mRcsSettings, mMessagingLog, mContactManager);
                     }
                     session.addListener(OneToOneFileTransferImpl.this);
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Resume file transfer from new session");
+                    }
                     session.startSession();
 
                 } catch (RuntimeException e) {
@@ -891,8 +906,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             ReasonCode rcsReasonCode = mPersistentStorage.getReasonCode();
             /*
              * According to Blackbird PDD v3.0, "When a File Transfer is interrupted by sender
-             * interaction (or fails), then ‘resend button’ shall be offered to allow the user to
-             * re-send the file without selecting a new receiver or selecting the file again."
+             * interaction (or fails), then resend button shall be offered to allow the user
+             * to re-send the file without selecting a new receiver or selecting the file again."
              */
             switch (rcsState) {
                 case FAILED:

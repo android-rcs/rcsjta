@@ -221,10 +221,7 @@ public class HttpUploadManager extends HttpTransferManager {
                 }
                 return null;
             }
-            // Notify listener
-            getListener().onHttpTransferStarted();
-
-            // Send a second POST request
+            /* Send a second POST request */
             return sendMultipartPost(url);
         } finally {
             if (urlConnection != null) {
@@ -283,102 +280,89 @@ public class HttpUploadManager extends HttpTransferManager {
             if (mFileIcon != null && mFileIcon.getSize() > 0) {
                 writeThumbnailMultipart(outputStream);
             }
-            /* From this point, resuming is possible */
-            ((HttpUploadTransferEventListener) getListener()).uploadStarted();
+            HttpTransferEventListener listeners = getListener();
+
+            /* Save Transfer ID into provider: from this point, resuming is possible. */
+            ((HttpUploadTransferEventListener) listeners).uploadStarted();
+
+            /*
+             * Upload resume can only be managed by HTTP Content Server if a transaction id (TID)
+             * has been defined during initial upload.
+             */
+            listeners.onHttpTransferStarted();
+
             try {
                 /* Add File */
                 writeFileMultipart(outputStream, mContent.getUri());
-                if (!isCancelled() && !isPaused()) {
-                    /*
-                     * if the upload is cancelled, we don't send the last boundary to get bad
-                     * request
-                     */
-                    outputStream.writeBytes(TWO_HYPENS + BOUNDARY_TAG + TWO_HYPENS);
-
-                    /* Check response status code */
-                    int responseCode = connection.getResponseCode();
-                    String message = connection.getResponseMessage();
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("Second POST response " + responseCode + " (" + message + ")");
-                    }
-                    byte[] result = null;
-                    boolean success = false;
-                    boolean retry = false;
-                    if (httpTraceEnabled) {
-                        String trace = "<<< Receive HTTP response:" + responseCode + " " + message;
-                        System.out.println(trace);
-                    }
-                    switch (responseCode) {
-                        case HttpURLConnection.HTTP_OK:
-                            success = true;
-                            InputStream inputStream = connection.getInputStream();
-                            result = convertStreamToString(inputStream);
-                            if (httpTraceEnabled) {
-                                System.out.println("\n" + new String(result));
-                            }
-                            break;
-                        case HttpURLConnection.HTTP_UNAVAILABLE:
-                            long retryAfter = getRetryTimeout(connection);
-                            if (retryAfter > 0) {
-                                try {
-                                    Thread.sleep(retryAfter);
-                                    /* Retry procedure */
-                                    if (mRetryCount < RETRY_MAX) {
-                                        mRetryCount++;
-                                        retry = true;
-                                    }
-                                } catch (InterruptedException ignore) {
-                                    /* Nothing to do, ignore the exception */
-                                }
-                            }
-                            break;
-                        default:
-                            break; /* no success, no retry */
-                    }
-                    if (success) {
-                        return result;
-                    } else if (retry) {
-                        return sendMultipartPost(url);
-                    } else {
-                        if (sLogger.isActivated()) {
-                            sLogger.warn("File Upload aborted, Received " + responseCode
-                                    + " from server");
-                        }
-                        return null;
-                    }
+                if (isCancelled() || isPaused()) {
+                    return null;
                 }
-                /* Check if user has paused transfer */
-                if (isPaused()) {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("File transfer paused by user (TID=" + mTId + ")");
-                    }
-                    try {
-                        /*
-                         * Sent data are bufferized. Must wait for response to enable sending to
-                         * server.
-                         */
-                        int responseCode = connection.getResponseCode();
-                        String message = connection.getResponseMessage();
-                        if (sLogger.isActivated()) {
-                            sLogger.debug("Second POST response " + responseCode + " " + "("
-                                    + message + ")");
+                /*
+                 * if the upload is cancelled or paused, we don't send the last boundary to get bad
+                 * request
+                 */
+                outputStream.writeBytes(TWO_HYPENS + BOUNDARY_TAG + TWO_HYPENS);
+
+                /* Check response status code */
+                int responseCode = connection.getResponseCode();
+                String message = connection.getResponseMessage();
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Second POST response " + responseCode + " (" + message + ")");
+                }
+                byte[] result = null;
+                boolean success = false;
+                boolean retry = false;
+                if (httpTraceEnabled) {
+                    String trace = "<<< Receive HTTP response:" + responseCode + " " + message;
+                    System.out.println(trace);
+                }
+                switch (responseCode) {
+                    case HttpURLConnection.HTTP_OK:
+                        success = true;
+                        InputStream inputStream = connection.getInputStream();
+                        result = convertStreamToString(inputStream);
+                        if (httpTraceEnabled) {
+                            System.out.println("\n" + new String(result));
                         }
-                    } catch (IOException e) {
-                        if (sLogger.isActivated()) {
-                            sLogger.warn("File Upload paused due to error! Waiting for resume...",
-                                    e);
+                        break;
+                    case HttpURLConnection.HTTP_UNAVAILABLE:
+                        long retryAfter = getRetryTimeout(connection);
+                        if (retryAfter > 0) {
+                            try {
+                                Thread.sleep(retryAfter);
+                                /* Retry procedure */
+                                if (mRetryCount < RETRY_MAX) {
+                                    mRetryCount++;
+                                    retry = true;
+                                }
+                            } catch (InterruptedException ignore) {
+                                /* Nothing to do, ignore the exception */
+                            }
                         }
-                    }
+                        break;
+                    default:
+                        break; /* no success, no retry */
+                }
+                if (success) {
+                    return result;
+                } else if (retry) {
+                    return sendMultipartPost(url);
                 } else {
                     if (sLogger.isActivated()) {
-                        sLogger.debug("File transfer cancelled by user");
+                        sLogger.warn("File Upload aborted, Received " + responseCode
+                                + " from server");
                     }
+                    return null;
                 }
-                return null;
 
             } catch (IOException e) {
                 if (sLogger.isActivated()) {
-                    sLogger.warn("File Upload paused due to error!", e);
+                    String message = e.getMessage();
+                    if (message != null) {
+                        sLogger.warn("File Upload paused due to error!", e);
+                    } else {
+                        sLogger.warn("File Upload paused due to error! Message=".concat(message));
+                    }
                 }
                 /*
                  * When there is a connection problem causing transfer terminated, state should be
@@ -396,7 +380,7 @@ public class HttpUploadManager extends HttpTransferManager {
                 if (sLogger.isActivated()) {
                     sLogger.error("Upload has failed due to that the file is not accessible!", e);
                 }
-                getListener().onHttpTransferNotAllowedToSend();
+                listeners.onHttpTransferNotAllowedToSend();
                 return null;
             }
         } finally {
