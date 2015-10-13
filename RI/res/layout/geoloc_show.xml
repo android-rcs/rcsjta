@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <Button
+        android:id="@+id/display_geoloc_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/label_display_geoloc" />
+
+    <TableLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="10dip"
+        android:stretchColumns="1" >
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="1" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="0"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:text="@string/label_contact_geoloc" />
+
+            <TextView
+                android:id="@+id/contact"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="1" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="1" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="0"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:text="@string/label_location" />
+
+            <TextView
+                android:id="@+id/location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:text="@string/label_gsh_default_label" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="1" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="0"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:text="@string/label_latitude" />
+
+            <TextView
+                android:id="@+id/latitude"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:text="@string/label_gsh_default_latitude" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="1" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="0"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:text="@string/label_longitude" />
+
+            <TextView
+                android:id="@+id/longitude"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:text="@string/label_gsh_default_longitude" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="1" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="0"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:text="@string/label_accuracy" />
+
+            <TextView
+                android:id="@+id/accuracy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:text="@string/label_gsh_default_accuracy" />
+        </TableRow>
+    </TableLayout>
+
+</LinearLayout>

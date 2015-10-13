@@ -296,10 +296,12 @@
     <string name="title_display_geoloc">Show a geoloc</string>
     <string name="label_geolocation_msg">Geolocation message</string>
     <string name="label_location">Label:</string>
+    <string name="label_contact_geoloc">Contact:</string>
     <string name="label_latitude">Latitude:</string>
     <string name="label_longitude">Longitude:</string>
     <string name="label_accuracy">Accuracy:</string>
     <string name="label_geoloc_not_found">No geoloc info to display!</string>
+    <string name="label_display_geoloc">Display via google map\n(Internet connectivity required)</string>
 
     <!-- Intents menu -->
     <string name="menu_intents">Intents</string>

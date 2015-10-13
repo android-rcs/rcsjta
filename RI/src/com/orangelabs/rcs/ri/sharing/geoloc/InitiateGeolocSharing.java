@@ -29,8 +29,8 @@ import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.api.connection.utils.LockAccess;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.messaging.geoloc.DisplayGeoloc;
 import com.orangelabs.rcs.ri.messaging.geoloc.EditGeoloc;
+import com.orangelabs.rcs.ri.messaging.geoloc.ShowGeoloc;
 import com.orangelabs.rcs.ri.utils.ContactListAdapter;
 import com.orangelabs.rcs.ri.utils.ContactUtil;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -178,7 +178,8 @@ public class InitiateGeolocSharing extends Activity {
                             ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
                             progressBar.setProgress(progressBar.getMax());
 
-                            DisplayGeoloc.showContactOnMap(InitiateGeolocSharing.this, contact, mGeoloc);
+                            ShowGeoloc.ShowGeolocForContact(InitiateGeolocSharing.this, contact,
+                                    mGeoloc);
                             break;
 
                         default:

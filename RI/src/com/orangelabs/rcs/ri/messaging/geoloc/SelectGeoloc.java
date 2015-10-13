@@ -56,7 +56,7 @@ public class SelectGeoloc extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapClick(LatLng point) {
         Geoloc geoloc = new Geoloc(null, point.latitude, point.longitude, 0, 0);
-        Intent intent = new Intent();
+        Intent intent = getIntent();
         intent.putExtra(DisplayGeoloc.EXTRA_GEOLOC, (Parcelable) geoloc);
         setResult(RESULT_OK, intent);
         finish();
