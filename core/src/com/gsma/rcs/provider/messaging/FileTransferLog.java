@@ -343,6 +343,15 @@ public class FileTransferLog implements IFileTransferLog {
     }
 
     @Override
+    public Long getFileTransferProgress(String fileTransferId) {
+        Cursor cursor = getFileTransferData(FileTransferData.KEY_TRANSFERRED, fileTransferId);
+        if (cursor == null) {
+            return null;
+        }
+        return getDataAsLong(cursor);
+    }
+
+    @Override
     public boolean setFileTransferred(String fileTransferId, MmContent content,
             long fileExpiration, long fileIconExpiration, long deliveryExpiration) {
         if (logger.isActivated()) {

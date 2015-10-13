@@ -265,8 +265,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     public boolean setFileTransferStateAndTimestamp(String fileTransferId,
             FileTransfer.State state, FileTransfer.ReasonCode reasonCode, long timestamp,
             long timestampSent) {
-        return mFileTransferLog.setFileTransferStateAndTimestamp(fileTransferId, state,
-                reasonCode, timestamp, timestampSent);
+        return mFileTransferLog.setFileTransferStateAndTimestamp(fileTransferId, state, reasonCode,
+                timestamp, timestampSent);
     }
 
     @Override
@@ -618,5 +618,10 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
             Content.ReasonCode reasonCode, long timestamp, long timestampSent) {
         return mMessageLog.setChatMessageStatusAndTimestamp(msgId, status, reasonCode, timestamp,
                 timestampSent);
+    }
+
+    @Override
+    public Long getFileTransferProgress(String fileTransferId) {
+        return mFileTransferLog.getFileTransferProgress(fileTransferId);
     }
 }

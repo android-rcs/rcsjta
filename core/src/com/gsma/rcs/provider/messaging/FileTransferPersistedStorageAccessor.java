@@ -424,4 +424,18 @@ public class FileTransferPersistedStorageAccessor {
     public boolean setFileInfoDequeued(long deliveryExpiration) {
         return mMessagingLog.setFileInfoDequeued(mFileTransferId, deliveryExpiration);
     }
+
+    /**
+     * Returns the number of transferred bytes.
+     * 
+     * @return the number of transferred bytes.
+     */
+    public long getFileTransferProgress() {
+        Long transferred = mMessagingLog.getFileTransferProgress(mFileTransferId);
+        if (transferred == null) {
+            throw new ServerApiPersistentStorageException(
+                    "Transferred not found for file transfer ".concat(mFileTransferId));
+        }
+        return transferred;
+    }
 }

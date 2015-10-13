@@ -384,4 +384,12 @@ public interface IFileTransferLog {
      * @return True if an entry was updated, otherwise false
      */
     public boolean setFileInfoDequeued(String fileTransferId, long deliveryExpiration);
+
+    /**
+     * Gets the number of transferred bytes
+     * 
+     * @param fileTransferId
+     * @return the number of transferred bytes
+     */
+    public Long getFileTransferProgress(String fileTransferId);
 }

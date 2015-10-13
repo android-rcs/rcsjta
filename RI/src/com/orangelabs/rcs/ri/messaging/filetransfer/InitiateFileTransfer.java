@@ -22,7 +22,6 @@ import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
-import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransferIntent;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
@@ -446,7 +445,7 @@ public class InitiateFileTransfer extends Activity {
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "quitSession");
         }
-        // Stop session
+        /* Stop session */
         try {
             if (mFileTransfer != null && !mTransferred) {
                 mFileTransfer.abortTransfer();
@@ -455,8 +454,6 @@ public class InitiateFileTransfer extends Activity {
             e.printStackTrace();
         }
         mFileTransfer = null;
-
-        // Exit activity
         finish();
     }
 
@@ -464,7 +461,6 @@ public class InitiateFileTransfer extends Activity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
-                // Quit session
                 quitSession();
                 return true;
         }
@@ -490,9 +486,6 @@ public class InitiateFileTransfer extends Activity {
         return true;
     }
 
-    /**
-     * Pause button listener
-     */
     private OnClickListener btnPauseListener = new OnClickListener() {
         public void onClick(View v) {
             try {
@@ -511,14 +504,12 @@ public class InitiateFileTransfer extends Activity {
         }
     };
 
-    /**
-     * Resume button listener
-     */
     private OnClickListener btnResumeListener = new OnClickListener() {
         public void onClick(View v) {
             try {
                 if (mFileTransfer.isAllowedToResumeTransfer()) {
                     mFileTransfer.resumeTransfer();
+
                 } else {
                     mResumeBtn.setEnabled(false);
                     Utils.showMessage(InitiateFileTransfer.this,
@@ -532,9 +523,6 @@ public class InitiateFileTransfer extends Activity {
         }
     };
 
-    /**
-     * File transfer listener
-     */
     private OneToOneFileTransferListener ftListener = new OneToOneFileTransferListener() {
 
         @Override
@@ -570,7 +558,22 @@ public class InitiateFileTransfer extends Activity {
                                 .append(_state).append(" reason=").append(_reasonCode).toString());
             }
             mHandler.post(new Runnable() {
+
                 public void run() {
+                    if (mFileTransfer != null) {
+                        try {
+                            mResumeBtn.setEnabled(mFileTransfer.isAllowedToResumeTransfer());
+                        } catch (RcsServiceException e) {
+                            mResumeBtn.setEnabled(false);
+                            Utils.displayToast(InitiateFileTransfer.this, e);
+                        }
+                        try {
+                            mPauseBtn.setEnabled(mFileTransfer.isAllowedToPauseTransfer());
+                        } catch (RcsServiceException e) {
+                            mPauseBtn.setEnabled(false);
+                            Utils.displayToast(InitiateFileTransfer.this, e);
+                        }
+                    }
                     TextView statusView = (TextView) findViewById(R.id.progress_status);
                     switch (state) {
                         case STARTED:
@@ -578,16 +581,6 @@ public class InitiateFileTransfer extends Activity {
                             hideProgressDialog();
                             /* Display session status */
                             statusView.setText(_state);
-                            mPauseBtn.setEnabled(true);
-                            mResumeBtn.setEnabled(false);
-                            break;
-
-                        case PAUSED:
-                            statusView.setText(_state);
-                            mPauseBtn.setEnabled(false);
-                            if (ReasonCode.PAUSED_BY_USER == reasonCode) {
-                                mResumeBtn.setEnabled(true);
-                            }
                             break;
 
                         case ABORTED:
@@ -618,9 +611,6 @@ public class InitiateFileTransfer extends Activity {
                             hideProgressDialog();
                             /* Display transfer progress */
                             statusView.setText(_state);
-                            /* Hide buttons Pause and Resume */
-                            mPauseBtn.setVisibility(View.INVISIBLE);
-                            mResumeBtn.setVisibility(View.INVISIBLE);
                             mTransferred = true;
 
                             try {

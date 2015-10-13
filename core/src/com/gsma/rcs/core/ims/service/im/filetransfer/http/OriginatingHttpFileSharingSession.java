@@ -150,7 +150,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 
     protected void sendResultToContact(byte[] result) throws PayloadException, NetworkException {
         // Check if upload has been cancelled
-        if (mUploadManager.isCancelled()) {
+        if (mUploadManager.isCancelled() || mUploadManager.isPaused()) {
             return;
         }
         boolean logActivated = sLogger.isActivated();
@@ -158,10 +158,6 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
         if (result == null
                 || (infoDocument = FileTransferUtils.parseFileTransferHttpDocument(result,
                         mRcsSettings)) == null) {
-            /* Don't call handleError in case of Pause or Cancel */
-            if (mUploadManager.isCancelled() || mUploadManager.isPaused()) {
-                return;
-            }
             handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED));
             return;
 
@@ -265,8 +261,14 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                     FtHttpResumeUpload upload = mMessagingLog
                             .retrieveFtHttpResumeUpload(mUploadManager.getTId());
                     if (upload != null) {
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("Resume: ".concat(upload.toString()));
+                        }
                         sendResultToContact(mUploadManager.resumeUpload());
                     } else {
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("No result for resuming file transfer");
+                        }
                         sendResultToContact(null);
                     }
 
