@@ -126,8 +126,8 @@ public abstract class ImageTransferSession extends ContentSharingSession {
             return;
         }
         if (sLogger.isActivated()) {
-            sLogger.info("Session error: " + error.getErrorCode() + ", reason="
-                    + error.getMessage());
+            sLogger.info(new StringBuilder("Transfer error: ").append(error.getErrorCode())
+                    .append(", reason=").append(error.getMessage()).toString());
         }
         closeMediaSession();
         removeSession();

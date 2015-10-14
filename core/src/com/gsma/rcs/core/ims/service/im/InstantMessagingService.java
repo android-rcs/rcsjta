@@ -1785,7 +1785,10 @@ public class InstantMessagingService extends ImsService {
                         try {
                             fileSharingSession.downloadFileIcon();
                         } catch (NetworkException e) {
-                            sLogger.error("Failed to download file icon", e);
+                            if (sLogger.isActivated()) {
+                                sLogger.debug(new StringBuilder("Failed to download file icon! (")
+                                        .append(e.getMessage()).append(")").toString());
+                            }
                             sendErrorResponse(invite, Response.DECLINE);
                             if (fileResent) {
                                 setResendFileTransferInvitationRejected(fileTransferId, remote,

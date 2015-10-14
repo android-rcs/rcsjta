@@ -291,9 +291,6 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
             handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
 
         } catch (NetworkException e) {
-            if (logActivated) {
-                sLogger.debug(e.getMessage());
-            }
             handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
 
         } catch (RuntimeException e) {

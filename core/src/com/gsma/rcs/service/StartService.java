@@ -680,15 +680,12 @@ public class StartService extends Service {
     }
 
     private void logIOException(String action, IOException e) {
-        String message = e.getMessage();
         if (action == null) {
-            action = "";
-        }
-        if (message == null) {
-            sLogger.warn("Failed to start the service for action: ".concat(action), e);
+            sLogger.debug(new StringBuilder("Failed to start the service, Message=").append(
+                    e.getMessage()).toString());
         } else {
-            sLogger.warn("Failed to start the service for action: " + action + ". Message="
-                    + message);
+            sLogger.warn(new StringBuilder("Failed to start the service for action: ")
+                    .append(action).append(", Message=").append(e.getMessage()).toString());
         }
     }
 

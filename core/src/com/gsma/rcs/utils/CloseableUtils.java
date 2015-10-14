@@ -50,7 +50,8 @@ public class CloseableUtils {
                 c.close();
             } catch (IOException e) {
                 if (sLogger.isActivated()) {
-                    sLogger.warn("Failed to close the stream!", e);
+                    sLogger.debug(new StringBuilder("Failed to close the stream, Message=").append(
+                            e.getMessage()).toString());
                 }
                 return e;
             }

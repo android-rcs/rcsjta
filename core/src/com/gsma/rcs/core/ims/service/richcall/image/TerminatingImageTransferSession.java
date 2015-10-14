@@ -313,9 +313,6 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
             handleError(new ContentSharingError(ContentSharingError.SEND_RESPONSE_FAILED, e));
 
         } catch (NetworkException e) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(e.getMessage());
-            }
             handleError(new ContentSharingError(ContentSharingError.SEND_RESPONSE_FAILED, e));
 
         } catch (RuntimeException e) {

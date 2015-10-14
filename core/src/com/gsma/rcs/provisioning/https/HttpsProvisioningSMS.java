@@ -224,6 +224,21 @@ public class HttpsProvisioningSMS {
                                     new StringBuilder(
                                             "Failed to update Config with OTP for requestUri : ")
                                             .append(requestUri).toString(), e);
+                        } catch (IOException e) {
+                            if (sLogger.isActivated()) {
+                                sLogger.debug(new StringBuilder(
+                                        "Failed to update Config with OTP for requestUri : ")
+                                        .append(requestUri).append(", Message=")
+                                        .append(e.getMessage()).toString());
+                            }
+                            /* Start the RCS service */
+                            if (mManager.isFirstProvisioningAfterBoot()) {
+                                // Reason: No configuration present
+                                mManager.provisioningFails(ProvisioningFailureReasons.CONNECTIVITY_ISSUE);
+                                mManager.retry();
+                            } else {
+                                mManager.tryLaunchRcsCoreService(ctx, -1);
+                            }
                         } catch (RuntimeException e) {
                             /*
                              * Normally we are not allowed to catch runtime exceptions as these are
@@ -236,19 +251,6 @@ public class HttpsProvisioningSMS {
                                     new StringBuilder(
                                             "Failed to update Config with OTP for requestUri : ")
                                             .append(requestUri).toString(), e);
-                        } catch (IOException e) {
-                            sLogger.error(
-                                    new StringBuilder(
-                                            "Failed to update Config with OTP for requestUri : ")
-                                            .append(requestUri).toString(), e);
-                            /* Start the RCS service */
-                            if (mManager.isFirstProvisioningAfterBoot()) {
-                                // Reason: No configuration present
-                                mManager.provisioningFails(ProvisioningFailureReasons.CONNECTIVITY_ISSUE);
-                                mManager.retry();
-                            } else {
-                                mManager.tryLaunchRcsCoreService(ctx, -1);
-                            }
                         }
                     }
                 });

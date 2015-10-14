@@ -176,20 +176,22 @@ public class OriginatingOneToOneChatSession extends OneToOneChatSession {
         } catch (InvalidArgumentException e) {
             mLogger.error("Unable to set authorization header for chat invite!", e);
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
+
         } catch (ParseException e) {
             mLogger.error("Unable to set authorization header for chat invite!", e);
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
+
         } catch (FileAccessException e) {
             mLogger.error("Unable to send 200OK response!", e);
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
+
         } catch (PayloadException e) {
             mLogger.error("Unable to send 200OK response!", e);
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
+
         } catch (NetworkException e) {
-            if (mLogger.isActivated()) {
-                mLogger.debug(e.getMessage());
-            }
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
+
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and

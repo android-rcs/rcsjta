@@ -116,7 +116,26 @@ public class HttpsProvisioningConnection {
                             mProvisioningManager.connectionEvent(action);
                         } catch (RcsAccountException e) {
                             sLogger.error("Unable to handle connection event for intent action: "
-                                    +action, e);
+                                    + action, e);
+                        } catch (IOException e) {
+                            if (sLogger.isActivated()) {
+                                sLogger.debug(new StringBuilder(
+                                        "Unable to handle connection event for intent action: ")
+                                        .append(action).append(", Message=").append(e.getMessage())
+                                        .toString());
+                            }
+                            /* Start the RCS service */
+                            if (mProvisioningManager.isFirstProvisioningAfterBoot()) {
+                                /* Reason: No configuration present */
+                                if (sLogger.isActivated()) {
+                                    sLogger.debug("Initial provisioning failed!");
+                                }
+                                mProvisioningManager
+                                        .provisioningFails(ProvisioningFailureReasons.CONNECTIVITY_ISSUE);
+                                mProvisioningManager.retry();
+                            } else {
+                                mProvisioningManager.tryLaunchRcsCoreService(context, -1);
+                            }
                         } catch (RuntimeException e) {
                             /*
                              * Normally we are not allowed to catch runtime exceptions as these are
@@ -126,22 +145,7 @@ public class HttpsProvisioningConnection {
                              * bring the whole system down, which is not intended.
                              */
                             sLogger.error("Unable to handle connection event for intent action: "
-                                    +action, e);
-                        } catch (IOException e) {
-                            sLogger.error("Unable to handle connection event for intent action: "
-                                    +action, e);
-                            /* Start the RCS service */
-                            if (mProvisioningManager.isFirstProvisioningAfterBoot()) {
-                                /* Reason: No configuration present */
-                                if (sLogger.isActivated()) {
-                                    sLogger.error("Initial provisioning faile!");
-                                }
-                                mProvisioningManager
-                                        .provisioningFails(ProvisioningFailureReasons.CONNECTIVITY_ISSUE);
-                                mProvisioningManager.retry();
-                            } else {
-                                mProvisioningManager.tryLaunchRcsCoreService(context, -1);
-                            }
+                                    + action, e);
                         }
                     }
                 });

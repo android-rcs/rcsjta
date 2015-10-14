@@ -100,14 +100,14 @@ public class OptionsRequestTask implements Runnable {
         } catch (ContactManagerException e) {
             sLogger.error("Options request failed for contact : ".concat(mContact.toString()), e);
             handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, e));
+
         } catch (PayloadException e) {
             sLogger.error("Options request failed for contact : ".concat(mContact.toString()), e);
             handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, e));
+
         } catch (NetworkException e) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(e.getMessage());
-            }
             handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, e));
+
         } catch (RuntimeException e) {
             /*
              * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
