@@ -254,7 +254,8 @@
             android:name="com.orangelabs.rcs.ri.messaging.chat.single.SingleChatView"
             android:icon="@drawable/ri_quick_chat_icon"
             android:label="@string/label_quick_chat"
-            android:launchMode="singleTop" />
+            android:launchMode="singleTop" >
+        </activity>
         <activity
             android:name="com.orangelabs.rcs.ri.messaging.chat.single.SingleChatList"
             android:icon="@drawable/ri_quick_chat_icon"
@@ -369,8 +370,9 @@
 
         <activity
             android:name=".sharing.image.ReceiveImageSharing"
-            android:exported="true"
-            android:label="@string/title_image_sharing" />
+            android:label="@string/title_image_sharing"
+            android:launchMode="singleTop" >
+        </activity>
         <activity
             android:name=".sharing.image.ImageSharingList"
             android:label="@string/menu_image_sharing_log" />
@@ -398,8 +400,9 @@
 
         <activity
             android:name=".sharing.geoloc.ReceiveGeolocSharing"
-            android:exported="true"
-            android:label="@string/title_geoloc_sharing" />
+            android:launchMode="singleTop"
+            android:label="@string/title_geoloc_sharing" >
+        </activity>
 
         <service
             android:name=".sharing.geoloc.GeolocSharingIntentService"
@@ -531,17 +534,16 @@
         <activity
             android:name="com.orangelabs.rcs.ri.history.sharing.SharingDetailView"
             android:label="@string/title_history_log_item" />
-        
-         <receiver
+
+        <receiver
             android:name="com.orangelabs.rcs.ri.messaging.chat.single.UndeliveredMessageReceiver"
             android:exported="true" >
             <intent-filter>
                 <action android:name="com.gsma.services.rcs.chat.action.MESSAGE_DELIVERY_EXPIRED" />
             </intent-filter>
         </receiver>
-        
-         <receiver
-            android:name="com.orangelabs.rcs.ri.messaging.messaging.filetransfer.UndeliveredFileReceiver"
+        <receiver
+            android:name="com.orangelabs.rcs.ri.messaging.filetransfer.UndeliveredFileReceiver"
             android:exported="true" >
             <intent-filter>
                 <action android:name="com.gsma.services.rcs.filetransfer.action.FILE_TRANSFER_DELIVERY_EXPIRED" />
