@@ -791,8 +791,11 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                     setChatMessageStatusAndReasonCode(msgId, mimeType, Status.FAILED,
                             ReasonCode.FAILED_SEND);
                 } catch (NetworkException e) {
-                    sLogger.error(new StringBuilder("Failed to send chat message with msgId '")
-                            .append(msg.getMessageId()).append("'").toString(), e);
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(new StringBuilder("Failed to send chat message with msgId '")
+                                .append(msg.getMessageId()).append("'! (").append(e.getMessage())
+                                .append(")").toString());
+                    }
                     setChatMessageStatusAndReasonCode(msgId, mimeType, Status.FAILED,
                             ReasonCode.FAILED_SEND);
                 } catch (RuntimeException e) {

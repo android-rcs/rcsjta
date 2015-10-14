@@ -405,6 +405,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
             }
 
         } catch (PayloadException e) {
+            sLogger.error("Unable to send 200OK response!", e);
             handleError(new FileSharingError(FileSharingError.SEND_RESPONSE_FAILED, e));
 
         } catch (NetworkException e) {
@@ -415,6 +416,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
+            sLogger.error("Failed to initiate chat session as terminating!", e);
             handleError(new FileSharingError(FileSharingError.SEND_RESPONSE_FAILED, e));
         }
     }

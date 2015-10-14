@@ -101,7 +101,7 @@ public class ProfileProvisioning extends Activity {
         AuthenticationProcedure.DIGEST.name()
     };
 
-    private static Logger logger = Logger.getLogger(ProfileProvisioning.class.getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(ProfileProvisioning.class.getName());
 
     private static final String PROVISIONING_EXTENSION = ".xml";
 
@@ -174,7 +174,8 @@ public class ProfileProvisioning extends Activity {
         spinner.setAdapter(adapter);
         spinner.setSelection(0);
 
-        setContactIdEditTextParam(R.id.ImsUsername, RcsSettingsData.USERPROFILE_IMS_USERNAME, helper);
+        setContactIdEditTextParam(R.id.ImsUsername, RcsSettingsData.USERPROFILE_IMS_USERNAME,
+                helper);
         setStringEditTextParam(R.id.ImsDisplayName, RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME,
                 helper);
         setStringEditTextParam(R.id.ImsHomeDomain, RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN,
@@ -277,7 +278,8 @@ public class ProfileProvisioning extends Activity {
             mRcsSettings.setImsAuhtenticationProcedureForWifi(procedure);
         }
 
-        saveContactIdEditTextParam(R.id.ImsUsername, RcsSettingsData.USERPROFILE_IMS_USERNAME, helper);
+        saveContactIdEditTextParam(R.id.ImsUsername, RcsSettingsData.USERPROFILE_IMS_USERNAME,
+                helper);
         saveStringEditTextParam(R.id.ImsDisplayName, RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME,
                 helper);
         saveStringEditTextParam(R.id.ImsHomeDomain, RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN,
@@ -345,18 +347,20 @@ public class ProfileProvisioning extends Activity {
     };
 
     private void loadProfile(ContactId contact, Uri provisioningFile) {
-        final boolean logActivated = logger.isActivated();
+        final boolean logActivated = sLogger.isActivated();
         try {
             if (logActivated) {
-                logger.debug("Selection of provisioning file: ".concat(provisioningFile.getPath()));
+                sLogger.debug("Selection of provisioning file: ".concat(provisioningFile.getPath()));
             }
             String xMLFileContent = getFileContent(provisioningFile);
             ProvisionTask mProvisionTask = new ProvisionTask();
             mProvisionTask.execute(xMLFileContent, contact.toString());
         } catch (IOException e) {
             if (logActivated) {
-                logger.error("Loading of provisioning failed: invalid XML file '"
-                        + provisioningFile + "'");
+                sLogger.debug(new StringBuilder(
+                        "Loading of provisioning failed: invalid XML file '")
+                        .append(provisioningFile).append("', Message=").append(e.getMessage())
+                        .toString());
             }
             Toast.makeText(ProfileProvisioning.this, getString(R.string.label_load_failed),
                     Toast.LENGTH_LONG).show();
@@ -484,8 +488,8 @@ public class ProfileProvisioning extends Activity {
                         && mRcsSettings.getFtHttpPassword() != null);
                 return true;
             } catch (SAXException e) {
-                if (logger.isActivated()) {
-                    logger.error("Can't parse provisioning document");
+                if (sLogger.isActivated()) {
+                    sLogger.debug(e.getMessage());
                 }
                 // Restore GSMA release saved before parsing of the provisioning
                 mRcsSettings.setGsmaRelease(release);

@@ -87,6 +87,10 @@ public class DownloadFromAcceptFileSharingSession extends TerminatingHttpFileSha
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
+            sLogger.error(
+                    new StringBuilder("Download failed for a file sessionId : ")
+                            .append(getSessionID()).append(" with transferId : ")
+                            .append(getFileTransferId()).toString(), e);
             handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
             return;
         }

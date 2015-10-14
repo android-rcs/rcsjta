@@ -241,18 +241,16 @@ public class HttpsProvisioningService extends Service {
                         sLogger.error("Unable to handle connection event!", e);
 
                     } catch (IOException e) {
-                        String message = e.getMessage();
-                        if (message == null) {
-                            sLogger.warn("Unable to handle connection event!", e);
-                        } else {
-                            sLogger.warn("Unable to handle connection event! Message="
-                                    .concat(message));
+                        if (sLogger.isActivated()) {
+                            sLogger.debug(new StringBuilder(
+                                    "Unable to handle connection event, Message=").append(
+                                    e.getMessage()).toString());
                         }
                         /* Start the RCS service */
                         if (mHttpsProvisioningMng.isFirstProvisioningAfterBoot()) {
                             /* Reason: No configuration present */
                             if (sLogger.isActivated()) {
-                                sLogger.error("Initial provisioning failed!");
+                                sLogger.debug("Initial provisioning failed!");
                             }
                             mHttpsProvisioningMng
                                     .provisioningFails(ProvisioningFailureReasons.CONNECTIVITY_ISSUE);
@@ -350,17 +348,16 @@ public class HttpsProvisioningService extends Service {
                         sLogger.error("Failed to update configuration!", e);
 
                     } catch (IOException e) {
-                        String message = e.getMessage();
-                        if (message == null) {
-                            sLogger.warn("Unable to handle connection event!", e);
-                        } else {
-                            sLogger.warn("Unable to handle connection event! ".concat(message));
+                        if (sLogger.isActivated()) {
+                            sLogger.debug(new StringBuilder(
+                                    "Unable to handle connection event, Message=").append(
+                                    e.getMessage()).toString());
                         }
                         /* Start the RCS service */
                         if (mHttpsProvisioningMng.isFirstProvisioningAfterBoot()) {
                             /* Reason: No configuration present */
                             if (sLogger.isActivated()) {
-                                sLogger.error("Initial provisioning failed!");
+                                sLogger.debug("Initial provisioning failed!");
                             }
                             mHttpsProvisioningMng
                                     .provisioningFails(ProvisioningFailureReasons.CONNECTIVITY_ISSUE);

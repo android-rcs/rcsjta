@@ -117,9 +117,6 @@ public class OriginatingSipRtpSession extends GenericSipRtpSession {
             handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED, e));
 
         } catch (NetworkException e) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(e.getMessage());
-            }
             handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED, e));
 
         } catch (RuntimeException e) {

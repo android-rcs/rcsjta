@@ -229,11 +229,10 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
         } catch (PayloadException e) {
             sLogger.error("Unable to send 200OK response!", e);
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
+
         } catch (NetworkException e) {
-            if (logActivated) {
-                sLogger.debug(e.getMessage());
-            }
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
+
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
@@ -271,16 +270,12 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
      * @param error Error
      */
     public void handleError(ImsServiceError error) {
-        // Error
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("Session error: ").append(error.getErrorCode())
                     .append(", reason=").append(error.getMessage()).toString());
         }
 
-        // Close media session
         closeMediaSession();
-
-        // Remove the current session
         removeSession();
     }
 

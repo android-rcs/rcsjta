@@ -142,6 +142,8 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
             if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
                 return;
             }
+            sLogger.error("Download of file has failed for mRemoteInstanceId : "
+                    .concat(mRemoteInstanceId), e);
             handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
 
         } catch (FileNotDownloadedException e) {
@@ -149,6 +151,8 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
             if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
                 return;
             }
+            sLogger.error("Download of file has failed for mRemoteInstanceId : "
+                    .concat(mRemoteInstanceId), e);
             handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
 
         } catch (IOException e) {
@@ -156,9 +160,13 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
             if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
                 return;
             }
+            sLogger.error("Download of file has failed for mRemoteInstanceId : "
+                    .concat(mRemoteInstanceId), e);
             handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
 
         } catch (PayloadException e) {
+            sLogger.error("Download of file has failed for mRemoteInstanceId : "
+                    .concat(mRemoteInstanceId), e);
             handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
 
         } catch (RuntimeException e) {
@@ -166,6 +174,8 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
+            sLogger.error("Download of file has failed for mRemoteInstanceId : "
+                    .concat(mRemoteInstanceId), e);
             handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
         }
     }
@@ -218,6 +228,8 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
                      * Intentionally catch runtime exceptions as else it will abruptly end the
                      * thread and eventually bring the whole system down, which is not intended.
                      */
+                    sLogger.error("Pause of download of file has failed for mRemoteInstanceId : "
+                            .concat(mRemoteInstanceId), e);
                     handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
                 }
             }
@@ -254,6 +266,8 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
                     if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
                         return;
                     }
+                    sLogger.error("Download of file has failed for mRemoteInstanceId : "
+                            .concat(mRemoteInstanceId), e);
                     handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
 
                 } catch (FileNotDownloadedException e) {
@@ -261,6 +275,8 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
                     if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
                         return;
                     }
+                    sLogger.error("Download of file has failed for mRemoteInstanceId : "
+                            .concat(mRemoteInstanceId), e);
                     handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
 
                 } catch (IOException e) {
@@ -268,9 +284,13 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
                     if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
                         return;
                     }
+                    sLogger.error("Download of file has failed for mRemoteInstanceId : "
+                            .concat(mRemoteInstanceId), e);
                     handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
 
                 } catch (PayloadException e) {
+                    sLogger.error("Download of file has failed for mRemoteInstanceId : "
+                            .concat(mRemoteInstanceId), e);
                     handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
 
                 } catch (RuntimeException e) {
@@ -278,6 +298,8 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
                      * Intentionally catch runtime exceptions as else it will abruptly end the
                      * thread and eventually bring the whole system down, which is not intended.
                      */
+                    sLogger.error("Download of file has failed for mRemoteInstanceId : "
+                            .concat(mRemoteInstanceId), e);
                     handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
                 }
             }

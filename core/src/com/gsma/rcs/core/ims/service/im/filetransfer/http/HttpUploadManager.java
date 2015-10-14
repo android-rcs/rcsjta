@@ -356,14 +356,6 @@ public class HttpUploadManager extends HttpTransferManager {
                 }
 
             } catch (IOException e) {
-                if (sLogger.isActivated()) {
-                    String message = e.getMessage();
-                    if (message != null) {
-                        sLogger.warn("File Upload paused due to error!", e);
-                    } else {
-                        sLogger.warn("File Upload paused due to error! Message=".concat(message));
-                    }
-                }
                 /*
                  * When there is a connection problem causing transfer terminated, state should be
                  * set to paused.

@@ -783,7 +783,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                     fileSession.downloadFileIcon();
                 } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
-                        sLogger.error("Failed to download file icon", e);
+                        sLogger.debug(new StringBuilder("Failed to download file icon! (")
+                                .append(e.getMessage()).append(")").toString());
                     }
                     MmContent fileIconContent = fileTransferHttpThumbnail.getLocalMmContent(msgId);
                     if (fileResent) {

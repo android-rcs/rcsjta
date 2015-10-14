@@ -249,7 +249,10 @@ public class FileUtils {
                 return false;
 
             } catch (IOException e) {
-                sLogger.error("Failed to read from uri :".concat(file.toString()), e);
+                if (sLogger.isActivated()) {
+                    sLogger.debug(new StringBuilder("Failed to read from uri :").append(file)
+                            .append(", Message=").append(e.getMessage()).toString());
+                }
                 return false;
 
             } finally {

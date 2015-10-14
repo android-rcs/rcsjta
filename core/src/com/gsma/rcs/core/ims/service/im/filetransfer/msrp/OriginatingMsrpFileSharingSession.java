@@ -245,15 +245,19 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
             sendInvite(invite);
 
         } catch (InvalidArgumentException e) {
+            sLogger.error("Unable to set authorization header!", e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
 
         } catch (ParseException e) {
+            sLogger.error("Unable to set authorization header!", e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
 
         } catch (FileAccessException e) {
+            sLogger.error("Unable to set and send initial invite!", e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
 
         } catch (PayloadException e) {
+            sLogger.error("Unable to set and send initial invite!", e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
 
         } catch (NetworkException e) {
@@ -264,6 +268,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
+            sLogger.error("Failed to initiate a file transfer session!", e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
         }
     }
