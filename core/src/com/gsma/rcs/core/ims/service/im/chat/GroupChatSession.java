@@ -768,6 +768,10 @@ public abstract class GroupChatSession extends ChatSession {
                 ChatMessage msg = new ChatMessage(cpimMsgId, remoteId, cpimMsg.getMessageContent(),
                         MimeType.TEXT_MESSAGE, timestamp, timestampSent, pseudo);
                 receive(msg, shouldSendDisplayReport(dispositionNotification));
+                if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
+                    sendMsrpMessageDeliveryStatus(remoteId, cpimMsgId,
+                            ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
+                }
             } else {
                 if (ChatUtils.isApplicationIsComposingType(contentType)) {
                     // Is composing event
@@ -798,13 +802,13 @@ public abstract class GroupChatSession extends ChatSession {
                                     cpimMsg.getMessageContent(), GeolocInfoDocument.MIME_TYPE,
                                     timestamp, timestampSent, pseudo);
                             receive(msg, shouldSendDisplayReport(dispositionNotification));
+                            if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
+                                sendMsrpMessageDeliveryStatus(remoteId, cpimMsgId,
+                                        ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
+                            }
                         }
                     }
                 }
-            }
-            if (dispositionNotification != null) {
-                sendMsrpMessageDeliveryStatus(remoteId, cpimMsgId,
-                        ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
             }
         }
     }
