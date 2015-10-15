@@ -1472,8 +1472,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     }
                 }
             }
-            if (mPersistedStorage.setRejoinId(session.getImSessionIdentity())) {
-                mBroadcaster.broadcastStateChanged(mChatId, State.STARTED, ReasonCode.UNSPECIFIED);
+            mPersistedStorage.setRejoinId(session.getImSessionIdentity());
+            if (State.STARTED != mPersistedStorage.getState()) {
+                mChatService.setGroupChatStateAndReasonCode(mChatId, State.STARTED,
+                        ReasonCode.UNSPECIFIED);
             }
         }
         mImService.tryToInviteQueuedGroupChatParticipantInvitations(mChatId);
