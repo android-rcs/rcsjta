@@ -20,7 +20,6 @@ package com.orangelabs.rcs.ri.messaging.chat.single;
 
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsGenericException;
-import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.RcsServiceException;
@@ -28,7 +27,6 @@ import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.RcsServiceNotRegisteredException;
 import com.gsma.services.rcs.capability.CapabilityService;
 import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.ChatService;
@@ -37,6 +35,9 @@ import com.gsma.services.rcs.chat.OneToOneChat;
 import com.gsma.services.rcs.chat.OneToOneChatIntent;
 import com.gsma.services.rcs.chat.OneToOneChatListener;
 import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.services.rcs.filetransfer.FileTransferLog;
+import com.gsma.services.rcs.history.HistoryLog;
 
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.chat.ChatView;
@@ -71,7 +72,10 @@ import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 /**
@@ -97,31 +101,24 @@ public class SingleChatView extends ChatView {
     /**
      * List of items for contextual menu
      */
-    private final static int CHAT_MENU_ITEM_DELETE = 0;
+    private final static int MENU_ITEM_DELETE = 0;
 
-    private final static int CHAT_MENU_ITEM_RESEND = 1;
-
-    private final static int CHAT_MENU_ITEM_REVOKE = 2;
+    private final static int MENU_ITEM_RESEND = 1;
 
     private static final String LOGTAG = LogUtils.getTag(SingleChatView.class.getSimpleName());
 
     /**
-     * Chat_id is set to contact id for one to one chat messages.
+     * Chat_id is set to contact id for one to one chat and file transfer messages.
      */
-    private static final String WHERE_CLAUSE = new StringBuilder(Message.CHAT_ID)
-            .append("=? AND (").append(Message.MIME_TYPE).append("='")
-            .append(Message.MimeType.GEOLOC_MESSAGE).append("' OR ").append(Message.MIME_TYPE)
-            .append("='").append(Message.MimeType.TEXT_MESSAGE).append("')").toString();
+    private static final String WHERE_CLAUSE = new StringBuilder(HistoryLog.CHAT_ID).append("=?")
+            .toString();
 
-    private final static String UNREADS_WHERE_CLAUSE = new StringBuilder(Message.CHAT_ID)
-            .append("=? AND ").append(Message.READ_STATUS).append("=")
-            .append(ReadStatus.UNREAD.toInt()).append(" AND (").append(Message.MIME_TYPE)
-            .append("='").append(Message.MimeType.GEOLOC_MESSAGE).append("' OR ")
-            .append(Message.MIME_TYPE).append("='").append(Message.MimeType.TEXT_MESSAGE)
-            .append("')").toString();
+    private final static String UNREADS_WHERE_CLAUSE = new StringBuilder(HistoryLog.CHAT_ID)
+            .append("=? AND ").append(HistoryLog.READ_STATUS).append("=")
+            .append(ReadStatus.UNREAD.toInt()).toString();
 
-    private final static String[] PROJECTION_MSG_ID = new String[] {
-        Message.MESSAGE_ID
+    private final static String[] PROJECTION_UNREAD_MESSAGE = new String[] {
+            HistoryLog.PROVIDER_ID, HistoryLog.ID
     };
 
     private static final String OPEN_ONE_TO_ONE_CHAT_CONVERSATION = "open_one_to_one_conversation";
@@ -165,6 +162,7 @@ public class SingleChatView extends ChatView {
 
         } catch (RcsServiceNotAvailableException e) {
             Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce, e);
+
         } catch (RcsServiceException e) {
             Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
         }
@@ -181,10 +179,9 @@ public class SingleChatView extends ChatView {
         if (mChat != null) {
             try {
                 mChat.setComposingStatus(false);
+
             } catch (RcsGenericException e) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "onComposing failed", e);
-                }
+                Utils.showException(this, e);
             }
         }
         super.onDestroy();
@@ -219,9 +216,13 @@ public class SingleChatView extends ChatView {
             mDisplayName = RcsContactUtil.getInstance(this).getDisplayName(mContact);
             setTitle(getString(R.string.title_chat, mDisplayName));
             /* Mark as read messages if required */
-            Set<String> msgIdUnreads = getUnreadMessageIds(mContact);
-            for (String msgId : msgIdUnreads) {
-                mChatService.markMessageAsRead(msgId);
+            Map<String, Integer> msgIdUnreads = getUnreadMessageIds(mContact);
+            for (Entry<String, Integer> entryMsgIdUnread : msgIdUnreads.entrySet()) {
+                if (ChatLog.Message.HISTORYLOG_MEMBER_ID == entryMsgIdUnread.getValue()) {
+                    mChatService.markMessageAsRead(entryMsgIdUnread.getKey());
+                } else {
+                    mFileTransferService.markFileTransferAsRead(entryMsgIdUnread.getKey());
+                }
             }
             if (OneToOneChatIntent.ACTION_MESSAGE_DELIVERY_EXPIRED.equals(intent.getAction())) {
                 processUndeliveredMessages(mDisplayName);
@@ -258,15 +259,8 @@ public class SingleChatView extends ChatView {
          * now.
          */
         mChat = mChatService.getOneToOneChat(mContact);
-        if (firstLoad) {
-            /*
-             * Initialize the Loader with id '1' and callbacks 'mCallbacks'.
-             */
-            getSupportLoaderManager().initLoader(LOADER_ID, null, this);
-        } else {
-            /* We switched from one contact to another: reload history since */
-            getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
-        }
+        setCursorLoader(firstLoad);
+
         contactOnForeground = mContact;
         if (mCapabilityService == null) {
             mCapabilityService = mCnxManager.getCapabilityApi();
@@ -274,20 +268,18 @@ public class SingleChatView extends ChatView {
         try {
             /* Request options for this new contact */
             mCapabilityService.requestContactCapabilities(mContact);
+
         } catch (RcsServiceNotRegisteredException e) {
-            if (LogUtils.isActive) {
-                Log.w(LOGTAG, "RcsServiceNotRegisteredException: " + e.getMessage());
-            }
+            Utils.showException(this, e);
         }
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         /* Create a new CursorLoader with the following query parameters. */
-        return new CursorLoader(this, Message.CONTENT_URI, PROJ_CHAT_MSG, WHERE_CLAUSE,
-                new String[] {
-                    mContact.toString()
-                }, ORDER_CHAT_MSG);
+        return new CursorLoader(this, mUriHistoryProvider, null, WHERE_CLAUSE, new String[] {
+            mContact.toString()
+        }, ORDER_CHAT_MSG);
     }
 
     @Override
@@ -297,30 +289,27 @@ public class SingleChatView extends ChatView {
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
         Cursor cursor = (Cursor) mAdapter.getItem(info.position);
         // Adapt the contextual menu according to the selected item
-        menu.add(0, CHAT_MENU_ITEM_DELETE, CHAT_MENU_ITEM_DELETE, R.string.menu_delete_message);
+        menu.add(0, MENU_ITEM_DELETE, MENU_ITEM_DELETE, R.string.menu_delete_message);
         Direction direction = Direction.valueOf(cursor.getInt(cursor
-                .getColumnIndexOrThrow(Message.DIRECTION)));
+                .getColumnIndexOrThrow(HistoryLog.DIRECTION)));
         if (Direction.OUTGOING != direction) {
             return;
-
         }
-        Content.Status status = Content.Status.valueOf(cursor.getInt(cursor
-                .getColumnIndexOrThrow(Message.STATUS)));
-        switch (status) {
-            case FAILED:
-                menu.add(0, CHAT_MENU_ITEM_RESEND, CHAT_MENU_ITEM_RESEND,
-                        R.string.menu_resend_message);
-                break;
-            case DISPLAY_REPORT_REQUESTED:
-            case DELIVERED:
-            case SENT:
-            case SENDING:
-            case QUEUED:
-                menu.add(0, CHAT_MENU_ITEM_REVOKE, CHAT_MENU_ITEM_REVOKE,
-                        R.string.menu_revoke_message);
-                break;
-            default:
-                break;
+        int providerId = cursor.getInt(cursor.getColumnIndexOrThrow(HistoryLog.PROVIDER_ID));
+        if (ChatLog.Message.HISTORYLOG_MEMBER_ID == providerId) {
+            Content.Status status = Content.Status.valueOf(cursor.getInt(cursor
+                    .getColumnIndexOrThrow(HistoryLog.STATUS)));
+            if (Content.Status.FAILED == status) {
+                menu.add(0, MENU_ITEM_RESEND, MENU_ITEM_RESEND, R.string.menu_resend_message);
+            }
+            // TODO depending on mime-type allow user to view file image
+
+        } else if (FileTransferLog.HISTORYLOG_MEMBER_ID == providerId) {
+            FileTransfer.State state = FileTransfer.State.valueOf(cursor.getInt(cursor
+                    .getColumnIndexOrThrow(HistoryLog.STATUS)));
+            if (FileTransfer.State.FAILED == state) {
+                menu.add(0, MENU_ITEM_RESEND, MENU_ITEM_RESEND, R.string.menu_resend_message);
+            }
         }
     }
 
@@ -328,31 +317,36 @@ public class SingleChatView extends ChatView {
     public boolean onContextItemSelected(MenuItem item) {
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
         Cursor cursor = (Cursor) (mAdapter.getItem(info.position));
-        String messageId = cursor.getString(cursor.getColumnIndexOrThrow(Message.MESSAGE_ID));
+        int providerId = cursor.getInt(cursor.getColumnIndexOrThrow(HistoryLog.PROVIDER_ID));
+        String messageId = cursor.getString(cursor.getColumnIndexOrThrow(HistoryLog.ID));
         if (LogUtils.isActive) {
-            Log.d(LOGTAG, "onContextItemSelected msgId=".concat(messageId));
+            Log.d(LOGTAG, "onContextItemSelected Id=".concat(messageId));
         }
         switch (item.getItemId()) {
-            case CHAT_MENU_ITEM_RESEND:
+            case MENU_ITEM_RESEND:
                 try {
-                    mChat.resendMessage(messageId);
-                } catch (Exception e) {
-                    if (LogUtils.isActive) {
-                        Log.e(LOGTAG, "resend message failed", e);
+                    if (ChatLog.Message.HISTORYLOG_MEMBER_ID == providerId) {
+                        mChat.resendMessage(messageId);
+                    } else {
+                        FileTransfer fileTransfer = mFileTransferService.getFileTransfer(messageId);
+                        if (fileTransfer != null) {
+                            fileTransfer.resendTransfer();
+                        }
                     }
+                } catch (RcsServiceException e) {
+                    Utils.showException(this, e);
                 }
                 return true;
 
-            case CHAT_MENU_ITEM_REVOKE:
-                return true;
-
-            case CHAT_MENU_ITEM_DELETE:
+            case MENU_ITEM_DELETE:
                 try {
-                    mChatService.deleteMessage(messageId);
-                } catch (Exception e) {
-                    if (LogUtils.isActive) {
-                        Log.e(LOGTAG, "delete message failed", e);
+                    if (ChatLog.Message.HISTORYLOG_MEMBER_ID == providerId) {
+                        mChatService.deleteMessage(messageId);
+                    } else {
+                        mFileTransferService.deleteFileTransfer(messageId);
                     }
+                } catch (RcsServiceException e) {
+                    Utils.showException(this, e);
                 }
                 return true;
 
@@ -395,63 +389,49 @@ public class SingleChatView extends ChatView {
      * Get unread messages for contact
      * 
      * @param contact
-     * @return set of unread message IDs
+     * @return Map of unread message IDs associated with the provider ID
      */
-    private Set<String> getUnreadMessageIds(ContactId contact) {
-        Set<String> unReadMessageIDs = new HashSet<String>();
+    private Map<String, Integer> getUnreadMessageIds(ContactId contact) {
+        Map<String, Integer> unReadMessageIDs = new HashMap<String, Integer>();
         String[] where_args = new String[] {
             contact.toString()
         };
         Cursor cursor = null;
         try {
-            cursor = getContentResolver().query(Message.CONTENT_URI, PROJECTION_MSG_ID,
+            cursor = getContentResolver().query(mUriHistoryProvider, PROJECTION_UNREAD_MESSAGE,
                     UNREADS_WHERE_CLAUSE, where_args, ORDER_CHAT_MSG);
-            int columIndex = cursor.getColumnIndexOrThrow(Message.MESSAGE_ID);
-            while (cursor.moveToNext()) {
-                unReadMessageIDs.add(cursor.getString(columIndex));
+            if (!cursor.moveToFirst()) {
+                return unReadMessageIDs;
             }
-        } catch (Exception e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "Exception occurred", e);
-            }
+            int msgIdcolumIdx = cursor.getColumnIndexOrThrow(HistoryLog.ID);
+            int providerIdColumIdx = cursor.getColumnIndexOrThrow(HistoryLog.PROVIDER_ID);
+            do {
+                unReadMessageIDs.put(cursor.getString(msgIdcolumIdx),
+                        cursor.getInt(providerIdColumIdx));
+            } while (cursor.moveToNext());
+            return unReadMessageIDs;
+
         } finally {
             if (cursor != null) {
                 cursor.close();
             }
         }
-        return unReadMessageIDs;
     }
 
     @Override
-    public ChatMessage sendMessage(String message) {
+    public ChatMessage sendMessage(String message) throws RcsServiceException {
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "sendTextMessage: ".concat(message));
         }
-        try {
-            return mChat.sendMessage(message);
-
-        } catch (Exception e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "sendTextMessage failed", e);
-            }
-            return null;
-        }
+        return mChat.sendMessage(message);
     }
 
     @Override
-    public ChatMessage sendMessage(Geoloc geoloc) {
+    public ChatMessage sendMessage(Geoloc geoloc) throws RcsServiceException {
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "sendGeolocMessage: ".concat(geoloc.toString()));
         }
-        try {
-            return mChat.sendMessage(geoloc);
-
-        } catch (Exception e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "sendMessage failed", e);
-            }
-            return null;
-        }
+        return mChat.sendMessage(geoloc);
     }
 
     @Override
@@ -471,15 +451,14 @@ public class SingleChatView extends ChatView {
                 try {
                     if (mChat == null) {
                         return;
-
                     }
                     mChat.setComposingStatus(isTyping);
                     if (LogUtils.isActive) {
                         Boolean _isTyping = Boolean.valueOf(isTyping);
                         Log.d(LOGTAG, "sendIsComposingEvent ".concat(_isTyping.toString()));
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } catch (RcsGenericException e) {
+                    Utils.showException(SingleChatView.this, e);
                 }
             }
         };
@@ -568,17 +547,13 @@ public class SingleChatView extends ChatView {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 try {
-                    Set<String> msgIds = SingleChatView.this.getUndeliveredMessages(mContact);
+                    Set<String> msgIds = getUndeliveredMessages(mContact);
                     mChatService.clearMessageDeliveryExpiration(msgIds);
                     if (LogUtils.isActive) {
                         Log.d(LOGTAG, "clearMessageDeliveryExpiration ".concat(msgIds.toString()));
                     }
-                } catch (RcsServiceNotAvailableException e) {
-                    Utils.displayToast(SingleChatView.this, e);
-                } catch (RcsPersistentStorageException e) {
-                    Utils.displayToast(SingleChatView.this, e);
-                } catch (RcsGenericException e) {
-                    Utils.displayToast(SingleChatView.this, e);
+                } catch (RcsServiceException e) {
+                    Utils.showException(SingleChatView.this, e);
                 } finally {
                     mClearUndeliveredAlertDialog = null;
                 }

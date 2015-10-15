@@ -2,68 +2,47 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:padding="2dip" >
+    android:orientation="vertical"
+    android:textAppearance="?android:attr/textAppearanceSmall" >
 
     <TextView
         android:id="@+id/contact"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:singleLine="true"
-        android:text="@string/label_uninitialized_contact"
-        android:textColor="@android:color/darker_gray"
-        android:textSize="12sp" />
+        android:textColor="@android:color/darker_gray" />
 
     <TextView
         android:id="@+id/deliver"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
-        android:layout_below="@id/contact"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:singleLine="true"
-        android:text="@string/label_uninitialized_date"
-        android:textColor="@android:color/darker_gray"
-        android:textSize="12sp" />
+        android:layout_below="@id/contact" />
 
     <TextView
         android:id="@+id/display"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/contact"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:singleLine="true"
-        android:text="@string/label_uninitialized_date"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/deliver" />
 
     <TextView
         android:id="@+id/status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
-        android:layout_below="@id/deliver"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:singleLine="true"
-        android:text="@string/label_group_delivery_unknown_status"
-        android:textColor="@android:color/darker_gray"
-        android:textSize="12sp" />
+        android:layout_below="@id/display" />
 
     <TextView
         android:id="@+id/reason"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/display"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:singleLine="true"
-        android:text="@string/label_group_delivery_unknown_reason"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/status" />
 
 </RelativeLayout>

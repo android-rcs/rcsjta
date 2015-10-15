@@ -20,9 +20,11 @@ import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.history.HistoryMemberBaseIdCreator;
 import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.DatabaseUtils;
+import com.gsma.services.rcs.history.HistoryLog;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingLog;
 
 import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
@@ -243,7 +245,9 @@ public class GeolocSharingProvider extends ContentProvider {
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.update(TABLE, values, selection, selectionArgs);
                 if (count > 0) {
-                    getContext().getContentResolver().notifyChange(notificationUri, null);
+                    ContentResolver resolver = getContext().getContentResolver();
+                    resolver.notifyChange(notificationUri, null);
+                    resolver.notifyChange(HistoryLog.CONTENT_URI, null);
                 }
                 return count;
 
@@ -276,7 +280,9 @@ public class GeolocSharingProvider extends ContentProvider {
                 }
                 Uri notificationUri = GeolocSharingLog.CONTENT_URI.buildUpon()
                         .appendPath(sharingId).build();
-                getContext().getContentResolver().notifyChange(notificationUri, null);
+                ContentResolver resolver = getContext().getContentResolver();
+                resolver.notifyChange(notificationUri, null);
+                resolver.notifyChange(HistoryLog.CONTENT_URI, null);
                 return notificationUri;
 
             case UriType.GeolocSharing.WITH_SHARING_ID:
@@ -306,7 +312,9 @@ public class GeolocSharingProvider extends ContentProvider {
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.delete(TABLE, selection, selectionArgs);
                 if (count > 0) {
-                    getContext().getContentResolver().notifyChange(notificationUri, null);
+                    ContentResolver resolver = getContext().getContentResolver();
+                    resolver.notifyChange(notificationUri, null);
+                    resolver.notifyChange(HistoryLog.CONTENT_URI, null);
                 }
                 return count;
 

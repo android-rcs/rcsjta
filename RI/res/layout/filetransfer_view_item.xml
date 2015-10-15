@@ -6,42 +6,64 @@
     android:textAppearance="?android:attr/textAppearanceSmall" >
 
     <RelativeLayout
-        android:id="@+id/msg_item"
+        android:id="@+id/rl_file_item"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
-        android:background="@drawable/msg_item_right"
         android:orientation="vertical" >
 
-        <TextView
-            android:id="@+id/chat_text"
+        <RelativeLayout
+            android:id="@+id/info_filetransfer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/contact_text"
-            android:text="@string/label_uninitialized_text"
-            android:textColor="@android:color/black" />
+            android:orientation="vertical" >
 
-        <TextView
-            android:id="@id/contact_text"
+            <TextView
+                android:id="@+id/progress_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true" />
+
+            <TextView
+                android:id="@+id/contact_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/progress_text"
+                android:singleLine="true"
+                android:text="@string/label_uninitialized_contact" />
+        </RelativeLayout>
+
+        <ImageView
+            android:id="@+id/file_image_incoming"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/chat_text"
-            android:singleLine="true"
-            android:text="@string/label_uninitialized_contact" />
+            android:padding="15dp"
+            android:layout_alignEnd="@id/info_filetransfer"
+            android:layout_alignRight="@id/info_filetransfer"
+            android:src="@drawable/ri_filetransfer_off" />
+
+        <ImageView
+            android:id="@+id/file_image_outgoing"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="15dp"
+            android:layout_alignLeft="@id/info_filetransfer"
+            android:layout_alignStart="@id/info_filetransfer"
+            android:src="@drawable/ri_filetransfer_off" />
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/msg_item"
+        android:layout_below="@id/rl_file_item"
         android:orientation="horizontal" >
 
         <LinearLayout
             android:id="@+id/status_bloc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
             android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             android:orientation="horizontal" >
 
             <ImageView

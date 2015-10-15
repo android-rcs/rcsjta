@@ -72,9 +72,9 @@ public class GroupDeliveryInfoCursorAdapter extends CursorAdapter {
         final ViewHolder holder = (ViewHolder) view.getTag();
 
         // Set the deliver date/time field
-        long deliver = cursor.getLong(holder.columnDeliver);
+        long timestampDeliver = cursor.getLong(holder.columnTimestampDeliver);
         // Set the deliver date/time field
-        long display = cursor.getLong(holder.columnDisplay);
+        long timestampDisplay = cursor.getLong(holder.columnTimestampDisplay);
         // Set the status text
         GroupDeliveryInfo.Status status = GroupDeliveryInfo.Status.valueOf(cursor
                 .getInt(holder.columnStatus));
@@ -86,20 +86,20 @@ public class GroupDeliveryInfoCursorAdapter extends CursorAdapter {
         String displayName = RcsContactUtil.getInstance(mContext).getDisplayName(number);
         holder.contactText.setText(mContext.getString(R.string.label_from_args, displayName));
 
-        if (deliver == 0) {
+        if (timestampDeliver == 0) {
             holder.deliverText.setVisibility(View.GONE);
         } else {
             holder.deliverText.setVisibility(View.VISIBLE);
             holder.deliverText.setText(mContext.getString(R.string.label_state_delivered_at,
-                    df.format(deliver)));
+                    df.format(timestampDeliver)));
         }
         /* Display information is only applicable to file transfers */
-        if (display == 0) {
+        if (timestampDisplay == 0) {
             holder.displayText.setVisibility(View.GONE);
         } else {
             holder.displayText.setVisibility(View.VISIBLE);
             holder.displayText.setText(mContext.getString(R.string.label_state_displayed_at,
-                    df.format(display)));
+                    df.format(timestampDisplay)));
         }
 
         String _status = mContext.getString(R.string.label_status,
@@ -133,9 +133,9 @@ public class GroupDeliveryInfoCursorAdapter extends CursorAdapter {
 
         int columnContact;
 
-        int columnDeliver;
+        int columnTimestampDeliver;
 
-        int columnDisplay;
+        int columnTimestampDisplay;
 
         int columnStatus;
 
@@ -149,8 +149,10 @@ public class GroupDeliveryInfoCursorAdapter extends CursorAdapter {
          */
         ViewHolder(View base, Cursor cursor) {
             columnContact = cursor.getColumnIndexOrThrow(GroupDeliveryInfoLog.CONTACT);
-            columnDeliver = cursor.getColumnIndexOrThrow(GroupDeliveryInfoLog.TIMESTAMP_DELIVERED);
-            columnDisplay = cursor.getColumnIndexOrThrow(GroupDeliveryInfoLog.TIMESTAMP_DISPLAYED);
+            columnTimestampDeliver = cursor
+                    .getColumnIndexOrThrow(GroupDeliveryInfoLog.TIMESTAMP_DELIVERED);
+            columnTimestampDisplay = cursor
+                    .getColumnIndexOrThrow(GroupDeliveryInfoLog.TIMESTAMP_DISPLAYED);
             columnStatus = cursor.getColumnIndexOrThrow(GroupDeliveryInfoLog.STATUS);
             columnReason = cursor.getColumnIndexOrThrow(GroupDeliveryInfoLog.REASON_CODE);
             statusText = (TextView) base.findViewById(R.id.status);
