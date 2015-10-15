@@ -202,6 +202,26 @@ public class Utils {
     }
 
     /**
+     * Show an exception
+     * 
+     * @param activity Activity
+     * @param e Exception to be displayed
+     * @return Dialog
+     */
+    public static AlertDialog showException(Activity activity, Exception e) {
+        Log.e(LOGTAG, ExceptionUtil.getFullStackTrace(e));
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        String message = e.getMessage();
+        builder.setMessage((message != null) ? message : "Exception occurred!");
+        builder.setTitle(R.string.title_msg);
+        builder.setCancelable(false);
+        builder.setPositiveButton(activity.getString(R.string.label_ok), null);
+        AlertDialog alert = builder.create();
+        alert.show();
+        return alert;
+    }
+
+    /**
      * Show a picture and exit activity
      * 
      * @param activity Activity

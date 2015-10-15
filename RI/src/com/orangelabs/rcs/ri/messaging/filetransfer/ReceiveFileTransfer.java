@@ -166,10 +166,8 @@ public class ReceiveFileTransfer extends Activity {
                 } else {
                     mCnxManager.getFileTransferApi().removeEventListener(ftListener);
                 }
-            } catch (Exception e) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "Failed to remove listener", e);
-                }
+            } catch (RcsServiceException e) {
+                Utils.showException(this, e);
             }
         }
     }
@@ -300,9 +298,7 @@ public class ReceiveFileTransfer extends Activity {
                         iconView.setImageBitmap(bitmap);
 
                     } catch (IOException e) {
-                        if (LogUtils.isActive) {
-                            Log.e(LOGTAG, "Failed to load thumbnail", e);
-                        }
+                        Utils.showException(this, e);
                     }
                 } else {
                     if (VCARD_MIME_TYPE.equals(mFtDao.getMimeType())) {
@@ -345,7 +341,7 @@ public class ReceiveFileTransfer extends Activity {
             mFileTransfer.rejectInvitation();
 
         } catch (RcsServiceException e) {
-            Utils.displayToast(this, e);
+            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
         }
     }
 
@@ -392,7 +388,8 @@ public class ReceiveFileTransfer extends Activity {
                 mFileTransfer.abortTransfer();
             }
         } catch (RcsServiceException e) {
-            Utils.displayToast(this, e);
+            Utils.showException(this, e);
+
         } finally {
             mFileTransfer = null;
             finish();
@@ -573,13 +570,13 @@ public class ReceiveFileTransfer extends Activity {
                         mResumeBtn.setEnabled(mFileTransfer.isAllowedToResumeTransfer());
                     } catch (RcsServiceException e) {
                         mResumeBtn.setEnabled(false);
-                        Utils.displayToast(ReceiveFileTransfer.this, e);
+                        Utils.showException(ReceiveFileTransfer.this, e);
                     }
                     try {
                         mPauseBtn.setEnabled(mFileTransfer.isAllowedToPauseTransfer());
                     } catch (RcsServiceException e) {
                         mPauseBtn.setEnabled(false);
-                        Utils.displayToast(ReceiveFileTransfer.this, e);
+                        Utils.showException(ReceiveFileTransfer.this, e);
                     }
                 }
                 TextView statusView = (TextView) findViewById(R.id.progress_status);
@@ -621,6 +618,14 @@ public class ReceiveFileTransfer extends Activity {
         /* Make sure progress bar is at the end */
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         progressBar.setProgress(progressBar.getMax());
+
+        FileTransferService ftService = mCnxManager.getFileTransferApi();
+        try {
+            ftService.markFileTransferAsRead(mTransferId);
+
+        } catch (RcsServiceException e) {
+            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+        }
 
         if (VCARD_MIME_TYPE.equals(mFtDao.getMimeType())) {
             // Show the transferred vCard

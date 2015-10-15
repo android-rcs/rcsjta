@@ -31,7 +31,7 @@ import android.content.Intent;
  * @author YPLO6403
  */
 public interface IChatView {
-    
+
     /**
      * Initialize
      */
@@ -42,16 +42,18 @@ public interface IChatView {
      * 
      * @param message Message to send
      * @return Message ID or null if sending failed
+     * @throws RcsServiceException
      */
-    ChatMessage sendMessage(String message);
+    ChatMessage sendMessage(String message) throws RcsServiceException;
 
     /**
      * Send geoloc message
      * 
      * @param geoloc Geoloc
      * @return Message ID or null if sending failed
+     * @throws RcsServiceException
      */
-    ChatMessage sendMessage(Geoloc geoloc);
+    ChatMessage sendMessage(Geoloc geoloc) throws RcsServiceException;
 
     /**
      * Process intent

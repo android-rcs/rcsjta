@@ -20,16 +20,20 @@ package com.orangelabs.rcs.ri.messaging.chat;
 
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.chat.ChatLog.Message;
-import com.gsma.services.rcs.chat.ChatMessage;
+import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.filetransfer.FileTransferLog;
+import com.gsma.services.rcs.filetransfer.FileTransferService;
+import com.gsma.services.rcs.history.HistoryLog;
+import com.gsma.services.rcs.history.HistoryUriBuilder;
 
 import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.api.connection.utils.LockAccess;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.geoloc.EditGeoloc;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -38,6 +42,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
@@ -101,27 +106,38 @@ public abstract class ChatView extends FragmentActivity implements
 
     protected ChatService mChatService;
 
+    protected Uri mUriHistoryProvider;
+
+    protected FileTransferService mFileTransferService;
+
+    private static final String LOGTAG = LogUtils.getTag(ChatView.class.getSimpleName());
+
     /**
      * Chat message projection
      */
     // @formatter:off
     protected static final String[] PROJ_CHAT_MSG = new String[] {
-        Message.BASECOLUMN_ID, 
-        Message.MESSAGE_ID, 
-        Message.MIME_TYPE, 
-        Message.CONTENT, 
-        Message.TIMESTAMP,
-        Message.STATUS, 
-        Message.DIRECTION, 
-        Message.CONTACT,
-        Message.EXPIRED_DELIVERY
+        HistoryLog.BASECOLUMN_ID, 
+        HistoryLog.ID, 
+        HistoryLog.PROVIDER_ID,
+        HistoryLog.MIME_TYPE, 
+        HistoryLog.CONTENT, 
+        HistoryLog.TIMESTAMP,
+        HistoryLog.STATUS, 
+        HistoryLog.DIRECTION, 
+        HistoryLog.CONTACT,
+        HistoryLog.EXPIRED_DELIVERY,
+        HistoryLog.FILENAME,
+        HistoryLog.FILESIZE,
+        HistoryLog.TRANSFERRED,
+        HistoryLog.REASON_CODE
     };
     // @formatter:on
 
     /**
      * Query sort order
      */
-    protected final static String ORDER_CHAT_MSG = new StringBuilder(Message.TIMESTAMP).append(
+    protected final static String ORDER_CHAT_MSG = new StringBuilder(HistoryLog.TIMESTAMP).append(
             " ASC").toString();
 
     @Override
@@ -132,6 +148,11 @@ public abstract class ChatView extends FragmentActivity implements
         setContentView(R.layout.chat_view);
 
         initialize();
+
+        HistoryUriBuilder uriBuilder = new HistoryUriBuilder(HistoryLog.CONTENT_URI);
+        uriBuilder.appendProvider(ChatLog.Message.HISTORYLOG_MEMBER_ID);
+        uriBuilder.appendProvider(FileTransferLog.HISTORYLOG_MEMBER_ID);
+        mUriHistoryProvider = uriBuilder.build();
 
         /* Register to API connection manager */
         mCnxManager = ConnectionManager.getInstance();
@@ -199,15 +220,16 @@ public abstract class ChatView extends FragmentActivity implements
         registerForContextMenu(listView);
 
         if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACT,
-                RcsServiceName.CAPABILITY)) {
+                RcsServiceName.CAPABILITY, RcsServiceName.FILE_TRANSFER)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
             return;
 
         }
         mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.CHAT,
-                RcsServiceName.CONTACT, RcsServiceName.CAPABILITY);
+                RcsServiceName.CONTACT, RcsServiceName.CAPABILITY, RcsServiceName.FILE_TRANSFER);
         mChatService = mCnxManager.getChatApi();
+        mFileTransferService = mCnxManager.getFileTransferApi();
         processIntent(getIntent());
     }
 
@@ -218,8 +240,9 @@ public abstract class ChatView extends FragmentActivity implements
         if (mCnxManager.isServiceConnected(RcsServiceName.CHAT) && mChatService != null) {
             try {
                 removeChatEventListener(mChatService);
+
             } catch (RcsServiceException e) {
-                e.printStackTrace();
+                Utils.showException(this, e);
             }
         }
     }
@@ -250,7 +273,8 @@ public abstract class ChatView extends FragmentActivity implements
         super.onNewIntent(intent);
         // Replace the value of intent
         setIntent(intent);
-        if (mCnxManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACT)) {
+        if (mCnxManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACT,
+                RcsServiceName.FILE_TRANSFER)) {
             processIntent(intent);
         }
     }
@@ -279,33 +303,29 @@ public abstract class ChatView extends FragmentActivity implements
         mAdapter.swapCursor(null);
     }
 
-    /**
-     * Send a text and display it
-     */
     private void sendText() {
         String text = mComposeText.getText().toString();
         if (TextUtils.isEmpty(text)) {
             return;
         }
-        ChatMessage message = sendMessage(text);
-        if (message == null) {
-            Utils.showMessage(this, getString(R.string.label_send_im_failed));
-            return;
+        try {
+            sendMessage(text);
+            /* Warn the composing manager that the message was sent */
+            mComposingManager.messageWasSent();
+            mComposeText.setText(null);
+
+        } catch (RcsServiceException e) {
+            Utils.showMessageAndExit(this, getString(R.string.label_send_im_failed), mExitOnce);
         }
-        /* Warn the composing manager that the message was sent */
-        mComposingManager.messageWasSent();
-        mComposeText.setText(null);
+
     }
 
-    /**
-     * Send a geolocation
-     * 
-     * @param geoloc
-     */
     private void sendGeoloc(Geoloc geoloc) {
-        ChatMessage message = sendMessage(geoloc);
-        if (message == null) {
-            Utils.showMessage(this, getString(R.string.label_send_im_failed));
+        try {
+            sendMessage(geoloc);
+
+        } catch (RcsServiceException e) {
+            Utils.showMessageAndExit(this, getString(R.string.label_send_im_failed), mExitOnce);
         }
     }
 
@@ -376,5 +396,17 @@ public abstract class ChatView extends FragmentActivity implements
                 }
             }
         });
+    }
+
+    protected void setCursorLoader(boolean firstLoad) {
+        if (firstLoad) {
+            /*
+             * Initialize the Loader with id '1' and callbacks 'mCallbacks'.
+             */
+            getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+        } else {
+            /* We switched from one contact to another: reload history since */
+            getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
+        }
     }
 }

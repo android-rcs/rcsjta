@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="2dip"
+    android:textAppearance="?android:attr/textAppearanceSmall" >
+
+    <RelativeLayout
+        android:id="@+id/msg_item"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" 
+        android:layout_centerInParent="true">
+
+        <TextView
+            android:id="@+id/status_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:textColor="@android:color/white" 
+            android:text="@string/label_state_unknown" />
+
+        <TextView
+            android:id="@+id/contact_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/status_text"
+            android:singleLine="true"
+            android:text="@string/label_uninitialized_contact" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/date_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/msg_item"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:singleLine="true"
+        android:text="@string/label_uninitialized_date" />
+
+</RelativeLayout>

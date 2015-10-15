@@ -27,8 +27,10 @@ import com.gsma.rcs.provider.history.HistoryMemberBaseIdCreator;
 import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.DatabaseUtils;
 import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.history.HistoryLog;
 
 import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
@@ -430,9 +432,9 @@ public class ChatProvider extends ContentProvider {
             }
 
         } /*
-         * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
-         * exception.
-         */
+           * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
+           * exception.
+           */
         catch (RuntimeException e) {
             if (cursor != null) {
                 cursor.close();
@@ -451,8 +453,10 @@ public class ChatProvider extends ContentProvider {
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.update(TABLE_GROUP_CHAT, values, selection, selectionArgs);
                 if (count > 0) {
-                    getContext().getContentResolver().notifyChange(
+                    ContentResolver resolver = getContext().getContentResolver();
+                    resolver.notifyChange(
                             Uri.withAppendedPath(ChatLog.GroupChat.CONTENT_URI, chatId), null);
+                    resolver.notifyChange(HistoryLog.CONTENT_URI, null);
                 }
                 return count;
 
@@ -460,8 +464,9 @@ public class ChatProvider extends ContentProvider {
                 db = mOpenHelper.getWritableDatabase();
                 count = db.update(TABLE_GROUP_CHAT, values, selection, selectionArgs);
                 if (count > 0) {
-                    getContext().getContentResolver().notifyChange(ChatLog.GroupChat.CONTENT_URI,
-                            null);
+                    ContentResolver resolver = getContext().getContentResolver();
+                    resolver.notifyChange(ChatLog.GroupChat.CONTENT_URI, null);
+                    resolver.notifyChange(HistoryLog.CONTENT_URI, null);
                 }
                 return count;
 
@@ -472,8 +477,10 @@ public class ChatProvider extends ContentProvider {
                 db = mOpenHelper.getWritableDatabase();
                 count = db.update(TABLE_MESSAGE, values, selection, selectionArgs);
                 if (count > 0) {
-                    getContext().getContentResolver().notifyChange(
-                            Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), null);
+                    ContentResolver resolver = getContext().getContentResolver();
+                    resolver.notifyChange(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId),
+                            null);
+                    resolver.notifyChange(HistoryLog.CONTENT_URI, null);
                 }
                 return count;
 
@@ -481,8 +488,9 @@ public class ChatProvider extends ContentProvider {
                 db = mOpenHelper.getWritableDatabase();
                 count = db.update(TABLE_MESSAGE, values, selection, selectionArgs);
                 if (count > 0) {
-                    getContext().getContentResolver().notifyChange(ChatLog.Message.CONTENT_URI,
-                            null);
+                    ContentResolver resolver = getContext().getContentResolver();
+                    resolver.notifyChange(ChatLog.Message.CONTENT_URI, null);
+                    resolver.notifyChange(HistoryLog.CONTENT_URI, null);
                 }
                 return count;
 
@@ -518,7 +526,9 @@ public class ChatProvider extends ContentProvider {
                             "Unable to insert row for URI ").append(uri).append('!').toString());
                 }
                 Uri notificationUri = Uri.withAppendedPath(ChatLog.GroupChat.CONTENT_URI, chatId);
-                getContext().getContentResolver().notifyChange(notificationUri, null);
+                ContentResolver resolver = getContext().getContentResolver();
+                resolver.notifyChange(notificationUri, null);
+                resolver.notifyChange(HistoryLog.CONTENT_URI, null);
                 return notificationUri;
 
             case UriType.InternalMessage.MESSAGE:
@@ -534,7 +544,9 @@ public class ChatProvider extends ContentProvider {
                             "Unable to insert row for URI ").append(uri).append('!').toString());
                 }
                 notificationUri = Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, messageId);
-                getContext().getContentResolver().notifyChange(notificationUri, null);
+                resolver = getContext().getContentResolver();
+                resolver.notifyChange(notificationUri, null);
+                resolver.notifyChange(HistoryLog.CONTENT_URI, null);
                 return notificationUri;
 
             case UriType.Chat.CHAT:
@@ -563,8 +575,10 @@ public class ChatProvider extends ContentProvider {
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.delete(TABLE_GROUP_CHAT, selection, selectionArgs);
                 if (count > 0) {
-                    getContext().getContentResolver().notifyChange(
+                    ContentResolver resolver = getContext().getContentResolver();
+                    resolver.notifyChange(
                             Uri.withAppendedPath(ChatLog.GroupChat.CONTENT_URI, chatId), null);
+                    resolver.notifyChange(HistoryLog.CONTENT_URI, null);
                 }
                 return count;
 
@@ -572,8 +586,9 @@ public class ChatProvider extends ContentProvider {
                 db = mOpenHelper.getWritableDatabase();
                 count = db.delete(TABLE_GROUP_CHAT, selection, selectionArgs);
                 if (count > 0) {
-                    getContext().getContentResolver().notifyChange(ChatLog.GroupChat.CONTENT_URI,
-                            null);
+                    ContentResolver resolver = getContext().getContentResolver();
+                    resolver.notifyChange(ChatLog.GroupChat.CONTENT_URI, null);
+                    resolver.notifyChange(HistoryLog.CONTENT_URI, null);
                 }
                 return count;
 
@@ -584,8 +599,10 @@ public class ChatProvider extends ContentProvider {
                 db = mOpenHelper.getWritableDatabase();
                 count = db.delete(TABLE_MESSAGE, selection, selectionArgs);
                 if (count > 0) {
-                    getContext().getContentResolver().notifyChange(
-                            Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), null);
+                    ContentResolver resolver = getContext().getContentResolver();
+                    resolver.notifyChange(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId),
+                            null);
+                    resolver.notifyChange(HistoryLog.CONTENT_URI, null);
                 }
                 return count;
 
@@ -593,8 +610,9 @@ public class ChatProvider extends ContentProvider {
                 db = mOpenHelper.getWritableDatabase();
                 count = db.delete(TABLE_MESSAGE, selection, selectionArgs);
                 if (count > 0) {
-                    getContext().getContentResolver().notifyChange(ChatLog.Message.CONTENT_URI,
-                            null);
+                    ContentResolver resolver = getContext().getContentResolver();
+                    resolver.notifyChange(ChatLog.Message.CONTENT_URI, null);
+                    resolver.notifyChange(HistoryLog.CONTENT_URI, null);
                 }
                 return count;
 
