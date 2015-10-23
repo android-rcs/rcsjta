@@ -1240,7 +1240,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         synchronized (mLock) {
             mFileTransferService.removeOneToOneFileTransfer(mFileTransferId);
             long deliveryExpiration = 0;
-            if (FileTransferProtocol.HTTP == ftProtocol && !mRcsSettings.isFtHttpCapAlwaysOn()) {
+            if (FileTransferProtocol.HTTP == ftProtocol && !mRcsSettings.isFtHttpCapAlwaysOn()
+                    && Direction.OUTGOING == mPersistentStorage.getDirection()) {
                 long timeout = mRcsSettings.getMsgDeliveryTimeoutPeriod();
                 if (timeout > 0) {
                     deliveryExpiration = System.currentTimeMillis() + timeout;
