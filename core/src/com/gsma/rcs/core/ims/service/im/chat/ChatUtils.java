@@ -925,8 +925,8 @@ public class ChatUtils {
         } else if (apiMimeType.startsWith(FileTransferHttpInfoDocument.MIME_TYPE)) {
             return FileTransferHttpInfoDocument.MIME_TYPE;
         }
-        throw new IllegalArgumentException(
-                "Unsupported input mimetype detected : ".concat(apiMimeType));
+        throw new IllegalArgumentException(new StringBuilder(
+                "Unsupported input mimetype detected : ").append(apiMimeType).toString());
     }
 
     /**
@@ -978,8 +978,8 @@ public class ChatUtils {
             return new ChatMessage(msgId, contact, content, MimeType.GEOLOC_MESSAGE, timestamp,
                     timestampSent, displayName);
         }
-        throw new IllegalArgumentException(
-                "Unable to create message, Invalid mimetype ".concat(apiMimeType));
+        throw new IllegalArgumentException(new StringBuilder(
+                "Unable to create message, Invalid mimetype ").append(apiMimeType).toString());
     }
 
 }

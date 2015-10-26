@@ -157,8 +157,7 @@ public class XdmManager {
      * @throws NetworkException
      */
     private HttpResponse sendRequestToXDMS(HttpRequest request,
-            HttpAuthenticationAgent authenticationAgent) throws PayloadException,
-            NetworkException {
+            HttpAuthenticationAgent authenticationAgent) throws PayloadException, NetworkException {
         HttpResponse response = sendHttpRequest(request, authenticationAgent);
         final int responseCode = response.getResponseCode();
         switch (responseCode) {
@@ -182,8 +181,8 @@ public class XdmManager {
                 return sendRequestToXDMS(request);
 
             default:
-                throw new NetworkException("Invalid response : ".concat(String
-                        .valueOf(responseCode)));
+                throw new NetworkException(new StringBuilder("Invalid response : ").append(
+                        responseCode).toString());
         }
     }
 
@@ -199,8 +198,7 @@ public class XdmManager {
     // @FIXME: This method needs a complete refactor, However at this moment due to other prior
     // tasks the refactoring task has been kept in backlog.
     private HttpResponse sendHttpRequest(HttpRequest request,
-            HttpAuthenticationAgent authenticationAgent) throws PayloadException,
-            NetworkException {
+            HttpAuthenticationAgent authenticationAgent) throws PayloadException, NetworkException {
         SocketConnection conn = null;
         InputStream is = null;
         OutputStream os = null;
@@ -353,9 +351,9 @@ public class XdmManager {
             return response;
 
         } catch (MalformedURLException e) {
-            throw new PayloadException(
-                    "Failed to send http request, malformed uri: ".concat(xdmServerAddr.toString()),
-                    e);
+            throw new PayloadException(new StringBuilder(
+                    "Failed to send http request, malformed uri: ").append(xdmServerAddr)
+                    .toString(), e);
 
         } catch (IOException e) {
             throw new NetworkException("Failed to send http request!", e);
@@ -899,8 +897,7 @@ public class XdmManager {
      * @throws PayloadException
      * @throws NetworkException
      */
-    public HttpResponse setPresenceInfo(String info) throws PayloadException,
-            NetworkException {
+    public HttpResponse setPresenceInfo(String info) throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Update presence info");
         }

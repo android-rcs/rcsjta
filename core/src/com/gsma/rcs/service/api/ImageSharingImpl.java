@@ -447,7 +447,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
                      * which is not intended.
                      */
                     sLogger.error(
-                            "Failed to accept invitation with sharing ID: ".concat(mSharingId), e);
+                            new StringBuilder("Failed to accept invitation with sharing ID: ")
+                                    .append(mSharingId).toString(), e);
                 }
             }
         });
@@ -483,7 +484,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
                      * which is not intended.
                      */
                     sLogger.error(
-                            "Failed to reject invitation with sharing ID: ".concat(mSharingId), e);
+                            new StringBuilder("Failed to reject invitation with sharing ID: ")
+                                    .append(mSharingId).toString(), e);
                 }
             }
         });
@@ -522,7 +524,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 
                 } catch (PayloadException e) {
                     sLogger.error(
-                            "Failed to terminate session with sharing ID: ".concat(mSharingId), e);
+                            new StringBuilder("Failed to terminate session with sharing ID: ")
+                                    .append(mSharingId).toString(), e);
 
                 } catch (RuntimeException e) {
                     /*
@@ -533,7 +536,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
                      * which is not intended.
                      */
                     sLogger.error(
-                            "Failed to terminate session with sharing ID: ".concat(mSharingId), e);
+                            new StringBuilder("Failed to terminate session with sharing ID: ")
+                                    .append(mSharingId).toString(), e);
                 }
             }
         });

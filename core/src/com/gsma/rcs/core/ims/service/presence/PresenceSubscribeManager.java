@@ -121,8 +121,7 @@ public class PresenceSubscribeManager extends SubscribeManager {
      * @throws PayloadException
      * @throws NetworkException
      */
-    public void receiveNotification(SipRequest notify) throws PayloadException,
-            NetworkException {
+    public void receiveNotification(SipRequest notify) throws PayloadException, NetworkException {
         if (!isNotifyForThisSubscriber(notify)) {
             return;
         }
@@ -131,8 +130,7 @@ public class PresenceSubscribeManager extends SubscribeManager {
         }
         String content = notify.getContent();
         if (TextUtils.isEmpty(content)) {
-            throw new PayloadException(
-                    "Presence notification content should not be null or empty!");
+            throw new PayloadException("Presence notification content should not be null or empty!");
         }
         try {
             String boundary = notify.getBoundaryContentType();
@@ -170,8 +168,8 @@ public class PresenceSubscribeManager extends SubscribeManager {
                             getImsModule().getPresenceService().getXdmManager()
                                     .removeContactFromGrantedList(contact);
                         }
-                        getImsModule().getPresenceService()
-                                .handlePresenceSharingNotification(contact, state, reason);
+                        getImsModule().getPresenceService().handlePresenceSharingNotification(
+                                contact, state, reason);
                     }
                 }
             }
@@ -183,11 +181,12 @@ public class PresenceSubscribeManager extends SubscribeManager {
             String entity = presenceInfo.getEntity();
             PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(entity);
             if (number == null) {
-                throw new PayloadException("Invalid entity :".concat(entity));
+                throw new PayloadException(new StringBuilder("Invalid entity :").append(entity)
+                        .toString());
             }
             ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
-            getImsModule().getPresenceService()
-                    .handlePresenceInfoNotification(contact, presenceInfo);
+            getImsModule().getPresenceService().handlePresenceInfoNotification(contact,
+                    presenceInfo);
         } catch (ParserConfigurationException e) {
             throw new PayloadException("Can't parse presence notification!", e);
 

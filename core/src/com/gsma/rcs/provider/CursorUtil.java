@@ -25,14 +25,15 @@ public class CursorUtil {
 
     public static void assertCursorIsNotNull(Cursor cursor, Uri requestedUri) {
         if (cursor == null) {
-            throw new ServerApiPersistentStorageException("Query failed: ".concat(requestedUri
-                    .toString()));
+            throw new ServerApiPersistentStorageException(new StringBuilder("Query failed: ")
+                    .append(requestedUri).toString());
         }
     }
 
     public static void assertCursorIsNotNull(Cursor cursor, String queriedTable) {
         if (cursor == null) {
-            throw new ServerApiPersistentStorageException("Query failed: ".concat(queriedTable));
+            throw new ServerApiPersistentStorageException(new StringBuilder("Query failed: ")
+                    .append(queriedTable).toString());
         }
     }
 

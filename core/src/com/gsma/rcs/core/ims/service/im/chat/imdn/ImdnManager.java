@@ -139,9 +139,8 @@ public class ImdnManager extends Thread {
                             delivery.getRemote(), delivery.getMsgId());
                 }
             } catch (PayloadException e) {
-                sLogger.error(
-                        "Failed to send delivery status for chatId : ".concat(delivery.getChatId()),
-                        e);
+                sLogger.error(new StringBuilder("Failed to send delivery status for chatId : ")
+                        .append(delivery.getChatId()).toString(), e);
             } catch (NetworkException e) {
                 if (sLogger.isActivated()) {
                     sLogger.debug(e.getMessage());
@@ -151,9 +150,8 @@ public class ImdnManager extends Thread {
                  * Intentionally catch runtime exceptions as else it will abruptly end the thread
                  * and eventually bring the whole system down, which is not intended.
                  */
-                sLogger.error(
-                        "Failed to send delivery status for chatId : ".concat(delivery.getChatId()),
-                        e);
+                sLogger.error(new StringBuilder("Failed to send delivery status for chatId : ")
+                        .append(delivery.getChatId()).toString(), e);
             }
         }
     }
@@ -187,8 +185,7 @@ public class ImdnManager extends Thread {
      * @throws NetworkException
      */
     public void sendMessageDeliveryStatusImmediately(String chatId, ContactId remote, String msgId,
-            String status, final String remoteInstanceId, long timestamp)
- throws PayloadException,
+            String status, final String remoteInstanceId, long timestamp) throws PayloadException,
             NetworkException {
         // Execute request in background
         final DeliveryStatus delivery = new DeliveryStatus(chatId, remote, msgId, status, timestamp);
@@ -197,8 +194,7 @@ public class ImdnManager extends Thread {
 
     private void analyzeSipResponse(SipTransactionContext ctx,
             SessionAuthenticationAgent authenticationAgent, SipDialogPath dialogPath, String cpim)
-            throws NetworkException, PayloadException, InvalidArgumentException,
-            ParseException {
+            throws NetworkException, PayloadException, InvalidArgumentException, ParseException {
         int statusCode = ctx.getStatusCode();
         switch (statusCode) {
             case Response.PROXY_AUTHENTICATION_REQUIRED:
@@ -293,15 +289,14 @@ public class ImdnManager extends Thread {
             analyzeSipResponse(ctx, authenticationAgent, dialogPath, cpim);
 
         } catch (InvalidArgumentException e) {
-            throw new PayloadException(
-                    "Unable to set authorization header for remoteInstanceId : "
-                            .concat(remoteInstanceId),
-                    e);
+            throw new PayloadException(new StringBuilder(
+                    "Unable to set authorization header for remoteInstanceId : ").append(
+                    remoteInstanceId).toString(), e);
+
         } catch (ParseException e) {
-            throw new PayloadException(
-                    "Unable to set authorization header for remoteInstanceId : "
-                            .concat(remoteInstanceId),
-                    e);
+            throw new PayloadException(new StringBuilder(
+                    "Unable to set authorization header for remoteInstanceId : ").append(
+                    remoteInstanceId).toString(), e);
         }
     }
 

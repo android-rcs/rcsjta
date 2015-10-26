@@ -94,7 +94,8 @@ public class IsComposingManager {
             List<ImsSessionListener> sessionListeners = mSession.getListeners();
             if ((isComposingInfo != null) && isComposingInfo.isStateActive()) {
                 for (ImsSessionListener sessionListener : sessionListeners) {
-                    ((ChatSessionListener) sessionListener).onIsComposingEventReceived(contact, true);
+                    ((ChatSessionListener) sessionListener).onIsComposingEventReceived(contact,
+                            true);
                 }
 
                 // Start the expiration timer
@@ -105,26 +106,27 @@ public class IsComposingManager {
                 startExpirationTimer(timeout, contact);
             } else {
                 for (ImsSessionListener sessionListener : sessionListeners) {
-                    ((ChatSessionListener) sessionListener).onIsComposingEventReceived(contact, false);
+                    ((ChatSessionListener) sessionListener).onIsComposingEventReceived(contact,
+                            false);
                 }
 
                 // Stop the expiration timer
                 stopExpirationTimer(contact);
             }
         } catch (ParserConfigurationException e) {
-            throw new PayloadException(
-                    "Can't parse is-composing event for session ID : ".concat(mSession
-                            .getSessionID()), e);
+            throw new PayloadException(new StringBuilder(
+                    "Can't parse is-composing event for session ID : ").append(
+                    mSession.getSessionID()).toString(), e);
 
         } catch (SAXException e) {
-            throw new PayloadException(
-                    "Can't parse is-composing event for session ID : ".concat(mSession
-                            .getSessionID()), e);
+            throw new PayloadException(new StringBuilder(
+                    "Can't parse is-composing event for session ID : ").append(
+                    mSession.getSessionID()).toString(), e);
 
         } catch (ParseFailureException e) {
-            throw new PayloadException(
-                    "Can't parse is-composing event for session ID : ".concat(mSession
-                            .getSessionID()), e);
+            throw new PayloadException(new StringBuilder(
+                    "Can't parse is-composing event for session ID : ").append(
+                    mSession.getSessionID()).toString(), e);
         }
     }
 
@@ -138,8 +140,8 @@ public class IsComposingManager {
         // We just received an instant message, so if composing info was active, it must
         // be changed to idle. If it was already idle, no need to notify listener again
         for (int j = 0; j < mSession.getListeners().size(); j++) {
-            ((ChatSessionListener) mSession.getListeners().get(j)).onIsComposingEventReceived(contact,
-                    state);
+            ((ChatSessionListener) mSession.getListeners().get(j)).onIsComposingEventReceived(
+                    contact, state);
         }
 
         // Stop the expiration timer

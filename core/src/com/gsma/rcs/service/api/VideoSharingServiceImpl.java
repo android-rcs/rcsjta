@@ -295,7 +295,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
             throw new ServerApiIllegalArgumentException("player must not be null!");
         }
         if (sLogger.isActivated()) {
-            sLogger.info("Initiate a live video session with ".concat(contact.toString()));
+            sLogger.info(new StringBuilder("Initiate a live video session with ").append(contact)
+                    .toString());
         }
         ServerApiUtils.testIms();
         try {

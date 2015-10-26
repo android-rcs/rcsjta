@@ -141,8 +141,8 @@ public class FileUtils {
      */
     public static void deleteDirectory(File dir) throws IOException {
         if (!dir.isDirectory()) {
-            throw new IllegalArgumentException(dir.getPath().concat(
-                    " should always be a directory!"));
+            throw new IllegalArgumentException(new StringBuilder(dir.getPath()).append(
+                    " should always be a directory!").toString());
         }
         String[] children = dir.list();
         for (String childname : children) {
@@ -150,16 +150,19 @@ public class FileUtils {
             if (child.isDirectory()) {
                 deleteDirectory(child);
                 if (!child.delete()) {
-                    throw new IOException("Failed to delete file : ".concat(child.getPath()));
+                    throw new IOException(new StringBuilder("Failed to delete file : ").append(
+                            child.getPath()).toString());
                 }
             } else {
                 if (!child.delete()) {
-                    throw new IOException("Failed to delete file : ".concat(child.getPath()));
+                    throw new IOException(new StringBuilder("Failed to delete file : ").append(
+                            child.getPath()).toString());
                 }
             }
         }
         if (!dir.delete()) {
-            throw new IOException("Failed to delete directory : ".concat(dir.getPath()));
+            throw new IOException(new StringBuilder("Failed to delete directory : ").append(
+                    dir.getPath()).toString());
         }
     }
 
@@ -245,7 +248,8 @@ public class FileUtils {
                 return true;
 
             } catch (SecurityException e) {
-                sLogger.error("Failed to read from uri :".concat(file.toString()), e);
+                sLogger.error(new StringBuilder("Failed to read from uri :").append(file)
+                        .toString(), e);
                 return false;
 
             } catch (IOException e) {
@@ -268,7 +272,8 @@ public class FileUtils {
                 return new File(path).canRead();
 
             } catch (SecurityException e) {
-                sLogger.error("Failed to read from uri :".concat(file.toString()), e);
+                sLogger.error(new StringBuilder("Failed to read from uri :").append(file)
+                        .toString(), e);
                 return false;
             }
 

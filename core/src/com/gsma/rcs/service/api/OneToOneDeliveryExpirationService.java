@@ -68,8 +68,9 @@ public class OneToOneDeliveryExpirationService extends IntentService {
                      * which is not intended.
                      */
                     sLogger.error(
-                            "Unable to handle one to one delivery expiration event for intent action : "
-                                    .concat(action), e);
+                            new StringBuilder(
+                                    "Unable to handle one to one delivery expiration event for intent action : ")
+                                    .append(action).toString(), e);
                 }
             }
         });

@@ -346,9 +346,9 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
             onReceivedCapabilities(contact, capabilities);
 
         } catch (FileAccessException e) {
-            throw new PayloadException(
-                    "Failed to reset content share capabilities for contact : ".concat(contact
-                            .toString()), e);
+            throw new PayloadException(new StringBuilder(
+                    "Failed to reset content share capabilities for contact : ").append(contact)
+                    .toString(), e);
         }
     }
 

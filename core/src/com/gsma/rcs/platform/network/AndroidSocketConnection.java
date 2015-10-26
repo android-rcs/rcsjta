@@ -197,8 +197,8 @@ public class AndroidSocketConnection implements SocketConnection {
             /* NOTE: External API limiting timeout that should be in type 'long' to 'int'. */
             mSocket.setSoTimeout((int) timeout);
         } catch (IOException e) {
-            throw new NetworkException("Failed to set socket timeout : ".concat(String
-                    .valueOf(timeout)), e);
+            throw new NetworkException(new StringBuilder("Failed to set socket timeout : ").append(
+                    timeout).toString(), e);
         }
     }
 }

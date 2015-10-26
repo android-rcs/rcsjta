@@ -93,8 +93,9 @@ public class GroupChatTerminalExceptionTask implements Runnable {
              * exit the system and thus can bring the whole system down, which is not intended.
              */
             sLogger.error(
-                    "Exception occured while trying to mark queued group chat messages and group file transfers as failed with chatId "
-                            .concat(mChatId), e);
+                    new StringBuilder(
+                            "Exception occured while trying to mark queued group chat messages and group file transfers as failed with chatId ")
+                            .append(mChatId).toString(), e);
         } finally {
             if (cursor != null) {
                 cursor.close();

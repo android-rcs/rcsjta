@@ -569,7 +569,8 @@ public abstract class ImsNetworkInterface {
                 } else if (ListeningPoint.TLS.equals(mImsProxyProtocol)) {
                     service = DNS_SIP_TLS_SERVICE;
                 } else {
-                    throw new PayloadException("Unkown SIP protocol : ".concat(mImsProxyProtocol));
+                    throw new PayloadException(new StringBuilder("Unkown SIP protocol : ").append(
+                            mImsProxyProtocol).toString());
                 }
 
                 boolean resolved = false;
@@ -702,10 +703,9 @@ public abstract class ImsNetworkInterface {
                 mSip.getSipStack().getKeepAliveManager().start();
             }
         } catch (UnknownHostException e) {
-            throw new PayloadException(
-                    "Unable to register due to stack initialization failure for address : "
-                            .concat(mImsProxyAddr),
-                    e);
+            throw new PayloadException(new StringBuilder(
+                    "Unable to register due to stack initialization failure for address : ")
+                    .append(mImsProxyAddr).toString(), e);
         }
     }
 

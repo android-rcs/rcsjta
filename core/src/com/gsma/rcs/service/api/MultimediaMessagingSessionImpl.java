@@ -294,7 +294,9 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error("Failed to accept session with ID: ".concat(mSessionId), e);
+                    sLogger.error(
+                            new StringBuilder("Failed to accept session with ID: ").append(
+                                    mSessionId).toString(), e);
                 }
             }
         });
@@ -331,7 +333,9 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error("Failed to reject session with ID: ".concat(mSessionId), e);
+                    sLogger.error(
+                            new StringBuilder("Failed to reject session with ID: ").append(
+                                    mSessionId).toString(), e);
                 }
             }
         });
@@ -367,11 +371,13 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                     session.terminateSession(TerminationReason.TERMINATION_BY_USER);
 
                 } catch (PayloadException e) {
-                    sLogger.error("Failed to abort session with ID: ".concat(mSessionId), e);
+                    sLogger.error(
+                            new StringBuilder("Failed to abort session with ID: ").append(
+                                    mSessionId).toString(), e);
 
                 } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
-                        sLogger.error("Failed to abort session with ID: ".concat(mSessionId), e);
+                        sLogger.debug(e.getMessage());
                     }
 
                 } catch (RuntimeException e) {
@@ -382,7 +388,9 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error("Failed to abort session with ID: ".concat(mSessionId), e);
+                    sLogger.error(
+                            new StringBuilder("Failed to abort session with ID: ").append(
+                                    mSessionId).toString(), e);
                 }
             }
         });
@@ -422,8 +430,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
                 } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
-                        sLogger.warn("Failed to send message within session with ID: "
-                                .concat(mSessionId), e);
+                        sLogger.debug(e.getMessage());
                     }
 
                 } catch (RuntimeException e) {
@@ -434,8 +441,9 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error(
-                            "Failed to send message within session with ID: ".concat(mSessionId), e);
+                    sLogger.error(new StringBuilder(
+                            "Failed to send message within session with ID: ").append(mSessionId)
+                            .toString(), e);
                 }
             }
         });
@@ -478,8 +486,8 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                     removeSession(contact, State.ABORTED, ReasonCode.ABORTED_BY_INACTIVITY);
                     break;
                 default:
-                    throw new IllegalArgumentException("Unknown TerminationReason=".concat(String
-                            .valueOf(reason)));
+                    throw new IllegalArgumentException(new StringBuilder(
+                            "Unknown TerminationReason=").append(reason).toString());
             }
         }
     }

@@ -122,6 +122,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.xml.parsers.ParserConfigurationException;
+
 import javax2.sip.header.ContactHeader;
 import javax2.sip.message.Response;
 
@@ -757,8 +758,8 @@ public class InstantMessagingService extends ImsService {
                 return new OriginatingMsrpFileSharingSession(this, fileTransferId, content,
                         contact, fileIcon, mRcsSettings, timestamp, mContactManager);
             default:
-                throw new IllegalArgumentException(
-                        "Unknown FileTransferProtocol ".concat(ftProtocol.toString()));
+                throw new IllegalArgumentException(new StringBuilder(
+                        "Unknown FileTransferProtocol ").append(ftProtocol).toString());
         }
     }
 

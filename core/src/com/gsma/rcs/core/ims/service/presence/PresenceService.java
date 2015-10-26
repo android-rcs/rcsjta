@@ -265,17 +265,20 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                 }
             }
         } catch (OperationApplicationException e) {
-            throw new PayloadException("Failed creating contact for URI : ".concat(publicUri), e);
+            throw new PayloadException(new StringBuilder("Failed creating contact for URI : ")
+                    .append(publicUri).toString(), e);
 
         } catch (ContactManagerException e) {
-            throw new PayloadException("Failed creating contact : ".concat(publicUri), e);
+            throw new PayloadException(new StringBuilder("Failed creating contact for URI : ")
+                    .append(publicUri).toString(), e);
 
         } catch (FileAccessException e) {
-            throw new PayloadException("Failed creating contact for URI : ".concat(publicUri), e);
+            throw new PayloadException(new StringBuilder("Failed creating contact for URI : ")
+                    .append(publicUri).toString(), e);
 
         } catch (RemoteException e) {
-            throw new PayloadException("Failed creating contact : ".concat(publicUri), e);
-
+            throw new PayloadException(new StringBuilder("Failed creating contact for URI : ")
+                    .append(publicUri).toString(), e);
         }
     }
 
@@ -678,8 +681,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * @throws NetworkException
      * @throws PayloadException
      */
-    private boolean updatePhotoIcon(PhotoIcon photoIcon) throws PayloadException,
-            NetworkException {
+    private boolean updatePhotoIcon(PhotoIcon photoIcon) throws PayloadException, NetworkException {
         boolean result = false;
 
         // Photo-icon management
@@ -721,8 +723,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * @throws NetworkException
      * @throws PayloadException
      */
-    public boolean publishPresenceInfo(PresenceInfo info) throws PayloadException,
-            NetworkException {
+    public boolean publishPresenceInfo(PresenceInfo info) throws PayloadException, NetworkException {
         boolean result = false;
 
         // Photo-icon management
@@ -843,8 +844,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * @throws NetworkException
      * @throws PayloadException
      */
-    public boolean revokeSharedContact(ContactId contact) throws PayloadException,
-            NetworkException {
+    public boolean revokeSharedContact(ContactId contact) throws PayloadException, NetworkException {
         // Add contact in the revoked contacts list
         HttpResponse response = mXdm.addContactToRevokedList(contact);
         if ((response == null) || (!response.isSuccessfullResponse())) {
@@ -986,7 +986,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
     /**
      * A new presence sharing notification has been received
-     *
+     * 
      * @param contact Contact identifier
      * @param status Status
      * @param reason Reason
@@ -1001,7 +1001,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
     /**
      * A new presence info notification has been received
-     *
+     * 
      * @param contact Contact identifier
      * @param presence Presence info document
      */
@@ -1014,7 +1014,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
     /**
      * A new presence sharing invitation has been received
-     *
+     * 
      * @param contact Contact identifier
      */
     public void handlePresenceSharingInvitation(ContactId contact) {

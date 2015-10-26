@@ -690,8 +690,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     @Override
     public void leave() throws RemoteException {
         if (isGroupChatAbandoned()) {
-            throw new ServerApiUnsupportedOperationException(
-                    "Cannot leave group chat with group chat Id : ".concat(mChatId));
+            throw new ServerApiUnsupportedOperationException(new StringBuilder(
+                    "Cannot leave group chat with group chat Id : ").append(mChatId).toString());
         }
         mImService.scheduleImOperation(new Runnable() {
             public void run() {
@@ -718,8 +718,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     session.terminateSession(TerminationReason.TERMINATION_BY_USER);
 
                 } catch (PayloadException e) {
-                    sLogger.error("Failed to terminate session with sessionId : ".concat(mChatId),
-                            e);
+                    sLogger.error(
+                            new StringBuilder("Failed to terminate session with sessionId : ")
+                                    .append(mChatId).toString(), e);
                 } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug(e.getMessage());
@@ -732,8 +733,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error("Failed to terminate session with sessionId : ".concat(mChatId),
-                            e);
+                    sLogger.error(
+                            new StringBuilder("Failed to terminate session with sessionId : ")
+                                    .append(mChatId).toString(), e);
                 }
             }
         });
@@ -756,8 +758,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             if (session == null) {
                 participants = mPersistedStorage.getParticipants();
                 if (participants == null) {
-                    throw new ServerApiPersistentStorageException(
-                            "No participants found for chatId : ".concat(mChatId));
+                    throw new ServerApiPersistentStorageException(new StringBuilder(
+                            "No participants found for chatId : ").append(mChatId).toString());
                 }
             } else {
                 participants = session.getParticipants();
@@ -1330,8 +1332,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error(
-                            "Failed to send composing status in group chat : ".concat(mChatId), e);
+                    sLogger.error(new StringBuilder(
+                            "Failed to send composing status in group chat : ").append(mChatId)
+                            .toString(), e);
                 }
             }
         });

@@ -79,8 +79,8 @@ public class GroupChatPersistedStorageAccessor {
         try {
             cursor = mMessagingLog.getGroupChatData(mChatId);
             if (!cursor.moveToNext()) {
-                throw new ServerApiPersistentStorageException(
-                        "Data not found for group chat ".concat(mChatId));
+                throw new ServerApiPersistentStorageException(new StringBuilder(
+                        "Data not found for group chat ").append(mChatId).toString());
             }
             mSubject = cursor.getString(cursor.getColumnIndexOrThrow(GroupChatData.KEY_SUBJECT));
             mDirection = Direction.valueOf(cursor.getInt(cursor
@@ -112,8 +112,8 @@ public class GroupChatPersistedStorageAccessor {
     public State getState() {
         State state = mMessagingLog.getGroupChatState(mChatId);
         if (state == null) {
-            throw new ServerApiPersistentStorageException(
-                    "State not found for group chat ".concat(mChatId));
+            throw new ServerApiPersistentStorageException(new StringBuilder(
+                    "State not found for group chat ").append(mChatId).toString());
         }
         return state;
     }
@@ -121,8 +121,8 @@ public class GroupChatPersistedStorageAccessor {
     public ReasonCode getReasonCode() {
         ReasonCode reasonCode = mMessagingLog.getGroupChatReasonCode(mChatId);
         if (reasonCode == null) {
-            throw new ServerApiPersistentStorageException(
-                    "Reason code not found for group chat ".concat(mChatId));
+            throw new ServerApiPersistentStorageException(new StringBuilder(
+                    "Reason code not found for group chat ").append(mChatId).toString());
         }
         return reasonCode;
     }

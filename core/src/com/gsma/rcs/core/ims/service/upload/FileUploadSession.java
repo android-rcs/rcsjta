@@ -160,8 +160,9 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
             storeResult(result);
         } catch (SecurityException e) {
             sLogger.error(
-                    "File icon creation has failed as the file is not accessible for HTTP uploadId "
-                            .concat(mUploadId), e);
+                    new StringBuilder(
+                            "File icon creation has failed as the file is not accessible for HTTP uploadId ")
+                            .append(mUploadId).toString(), e);
             removeSession();
             mListener.handleUploadNotAllowedToSend();
         } catch (IOException e) {
@@ -171,11 +172,13 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
             removeSession();
             mListener.handleUploadError(FileSharingError.MEDIA_UPLOAD_FAILED);
         } catch (FileAccessException e) {
-            sLogger.error("Failed to initiate session for HTTP uploadId ".concat(mUploadId), e);
+            sLogger.error(new StringBuilder("Failed to initiate session for HTTP uploadId ")
+                    .append(mUploadId).toString(), e);
             removeSession();
             mListener.handleUploadError(FileSharingError.MEDIA_UPLOAD_FAILED);
         } catch (PayloadException e) {
-            sLogger.error("Failed to initiate session for HTTP uploadId ".concat(mUploadId), e);
+            sLogger.error(new StringBuilder("Failed to initiate session for HTTP uploadId ")
+                    .append(mUploadId).toString(), e);
             removeSession();
             mListener.handleUploadError(FileSharingError.MEDIA_UPLOAD_FAILED);
         } catch (NetworkException e) {
@@ -189,7 +192,8 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
-            sLogger.error("Failed to initiate session for HTTP uploadId ".concat(mUploadId), e);
+            sLogger.error(new StringBuilder("Failed to initiate session for HTTP uploadId ")
+                    .append(mUploadId).toString(), e);
             removeSession();
             mListener.handleUploadError(FileSharingError.MEDIA_UPLOAD_FAILED);
         }

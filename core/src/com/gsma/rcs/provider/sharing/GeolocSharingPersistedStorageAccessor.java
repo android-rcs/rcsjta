@@ -67,8 +67,8 @@ public class GeolocSharingPersistedStorageAccessor {
         try {
             cursor = mRichCallLog.getGeolocSharingData(mSharingId);
             if (!cursor.moveToNext()) {
-                throw new ServerApiPersistentStorageException(
-                        "Data not found for video sharing ".concat(mSharingId));
+                throw new ServerApiPersistentStorageException(new StringBuilder(
+                        "Data not found for video sharing ").append(mSharingId).toString());
             }
             String contact = cursor.getString(cursor
                     .getColumnIndexOrThrow(GeolocSharingData.KEY_CONTACT));
@@ -118,8 +118,8 @@ public class GeolocSharingPersistedStorageAccessor {
     public State getState() {
         State state = mRichCallLog.getGeolocSharingState(mSharingId);
         if (state == null) {
-            throw new ServerApiPersistentStorageException(
-                    "State not found for geoloc sharing ".concat(mSharingId));
+            throw new ServerApiPersistentStorageException(new StringBuilder(
+                    "State not found for geoloc sharing ").append(mSharingId).toString());
         }
         return state;
     }
@@ -127,8 +127,8 @@ public class GeolocSharingPersistedStorageAccessor {
     public ReasonCode getReasonCode() {
         ReasonCode reasonCode = mRichCallLog.getGeolocSharingReasonCode(mSharingId);
         if (reasonCode == null) {
-            throw new ServerApiPersistentStorageException(
-                    "Reason code not found for geoloc sharing ".concat(mSharingId));
+            throw new ServerApiPersistentStorageException(new StringBuilder(
+                    "Reason code not found for geoloc sharing ").append(mSharingId).toString());
         }
         return reasonCode;
     }

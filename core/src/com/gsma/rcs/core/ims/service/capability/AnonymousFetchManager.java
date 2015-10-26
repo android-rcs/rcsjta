@@ -195,8 +195,8 @@ public class AnonymousFetchManager implements DiscoveryManager {
                         Capabilities.sDefaultCapabilities);
             }
         } catch (FileAccessException e) {
-            throw new PayloadException("Can't parse XML notification! CallId=".concat(notify
-                    .getCallId()), e);
+            throw new PayloadException(new StringBuilder("Can't parse XML notification! CallId=")
+                    .append(notify.getCallId()).toString(), e);
         }
     }
 }

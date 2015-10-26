@@ -308,7 +308,8 @@ public class RcsSettings {
                     whereArg, null);
             CursorUtil.assertCursorIsNotNull(c, RcsSettingsData.CONTENT_URI);
             if (!c.moveToFirst()) {
-                throw new IllegalArgumentException("Illegal setting key:".concat(key));
+                throw new IllegalArgumentException(new StringBuilder("Illegal setting key:")
+                        .append(key).toString());
             }
             return c.getString(c.getColumnIndexOrThrow(RcsSettingsData.KEY_VALUE));
 

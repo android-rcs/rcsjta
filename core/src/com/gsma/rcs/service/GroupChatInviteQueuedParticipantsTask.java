@@ -97,8 +97,9 @@ public class GroupChatInviteQueuedParticipantsTask implements Runnable {
              * exit the system and thus can bring the whole system down, which is not intended.
              */
             sLogger.error(
-                    "Exception occured while trying to invite queued participants to group chat with chatId "
-                            .concat(mChatId), e);
+                    new StringBuilder(
+                            "Exception occured while trying to invite queued participants to group chat with chatId ")
+                            .append(mChatId).toString(), e);
         }
     }
 }

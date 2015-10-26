@@ -345,8 +345,7 @@ public class SessionTimerManager extends PeriodicRefresher {
      * @throws PayloadException
      * @throws NetworkException
      */
-    public void receiveReInvite(SipRequest reInvite) throws PayloadException,
-            NetworkException {
+    public void receiveReInvite(SipRequest reInvite) throws PayloadException, NetworkException {
         if (mLogger.isActivated()) {
             mLogger.debug("Session refresh request received");
         }
@@ -365,9 +364,9 @@ public class SessionTimerManager extends PeriodicRefresher {
             }
             mSession.getDialogPath().setSessionEstablished();
         } else {
-            throw new PayloadException(
-                    "No ACK received for INVITE with sessionId: ".concat(String.valueOf(mSession
-                            .getId())));
+            throw new PayloadException(new StringBuilder(
+                    "No ACK received for INVITE with sessionId: ").append(mSession.getId())
+                    .toString());
         }
     }
 

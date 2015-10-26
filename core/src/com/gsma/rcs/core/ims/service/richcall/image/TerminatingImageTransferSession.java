@@ -192,9 +192,8 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                     return;
 
                 default:
-                    throw new IllegalArgumentException(
-                            "Unknown invitation answer in run; answer=".concat(String
-                                    .valueOf(answer)));
+                    throw new IllegalArgumentException(new StringBuilder(
+                            "Unknown invitation answer in run; answer=").append(answer).toString());
             }
             final SipRequest invite = dialogPath.getInvite();
             String remoteSdp = invite.getSdpContent();

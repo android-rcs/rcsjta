@@ -102,8 +102,10 @@ public class AccountChangedReceiver extends BroadcastReceiver {
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error("Unable to handle connection event for intent action : "
-                            .concat(intent.getAction()), e);
+                    sLogger.error(
+                            new StringBuilder(
+                                    "Unable to handle connection event for intent action : ")
+                                    .append(intent.getAction()).toString(), e);
                 }
             }
         });

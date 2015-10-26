@@ -134,8 +134,8 @@ public class AndroidDatagramConnection implements DatagramConnection {
             DatagramPacket packet = new DatagramPacket(data, data.length, address, remotePort);
             connection.send(packet);
         } catch (IOException e) {
-            throw new NetworkException(
-                    "Failed to send data to remoteAddr : ".concat(remoteAddr), e);
+            throw new NetworkException(new StringBuilder("Failed to send data to remoteAddr : ")
+                    .append(remoteAddr).toString(), e);
         }
 
     }

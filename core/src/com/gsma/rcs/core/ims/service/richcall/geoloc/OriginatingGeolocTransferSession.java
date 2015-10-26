@@ -242,7 +242,8 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
                         initiatedByRemote);
             }
         } catch (PayloadException e) {
-            sLogger.error("Failed to notify msrp data transfered for msgId : ".concat(msgId), e);
+            sLogger.error(new StringBuilder("Failed to notify msrp data transfered for msgId : ")
+                    .append(msgId).toString(), e);
         } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
@@ -254,7 +255,8 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
              * executing operations on a thread unhandling such exceptions will eventually lead to
              * exit the system and thus can bring the whole system down, which is not intended.
              */
-            sLogger.error("Failed to notify msrp data transfered for msgId : ".concat(msgId), e);
+            sLogger.error(new StringBuilder("Failed to notify msrp data transfered for msgId : ")
+                    .append(msgId).toString(), e);
         }
     }
 

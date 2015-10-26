@@ -93,8 +93,8 @@ public class ChatMessagePersistedStorageAccessor {
         try {
             cursor = mMessagingLog.getChatMessageData(mId);
             if (!cursor.moveToNext()) {
-                throw new ServerApiPersistentStorageException(
-                        "Data not found for message ".concat(mId));
+                throw new ServerApiPersistentStorageException(new StringBuilder(
+                        "Data not found for message ").append(mId).toString());
             }
 
             String contact = cursor
@@ -160,8 +160,8 @@ public class ChatMessagePersistedStorageAccessor {
     public long getTimestamp() {
         Long timestamp = mMessagingLog.getMessageTimestamp(mId);
         if (timestamp == null) {
-            throw new ServerApiPersistentStorageException(
-                    "Timestamp not found for message ".concat(mId));
+            throw new ServerApiPersistentStorageException(new StringBuilder(
+                    "Timestamp not found for message ").append(mId).toString());
         }
         return timestamp;
     }
@@ -169,8 +169,8 @@ public class ChatMessagePersistedStorageAccessor {
     public long getTimestampSent() {
         Long timestamp = mMessagingLog.getMessageSentTimestamp(mId);
         if (timestamp == null) {
-            throw new ServerApiPersistentStorageException(
-                    "TimestampSent not found for message ".concat(mId));
+            throw new ServerApiPersistentStorageException(new StringBuilder(
+                    "TimestampSent not found for message ").append(mId).toString());
         }
         return timestamp;
     }
@@ -202,8 +202,8 @@ public class ChatMessagePersistedStorageAccessor {
     public Status getStatus() {
         Status status = mMessagingLog.getMessageStatus(mId);
         if (status == null) {
-            throw new ServerApiPersistentStorageException(
-                    "Status not found for message ".concat(mId));
+            throw new ServerApiPersistentStorageException(new StringBuilder(
+                    "Status not found for message ").append(mId).toString());
         }
         return status;
     }
@@ -211,8 +211,8 @@ public class ChatMessagePersistedStorageAccessor {
     public ReasonCode getReasonCode() {
         ReasonCode reasonCode = mMessagingLog.getMessageReasonCode(mId);
         if (reasonCode == null) {
-            throw new ServerApiPersistentStorageException(
-                    "Reason code not found for message ".concat(mId));
+            throw new ServerApiPersistentStorageException(new StringBuilder(
+                    "Reason code not found for message ").append(mId).toString());
         }
         return reasonCode;
     }
@@ -237,8 +237,8 @@ public class ChatMessagePersistedStorageAccessor {
     public boolean isExpiredDelivery() {
         Boolean expiredDelivery = mMessagingLog.isChatMessageExpiredDelivery(mId);
         if (expiredDelivery == null) {
-            throw new ServerApiPersistentStorageException(
-                    "Expired Delivery not found for message ".concat(mId));
+            throw new ServerApiPersistentStorageException(new StringBuilder(
+                    "Expired Delivery not found for message ").append(mId).toString());
         }
         return expiredDelivery;
     }

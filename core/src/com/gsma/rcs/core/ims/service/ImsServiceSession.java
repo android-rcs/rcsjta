@@ -742,8 +742,8 @@ public abstract class ImsServiceSession extends Thread {
                 resp = SipMessageFactory.createResponse(request, localTag, Response.FORBIDDEN);
                 break;
             default:
-                throw new IllegalArgumentException("Unknown InvitationStatus ".concat(status
-                        .toString()));
+                throw new IllegalArgumentException(new StringBuilder("Unknown InvitationStatus ")
+                        .append(status).toString());
         }
         getImsService().getImsModule().getSipManager().sendSipResponse(resp);
     }

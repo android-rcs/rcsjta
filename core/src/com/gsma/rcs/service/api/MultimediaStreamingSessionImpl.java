@@ -295,7 +295,9 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error("Failed to accept session with ID: ".concat(mSessionId), e);
+                    sLogger.error(
+                            new StringBuilder("Failed to accept session with ID: ").append(
+                                    mSessionId).toString(), e);
                 }
             }
         });
@@ -330,7 +332,9 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error("Failed to reject session with ID: ".concat(mSessionId), e);
+                    sLogger.error(
+                            new StringBuilder("Failed to reject session with ID: ").append(
+                                    mSessionId).toString(), e);
                 }
             }
         });
@@ -364,13 +368,13 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
                     session.terminateSession(TerminationReason.TERMINATION_BY_USER);
 
                 } catch (PayloadException e) {
-                    sLogger.error("Failed to abort session with ID: ".concat(mSessionId), e);
-
+                    sLogger.error(
+                            new StringBuilder("Failed to abort session with ID: ").append(
+                                    mSessionId).toString(), e);
                 } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
-                        sLogger.error("Failed to abort session with ID: ".concat(mSessionId), e);
+                        sLogger.debug(e.getMessage());
                     }
-
                 } catch (RuntimeException e) {
                     /*
                      * Normally we are not allowed to catch runtime exceptions as these are genuine
@@ -379,7 +383,9 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error("Failed to abort session with ID: ".concat(mSessionId), e);
+                    sLogger.error(
+                            new StringBuilder("Failed to abort session with ID: ").append(
+                                    mSessionId).toString(), e);
                 }
             }
         });
@@ -424,8 +430,9 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error(
-                            "Failed to send payload within session with ID: ".concat(mSessionId), e);
+                    sLogger.error(new StringBuilder(
+                            "Failed to send payload within session with ID: ").append(mSessionId)
+                            .toString(), e);
                 }
             }
         });
@@ -465,8 +472,8 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
                     removeSession(contact, State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
                     break;
                 default:
-                    throw new IllegalArgumentException("Unknown TerminationReason=".concat(String
-                            .valueOf(reason)));
+                    throw new IllegalArgumentException(new StringBuilder(
+                            "Unknown TerminationReason=").append(reason).toString());
             }
         }
     }
