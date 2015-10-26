@@ -77,8 +77,8 @@ public class ImageSharingPersistedStorageAccessor {
         try {
             cursor = mRichCallLog.getImageTransferData(mSharingId);
             if (!cursor.moveToNext()) {
-                throw new ServerApiPersistentStorageException(
-                        "Data not found for image sharing ".concat(mSharingId));
+                throw new ServerApiPersistentStorageException(new StringBuilder(
+                        "Data not found for image sharing ").append(mSharingId).toString());
             }
             String contact = cursor.getString(cursor
                     .getColumnIndexOrThrow(ImageSharingData.KEY_CONTACT));
@@ -159,8 +159,8 @@ public class ImageSharingPersistedStorageAccessor {
     public State getState() {
         State state = mRichCallLog.getImageSharingState(mSharingId);
         if (state == null) {
-            throw new ServerApiPersistentStorageException(
-                    "State not found for image sharing ".concat(mSharingId));
+            throw new ServerApiPersistentStorageException(new StringBuilder(
+                    "State not found for image sharing ").append(mSharingId).toString());
         }
         return state;
     }
@@ -168,8 +168,8 @@ public class ImageSharingPersistedStorageAccessor {
     public ReasonCode getReasonCode() {
         ReasonCode reasonCode = mRichCallLog.getImageSharingReasonCode(mSharingId);
         if (reasonCode == null) {
-            throw new ServerApiPersistentStorageException(
-                    "Reason code not found for image sharing ".concat(mSharingId));
+            throw new ServerApiPersistentStorageException(new StringBuilder(
+                    "Reason code not found for image sharing ").append(mSharingId).toString());
         }
         return reasonCode;
     }

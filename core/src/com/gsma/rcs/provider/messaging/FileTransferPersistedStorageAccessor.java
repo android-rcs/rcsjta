@@ -112,8 +112,8 @@ public class FileTransferPersistedStorageAccessor {
         try {
             cursor = mMessagingLog.getFileTransferData(mFileTransferId);
             if (!cursor.moveToNext()) {
-                throw new ServerApiPersistentStorageException(
-                        "Data not found for file transfer ".concat(mFileTransferId));
+                throw new ServerApiPersistentStorageException(new StringBuilder(
+                        "Data not found for file transfer ").append(mFileTransferId).toString());
             }
 
             String contact = cursor.getString(cursor
@@ -254,8 +254,8 @@ public class FileTransferPersistedStorageAccessor {
     public long getTimestamp() {
         Long timestamp = mMessagingLog.getFileTransferTimestamp(mFileTransferId);
         if (timestamp == null) {
-            throw new ServerApiPersistentStorageException(
-                    "Timestamp not found for file transfer ".concat(mFileTransferId));
+            throw new ServerApiPersistentStorageException(new StringBuilder(
+                    "Timestamp not found for file transfer ").append(mFileTransferId).toString());
         }
         return timestamp;
     }
@@ -263,8 +263,9 @@ public class FileTransferPersistedStorageAccessor {
     public long getTimestampSent() {
         Long timestamp = mMessagingLog.getFileTransferSentTimestamp(mFileTransferId);
         if (timestamp == null) {
-            throw new ServerApiPersistentStorageException(
-                    "TimestampSent not found for file transfer ".concat(mFileTransferId));
+            throw new ServerApiPersistentStorageException(new StringBuilder(
+                    "TimestampSent not found for file transfer ").append(mFileTransferId)
+                    .toString());
         }
         return timestamp;
     }
@@ -296,8 +297,8 @@ public class FileTransferPersistedStorageAccessor {
     public State getState() {
         State state = mMessagingLog.getFileTransferState(mFileTransferId);
         if (state == null) {
-            throw new ServerApiPersistentStorageException(
-                    "State not found for file transfer ".concat(mFileTransferId));
+            throw new ServerApiPersistentStorageException(new StringBuilder(
+                    "State not found for file transfer ").append(mFileTransferId).toString());
         }
         return state;
     }
@@ -305,8 +306,8 @@ public class FileTransferPersistedStorageAccessor {
     public ReasonCode getReasonCode() {
         ReasonCode reasonCode = mMessagingLog.getFileTransferReasonCode(mFileTransferId);
         if (reasonCode == null) {
-            throw new ServerApiPersistentStorageException(
-                    "Reason code not found for file transfer ".concat(mFileTransferId));
+            throw new ServerApiPersistentStorageException(new StringBuilder(
+                    "Reason code not found for file transfer ").append(mFileTransferId).toString());
         }
         return reasonCode;
     }
@@ -409,8 +410,9 @@ public class FileTransferPersistedStorageAccessor {
     public boolean isExpiredDelivery() {
         Boolean expiredDelivery = mMessagingLog.isFileTransferExpiredDelivery(mFileTransferId);
         if (expiredDelivery == null) {
-            throw new ServerApiPersistentStorageException(
-                    "Expired Delivery not found for file transfer ".concat(mFileTransferId));
+            throw new ServerApiPersistentStorageException(new StringBuilder(
+                    "Expired Delivery not found for file transfer ").append(mFileTransferId)
+                    .toString());
         }
         return expiredDelivery;
     }
@@ -433,8 +435,8 @@ public class FileTransferPersistedStorageAccessor {
     public long getFileTransferProgress() {
         Long transferred = mMessagingLog.getFileTransferProgress(mFileTransferId);
         if (transferred == null) {
-            throw new ServerApiPersistentStorageException(
-                    "Transferred not found for file transfer ".concat(mFileTransferId));
+            throw new ServerApiPersistentStorageException(new StringBuilder(
+                    "Transferred not found for file transfer ").append(mFileTransferId).toString());
         }
         return transferred;
     }

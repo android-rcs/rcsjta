@@ -276,8 +276,8 @@ public class HttpDownloadManager extends HttpTransferManager {
             /* Save data to file on disk */
             fileIcon.writeData2File(baos.toByteArray());
         } catch (MalformedURLException e) {
-            throw new IllegalArgumentException(
-                    "Failed to download thumbnail for uri : ".concat(iconUri.toString()), e);
+            throw new IllegalArgumentException(new StringBuilder(
+                    "Failed to download thumbnail for uri : ").append(iconUri).toString(), e);
 
         } finally {
             CloseableUtils.tryToClose(baos);

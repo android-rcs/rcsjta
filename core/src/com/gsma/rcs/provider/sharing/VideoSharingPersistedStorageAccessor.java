@@ -90,8 +90,8 @@ public class VideoSharingPersistedStorageAccessor {
         try {
             cursor = mRichCallLog.getVideoSharingData(mSharingId);
             if (!cursor.moveToNext()) {
-                throw new ServerApiPersistentStorageException(
-                        "Data not found for video sharing ".concat(mSharingId));
+                throw new ServerApiPersistentStorageException(new StringBuilder(
+                        "Data not found for video sharing ").append(mSharingId).toString());
             }
             String contact = cursor.getString(cursor
                     .getColumnIndexOrThrow(VideoSharingData.KEY_CONTACT));
@@ -136,8 +136,8 @@ public class VideoSharingPersistedStorageAccessor {
     public State getState() {
         State state = mRichCallLog.getVideoSharingState(mSharingId);
         if (state == null) {
-            throw new ServerApiPersistentStorageException(
-                    "State not found for video sharing ".concat(mSharingId));
+            throw new ServerApiPersistentStorageException(new StringBuilder(
+                    "State not found for video sharing ").append(mSharingId).toString());
         }
         return state;
     }
@@ -150,8 +150,8 @@ public class VideoSharingPersistedStorageAccessor {
     public ReasonCode getReasonCode() {
         ReasonCode reasonCode = mRichCallLog.getVideoSharingReasonCode(mSharingId);
         if (reasonCode == null) {
-            throw new ServerApiPersistentStorageException(
-                    "Reason code not found for video sharing ".concat(mSharingId));
+            throw new ServerApiPersistentStorageException(new StringBuilder(
+                    "Reason code not found for video sharing ").append(mSharingId).toString());
         }
         return reasonCode;
     }
@@ -263,8 +263,8 @@ public class VideoSharingPersistedStorageAccessor {
     public long getDuration() {
         Long duration = mRichCallLog.getVideoSharingDuration(mSharingId);
         if (duration == null) {
-            throw new ServerApiPersistentStorageException(
-                    "Duration not found for video sharing ".concat(mSharingId));
+            throw new ServerApiPersistentStorageException(new StringBuilder(
+                    "Duration not found for video sharing ").append(mSharingId).toString());
         }
         return duration;
     }

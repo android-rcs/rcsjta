@@ -154,8 +154,8 @@ public class FileTransferUtils {
             return fileIcon;
 
         } catch (IOException e) {
-            throw new FileAccessException(
-                    "Failed to create icon for uri : ".concat(file.toString()), e);
+            throw new FileAccessException(new StringBuilder("Failed to create icon for uri : ")
+                    .append(file).toString(), e);
 
         } finally {
             CloseableUtils.tryToClose(in);

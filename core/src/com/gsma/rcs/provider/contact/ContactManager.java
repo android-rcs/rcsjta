@@ -789,13 +789,13 @@ public final class ContactManager {
                 mContentResolver.applyBatch(ContactsContract.AUTHORITY, ops);
 
             } catch (RemoteException e) {
-                throw new ContactManagerException(
-                        "Unable to apply batch updates for contact :".concat(newInfo.getContact()
-                                .toString()), e);
+                throw new ContactManagerException(new StringBuilder(
+                        "Unable to apply batch updates for contact :").append(newInfo.getContact())
+                        .toString(), e);
             } catch (OperationApplicationException e) {
-                throw new ContactManagerException(
-                        "Unable to apply batch updates for contact :".concat(newInfo.getContact()
-                                .toString()), e);
+                throw new ContactManagerException(new StringBuilder(
+                        "Unable to apply batch updates for contact :").append(newInfo.getContact())
+                        .toString(), e);
             }
         }
     }
@@ -968,8 +968,8 @@ public final class ContactManager {
             outstream.write(photoContent);
             outstream.flush();
         } catch (IOException e) {
-            throw new FileAccessException("Failed to save photo icon for contact : ".concat(contact
-                    .toString()), e);
+            throw new FileAccessException(new StringBuilder(
+                    "Failed to save photo icon for contact : ").append(contact).toString(), e);
 
         } finally {
             CloseableUtils.tryToClose(outstream);
@@ -992,7 +992,8 @@ public final class ContactManager {
         stream.read(content, 0, content.length);
         Bitmap bmp = BitmapFactory.decodeByteArray(content, 0, content.length);
         if (bmp == null) {
-            throw new IOException("unable to create icon for contact :".concat(contact.toString()));
+            throw new IOException(new StringBuilder("unable to create icon for contact :").append(
+                    contact).toString());
         }
         return new PhotoIcon(content, bmp.getWidth(), bmp.getHeight(), etag);
     }
@@ -2153,12 +2154,12 @@ public final class ContactManager {
             return rcsRawContactId;
 
         } catch (RemoteException e) {
-            throw new ContactManagerException(
-                    "Unable to apply batch updates for contact :".concat(contact.toString()), e);
+            throw new ContactManagerException(new StringBuilder(
+                    "Unable to apply batch updates for contact :").append(contact).toString(), e);
 
         } catch (OperationApplicationException e) {
-            throw new ContactManagerException(
-                    "Unable to apply batch updates for contact :".concat(contact.toString()), e);
+            throw new ContactManagerException(new StringBuilder(
+                    "Unable to apply batch updates for contact :").append(contact).toString(), e);
         }
     }
 

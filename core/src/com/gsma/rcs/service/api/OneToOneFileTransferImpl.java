@@ -538,8 +538,10 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                      * Intentionally catch runtime exceptions as else it will abruptly end the
                      * thread and eventually bring the whole system down, which is not intended.
                      */
-                    sLogger.error("Failed to accept file transfer with fileTransferId : "
-                            .concat(mFileTransferId), e);
+                    sLogger.error(
+                            new StringBuilder(
+                                    "Failed to accept file transfer with fileTransferId : ")
+                                    .append(mFileTransferId).toString(), e);
                 }
             }
         });
@@ -588,8 +590,10 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                      * Intentionally catch runtime exceptions as else it will abruptly end the
                      * thread and eventually bring the whole system down, which is not intended.
                      */
-                    sLogger.error("Failed to reject file transfer with fileTransferId : "
-                            .concat(mFileTransferId), e);
+                    sLogger.error(
+                            new StringBuilder(
+                                    "Failed to reject file transfer with fileTransferId : ")
+                                    .append(mFileTransferId).toString(), e);
                 }
             }
         });
@@ -636,11 +640,13 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                         sLogger.debug(e.getMessage());
                     }
                 } catch (PayloadException e) {
-                    sLogger.error("Failed to terminate session with fileTransferId : "
-                            .concat(mFileTransferId), e);
+                    sLogger.error(
+                            new StringBuilder("Failed to terminate session with fileTransferId : ")
+                                    .append(mFileTransferId).toString(), e);
                 } catch (RemoteException e) {
-                    sLogger.error("Failed to terminate session with fileTransferId : "
-                            .concat(mFileTransferId), e);
+                    sLogger.error(
+                            new StringBuilder("Failed to terminate session with fileTransferId : ")
+                                    .append(mFileTransferId).toString(), e);
                 } catch (RuntimeException e) {
                     /*
                      * Normally we are not allowed to catch runtime exceptions as these are genuine
@@ -649,8 +655,9 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error("Failed to terminate session with fileTransferId : "
-                            .concat(mFileTransferId), e);
+                    sLogger.error(
+                            new StringBuilder("Failed to terminate session with fileTransferId : ")
+                                    .append(mFileTransferId).toString(), e);
                 }
             }
         });
@@ -743,8 +750,10 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                      * Intentionally catch runtime exceptions as else it will abruptly end the
                      * thread and eventually bring the whole system down, which is not intended.
                      */
-                    sLogger.error("Failed to pause file transfer with fileTransferId : "
-                            .concat(mFileTransferId), e);
+                    sLogger.error(
+                            new StringBuilder(
+                                    "Failed to pause file transfer with fileTransferId : ").append(
+                                    mFileTransferId).toString(), e);
                 }
             }
         });
@@ -882,8 +891,10 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                      * Intentionally catch runtime exceptions as else it will abruptly end the
                      * thread and eventually bring the whole system down, which is not intended.
                      */
-                    sLogger.error("Failed to resume file transfer with fileTransferId : "
-                            .concat(mFileTransferId), e);
+                    sLogger.error(
+                            new StringBuilder(
+                                    "Failed to resume file transfer with fileTransferId : ")
+                                    .append(mFileTransferId).toString(), e);
                 }
             }
         });
@@ -906,8 +917,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             ReasonCode rcsReasonCode = mPersistentStorage.getReasonCode();
             /*
              * According to Blackbird PDD v3.0, "When a File Transfer is interrupted by sender
-             * interaction (or fails), then resend button shall be offered to allow the user
-             * to re-send the file without selecting a new receiver or selecting the file again."
+             * interaction (or fails), then resend button shall be offered to allow the user to
+             * re-send the file without selecting a new receiver or selecting the file again."
              */
             switch (rcsState) {
                 case FAILED:
@@ -982,11 +993,15 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                      * Intentionally catch runtime exceptions as else it will abruptly end the
                      * thread and eventually bring the whole system down, which is not intended.
                      */
-                    sLogger.error("Failed to resume file transfer with fileTransferId : "
-                            .concat(mFileTransferId), e);
+                    sLogger.error(
+                            new StringBuilder(
+                                    "Failed to resume file transfer with fileTransferId : ")
+                                    .append(mFileTransferId).toString(), e);
                 } catch (RemoteException e) {
-                    sLogger.error("Failed to resume file transfer with fileTransferId : "
-                            + mFileTransferId, e);
+                    sLogger.error(
+                            new StringBuilder(
+                                    "Failed to resume file transfer with fileTransferId : ")
+                                    .append(mFileTransferId).toString(), e);
                 }
             }
         });

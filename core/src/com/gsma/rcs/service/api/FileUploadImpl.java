@@ -197,8 +197,8 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
             }
             final FileUploadSession session = mImService.getFileUploadSession(mUploadId);
             if (session == null) {
-                throw new ServerApiGenericException(
-                        "Cannot cancel session with ID= ".concat(mUploadId));
+                throw new ServerApiGenericException(new StringBuilder(
+                        "Cannot cancel session with ID= ").append(mUploadId).toString());
             }
             session.interrupt();
         } catch (ServerApiBaseException e) {

@@ -98,11 +98,15 @@ public class OptionsRequestTask implements Runnable {
         try {
             sendOptions();
         } catch (ContactManagerException e) {
-            sLogger.error("Options request failed for contact : ".concat(mContact.toString()), e);
+            sLogger.error(
+                    new StringBuilder("Options request failed for contact : ").append(mContact)
+                            .toString(), e);
             handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, e));
 
         } catch (PayloadException e) {
-            sLogger.error("Options request failed for contact : ".concat(mContact.toString()), e);
+            sLogger.error(
+                    new StringBuilder("Options request failed for contact : ").append(mContact)
+                            .toString(), e);
             handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, e));
 
         } catch (NetworkException e) {
@@ -115,7 +119,9 @@ public class OptionsRequestTask implements Runnable {
              * executing operations on a thread unhandling such exceptions will eventually lead to
              * exit the system and thus can bring the whole system down, which is not intended.
              */
-            sLogger.error("Options request failed for contact : ".concat(mContact.toString()), e);
+            sLogger.error(
+                    new StringBuilder("Options request failed for contact : ").append(mContact)
+                            .toString(), e);
         } finally {
             if (mCallback != null) {
                 try {
@@ -128,8 +134,10 @@ public class OptionsRequestTask implements Runnable {
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error("Failed to notify end of options request for contact : "
-                            .concat(mContact.toString()), e);
+                    sLogger.error(
+                            new StringBuilder(
+                                    "Failed to notify end of options request for contact : ")
+                                    .append(mContact).toString(), e);
                 }
             }
         }

@@ -240,8 +240,8 @@ public class StartService extends Service {
                      * This is a non revocable use-case as the RCS account itself was not created,
                      * So we log this as error and stop the service itself.
                      */
-                    sLogger.error(
-                            "Failed to start the service for intent: ".concat(intent.toString()), e);
+                    sLogger.error(new StringBuilder("Failed to start the service for intent: ")
+                            .append(intent).toString(), e);
                     stopSelf();
 
                 } catch (RuntimeException e) {
@@ -252,8 +252,8 @@ public class StartService extends Service {
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error(
-                            "Failed to start the service for intent: ".concat(intent.toString()), e);
+                    sLogger.error(new StringBuilder("Failed to start the service for intent: ")
+                            .append(intent).toString(), e);
                     stopSelf();
                 }
             }
@@ -299,8 +299,9 @@ public class StartService extends Service {
                              * such exceptions will eventually lead to exit the system and thus can
                              * bring the whole system down, which is not intended.
                              */
-                            sLogger.error("Unable to handle connection event for intent action : "
-                                    .concat(intent.getAction()), e);
+                            sLogger.error(new StringBuilder(
+                                    "Unable to handle connection event for intent action : ")
+                                    .append(intent.getAction()).toString(), e);
                         }
                     }
                 });

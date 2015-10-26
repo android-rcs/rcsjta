@@ -280,8 +280,8 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
             ParticipantStatus status = participant.getValue();
             if (isGroupChatEventRequired(contact, status, groupChatEventsInDB))
                 for (ImsSessionListener listener : mSession.getListeners()) {
-                    ((GroupChatSessionListener) listener).onConferenceEventReceived(contact, status,
-                            timestamp);
+                    ((GroupChatSessionListener) listener).onConferenceEventReceived(contact,
+                            status, timestamp);
                 }
         }
         mSession.updateParticipants(participantsToUpdate);
@@ -516,8 +516,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * @throws PayloadException
      * @throws NetworkException
      */
-    private void sendSubscribe(SipRequest subscribe) throws PayloadException,
-            NetworkException {
+    private void sendSubscribe(SipRequest subscribe) throws PayloadException, NetworkException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info(new StringBuilder("Send SUBSCRIBE, expire=")
@@ -567,15 +566,10 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
                 handleError(new ChatError(ChatError.SUBSCRIBE_CONFERENCE_FAILED));
             }
         } catch (InvalidArgumentException e) {
-            throw new PayloadException(
-                    "Unable to set authorization header for subscribe "
-                            .concat(subscribe.toString()),
-                    e);
+            throw new PayloadException("Unable to set authorization header for subscribe!", e);
+
         } catch (ParseException e) {
-            throw new PayloadException(
-                    "Unable to set authorization header for subscribe "
-                            .concat(subscribe.toString()),
-                    e);
+            throw new PayloadException("Unable to set authorization header for subscribe!", e);
         }
     }
 

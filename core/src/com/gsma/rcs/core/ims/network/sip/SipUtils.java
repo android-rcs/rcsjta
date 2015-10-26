@@ -667,8 +667,9 @@ public class SipUtils {
     public static void assertContentIsNotNull(String content, SipRequest invite)
             throws PayloadException {
         if (content == null) {
-            throw new PayloadException("Unable to extract content from invite : ".concat(invite
-                    .toString()));
+            throw new PayloadException(
+                    new StringBuilder("Unable to extract content from invite : ").append(invite)
+                            .toString());
         }
     }
 }

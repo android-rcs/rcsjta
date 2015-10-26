@@ -106,7 +106,8 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
                     .getContentResolver().openInputStream(file);
             byte[] data = new byte[size];
             if (size != fileInputStream.read(data, 0, size)) {
-                throw new IOException("Unable to retrive data from ".concat(file.toString()));
+                throw new IOException(new StringBuilder("Unable to retrive data from ")
+                        .append(file).toString());
             }
             return data;
         } finally {
@@ -282,9 +283,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
             msrpMgr.sendChunks(stream, getFileTransferId(), getContent().getEncoding(),
                     getContent().getSize(), TypeMsrpChunk.FileSharing);
         } catch (FileNotFoundException e) {
-            throw new FileAccessException(
-                    "Failed to initiate media transfer for uri : ".concat(getContent().getUri()
-                            .toString()), e);
+            throw new FileAccessException("Failed to initiate media transfer!", e);
         }
     }
 
@@ -315,8 +314,8 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
             }
 
         } catch (PayloadException e) {
-            sLogger.error("Failed to notify msrp data transfered for msgId : ".concat(msgId), e);
-
+            sLogger.error(new StringBuilder("Failed to notify msrp data transfered for msgId : ")
+                    .append(msgId).toString(), e);
         } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
@@ -329,7 +328,8 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
              * executing operations on a thread unhandling such exceptions will eventually lead to
              * exit the system and thus can bring the whole system down, which is not intended.
              */
-            sLogger.error("Failed to notify msrp data transfered for msgId : ".concat(msgId), e);
+            sLogger.error(new StringBuilder("Failed to notify msrp data transfered for msgId : ")
+                    .append(msgId).toString(), e);
         }
     }
 

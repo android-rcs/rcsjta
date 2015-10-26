@@ -118,8 +118,8 @@ public class ImsServiceDispatcher extends Thread {
             try {
                 dispatch(request, System.currentTimeMillis());
             } catch (PayloadException e) {
-                sLogger.error("Failed to dispatch received SIP request! CallId=".concat(request
-                        .getCallId()), e);
+                sLogger.error(new StringBuilder("Failed to dispatch received SIP request! CallId=")
+                        .append(request.getCallId()).toString(), e);
                 handleImsDispatchError(request);
             } catch (NetworkException e) {
                 if (sLogger.isActivated()) {
@@ -134,8 +134,8 @@ public class ImsServiceDispatcher extends Thread {
                  * to exit the system and thus can bring the whole system down, which is not
                  * intended.
                  */
-                sLogger.error("Failed to dispatch received SIP request! CallId=".concat(request
-                        .getCallId()), e);
+                sLogger.error(new StringBuilder("Failed to dispatch received SIP request! CallId=")
+                        .append(request.getCallId()).toString(), e);
                 handleImsDispatchError(request);
             }
         }

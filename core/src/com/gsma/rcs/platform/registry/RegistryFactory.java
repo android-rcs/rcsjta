@@ -48,13 +48,16 @@ public abstract class RegistryFactory {
         try {
             mFactory = (RegistryFactory) Class.forName(classname).newInstance();
         } catch (InstantiationException e) {
-            throw new FactoryException("Can't load the factory ".concat(classname), e);
+            throw new FactoryException(new StringBuilder("Can't load the factory ").append(
+                    classname).toString(), e);
 
         } catch (IllegalAccessException e) {
-            throw new FactoryException("Can't load the factory ".concat(classname), e);
+            throw new FactoryException(new StringBuilder("Can't load the factory ").append(
+                    classname).toString(), e);
 
         } catch (ClassNotFoundException e) {
-            throw new FactoryException("Can't load the factory ".concat(classname), e);
+            throw new FactoryException(new StringBuilder("Can't load the factory ").append(
+                    classname).toString(), e);
         }
     }
 

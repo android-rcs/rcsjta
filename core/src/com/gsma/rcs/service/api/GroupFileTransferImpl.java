@@ -519,8 +519,10 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                      * Intentionally catch runtime exceptions as else it will abruptly end the
                      * thread and eventually bring the whole system down, which is not intended.
                      */
-                    sLogger.error("Failed to accept file transfer with fileTransferId : "
-                            .concat(mFileTransferId), e);
+                    sLogger.error(
+                            new StringBuilder(
+                                    "Failed to accept file transfer with fileTransferId : ")
+                                    .append(mFileTransferId).toString(), e);
                 }
             }
         });
@@ -547,8 +549,10 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                      * Intentionally catch runtime exceptions as else it will abruptly end the
                      * thread and eventually bring the whole system down, which is not intended.
                      */
-                    sLogger.error("Failed to reject file transfer with fileTransferId : "
-                            .concat(mFileTransferId), e);
+                    sLogger.error(
+                            new StringBuilder(
+                                    "Failed to reject file transfer with fileTransferId : ")
+                                    .append(mFileTransferId).toString(), e);
                 }
             }
         });
@@ -594,8 +598,9 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                         sLogger.debug(e.getMessage());
                     }
                 } catch (PayloadException e) {
-                    sLogger.error("Failed to terminate session with fileTransferId : "
-                            .concat(mFileTransferId), e);
+                    sLogger.error(
+                            new StringBuilder("Failed to terminate session with fileTransferId : ")
+                                    .append(mFileTransferId).toString(), e);
                 } catch (RuntimeException e) {
                     /*
                      * Normally we are not allowed to catch runtime exceptions as these are genuine
@@ -604,8 +609,9 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error("Failed to terminate session with fileTransferId : "
-                            .concat(mFileTransferId), e);
+                    sLogger.error(
+                            new StringBuilder("Failed to terminate session with fileTransferId : ")
+                                    .append(mFileTransferId).toString(), e);
                 }
             }
         });
@@ -690,8 +696,10 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                      * Intentionally catch runtime exceptions as else it will abruptly end the
                      * thread and eventually bring the whole system down, which is not intended.
                      */
-                    sLogger.error("Failed to pause file transfer with fileTransferId : "
-                            .concat(mFileTransferId), e);
+                    sLogger.error(
+                            new StringBuilder(
+                                    "Failed to pause file transfer with fileTransferId : ").append(
+                                    mFileTransferId).toString(), e);
                 }
             }
         });
@@ -818,8 +826,10 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                      * Intentionally catch runtime exceptions as else it will abruptly end the
                      * thread and eventually bring the whole system down, which is not intended.
                      */
-                    sLogger.error("Failed to resume file transfer with fileTransferId : "
-                            .concat(mFileTransferId), e);
+                    sLogger.error(
+                            new StringBuilder(
+                                    "Failed to resume file transfer with fileTransferId : ")
+                                    .append(mFileTransferId).toString(), e);
                 }
             }
         });
@@ -850,9 +860,9 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
     @Override
     public void resendTransfer() throws RemoteException {
-        throw new ServerApiUnsupportedOperationException(
-                "Resend operation not supported for group file transfer with file transfer ID "
-                        .concat(mFileTransferId));
+        throw new ServerApiUnsupportedOperationException(new StringBuilder(
+                "Resend operation not supported for group file transfer with file transfer ID ")
+                .append(mFileTransferId).toString());
     }
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/

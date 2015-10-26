@@ -685,7 +685,8 @@ public class SipInterface implements SipListener {
             return contactHeader;
 
         } catch (ParseException e) {
-            throw new PayloadException("Unable to create SIP URI : ".concat(mLocalIpAddress), e);
+            throw new PayloadException(new StringBuilder("Unable to create SIP URI : ").append(
+                    mLocalIpAddress).toString(), e);
 
         } catch (InvalidArgumentException e) {
             throw new PayloadException(new StringBuilder("Unable to set port : ")
@@ -722,7 +723,8 @@ public class SipInterface implements SipListener {
             return contactHeader;
 
         } catch (ParseException e) {
-            throw new PayloadException("Unable to create SIP URI : ".concat(mPublicGruu), e);
+            throw new PayloadException(new StringBuilder("Unable to create SIP URI : ").append(
+                    mPublicGruu).toString(), e);
         }
     }
 

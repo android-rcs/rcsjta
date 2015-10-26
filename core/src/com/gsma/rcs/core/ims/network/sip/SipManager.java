@@ -438,9 +438,9 @@ public class SipManager {
             WarningHeader warn = (WarningHeader) ctx.getSipResponse().getHeader(WarningHeader.NAME);
             if ((Response.FORBIDDEN == code) && (warn == null)) {
                 mNetworkInterface.getRegistrationManager().restart();
-                throw new PayloadException(
-                        "Stack not properly registered with status code : ".concat(Integer
-                                .toString(code)));
+                throw new PayloadException(new StringBuilder(
+                        "Stack not properly registered with status code : ").append(code)
+                        .toString());
             }
         }
         return ctx;

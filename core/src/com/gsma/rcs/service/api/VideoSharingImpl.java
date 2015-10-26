@@ -114,8 +114,8 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
             case ContentSharingError.MEDIA_PLAYER_NOT_INITIALIZED:
                 return new VideoSharingStateAndReasonCode(State.FAILED, ReasonCode.FAILED_SHARING);
             default:
-                throw new IllegalArgumentException(
-                        "Unknown errorCode=".concat(String.valueOf(code)));
+                throw new IllegalArgumentException(new StringBuilder("Unknown errorCode=").append(
+                        code).toString());
         }
     }
 
@@ -325,7 +325,8 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
                      * which is not intended.
                      */
                     sLogger.error(
-                            "Failed to accept invitation with sharing ID: ".concat(mSharingId), e);
+                            new StringBuilder("Failed to accept invitation with sharing ID: ")
+                                    .append(mSharingId).toString(), e);
                 }
             }
         });
@@ -360,7 +361,8 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
                      * which is not intended.
                      */
                     sLogger.error(
-                            "Failed to reject invitation with sharing ID: ".concat(mSharingId), e);
+                            new StringBuilder("Failed to reject invitation with sharing ID: ")
+                                    .append(mSharingId).toString(), e);
                 }
             }
         });
@@ -393,7 +395,8 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
                     }
                 } catch (PayloadException e) {
                     sLogger.error(
-                            "Failed to terminate session with sharing ID: ".concat(mSharingId), e);
+                            new StringBuilder("Failed to terminate session with sharing ID: ")
+                                    .append(mSharingId).toString(), e);
                 } catch (RuntimeException e) {
                     /*
                      * Normally we are not allowed to catch runtime exceptions as these are genuine
@@ -403,7 +406,8 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
                      * which is not intended.
                      */
                     sLogger.error(
-                            "Failed to terminate session with sharing ID: ".concat(mSharingId), e);
+                            new StringBuilder("Failed to terminate session with sharing ID: ")
+                                    .append(mSharingId).toString(), e);
                 }
             }
         });
@@ -424,13 +428,15 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
             }
             IVideoPlayer player = session.getPlayer();
             if (player == null) {
-                throw new ServerApiGenericException(
-                        "Cannot get video encoding for session with sharing ID:".concat(mSharingId));
+                throw new ServerApiGenericException(new StringBuilder(
+                        "Cannot get video encoding for session with sharing ID:")
+                        .append(mSharingId).toString());
             }
             VideoCodec codec = player.getCodec();
             if (codec == null) {
-                throw new ServerApiGenericException(
-                        "Cannot get video codec for session with sharing ID:".concat(mSharingId));
+                throw new ServerApiGenericException(new StringBuilder(
+                        "Cannot get video codec for session with sharing ID:").append(mSharingId)
+                        .toString());
             }
             return codec.getEncoding();
 
@@ -571,8 +577,8 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
                     setStateAndReasonCode(contact, State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
                     break;
                 default:
-                    throw new IllegalArgumentException(
-                            "Unknown imsServiceSessionError=".concat(String.valueOf(reason)));
+                    throw new IllegalArgumentException(new StringBuilder(
+                            "Unknown imsServiceSessionError=").append(reason).toString());
             }
         }
     }

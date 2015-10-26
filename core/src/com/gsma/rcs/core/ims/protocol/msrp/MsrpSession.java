@@ -504,7 +504,8 @@ public class MsrpSession {
                 mMsrpEventListener.msrpDataTransfered(msgId);
             }
         } catch (IOException e) {
-            throw new NetworkException("Send chunk failed for msgId : ".concat(msgId), e);
+            throw new NetworkException(new StringBuilder("Send chunk failed for msgId : ").append(
+                    msgId).toString(), e);
 
         } finally {
             CloseableUtils.tryToClose(inputStream);

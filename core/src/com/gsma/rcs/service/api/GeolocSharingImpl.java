@@ -316,7 +316,8 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
                      * which is not intended.
                      */
                     sLogger.error(
-                            "Failed to accept invitation with sharing ID: ".concat(mSharingId), e);
+                            new StringBuilder("Failed to accept invitation with sharing ID: ")
+                                    .append(mSharingId).toString(), e);
                 }
             }
         });
@@ -352,7 +353,8 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
                      * which is not intended.
                      */
                     sLogger.error(
-                            "Failed to reject invitation with sharing ID: ".concat(mSharingId), e);
+                            new StringBuilder("Failed to reject invitation with sharing ID: ")
+                                    .append(mSharingId).toString(), e);
                 }
             }
         });
@@ -391,8 +393,8 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 
                 } catch (PayloadException e) {
                     sLogger.error(
-                            "Failed to terminate session with sharing ID: ".concat(mSharingId), e);
-
+                            new StringBuilder("Failed to terminate session with sharing ID: ")
+                                    .append(mSharingId).toString(), e);
                 } catch (RuntimeException e) {
                     /*
                      * Normally we are not allowed to catch runtime exceptions as these are genuine
@@ -402,7 +404,8 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
                      * which is not intended.
                      */
                     sLogger.error(
-                            "Failed to terminate session with sharing ID: ".concat(mSharingId), e);
+                            new StringBuilder("Failed to terminate session with sharing ID: ")
+                                    .append(mSharingId).toString(), e);
                 }
             }
         });

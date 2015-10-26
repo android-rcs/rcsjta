@@ -221,8 +221,8 @@ public abstract class HttpTransferManager {
             return cnx;
 
         } catch (IOException e) {
-            throw new NetworkException("Failed to open http connection with url : ".concat(url
-                    .toString()), e);
+            throw new NetworkException(new StringBuilder(
+                    "Failed to open http connection with url : ").append(url).toString(), e);
         }
     }
 

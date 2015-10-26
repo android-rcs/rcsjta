@@ -137,8 +137,9 @@ public class LocaleManager {
                          * exceptions will eventually lead to exit the system and thus can bring the
                          * whole system down, which is not intended.
                          */
-                        sLogger.error("Failed to update rcs locale for action : ".concat(intent
-                                .getAction()), e);
+                        sLogger.error(
+                                new StringBuilder("Failed to update rcs locale for action : ")
+                                        .append(intent.getAction()).toString(), e);
                     }
                 }
             });
