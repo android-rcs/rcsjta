@@ -171,7 +171,7 @@ public class SingleChatIntentService extends IntentService {
     /**
      * Forward one to one chat message to view activity
      * 
-     * @param ctx Context
+     * @param messageIntent intent
      * @param message the chat message DAO
      */
     private void forwardSingleChatMessage2UI(Intent messageIntent, ChatMessageDAO message) {
@@ -267,9 +267,9 @@ public class SingleChatIntentService extends IntentService {
     /**
      * Generate a notification
      * 
-     * @param invitation
-     * @param title
-     * @param message
+     * @param invitation invitation
+     * @param title title
+     * @param message message
      * @return the notification
      */
     private Notification buildNotification(PendingIntent invitation, String title, String message) {

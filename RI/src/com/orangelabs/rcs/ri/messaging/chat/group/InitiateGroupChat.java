@@ -24,12 +24,9 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactService;
 import com.gsma.services.rcs.contact.RcsContact;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
 import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.Utils;
 
-import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.util.SparseBooleanArray;
@@ -50,9 +47,9 @@ import java.util.Set;
  * Initiate group chat
  * 
  * @author Jean-Marc AUFFRET
- * @author yplo6403
+ * @author Philippe LEMORDANT
  */
-public class InitiateGroupChat extends Activity implements OnItemClickListener {
+public class InitiateGroupChat extends RcsActivity implements OnItemClickListener {
 
     private ArrayList<String> mParticipants;
 
@@ -62,34 +59,33 @@ public class InitiateGroupChat extends Activity implements OnItemClickListener {
 
     private Button mInviteBtn;
 
-    private LockAccess mExitOnce = new LockAccess();
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.chat_initiate_group);
 
+        if (!getChatApi().isServiceConnected()) {
+            showMessageThenExit(R.string.label_service_not_available);
+            return;
+        }
         mContactList = (ListView) findViewById(R.id.contacts);
 
         /* Check if Group chat initialization is allowed */
-        ConnectionManager cnxManager = ConnectionManager.getInstance();
-        ContactService contactService = cnxManager.getContactApi();
-        ChatService chatService = cnxManager.getChatApi();
+        ContactService contactService = getContactApi();
+        ChatService chatService = getChatApi();
         try {
             Set<RcsContact> rcsContacts = contactService.getRcsContacts();
-            mAllowedContactIds = new ArrayList<ContactId>();
-            List<String> allowedContacts = new ArrayList<String>();
+            mAllowedContactIds = new ArrayList<>();
+            List<String> allowedContacts = new ArrayList<>();
             for (RcsContact rcsContact : rcsContacts) {
                 ContactId contact = rcsContact.getContactId();
                 if (chatService.isAllowedToInitiateGroupChat(contact)) {
                     mAllowedContactIds.add(contact);
                     if (rcsContact.getDisplayName() != null) {
-                        allowedContacts.add(new StringBuilder(rcsContact.getDisplayName())
-                                .append(" (").append(rcsContact.getContactId()).append(")")
-                                .toString());
+                        allowedContacts.add(rcsContact.getDisplayName() + " ("
+                                + rcsContact.getContactId() + ")");
                     } else {
                         allowedContacts.add(contact.toString());
                     }
@@ -98,7 +94,7 @@ public class InitiateGroupChat extends Activity implements OnItemClickListener {
             }
             if (allowedContacts.size() > 0) {
                 String[] contacts = allowedContacts.toArray(new String[allowedContacts.size()]);
-                ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                         android.R.layout.simple_list_item_multiple_choice, contacts);
                 mContactList.setAdapter(adapter);
                 mContactList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
@@ -112,12 +108,10 @@ public class InitiateGroupChat extends Activity implements OnItemClickListener {
                 mInviteBtn.setOnClickListener(btnInviteListener);
                 mInviteBtn.setEnabled(false);
             } else {
-                Utils.showMessage(this, getString(R.string.label_no_participant_found));
-                return;
-
+                showMessage(R.string.label_no_participant_found);
             }
         } catch (RcsServiceException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce);
+            showExceptionThenExit(e);
         }
     }
 
@@ -138,7 +132,7 @@ public class InitiateGroupChat extends Activity implements OnItemClickListener {
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
         /* Build list of participant numbers */
         SparseBooleanArray checkedArray = mContactList.getCheckedItemPositions();
-        mParticipants = new ArrayList<String>();
+        mParticipants = new ArrayList<>();
         for (int i = 0; i < checkedArray.size(); i++) {
             if (checkedArray.get(i)) {
                 mParticipants.add(mAllowedContactIds.get(i).toString());

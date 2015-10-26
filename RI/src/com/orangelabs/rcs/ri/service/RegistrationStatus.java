@@ -19,42 +19,34 @@
 package com.orangelabs.rcs.ri.service;
 
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.RcsServiceRegistrationListener;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
 import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.Utils;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 
-import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.TextView;
 
 /**
  * Display and monitor the registration status
  * 
  * @author Jean-Marc AUFFRET
+ * @author Philippe LEMORDANT
  */
-public class RegistrationStatus extends Activity {
+public class RegistrationStatus extends RcsActivity {
 
     private final Handler mHandler = new Handler();
 
-    private ConnectionManager mCnxManager;
-
-    /**
-     * A locker to exit only once
-     */
-    private LockAccess mExitOnce = new LockAccess();
-
-    /**
-     * Registration listener
-     */
     private MyRegistrationListener registrationListener = new MyRegistrationListener();
+
+    private static final String LOGTAG = LogUtils.getTag(RegistrationStatus.class.getSimpleName());
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -68,30 +60,26 @@ public class RegistrationStatus extends Activity {
         displayRegistrationStatus(false);
 
         // Register to API connection manager
-        mCnxManager = ConnectionManager.getInstance();
-        if (!mCnxManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
-            Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
-                    mExitOnce);
+        if (!isServiceConnected(RcsServiceName.CAPABILITY)) {
+            showMessageThenExit(R.string.label_service_not_available);
             return;
         }
-        mCnxManager.startMonitorServices(this, null, RcsServiceName.CAPABILITY);
+        startMonitorServices(RcsServiceName.CAPABILITY);
         try {
-            // Add service listener
-            mCnxManager.getCapabilityApi().addEventListener(registrationListener);
+            getCapabilityApi().addEventListener(registrationListener);
         } catch (RcsServiceException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+            showExceptionThenExit(e);
         }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mCnxManager.stopMonitorServices(this);
-        if (mCnxManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
-            // Remove listener
+        if (isServiceConnected(RcsServiceName.CAPABILITY)) {
             try {
-                mCnxManager.getCapabilityApi().removeEventListener(registrationListener);
-            } catch (Exception e) {
+                getCapabilityApi().removeEventListener(registrationListener);
+            } catch (RcsServiceException e) {
+                Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
             }
         }
     }
@@ -99,25 +87,21 @@ public class RegistrationStatus extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (isExiting()) {
+            return;
+        }
         try {
-            // Display registration status
-            displayRegistrationStatus(mCnxManager.getCapabilityApi().isServiceRegistered());
-        } catch (RcsServiceNotAvailableException e) {
-            Utils.showMessageAndExit(RegistrationStatus.this, getString(R.string.label_api_failed));
+            displayRegistrationStatus(getCapabilityApi().isServiceRegistered());
         } catch (RcsServiceException e) {
-            Utils.showMessageAndExit(RegistrationStatus.this, getString(R.string.label_api_failed));
+            showExceptionThenExit(e);
         }
     }
 
-    /**
-     * Registration event listener
-     */
     private class MyRegistrationListener extends RcsServiceRegistrationListener {
         // Service is registered to the network platform
         public void onServiceRegistered() {
             mHandler.post(new Runnable() {
                 public void run() {
-                    // Display registration status
                     displayRegistrationStatus(true);
                 }
             });
@@ -127,19 +111,12 @@ public class RegistrationStatus extends Activity {
         public void onServiceUnregistered(RcsServiceRegistration.ReasonCode reason) {
             mHandler.post(new Runnable() {
                 public void run() {
-                    // Display registration status
                     displayRegistrationStatus(false);
                 }
             });
         }
-
     }
 
-    /**
-     * Display registration status
-     * 
-     * @param status Status
-     */
     private void displayRegistrationStatus(boolean status) {
         TextView statusTxt = (TextView) findViewById(R.id.registration_status);
         statusTxt.setText(String.valueOf(status));

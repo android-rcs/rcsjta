@@ -1,4 +1,4 @@
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion rootProject.compileSdkVersion
@@ -17,4 +17,5 @@ android {
 
 dependencies {
     compile project(':api')
+	compile 'com.android.support:support-v4:+'
 }

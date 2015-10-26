@@ -22,16 +22,18 @@ import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.FileUtils;
 import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsSessionUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.Activity;
-import android.app.Dialog;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -41,7 +43,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -68,18 +69,12 @@ import java.util.Set;
  * 
  * @author Philippe LEMORDANT
  */
-public abstract class SendMultiFile extends Activity implements ISendMultiFile {
+public abstract class SendMultiFile extends RcsActivity implements ISendMultiFile {
 
     private static final String LOGTAG = LogUtils.getTag(SendMultiFile.class.getSimpleName());
 
-    /**
-     * Intent parameters
-     */
     private final static String EXTRA_CHAT_ID = "chat_id";
 
-    /**
-     * The chatId
-     */
     protected String mChatId;
 
     /**
@@ -97,44 +92,27 @@ public abstract class SendMultiFile extends Activity implements ISendMultiFile {
      */
     protected List<FileTransferProperties> mFiles;
 
-    private ConnectionManager mCnxManager;
-
     /**
      * A flag to only add listener once and to remove only if previously added
      */
     protected boolean mFileTransferListenerAdded = false;
 
-    /**
-     * Set of file transfers
-     */
     protected Set<FileTransfer> mFileTransfers;
 
-    private Dialog progressDialog;
+    private ProgressDialog mProgressDialog;
 
     /**
      * List view file transfer adapter
      */
     protected FileTransferAdapter mFileTransferAdapter;
 
-    /**
-     * A locker to exit only once
-     */
-    protected LockAccess mExitOnce = new LockAccess();
-
-    /**
-     * Instance of file transfer service
-     */
     protected FileTransferService mFileTransferService;
-
-    private Button mStartButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        mCnxManager = ConnectionManager.getInstance();
-
-        mTransferIds = new ArrayList<String>();
+        initialize();
+        mTransferIds = new ArrayList<>();
         if (!parseIntent(getIntent())) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG, "onCreate invalid intent");
@@ -147,18 +125,17 @@ public abstract class SendMultiFile extends Activity implements ISendMultiFile {
         setContentView(R.layout.filetransfer_send_multi_file);
 
         ListView listView = (ListView) findViewById(android.R.id.list);
-        mFileTransferAdapter = new FileTransferAdapter(
-                this,
+        mFileTransferAdapter = new FileTransferAdapter(this,
                 R.layout.filetransfer_send_multi_file_item,
-                (FileTransferProperties[]) mFiles.toArray(new FileTransferProperties[mFiles.size()]));
+                mFiles.toArray(new FileTransferProperties[mFiles.size()]));
         listView.setAdapter(mFileTransferAdapter);
 
-        mFileTransfers = new HashSet<FileTransfer>();
+        mFileTransfers = new HashSet<>();
 
         /* Set start button */
-        mStartButton = (Button) findViewById(R.id.ft_start_btn);
-        mStartButton.setVisibility(View.GONE);
-        mStartButton.setOnClickListener(new OnClickListener() {
+        Button startButton = (Button) findViewById(R.id.ft_start_btn);
+        startButton.setVisibility(View.GONE);
+        startButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 // TODO check warn size
                 initiateTransfer();
@@ -166,28 +143,29 @@ public abstract class SendMultiFile extends Activity implements ISendMultiFile {
         });
 
         /* Register to API connection manager */
-        if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.FILE_TRANSFER,
+        if (!isServiceConnected(RcsServiceName.CHAT, RcsServiceName.FILE_TRANSFER,
                 RcsServiceName.CONTACT)) {
-            Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
-                    mExitOnce);
+            showMessageThenExit(R.string.label_service_not_available);
+
         } else {
-            mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.CHAT,
-                    RcsServiceName.FILE_TRANSFER, RcsServiceName.CONTACT);
-            mFileTransferService = mCnxManager.getFileTransferApi();
+            startMonitorServices(RcsServiceName.CHAT, RcsServiceName.FILE_TRANSFER,
+                    RcsServiceName.CONTACT);
+            mFileTransferService = getFileTransferApi();
             try {
                 Boolean authorized = checkPermissionToSendFile(mChatId);
                 if (authorized) {
-                    mStartButton.setVisibility(View.VISIBLE);
+                    startButton.setVisibility(View.VISIBLE);
                     addFileTransferEventListener(mFileTransferService);
+
                 } else {
                     if (LogUtils.isActive) {
                         Log.d(LOGTAG, "Not allowed to transfer file to ".concat(mChatId));
                     }
-                    mStartButton.setVisibility(View.INVISIBLE);
-                    Utils.showMessage(this, getString(R.string.label_ft_not_allowed));
+                    startButton.setVisibility(View.INVISIBLE);
+                    showMessage(R.string.label_ft_not_allowed);
                 }
             } catch (RcsServiceException e) {
-                Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+                showExceptionThenExit(e);
             }
         }
     }
@@ -197,9 +175,9 @@ public abstract class SendMultiFile extends Activity implements ISendMultiFile {
         String action = intent.getAction();
         // Here we get data from the event.
         if (Intent.ACTION_SEND.equals(action)) {
-            mFiles = new ArrayList<FileTransferProperties>();
+            mFiles = new ArrayList<>();
             // Handle normal one file or text sharing.
-            Uri uri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+            Uri uri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
             String fileName = FileUtils.getFileName(this, uri);
             long fileSize = FileUtils.getFileSize(this, uri) / 1024;
             mFiles.add(new FileTransferProperties(uri, fileName, fileSize));
@@ -212,7 +190,7 @@ public abstract class SendMultiFile extends Activity implements ISendMultiFile {
             // Handle multiple file sharing.
             ArrayList<Uri> uris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
             if (uris != null) {
-                mFiles = new ArrayList<FileTransferProperties>();
+                mFiles = new ArrayList<>();
                 StringBuilder files = new StringBuilder("Transfer multiple files [");
                 String loopDelim = "";
                 for (Uri uri : uris) {
@@ -239,30 +217,49 @@ public abstract class SendMultiFile extends Activity implements ISendMultiFile {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mCnxManager.stopMonitorServices(this);
-        if (mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
-            // Remove file listener
+        if (isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
             try {
                 removeFileTransferEventListener(mFileTransferService);
             } catch (RcsServiceException e) {
+                Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
             }
         }
     }
 
     private void initiateTransfer() {
         if (transferFiles(mFiles)) {
-            // Display a progress dialog
-            progressDialog = Utils.showProgressDialog(SendMultiFile.this,
-                    getString(R.string.label_command_in_progress));
-            progressDialog.setOnCancelListener(new OnCancelListener() {
+            mProgressDialog = showProgressDialog(getString(R.string.label_command_in_progress));
+            mProgressDialog.setOnCancelListener(new OnCancelListener() {
                 public void onCancel(DialogInterface dialog) {
-                    Toast.makeText(SendMultiFile.this,
-                            getString(R.string.label_transfer_cancelled), Toast.LENGTH_SHORT)
-                            .show();
-                    quitSession();
+                    hideProgressDialog();
+                    if (!isThereAnyOnGoingSession()) {
+                        finish();
+                    }
+                    if (LogUtils.isActive) {
+                        Log.d(LOGTAG, "onKeyDown abort on going sessions");
+                    }
+                    AlertDialog.Builder builder = new AlertDialog.Builder(SendMultiFile.this);
+                    builder.setTitle(R.string.label_confirm_close);
+                    builder.setPositiveButton(R.string.label_ok,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Toast.makeText(SendMultiFile.this,
+                                            getString(R.string.label_transfer_cancelled),
+                                            Toast.LENGTH_SHORT).show();
+                                    quitSession();
+                                }
+                            });
+                    builder.setNegativeButton(R.string.label_cancel,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    /* Exit activity */
+                                    finish();
+                                }
+                            });
+                    builder.setCancelable(true);
+                    registerDialog(builder.show());
                 }
             });
-
             /* Hide start button */
             Button inviteBtn = (Button) findViewById(R.id.ft_start_btn);
             inviteBtn.setVisibility(View.GONE);
@@ -272,10 +269,10 @@ public abstract class SendMultiFile extends Activity implements ISendMultiFile {
     /**
      * Hide progress dialog
      */
-    public void hideProgressDialog() {
-        if (progressDialog != null && progressDialog.isShowing()) {
-            progressDialog.dismiss();
-            progressDialog = null;
+    protected void hideProgressDialog() {
+        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+            mProgressDialog.dismiss();
+            mProgressDialog = null;
         }
     }
 
@@ -294,34 +291,43 @@ public abstract class SendMultiFile extends Activity implements ISendMultiFile {
         mFileTransferAdapter.notifyDataSetChanged();
     }
 
-    /**
-     * Quit the session
-     */
     private void quitSession() {
-        /* Stop sessions */
-        try {
-            for (FileTransfer fileTransfer : mFileTransfers) {
-                if (FileTransfer.State.STARTED == fileTransfer.getState()) {
-                    fileTransfer.abortTransfer();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (LogUtils.isActive) {
+            Log.d(LOGTAG, "quitSession");
         }
-        mFileTransfers.clear();
+        try {
+            if (mFileTransfers != null) {
+                for (FileTransfer fileTransfer : mFileTransfers) {
+                    if (RcsSessionUtil.isAllowedToAbortFileTransferSession(fileTransfer)) {
+                        fileTransfer.abortTransfer();
+                    }
+                }
+                mFileTransfers.clear();
+            }
+        } catch (RcsServiceException e) {
+            showException(e);
 
-        /* Exit activity */
-        finish();
+        } finally {
+            mFileTransfers = null;
+            /* Exit activity */
+            finish();
+        }
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_BACK:
-                quitSession();
-                return true;
+    private boolean isThereAnyOnGoingSession() {
+        if (mFileTransfers == null) {
+            return false;
         }
-        return super.onKeyDown(keyCode, event);
+        try {
+            for (FileTransfer fileTransfer : mFileTransfers) {
+                if (RcsSessionUtil.isAllowedToAbortFileTransferSession(fileTransfer)) {
+                    return true;
+                }
+            }
+        } catch (RcsServiceException e) {
+            showException(e);
+        }
+        return false;
     }
 
     @Override
@@ -356,7 +362,6 @@ public abstract class SendMultiFile extends Activity implements ISendMultiFile {
         } else {
             intent.setClass(context, SendMultiFileGroupChat.class);
         }
-
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(EXTRA_CHAT_ID, chatId);
         context.startActivity(intent);
@@ -456,6 +461,9 @@ public abstract class SendMultiFile extends Activity implements ISendMultiFile {
      * 
      */
     protected void closeDialogIfMultipleFileTransferIsFinished() {
+        if (mFileTransfers == null) {
+            return;
+        }
         try {
             for (FileTransfer fileTransfer : mFileTransfers) {
                 if (!isFileTransferFinished(fileTransfer)) {
@@ -465,10 +473,9 @@ public abstract class SendMultiFile extends Activity implements ISendMultiFile {
             }
             /* There is no ongoing file transfer -> hide progress dialog */
             hideProgressDialog();
-        } catch (Exception e) {
-            hideProgressDialog();
-            Utils.showMessageAndExit(SendMultiFile.this,
-                    getString(R.string.label_invitation_failed), mExitOnce, e);
+        } catch (RcsServiceException e) {
+            showExceptionThenExit(e);
         }
     }
+
 }

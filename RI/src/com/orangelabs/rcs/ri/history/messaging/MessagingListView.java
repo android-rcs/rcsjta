@@ -19,6 +19,7 @@
 package com.orangelabs.rcs.ri.history.messaging;
 
 import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content;
 import com.gsma.services.rcs.chat.ChatService;
@@ -32,8 +33,8 @@ import com.gsma.services.rcs.filetransfer.FileTransferLog;
 import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 import com.gsma.services.rcs.history.HistoryLog;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.history.HistoryListView;
 import com.orangelabs.rcs.ri.messaging.filetransfer.multi.SendMultiFile;
@@ -82,20 +83,20 @@ public class MessagingListView extends HistoryListView {
             ChatLog.GroupChat.CHAT_ID, ChatLog.GroupChat.SUBJECT, ChatLog.GroupChat.DIRECTION,
             ChatLog.GroupChat.STATE, ChatLog.GroupChat.TIMESTAMP
     };
-    private final static String SORT_ORDER_GROUP_CHAT = new StringBuilder(
-            ChatLog.GroupChat.TIMESTAMP).append(" DESC").toString();
+
+    private final static String SORT_ORDER_GROUP_CHAT = ChatLog.GroupChat.TIMESTAMP + " DESC";
 
     /**
      * WHERE mime_type!='rcs/groupchat-event' group by chat_id
      */
-    private final static String WHERE_CLAUSE = new StringBuilder(HistoryLog.MIME_TYPE)
-            .append("!='").append(ChatLog.Message.MimeType.GROUPCHAT_EVENT).append("' group by ")
-            .append(HistoryLog.PROVIDER_ID).append(",").append(HistoryLog.CHAT_ID).toString();
+    private final static String WHERE_CLAUSE = HistoryLog.MIME_TYPE + "!='"
+            + ChatLog.Message.MimeType.GROUPCHAT_EVENT + "' group by " + HistoryLog.PROVIDER_ID
+            + "," + HistoryLog.CHAT_ID;
 
     /**
      * Associate the providers name menu with providerIds defined in HistoryLog
      */
-    private final static TreeMap<Integer, String> sProviders = new TreeMap<Integer, String>();
+    private final static TreeMap<Integer, String> sProviders = new TreeMap<>();
 
     /**
      * List of items for contextual menu
@@ -103,11 +104,11 @@ public class MessagingListView extends HistoryListView {
     private static final int CHAT_MENU_ITEM_DELETE = 0;
 
     /* mapping chat_id / group chat info */
-    private final Map<String, MessagingLogInfo> mGroupChatMap = new HashMap<String, MessagingLogInfo>();
+    private final Map<String, MessagingLogInfo> mGroupChatMap;
 
     private ArrayAdapter<MessagingLogInfo> mArrayAdapter;
 
-    private final List<MessagingLogInfo> mMessagingLogInfos = new ArrayList<MessagingLogInfo>();
+    private final List<MessagingLogInfo> mMessagingLogInfos;
 
     private boolean mSendFile = false;
 
@@ -117,16 +118,17 @@ public class MessagingListView extends HistoryListView {
 
     private ChatService mChatService;
 
-    private ConnectionManager mCnxManager;
-
     private static final String LOGTAG = LogUtils.getTag(MessagingListView.class.getSimpleName());
+
+    public MessagingListView() {
+        mMessagingLogInfos = new ArrayList<>();
+        mGroupChatMap = new HashMap<>();
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.history_log_messaging);
-
-        mCnxManager = ConnectionManager.getInstance();
 
         mArrayAdapter = new MessagingLogAdapter(this);
         TextView emptyView = (TextView) findViewById(android.R.id.empty);
@@ -164,10 +166,8 @@ public class MessagingListView extends HistoryListView {
             if (mGroupChatListenerSet) {
                 mChatService.removeEventListener(mGroupChatListener);
             }
-        } catch (Exception e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "removeEventListener failed", e);
-            }
+        } catch (RcsServiceException e) {
+            Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
         }
     }
 
@@ -294,7 +294,7 @@ public class MessagingListView extends HistoryListView {
     @Override
     protected void queryHistoryLogAndRefreshView() {
         List<Integer> providers = getSelectedProviderIds();
-        Map<String, MessagingLogInfo> dataMap = new HashMap<String, MessagingLogInfo>();
+        Map<String, MessagingLogInfo> dataMap = new HashMap<>();
         if (!providers.isEmpty()) {
             Uri uri = createHistoryUri(providers);
             Cursor cursor = null;
@@ -555,10 +555,7 @@ public class MessagingListView extends HistoryListView {
          * @return true if single chat
          */
         public boolean isSingleChat() {
-            if (mContact == null) {
-                return false;
-            }
-            return mChatId.equals(mContact.toString());
+            return mContact != null && mChatId.equals(mContact.toString());
         }
 
         /**
@@ -586,15 +583,15 @@ public class MessagingListView extends HistoryListView {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-        MessagingLogInfo chatInfo = (MessagingLogInfo) (mArrayAdapter.getItem(info.position));
+        MessagingLogInfo chatInfo = mArrayAdapter.getItem(info.position);
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "onContextItemSelected chatId=".concat(chatInfo.mChatId));
         }
         switch (item.getItemId()) {
             case CHAT_MENU_ITEM_DELETE:
-                if (mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
+                if (isServiceConnected(RcsServiceName.CHAT)) {
                     if (mChatService == null) {
-                        mChatService = mCnxManager.getChatApi();
+                        mChatService = getChatApi();
                     }
                     boolean singleChat = chatInfo.isSingleChat();
                     try {
@@ -620,10 +617,8 @@ public class MessagingListView extends HistoryListView {
                             }
                             mChatService.deleteGroupChat(chatId);
                         }
-                    } catch (Exception e) {
-                        if (LogUtils.isActive) {
-                            Log.e(LOGTAG, "delete chat session failed", e);
-                        }
+                    } catch (RcsServiceException e) {
+                        showException(e);
                     }
                 }
                 return true;

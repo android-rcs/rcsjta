@@ -21,11 +21,11 @@ package com.orangelabs.rcs.ri.sharing.geoloc;
 import com.gsma.services.rcs.capability.CapabilitiesLog;
 import com.gsma.services.rcs.contact.ContactId;
 
+import com.orangelabs.rcs.api.connection.utils.RcsListActivity;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.geoloc.DisplayGeoloc;
 import com.orangelabs.rcs.ri.utils.ContactUtil;
 
-import android.app.ListActivity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
@@ -41,8 +41,9 @@ import java.util.Set;
  * Geoloc sharing API
  * 
  * @author Jean-Marc AUFFRET
+ * @author Philippe LEMORDANT
  */
-public class TestGeolocSharingApi extends ListActivity {
+public class TestGeolocSharingApi extends RcsListActivity {
 
     private static final String[] PROJECTION = new String[] {
         CapabilitiesLog.CONTACT
@@ -60,7 +61,7 @@ public class TestGeolocSharingApi extends ListActivity {
                 getString(R.string.menu_initiate_geoloc_sharing),
                 getString(R.string.menu_showus_map)
         };
-        setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
+        setListAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items));
     }
 
     @Override
@@ -71,19 +72,22 @@ public class TestGeolocSharingApi extends ListActivity {
                 break;
 
             case 1:
-                Set<ContactId> contacts = new HashSet<ContactId>();
+                Set<ContactId> contacts = new HashSet<>();
                 Cursor cursor = null;
                 try {
                     cursor = getContentResolver().query(CapabilitiesLog.CONTENT_URI, PROJECTION,
                             null, null, null);
-                    while (cursor.moveToNext()) {
-                        String contact = cursor.getString(cursor
-                                .getColumnIndexOrThrow(CapabilitiesLog.CONTACT));
-                        contacts.add(ContactUtil.formatContact(contact));
+                    if (!cursor.moveToFirst()) {
+                        showMessage(R.string.label_geoloc_not_found);
+                        return;
                     }
+                    int contactColumnIdx = cursor.getColumnIndexOrThrow(CapabilitiesLog.CONTACT);
+                    do {
+                        String contact = cursor.getString(contactColumnIdx);
+                        contacts.add(ContactUtil.formatContact(contact));
+                    } while (cursor.moveToNext());
                     DisplayGeoloc.showContactsOnMap(this, contacts);
-                } catch (Exception e) {
-                    // Skip intentionally
+
                 } finally {
                     if (cursor != null) {
                         cursor.close();

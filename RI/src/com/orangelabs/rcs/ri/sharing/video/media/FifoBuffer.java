@@ -34,7 +34,7 @@ public class FifoBuffer {
     /**
      * Buffer of objects
      */
-    private Vector<Object> fifo = new Vector<Object>();
+    private Vector<Object> fifo = new Vector<>();
 
     /**
      * Add an object in the buffer

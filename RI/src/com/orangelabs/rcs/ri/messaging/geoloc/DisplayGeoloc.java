@@ -20,7 +20,7 @@ package com.orangelabs.rcs.ri.messaging.geoloc;
 
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.contact.ContactId;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -66,16 +66,14 @@ public class DisplayGeoloc extends FragmentActivity implements OnMapReadyCallbac
     private static final int LARGE_ZOOM = 12;
     private static final int SMALL_ZOOM = 4;
 
-    private final static String QUERY_SORT_ORDER = new StringBuilder(ChatLog.Message.TIMESTAMP)
-            .append(" DESC").toString();
+    private final static String QUERY_SORT_ORDER = Message.TIMESTAMP + " DESC";
 
-    private final static String QUERY_WHERE_CLAUSE = new StringBuilder(ChatLog.Message.MIME_TYPE)
-            .append("='").append(ChatLog.Message.MimeType.GEOLOC_MESSAGE).append("' AND ")
-            .append(ChatLog.Message.DIRECTION).append(" = ").append(Direction.OUTGOING.toInt())
-            .toString();
+    private final static String QUERY_WHERE_CLAUSE = Message.MIME_TYPE + "='"
+            + Message.MimeType.GEOLOC_MESSAGE + "' AND " + Message.DIRECTION + " = "
+            + Direction.OUTGOING.toInt();
 
     private final static String[] QUERY_PROJECTION = new String[] {
-        ChatLog.Message.CONTENT
+        Message.CONTENT
     };
 
     @Override
@@ -128,20 +126,17 @@ public class DisplayGeoloc extends FragmentActivity implements OnMapReadyCallbac
 
     private static Geoloc getLastGeoloc(Context ctx, ContactId contact) {
         Cursor cursor = null;
-        String where = new StringBuilder(ChatLog.Message.CONTACT).append("='")
-                .append(contact.toString()).append("' AND ").append(ChatLog.Message.MIME_TYPE)
-                .append("='").append(ChatLog.Message.MimeType.GEOLOC_MESSAGE).append("' AND ")
-                .append(ChatLog.Message.DIRECTION).append(" = ").append(Direction.INCOMING.toInt())
-                .toString();
+        String where = Message.CONTACT + "='" + contact.toString() + "' AND " + Message.MIME_TYPE
+                + "='" + Message.MimeType.GEOLOC_MESSAGE + "' AND " + Message.DIRECTION + " = "
+                + Direction.INCOMING.toInt();
         try {
             // TODO CR025 Geoloc sharing provider
-            cursor = ctx.getContentResolver().query(ChatLog.Message.CONTENT_URI, QUERY_PROJECTION,
-                    where, null, QUERY_SORT_ORDER);
+            cursor = ctx.getContentResolver().query(Message.CONTENT_URI, QUERY_PROJECTION, where,
+                    null, QUERY_SORT_ORDER);
             if (!cursor.moveToNext()) {
                 return null;
             }
-            String content = cursor
-                    .getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CONTENT));
+            String content = cursor.getString(cursor.getColumnIndexOrThrow(Message.CONTENT));
             return new Geoloc(content);
         } finally {
             if (cursor != null) {
@@ -154,13 +149,12 @@ public class DisplayGeoloc extends FragmentActivity implements OnMapReadyCallbac
         Cursor cursor = null;
         try {
             // TODO CR025 Geoloc sharing provider
-            cursor = ctx.getContentResolver().query(ChatLog.Message.CONTENT_URI, QUERY_PROJECTION,
+            cursor = ctx.getContentResolver().query(Message.CONTENT_URI, QUERY_PROJECTION,
                     QUERY_WHERE_CLAUSE, null, QUERY_SORT_ORDER);
             if (!cursor.moveToNext()) {
                 return null;
             }
-            String content = cursor
-                    .getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CONTENT));
+            String content = cursor.getString(cursor.getColumnIndexOrThrow(Message.CONTENT));
             return new Geoloc(content);
         } finally {
             if (cursor != null) {
@@ -172,11 +166,11 @@ public class DisplayGeoloc extends FragmentActivity implements OnMapReadyCallbac
     /**
      * Show geolocation for a set of contacts
      * 
-     * @param context
+     * @param ctx context
      * @param contacts set of contacts
      */
     public static void showContactsOnMap(Context ctx, Set<ContactId> contacts) {
-        HashMap<String, Geoloc> mapContactGeoloc = new HashMap<String, Geoloc>();
+        HashMap<String, Geoloc> mapContactGeoloc = new HashMap<>();
         RcsContactUtil rcsContactUtil = RcsContactUtil.getInstance(ctx);
         for (ContactId contact : contacts) {
             Geoloc geoloc = getLastGeoloc(ctx, contact);
@@ -200,11 +194,11 @@ public class DisplayGeoloc extends FragmentActivity implements OnMapReadyCallbac
     /**
      * Show geolocation for a one contact
      * 
-     * @param context
+     * @param ctx context
      * @param contact The contact
      */
     public static void showContactOnMap(Context ctx, ContactId contact) {
-        Set<ContactId> set = new HashSet<ContactId>();
+        Set<ContactId> set = new HashSet<>();
         set.add(contact);
         showContactsOnMap(ctx, set);
     }
@@ -217,7 +211,7 @@ public class DisplayGeoloc extends FragmentActivity implements OnMapReadyCallbac
      * @param geoloc The geolocation
      */
     public static void showContactOnMap(Context ctx, ContactId contact, Geoloc geoloc) {
-        HashMap<String, Geoloc> mapContactGeoloc = new HashMap<String, Geoloc>();
+        HashMap<String, Geoloc> mapContactGeoloc = new HashMap<>();
         String displayName = RcsContactUtil.getInstance(ctx).getDisplayName(contact);
         mapContactGeoloc.put(displayName, geoloc);
         Intent intent = new Intent(ctx, DisplayGeoloc.class);

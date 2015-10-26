@@ -49,7 +49,7 @@ public class TestCapabilitiesApi extends ListActivity {
                 getString(R.string.menu_refresh_capabilities),
                 getString(R.string.menu_capabilities_log)
         };
-        setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
+        setListAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items));
     }
 
     @Override

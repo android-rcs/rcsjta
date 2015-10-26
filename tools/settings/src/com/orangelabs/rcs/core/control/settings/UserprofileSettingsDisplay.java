@@ -20,27 +20,23 @@ package com.orangelabs.rcs.core.control.settings;
 
 import com.gsma.services.rcs.RcsServiceException;
 
-import com.orangelabs.rcs.core.control.R;
-import com.orangelabs.rcs.core.control.utils.MessageUtils;
-import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.api.connection.utils.RcsPreferenceActivity;
+import com.orangelabs.rcs.core.control.R;
 
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
-import android.preference.PreferenceActivity;
 
 /**
  * Presence settings display
  * 
  * @author jexa7410
  */
-public class UserprofileSettingsDisplay extends PreferenceActivity implements
+public class UserprofileSettingsDisplay extends RcsPreferenceActivity implements
         Preference.OnPreferenceChangeListener {
 
     private EditTextPreference displaynameEdit;
-
-    private ConnectionManager mCnxManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,19 +48,18 @@ public class UserprofileSettingsDisplay extends PreferenceActivity implements
         displaynameEdit.setPersistent(false);
         displaynameEdit.setOnPreferenceChangeListener(this);
 
-        mCnxManager = ConnectionManager.getInstance();
-        if (!mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
-            MessageUtils.showMessage(this, getString(R.string.label_service_not_available));
+        if (!isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
+            showMessage(R.string.label_service_not_available);
             return;
         }
 
         try {
-            String name = mCnxManager.getContactApi().getCommonConfiguration().getMyDisplayName();
+            String name = getContactApi().getCommonConfiguration().getMyDisplayName();
             displaynameEdit.setText(name);
             displaynameEdit.setTitle(name);
+
         } catch (RcsServiceException e) {
-            MessageUtils.showMessage(this, getString(R.string.label_api_failed));
-            return;
+            showExceptionThenExit(e);
         }
     }
 
@@ -72,10 +67,11 @@ public class UserprofileSettingsDisplay extends PreferenceActivity implements
         if ("edit_displayname".equals(preference.getKey())) {
             String name = (String) objValue;
             try {
-                mCnxManager.getContactApi().getCommonConfiguration().setMyDisplayName(name);
+                getContactApi().getCommonConfiguration().setMyDisplayName(name);
                 displaynameEdit.setTitle(name);
+
             } catch (RcsServiceException e) {
-                MessageUtils.showMessage(this, getString(R.string.label_api_failed));
+                showExceptionThenExit(e);
             }
         }
         return true;

@@ -19,6 +19,7 @@
 package com.orangelabs.rcs.ri.messaging.chat.group;
 
 import com.gsma.services.rcs.RcsPermissionDeniedException;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content;
 import com.gsma.services.rcs.chat.ChatService;
@@ -28,9 +29,9 @@ import com.gsma.services.rcs.chat.GroupChatListener;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsFragmentActivity;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -41,7 +42,6 @@ import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -70,7 +70,7 @@ import java.util.Set;
  * 
  * @author YPLO6403
  */
-public class GroupChatList extends FragmentActivity implements
+public class GroupChatList extends RcsFragmentActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
     // @formatter:off
@@ -89,10 +89,6 @@ public class GroupChatList extends FragmentActivity implements
             " DESC").toString();
 
     private ListView mListView;
-
-    private LockAccess mExitOnce = new LockAccess();
-
-    private ConnectionManager mCnxManager;
 
     private ChatService mChatService;
 
@@ -123,8 +119,7 @@ public class GroupChatList extends FragmentActivity implements
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.chat_list);
 
-        mCnxManager = ConnectionManager.getInstance();
-        mChatService = mCnxManager.getChatApi();
+        mChatService = getChatApi();
 
         /* Set list adapter */
         mListView = (ListView) findViewById(android.R.id.list);
@@ -148,10 +143,8 @@ public class GroupChatList extends FragmentActivity implements
         }
         try {
             mChatService.removeEventListener(mGroupChatListener);
-        } catch (Exception e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "removeEventListener failed", e);
-            }
+        } catch (RcsServiceException e) {
+            Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
         }
     }
 
@@ -283,8 +276,8 @@ public class GroupChatList extends FragmentActivity implements
         switch (item.getItemId()) {
             case R.id.menu_clear_log:
                 /* Delete all group chats */
-                if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
-                    Utils.showMessage(this, getString(R.string.label_api_unavailable));
+                if (!isServiceConnected(RcsServiceName.CHAT)) {
+                    showMessage(R.string.label_service_not_available);
                     break;
                 }
                 if (LogUtils.isActive) {
@@ -296,9 +289,8 @@ public class GroupChatList extends FragmentActivity implements
                         mGroupChatListenerSet = true;
                     }
                     mChatService.deleteGroupChats();
-                } catch (Exception e) {
-                    Utils.showMessageAndExit(this, getString(R.string.label_delete_chat_failed),
-                            mExitOnce, e);
+                } catch (RcsServiceException e) {
+                    showExceptionThenExit(e);
                 }
                 break;
         }
@@ -309,8 +301,8 @@ public class GroupChatList extends FragmentActivity implements
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         /* Check file transfer API is connected */
-        if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
-            Utils.showMessage(this, getString(R.string.label_api_unavailable));
+        if (!isServiceConnected(RcsServiceName.CHAT)) {
+            showMessage(R.string.label_service_not_available);
             return;
         }
         menu.add(0, CHAT_MENU_ITEM_OPEN, CHAT_MENU_ITEM_OPEN, R.string.menu_open_chat_session);
@@ -328,8 +320,8 @@ public class GroupChatList extends FragmentActivity implements
         }
         switch (item.getItemId()) {
             case CHAT_MENU_ITEM_OPEN:
-                if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
-                    Utils.showMessage(this, getString(R.string.label_api_unavailable));
+                if (!isServiceConnected(RcsServiceName.CHAT)) {
+                    showMessage(R.string.label_service_not_available);
                     return true;
                 }
                 if (LogUtils.isActive) {
@@ -340,8 +332,8 @@ public class GroupChatList extends FragmentActivity implements
                 return true;
 
             case CHAT_MENU_ITEM_DELETE:
-                if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
-                    Utils.showMessage(this, getString(R.string.label_api_unavailable));
+                if (!isServiceConnected(RcsServiceName.CHAT)) {
+                    showMessage(R.string.label_service_not_available);
                     return true;
                 }
                 /* Delete messages for chat ID */
@@ -354,9 +346,8 @@ public class GroupChatList extends FragmentActivity implements
                         mGroupChatListenerSet = true;
                     }
                     mChatService.deleteGroupChat(chatId);
-                } catch (Exception e) {
-                    Utils.showMessageAndExit(this, getString(R.string.label_delete_chat_failed),
-                            mExitOnce, e);
+                } catch (RcsServiceException e) {
+                    showExceptionThenExit(e);
                 }
                 return true;
             default:

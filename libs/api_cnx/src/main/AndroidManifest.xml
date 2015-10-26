@@ -1,4 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.orangelabs.rcs.api.connection">
 
+    <uses-sdk
+        android:minSdkVersion="12"
+        android:targetSdkVersion="22" />
 </manifest>

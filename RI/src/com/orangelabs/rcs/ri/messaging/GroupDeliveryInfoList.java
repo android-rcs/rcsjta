@@ -68,8 +68,7 @@ public class GroupDeliveryInfoList extends FragmentActivity implements
     };
     // @formatter:on
 
-    private static final String WHERE_CLAUSE = new StringBuilder(GroupDeliveryInfoLog.ID).append(
-            "=?").toString();
+    private static final String WHERE_CLAUSE = GroupDeliveryInfoLog.ID + "=?";
 
     /**
      * The log tag for this class
@@ -120,11 +119,10 @@ public class GroupDeliveryInfoList extends FragmentActivity implements
             Log.d(LOGTAG, "onCreateLoader " + id);
         }
         // Create a new CursorLoader with the following query parameters.
-        CursorLoader loader = new CursorLoader(this, GroupDeliveryInfoLog.CONTENT_URI, PROJECTION,
-                WHERE_CLAUSE, new String[] {
+        return new CursorLoader(this, GroupDeliveryInfoLog.CONTENT_URI, PROJECTION, WHERE_CLAUSE,
+                new String[] {
                     mMessageId
                 }, null);
-        return loader;
     }
 
     @Override

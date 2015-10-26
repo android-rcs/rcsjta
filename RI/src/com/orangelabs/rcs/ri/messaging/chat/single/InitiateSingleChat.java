@@ -20,11 +20,11 @@ package com.orangelabs.rcs.ri.messaging.chat.single;
 
 import com.gsma.services.rcs.contact.ContactId;
 
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.ContactListAdapter;
 import com.orangelabs.rcs.ri.utils.ContactUtil;
 
-import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.View;
@@ -36,9 +36,9 @@ import android.widget.Spinner;
  * Initiate chat
  * 
  * @author Jean-Marc AUFFRET
- * @author YPLO6403
+ * @author Philippe LEMORDANT
  */
-public class InitiateSingleChat extends Activity {
+public class InitiateSingleChat extends RcsActivity {
 
     /**
      * Spinner for contact selection
@@ -52,6 +52,10 @@ public class InitiateSingleChat extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.chat_initiate_single);
 
+        if (!getChatApi().isServiceConnected()) {
+            showMessageThenExit(R.string.label_service_not_available);
+            return;
+        }
         /* Set contact selector */
         mSpinner = (Spinner) findViewById(R.id.contact);
         mSpinner.setAdapter(ContactListAdapter.createRcsContactListAdapter(this));
@@ -75,7 +79,8 @@ public class InitiateSingleChat extends Activity {
             ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
             ContactId contact = ContactUtil.formatContact(phoneNumber);
-            startActivity(SingleChatView.forgeIntentToOpenConversation(InitiateSingleChat.this, contact));
+            startActivity(SingleChatView.forgeIntentToOpenConversation(InitiateSingleChat.this,
+                    contact));
             /* Exit activity */
             finish();
         }

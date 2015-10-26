@@ -18,15 +18,17 @@
 
 package com.orangelabs.rcs.ri.contacts;
 
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsListActivity;
 import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.Utils;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 
-import android.app.ListActivity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -36,7 +38,9 @@ import android.widget.ListView;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class TestContactsApi extends ListActivity {
+public class TestContactsApi extends RcsListActivity {
+
+    private static final String LOGTAG = LogUtils.getTag(TestContactsApi.class.getSimpleName());
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -52,7 +56,7 @@ public class TestContactsApi extends ListActivity {
                 getString(R.string.menu_list_supported_contacts),
                 getString(R.string.menu_contact_vcard), getString(R.string.menu_blocking_contact)
         };
-        setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
+        setListAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items));
     }
 
     @Override
@@ -62,12 +66,14 @@ public class TestContactsApi extends ListActivity {
                 try {
                     startActivity(new Intent(Intent.ACTION_VIEW)
                             .setType(ContactsContract.Contacts.CONTENT_TYPE));
+
                 } catch (ActivityNotFoundException e1) {
                     try {
                         startActivity(new Intent("com.android.contacts.action.LIST_DEFAULT"));
+
                     } catch (ActivityNotFoundException e2) {
-                        e2.printStackTrace();
-                        Utils.showMessage(this, getString(R.string.label_ab_not_found));
+                        Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e2));
+                        showMessage(R.string.label_ab_not_found);
                     }
                 }
                 break;

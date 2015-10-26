@@ -50,7 +50,7 @@ public class AboutSettings extends Activity {
             PackageInfo infos = getPackageManager().getPackageInfo(
                     RcsServiceControl.RCS_STACK_PACKAGENAME, 0);
             versionName = infos.versionName;
-            versionCode = getBuildNumber(infos.versionCode);
+            versionCode = getBuildNumber();
         } catch (NameNotFoundException e) {
             versionName = getString(R.string.label_api_unavailable);
             versionCode = getString(R.string.label_api_unavailable);
@@ -66,10 +66,9 @@ public class AboutSettings extends Activity {
      * 
      * @return String
      */
-    private String getBuildNumber(int versionCode) {
-        return new StringBuilder(Build.API_CODENAME).append(" ")
-                .append(getGsmaVersion(Build.API_VERSION)).append('.')
-                .append(Build.API_INCREMENTAL).toString();
+    private String getBuildNumber() {
+        return Build.API_CODENAME + " " + getGsmaVersion(Build.API_VERSION) + '.'
+                + Build.API_INCREMENTAL;
     }
 
     /**

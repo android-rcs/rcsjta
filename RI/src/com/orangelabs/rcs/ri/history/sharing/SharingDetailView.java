@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.widget.TextView;
 
 /**
@@ -42,7 +41,7 @@ public class SharingDetailView extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.history_log_item_detail);
 
-        SharingInfos infos = (SharingInfos) getIntent().getParcelableExtra(EXTRA_INFOS);
+        SharingInfos infos = getIntent().getParcelableExtra(EXTRA_INFOS);
         ((TextView) findViewById(R.id.history_log_item_contact)).setText(infos.getContact());
         ((TextView) findViewById(R.id.history_log_item_filename)).setText(infos.getFilename());
         ((TextView) findViewById(R.id.history_log_item_size)).setText(infos.getFilesize());
@@ -55,13 +54,13 @@ public class SharingDetailView extends Activity {
     /**
      * Start activity
      * 
-     * @param context
-     * @param infos
+     * @param context context
+     * @param infos sharing information
      */
     public static void startActivity(Context context, SharingInfos infos) {
         Intent intent = new Intent(context, SharingDetailView.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(EXTRA_INFOS, (Parcelable) infos);
+        intent.putExtra(EXTRA_INFOS, infos);
         context.startActivity(intent);
     }
 

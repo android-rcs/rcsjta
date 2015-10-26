@@ -7,10 +7,12 @@ It also displays the RCS core stack settings and enables user to modify them.
 
 <code>../../gradlew :settings:build</code>
 
-Additional steps for Eclipse compatibility:
+**Additional steps for Eclipse compatibility:**
 
 <code>ant libs</code>
 
 This will create the following jar files under the "libs" folder:
 - api.jar
 - api_cnx.jar
+
+Set up the api connection library by importing the Android project '../libs/api_cnx/build/intermediates/bundles/debug/'

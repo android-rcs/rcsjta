@@ -19,16 +19,12 @@
 package com.orangelabs.rcs.ri.capabilities;
 
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.capability.Capabilities;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
 import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.Utils;
 
-import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.widget.CheckBox;
@@ -37,17 +33,7 @@ import android.widget.TextView;
 /**
  * My capabilities
  */
-public class MyCapabilities extends Activity {
-
-    /**
-     * API connection manager
-     */
-    private ConnectionManager mCnxManager;
-
-    /**
-     * A locker to exit only once
-     */
-    private LockAccess mExitOnce = new LockAccess();
+public class MyCapabilities extends RcsActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -58,27 +44,22 @@ public class MyCapabilities extends Activity {
         setContentView(R.layout.capabilities_mine);
 
         // Register to API connection manager
-        mCnxManager = ConnectionManager.getInstance();
-        if (!mCnxManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
-            Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
-                    mExitOnce);
+        if (!isServiceConnected(RcsServiceName.CAPABILITY)) {
+            showMessageThenExit(R.string.label_service_not_available);
             return;
         }
-        mCnxManager.startMonitorServices(this, null, RcsServiceName.CAPABILITY);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mCnxManager.stopMonitorServices(this);
+        startMonitorServices(RcsServiceName.CAPABILITY);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        if (isExiting()) {
+            return;
+        }
         try {
             // Get the current capabilities from the RCS contacts API
-            Capabilities capabilities = mCnxManager.getCapabilityApi().getMyCapabilities();
+            Capabilities capabilities = getCapabilityApi().getMyCapabilities();
 
             // Set capabilities
             CheckBox imageCSh = (CheckBox) findViewById(R.id.image_sharing);
@@ -100,10 +81,8 @@ public class MyCapabilities extends Activity {
             CheckBox automata = (CheckBox) findViewById(R.id.automata);
             automata.setChecked(capabilities.isAutomata());
 
-        } catch (RcsServiceNotAvailableException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce, e);
         } catch (RcsServiceException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+            showExceptionThenExit(e);
         }
     }
 

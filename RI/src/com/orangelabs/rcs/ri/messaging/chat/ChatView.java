@@ -28,14 +28,13 @@ import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.history.HistoryLog;
 import com.gsma.services.rcs.history.HistoryUriBuilder;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsFragmentActivity;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.geoloc.EditGeoloc;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsContactUtil;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -45,12 +44,12 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -63,17 +62,16 @@ import android.widget.TextView;
 /**
  * Chat view
  */
-public abstract class ChatView extends FragmentActivity implements
+public abstract class ChatView extends RcsFragmentActivity implements
         LoaderManager.LoaderCallbacks<Cursor>, IChatView {
     /**
      * The loader's unique ID. Loader IDs are specific to the Activity in which they reside.
      */
     protected static final int LOADER_ID = 1;
 
-    /**
-     * Activity result constant
-     */
     private final static int SELECT_GEOLOCATION = 0;
+
+    private static final String LOGTAG = LogUtils.getTag(ChatView.class.getSimpleName());
 
     /**
      * The adapter that binds data to the ListView
@@ -90,14 +88,7 @@ public abstract class ChatView extends FragmentActivity implements
      */
     protected IsComposingManager mComposingManager;
 
-    /**
-     * A locker to exit only once
-     */
-    protected LockAccess mExitOnce = new LockAccess();
-
     private static boolean sActivityDisplayed = false;
-
-    protected ConnectionManager mCnxManager;
 
     /**
      * UI handler
@@ -109,8 +100,6 @@ public abstract class ChatView extends FragmentActivity implements
     protected Uri mUriHistoryProvider;
 
     protected FileTransferService mFileTransferService;
-
-    private static final String LOGTAG = LogUtils.getTag(ChatView.class.getSimpleName());
 
     /**
      * Chat message projection
@@ -137,8 +126,7 @@ public abstract class ChatView extends FragmentActivity implements
     /**
      * Query sort order
      */
-    protected final static String ORDER_CHAT_MSG = new StringBuilder(HistoryLog.TIMESTAMP).append(
-            " ASC").toString();
+    protected final static String ORDER_CHAT_MSG = HistoryLog.TIMESTAMP + " ASC";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,9 +141,6 @@ public abstract class ChatView extends FragmentActivity implements
         uriBuilder.appendProvider(ChatLog.Message.HISTORYLOG_MEMBER_ID);
         uriBuilder.appendProvider(FileTransferLog.HISTORYLOG_MEMBER_ID);
         mUriHistoryProvider = uriBuilder.build();
-
-        /* Register to API connection manager */
-        mCnxManager = ConnectionManager.getInstance();
 
         /* Set message composer callbacks */
         mComposeText = (EditText) findViewById(R.id.userText);
@@ -219,30 +204,26 @@ public abstract class ChatView extends FragmentActivity implements
         listView.setAdapter(mAdapter);
         registerForContextMenu(listView);
 
-        if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACT,
+        if (!isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACT,
                 RcsServiceName.CAPABILITY, RcsServiceName.FILE_TRANSFER)) {
-            Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
-                    mExitOnce);
+            showMessageThenExit(R.string.label_service_not_available);
             return;
-
         }
-        mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.CHAT,
-                RcsServiceName.CONTACT, RcsServiceName.CAPABILITY, RcsServiceName.FILE_TRANSFER);
-        mChatService = mCnxManager.getChatApi();
-        mFileTransferService = mCnxManager.getFileTransferApi();
+        startMonitorServices(RcsServiceName.CHAT, RcsServiceName.CONTACT,
+                RcsServiceName.CAPABILITY, RcsServiceName.FILE_TRANSFER);
+        mChatService = getChatApi();
+        mFileTransferService = getFileTransferApi();
         processIntent(getIntent());
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mCnxManager.stopMonitorServices(this);
-        if (mCnxManager.isServiceConnected(RcsServiceName.CHAT) && mChatService != null) {
+        if (isServiceConnected(RcsServiceName.CHAT) && mChatService != null) {
             try {
                 removeChatEventListener(mChatService);
-
             } catch (RcsServiceException e) {
-                Utils.showException(this, e);
+                Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
             }
         }
     }
@@ -255,7 +236,7 @@ public abstract class ChatView extends FragmentActivity implements
 
     @Override
     protected void onPause() {
-        super.onStart();
+        super.onPause();
         sActivityDisplayed = false;
     }
 
@@ -273,7 +254,7 @@ public abstract class ChatView extends FragmentActivity implements
         super.onNewIntent(intent);
         // Replace the value of intent
         setIntent(intent);
-        if (mCnxManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACT,
+        if (isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACT,
                 RcsServiceName.FILE_TRANSFER)) {
             processIntent(intent);
         }
@@ -315,7 +296,7 @@ public abstract class ChatView extends FragmentActivity implements
             mComposeText.setText(null);
 
         } catch (RcsServiceException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_send_im_failed), mExitOnce);
+            showExceptionThenExit(e);
         }
 
     }
@@ -325,7 +306,7 @@ public abstract class ChatView extends FragmentActivity implements
             sendMessage(geoloc);
 
         } catch (RcsServiceException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_send_im_failed), mExitOnce);
+            showExceptionThenExit(e);
         }
     }
 
@@ -342,9 +323,7 @@ public abstract class ChatView extends FragmentActivity implements
                 mComposeText.append(items[which]);
             }
         });
-
-        AlertDialog alert = builder.create();
-        alert.show();
+        registerDialog(builder.show());
     }
 
     /**
@@ -355,13 +334,7 @@ public abstract class ChatView extends FragmentActivity implements
         startActivityForResult(new Intent(this, EditGeoloc.class), SELECT_GEOLOCATION);
     }
 
-    /**
-     * On activity result
-     * 
-     * @param requestCode Request code
-     * @param resultCode Result code
-     * @param data Data
-     */
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != RESULT_OK) {
             return;

@@ -68,16 +68,15 @@ public class NetworkRessourceManager {
      * @return Boolean
      */
     private static boolean isLocalUdpPortFree(int port) {
-        boolean res = false;
         try {
             DatagramConnection conn = NetworkRessourceManager.createDatagramConnection();
             conn.open(port);
             conn.close();
-            res = true;
+            return true;
+
         } catch (IOException e) {
-            res = false;
+            return false;
         }
-        return res;
     }
 
     /**

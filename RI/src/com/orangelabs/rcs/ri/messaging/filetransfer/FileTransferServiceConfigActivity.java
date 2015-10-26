@@ -22,14 +22,11 @@ import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration;
 import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration.ImageResizeOption;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.Utils;
 
-import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.util.Log;
@@ -48,9 +45,7 @@ import android.widget.TextView;
  * 
  * @author Philippe LEMORDANT
  */
-public class FileTransferServiceConfigActivity extends Activity {
-
-    private ConnectionManager mCnxManager;
+public class FileTransferServiceConfigActivity extends RcsActivity {
 
     private FileTransferServiceConfiguration mConfig;
 
@@ -59,11 +54,6 @@ public class FileTransferServiceConfigActivity extends Activity {
     private CheckBox mCheckBoxIsAutoAccept;
 
     private CheckBox mCheckBoxIsAutoAcceptInRoaming;
-
-    /**
-     * A locker to exit only once
-     */
-    private LockAccess mExitOnce = new LockAccess();
 
     private static final String LOGTAG = LogUtils.getTag(FileTransferServiceConfigActivity.class
             .getSimpleName());
@@ -81,23 +71,20 @@ public class FileTransferServiceConfigActivity extends Activity {
         setContentView(R.layout.filetransfer_service_config);
 
         /* Register to API connection manager */
-        mCnxManager = ConnectionManager.getInstance();
-        if (!mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
-            Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
-                    mExitOnce);
+        if (!isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
+            showMessageThenExit(R.string.label_service_not_available);
             return;
         }
         try {
-            mConfig = mCnxManager.getFileTransferApi().getConfiguration();
+            mConfig = getFileTransferApi().getConfiguration();
         } catch (RcsServiceException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce);
+            showExceptionThenExit(e);
             return;
         }
-
-        mCnxManager.startMonitorServices(this, null, RcsServiceName.FILE_TRANSFER);
+        startMonitorServices(RcsServiceName.FILE_TRANSFER);
 
         mSpinnerImageResizeOption = (Spinner) findViewById(R.id.ft_ImageResizeOption);
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, ImageResizeOptionTab);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mSpinnerImageResizeOption.setAdapter(dataAdapter);
@@ -117,9 +104,7 @@ public class FileTransferServiceConfigActivity extends Activity {
                         }
                     }
                 } catch (RcsServiceException e) {
-                    if (LogUtils.isActive) {
-                        Log.e(LOGTAG, "Exception occurred", e);
-                    }
+                    showException(e);
                 }
 
             }
@@ -148,9 +133,7 @@ public class FileTransferServiceConfigActivity extends Activity {
                         Log.d(LOGTAG, "onClick isAutoAccept ".concat(autoAccept.toString()));
                     }
                 } catch (RcsServiceException e) {
-                    if (LogUtils.isActive) {
-                        Log.e(LOGTAG, "Exception occurred", e);
-                    }
+                    showException(e);
                 }
 
             }
@@ -169,8 +152,7 @@ public class FileTransferServiceConfigActivity extends Activity {
                                 .toString()));
                     }
                 } catch (RcsServiceException e) {
-                    Utils.showMessageAndExit(FileTransferServiceConfigActivity.this,
-                            getString(R.string.label_api_failed), mExitOnce, e);
+                    showException(e);
                 }
 
             }
@@ -179,18 +161,15 @@ public class FileTransferServiceConfigActivity extends Activity {
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mCnxManager.stopMonitorServices(this);
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
+        if (isExiting()) {
+            return;
+        }
         try {
             displayFileTransferServiceConfig();
         } catch (RcsServiceException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+            showExceptionThenExit(e);
         }
     }
 

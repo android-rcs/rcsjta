@@ -21,7 +21,9 @@ package com.orangelabs.rcs.ri.sharing.video.media;
 import com.gsma.services.rcs.sharing.video.VideoCodec;
 import com.gsma.services.rcs.sharing.video.VideoPlayer;
 
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
 import com.orangelabs.rcs.core.ims.protocol.rtp.DummyPacketGenerator;
+import com.orangelabs.rcs.core.ims.protocol.rtp.RtpException;
 import com.orangelabs.rcs.core.ims.protocol.rtp.VideoRtpReceiver;
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.JavaPacketizer;
@@ -36,10 +38,12 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.media.MediaSample;
 import com.orangelabs.rcs.core.ims.protocol.rtp.media.VideoSample;
 import com.orangelabs.rcs.core.ims.protocol.rtp.stream.RtpStreamListener;
 import com.orangelabs.rcs.ri.utils.DatagramConnection;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.NetworkRessourceManager;
 
 import android.graphics.Bitmap;
 import android.os.SystemClock;
+import android.util.Log;
 
 import java.io.IOException;
 
@@ -49,75 +53,58 @@ import java.io.IOException;
  * @author Jean-Marc AUFFRET
  */
 public class TerminatingVideoPlayer extends VideoPlayer implements RtpStreamListener {
-    /**
-     * Default video codec
-     */
-    private VideoCodec defaultVideoCodec;
 
-    /**
-     * Local RTP port
-     */
-    private int localRtpPort;
+    private VideoCodec mDefaultVideoCodec;
+
+    private int mLocalRtpPort;
 
     /**
      * RTP receiver session
      */
-    private VideoRtpReceiver rtpReceiver;
+    private VideoRtpReceiver mRtpReceiver;
 
     /**
      * RTP dummy packet generator
      */
-    private DummyPacketGenerator rtpDummySender;
+    private DummyPacketGenerator mRtpDummySender;
 
     /**
      * RTP media output
      */
-    private MediaRtpOutput rtpOutput;
+    private MediaRtpOutput mRtpOutput;
 
     /**
      * Is player opened
      */
-    private boolean opened = false;
+    private boolean mOpened = false;
 
     /**
      * Is player started
      */
-    private boolean started = false;
+    private boolean mStarted = false;
 
-    /**
-     * Video start time
-     */
-    private long videoStartTime = 0L;
+    private long mVideoStartTime = 0L;
 
     /**
      * Video surface
      */
-    private VideoSurface surface;
+    private VideoSurface mSurface;
 
     /**
      * Temporary connection to reserve the port
      */
-    private DatagramConnection temporaryConnection;
+    private DatagramConnection mTemporaryConnection;
 
-    /**
-     * Orientation header id.
-     */
-    private int orientationHeaderId = -1;
+    private int mOrientationHeaderId = -1;
 
-    /**
-     * Video player event listener
-     */
-    private VideoPlayerListener eventListener;
+    private VideoPlayerListener mEventListener;
 
-    /**
-     * Remote host
-     */
-    private String remoteHost;
+    private String mRemoteHost;
 
-    /**
-     * Remote port
-     */
-    private int remotePort;
+    private int mRemotePort;
+
+    private static final String LOGTAG = LogUtils.getTag(TerminatingVideoPlayer.class
+            .getSimpleName());
 
     /**
      * Constructor
@@ -127,17 +114,17 @@ public class TerminatingVideoPlayer extends VideoPlayer implements RtpStreamList
      */
     public TerminatingVideoPlayer(VideoSurfaceView surface, VideoPlayerListener eventListener) {
         // Set surface view
-        this.surface = surface;
+        mSurface = surface;
 
         // Set event listener
-        this.eventListener = eventListener;
+        mEventListener = eventListener;
 
         // Set the local RTP port
-        localRtpPort = NetworkRessourceManager.generateLocalRtpPort();
-        reservePort(localRtpPort);
+        mLocalRtpPort = NetworkRessourceManager.generateLocalRtpPort();
+        reservePort(mLocalRtpPort);
 
         // Set the default media codec
-        defaultVideoCodec = new VideoCodec(H264Config.CODEC_NAME, H264VideoFormat.PAYLOAD,
+        mDefaultVideoCodec = new VideoCodec(H264Config.CODEC_NAME, H264VideoFormat.PAYLOAD,
                 H264Config.CLOCK_RATE, 15, 96000, H264Config.QCIF_WIDTH, H264Config.QCIF_HEIGHT,
                 H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1b.BASELINE_PROFILE_ID + ";"
                         + H264Config.CODEC_PARAM_PACKETIZATIONMODE + "="
@@ -156,14 +143,14 @@ public class TerminatingVideoPlayer extends VideoPlayer implements RtpStreamList
     public void setRemoteInfo(VideoCodec codec, String remoteHost, int remotePort,
             int orientationHeaderId) {
         // Set the video codec
-        defaultVideoCodec = codec;
+        mDefaultVideoCodec = codec;
 
         // Set remote host and port
-        this.remoteHost = remoteHost;
-        this.remotePort = remotePort;
+        mRemoteHost = remoteHost;
+        mRemotePort = remotePort;
 
         // Set the orientation ID
-        this.orientationHeaderId = orientationHeaderId;
+        mOrientationHeaderId = orientationHeaderId;
     }
 
     /**
@@ -173,7 +160,7 @@ public class TerminatingVideoPlayer extends VideoPlayer implements RtpStreamList
      */
     public VideoCodec[] getSupportedCodecs() {
         VideoCodec[] list = new VideoCodec[1];
-        list[0] = defaultVideoCodec;
+        list[0] = mDefaultVideoCodec;
         return list;
     }
 
@@ -183,14 +170,14 @@ public class TerminatingVideoPlayer extends VideoPlayer implements RtpStreamList
      * @return Codec
      */
     public VideoCodec getCodec() {
-        return defaultVideoCodec;
+        return mDefaultVideoCodec;
     }
 
     /**
      * Opens the player and prepares resources
      */
     public synchronized void open() {
-        if (opened) {
+        if (mOpened) {
             // Already opened
             return;
         }
@@ -200,106 +187,106 @@ public class TerminatingVideoPlayer extends VideoPlayer implements RtpStreamList
             int result = NativeH264Decoder.InitDecoder();
             if (result != 0) {
                 // Decoder init failed
-                eventListener.onPlayerError();
+                mEventListener.onPlayerError();
                 return;
             }
 
             // Init the RTP layer
             releasePort();
-            rtpReceiver = new VideoRtpReceiver(localRtpPort);
-            rtpDummySender = new DummyPacketGenerator();
-            rtpOutput = new MediaRtpOutput();
-            rtpOutput.open();
-            rtpReceiver.prepareSession(remoteHost, remotePort, orientationHeaderId, rtpOutput,
+            mRtpReceiver = new VideoRtpReceiver(mLocalRtpPort);
+            mRtpDummySender = new DummyPacketGenerator();
+            mRtpOutput = new MediaRtpOutput();
+            mRtpOutput.open();
+            mRtpReceiver.prepareSession(mRemoteHost, mRemotePort, mOrientationHeaderId, mRtpOutput,
                     new H264VideoFormat(), this);
-            rtpDummySender.prepareSession(remoteHost, remotePort, rtpReceiver.getInputStream());
-            rtpDummySender.startSession();
-        } catch (Exception e) {
+            mRtpDummySender.prepareSession(mRemoteHost, mRemotePort, mRtpReceiver.getInputStream());
+            mRtpDummySender.startSession();
+        } catch (RtpException e) {
             // RTP failed
-            eventListener.onPlayerError();
+            mEventListener.onPlayerError();
             return;
         }
 
         // Player is opened
-        opened = true;
-        eventListener.onPlayerOpened();
+        mOpened = true;
+        mEventListener.onPlayerOpened();
     }
 
     /**
      * Closes the player and deallocates resources
      */
     public synchronized void close() {
-        if (!opened) {
+        if (!mOpened) {
             // Already closed
             return;
         }
 
         // Close the RTP layer
-        rtpOutput.close();
-        rtpReceiver.stopSession();
-        rtpDummySender.stopSession();
+        mRtpOutput.close();
+        mRtpReceiver.stopSession();
+        mRtpDummySender.stopSession();
 
         try {
             // Close the video decoder
             NativeH264Decoder.DeinitDecoder();
         } catch (UnsatisfiedLinkError e) {
-            e.printStackTrace();
+            Log.d(LOGTAG, ExceptionUtil.getFullStackTrace(e));
         }
 
         // Player is closed
-        opened = false;
-        eventListener.onPlayerClosed();
+        mOpened = false;
+        mEventListener.onPlayerClosed();
     }
 
     /**
      * Starts the player
      */
     public synchronized void start() {
-        if (!opened) {
+        if (!mOpened) {
             // Player not opened
             return;
         }
 
-        if (started) {
+        if (mStarted) {
             // Already started
             return;
         }
 
         // Start RTP layer
-        rtpReceiver.startSession();
+        mRtpReceiver.startSession();
 
         // Player is started
-        videoStartTime = SystemClock.uptimeMillis();
-        started = true;
-        eventListener.onPlayerStarted();
+        mVideoStartTime = SystemClock.uptimeMillis();
+        mStarted = true;
+        mEventListener.onPlayerStarted();
     }
 
     /**
      * Stops the player
      */
     public synchronized void stop() {
-        if (!started) {
+        if (!mStarted) {
             return;
         }
 
         // Stop RTP layer
-        if (rtpReceiver != null) {
-            rtpReceiver.stopSession();
+        if (mRtpReceiver != null) {
+            mRtpReceiver.stopSession();
         }
-        if (rtpDummySender != null) {
-            rtpDummySender.stopSession();
+        if (mRtpDummySender != null) {
+            mRtpDummySender.stopSession();
         }
-        if (rtpOutput != null) {
-            rtpOutput.close();
+        if (mRtpOutput != null) {
+            mRtpOutput.close();
         }
 
         // Force black screen
-        surface.clearImage();
+        mSurface.clearImage();
 
         // Player is stopped
-        started = false;
-        videoStartTime = 0L;
-        eventListener.onPlayerStopped();
+        mStarted = false;
+        mVideoStartTime = 0L;
+        mEventListener.onPlayerStopped();
     }
 
     /*---------------------------------------------------------------------*/
@@ -310,7 +297,7 @@ public class TerminatingVideoPlayer extends VideoPlayer implements RtpStreamList
      * @return Milliseconds
      */
     public long getVideoStartTime() {
-        return videoStartTime;
+        return mVideoStartTime;
     }
 
     /**
@@ -319,7 +306,7 @@ public class TerminatingVideoPlayer extends VideoPlayer implements RtpStreamList
      * @return Port
      */
     public int getLocalRtpPort() {
-        return localRtpPort;
+        return mLocalRtpPort;
     }
 
     /**
@@ -328,12 +315,12 @@ public class TerminatingVideoPlayer extends VideoPlayer implements RtpStreamList
      * @param port Port to reserve
      */
     private void reservePort(int port) {
-        if (temporaryConnection == null) {
+        if (mTemporaryConnection == null) {
             try {
-                temporaryConnection = NetworkRessourceManager.createDatagramConnection();
-                temporaryConnection.open(port);
+                mTemporaryConnection = NetworkRessourceManager.createDatagramConnection();
+                mTemporaryConnection.open(port);
             } catch (IOException e) {
-                temporaryConnection = null;
+                mTemporaryConnection = null;
             }
         }
     }
@@ -342,11 +329,11 @@ public class TerminatingVideoPlayer extends VideoPlayer implements RtpStreamList
      * Release the reserved port.
      */
     private void releasePort() {
-        if (temporaryConnection != null) {
+        if (mTemporaryConnection != null) {
             try {
-                temporaryConnection.close();
+                mTemporaryConnection.close();
             } catch (IOException e) {
-                temporaryConnection = null;
+                mTemporaryConnection = null;
             }
         }
     }
@@ -357,7 +344,7 @@ public class TerminatingVideoPlayer extends VideoPlayer implements RtpStreamList
      * @return Boolean
      */
     public boolean isOpened() {
-        return opened;
+        return mOpened;
     }
 
     /**
@@ -366,14 +353,14 @@ public class TerminatingVideoPlayer extends VideoPlayer implements RtpStreamList
      * @return Boolean
      */
     public boolean isStarted() {
-        return started;
+        return mStarted;
     }
 
     /**
      * Notify RTP aborted
      */
     public void rtpStreamAborted() {
-        eventListener.onPlayerError();
+        mEventListener.onPlayerError();
     }
 
     /**
@@ -382,7 +369,7 @@ public class TerminatingVideoPlayer extends VideoPlayer implements RtpStreamList
      * @param orientation Video orientation value (see urn:3gpp:video-orientation)
      */
     public void setOrientation(int orientation) {
-        this.orientationHeaderId = orientation;
+        this.mOrientationHeaderId = orientation;
     }
 
     /**
@@ -432,7 +419,7 @@ public class TerminatingVideoPlayer extends VideoPlayer implements RtpStreamList
          * @param sample Sample
          */
         public void writeSample(MediaSample sample) {
-            rtpDummySender.incomingStarted();
+            mRtpDummySender.incomingStarted();
 
             // Init orientation
             VideoOrientation orientation = ((VideoSample) sample).getVideoOrientation();
@@ -443,20 +430,20 @@ public class TerminatingVideoPlayer extends VideoPlayer implements RtpStreamList
             int[] decodedFrame = NativeH264Decoder.DecodeAndConvert(sample.getData(),
                     videoOrientation.getOrientation().getValue(), decodedFrameDimensions);
             if (NativeH264Decoder.getLastDecodeStatus() == 0) {
-                if ((surface != null) && (decodedFrame.length > 0)) {
+                if ((mSurface != null) && (decodedFrame.length > 0)) {
                     // Init RGB frame with the decoder dimensions
                     if ((rgbFrame.getWidth() != decodedFrameDimensions[0])
                             || (rgbFrame.getHeight() != decodedFrameDimensions[1])) {
                         rgbFrame = Bitmap.createBitmap(decodedFrameDimensions[0],
                                 decodedFrameDimensions[1], Bitmap.Config.RGB_565);
-                        eventListener.onPlayerResized(decodedFrameDimensions[0],
+                        mEventListener.onPlayerResized(decodedFrameDimensions[0],
                                 decodedFrameDimensions[1]);
                     }
 
                     // Set data in image
                     rgbFrame.setPixels(decodedFrame, 0, decodedFrameDimensions[0], 0, 0,
                             decodedFrameDimensions[0], decodedFrameDimensions[1]);
-                    surface.setImage(rgbFrame);
+                    mSurface.setImage(rgbFrame);
                 }
             }
         }
@@ -468,6 +455,6 @@ public class TerminatingVideoPlayer extends VideoPlayer implements RtpStreamList
      * @param surface
      */
     public void setSurface(VideoSurface surface) {
-        this.surface = surface;
+        this.mSurface = surface;
     }
 }

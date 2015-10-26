@@ -18,13 +18,14 @@
 
 package com.orangelabs.rcs.ri.capabilities;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
+
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 
-import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.View;
@@ -35,78 +36,59 @@ import android.widget.Button;
  * Request capabilities of all contacts
  * 
  * @author Jean-Marc AUFFRET
+ * @author Philippe LEMORDANT
  */
-public class RequestAllCapabilities extends Activity {
+public class RequestAllCapabilities extends RcsActivity {
 
-    /**
-     * API connection manager
-     */
-    private ConnectionManager mCnxManager;
-
-    /**
-     * A locker to exit only once
-     */
-    private LockAccess mExitOnce = new LockAccess();
+    private OnClickListener mBtnSyncListener;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        intialize();
 
-        // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.capabilities_refresh);
 
-        // Set buttons callback
+        /* Set buttons callback */
         Button refreshBtn = (Button) findViewById(R.id.refresh_btn);
-        refreshBtn.setOnClickListener(btnSyncListener);
+        refreshBtn.setOnClickListener(mBtnSyncListener);
 
-        // Register to API connection manager
-        mCnxManager = ConnectionManager.getInstance();
-        if (!mCnxManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
-            Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
-                    mExitOnce);
+        /* Register to API connection manager */
+        if (!isServiceConnected(RcsServiceName.CAPABILITY)) {
+            showMessageThenExit(R.string.label_service_not_available);
             return;
         }
-        mCnxManager.startMonitorServices(this, null, RcsServiceName.CAPABILITY);
+        startMonitorServices(RcsServiceName.CAPABILITY);
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mCnxManager.stopMonitorServices(this);
+    private void intialize() {
+        mBtnSyncListener = new OnClickListener() {
+            public void onClick(View v) {
+                try {
+                    /* Check if the service is available */
+                    try {
+                        if (!getCapabilityApi().isServiceRegistered()) {
+                            showMessage(R.string.error_not_registered);
+                            return;
+                        }
+                    } catch (RcsServiceNotAvailableException e) {
+                        showMessage(R.string.label_service_not_available);
+                        return;
+                    }
+
+                    /* Refresh all contacts */
+                    getCapabilityApi().requestAllContactsCapabilities();
+
+                    /* Display message */
+                    Utils.displayLongToast(RequestAllCapabilities.this,
+                            getString(R.string.label_refresh_success));
+
+                } catch (RcsServiceException e) {
+                    showExceptionThenExit(e);
+                }
+            }
+        };
     }
 
-    /**
-     * Publish button listener
-     */
-    private OnClickListener btnSyncListener = new OnClickListener() {
-        public void onClick(View v) {
-            // Check if the service is available
-            boolean registered = false;
-            try {
-                registered = mCnxManager.getCapabilityApi().isServiceRegistered();
-            } catch (Exception e) {
-                Utils.showMessageAndExit(RequestAllCapabilities.this,
-                        getString(R.string.label_api_unavailable), mExitOnce, e);
-                return;
-            }
-            if (!registered) {
-                Utils.showMessage(RequestAllCapabilities.this,
-                        getString(R.string.label_service_not_available));
-                return;
-            }
-
-            try {
-                // Refresh all contacts
-                mCnxManager.getCapabilityApi().requestAllContactsCapabilities();
-
-                // Display message
-                Utils.displayLongToast(RequestAllCapabilities.this,
-                        getString(R.string.label_refresh_success));
-            } catch (Exception e) {
-                Utils.showMessageAndExit(RequestAllCapabilities.this,
-                        getString(R.string.label_refresh_failed), mExitOnce, e);
-            }
-        }
-    };
 }

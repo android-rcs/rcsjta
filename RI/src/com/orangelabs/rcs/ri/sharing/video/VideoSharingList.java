@@ -19,6 +19,7 @@
 package com.orangelabs.rcs.ri.sharing.video;
 
 import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.video.VideoSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.video.VideoSharing.State;
@@ -26,9 +27,9 @@ import com.gsma.services.rcs.sharing.video.VideoSharingListener;
 import com.gsma.services.rcs.sharing.video.VideoSharingLog;
 import com.gsma.services.rcs.sharing.video.VideoSharingService;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsFragmentActivity;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -40,7 +41,6 @@ import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -68,9 +68,9 @@ import java.util.Set;
  * List video sharing from the content provider
  * 
  * @author Jean-Marc AUFFRET
- * @author YPLO6403
+ * @author Philippe LEMORDANT
  */
-public class VideoSharingList extends FragmentActivity implements
+public class VideoSharingList extends RcsFragmentActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
     // @formatter:off
@@ -91,15 +91,11 @@ public class VideoSharingList extends FragmentActivity implements
 
     private ListView mListView;
 
-    private ConnectionManager mCnxManager;
-
     private VideoSharingService mVideoSharingService;
 
     private boolean mVideoSharingListenerSet = false;
 
     private VideoSharingListAdapter mAdapter;
-
-    private LockAccess mExitOnce = new LockAccess();
 
     /**
      * List of items for contextual menu
@@ -123,8 +119,7 @@ public class VideoSharingList extends FragmentActivity implements
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.video_sharing_list);
 
-        mCnxManager = ConnectionManager.getInstance();
-        mVideoSharingService = mCnxManager.getVideoSharingApi();
+        mVideoSharingService = getVideoSharingApi();
 
         mListView = (ListView) findViewById(android.R.id.list);
         TextView emptyView = (TextView) findViewById(android.R.id.empty);
@@ -147,10 +142,8 @@ public class VideoSharingList extends FragmentActivity implements
         }
         try {
             mVideoSharingService.removeEventListener(mVideoSharingListener);
-        } catch (Exception e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "removeEventListener failed", e);
-            }
+        } catch (RcsServiceException e) {
+            Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
         }
     }
 
@@ -278,8 +271,8 @@ public class VideoSharingList extends FragmentActivity implements
         switch (item.getItemId()) {
             case R.id.menu_clear_log:
                 /* Delete all video sharings */
-                if (!mCnxManager.isServiceConnected(RcsServiceName.VIDEO_SHARING)) {
-                    Utils.showMessage(this, getString(R.string.label_api_unavailable));
+                if (!isServiceConnected(RcsServiceName.VIDEO_SHARING)) {
+                    showMessage(R.string.label_service_not_available);
                     break;
                 }
                 if (LogUtils.isActive) {
@@ -291,9 +284,8 @@ public class VideoSharingList extends FragmentActivity implements
                         mVideoSharingListenerSet = true;
                     }
                     mVideoSharingService.deleteVideoSharings();
-                } catch (Exception e) {
-                    Utils.showMessageAndExit(this, getString(R.string.label_delete_sharing_failed),
-                            mExitOnce, e);
+                } catch (RcsServiceException e) {
+                    showExceptionThenExit(e);
                 }
                 break;
         }
@@ -303,8 +295,8 @@ public class VideoSharingList extends FragmentActivity implements
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        if (!mCnxManager.isServiceConnected(RcsServiceName.IMAGE_SHARING)) {
-            Utils.showMessage(this, getString(R.string.label_api_unavailable));
+        if (!isServiceConnected(RcsServiceName.IMAGE_SHARING)) {
+            showMessage(R.string.label_service_not_available);
             return;
         }
         menu.add(0, MENU_ITEM_DELETE, MENU_ITEM_DELETE, R.string.menu_sharing_delete);
@@ -322,8 +314,8 @@ public class VideoSharingList extends FragmentActivity implements
         }
         switch (item.getItemId()) {
             case MENU_ITEM_DELETE:
-                if (!mCnxManager.isServiceConnected(RcsServiceName.VIDEO_SHARING)) {
-                    Utils.showMessage(this, getString(R.string.label_api_unavailable));
+                if (!isServiceConnected(RcsServiceName.VIDEO_SHARING)) {
+                    showMessage(R.string.label_service_not_available);
                     return true;
                 }
                 /* Delete messages for contact */
@@ -336,9 +328,9 @@ public class VideoSharingList extends FragmentActivity implements
                         Log.d(LOGTAG, "Delete video sharing ID=".concat(sharingId));
                     }
                     mVideoSharingService.deleteVideoSharing(sharingId);
-                } catch (Exception e) {
-                    Utils.showMessageAndExit(this, getString(R.string.label_delete_sharing_failed),
-                            mExitOnce, e);
+
+                } catch (RcsServiceException e) {
+                    showExceptionThenExit(e);
                 }
                 return true;
             default:

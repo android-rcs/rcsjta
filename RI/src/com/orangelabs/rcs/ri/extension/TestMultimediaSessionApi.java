@@ -52,7 +52,7 @@ public class TestMultimediaSessionApi extends ListActivity {
                 getString(R.string.menu_initiate_streaming_session),
                 getString(R.string.menu_streaming_sessions_list)
         };
-        setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
+        setListAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items));
     }
 
     @Override

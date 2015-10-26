@@ -62,15 +62,14 @@ public class SharingListView extends HistoryListView {
 
     private ResourceCursorAdapter mResourceCursorAdapter;
 
-    private final static String WHERE_CLAUSE_WITH_CONTACT = new StringBuilder(HistoryLog.CONTACT)
-            .append("=?").toString();
+    private final static String WHERE_CLAUSE_WITH_CONTACT = HistoryLog.CONTACT + "=?";
 
     private Spinner mSpinner;
 
     /**
      * Associate the providers name menu with providerIds defined in HistoryLog
      */
-    private final static TreeMap<Integer, String> sProviders = new TreeMap<Integer, String>();
+    private final static TreeMap<Integer, String> sProviders = new TreeMap<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -244,8 +243,8 @@ public class SharingListView extends HistoryListView {
                 case VideoSharingLog.HISTORYLOG_MEMBER_ID:
                     sharingTypeView.setText(R.string.label_history_log_video_sharing);
                     int duration = cursor.getInt(cursor.getColumnIndex(HistoryLog.DURATION));
-                    descriptionView.setText(new StringBuilder("Duration : ").append(
-                            DateUtils.formatElapsedTime(duration / 1000)).toString());
+                    descriptionView.setText("Duration : "
+                            + DateUtils.formatElapsedTime(duration / 1000));
                     break;
                 case GeolocSharingLog.HISTORYLOG_MEMBER_ID:
                     sharingTypeView.setText(R.string.label_history_log_geoloc_sharing);

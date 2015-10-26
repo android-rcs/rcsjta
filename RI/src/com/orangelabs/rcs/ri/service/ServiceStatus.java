@@ -25,13 +25,12 @@ import com.gsma.services.rcs.RcsServiceControl;
 import com.gsma.services.rcs.RcsServiceListener;
 import com.gsma.services.rcs.capability.CapabilityService;
 
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.Utils;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -49,19 +48,15 @@ import android.widget.TextView;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class ServiceStatus extends Activity implements RcsServiceListener {
+public class ServiceStatus extends RcsActivity implements RcsServiceListener {
 
     private RcsService mApi;
-
-    private LockAccess mExitOnce = new LockAccess();
 
     private RcsServiceControl mRcsServiceControl;
 
     private TextView mServiceBound;
 
     private TextView mServiceActivated;
-
-    private Button mServiceActivationRefresh;
 
     private TextView mServiceStarted;
 
@@ -80,8 +75,8 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
         mServiceBound = (TextView) findViewById(R.id.service_bound);
         mServiceActivated = (TextView) findViewById(R.id.service_activated);
         mServiceStarted = (TextView) findViewById(R.id.service_started);
-        mServiceActivationRefresh = (Button) findViewById(R.id.service_refresh_all);
-        mServiceActivationRefresh.setOnClickListener(new OnClickListener() {
+        Button serviceActivationRefresh = (Button) findViewById(R.id.service_refresh_all);
+        serviceActivationRefresh.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 displayServiceActivation();
@@ -110,7 +105,7 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
             mApi.connect();
         } catch (RcsPermissionDeniedException e) {
             mApi = null;
-            Utils.showMessageAndExit(this, getString(R.string.label_api_not_compatible), mExitOnce);
+            showMessageThenExit(R.string.label_api_not_compatible);
         }
     }
 
@@ -135,14 +130,12 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
         // Unregister service up event listener
         try {
             unregisterReceiver(serviceUpListener);
         } catch (IllegalArgumentException e) {
-            // Nothing to do
+            Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
         }
-
         if (mApi != null) {
             // Disconnect API
             mApi.disconnect();
@@ -190,8 +183,7 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
                 mApi.connect();
             } catch (RcsPermissionDeniedException e) {
                 mApi = null;
-                Utils.showMessageAndExit(ServiceStatus.this,
-                        getString(R.string.label_api_not_compatible), mExitOnce);
+                showMessageThenExit(R.string.label_api_not_compatible);
             }
         }
     };

@@ -23,7 +23,6 @@ import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChatIntent;
 import com.gsma.services.rcs.contact.ContactId;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.chat.ChatMessageDAO;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -45,7 +44,7 @@ import android.util.LruCache;
 /**
  * File transfer intent service
  * 
- * @author YPLO6403
+ * @author Philippe LEMORDANT
  */
 public class GroupChatIntentService extends IntentService {
 
@@ -186,6 +185,7 @@ public class GroupChatIntentService extends IntentService {
             }
             /* This will trigger onNewIntent for the target activity */
             startActivity(intent);
+
         } else {
             /*
              * If the PendingIntent has the same operation, action, data, categories, components,
@@ -244,7 +244,8 @@ public class GroupChatIntentService extends IntentService {
         /* Create notification */
         String title = getString(R.string.title_group_chat);
         /* Try to retrieve display name of remote contact */
-        String displayName = getGcDisplayNameOfRemoteContact(groupChat.getChatId());
+        String displayName = RcsContactUtil.getInstance(this)
+                .getDisplayName(groupChat.getContact());
         if (displayName != null) {
             title = getString(R.string.title_recv_group_chat, displayName);
         }
@@ -258,35 +259,6 @@ public class GroupChatIntentService extends IntentService {
         mNotifManager.notify(uniqueId, notif);
     }
 
-    /**
-     * Get the RCS display name of remote contact in Group Chat
-     * 
-     * @param chatId
-     * @return the RCS display name or null
-     */
-    private String getGcDisplayNameOfRemoteContact(String chatId) {
-        try {
-            GroupChat gc = ConnectionManager.getInstance().getChatApi().getGroupChat(chatId);
-            if (gc != null) {
-                ContactId contact = gc.getRemoteContact();
-                return RcsContactUtil.getInstance(this).getDisplayName(contact);
-            }
-        } catch (Exception e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "Cannot get displayName", e);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Generate a notification
-     * 
-     * @param invitation
-     * @param title
-     * @param message
-     * @return notification
-     */
     private Notification buildNotification(PendingIntent invitation, String title, String message) {
         // Create notification
         NotificationCompat.Builder notif = new NotificationCompat.Builder(this);

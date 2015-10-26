@@ -29,14 +29,14 @@ public interface DatagramConnection {
     /**
      * Default datagram packet size
      */
-    public static int DEFAULT_DATAGRAM_SIZE = 4096 * 8;
+    int DEFAULT_DATAGRAM_SIZE = 4096 * 8;
 
     /**
      * Open the datagram connection
      * 
      * @throws IOException
      */
-    public void open() throws IOException;
+    void open() throws IOException;
 
     /**
      * Open the datagram connection
@@ -44,14 +44,14 @@ public interface DatagramConnection {
      * @param port Local port
      * @throws IOException
      */
-    public void open(int port) throws IOException;
+    void open(int port) throws IOException;
 
     /**
      * Close the datagram connection
      * 
      * @throws IOException
      */
-    public void close() throws IOException;
+    void close() throws IOException;
 
     /**
      * Send data
@@ -61,7 +61,7 @@ public interface DatagramConnection {
      * @param data Data as byte array
      * @throws IOException
      */
-    public void send(String remoteAddr, int remotePort, byte[] data) throws IOException;
+    void send(String remoteAddr, int remotePort, byte[] data) throws IOException;
 
     /**
      * Receive data
@@ -69,7 +69,7 @@ public interface DatagramConnection {
      * @return Byte array
      * @throws IOException
      */
-    public byte[] receive() throws IOException;
+    byte[] receive() throws IOException;
 
     /**
      * Returns the local address
@@ -77,7 +77,7 @@ public interface DatagramConnection {
      * @return Address
      * @throws IOException
      */
-    public String getLocalAddress() throws IOException;
+    String getLocalAddress() throws IOException;
 
     /**
      * Returns the local port
@@ -85,5 +85,5 @@ public interface DatagramConnection {
      * @return Port
      * @throws IOException
      */
-    public int getLocalPort() throws IOException;
+    int getLocalPort() throws IOException;
 }

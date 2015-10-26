@@ -53,7 +53,7 @@ public class IsComposingManager {
     /**
      * Constructor
      * 
-     * @param timeout
+     * @param timeout the composing timeout
      * @param notifyComposing interface to notify isComposing status
      */
     public IsComposingManager(long timeout, INotifyComposing notifyComposing) {
@@ -66,9 +66,9 @@ public class IsComposingManager {
      */
     public interface INotifyComposing {
         /**
-         * @param status
+         * @param status typing status
          */
-        public void setTypingStatus(boolean status);
+        void setTypingStatus(boolean status);
     }
 
     // Clock handler class

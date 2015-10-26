@@ -320,7 +320,7 @@ public class FileTransferDAO implements Parcelable {
         dest.writeInt(mReasonCode.toInt());
         dest.writeLong(mFileExpiration);
         dest.writeLong(mFileIconExpiration);
-    };
+    }
 
     public static final Parcelable.Creator<FileTransferDAO> CREATOR = new Parcelable.Creator<FileTransferDAO>() {
         @Override
@@ -337,8 +337,8 @@ public class FileTransferDAO implements Parcelable {
     /**
      * Gets instance of File Transfer from RCS provider
      * 
-     * @param context
-     * @param fileTransferId
+     * @param context the context
+     * @param fileTransferId the file transfer ID
      * @return instance or null if entry not found
      */
     public static FileTransferDAO getFileTransferDAO(final Context context,

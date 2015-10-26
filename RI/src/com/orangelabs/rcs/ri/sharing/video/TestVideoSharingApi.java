@@ -46,7 +46,7 @@ public class TestVideoSharingApi extends ListActivity {
                 getString(R.string.menu_initiate_video_sharing),
                 getString(R.string.menu_video_sharing_log)
         };
-        setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
+        setListAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items));
     }
 
     @Override

@@ -41,7 +41,7 @@ import java.util.Set;
  * Resources for smiley parser.
  */
 public class Smileys implements AbstractMessageParser.Resources {
-    private HashMap<String, Integer> mSmileyToRes = new HashMap<String, Integer>();
+    private HashMap<String, Integer> mSmileyToRes = new HashMap<>();
 
     private static final int[] DEFAULT_SMILEY_RES_IDS = {
             R.drawable.ri_smiley_happy, // 0
@@ -71,7 +71,7 @@ public class Smileys implements AbstractMessageParser.Resources {
     /**
      * Constructor
      * 
-     * @param context
+     * @param context context
      */
     public Smileys(Context context) {
         String[] smilies = context.getResources().getStringArray(DEFAULT_SMILEY_TEXTS);
@@ -95,7 +95,7 @@ public class Smileys implements AbstractMessageParser.Resources {
         if (i == null) {
             return -1;
         }
-        return i.intValue();
+        return i;
     }
 
     private final TrieNode smileys = new TrieNode();
@@ -118,8 +118,14 @@ public class Smileys implements AbstractMessageParser.Resources {
 
     /**
      * Show a list of smileys
+     * 
+     * @param context context
+     * @param textEdit text edit
+     * @param resources resources
+     * @param title title
+     * @return the dialog
      */
-    public static void showSmileyDialog(Context context, final EditText textEdit,
+    public static AlertDialog showSmileyDialog(Context context, final EditText textEdit,
             final Resources resources, String title) {
         int[] icons = DEFAULT_SMILEY_RES_IDS;
         String[] names = resources.getStringArray(DEFAULT_SMILEY_NAMES);
@@ -127,7 +133,7 @@ public class Smileys implements AbstractMessageParser.Resources {
 
         final int N = names.length;
 
-        List<Map<String, ?>> entries = new ArrayList<Map<String, ?>>();
+        List<Map<String, ?>> entries = new ArrayList<>();
         for (int i = 0; i < N; i++) {
             // We might have different ASCII for the same icon, skip it if
             // the icon is already added.
@@ -139,7 +145,7 @@ public class Smileys implements AbstractMessageParser.Resources {
                 }
             }
             if (!added) {
-                HashMap<String, Object> entry = new HashMap<String, Object>();
+                HashMap<String, Object> entry = new HashMap<>();
                 entry.put("icon", icons[i]);
                 entry.put("name", names[i]);
                 entry.put("text", texts[i]);
@@ -175,9 +181,7 @@ public class Smileys implements AbstractMessageParser.Resources {
                 textEdit.append((String) item.get("text"));
             }
         });
-
-        AlertDialog dialog = b.create();
-        dialog.show();
+        return b.show();
     }
 
 }

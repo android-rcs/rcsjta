@@ -234,7 +234,7 @@ public class VideoSharingDAO implements Parcelable {
         dest.writeInt(mWidth);
         dest.writeString(mVideoEncoding);
         dest.writeInt(mReasonCode.toInt());
-    };
+    }
 
     /**
      * public CREATOR field that generates instances of Parcelable class from a VideoSharingDAO.
@@ -254,8 +254,8 @@ public class VideoSharingDAO implements Parcelable {
     /**
      * Gets instance of Video sharing from RCS provider
      * 
-     * @param context
-     * @param sharingId
+     * @param context the context
+     * @param sharingId the sharing ID
      * @return instance or null if entry not found
      */
     public static VideoSharingDAO getVideoSharingDAO(Context context, String sharingId) {
