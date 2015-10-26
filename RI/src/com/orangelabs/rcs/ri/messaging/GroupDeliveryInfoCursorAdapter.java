@@ -145,7 +145,7 @@ public class GroupDeliveryInfoCursorAdapter extends CursorAdapter {
          * Constructor
          * 
          * @param base the view
-         * @param cursor
+         * @param cursor cursor
          */
         ViewHolder(View base, Cursor cursor) {
             columnContact = cursor.getColumnIndexOrThrow(GroupDeliveryInfoLog.CONTACT);

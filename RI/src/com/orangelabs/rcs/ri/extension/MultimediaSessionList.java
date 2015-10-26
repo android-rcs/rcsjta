@@ -18,13 +18,10 @@
 
 package com.orangelabs.rcs.ri.extension;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
+import com.orangelabs.rcs.api.connection.utils.RcsListActivity;
 import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.Utils;
 
-import android.app.ListActivity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.View;
@@ -35,17 +32,7 @@ import android.widget.ListView;
  * 
  * @author Jean-Marc AUFFRET
  */
-public abstract class MultimediaSessionList extends ListActivity {
-
-    /**
-     * API connection manager
-     */
-    protected ConnectionManager mCnxManager;
-
-    /**
-     * A locker to exit only once
-     */
-    protected LockAccess mExitOnce = new LockAccess();
+public abstract class MultimediaSessionList extends RcsListActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,42 +43,32 @@ public abstract class MultimediaSessionList extends ListActivity {
         setContentView(R.layout.extension_session_list);
 
         // Register to API connection manager
-        mCnxManager = ConnectionManager.getInstance();
-        if (!mCnxManager.isServiceConnected(RcsServiceName.MULTIMEDIA)) {
-            Utils.showMessageAndExit(MultimediaSessionList.this,
-                    getString(R.string.label_service_not_available), mExitOnce);
+        if (!isServiceConnected(RcsServiceName.MULTIMEDIA)) {
+            showMessageThenExit(R.string.label_service_not_available);
             return;
         }
-        mCnxManager.startMonitorServices(this, null, RcsServiceName.MULTIMEDIA);
+        startMonitorServices(RcsServiceName.MULTIMEDIA);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (!mExitOnce.isLocked()) {
-            // Update the list of sessions
-            updateList();
+        if (isExiting()) {
+            return;
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mCnxManager.stopMonitorServices(this);
+        updateList();
     }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
-
-        // Display the selected session
         displaySession(position);
     }
 
     /**
      * Display a session
      * 
-     * @param position
+     * @param position position
      */
     public abstract void displaySession(int position);
 

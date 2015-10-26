@@ -157,8 +157,8 @@ public class ChatMessageDAO {
     /**
      * Gets instance of chat message from RCS provider
      * 
-     * @param ctx
-     * @param msgId
+     * @param ctx the context
+     * @param msgId the message ID
      * @return instance or null if entry not found
      */
     public static ChatMessageDAO getChatMessageDAO(Context ctx, String msgId) {
@@ -187,7 +187,7 @@ public class ChatMessageDAO {
                     .getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CONTENT));
             int status = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.Message.STATUS));
             GroupChatEvent.Status chatEvent = null;
-            Message.Content.Status contentStatus = null;
+            Message.Content.Status contentStatus;
             if (Message.MimeType.GROUPCHAT_EVENT.equals(mimeType)) {
                 chatEvent = GroupChatEvent.Status.valueOf(status);
                 contentStatus = null;

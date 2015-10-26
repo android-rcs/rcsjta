@@ -19,11 +19,12 @@
 package com.orangelabs.rcs.ri.messaging.chat;
 
 import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.capability.CapabilitiesLog;
 import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.contact.ContactId;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
+import com.orangelabs.rcs.api.connection.utils.RcsListActivity;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.chat.group.GroupChatList;
 import com.orangelabs.rcs.ri.messaging.chat.group.InitiateGroupChat;
@@ -31,15 +32,11 @@ import com.orangelabs.rcs.ri.messaging.chat.single.InitiateSingleChat;
 import com.orangelabs.rcs.ri.messaging.chat.single.SingleChatList;
 import com.orangelabs.rcs.ri.messaging.geoloc.DisplayGeoloc;
 import com.orangelabs.rcs.ri.utils.ContactUtil;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.Utils;
 
-import android.app.ListActivity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -48,17 +45,16 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * CHAT API
+ * Chat API
  * 
  * @author Jean-Marc AUFFRET
+ * @author Philippe LEMORDANT
  */
-public class TestChatApi extends ListActivity {
+public class TestChatApi extends RcsListActivity {
 
     private static final String[] PROJECTION = new String[] {
         CapabilitiesLog.CONTACT
     };
-
-    private static final String LOGTAG = LogUtils.getTag(TestChatApi.class.getSimpleName());
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -76,7 +72,7 @@ public class TestChatApi extends ListActivity {
                 getString(R.string.menu_showus_map),
         };
         // @formatter:on
-        setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
+        setListAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items));
     }
 
     @Override
@@ -92,19 +88,18 @@ public class TestChatApi extends ListActivity {
 
             case 2:
                 /* Check if Group chat initialization is allowed */
-                ChatService chatService = ConnectionManager.getInstance().getChatApi();
+                ChatService chatService = getChatApi();
                 try {
                     if (chatService.isAllowedToInitiateGroupChat()) {
                         startActivity(new Intent(this, InitiateGroupChat.class));
                     } else {
-                        Utils.showMessage(this,
-                                getString(R.string.label_NotAllowedToInitiateGroupChat));
+                        showMessage(R.string.label_NotAllowedToInitiateGroupChat);
                     }
+                } catch (RcsServiceNotAvailableException e) {
+                    showMessage(R.string.label_service_not_available);
+
                 } catch (RcsServiceException e) {
-                    if (LogUtils.isActive) {
-                        Log.d(LOGTAG, "Cannot check if Group chat initialization is allowed", e);
-                    }
-                    Utils.showMessage(this, getString(R.string.label_api_failed));
+                    showExceptionThenExit(e);
                 }
                 break;
 
@@ -117,19 +112,22 @@ public class TestChatApi extends ListActivity {
                 break;
 
             case 5:
-                Set<ContactId> contacts = new HashSet<ContactId>();
+                Set<ContactId> contacts = new HashSet<>();
                 Cursor cursor = null;
                 try {
                     cursor = getContentResolver().query(CapabilitiesLog.CONTENT_URI, PROJECTION,
                             null, null, null);
-                    while (cursor.moveToNext()) {
-                        String contact = cursor.getString(cursor
-                                .getColumnIndex(CapabilitiesLog.CONTACT));
-                        contacts.add(ContactUtil.formatContact(contact));
+                    if (!cursor.moveToFirst()) {
+                        showMessage(getString(R.string.label_geoloc_not_found));
+                        return;
                     }
+                    int contactColumIdx = cursor.getColumnIndex(CapabilitiesLog.CONTACT);
+                    do {
+                        String contact = cursor.getString(contactColumIdx);
+                        contacts.add(ContactUtil.formatContact(contact));
+                    } while (cursor.moveToNext());
                     DisplayGeoloc.showContactsOnMap(this, contacts);
-                } catch (Exception e) {
-                    // Skip intentionally
+
                 } finally {
                     if (cursor != null) {
                         cursor.close();

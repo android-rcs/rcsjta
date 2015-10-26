@@ -65,10 +65,9 @@ public class RcsServiceNotifManager extends Service {
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "Service started");
         }
-
         notifyImsUnregistered(RcsServiceRegistration.ReasonCode.UNSPECIFIED);
 
-        RcsServiceStartupListener mStartupEventReceiver = new RcsServiceStartupListener();
+        mStartupEventReceiver = new RcsServiceStartupListener();
         registerReceiver(mStartupEventReceiver, new IntentFilter(RcsService.ACTION_SERVICE_UP));
 
         connectToService(this);
@@ -79,7 +78,6 @@ public class RcsServiceNotifManager extends Service {
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "Service stopped");
         }
-
         unregisterReceiver(mStartupEventReceiver);
     }
 

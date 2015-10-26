@@ -19,6 +19,7 @@
 package com.orangelabs.rcs.ri.sharing.image;
 
 import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.image.ImageSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.image.ImageSharing.State;
@@ -26,9 +27,9 @@ import com.gsma.services.rcs.sharing.image.ImageSharingListener;
 import com.gsma.services.rcs.sharing.image.ImageSharingLog;
 import com.gsma.services.rcs.sharing.image.ImageSharingService;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsFragmentActivity;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -40,7 +41,6 @@ import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -67,9 +67,9 @@ import java.util.Set;
  * List image sharings from the content provider
  * 
  * @author Jean-Marc AUFFRET
- * @author YPLO6403
+ * @author Philippe LEMORDANT
  */
-public class ImageSharingList extends FragmentActivity implements
+public class ImageSharingList extends RcsFragmentActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
     // @formatter:off
@@ -86,20 +86,15 @@ public class ImageSharingList extends FragmentActivity implements
     };
     // @formatter:on
 
-    private static final String SORT_ORDER = new StringBuilder(ImageSharingLog.TIMESTAMP).append(
-            " DESC").toString();
+    private static final String SORT_ORDER = ImageSharingLog.TIMESTAMP + " DESC";
 
     private ListView mListView;
-
-    private ConnectionManager mCnxManager;
 
     private ImageSharingService mImageSharingService;
 
     private ImageSharingListAdapter mAdapter;
 
     private boolean mImageSharingListenerSet = false;
-
-    private LockAccess mExitOnce = new LockAccess();
 
     /**
      * List of items for contextual menu
@@ -123,8 +118,7 @@ public class ImageSharingList extends FragmentActivity implements
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.image_sharing_list);
 
-        mCnxManager = ConnectionManager.getInstance();
-        mImageSharingService = mCnxManager.getImageSharingApi();
+        mImageSharingService = getImageSharingApi();
 
         mListView = (ListView) findViewById(android.R.id.list);
         TextView emptyView = (TextView) findViewById(android.R.id.empty);
@@ -147,10 +141,8 @@ public class ImageSharingList extends FragmentActivity implements
         }
         try {
             mImageSharingService.removeEventListener(mImageSharingListener);
-        } catch (Exception e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "removeEventListener failed", e);
-            }
+        } catch (RcsServiceException e) {
+            Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
         }
     }
 
@@ -265,12 +257,6 @@ public class ImageSharingList extends FragmentActivity implements
         }
     }
 
-    /**
-     * Decode date
-     * 
-     * @param date Date
-     * @return String
-     */
     private String decodeDate(long date) {
         return DateFormat.getInstance().format(new Date(date));
     }
@@ -287,8 +273,8 @@ public class ImageSharingList extends FragmentActivity implements
         switch (item.getItemId()) {
             case R.id.menu_clear_log:
                 /* Delete all image sharings */
-                if (!mCnxManager.isServiceConnected(RcsServiceName.IMAGE_SHARING)) {
-                    Utils.showMessage(this, getString(R.string.label_api_unavailable));
+                if (!isServiceConnected(RcsServiceName.IMAGE_SHARING)) {
+                    showMessage(R.string.label_service_not_available);
                     break;
                 }
                 if (LogUtils.isActive) {
@@ -300,9 +286,8 @@ public class ImageSharingList extends FragmentActivity implements
                         mImageSharingListenerSet = true;
                     }
                     mImageSharingService.deleteImageSharings();
-                } catch (Exception e) {
-                    Utils.showMessageAndExit(this, getString(R.string.label_delete_sharing_failed),
-                            mExitOnce, e);
+                } catch (RcsServiceException e) {
+                    showExceptionThenExit(e);
                 }
                 break;
         }
@@ -312,8 +297,8 @@ public class ImageSharingList extends FragmentActivity implements
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        if (!mCnxManager.isServiceConnected(RcsServiceName.IMAGE_SHARING)) {
-            Utils.showMessage(this, getString(R.string.label_api_unavailable));
+        if (!isServiceConnected(RcsServiceName.IMAGE_SHARING)) {
+            showMessage(R.string.label_service_not_available);
             return;
         }
         menu.add(0, MENU_ITEM_DELETE, MENU_ITEM_DELETE, R.string.menu_sharing_delete);
@@ -331,8 +316,8 @@ public class ImageSharingList extends FragmentActivity implements
         }
         switch (item.getItemId()) {
             case MENU_ITEM_DELETE:
-                if (!mCnxManager.isServiceConnected(RcsServiceName.IMAGE_SHARING)) {
-                    Utils.showMessage(this, getString(R.string.label_api_unavailable));
+                if (!isServiceConnected(RcsServiceName.IMAGE_SHARING)) {
+                    showMessage(R.string.label_service_not_available);
                     return true;
                 }
                 /* Delete messages for contact */
@@ -345,11 +330,12 @@ public class ImageSharingList extends FragmentActivity implements
                         mImageSharingListenerSet = true;
                     }
                     mImageSharingService.deleteImageSharing(sharingId);
-                } catch (Exception e) {
-                    Utils.showMessageAndExit(this, getString(R.string.label_delete_sharing_failed),
-                            mExitOnce, e);
+
+                } catch (RcsServiceException e) {
+                    showExceptionThenExit(e);
                 }
                 return true;
+
             default:
                 return super.onContextItemSelected(item);
         }

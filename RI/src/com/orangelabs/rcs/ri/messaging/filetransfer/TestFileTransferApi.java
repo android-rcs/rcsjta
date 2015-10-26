@@ -46,7 +46,7 @@ public class TestFileTransferApi extends ListActivity {
                 getString(R.string.menu_transfer_file), getString(R.string.menu_file_transfer_log),
                 getString(R.string.menu_file_transfer_config)
         };
-        setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
+        setListAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items));
     }
 
     @Override

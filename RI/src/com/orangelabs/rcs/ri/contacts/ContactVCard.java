@@ -18,14 +18,13 @@
 
 package com.orangelabs.rcs.ri.contacts;
 
+import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.contact.ContactUtil;
 
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.ContactListAdapter;
-import com.orangelabs.rcs.ri.utils.Utils;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
@@ -46,17 +45,12 @@ import java.io.File;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class ContactVCard extends Activity {
+public class ContactVCard extends RcsActivity {
 
     /**
      * Spinner for contact selection
      */
     private Spinner mSpinner;
-
-    /**
-     * A locker to exit only once
-     */
-    private LockAccess mExitOnce = new LockAccess();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -117,9 +111,8 @@ public class ContactVCard extends Activity {
             Uri vcard = ContactUtil.getInstance(this).getVCard(contactUri);
             TextView vcardView = (TextView) findViewById(R.id.vcard);
             vcardView.setText(vcard.getPath());
-        } catch (Exception e) {
-            Utils.showMessageAndExit(ContactVCard.this, getString(R.string.label_api_failed),
-                    mExitOnce, e);
+        } catch (RcsGenericException e) {
+            showExceptionThenExit(e);
         }
     }
 

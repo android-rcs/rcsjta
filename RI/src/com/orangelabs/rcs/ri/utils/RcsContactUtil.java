@@ -18,14 +18,14 @@
 
 package com.orangelabs.rcs.ri.utils;
 
-import com.gsma.services.rcs.RcsGenericException;
-import com.gsma.services.rcs.RcsPersistentStorageException;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactService;
 import com.gsma.services.rcs.contact.RcsContact;
 
 import com.orangelabs.rcs.api.connection.ConnectionManager;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
 import com.orangelabs.rcs.ri.R;
 
 import android.content.Context;
@@ -34,7 +34,7 @@ import android.util.Log;
 /**
  * Utilities to manage the RCS display name
  * 
- * @author YPLO6403
+ * @author Philippe LEMORDANT
  */
 public class RcsContactUtil {
 
@@ -49,7 +49,7 @@ public class RcsContactUtil {
     /**
      * Constructor
      * 
-     * @param context
+     * @param context the context
      */
     private RcsContactUtil(Context context) {
         mService = ConnectionManager.getInstance().getContactApi();
@@ -77,7 +77,7 @@ public class RcsContactUtil {
     /**
      * Returns RCS display name which can be displayed on UI
      * 
-     * @param contact
+     * @param contact the contact
      * @return the RCS display name
      */
     public String getDisplayName(ContactId contact) {
@@ -101,19 +101,10 @@ public class RcsContactUtil {
             } else {
                 return displayName;
             }
-        } catch (RcsServiceNotAvailableException e) {
-            if (LogUtils.isActive) {
-                Log.i(LOGTAG, "RcsServiceNotAvailableException");
-            }
+        } catch (RcsServiceNotAvailableException ignore) {
 
-        } catch (RcsPersistentStorageException e) {
-            if (LogUtils.isActive) {
-                Log.w(LOGTAG, "RcsServiceNotAvailableException", e);
-            }
-        } catch (RcsGenericException e) {
-            if (LogUtils.isActive) {
-                Log.w(LOGTAG, "RcsGenericException", e);
-            }
+        } catch (RcsServiceException e) {
+            Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
         }
         return contact.toString();
     }
@@ -121,7 +112,7 @@ public class RcsContactUtil {
     /**
      * get RCS display in a String which can be displayed on UI
      * 
-     * @param number
+     * @param number the phone number
      * @return the name which can be displayed on UI
      */
     public String getDisplayName(String number) {

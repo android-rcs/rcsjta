@@ -21,7 +21,8 @@ package com.orangelabs.rcs.ri;
 import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.contact.ContactUtil;
 
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsListActivity;
 import com.orangelabs.rcs.ri.capabilities.TestCapabilitiesApi;
 import com.orangelabs.rcs.ri.contacts.TestContactsApi;
 import com.orangelabs.rcs.ri.extension.TestMultimediaSessionApi;
@@ -32,9 +33,7 @@ import com.orangelabs.rcs.ri.service.TestServiceApi;
 import com.orangelabs.rcs.ri.sharing.TestSharingApi;
 import com.orangelabs.rcs.ri.upload.InitiateFileUpload;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.Utils;
 
-import android.app.ListActivity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
@@ -48,11 +47,9 @@ import android.widget.ListView;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class RI extends ListActivity {
+public class RI extends RcsListActivity {
 
     private static final String LOGTAG = LogUtils.getTag(RI.class.getSimpleName());
-
-    private LockAccess mExitOnce = new LockAccess();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -69,7 +66,7 @@ public class RI extends ListActivity {
                 getString(R.string.menu_service), getString(R.string.menu_upload),
                 getString(R.string.menu_history_log), getString(R.string.menu_about)
         };
-        setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
+        setListAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items));
 
         ContactUtil contactUtil = ContactUtil.getInstance(this);
         try {
@@ -78,10 +75,11 @@ public class RI extends ListActivity {
             if (LogUtils.isActive) {
                 Log.w(LOGTAG, "Country code is '" + cc + "'");
             }
+
         } catch (RcsPermissionDeniedException e) {
+            Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
             /* We should not be allowed to continue if this exception occurs */
-            Utils.showMessageAndExit(this, getString(R.string.error_api_permission_denied),
-                    mExitOnce, e);
+            showMessageThenExit(R.string.error_api_permission_denied);
         }
     }
 

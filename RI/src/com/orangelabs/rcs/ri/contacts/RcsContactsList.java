@@ -18,15 +18,13 @@
 
 package com.orangelabs.rcs.ri.contacts;
 
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.RcsContact;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
+import com.orangelabs.rcs.api.connection.utils.RcsListActivity;
 import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.Utils;
 
-import android.app.ListActivity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
@@ -40,17 +38,7 @@ import java.util.Set;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class RcsContactsList extends ListActivity {
-
-    /**
-     * API connection manager
-     */
-    private ConnectionManager mCnxManager;
-
-    /**
-     * A locker to exit only once
-     */
-    private LockAccess mExitOnce = new LockAccess();
+public class RcsContactsList extends RcsListActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -61,38 +49,27 @@ public class RcsContactsList extends ListActivity {
         setContentView(R.layout.contacts_rcs_list);
 
         // Register to API connection manager
-        mCnxManager = ConnectionManager.getInstance();
-        if (!mCnxManager.isServiceConnected(RcsServiceName.CONTACT)) {
-            Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
-                    mExitOnce);
+        if (!isServiceConnected(RcsServiceName.CONTACT)) {
+            showMessageThenExit(R.string.label_service_not_available);
             return;
         }
-        mCnxManager.startMonitorServices(this, null, RcsServiceName.CONTACT);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mCnxManager.stopMonitorServices(this);
+        startMonitorServices(RcsServiceName.CONTACT);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (!mExitOnce.isLocked()) {
-            // Update the list of RCS contacts
-            updateList();
+        if (isExiting()) {
+            return;
         }
+        updateList();
     }
 
-    /**
-     * Update the list
-     */
     private void updateList() {
         try {
             // Get list of RCS contacts
-            Set<RcsContact> allContacts = mCnxManager.getContactApi().getRcsContacts();
-            List<RcsContact> contacts = new ArrayList<RcsContact>(allContacts);
+            Set<RcsContact> allContacts = getContactApi().getRcsContacts();
+            List<RcsContact> contacts = new ArrayList<>(allContacts);
             if (contacts.size() > 0) {
                 String[] items = new String[contacts.size()];
                 for (int i = 0; i < contacts.size(); i++) {
@@ -105,13 +82,12 @@ public class RcsContactsList extends ListActivity {
                     }
                     items[i] = contact.getContactId() + " (" + status + ")";
                 }
-                setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
-                        items));
+                setListAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items));
             } else {
                 setListAdapter(null);
             }
-        } catch (Exception e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+        } catch (RcsServiceException e) {
+            showExceptionThenExit(e);
         }
     }
 }

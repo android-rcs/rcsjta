@@ -21,6 +21,8 @@ package com.orangelabs.rcs.ri.sharing.video.media;
 import com.gsma.services.rcs.sharing.video.VideoCodec;
 import com.gsma.services.rcs.sharing.video.VideoPlayer;
 
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.core.ims.protocol.rtp.RtpException;
 import com.orangelabs.rcs.core.ims.protocol.rtp.RtpUtils;
 import com.orangelabs.rcs.core.ims.protocol.rtp.VideoRtpSender;
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
@@ -37,10 +39,12 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.media.MediaInput;
 import com.orangelabs.rcs.core.ims.protocol.rtp.media.VideoSample;
 import com.orangelabs.rcs.core.ims.protocol.rtp.stream.RtpStreamListener;
 import com.orangelabs.rcs.ri.utils.DatagramConnection;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.NetworkRessourceManager;
 
 import android.hardware.Camera;
 import android.os.SystemClock;
+import android.util.Log;
 
 import java.io.IOException;
 
@@ -52,72 +56,66 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
     /**
      * Default video codec
      */
-    private VideoCodec defaultVideoCodec;
+    private VideoCodec mDefaultVideoCodec;
 
     /**
      * Is player opened
      */
-    private boolean opened = false;
+    private boolean mOpened = false;
 
     /**
      * Is player started
      */
-    private boolean started = false;
+    private boolean mStarted = false;
 
-    /**
-     * Local RTP port
-     */
-    private int localRtpPort;
+    private int mLocalRtpPort;
 
     /**
      * RTP sender session
      */
-    private VideoRtpSender rtpSender = null;
+    private VideoRtpSender mRtpSender;
 
     /**
      * RTP media input
      */
-    private MediaRtpInput rtpInput = null;
+    private MediaRtpInput mRtpInput;
 
     /**
      * Video start time
      */
-    private long videoStartTime = 0L;
+    private long mVideoStartTime = 0L;
 
     /**
      * Temporary connection to reserve the port
      */
-    private DatagramConnection temporaryConnection = null;
+    private DatagramConnection mTemporaryConnection;
 
     /**
      * NAL SPS
      */
-    private byte[] sps = new byte[0];
+    private byte[] mSps = new byte[0];
 
     /**
      * NAL PPS
      */
-    private byte[] pps = new byte[0];
+    private byte[] mPps = new byte[0];
 
     /**
      * Timestamp increment
      */
-    private int timestampInc;
+    private int mTimestampInc;
 
-    /***
-     * Current time stamp
-     */
-    private long timeStamp = 0;
+    private long mTimeStamp = 0;
 
     /**
      * NAL initialization
      */
-    private boolean nalInit = false;
+    private boolean mNalInit = false;
 
     /**
      * NAL repeat
      */
-    private int nalRepeat = 0;
+    private int mNalRepeat = 0;
 
     /**
      * NAL repeat MAX value
@@ -127,52 +125,31 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
     /**
      * Scaling factor for encoding
      */
-    private float scaleFactor = 1;
+    private float mScaleFactor = 1;
 
     /**
      * Mirroring (horizontal and vertival) for encoding
      */
-    private boolean mirroring = false;
+    private boolean mMirroring = false;
 
-    /**
-     * Video Orientation
-     */
     private Orientation mOrientation = Orientation.NONE;
 
-    /**
-     * Orientation header id
-     */
-    private int orientationHeaderId = RtpUtils.RTP_DEFAULT_EXTENSION_ID;
+    private int mOrientationHeaderId = RtpUtils.RTP_DEFAULT_EXTENSION_ID;
 
-    /**
-     * Camera ID
-     */
-    private int cameraId = CameraOptions.BACK.getValue();
+    private int mCameraId = CameraOptions.BACK.getValue();
 
-    /**
-     * Frame process
-     */
-    private FrameProcess frameProcess;
+    private FrameProcess mFrameProcess;
 
-    /**
-     * Frame buffer
-     */
-    private FrameBuffer frameBuffer = new FrameBuffer();
+    private FrameBuffer mFrameBuffer = new FrameBuffer();
 
-    /**
-     * Video player event listener
-     */
-    private VideoPlayerListener eventListener;
+    private VideoPlayerListener mEventListener;
 
-    /**
-     * Remote host
-     */
-    private String remoteHost;
+    private String mRemoteHost;
 
-    /**
-     * Remote port
-     */
-    private int remotePort;
+    private int mRemotePort;
+
+    private static final String LOGTAG = LogUtils.getTag(OriginatingVideoPlayer.class
+            .getSimpleName());
 
     /**
      * Constructor
@@ -181,14 +158,14 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      */
     public OriginatingVideoPlayer(VideoPlayerListener eventListener) {
         // Set event listener
-        this.eventListener = eventListener;
+        mEventListener = eventListener;
 
         // Set the local RTP port
-        localRtpPort = NetworkRessourceManager.generateLocalRtpPort();
-        reservePort(localRtpPort);
+        mLocalRtpPort = NetworkRessourceManager.generateLocalRtpPort();
+        reservePort(mLocalRtpPort);
 
         // Set the default media codec
-        defaultVideoCodec = new VideoCodec(H264Config.CODEC_NAME, H264VideoFormat.PAYLOAD,
+        mDefaultVideoCodec = new VideoCodec(H264Config.CODEC_NAME, H264VideoFormat.PAYLOAD,
                 H264Config.CLOCK_RATE, 15, 96000, H264Config.QCIF_WIDTH, H264Config.QCIF_HEIGHT,
                 H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1b.BASELINE_PROFILE_ID + ";"
                         + H264Config.CODEC_PARAM_PACKETIZATIONMODE + "="
@@ -207,14 +184,14 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
     public void setRemoteInfo(VideoCodec codec, String remoteHost, int remotePort,
             int orientationHeaderId) {
         // Set the video codec
-        defaultVideoCodec = codec;
+        mDefaultVideoCodec = codec;
 
         // Set remote host and port
-        this.remoteHost = remoteHost;
-        this.remotePort = remotePort;
+        mRemoteHost = remoteHost;
+        mRemotePort = remotePort;
 
         // Set the orientation ID
-        this.orientationHeaderId = orientationHeaderId;
+        mOrientationHeaderId = orientationHeaderId;
     }
 
     /**
@@ -223,7 +200,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      * @return Port
      */
     public int getLocalRtpPort() {
-        return localRtpPort;
+        return mLocalRtpPort;
     }
 
     /**
@@ -233,7 +210,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      */
     public VideoCodec[] getSupportedCodecs() {
         VideoCodec[] list = new VideoCodec[1];
-        list[0] = defaultVideoCodec;
+        list[0] = mDefaultVideoCodec;
         return list;
     }
 
@@ -243,31 +220,31 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      * @return Codec
      */
     public VideoCodec getCodec() {
-        return defaultVideoCodec;
+        return mDefaultVideoCodec;
     }
 
     /**
      * Opens the player and prepares resources
      */
     public synchronized void open() {
-        if (opened) {
+        if (mOpened) {
             // Already opened
             return;
         }
 
         // Init video encoder
         try {
-            timestampInc = (int) (90000 / defaultVideoCodec.getFrameRate());
+            mTimestampInc = (int) (90000 / mDefaultVideoCodec.getFrameRate());
             NativeH264EncoderParams nativeH264EncoderParams = new NativeH264EncoderParams();
 
             // Codec dimensions
-            nativeH264EncoderParams.setFrameWidth(defaultVideoCodec.getWidth());
-            nativeH264EncoderParams.setFrameHeight(defaultVideoCodec.getHeight());
-            nativeH264EncoderParams.setFrameRate(defaultVideoCodec.getFrameRate());
-            nativeH264EncoderParams.setBitRate(defaultVideoCodec.getBitRate());
+            nativeH264EncoderParams.setFrameWidth(mDefaultVideoCodec.getWidth());
+            nativeH264EncoderParams.setFrameHeight(mDefaultVideoCodec.getHeight());
+            nativeH264EncoderParams.setFrameRate(mDefaultVideoCodec.getFrameRate());
+            nativeH264EncoderParams.setBitRate(mDefaultVideoCodec.getBitRate());
 
             // Codec profile and level
-            nativeH264EncoderParams.setProfilesAndLevel(defaultVideoCodec.getParameters());
+            nativeH264EncoderParams.setProfilesAndLevel(mDefaultVideoCodec.getParameters());
 
             // Codec settings optimization
             nativeH264EncoderParams.setEncMode(NativeH264EncoderParams.ENCODING_MODE_STREAMING);
@@ -277,70 +254,69 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
             int result = NativeH264Encoder.InitEncoder(nativeH264EncoderParams);
             if (result != 0) {
                 // Encoder init has failed
-                eventListener.onPlayerError();
+                mEventListener.onPlayerError();
                 return;
             }
         } catch (UnsatisfiedLinkError e) {
             // Native encoder not found
-            eventListener.onPlayerError();
+            mEventListener.onPlayerError();
             return;
         }
 
         // Init the RTP layer
         try {
             releasePort();
-            rtpSender = new VideoRtpSender(new H264VideoFormat(), localRtpPort);
-            rtpInput = new MediaRtpInput();
-            rtpInput.open();
-            rtpSender.prepareSession(rtpInput, remoteHost, remotePort, this);
-        } catch (Exception e) {
+            mRtpSender = new VideoRtpSender(new H264VideoFormat(), mLocalRtpPort);
+            mRtpInput = new MediaRtpInput();
+            mRtpInput.open();
+            mRtpSender.prepareSession(mRtpInput, mRemoteHost, mRemotePort, this);
+
+        } catch (RtpException e) {
             // RTP failure
-            e.printStackTrace();
-            eventListener.onPlayerError();
+            Log.d(LOGTAG, ExceptionUtil.getFullStackTrace(e));
+            mEventListener.onPlayerError();
             return;
         }
 
         // Player is opened
-        opened = true;
-        eventListener.onPlayerOpened();
+        mOpened = true;
+        mEventListener.onPlayerOpened();
     }
 
     /**
      * Closes the player and deallocates resources
-     * 
-     * @throws JoynServiceException
      */
     public synchronized void close() {
-        if (!opened) {
+        if (!mOpened) {
             // Already closed
             return;
         }
         // Close the RTP layer
-        rtpInput.close();
-        rtpSender.stopSession();
+        mRtpInput.close();
+        mRtpSender.stopSession();
 
         try {
             // Close the video encoder
             NativeH264Encoder.DeinitEncoder();
         } catch (UnsatisfiedLinkError e) {
-            e.printStackTrace();
+            Log.d(LOGTAG, ExceptionUtil.getFullStackTrace(e));
         }
 
         // Player is closed
-        opened = false;
-        eventListener.onPlayerClosed();
+        mOpened = false;
+        mEventListener.onPlayerClosed();
     }
 
     /**
      * Starts the player
      */
     public synchronized void start() {
-        if (!opened) {
+        if (!mOpened) {
             // Player not opened
             return;
         }
 
-        if (started) {
+        if (mStarted) {
             // Already started
             return;
         }
@@ -349,46 +325,42 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
         if (!initNAL()) {
             return;
         }
-        nalInit = false;
+        mNalInit = false;
 
-        timeStamp = 0;
-        nalInit = false;
-        nalRepeat = 0;
+        mTimeStamp = 0;
+        mNalInit = false;
+        mNalRepeat = 0;
 
         // Start RTP layer
-        rtpSender.startSession();
+        mRtpSender.startSession();
 
         // Player is started
-        videoStartTime = SystemClock.uptimeMillis();
-        started = true;
-        frameProcess = new FrameProcess((int) defaultVideoCodec.getFrameRate());
-        frameProcess.start();
-        eventListener.onPlayerStarted();
+        mVideoStartTime = SystemClock.uptimeMillis();
+        mStarted = true;
+        mFrameProcess = new FrameProcess((int) mDefaultVideoCodec.getFrameRate());
+        mFrameProcess.start();
+        mEventListener.onPlayerStarted();
     }
 
     /**
      * Stops the player
      */
     public synchronized void stop() {
-        if (!opened) {
+        if (!mOpened) {
             // Player not opened
             return;
         }
 
-        if (!started) {
+        if (!mStarted) {
             // Already stopped
             return;
         }
 
         // Player is stopped
-        videoStartTime = 0L;
-        started = false;
-        try {
-            frameProcess.interrupt();
-        } catch (Exception e) {
-            // Nothing to do
-        }
-        eventListener.onPlayerStopped();
+        mVideoStartTime = 0L;
+        mStarted = false;
+        mFrameProcess.interrupt();
+        mEventListener.onPlayerStopped();
     }
 
     /*---------------------------------------------------------------------*/
@@ -399,12 +371,13 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      * @param port Port to reserve
      */
     private void reservePort(int port) {
-        if (temporaryConnection == null) {
+        if (mTemporaryConnection == null) {
             try {
-                temporaryConnection = NetworkRessourceManager.createDatagramConnection();
-                temporaryConnection.open(port);
+                mTemporaryConnection = NetworkRessourceManager.createDatagramConnection();
+                mTemporaryConnection.open(port);
+
             } catch (IOException e) {
-                temporaryConnection = null;
+                mTemporaryConnection = null;
             }
         }
     }
@@ -413,11 +386,11 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      * Release the reserved port.
      */
     private void releasePort() {
-        if (temporaryConnection != null) {
+        if (mTemporaryConnection != null) {
             try {
-                temporaryConnection.close();
+                mTemporaryConnection.close();
             } catch (IOException e) {
-                temporaryConnection = null;
+                mTemporaryConnection = null;
             }
         }
     }
@@ -428,7 +401,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      * @return Milliseconds
      */
     public long getVideoStartTime() {
-        return videoStartTime;
+        return mVideoStartTime;
     }
 
     /**
@@ -454,10 +427,10 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
         if ((nal != null) && (nal.length > 0)) {
             int type = (nal[0] & 0x1f);
             if (type == JavaPacketizer.AVC_NALTYPE_SPS) {
-                sps = nal;
+                mSps = nal;
                 return true;
             } else if (type == JavaPacketizer.AVC_NALTYPE_PPS) {
-                pps = nal;
+                mPps = nal;
                 return true;
             }
         }
@@ -470,10 +443,10 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      * @return Width
      */
     public int getVideoWidth() {
-        if (defaultVideoCodec == null) {
+        if (mDefaultVideoCodec == null) {
             return H264Config.VIDEO_WIDTH;
         } else {
-            return defaultVideoCodec.getWidth();
+            return mDefaultVideoCodec.getWidth();
         }
     }
 
@@ -483,10 +456,10 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      * @return Height
      */
     public int getVideoHeight() {
-        if (defaultVideoCodec == null) {
+        if (mDefaultVideoCodec == null) {
             return H264Config.VIDEO_HEIGHT;
         } else {
-            return defaultVideoCodec.getHeight();
+            return mDefaultVideoCodec.getHeight();
         }
     }
 
@@ -496,7 +469,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      * @param headerId extension header orientation id
      */
     public void setOrientationHeaderId(int headerId) {
-        this.orientationHeaderId = headerId;
+        this.mOrientationHeaderId = headerId;
     }
 
     /**
@@ -514,7 +487,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      * @param cameraId Camera ID
      */
     public void setCameraId(int cameraId) {
-        this.cameraId = cameraId;
+        this.mCameraId = cameraId;
     }
 
     /**
@@ -523,7 +496,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      * @param mirroring New mirroring value
      */
     public void setMirroring(boolean mirroring) {
-        this.mirroring = mirroring;
+        this.mMirroring = mirroring;
     }
 
     /**
@@ -531,7 +504,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      */
     public void rtpStreamAborted() {
         // RTP failure
-        eventListener.onPlayerError();
+        mEventListener.onPlayerError();
     }
 
     /**
@@ -541,11 +514,10 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      * @param camera Camera
      */
     public void onPreviewFrame(byte[] data, Camera camera) {
-        if (!started) {
+        if (!mStarted) {
             return;
         }
-
-        frameBuffer.setData(data);
+        mFrameBuffer.setData(data);
     };
 
     /**
@@ -555,39 +527,39 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      */
     private void encode(byte[] data) {
         // Send SPS/PPS if necessary
-        nalRepeat++;
-        if (nalRepeat > NALREPEATMAX) {
-            nalInit = false;
-            nalRepeat = 0;
+        mNalRepeat++;
+        if (mNalRepeat > NALREPEATMAX) {
+            mNalInit = false;
+            mNalRepeat = 0;
         }
-        if (!nalInit) {
-            rtpInput.addFrame(sps, timeStamp);
-            timeStamp += timestampInc;
+        if (!mNalInit) {
+            mRtpInput.addFrame(mSps, mTimeStamp);
+            mTimeStamp += mTimestampInc;
 
-            rtpInput.addFrame(pps, timeStamp);
-            timeStamp += timestampInc;
+            mRtpInput.addFrame(mPps, mTimeStamp);
+            mTimeStamp += mTimestampInc;
 
-            nalInit = true;
+            mNalInit = true;
         }
 
         // Encode frame
         byte[] encoded;
-        if (frameBuffer.dataSrcWidth != 0 && frameBuffer.dataSrcHeight != 0) {
-            encoded = NativeH264Encoder.ResizeAndEncodeFrame(data, timeStamp, mirroring,
-                    frameBuffer.dataSrcWidth, frameBuffer.dataSrcHeight);
+        if (mFrameBuffer.dataSrcWidth != 0 && mFrameBuffer.dataSrcHeight != 0) {
+            encoded = NativeH264Encoder.ResizeAndEncodeFrame(data, mTimeStamp, mMirroring,
+                    mFrameBuffer.dataSrcWidth, mFrameBuffer.dataSrcHeight);
         } else {
-            encoded = NativeH264Encoder.EncodeFrame(data, timeStamp, mirroring,
-                    frameBuffer.dataScaleFactor);
+            encoded = NativeH264Encoder.EncodeFrame(data, mTimeStamp, mMirroring,
+                    mFrameBuffer.dataScaleFactor);
         }
         int encodeResult = NativeH264Encoder.getLastEncodeStatus();
         if ((encodeResult == 0) && (encoded.length > 0)) {
             VideoOrientation videoOrientation = null;
-            if (orientationHeaderId > 0) {
-                videoOrientation = new VideoOrientation(orientationHeaderId,
-                        CameraOptions.convert(cameraId), mOrientation);
+            if (mOrientationHeaderId > 0) {
+                videoOrientation = new VideoOrientation(mOrientationHeaderId,
+                        CameraOptions.convert(mCameraId), mOrientation);
             }
-            rtpInput.addFrame(encoded, timeStamp, videoOrientation);
-            timeStamp += timestampInc;
+            mRtpInput.addFrame(encoded, mTimeStamp, videoOrientation);
+            mTimeStamp += mTimestampInc;
         }
     }
 
@@ -614,11 +586,11 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
         @Override
         public void run() {
             byte[] frameData = null;
-            while (started) {
+            while (mStarted) {
                 long time = System.currentTimeMillis();
 
                 // Encode
-                frameData = frameBuffer.getData();
+                frameData = mFrameBuffer.getData();
                 if (frameData != null) {
                     encode(frameData);
                 }
@@ -677,9 +649,9 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
             this.data = data;
 
             // Update resizing / scaling values
-            this.dataScaleFactor = scaleFactor;
-            this.dataSrcWidth = defaultVideoCodec.getWidth();
-            this.dataSrcHeight = defaultVideoCodec.getHeight();
+            this.dataScaleFactor = mScaleFactor;
+            this.dataSrcWidth = mDefaultVideoCodec.getWidth();
+            this.dataSrcHeight = mDefaultVideoCodec.getHeight();
         }
     }
 
@@ -748,14 +720,10 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
          * @throws MediaException
          */
         public VideoSample readSample() throws MediaException {
-            try {
-                if (fifo != null) {
-                    return (VideoSample) fifo.getObject();
-                } else {
-                    throw new MediaException("Media input not opened");
-                }
-            } catch (Exception e) {
-                throw new MediaException("Can't read media sample");
+            if (fifo != null) {
+                return (VideoSample) fifo.getObject();
+            } else {
+                throw new MediaException("Media input not opened");
             }
         }
     }

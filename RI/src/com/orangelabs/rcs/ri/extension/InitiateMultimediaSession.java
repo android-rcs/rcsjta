@@ -66,11 +66,6 @@ public abstract class InitiateMultimediaSession extends Activity {
         }
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
     /**
      * Initiate button callback
      */

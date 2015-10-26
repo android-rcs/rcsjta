@@ -23,7 +23,6 @@ import com.gsma.services.rcs.extension.MultimediaStreamingSession;
 
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.extension.MultimediaSessionList;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.content.Intent;
 import android.widget.ArrayAdapter;
@@ -41,12 +40,12 @@ public class StreamingSessionList extends MultimediaSessionList {
     /**
      * List of sessions
      */
-    private List<MultimediaStreamingSession> sessions = new ArrayList<MultimediaStreamingSession>();
+    private List<MultimediaStreamingSession> sessions = new ArrayList<>();
 
     /**
      * Display a session
      * 
-     * @param position
+     * @param position position
      */
     public void displaySession(int position) {
         try {
@@ -55,8 +54,9 @@ public class StreamingSessionList extends MultimediaSessionList {
             intent.putExtra(StreamingSessionView.EXTRA_MODE, StreamingSessionView.MODE_OPEN);
             intent.putExtra(StreamingSessionView.EXTRA_SESSION_ID, sessionId);
             startActivity(intent);
+
         } catch (RcsServiceException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+            showExceptionThenExit(e);
         }
     }
 
@@ -69,22 +69,21 @@ public class StreamingSessionList extends MultimediaSessionList {
             sessions.clear();
 
             // Get list of pending sessions
-            Set<MultimediaStreamingSession> currentSessions = mCnxManager.getMultimediaSessionApi()
+            Set<MultimediaStreamingSession> currentSessions = getMultimediaSessionApi()
                     .getStreamingSessions(StreamingSessionUtils.SERVICE_ID);
-            sessions = new ArrayList<MultimediaStreamingSession>(currentSessions);
+            sessions = new ArrayList<>(currentSessions);
             if (sessions.size() > 0) {
                 String[] items = new String[sessions.size()];
                 for (int i = 0; i < items.length; i++) {
                     items[i] = getString(R.string.label_session, sessions.get(i).getSessionId());
                 }
-                setListAdapter(new ArrayAdapter<String>(StreamingSessionList.this,
+                setListAdapter(new ArrayAdapter<>(StreamingSessionList.this,
                         android.R.layout.simple_list_item_1, items));
             } else {
                 setListAdapter(null);
             }
-        } catch (Exception e) {
-            Utils.showMessageAndExit(StreamingSessionList.this,
-                    getString(R.string.label_api_failed), mExitOnce, e);
+        } catch (RcsServiceException e) {
+            showExceptionThenExit(e);
         }
     }
 }

@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.orangelabs.rcs.ri.utils;
+package com.orangelabs.rcs.api.connection.utils;
 
 public class ExceptionUtil {
 
@@ -22,6 +22,17 @@ public class ExceptionUtil {
      * Special Delimiter that will be appended while propagating server exceptions over AIDL layer.
      */
     private static final char DELIMITER_PIPE = '|';
+
+    public static String getFullStackTrace(Throwable t) {
+        StringBuilder sb = new StringBuilder();
+        addTrace(sb, t, true);
+        Throwable cause = t.getCause();
+        while (null != cause) {
+            addTrace(sb, cause, false);
+            cause = cause.getCause();
+        }
+        return sb.toString();
+    }
 
     private static void addTrace(StringBuilder sb, Throwable t, boolean first) {
         StackTraceElement[] traces = t.getStackTrace();
@@ -57,16 +68,5 @@ public class ExceptionUtil {
                 sb.append(')').append('\n');
             }
         }
-    }
-
-    public static String getFullStackTrace(Throwable t) {
-        StringBuilder sb = new StringBuilder();
-        addTrace(sb, t, true);
-        Throwable cause = t.getCause();
-        while (null != cause) {
-            addTrace(sb, cause, false);
-            cause = cause.getCause();
-        }
-        return sb.toString();
     }
 }

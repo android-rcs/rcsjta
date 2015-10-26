@@ -25,9 +25,9 @@ import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.sharing.video.VideoSharingListener;
 import com.gsma.services.rcs.sharing.video.VideoSharingService;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.CameraOptions;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.Orientation;
@@ -40,9 +40,9 @@ import com.orangelabs.rcs.ri.utils.ContactListAdapter;
 import com.orangelabs.rcs.ri.utils.ContactUtil;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsContactUtil;
-import com.orangelabs.rcs.ri.utils.Utils;
+import com.orangelabs.rcs.ri.utils.RcsSessionUtil;
 
-import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -79,9 +79,9 @@ import java.util.Set;
  * Initiate video sharing.
  * 
  * @author Jean-Marc AUFFRET
- * @author YPLO6403
+ * @author Philippe LEMORDANT
  */
-public class OutgoingVideoSharing extends Activity implements VideoPlayerListener,
+public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerListener,
         SurfaceHolder.Callback {
 
     /**
@@ -151,16 +151,6 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
     private Dialog mProgressDialog;
 
     /**
-     * A locker to exit only once
-     */
-    private LockAccess mExitOnce = new LockAccess();
-
-    /**
-     * API connection manager
-     */
-    private ConnectionManager mCnxManager;
-
-    /**
      * Spinner for contact selection
      */
     private Spinner mSpinner;
@@ -183,9 +173,6 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
      */
     private boolean mIsSurfaceCreated;
 
-    /**
-     * The log tag for this class
-     */
     private static final String LOGTAG = LogUtils
             .getTag(OutgoingVideoSharing.class.getSimpleName());
 
@@ -219,8 +206,6 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mCnxManager = ConnectionManager.getInstance();
-
         // Always on window
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
@@ -247,15 +232,11 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
             mStarted = savedInstanceState.getBoolean(SAVE_STARTED);
         }
         if (LogUtils.isActive) {
-            Log.d(LOGTAG,
-                    new StringBuilder("Sharing ID ").append(mSharingId).append(" Nb of cameras=")
-                            .append(mNbfCameras).append(" active camera=").append(mOpenedCameraId)
-                            .toString());
+            Log.d(LOGTAG, "Sharing ID " + mSharingId + " Nb of cameras=" + mNbfCameras
+                    + " active camera=" + mOpenedCameraId);
         }
         if (LogUtils.isActive) {
-            Log.d(LOGTAG,
-                    new StringBuilder("Resolution: ").append(mVideoWidth).append("x")
-                            .append(mVideoHeight).toString());
+            Log.d(LOGTAG, "Resolution: " + mVideoWidth + "x" + mVideoHeight);
         }
 
         // Set button callback
@@ -335,16 +316,15 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
         }
 
         // Register to API connection manager
-        if (!mCnxManager.isServiceConnected(RcsServiceName.VIDEO_SHARING)) {
-            Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
-                    mExitOnce);
+        if (!isServiceConnected(RcsServiceName.VIDEO_SHARING)) {
+            showMessageThenExit(R.string.label_service_not_available);
             return;
         }
-        mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.VIDEO_SHARING);
+        startMonitorServices(RcsServiceName.VIDEO_SHARING);
 
         // Add service listener
         try {
-            VideoSharingService vshService = mCnxManager.getVideoSharingApi();
+            VideoSharingService vshService = getVideoSharingApi();
             if (mSharingId != null) {
                 // Sharing is in progress: get sharing session
                 mVideoSharing = vshService.getVideoSharing(mSharingId);
@@ -357,7 +337,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
                 Log.d(LOGTAG, "onCreate video sharing");
             }
         } catch (RcsServiceException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+            showExceptionThenExit(e);
         }
     }
 
@@ -372,31 +352,27 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
         outState.putInt(SAVE_OPENED_CAMERA_ID, mOpenedCameraId.getValue());
         outState.putParcelable(SAVE_REMOTE_CONTACT, mContact);
         outState.putBoolean(SAVE_STARTED, mStarted);
-    };
+    }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mCnxManager.stopMonitorServices(this);
-        if (!mCnxManager.isServiceConnected(RcsServiceName.VIDEO_SHARING)) {
+        if (!isServiceConnected(RcsServiceName.VIDEO_SHARING)) {
             return;
         }
-        // Remove video sharing listener
         try {
-            mCnxManager.getVideoSharingApi().removeEventListener(vshListener);
-        } catch (Exception e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "Failed to remove listener", e);
-            }
-        }
+            getVideoSharingApi().removeEventListener(vshListener);
 
-        // Close the camera
+        } catch (RcsServiceException e) {
+            Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
+        }
         closeCamera();
     }
 
     /**
      * Dial button listener
      */
+    // TODO initialize
     private OnClickListener btnDialListener = new OnClickListener() {
         public void onClick(View v) {
 
@@ -417,17 +393,13 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
     private OnClickListener btnInviteListener = new OnClickListener() {
         public void onClick(View v) {
             // Check if the service is available
-            boolean registered = false;
             try {
-                registered = mCnxManager.getVideoSharingApi().isServiceRegistered();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            if (!registered) {
-                Utils.showMessage(OutgoingVideoSharing.this,
-                        getString(R.string.label_service_not_available));
-                return;
-
+                if (!getVideoSharingApi().isServiceRegistered()) {
+                    showMessage(R.string.label_service_not_available);
+                    return;
+                }
+            } catch (RcsServiceException e) {
+                showExceptionThenExit(e);
             }
 
             // Get the remote contact
@@ -446,20 +418,16 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
                         openCamera();
 
                         // Initiate sharing
-                        mVideoSharing = mCnxManager.getVideoSharingApi().shareVideo(mContact,
-                                mVideoPlayer);
+                        mVideoSharing = getVideoSharingApi().shareVideo(mContact, mVideoPlayer);
                         mSharingId = mVideoSharing.getSharingId();
-                    } catch (Exception e) {
-                        e.printStackTrace();
 
+                    } catch (final RcsServiceException e) {
                         // Free the camera
                         closeCamera();
 
                         handler.post(new Runnable() {
                             public void run() {
-                                hideProgressDialog();
-                                Utils.showMessageAndExit(OutgoingVideoSharing.this,
-                                        getString(R.string.label_invitation_failed), mExitOnce);
+                                showExceptionThenExit(e);
                             }
                         });
                     }
@@ -469,8 +437,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
             mSwitchCamBtn.setEnabled(true);
 
             // Display a progress dialog
-            mProgressDialog = Utils.showProgressDialog(OutgoingVideoSharing.this,
-                    getString(R.string.label_command_in_progress));
+            mProgressDialog = showProgressDialog(getString(R.string.label_command_in_progress));
             mProgressDialog.setOnCancelListener(new OnCancelListener() {
                 public void onCancel(DialogInterface dialog) {
                     Toast.makeText(OutgoingVideoSharing.this,
@@ -497,13 +464,9 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
         }
     };
 
-    /**
-     * Hide progress dialog
-     */
-    public void hideProgressDialog() {
+    private void hideProgressDialog() {
         if (mProgressDialog == null) {
             return;
-
         }
         if (mProgressDialog.isShowing()) {
             mProgressDialog.dismiss();
@@ -511,11 +474,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
         mProgressDialog = null;
     }
 
-    /**
-     * Quit the session
-     */
     private void quitSession() {
-        // Stop the sharing
         try {
             if (mVideoSharing != null && VideoSharing.State.STARTED == mVideoSharing.getState()) {
                 if (LogUtils.isActive) {
@@ -523,29 +482,48 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
                 }
                 mVideoSharing.abortSharing();
             }
-        } catch (Exception e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "Exception occurred", e);
-            }
-        }
-        mVideoSharing = null;
+        } catch (RcsServiceException e) {
+            showException(e);
 
-        // Exit activity
-        finish();
+        } finally {
+            mVideoSharing = null;
+            // Exit activity
+            finish();
+        }
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_BACK:
-                if (LogUtils.isActive) {
-                    Log.d(LOGTAG, "Back key pressed");
+        if (KeyEvent.KEYCODE_BACK == keyCode) {
+            if (LogUtils.isActive) {
+                Log.d(LOGTAG, "Back key pressed");
+            }
+            try {
+                if (mVideoSharing == null
+                        || !RcsSessionUtil.isAllowedToAbortVideoSharingSession(mVideoSharing)) {
+                    finish();
+                    return true;
                 }
-                // Quit the session
-                quitSession();
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.label_confirm_close);
+                builder.setPositiveButton(R.string.label_ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        quitSession();
+                    }
+                });
+                builder.setNegativeButton(R.string.label_cancel,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        });
+                builder.setCancelable(true);
+                registerDialog(builder.show());
                 return true;
-        }
 
+            } catch (RcsServiceException e) {
+                showException(e);
+            }
+        }
         return super.onKeyDown(keyCode, event);
     }
 
@@ -560,7 +538,6 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_close_session:
-                // Quit the session
                 quitSession();
                 break;
         }
@@ -632,7 +609,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
     /**
      * Check if good camera sizes are available for encoder. Must be used only before open camera.
      * 
-     * @param cameraId
+     * @param cameraId the camera ID
      * @return false if the camera don't have the good preview size for the encoder
      */
     boolean checkCameraSize(CameraOptions cameraId) {
@@ -739,9 +716,8 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
             // same size = no
             // resizing
             if (LogUtils.isActive) {
-                Log.d(LOGTAG,
-                        new StringBuilder("Camera preview initialized with size ")
-                                .append(mVideoWidth).append("x").append(mVideoHeight).toString());
+                Log.d(LOGTAG, "Camera preview initialized with size " + mVideoWidth + "x"
+                        + mVideoHeight);
             }
         } else {
             // Check if can use a other known size (QVGA, CIF or VGA)
@@ -763,18 +739,14 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
                 // for Samsung S5 mini
                 // mVideoPlayer.activateResizing(w, h);
                 if (LogUtils.isActive) {
-                    Log.d(LOGTAG,
-                            new StringBuilder("Camera preview initialized with size ").append(w)
-                                    .append("x").append(h).append(" with a resizing to ")
-                                    .append(mVideoWidth).append("x").append(mVideoHeight)
-                                    .toString());
+                    Log.d(LOGTAG, "Camera preview initialized with size " + w + "x" + h
+                            + " with a resizing to " + mVideoWidth + "x" + mVideoHeight);
                 }
             } else {
                 // The camera don't have known size, we can't use it
                 if (LogUtils.isActive) {
-                    Log.d(LOGTAG, new StringBuilder(
-                            "Camera preview can't be initialized with size ").append(mVideoWidth)
-                            .append("x").append(mVideoHeight).toString());
+                    Log.d(LOGTAG, "Camera preview can't be initialized with size " + mVideoWidth
+                            + "x" + mVideoHeight);
                 }
                 Toast.makeText(this,
                         getString(R.string.label_session_failed, "Camera is not compatible"),
@@ -809,9 +781,9 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
                 return cameraClass.getMethod("open", new Class[] {
                     int.class
                 });
-            } catch (NoSuchMethodException e) {
+            } catch (NoSuchMethodException ignored) {
             }
-        } catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException ignored) {
         }
         return null;
     }
@@ -867,9 +839,9 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
             Class<?> cameraClass = classLoader.loadClass("android.hardware.Camera");
             try {
                 return cameraClass.getMethod("getNumberOfCameras", (Class[]) null);
-            } catch (NoSuchMethodException e) {
+            } catch (NoSuchMethodException ignored) {
             }
-        } catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException ignored) {
         }
         return null;
     }
@@ -883,8 +855,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
         Method method = getCameraNumberOfCamerasMethod();
         if (method != null) {
             try {
-                Integer ret = (Integer) method.invoke(null, (Object[]) null);
-                return ret.intValue();
+                return (Integer) method.invoke(null, (Object[]) null);
             } catch (Exception e) {
                 return 1;
             }
@@ -905,13 +876,10 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
             // Discard event if not for current sharingId
             if (mSharingId == null || !mSharingId.equals(sharingId)) {
                 return;
-
             }
             if (LogUtils.isActive) {
-                Log.d(LOGTAG,
-                        new StringBuilder("onStateChanged contact=").append(contact)
-                                .append(" sharingId=").append(sharingId).append(" state=")
-                                .append(state).append(" reason=").append(reasonCode).toString());
+                Log.d(LOGTAG, "onStateChanged contact=" + contact + " sharingId=" + sharingId
+                        + " state=" + state + " reason=" + reasonCode);
             }
             final String _reasonCode = RiApplication.sVideoReasonCodes[reasonCode.toInt()];
             handler.post(new Runnable() {
@@ -941,24 +909,17 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
                             // Release the camera
                             closeCamera();
 
-                            // Hide progress dialog
-                            hideProgressDialog();
-
                             // Display message info and exit
-                            Utils.showMessageAndExit(OutgoingVideoSharing.this,
-                                    getString(R.string.label_sharing_aborted, _reasonCode),
-                                    mExitOnce);
+                            showMessageThenExit(getString(R.string.label_sharing_aborted,
+                                    _reasonCode));
                             break;
 
                         case REJECTED:
                             // Release the camera
                             closeCamera();
 
-                            // Hide progress dialog
-                            hideProgressDialog();
-                            Utils.showMessageAndExit(OutgoingVideoSharing.this,
-                                    getString(R.string.label_sharing_rejected, _reasonCode),
-                                    mExitOnce);
+                            showMessageThenExit(getString(R.string.label_sharing_rejected,
+                                    _reasonCode));
                             break;
 
                         case FAILED:
@@ -969,13 +930,9 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
                             // Release the camera
                             closeCamera();
 
-                            // Hide progress dialog
-                            hideProgressDialog();
-
                             // Display error info and exit
-                            Utils.showMessageAndExit(OutgoingVideoSharing.this,
-                                    getString(R.string.label_sharing_failed, _reasonCode),
-                                    mExitOnce);
+                            showMessageThenExit(getString(R.string.label_sharing_failed,
+                                    _reasonCode));
                             break;
 
                         default:
@@ -993,9 +950,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
         @Override
         public void onDeleted(ContactId contact, Set<String> sharingIds) {
             if (LogUtils.isActive) {
-                Log.w(LOGTAG,
-                        new StringBuilder("onDeleted contact=").append(contact)
-                                .append(" sharingIds=").append(sharingIds).toString());
+                Log.w(LOGTAG, "onDeleted contact=" + contact + " sharingIds=" + sharingIds);
             }
         }
     };
@@ -1062,8 +1017,8 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
      * Check if preview size is supported
      * 
      * @param parameters Camera parameters
-     * @param width
-     * @param height
+     * @param width width
+     * @param height height
      * @return True if supported
      */
     private boolean isPreviewSizeSupported(Parameters parameters, int width, int height) {
@@ -1123,9 +1078,8 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
     private void displayVideoFormat() {
         try {
             VideoDescriptor videoDescriptor = mVideoSharing.getVideoDescriptor();
-            String format = new StringBuilder(mVideoSharing.getVideoEncoding()).append(" ")
-                    .append(videoDescriptor.getWidth()).append("x")
-                    .append(videoDescriptor.getHeight()).toString();
+            String format = mVideoSharing.getVideoEncoding() + " " + videoDescriptor.getWidth()
+                    + "x" + videoDescriptor.getHeight();
             TextView fmtView = (TextView) findViewById(R.id.video_format);
             fmtView.setVisibility(View.VISIBLE);
             fmtView.setText(getString(R.string.label_video_format, format));

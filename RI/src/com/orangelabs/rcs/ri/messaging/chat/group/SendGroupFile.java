@@ -30,7 +30,6 @@ import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.messaging.chat.SendFile;
 import com.orangelabs.rcs.ri.utils.FileUtils;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.content.Context;
 import android.content.Intent;
@@ -48,136 +47,18 @@ import java.util.Set;
  * @author Philippe LEMORDANT
  */
 public class SendGroupFile extends SendFile {
-    /**
-     * Intent parameters
-     */
+
     private final static String EXTRA_CHAT_ID = "chat_id";
 
     private String mChatId;
 
     private static final String LOGTAG = LogUtils.getTag(SendGroupFile.class.getSimpleName());
 
-    /**
-     * File transfer listener
-     */
-    private GroupFileTransferListener ftListener = new GroupFileTransferListener() {
-
-        @Override
-        public void onDeliveryInfoChanged(String chatId, ContactId contact, String transferId,
-                GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
-            if (LogUtils.isActive) {
-                Log.d(LOGTAG,
-                        new StringBuilder("onDeliveryInfoChanged chatId=").append(chatId)
-                                .append(" contact=").append(contact).append(" trasnferId=")
-                                .append(transferId).append(" state=").append(status)
-                                .append(" reason=").append(reasonCode).toString());
-            }
-        }
-
-        @Override
-        public void onProgressUpdate(String chatId, String transferId, final long currentSize,
-                final long totalSize) {
-            // Discard event if not for current transferId
-            if (mTransferId == null || !mTransferId.equals(transferId)) {
-                return;
-            }
-            handler.post(new Runnable() {
-                public void run() {
-                    // Display transfer progress
-                    updateProgressBar(currentSize, totalSize);
-                }
-            });
-        }
-
-        @Override
-        public void onStateChanged(String chatId, String transferId,
-                final FileTransfer.State state, final FileTransfer.ReasonCode reasonCode) {
-            if (LogUtils.isActive) {
-                Log.d(LOGTAG,
-                        new StringBuilder("onStateChanged chatId=").append(chatId)
-                                .append(" transferId=").append(transferId).append(" state=")
-                                .append(state).append(" reason=").append(reasonCode).toString());
-            }
-
-            // Discard event if not for current transferId
-            if (mTransferId == null || !mTransferId.equals(transferId)) {
-                return;
-            }
-            final String _reasonCode = RiApplication.sFileTransferReasonCodes[reasonCode.toInt()];
-            final String _state = RiApplication.sFileTransferStates[state.toInt()];
-            handler.post(new Runnable() {
-
-                public void run() {
-                    if (mFileTransfer != null) {
-                        try {
-                            mResumeBtn.setEnabled(mFileTransfer.isAllowedToResumeTransfer());
-                        } catch (RcsServiceException e) {
-                            mResumeBtn.setEnabled(false);
-                            Utils.displayToast(SendGroupFile.this, e);
-                        }
-                        try {
-                            mPauseBtn.setEnabled(mFileTransfer.isAllowedToPauseTransfer());
-                        } catch (RcsServiceException e) {
-                            mPauseBtn.setEnabled(false);
-                            Utils.displayToast(SendGroupFile.this, e);
-                        }
-                    }
-                    TextView statusView = (TextView) findViewById(R.id.progress_status);
-                    switch (state) {
-                        case STARTED:
-                            //$FALL-THROUGH$
-                        case TRANSFERRED:
-                            hideProgressDialog();
-                            /* Display transfer state started */
-                            statusView.setText(_state);
-                            break;
-
-                        case ABORTED:
-                            /* Transfer is aborted: hide progress dialog then exit. */
-                            hideProgressDialog();
-                            Utils.showMessageAndExit(SendGroupFile.this,
-                                    getString(R.string.label_transfer_aborted, _reasonCode),
-                                    mExitOnce);
-                            break;
-
-                        case REJECTED:
-                            /* Transfer is rejected: hide progress dialog then exit */
-                            hideProgressDialog();
-                            Utils.showMessageAndExit(SendGroupFile.this,
-                                    getString(R.string.label_transfer_rejected, _reasonCode),
-                                    mExitOnce);
-                            break;
-
-                        case FAILED:
-                            /* Transfer failed: hide progress dialog then exit */
-                            hideProgressDialog();
-                            Utils.showMessageAndExit(SendGroupFile.this,
-                                    getString(R.string.label_transfer_failed, _reasonCode),
-                                    mExitOnce);
-                            break;
-
-                        default:
-                            statusView.setText(_state);
-                    }
-                }
-            });
-        }
-
-        @Override
-        public void onDeleted(String chatId, Set<String> transferIds) {
-            if (LogUtils.isActive) {
-                Log.w(LOGTAG,
-                        new StringBuilder("onDeleted chatId=").append(chatId)
-                                .append(" transferIds=").append(transferIds).toString());
-            }
-        }
-
-    };
+    private GroupFileTransferListener mFileTransferListener;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Get chat ID
         mChatId = getIntent().getStringExtra(EXTRA_CHAT_ID);
     }
 
@@ -197,20 +78,18 @@ public class SendGroupFile extends SendFile {
     public boolean transferFile(Uri file, boolean fileicon) {
         try {
             if (LogUtils.isActive) {
-                Log.d(LOGTAG, "initiateTransfer filename=" + filename + " size=" + filesize
+                Log.d(LOGTAG, "initiateTransfer filename=" + mFilename + " size=" + mFilesize
                         + " chatId=" + mChatId);
             }
             /* Only take persistable permission for content Uris */
             FileUtils.tryToTakePersistableContentUriPermission(getApplicationContext(), file);
-            // Initiate transfer
-            mFileTransfer = mCnxManager.getFileTransferApi().transferFileToGroupChat(mChatId, file,
-                    fileicon);
+            /* Initiate transfer */
+            mFileTransfer = mFileTransferService.transferFileToGroupChat(mChatId, file, fileicon);
             mTransferId = mFileTransfer.getTransferId();
             return true;
-        } catch (Exception e) {
-            hideProgressDialog();
-            Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce,
-                    e);
+
+        } catch (RcsServiceException e) {
+            showExceptionThenExit(e);
             return false;
         }
     }
@@ -218,13 +97,117 @@ public class SendGroupFile extends SendFile {
     @Override
     public void addFileTransferEventListener(FileTransferService fileTransferService)
             throws RcsServiceException {
-        fileTransferService.addEventListener(ftListener);
+        fileTransferService.addEventListener(mFileTransferListener);
     }
 
     @Override
     public void removeFileTransferEventListener(FileTransferService fileTransferService)
             throws RcsServiceException {
-        fileTransferService.removeEventListener(ftListener);
+        fileTransferService.removeEventListener(mFileTransferListener);
+    }
+
+    @Override
+    public void initialize() {
+        super.initialize();
+        mFileTransferListener = new GroupFileTransferListener() {
+
+            @Override
+            public void onDeliveryInfoChanged(String chatId, ContactId contact, String transferId,
+                    GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "onDeliveryInfoChanged chatId=" + chatId + " contact=" + contact
+                            + " trasnferId=" + transferId + " state=" + status + " reason="
+                            + reasonCode);
+                }
+            }
+
+            @Override
+            public void onProgressUpdate(String chatId, String transferId, final long currentSize,
+                    final long totalSize) {
+                /* Discard event if not for current transferId */
+                if (mTransferId == null || !mTransferId.equals(transferId)) {
+                    return;
+                }
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        updateProgressBar(currentSize, totalSize);
+                    }
+                });
+            }
+
+            @Override
+            public void onStateChanged(String chatId, String transferId,
+                    final FileTransfer.State state, final FileTransfer.ReasonCode reasonCode) {
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "onStateChanged chatId=" + chatId + " transferId=" + transferId
+                            + " state=" + state + " reason=" + reasonCode);
+                }
+                /* Discard event if not for current transferId */
+                if (mTransferId == null || !mTransferId.equals(transferId)) {
+                    return;
+                }
+                final String _reasonCode = RiApplication.sFileTransferReasonCodes[reasonCode
+                        .toInt()];
+                final String _state = RiApplication.sFileTransferStates[state.toInt()];
+                mHandler.post(new Runnable() {
+
+                    public void run() {
+                        if (mFileTransfer != null) {
+                            try {
+                                mResumeBtn.setEnabled(mFileTransfer.isAllowedToResumeTransfer());
+
+                            } catch (RcsServiceException e) {
+                                mResumeBtn.setEnabled(false);
+                                showException(e);
+                            }
+                            try {
+                                mPauseBtn.setEnabled(mFileTransfer.isAllowedToPauseTransfer());
+
+                            } catch (RcsServiceException e) {
+                                mPauseBtn.setEnabled(false);
+                                showException(e);
+                            }
+                        }
+                        TextView statusView = (TextView) findViewById(R.id.progress_status);
+                        switch (state) {
+                            case STARTED:
+                                //$FALL-THROUGH$
+                            case TRANSFERRED:
+                                hideProgressDialog();
+                                /* Display transfer state started */
+                                statusView.setText(_state);
+                                break;
+
+                            case ABORTED:
+                                showMessageThenExit(getString(R.string.label_transfer_aborted,
+                                        _reasonCode));
+                                break;
+
+                            case REJECTED:
+                                showMessageThenExit(getString(R.string.label_transfer_rejected,
+                                        _reasonCode));
+                                break;
+
+                            case FAILED:
+                                showMessageThenExit(getString(R.string.label_transfer_failed,
+                                        _reasonCode));
+                                break;
+
+                            default:
+                                statusView.setText(_state);
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onDeleted(String chatId, Set<String> transferIds) {
+                if (LogUtils.isActive) {
+                    Log.w(LOGTAG, "onDeleted chatId=" + chatId + " transferIds=" + transferIds);
+                }
+            }
+
+        };
     }
 
 }

@@ -37,21 +37,21 @@ public class SharingInfos implements Parcelable {
     /**
      * Constructor
      * 
-     * @param contact
-     * @param filename
-     * @param filesize
-     * @param sate
-     * @param direction
-     * @param timestamp
-     * @param duration
+     * @param contact contact ID
+     * @param filename file name
+     * @param filesize file size
+     * @param state session state
+     * @param direction direction
+     * @param timestamp timestamp
+     * @param duration duration
      */
-    public SharingInfos(String contact, String filename, String filesize, String sate,
+    public SharingInfos(String contact, String filename, String filesize, String state,
             String direction, String timestamp, String duration) {
         super();
         mContact = contact;
         mFilename = filename;
         mFilesize = filesize;
-        mState = sate;
+        mState = state;
         mDirection = direction;
         mTimestamp = timestamp;
         mDuration = duration;
@@ -60,7 +60,7 @@ public class SharingInfos implements Parcelable {
     /**
      * Constructor
      * 
-     * @param in
+     * @param in parcel
      */
     public SharingInfos(Parcel in) {
         String[] values = new String[7];

@@ -52,15 +52,6 @@ public class ImageSharingIntentService extends IntentService {
 
     /**
      * Creates an IntentService.
-     * 
-     * @param name of the thread
-     */
-    public ImageSharingIntentService(String name) {
-        super(name);
-    }
-
-    /**
-     * Creates an IntentService.
      */
     public ImageSharingIntentService() {
         super("ImageSharingIntentService");
@@ -115,7 +106,7 @@ public class ImageSharingIntentService extends IntentService {
     /**
      * Add image share notification
      * 
-     * @param intent Intent invitation
+     * @param invitation Intent invitation
      * @param ishDao the image sharing data object
      */
     private void addImageSharingInvitationNotification(Intent invitation, ImageSharingDAO ishDao) {

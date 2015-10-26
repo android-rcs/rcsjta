@@ -24,15 +24,12 @@ import com.gsma.services.rcs.CommonServiceConfiguration.MinimumBatteryLevel;
 import com.gsma.services.rcs.RcsServiceControl;
 import com.gsma.services.rcs.RcsServiceException;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.Utils;
 
-import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.util.Log;
@@ -51,28 +48,12 @@ import java.util.Map;
 /**
  * Service configuration
  * 
- * @author yplo6403
- */
-/**
  * @author LEMORDANT Philippe
  */
-public class ServiceConfigurationActivity extends Activity {
+public class ServiceConfigurationActivity extends RcsActivity {
 
-    /**
-     * The log tag for this class
-     */
     private static final String LOGTAG = LogUtils.getTag(ServiceConfigurationActivity.class
             .getSimpleName());
-
-    /**
-     * API connection manager
-     */
-    private ConnectionManager mCnxManager;
-
-    /**
-     * A locker to exit only once
-     */
-    private LockAccess mExitOnce = new LockAccess();
 
     private Spinner mSpinnerDefMessaginMethod;
     private Spinner mSpinnerMinBatteryLevel;
@@ -88,8 +69,8 @@ public class ServiceConfigurationActivity extends Activity {
 
     private RcsServiceControl mRcsServiceControl;
 
-    private static SparseArray<MinimumBatteryLevel> sPosToMinimumBatteryLevel = new SparseArray<MinimumBatteryLevel>();
-    private static Map<MinimumBatteryLevel, Integer> sMinimumBatteryLevelToPos = new HashMap<MinimumBatteryLevel, Integer>();
+    private static SparseArray<MinimumBatteryLevel> sPosToMinimumBatteryLevel = new SparseArray<>();
+    private static Map<MinimumBatteryLevel, Integer> sMinimumBatteryLevelToPos = new HashMap<>();
     static {
         int order = 0;
         for (MinimumBatteryLevel entry : MinimumBatteryLevel.values()) {
@@ -123,28 +104,25 @@ public class ServiceConfigurationActivity extends Activity {
         mTextRcsServiceActivation = (TextView) findViewById(R.id.text_service_activation);
 
         /* Register to API connection manager */
-        mCnxManager = ConnectionManager.getInstance();
-        if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CONTACT)) {
-            Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
-                    mExitOnce);
+        if (!isServiceConnected(RcsServiceName.CONTACT)) {
+            showMessageThenExit(R.string.label_service_not_available);
             return;
-
         }
+        startMonitorServices(RcsServiceName.CONTACT);
         try {
-            mConfiguration = mCnxManager.getContactApi().getCommonConfiguration();
+            mConfiguration = getContactApi().getCommonConfiguration();
             mIntialDisplayName = mConfiguration.getMyDisplayName();
             if (mIntialDisplayName == null) {
                 mIntialDisplayName = "";
             }
-        } catch (Exception e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+        } catch (RcsServiceException e) {
+            showExceptionThenExit(e);
             return;
-
         }
 
         String[] messagingMethods = getResources().getStringArray(R.array.messaging_method);
         mSpinnerDefMessaginMethod = (Spinner) findViewById(R.id.spinner_default_messaging_method);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, messagingMethods);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mSpinnerDefMessaginMethod.setAdapter(adapter);
@@ -166,8 +144,7 @@ public class ServiceConfigurationActivity extends Activity {
                         }
                     }
                 } catch (RcsServiceException e) {
-                    Utils.showMessageAndExit(ServiceConfigurationActivity.this,
-                            getString(R.string.label_api_failed), mExitOnce, e);
+                    showExceptionThenExit(e);
                 }
 
             }
@@ -179,8 +156,7 @@ public class ServiceConfigurationActivity extends Activity {
 
         String[] batteryLevels = getResources().getStringArray(R.array.minimum_battery_level);
         mSpinnerMinBatteryLevel = (Spinner) findViewById(R.id.spinner_label_min_battery_level);
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,
-                batteryLevels);
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, batteryLevels);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mSpinnerMinBatteryLevel.setAdapter(adapter);
 
@@ -200,8 +176,7 @@ public class ServiceConfigurationActivity extends Activity {
                         }
                     }
                 } catch (RcsServiceException e) {
-                    Utils.showMessageAndExit(ServiceConfigurationActivity.this,
-                            getString(R.string.label_api_failed), mExitOnce, e);
+                    showExceptionThenExit(e);
                 }
 
             }
@@ -210,9 +185,7 @@ public class ServiceConfigurationActivity extends Activity {
             public void onNothingSelected(AdapterView<?> parentView) {
             }
         });
-
-        mCnxManager.startMonitorServices(this, null, RcsServiceName.CONTACT);
-
+        startMonitorServices(RcsServiceName.CONTACT);
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "onCreate");
         }
@@ -225,18 +198,15 @@ public class ServiceConfigurationActivity extends Activity {
         if (mIntialDisplayName != null && !mIntialDisplayName.equals(newDisplayName)) {
             setDisplayName(newDisplayName);
         }
-        if (mCnxManager == null) {
-            return;
-        }
-        mCnxManager.stopMonitorServices(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (!mExitOnce.isLocked()) {
-            displayServiceConfiguration();
+        if (isExiting()) {
+            return;
         }
+        displayServiceConfiguration();
     }
 
     private void displayServiceConfiguration() {
@@ -260,7 +230,7 @@ public class ServiceConfigurationActivity extends Activity {
                         .setText(getString(R.string.label_service_activate_unchangeable));
             }
         } catch (RcsServiceException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+            showException(e);
         }
     }
 

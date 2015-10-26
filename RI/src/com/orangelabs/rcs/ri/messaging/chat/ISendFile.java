@@ -29,18 +29,23 @@ import android.net.Uri;
 public interface ISendFile {
 
     /**
+     * Initialize
+     */
+    void initialize();
+
+    /**
      * Transfer file
      * 
      * @param file Uri of file to transfer
-     * @param fileicon File icon option. If true, the stack tries to attach fileicon.
+     * @param fileIcon File icon option. If true, the stack tries to attach fileicon.
      * @return True if file transfer is successful
      */
-    boolean transferFile(Uri file, boolean fileicon);
+    boolean transferFile(Uri file, boolean fileIcon);
 
     /**
      * Add file transfer event listener
      * 
-     * @param fileTransferService
+     * @param fileTransferService the file transfer service
      */
     void addFileTransferEventListener(FileTransferService fileTransferService)
             throws RcsServiceException;
@@ -48,7 +53,7 @@ public interface ISendFile {
     /**
      * Remove file transfer event listener
      * 
-     * @param fileTransferService
+     * @param fileTransferService the file transfer service
      */
     void removeFileTransferEventListener(FileTransferService fileTransferService)
             throws RcsServiceException;

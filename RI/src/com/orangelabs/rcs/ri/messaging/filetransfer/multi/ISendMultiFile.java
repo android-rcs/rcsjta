@@ -24,9 +24,14 @@ import com.gsma.services.rcs.filetransfer.FileTransferService;
 import java.util.List;
 
 /**
- * @author YPLO6403
+ * @author Philippe LEMORDANT
  */
 public interface ISendMultiFile {
+
+    /**
+     * Initialize
+     */
+    void initialize();
 
     /**
      * Transfers list of files
@@ -39,7 +44,7 @@ public interface ISendMultiFile {
     /**
      * Adds file transfer event listener
      * 
-     * @param fileTransferService
+     * @param fileTransferService file transfer service
      * @throws RcsServiceException
      */
     void addFileTransferEventListener(FileTransferService fileTransferService)
@@ -48,7 +53,7 @@ public interface ISendMultiFile {
     /**
      * Removes file transfer event listener
      * 
-     * @param fileTransferService
+     * @param fileTransferService file transfer service
      * @throws RcsServiceException
      */
     void removeFileTransferEventListener(FileTransferService fileTransferService)

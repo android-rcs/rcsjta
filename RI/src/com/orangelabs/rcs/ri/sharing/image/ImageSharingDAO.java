@@ -120,7 +120,7 @@ public class ImageSharingDAO implements Parcelable {
         dest.writeLong(mSizeTransferred);
         dest.writeLong(mSize);
         dest.writeInt(mReasonCode.toInt());
-    };
+    }
 
     /**
      * Gets state
@@ -278,8 +278,8 @@ public class ImageSharingDAO implements Parcelable {
     /**
      * Gets instance of Image sharing from RCS provider
      * 
-     * @param context
-     * @param sharingId
+     * @param context the context
+     * @param sharingId the sharing ID
      * @return instance or null if entry not found
      */
     public static ImageSharingDAO getImageSharingDAO(Context context, String sharingId) {

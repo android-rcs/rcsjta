@@ -26,20 +26,17 @@ import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
+import com.orangelabs.rcs.api.connection.utils.RcsFragmentActivity;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsContactUtil;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -64,9 +61,9 @@ import java.util.Date;
  * List file transfers from the content provider
  * 
  * @author Jean-Marc AUFFRET
- * @author YPLO6403
+ * @author Philippe LEMORDANT
  */
-public class FileTransferList extends FragmentActivity implements
+public class FileTransferList extends RcsFragmentActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
     // @formatter:off
@@ -84,16 +81,9 @@ public class FileTransferList extends FragmentActivity implements
     };
     // @formatter:on
 
-    private static final String SORT_ORDER = new StringBuilder(FileTransferLog.TIMESTAMP).append(
-            " DESC").toString();
-
-    private ListView mListView;
+    private static final String SORT_ORDER = FileTransferLog.TIMESTAMP + " DESC";
 
     private FtCursorAdapter mAdapter;
-
-    private ConnectionManager mCnxManager;
-
-    private LockAccess mExitOnce = new LockAccess();
 
     private FileTransferService mFileTransferService;
 
@@ -117,17 +107,16 @@ public class FileTransferList extends FragmentActivity implements
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.filetransfer_list);
 
-        mCnxManager = ConnectionManager.getInstance();
-        mFileTransferService = mCnxManager.getFileTransferApi();
+        mFileTransferService = getFileTransferApi();
 
         /* Set list adapter */
-        mListView = (ListView) findViewById(android.R.id.list);
+        ListView listView = (ListView) findViewById(android.R.id.list);
         TextView emptyView = (TextView) findViewById(android.R.id.empty);
-        mListView.setEmptyView(emptyView);
-        registerForContextMenu(mListView);
+        listView.setEmptyView(emptyView);
+        registerForContextMenu(listView);
 
         mAdapter = new FtCursorAdapter(this);
-        mListView.setAdapter(mAdapter);
+        listView.setAdapter(mAdapter);
         /*
          * Initialize the Loader with id '1' and callbacks 'mCallbacks'.
          */
@@ -244,12 +233,6 @@ public class FileTransferList extends FragmentActivity implements
 
     }
 
-    /**
-     * Decode date
-     * 
-     * @param date Date
-     * @return String
-     */
     private String decodeDate(long date) {
         return DateFormat.getInstance().format(new Date(date));
     }
@@ -266,8 +249,8 @@ public class FileTransferList extends FragmentActivity implements
         switch (item.getItemId()) {
             case R.id.menu_clear_log:
                 /* Delete all file transfers */
-                if (!mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
-                    Utils.showMessage(this, getString(R.string.label_api_unavailable));
+                if (!isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
+                    showMessage(R.string.label_service_not_available);
                     break;
                 }
                 try {
@@ -281,8 +264,7 @@ public class FileTransferList extends FragmentActivity implements
                     }
                     mFileTransferService.deleteGroupFileTransfers();
                 } catch (RcsServiceException e) {
-                    Utils.showMessageAndExit(this, getString(R.string.label_delete_ft_failed),
-                            mExitOnce, e);
+                    showExceptionThenExit(e);
                 }
                 break;
         }
@@ -293,8 +275,8 @@ public class FileTransferList extends FragmentActivity implements
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         /* Check file transfer API is connected */
-        if (!mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
-            Utils.showMessage(this, getString(R.string.label_api_unavailable));
+        if (!isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
+            showMessage(R.string.label_service_not_available);
             return;
         }
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
@@ -305,11 +287,11 @@ public class FileTransferList extends FragmentActivity implements
         String transferId = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FT_ID));
         try {
             FileTransfer transfer = mFileTransferService.getFileTransfer(transferId);
-            if (transfer.isAllowedToResendTransfer()) {
+            if (transfer != null && transfer.isAllowedToResendTransfer()) {
                 menu.add(0, MENU_ITEM_RESEND, 1, R.string.menu_resend_message);
             }
         } catch (RcsServiceException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_resend_failed), mExitOnce, e);
+            showExceptionThenExit(e);
         }
     }
 
@@ -318,43 +300,37 @@ public class FileTransferList extends FragmentActivity implements
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
         Cursor cursor = (Cursor) (mAdapter.getItem(info.position));
         String transferId = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FT_ID));
-        switch (item.getItemId()) {
-            case MENU_ITEM_RESEND:
-                if (LogUtils.isActive) {
-                    Log.d(LOGTAG, "onContextItemSelected resend ftId=".concat(transferId));
-                }
-                if (!mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
-                    Utils.showMessage(this, getString(R.string.label_api_unavailable));
-                    return true;
-                }
-                try {
+        try {
+            switch (item.getItemId()) {
+                case MENU_ITEM_RESEND:
+                    if (LogUtils.isActive) {
+                        Log.d(LOGTAG, "onContextItemSelected resend ftId=".concat(transferId));
+                    }
+                    if (!isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
+                        showMessage(R.string.label_service_not_available);
+                        return true;
+                    }
                     FileTransfer transfer = mFileTransferService.getFileTransfer(transferId);
-                    transfer.resendTransfer();
-                } catch (RcsServiceException e) {
-                    Utils.showMessageAndExit(this, getString(R.string.label_resend_failed),
-                            mExitOnce, e);
-                }
-                return true;
-
-            case MENU_ITEM_DELETE:
-                if (LogUtils.isActive) {
-                    Log.d(LOGTAG, "onContextItemSelected delete ftId=".concat(transferId));
-                }
-                if (!mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
-                    Utils.showMessage(this, getString(R.string.label_api_unavailable));
+                    if (transfer != null) {
+                        transfer.resendTransfer();
+                    }
                     return true;
-                }
-                try {
-                    mFileTransferService.deleteFileTransfer(transferId);
-                } catch (RcsServiceException e) {
-                    Utils.showMessageAndExit(this, getString(R.string.label_delete_ft_failed),
-                            mExitOnce, e);
-                }
-                return true;
 
-            default:
-                return super.onContextItemSelected(item);
+                case MENU_ITEM_DELETE:
+                    if (LogUtils.isActive) {
+                        Log.d(LOGTAG, "onContextItemSelected delete ftId=".concat(transferId));
+                    }
+                    if (!isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
+                        showMessage(R.string.label_service_not_available);
+                        return true;
+                    }
+                    mFileTransferService.deleteFileTransfer(transferId);
+                    return true;
+            }
+        } catch (RcsServiceException e) {
+            showExceptionThenExit(e);
         }
+        return super.onContextItemSelected(item);
     }
 
     @Override

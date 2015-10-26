@@ -69,7 +69,7 @@ public class ChatCursorAdapter extends CursorAdapter {
     /**
      * A map between contact and display name to minimize queries of RCS settings provider
      */
-    private Map<ContactId, String> mContactIdDisplayNameMap = new HashMap<ContactId, String>();
+    private Map<ContactId, String> mContactIdDisplayNameMap = new HashMap<>();
 
     private Context mContext;
 
@@ -116,7 +116,7 @@ public class ChatCursorAdapter extends CursorAdapter {
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        View view = null;
+        View view;
         String mimetype = cursor.getString(cursor.getColumnIndexOrThrow(HistoryLog.MIME_TYPE));
 
         if (ChatLog.Message.MimeType.GEOLOC_MESSAGE.equals(mimetype)
@@ -159,20 +159,20 @@ public class ChatCursorAdapter extends CursorAdapter {
         }
         holder.dateText.setText(df.format(date));
         if (itemType == CHAT_MESSAGE) {
-            bindChatMessage(view, ctx, cursor, direction, displayName, status,
+            bindChatMessage(ctx, cursor, direction, displayName, status,
                     (ViewHolderChatMessage) holder);
 
         } else if (itemType == GROUPCHAT_EVENT) {
-            bindGroupChatEvent(view, ctx, cursor, displayName, status, holder);
+            bindGroupChatEvent(ctx, displayName, status, holder);
 
         } else {
-            bindFileTransferMessage(view, ctx, cursor, direction, displayName, status,
+            bindFileTransferMessage(cursor, direction, displayName, status,
                     (ViewHolderFileTransfer) holder);
         }
     }
 
-    private void bindFileTransferMessage(View view, Context ctx, Cursor cursor, Direction dir,
-            String displayName, int status, ViewHolderFileTransfer holder) {
+    private void bindFileTransferMessage(Cursor cursor, Direction dir, String displayName,
+            int status, ViewHolderFileTransfer holder) {
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         String mimeType = cursor.getString(holder.columnMimetype);
@@ -222,8 +222,7 @@ public class ChatCursorAdapter extends CursorAdapter {
         holder.filetransferItemLayout.setLayoutParams(lp);
     }
 
-    private void bindGroupChatEvent(View view, Context ctx, Cursor cursor, String displayName,
-            int status, ViewHolder holder) {
+    private void bindGroupChatEvent(Context ctx, String displayName, int status, ViewHolder holder) {
         String event = RiApplication.sGroupChatEvents[status];
         holder.statusText.setText(ctx.getString(R.string.label_groupchat_event, event));
         if (displayName != null) {
@@ -234,8 +233,8 @@ public class ChatCursorAdapter extends CursorAdapter {
         }
     }
 
-    private void bindChatMessage(View view, Context ctx, Cursor cursor, Direction dir,
-            String displayName, int status, ViewHolderChatMessage holder) {
+    private void bindChatMessage(Context ctx, Cursor cursor, Direction dir, String displayName,
+            int status, ViewHolderChatMessage holder) {
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         String mimeType = cursor.getString(holder.columnMimetype);
@@ -269,9 +268,9 @@ public class ChatCursorAdapter extends CursorAdapter {
     /**
      * Format data to text
      * 
-     * @param context
-     * @param mimeType
-     * @param data
+     * @param context context
+     * @param mimeType mime type
+     * @param data data
      * @return a formatted text
      */
     private CharSequence formatDataToText(Context context, String mimeType, String data) {
@@ -316,8 +315,8 @@ public class ChatCursorAdapter extends CursorAdapter {
         /**
          * Constructor
          * 
-         * @param base
-         * @param cursor
+         * @param base view
+         * @param cursor cursor
          */
         ViewHolder(View base, Cursor cursor) {
             /* Save column indexes */
@@ -349,8 +348,8 @@ public class ChatCursorAdapter extends CursorAdapter {
         /**
          * Constructor
          * 
-         * @param base
-         * @param cursor
+         * @param base view
+         * @param cursor cursor
          */
         ViewHolderChatMessage(View base, Cursor cursor) {
             super(base, cursor);
@@ -381,8 +380,8 @@ public class ChatCursorAdapter extends CursorAdapter {
         /**
          * Constructor
          * 
-         * @param base
-         * @param cursor
+         * @param base view
+         * @param cursor cursor
          */
         ViewHolderFileTransfer(View base, Cursor cursor) {
             super(base, cursor);

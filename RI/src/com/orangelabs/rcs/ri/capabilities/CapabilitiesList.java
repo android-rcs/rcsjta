@@ -20,11 +20,10 @@ package com.orangelabs.rcs.ri.capabilities;
 
 import com.gsma.services.rcs.capability.CapabilitiesLog;
 
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.RcsContactUtil;
-import com.orangelabs.rcs.ri.utils.Utils;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
@@ -42,9 +41,9 @@ import android.widget.TextView;
  * List capabilities from the content provider
  * 
  * @author Jean-Marc AUFFRET
- * @author YPLO6403
+ * @author Philippe LEMORDANT
  */
-public class CapabilitiesList extends Activity {
+public class CapabilitiesList extends RcsActivity {
 
     // @formatter:off
     private static final String[] PROJECTION = new String[] {
@@ -62,8 +61,7 @@ public class CapabilitiesList extends Activity {
 
     // @formatter:on
 
-    private static final String SORT_ORDER = new StringBuilder(CapabilitiesLog.CONTACT).append(
-            " DESC").toString();
+    private static final String SORT_ORDER = CapabilitiesLog.CONTACT + " DESC";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -81,14 +79,11 @@ public class CapabilitiesList extends Activity {
         view.setAdapter(adapter);
     }
 
-    /**
-     * Create list adapter
-     */
     private CapabilitiesListAdapter createListAdapter() {
         Cursor cursor = getContentResolver().query(CapabilitiesLog.CONTENT_URI, PROJECTION, null,
                 null, SORT_ORDER);
         if (cursor == null) {
-            Utils.showMessageAndExit(this, getString(R.string.label_load_log_failed));
+            showMessageThenExit(R.string.label_load_log_failed);
             return null;
         }
         return new CapabilitiesListAdapter(this, cursor);
@@ -107,6 +102,7 @@ public class CapabilitiesList extends Activity {
          * @param c Cursor
          */
         public CapabilitiesListAdapter(Context context, Cursor c) {
+            // TODO use CursorLoader
             super(context, c);
             rcsDisplayName = RcsContactUtil.getInstance(context);
         }
@@ -152,9 +148,14 @@ public class CapabilitiesList extends Activity {
             holder.automataBox
                     .setChecked(cursor.getInt(holder.columnAutomata) == CapabilitiesLog.SUPPORTED);
             long lastRefresh = cursor.getLong(holder.columnTimestamp);
-            holder.lastRefreshText.setText(DateUtils.getRelativeTimeSpanString(lastRefresh,
-                    System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS,
-                    DateUtils.FORMAT_ABBREV_RELATIVE));
+            if (lastRefresh == -1) {
+                holder.lastRefreshText.setVisibility(View.GONE);
+            } else {
+                holder.lastRefreshText.setVisibility(View.VISIBLE);
+                holder.lastRefreshText.setText(DateUtils.getRelativeTimeSpanString(lastRefresh,
+                        System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS,
+                        DateUtils.FORMAT_ABBREV_RELATIVE));
+            }
         }
     }
 

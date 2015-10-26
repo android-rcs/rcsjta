@@ -19,12 +19,8 @@
 package com.orangelabs.rcs.ri.sharing.geoloc;
 
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingIntent;
-import com.gsma.services.rcs.sharing.geoloc.GeolocSharingService;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
-import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsContactUtil;
@@ -63,8 +59,9 @@ public class GeolocSharingIntentService extends IntentService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        // We want this service to stop running if forced stop
-        // so return not sticky.
+        /*
+         * We want this service to stop running if forced stop so return not sticky.
+         */
         return START_NOT_STICKY;
     }
 
@@ -74,14 +71,14 @@ public class GeolocSharingIntentService extends IntentService {
         if ((action = intent.getAction()) == null) {
             return;
         }
-        // Check action from incoming intent
+        /* Check action from incoming intent */
         if (!GeolocSharingIntent.ACTION_NEW_INVITATION.equals(action)) {
             if (LogUtils.isActive) {
                 Log.e(LOGTAG, "Unknown action ".concat(action));
             }
             return;
         }
-        // Gets data from the incoming Intent
+        /* Gets data from the incoming Intent */
         String sharingId = intent.getStringExtra(GeolocSharingIntent.EXTRA_SHARING_ID);
         if (sharingId == null) {
             if (LogUtils.isActive) {
@@ -89,57 +86,34 @@ public class GeolocSharingIntentService extends IntentService {
             }
             return;
         }
-
-        try {
-            ConnectionManager connectionManager = ConnectionManager.getInstance();
-            if (!connectionManager.isServiceConnected(RcsServiceName.GEOLOC_SHARING)) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "Cannot bind to GSH service");
-                }
-                return;
-            }
-            GeolocSharingService api = connectionManager.getGeolocSharingApi();
-            if (api == null) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "Cannot connect to GSH service");
-                }
-                return;
-            }
-            GeolocSharing gshSharing = api.getGeolocSharing(sharingId);
-            if (gshSharing == null) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "Cannot get geoloc sharing for ".concat(sharingId));
-                }
-                return;
-            }
-            ContactId contact = gshSharing.getRemoteContact();
-            if (contact == null) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "Cannot get contact sharing for ".concat(sharingId));
-                }
-                return;
-            }
-            // Save contact into intent
-            Bundle bundle = new Bundle();
-            bundle.putParcelable(BUNDLE_GSH_ID, contact);
-            intent.putExtras(bundle);
-            // Display invitation notification
-            addGeolocSharingInvitationNotification(intent, sharingId, contact);
-        } catch (Exception e) {
+        GeolocSharingDAO gshSharing = GeolocSharingDAO.getGeolocSharing(this, sharingId);
+        if (gshSharing == null) {
             if (LogUtils.isActive) {
-                Log.e(LOGTAG, "Cannot read GSH data from provider", e);
+                Log.e(LOGTAG, "Cannot get geoloc sharing for ".concat(sharingId));
             }
+            return;
         }
+        ContactId contact = gshSharing.getContact();
+        if (contact == null) {
+            if (LogUtils.isActive) {
+                Log.e(LOGTAG, "Cannot get contact sharing for ".concat(sharingId));
+            }
+            return;
+        }
+        /* Save contact into intent */
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(BUNDLE_GSH_ID, contact);
+        intent.putExtras(bundle);
+        /* Display invitation notification */
+        addGeolocSharingInvitationNotification(intent, contact);
     }
 
     /**
      * Add geoloc share notification
      * 
-     * @param intent Intent invitation
-     * @param gshSharing the geoloc sharing
+     * @param invitation intent
      */
-    private void addGeolocSharingInvitationNotification(Intent invitation, String sharingId,
-            ContactId contact) {
+    private void addGeolocSharingInvitationNotification(Intent invitation, ContactId contact) {
         /* Create pending intent */
         Intent intent = new Intent(invitation);
         intent.setClass(this, ReceiveGeolocSharing.class);

@@ -20,20 +20,19 @@ package com.orangelabs.rcs.ri.upload;
 
 import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.upload.FileUpload;
 import com.gsma.services.rcs.upload.FileUploadInfo;
 import com.gsma.services.rcs.upload.FileUploadListener;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.FileUtils;
 import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsSessionUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
@@ -52,8 +51,9 @@ import android.widget.TextView;
  * Initiate file upload
  * 
  * @author Jean-Marc AUFFRET
+ * @author Philippe LEMORDANT
  */
-public class InitiateFileUpload extends Activity {
+public class InitiateFileUpload extends RcsActivity {
     /**
      * Activity result constants
      */
@@ -72,10 +72,6 @@ public class InitiateFileUpload extends Activity {
 
     private String mUploadId;
 
-    private LockAccess mExitOnce = new LockAccess();
-
-    private ConnectionManager mCnxManager;
-
     private MyFileUploadListener mUploadListener = new MyFileUploadListener();
 
     private boolean mUploadThumbnail = false;
@@ -88,20 +84,28 @@ public class InitiateFileUpload extends Activity {
 
     private Button mSelectBtn;
 
+    private OnClickListener mBtnUploadListener;
+
+    private OnClickListener mBtnSelectListener;
+
+    private OnClickListener mBtnShowListener;
+
+    private OnClickListener mBtnShowThumbnailListener;
+
     private static final String LOGTAG = LogUtils.getTag(InitiateFileUpload.class.getSimpleName());
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mCnxManager = ConnectionManager.getInstance();
+        initialize();
 
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.fileupload_initiate);
 
         // Set buttons callback
         mUploadBtn = (Button) findViewById(R.id.upload_btn);
-        mUploadBtn.setOnClickListener(btnUploadListener);
+        mUploadBtn.setOnClickListener(mBtnUploadListener);
         mUploadBtn.setEnabled(false);
 
         mShowBtn = (Button) findViewById(R.id.show_btn);
@@ -116,132 +120,32 @@ public class InitiateFileUpload extends Activity {
         mSelectBtn.setOnClickListener(mBtnSelectListener);
 
         // Register to API connection manager
-        if (!mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
-            Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
-                    mExitOnce);
+        if (!isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
+            showMessageThenExit(R.string.label_service_not_available);
             return;
         }
-        mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.FILE_UPLOAD);
+        startMonitorServices(RcsServiceName.FILE_UPLOAD);
         try {
-            // Add upload listener
-            mCnxManager.getFileUploadApi().addEventListener(mUploadListener);
-        } catch (RcsServiceNotAvailableException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce, e);
+            getFileUploadApi().addEventListener(mUploadListener);
         } catch (RcsServiceException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+            showExceptionThenExit(e);
         }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mCnxManager.stopMonitorServices(this);
-        // Remove upload listener
-        if (mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
-            try {
-                mCnxManager.getFileUploadApi().removeEventListener(mUploadListener);
-            } catch (Exception e) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "Failed to remove listener", e);
-                }
-            }
+        if (!isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
+            return;
+        }
+        try {
+            getFileUploadApi().removeEventListener(mUploadListener);
+        } catch (RcsServiceException e) {
+            Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
         }
     }
 
-    /**
-     * Upload button listener
-     */
-    private OnClickListener btnUploadListener = new OnClickListener() {
-        public void onClick(View v) {
-            try {
-                // Check max size
-                long maxSize = 0;
-                try {
-                    maxSize = mCnxManager.getFileUploadApi().getConfiguration().getMaxSize();
-                    if (LogUtils.isActive) {
-                        Log.d(LOGTAG,
-                                "FileUpload max size=".concat(Long.valueOf(maxSize).toString()));
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                if ((maxSize > 0) && (mFilesize >= maxSize)) {
-                    // Display an error
-                    Utils.showMessage(InitiateFileUpload.this,
-                            getString(R.string.label_upload_max_size, maxSize));
-                    return;
-
-                }
-
-                // Get thumbnail option
-                CheckBox ftThumb = (CheckBox) findViewById(R.id.file_thumb);
-                mUploadThumbnail = ftThumb.isChecked();
-
-                /* Only take persistable permission for content Uris */
-                FileUtils.tryToTakePersistableContentUriPermission(getApplicationContext(), mFile);
-
-                // Initiate upload
-                mUpload = mCnxManager.getFileUploadApi().uploadFile(mFile, mUploadThumbnail);
-                mUploadId = mUpload.getUploadId();
-
-                // Hide buttons
-                mUploadBtn.setVisibility(View.GONE);
-                mSelectBtn.setVisibility(View.GONE);
-            } catch (Exception e) {
-                Utils.showMessageAndExit(InitiateFileUpload.this,
-                        getString(R.string.label_upload_failed), mExitOnce, e);
-            }
-        }
-    };
-
-    /**
-     * Select file button listener
-     */
-    private OnClickListener mBtnSelectListener = new OnClickListener() {
-        public void onClick(View v) {
-            FileUtils.openFile(InitiateFileUpload.this, "image/*", SELECT_IMAGE);
-        }
-    };
-
-    private OnClickListener mBtnShowListener = new OnClickListener() {
-        public void onClick(View v) {
-            /* Show uploaded file */
-            try {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(mUpload.getUploadInfo().getFile());
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-            } catch (RcsGenericException e) {
-                e.printStackTrace();
-                Utils.showMessage(InitiateFileUpload.this,
-                        getString(R.string.label_open_upload_failed));
-            }
-        }
-    };
-
-    private OnClickListener mBtnShowThumbnailListener = new OnClickListener() {
-        public void onClick(View v) {
-            /* Show uploaded thumbnail */
-            try {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(mUpload.getUploadInfo().getFileIcon());
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-            } catch (RcsGenericException e) {
-                e.printStackTrace();
-                Utils.showMessage(InitiateFileUpload.this,
-                        getString(R.string.label_open_upload_failed));
-            }
-        }
-    };
-
-    /**
-     * On activity result
-     * 
-     * @param requestCode Request code
-     * @param resultCode Result code
-     * @param data Data
-     */
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != RESULT_OK || data == null || data.getData() == null) {
             return;
@@ -250,17 +154,10 @@ public class InitiateFileUpload extends Activity {
         TextView uriEdit = (TextView) findViewById(R.id.uri);
         switch (requestCode) {
             case SELECT_IMAGE:
-                // Display file info
-                try {
-                    // Get image filename and size
-                    mFilesize = FileUtils.getFileSize(this, mFile) / 1024;
-                    uriEdit.setText(mFilesize + " KB");
-                } catch (Exception e) {
-                    mFilesize = -1;
-                    uriEdit.setText("Unknown");
-                }
-
-                // Enable upload button
+                /* Display file info */
+                mFilesize = FileUtils.getFileSize(this, mFile) / 1024;
+                uriEdit.setText(mFilesize + " KB");
+                /* Enable upload button */
                 mUploadBtn.setEnabled(true);
                 break;
         }
@@ -290,12 +187,12 @@ public class InitiateFileUpload extends Activity {
                         statusView.setText(getString(R.string.label_upload_started));
                     } else if (state == FileUpload.State.FAILED) {
                         // Display sharing status
-                        Utils.showMessageAndExit(InitiateFileUpload.this,
-                                getString(R.string.label_upload_failed));
+                        showMessageThenExit(R.string.label_upload_failed);
+
                     } else if (state == FileUpload.State.ABORTED) {
                         // Display sharing status
-                        Utils.showMessage(InitiateFileUpload.this,
-                                getString(R.string.label_upload_aborted));
+                        showMessageThenExit(R.string.label_upload_aborted);
+
                     } else if (state == FileUpload.State.TRANSFERRED) {
                         // Display sharing status
                         statusView.setText(getString(R.string.label_upload_transferred));
@@ -309,8 +206,7 @@ public class InitiateFileUpload extends Activity {
                                         + ") (state=" + state + ") (info=" + fileInfo + ")");
                             }
                         } catch (RcsServiceException e) {
-                            // TODO handled later in CR037
-                            e.printStackTrace();
+                            showExceptionThenExit(e);
                         }
 
                     }
@@ -319,29 +215,15 @@ public class InitiateFileUpload extends Activity {
 
         }
 
-        /**
-         * Callback called during the upload progress.
-         * 
-         * @param uploadId ID of upload
-         * @param currentSize Current transferred size in bytes
-         * @param totalSize Total size to transfer in bytes
-         */
         @Override
         public void onProgressUpdate(String uploadId, final long currentSize, final long totalSize) {
             mHandler.post(new Runnable() {
                 public void run() {
-                    // Display sharing progress
                     updateProgressBar(currentSize, totalSize);
                 }
             });
         }
 
-        /**
-         * Callback called when the file has been uploaded.
-         * 
-         * @param uploadId ID of upload
-         * @param info Info about the file upload
-         */
         @Override
         public void onUploaded(String uploadId, final FileUploadInfo info) {
             mHandler.post(new Runnable() {
@@ -351,14 +233,8 @@ public class InitiateFileUpload extends Activity {
                 }
             });
         }
-    };
+    }
 
-    /**
-     * Show the sharing progress
-     * 
-     * @param currentSize Current size transferred
-     * @param totalSize Total size to be transferred
-     */
     private void updateProgressBar(long currentSize, long totalSize) {
         TextView statusView = (TextView) findViewById(R.id.progress_status);
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
@@ -367,30 +243,107 @@ public class InitiateFileUpload extends Activity {
         progressBar.setProgress((int) position);
     }
 
-    /**
-     * Quit the upload
-     */
-    private void quitUpload() {
-        // Stop upload
+    private void quitSession() {
         try {
-            if (mUpload != null && FileUpload.State.STARTED == mUpload.getState()) {
+            if (mUpload != null && RcsSessionUtil.isAllowedToAbortFileUploadSession(mUpload)) {
                 mUpload.abortUpload();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (RcsServiceException e) {
+            showException(e);
+
+        } finally {
+            mUpload = null;
+            finish();
         }
-        mUpload = null;
-        finish();
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_BACK:
-                quitUpload();
-                return true;
+        if (KeyEvent.KEYCODE_BACK == keyCode) {
+            quitSession();
+            return true;
         }
-
         return super.onKeyDown(keyCode, event);
     }
+
+    private void initialize() {
+        mBtnUploadListener = new OnClickListener() {
+            public void onClick(View v) {
+                try {
+                    // Check max size
+                    long maxSize = 0;
+                    try {
+                        maxSize = getFileUploadApi().getConfiguration().getMaxSize();
+                        if (LogUtils.isActive) {
+                            Log.d(LOGTAG,
+                                    "FileUpload max size=".concat(Long.valueOf(maxSize).toString()));
+                        }
+                    } catch (RcsServiceException e) {
+                        showException(e);
+                    }
+                    if ((maxSize > 0) && (mFilesize >= maxSize)) {
+                        // Display an error
+                        showMessage(getString(R.string.label_upload_max_size, maxSize));
+                        return;
+                    }
+
+                    // Get thumbnail option
+                    CheckBox ftThumb = (CheckBox) findViewById(R.id.file_thumb);
+                    mUploadThumbnail = ftThumb.isChecked();
+
+                    /* Only take persistable permission for content Uris */
+                    FileUtils.tryToTakePersistableContentUriPermission(getApplicationContext(),
+                            mFile);
+
+                    // Initiate upload
+                    mUpload = getFileUploadApi().uploadFile(mFile, mUploadThumbnail);
+                    mUploadId = mUpload.getUploadId();
+
+                    // Hide buttons
+                    mUploadBtn.setVisibility(View.GONE);
+                    mSelectBtn.setVisibility(View.GONE);
+
+                } catch (RcsServiceException e) {
+                    showExceptionThenExit(e);
+                }
+            }
+        };
+
+        mBtnSelectListener = new OnClickListener() {
+            public void onClick(View v) {
+                FileUtils.openFile(InitiateFileUpload.this, "image/*", SELECT_IMAGE);
+            }
+        };
+
+        mBtnShowListener = new OnClickListener() {
+            public void onClick(View v) {
+                /* Show uploaded file */
+                try {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(mUpload.getUploadInfo().getFile());
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                } catch (RcsGenericException e) {
+                    showExceptionThenExit(e);
+                }
+            }
+        };
+
+        mBtnShowThumbnailListener = new OnClickListener() {
+            public void onClick(View v) {
+                /* Show uploaded thumbnail */
+                try {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(mUpload.getUploadInfo().getFileIcon());
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+
+                } catch (RcsGenericException e) {
+                    showExceptionThenExit(e);
+                }
+            }
+        };
+
+    }
+
 }

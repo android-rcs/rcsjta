@@ -21,9 +21,9 @@ package com.orangelabs.rcs.ri.history;
 import com.gsma.services.rcs.history.HistoryLog;
 import com.gsma.services.rcs.history.HistoryUriBuilder;
 
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
 import com.orangelabs.rcs.ri.R;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
@@ -42,12 +42,11 @@ import java.util.TreeMap;
 /**
  * History log
  */
-public abstract class HistoryListView extends Activity {
+public abstract class HistoryListView extends RcsActivity {
 
     protected final static int MAX_LENGTH_DESCRIPTION = 25;
     protected final static int MAX_LENGTH_SUBJECT = 15;
-    protected final static String SORT_BY = new StringBuilder(HistoryLog.TIMESTAMP).append(" DESC")
-            .toString();
+    protected final static String SORT_BY = HistoryLog.TIMESTAMP + " DESC";
 
     /**
      * AlertDialog to show for selecting filters.
@@ -112,6 +111,7 @@ public abstract class HistoryListView extends Activity {
                             }
                         });
                 mFilterAlertDialog = builder.show();
+                registerDialog(mFilterAlertDialog);
                 break;
         }
         return true;
@@ -142,7 +142,7 @@ public abstract class HistoryListView extends Activity {
         if (in.length() > maxLength) {
             in = in.substring(0, maxLength).concat("...");
         }
-        return new StringBuilder("\"").append(in).append("\"").toString();
+        return "\"" + in + "\"";
     }
 
     /**
@@ -151,8 +151,8 @@ public abstract class HistoryListView extends Activity {
      * @param providers ordered map of providers IDs associated with their name
      */
     protected void setProviders(TreeMap<Integer, String> providers) {
-        mProviderIds = new ArrayList<Integer>();
-        mFilterMenuItems = new ArrayList<String>();
+        mProviderIds = new ArrayList<>();
+        mFilterMenuItems = new ArrayList<>();
         for (Entry<Integer, String> entry : providers.entrySet()) {
             mFilterMenuItems.add(entry.getValue());
             mProviderIds.add(entry.getKey());
@@ -170,7 +170,7 @@ public abstract class HistoryListView extends Activity {
      * @return the list of selected providers IDs
      */
     protected List<Integer> getSelectedProviderIds() {
-        List<Integer> providers = new ArrayList<Integer>();
+        List<Integer> providers = new ArrayList<>();
         for (int i = 0; i < mCheckedProviders.length; i++) {
             if (mCheckedProviders[i]) {
                 providers.add(mProviderIds.get(i));

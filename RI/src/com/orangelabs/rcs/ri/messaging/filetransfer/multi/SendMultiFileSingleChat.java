@@ -25,10 +25,8 @@ import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
 
-import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.util.Log;
 
@@ -45,6 +43,8 @@ public class SendMultiFileSingleChat extends SendMultiFile implements ISendMulti
     private static final String LOGTAG = LogUtils.getTag(SendMultiFileSingleChat.class
             .getSimpleName());
 
+    private OneToOneFileTransferListener mFtListener;
+
     @Override
     public boolean transferFiles(List<FileTransferProperties> filesToTransfer) {
         try {
@@ -60,75 +60,12 @@ public class SendMultiFileSingleChat extends SendMultiFile implements ISendMulti
                 mTransferIds.add(fileTransfer.getTransferId());
             }
             return true;
-        } catch (Exception e) {
-            hideProgressDialog();
-            Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce,
-                    e);
+
+        } catch (RcsServiceException e) {
+            showExceptionThenExit(e);
             return false;
         }
     }
-
-    private OneToOneFileTransferListener mFtListener = new OneToOneFileTransferListener() {
-
-        @Override
-        public void onProgressUpdate(ContactId contact, final String transferId,
-                final long currentSize, final long totalSize) {
-            /* Discard event if not for current transferId */
-            if (!mTransferIds.contains(transferId)) {
-                return;
-            }
-            // if (LogUtils.isActive) {
-            // Log.d(LOGTAG,
-            // "onProgressUpdate contact " + contact + " transferId:" + transferId
-            // + " (size=" + currentSize + ") (total=" + totalSize + ") "
-            // + mTransferIds.size());
-            // }
-            mHandler.post(new Runnable() {
-                public void run() {
-                    updateProgressBar(mTransferIds.indexOf(transferId), currentSize, totalSize);
-                }
-            });
-        }
-
-        @Override
-        public void onStateChanged(ContactId contact, String transferId,
-                final FileTransfer.State state, FileTransfer.ReasonCode reasonCode) {
-            if (LogUtils.isActive) {
-                Log.d(LOGTAG, "onStateChanged contact=" + contact + " transferId=" + transferId
-                        + " state=" + state + " reason=" + reasonCode);
-            }
-            /* Discard event if not for current transferId */
-            if (!mTransferIds.contains(transferId)) {
-                return;
-            }
-            final String _reasonCode;
-            if (FileTransfer.ReasonCode.UNSPECIFIED == reasonCode) {
-                _reasonCode = null;
-            } else {
-                _reasonCode = RiApplication.sFileTransferReasonCodes[reasonCode.toInt()];
-            }
-            final String _state = RiApplication.sFileTransferStates[state.toInt()];
-            final FileTransferProperties prop = mFileTransferAdapter.getItem(mTransferIds
-                    .indexOf(transferId));
-            mHandler.post(new Runnable() {
-                public void run() {
-                    prop.setStatus(_state);
-                    prop.setReasonCode(_reasonCode);
-                    mFileTransferAdapter.notifyDataSetChanged();
-                    closeDialogIfMultipleFileTransferIsFinished();
-                }
-
-            });
-        }
-
-        @Override
-        public void onDeleted(ContactId contact, Set<String> transferIds) {
-            if (LogUtils.isActive) {
-                Log.w(LOGTAG, "onDeleted contact=" + contact + " transferIds=" + transferIds);
-            }
-        }
-
-    };
 
     @Override
     public void addFileTransferEventListener(FileTransferService fileTransferService)
@@ -152,5 +89,70 @@ public class SendMultiFileSingleChat extends SendMultiFile implements ISendMulti
     public boolean checkPermissionToSendFile(String chatId) throws RcsServiceException {
         ContactId contact = ContactUtil.getInstance(this).formatContact(mChatId);
         return mFileTransferService.isAllowedToTransferFile(contact);
+    }
+
+    @Override
+    public void initialize() {
+        mFtListener = new OneToOneFileTransferListener() {
+
+            @Override
+            public void onProgressUpdate(ContactId contact, final String transferId,
+                    final long currentSize, final long totalSize) {
+                /* Discard event if not for current transferId */
+                if (!mTransferIds.contains(transferId)) {
+                    return;
+                }
+                // if (LogUtils.isActive) {
+                // Log.d(LOGTAG,
+                // "onProgressUpdate contact " + contact + " transferId:" + transferId
+                // + " (size=" + currentSize + ") (total=" + totalSize + ") "
+                // + mTransferIds.size());
+                // }
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        updateProgressBar(mTransferIds.indexOf(transferId), currentSize, totalSize);
+                    }
+                });
+            }
+
+            @Override
+            public void onStateChanged(ContactId contact, String transferId,
+                    final FileTransfer.State state, FileTransfer.ReasonCode reasonCode) {
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "onStateChanged contact=" + contact + " transferId=" + transferId
+                            + " state=" + state + " reason=" + reasonCode);
+                }
+                /* Discard event if not for current transferId */
+                if (!mTransferIds.contains(transferId)) {
+                    return;
+                }
+                final String _reasonCode;
+                if (FileTransfer.ReasonCode.UNSPECIFIED == reasonCode) {
+                    _reasonCode = null;
+                } else {
+                    _reasonCode = RiApplication.sFileTransferReasonCodes[reasonCode.toInt()];
+                }
+                final String _state = RiApplication.sFileTransferStates[state.toInt()];
+                final FileTransferProperties prop = mFileTransferAdapter.getItem(mTransferIds
+                        .indexOf(transferId));
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        prop.setStatus(_state);
+                        prop.setReasonCode(_reasonCode);
+                        mFileTransferAdapter.notifyDataSetChanged();
+                        closeDialogIfMultipleFileTransferIsFinished();
+                    }
+
+                });
+            }
+
+            @Override
+            public void onDeleted(ContactId contact, Set<String> transferIds) {
+                if (LogUtils.isActive) {
+                    Log.w(LOGTAG, "onDeleted contact=" + contact + " transferIds=" + transferIds);
+                }
+            }
+
+        };
     }
 }

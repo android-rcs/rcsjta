@@ -41,9 +41,14 @@ import java.util.Map;
 /**
  * This subclass of Application allows to get a resource content from a static context
  * 
- * @author YPLO6403
+ * @author Philippe LEMORDANT
  */
 public class RiApplication extends Application {
+
+    /*
+     * Delay before creating connection manager.
+     */
+    private static final long DELAY_FOR_MANAGING_CONNECTION = 5000;
 
     private static Context mContext;
 
@@ -177,7 +182,7 @@ public class RiApplication extends Application {
         sMultimediaReasonCodes = convertForUI(resources.getStringArray(R.array.mms_reason_codes));
         sGroupChatEvents = convertForUI(resources.getStringArray(R.array.group_chat_event));
 
-        sDirectionToString = new HashMap<Direction, String>();
+        sDirectionToString = new HashMap<>();
         sDirectionToString.put(Direction.INCOMING, resources.getString(R.string.label_incoming));
         sDirectionToString.put(Direction.OUTGOING, resources.getString(R.string.label_outgoing));
         sDirectionToString.put(Direction.IRRELEVANT,
@@ -192,15 +197,20 @@ public class RiApplication extends Application {
         Handler mainThreadHandler = new Handler(Looper.getMainLooper());
         final ConnectionManager cnxManager = ConnectionManager.createInstance(mContext,
                 mRcsServiceControl, EnumSet.allOf(RcsServiceName.class));
-        mainThreadHandler.post(new Runnable() {
+        mainThreadHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 cnxManager.start();
             }
-        });
-
+        }, DELAY_FOR_MANAGING_CONNECTION);
     }
 
+    /**
+     * Convert to lower case and readable strings
+     * 
+     * @param strings
+     * @return converted strings
+     */
     private String[] convertForUI(String[] strings) {
         List<String> stringList = Arrays.asList(strings);
         for (int i = 0, l = stringList.size(); i < l; ++i) {

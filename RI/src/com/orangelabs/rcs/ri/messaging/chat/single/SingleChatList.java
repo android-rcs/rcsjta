@@ -19,15 +19,16 @@
 package com.orangelabs.rcs.ri.messaging.chat.single;
 
 import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content;
 import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.chat.OneToOneChatListener;
 import com.gsma.services.rcs.contact.ContactId;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsFragmentActivity;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.ContactUtil;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -39,7 +40,6 @@ import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -66,7 +66,7 @@ import java.util.Set;
  * 
  * @author YPLO6403
  */
-public class SingleChatList extends FragmentActivity implements
+public class SingleChatList extends RcsFragmentActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
     // @formatter:off
@@ -96,13 +96,9 @@ public class SingleChatList extends FragmentActivity implements
 
     private boolean mOneToOneChatListenerSet = false;
 
-    private ConnectionManager mCnxManager;
-
     private ChatListAdapter mAdapter;
 
     private Handler mHandler = new Handler();
-
-    private LockAccess mExitOnce = new LockAccess();
 
     private static final String LOGTAG = LogUtils.getTag(SingleChatList.class.getSimpleName());
 
@@ -125,8 +121,7 @@ public class SingleChatList extends FragmentActivity implements
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.chat_list);
 
-        mCnxManager = ConnectionManager.getInstance();
-        mChatService = mCnxManager.getChatApi();
+        mChatService = getChatApi();
 
         mListView = (ListView) findViewById(android.R.id.list);
         TextView emptyView = (TextView) findViewById(android.R.id.empty);
@@ -149,10 +144,9 @@ public class SingleChatList extends FragmentActivity implements
         }
         try {
             mChatService.removeEventListener(mOneChatListener);
-        } catch (Exception e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "removeEventListener failed", e);
-            }
+
+        } catch (RcsServiceException e) {
+            Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
         }
     }
 
@@ -197,16 +191,12 @@ public class SingleChatList extends FragmentActivity implements
             String mimetype = cursor.getString(holder.columnMimetype);
             String text = "";
             if (Message.MimeType.GEOLOC_MESSAGE.equals(mimetype)) {
-                try {
-                    Geoloc geoloc = new Geoloc(content);
-                    text = new StringBuilder(geoloc.getLabel()).append(",")
-                            .append(geoloc.getLatitude()).append(",").append(geoloc.getLongitude())
-                            .toString();
-                } catch (Exception e) {
-                    if (LogUtils.isActive) {
-                        Log.e(LOGTAG, "Invalid geoloc message:".concat(content));
-                    }
-                    text = content;
+                Geoloc geoloc = new Geoloc(content);
+                String label = geoloc.getLabel();
+                if (label == null) {
+                    text = geoloc.getLatitude() + "," + geoloc.getLongitude();
+                } else {
+                    text = label + "," + geoloc.getLatitude() + "," + geoloc.getLongitude();
                 }
             } else {
                 if (Message.MimeType.TEXT_MESSAGE.equals(mimetype)) {
@@ -261,8 +251,8 @@ public class SingleChatList extends FragmentActivity implements
         switch (item.getItemId()) {
             case R.id.menu_clear_log:
                 /* Delete all one-to-one chat messages */
-                if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
-                    Utils.showMessage(this, getString(R.string.label_api_unavailable));
+                if (!isServiceConnected(RcsServiceName.CHAT)) {
+                    showMessage(R.string.label_service_not_available);
                     break;
                 }
                 if (LogUtils.isActive) {
@@ -274,9 +264,9 @@ public class SingleChatList extends FragmentActivity implements
                         mOneToOneChatListenerSet = true;
                     }
                     mChatService.deleteOneToOneChats();
-                } catch (Exception e) {
-                    Utils.showMessageAndExit(this, getString(R.string.label_delete_chat_failed),
-                            mExitOnce, e);
+
+                } catch (RcsServiceException e) {
+                    showExceptionThenExit(e);
                 }
                 break;
         }
@@ -287,8 +277,8 @@ public class SingleChatList extends FragmentActivity implements
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         /* Check file transfer API is connected */
-        if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
-            Utils.showMessage(this, getString(R.string.label_api_unavailable));
+        if (!isServiceConnected(RcsServiceName.CHAT)) {
+            showMessage(R.string.label_service_not_available);
             return;
         }
         menu.add(0, CHAT_MENU_ITEM_OPEN, CHAT_MENU_ITEM_OPEN, R.string.menu_open_chat_session);
@@ -307,17 +297,17 @@ public class SingleChatList extends FragmentActivity implements
         }
         switch (item.getItemId()) {
             case CHAT_MENU_ITEM_OPEN:
-                if (mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
+                if (isServiceConnected(RcsServiceName.CHAT)) {
                     /* Open one-to-one chat view */
                     startActivity(SingleChatView.forgeIntentToOpenConversation(this, contact));
                 } else {
-                    Utils.showMessage(this, getString(R.string.label_continue_chat_failed));
+                    showMessage(R.string.label_continue_chat_failed);
                 }
                 return true;
 
             case CHAT_MENU_ITEM_DELETE:
-                if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
-                    Utils.showMessage(this, getString(R.string.label_delete_chat_failed));
+                if (!isServiceConnected(RcsServiceName.CHAT)) {
+                    showMessage(R.string.label_delete_chat_failed);
                     return true;
                 }
                 /* Delete messages for contact */
@@ -330,11 +320,11 @@ public class SingleChatList extends FragmentActivity implements
                         mOneToOneChatListenerSet = true;
                     }
                     mChatService.deleteOneToOneChat(contact);
-                } catch (Exception e) {
-                    Utils.showMessageAndExit(this, getString(R.string.label_delete_chat_failed),
-                            mExitOnce, e);
+                } catch (RcsServiceException e) {
+                    showExceptionThenExit(e);
                 }
                 return true;
+
             default:
                 return super.onContextItemSelected(item);
         }

@@ -47,7 +47,7 @@ public class TestMessagingApi extends ListActivity {
         String[] items = {
                 getString(R.string.menu_file_transfer), getString(R.string.menu_chat)
         };
-        setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
+        setListAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items));
     }
 
     @Override

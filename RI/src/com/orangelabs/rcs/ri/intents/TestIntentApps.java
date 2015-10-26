@@ -18,11 +18,10 @@
 
 package com.orangelabs.rcs.ri.intents;
 
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
 import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.Utils;
 
-import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
@@ -35,17 +34,11 @@ import android.widget.Button;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class TestIntentApps extends Activity {
-
-    /**
-     * A locker to exit only once
-     */
-    private LockAccess mExitOnce = new LockAccess();
+public class TestIntentApps extends RcsActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.intents_apps);
@@ -65,71 +58,47 @@ public class TestIntentApps extends Activity {
         btn.setOnClickListener(btnListener);
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
     /**
      * Button callback
      */
     private OnClickListener btnListener = new OnClickListener() {
         public void onClick(View v) {
-            if (v.getId() == R.id.load_chat) {
-                try {
+            try {
+                if (v.getId() == R.id.load_chat) {
                     Intent intent = new Intent(
                             com.gsma.services.rcs.Intents.Chat.ACTION_VIEW_ONE_TO_ONE_CHAT);
                     startActivity(intent);
-                } catch (Exception e) {
-                    Utils.showMessageAndExit(TestIntentApps.this,
-                            getString(R.string.label_intent_failed), mExitOnce, e);
-                }
-            } else if (v.getId() == R.id.initiate_chat) {
-                try {
+
+                } else if (v.getId() == R.id.initiate_chat) {
                     Intent intent = new Intent(
                             com.gsma.services.rcs.Intents.Chat.ACTION_SEND_ONE_TO_ONE_CHAT_MESSAGE);
                     startActivity(intent);
-                } catch (Exception e) {
-                    Utils.showMessageAndExit(TestIntentApps.this,
-                            getString(R.string.label_intent_failed), mExitOnce, e);
-                }
-            } else if (v.getId() == R.id.load_group_chat) {
-                try {
+
+                } else if (v.getId() == R.id.load_group_chat) {
                     Intent intent = new Intent(
                             com.gsma.services.rcs.Intents.Chat.ACTION_VIEW_GROUP_CHAT);
                     startActivity(intent);
-                } catch (Exception e) {
-                    Utils.showMessageAndExit(TestIntentApps.this,
-                            getString(R.string.label_intent_failed), mExitOnce, e);
-                }
-            } else if (v.getId() == R.id.initiate_group_chat) {
-                try {
+
+                } else if (v.getId() == R.id.initiate_group_chat) {
                     Intent intent = new Intent(
                             com.gsma.services.rcs.Intents.Chat.ACTION_INITIATE_GROUP_CHAT);
                     startActivity(intent);
-                } catch (Exception e) {
-                    Utils.showMessageAndExit(TestIntentApps.this,
-                            getString(R.string.label_intent_failed), mExitOnce, e);
-                }
-            } else if (v.getId() == R.id.load_ft) {
-                try {
+
+                } else if (v.getId() == R.id.load_ft) {
                     Intent intent = new Intent(
                             com.gsma.services.rcs.Intents.FileTransfer.ACTION_VIEW_FILE_TRANSFER);
                     startActivity(intent);
-                } catch (Exception e) {
-                    Utils.showMessageAndExit(TestIntentApps.this,
-                            getString(R.string.label_intent_failed), mExitOnce, e);
-                }
-            } else if (v.getId() == R.id.initiate_ft) {
-                try {
+
+                } else if (v.getId() == R.id.initiate_ft) {
                     Intent intent = new Intent(
                             com.gsma.services.rcs.Intents.FileTransfer.ACTION_INITIATE_ONE_TO_ONE_FILE_TRANSFER);
                     startActivity(intent);
-                } catch (Exception e) {
-                    Utils.showMessageAndExit(TestIntentApps.this,
-                            getString(R.string.label_intent_failed), mExitOnce, e);
                 }
+
+            } catch (ActivityNotFoundException e) {
+                showMessageThenExit(R.string.label_intent_failed);
             }
+
         }
     };
 }

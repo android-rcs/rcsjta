@@ -19,22 +19,20 @@
 package com.orangelabs.rcs.ri.capabilities;
 
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.capability.Capabilities;
 import com.gsma.services.rcs.capability.CapabilitiesListener;
 import com.gsma.services.rcs.capability.CapabilityService;
 import com.gsma.services.rcs.contact.ContactId;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.ContactListAdapter;
 import com.orangelabs.rcs.ri.utils.ContactUtil;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
-import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
@@ -54,15 +52,11 @@ import android.widget.TextView;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class RequestCapabilities extends Activity {
+public class RequestCapabilities extends RcsActivity {
 
     private final Handler mHandler = new Handler();
 
-    private LockAccess mExitOnce = new LockAccess();
-
-    private ConnectionManager mCnxManager;
-
-    private MyCapabilitiesListener capabilitiesListener = new MyCapabilitiesListener();
+    private MyCapabilitiesListener mCapabilitiesListener = new MyCapabilitiesListener();
 
     private static final String EXTENSION_SEPARATOR = "\n";
 
@@ -73,24 +67,26 @@ public class RequestCapabilities extends Activity {
      */
     private Spinner mSpinner;
 
+    private OnClickListener mBtnRefreshListener;
+
+    private OnItemSelectedListener mListenerContact;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        initialize();
         /* Set layout */
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.capabilities_request);
 
-        mCnxManager = ConnectionManager.getInstance();
-
         /* Set the contact selector */
         mSpinner = (Spinner) findViewById(R.id.contact);
         mSpinner.setAdapter(ContactListAdapter.createContactListAdapter(this));
-        mSpinner.setOnItemSelectedListener(listenerContact);
+        mSpinner.setOnItemSelectedListener(mListenerContact);
 
         /* Set button callback */
         Button refreshBtn = (Button) findViewById(R.id.refresh_btn);
-        refreshBtn.setOnClickListener(btnRefreshListener);
+        refreshBtn.setOnClickListener(mBtnRefreshListener);
 
         /* Update refresh button */
         if (mSpinner.getAdapter().getCount() == 0) {
@@ -101,35 +97,29 @@ public class RequestCapabilities extends Activity {
         }
 
         /* Register to API connection manager */
-        if (!mCnxManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
-            Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
-                    mExitOnce);
+        if (!isServiceConnected(RcsServiceName.CAPABILITY)) {
+            showMessageThenExit(R.string.label_service_not_available);
             return;
         }
-        mCnxManager.startMonitorServices(this, null, RcsServiceName.CAPABILITY);
+        startMonitorServices(RcsServiceName.CAPABILITY);
         try {
-            // Add service listener
-            mCnxManager.getCapabilityApi().addCapabilitiesListener(capabilitiesListener);
+            getCapabilityApi().addCapabilitiesListener(mCapabilitiesListener);
+
         } catch (RcsServiceException e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "Failed to add listener", e);
-            }
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce);
+            showExceptionThenExit(e);
         }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mCnxManager.stopMonitorServices(this);
-        if (mCnxManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
+        if (isServiceConnected(RcsServiceName.CAPABILITY)) {
             // Remove image sharing listener
             try {
-                mCnxManager.getCapabilityApi().removeCapabilitiesListener(capabilitiesListener);
-            } catch (Exception e) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "Failed to remove listener", e);
-                }
+                getCapabilityApi().removeCapabilitiesListener(mCapabilitiesListener);
+
+            } catch (RcsServiceException e) {
+                Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
             }
         }
     }
@@ -157,47 +147,14 @@ public class RequestCapabilities extends Activity {
                 public void run() {
                     // Check if this intent concerns the current selected
                     // contact
-                    if (contact != null && contact.equals(selectedContact)) {
+                    if (contact.equals(selectedContact)) {
                         // Update UI
                         displayCapabilities(capabilities);
                     }
                 }
             });
-        };
+        }
     }
-
-    /**
-     * Spinner contact listener
-     */
-    private OnItemSelectedListener listenerContact = new OnItemSelectedListener() {
-        @Override
-        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-            CapabilityService capabilityApi = mCnxManager.getCapabilityApi();
-            try {
-                // Get selected contact
-                ContactId contactId = getSelectedContact();
-
-                // Get current capabilities
-                Capabilities currentCapabilities = capabilityApi.getContactCapabilities(contactId);
-                // Display default capabilities
-                displayCapabilities(currentCapabilities);
-                if (currentCapabilities == null) {
-                    Utils.displayLongToast(RequestCapabilities.this,
-                            getString(R.string.label_no_capabilities, contactId.toString()));
-                }
-            } catch (RcsServiceNotAvailableException e) {
-                Utils.showMessageAndExit(RequestCapabilities.this,
-                        getString(R.string.label_api_unavailable), mExitOnce, e);
-            } catch (RcsServiceException e) {
-                Utils.showMessageAndExit(RequestCapabilities.this,
-                        getString(R.string.label_api_failed), mExitOnce, e);
-            }
-        }
-
-        @Override
-        public void onNothingSelected(AdapterView<?> arg0) {
-        }
-    };
 
     /**
      * Returns the selected contact
@@ -210,58 +167,18 @@ public class RequestCapabilities extends Activity {
         return ContactUtil.formatContact(adapter.getSelectedNumber(mSpinner.getSelectedView()));
     }
 
-    /**
-     * Request button callback
-     */
-    private OnClickListener btnRefreshListener = new OnClickListener() {
-        public void onClick(View v) {
-            // Check if the service is available
-            boolean registered = false;
-            try {
-                registered = mCnxManager.getCapabilityApi().isServiceRegistered();
-            } catch (Exception e) {
-                Utils.showMessageAndExit(RequestCapabilities.this,
-                        getString(R.string.label_api_unavailable), mExitOnce, e);
-                return;
-            }
-            if (!registered) {
-                Utils.showMessage(RequestCapabilities.this,
-                        getString(R.string.label_service_not_available));
-                return;
-            }
-
-            ContactId contact = getSelectedContact();
-            if (contact != null) {
-                updateCapabilities(contact);
-            }
-        }
-    };
-
-    /**
-     * Update capabilities of a given contact
-     * 
-     * @param contact Contact
-     */
     private void updateCapabilities(ContactId contact) {
         // Display info
         Utils.displayLongToast(RequestCapabilities.this,
                 getString(R.string.label_request_in_background, contact));
-        // Request capabilities
         try {
-            // Request new capabilities
-            mCnxManager.getCapabilityApi().requestContactCapabilities(contact);
-        } catch (RcsServiceNotAvailableException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce, e);
+            getCapabilityApi().requestContactCapabilities(contact);
+
         } catch (RcsServiceException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+            showExceptionThenExit(e);
         }
     }
 
-    /**
-     * Display the capabilities
-     * 
-     * @param capabilities Capabilities
-     */
     private void displayCapabilities(Capabilities capabilities) {
         CheckBox imageCSh = (CheckBox) findViewById(R.id.image_sharing);
         CheckBox videoCSh = (CheckBox) findViewById(R.id.video_sharing);
@@ -272,16 +189,16 @@ public class RequestCapabilities extends Activity {
         TextView timestamp = (TextView) findViewById(R.id.last_refresh);
         CheckBox automata = (CheckBox) findViewById(R.id.automata);
         // Set capabilities
-        imageCSh.setChecked((capabilities != null) ? capabilities.isImageSharingSupported() : false);
-        videoCSh.setChecked((capabilities != null) ? capabilities.isVideoSharingSupported() : false);
-        ft.setChecked((capabilities != null) ? capabilities.isFileTransferSupported() : false);
-        im.setChecked((capabilities != null) ? capabilities.isImSessionSupported() : false);
-        geoloc.setChecked((capabilities != null) ? capabilities.isGeolocPushSupported() : false);
+        imageCSh.setChecked((capabilities != null) && capabilities.isImageSharingSupported());
+        videoCSh.setChecked((capabilities != null) && capabilities.isVideoSharingSupported());
+        ft.setChecked((capabilities != null) && capabilities.isFileTransferSupported());
+        im.setChecked((capabilities != null) && capabilities.isImSessionSupported());
+        geoloc.setChecked((capabilities != null) && capabilities.isGeolocPushSupported());
 
         // Set extensions
         extensions.setVisibility(View.VISIBLE);
         extensions.setText(getExtensions(capabilities));
-        automata.setChecked((capabilities != null) ? capabilities.isAutomata() : false);
+        automata.setChecked((capabilities != null) && capabilities.isAutomata());
         timestamp.setText((capabilities != null) ? DateUtils.getRelativeTimeSpanString(
                 capabilities.getTimestamp(), System.currentTimeMillis(),
                 DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE) : "");
@@ -296,5 +213,53 @@ public class RequestCapabilities extends Activity {
             extensions.append(EXTENSION_SEPARATOR).append(capability);
         }
         return extensions.substring(EXTENSION_SEPARATOR.length());
+    }
+
+    private void initialize() {
+        mBtnRefreshListener = new OnClickListener() {
+            public void onClick(View v) {
+                // Check if the service is available
+                try {
+                    if (!getCapabilityApi().isServiceRegistered()) {
+                        showMessage(R.string.error_not_registered);
+                        return;
+                    }
+                } catch (RcsServiceException e) {
+                    showExceptionThenExit(e);
+                    return;
+                }
+                ContactId contact = getSelectedContact();
+                if (contact != null) {
+                    updateCapabilities(contact);
+                }
+            }
+        };
+
+        mListenerContact = new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                CapabilityService capabilityApi = getCapabilityApi();
+                try {
+                    // Get selected contact
+                    ContactId contactId = getSelectedContact();
+
+                    // Get current capabilities
+                    Capabilities currentCapabilities = capabilityApi
+                            .getContactCapabilities(contactId);
+                    // Display default capabilities
+                    displayCapabilities(currentCapabilities);
+                    if (currentCapabilities == null) {
+                        Utils.displayLongToast(RequestCapabilities.this,
+                                getString(R.string.label_no_capabilities, contactId.toString()));
+                    }
+                } catch (RcsServiceException e) {
+                    showExceptionThenExit(e);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> arg0) {
+            }
+        };
     }
 }

@@ -18,19 +18,15 @@
 
 package com.orangelabs.rcs.ri.utils;
 
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
 import com.orangelabs.rcs.ri.R;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
-import android.util.Log;
 import android.widget.Toast;
 
 import java.util.Random;
@@ -45,6 +41,8 @@ public class Utils {
 
     private static final Random sPendingIntentIdGenerator = new Random();
 
+    private static final String LOGTAG = LogUtils.getTag(Utils.class.getSimpleName());
+
     /**
      * Gets a unique ID for pending intent
      * 
@@ -53,8 +51,6 @@ public class Utils {
     public static int getUniqueIdForPendingIntent() {
         return sPendingIntentIdGenerator.nextInt();
     }
-
-    private static final String LOGTAG = LogUtils.getTag(Utils.class.getSimpleName());
 
     /**
      * Returns the application version from manifest file
@@ -67,7 +63,7 @@ public class Utils {
         try {
             PackageInfo info = ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0);
             version = info.versionName;
-        } catch (NameNotFoundException e) {
+        } catch (NameNotFoundException ignored) {
         }
         return version;
     }
@@ -90,135 +86,6 @@ public class Utils {
      */
     public static void displayLongToast(Context ctx, String message) {
         Toast.makeText(ctx, message, Toast.LENGTH_LONG).show();
-    }
-
-    /**
-     * Display toast and log an exception
-     * 
-     * @param context Context of activity
-     * @param e exception to log
-     */
-    public static void displayToast(Context context, Exception e) {
-        displayToast(context, "Exception occurred", e);
-    }
-
-    /**
-     * Display toast and log an exception
-     * 
-     * @param context Context of activity
-     * @param message message to display
-     * @param e exception to log
-     */
-    public static void displayToast(Context context, String message, Exception e) {
-        Log.w(LOGTAG, message);
-        Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
-        displayLongToast(context, message.concat(": see Logcat!"));
-    }
-
-    /**
-     * Show a message and exit activity
-     * 
-     * @param activity Activity
-     * @param msg Message to be displayed
-     */
-    public static void showMessageAndExit(final Activity activity, String msg) {
-        showMessageAndExit(activity, msg, null, null);
-    }
-
-    /**
-     * Show a message and exit activity
-     * 
-     * @param activity the activity.
-     * @param msg the message
-     * @param locker the locker
-     */
-    public static void showMessageAndExit(final Activity activity, String msg, LockAccess locker) {
-        showMessageAndExit(activity, msg, locker, null);
-    }
-
-    /**
-     * Show a message and exit activity
-     * 
-     * @param activity Activity
-     * @param msg Message to be displayed
-     * @param locker a locker to only execute once
-     * @param e the exception
-     */
-    public static void showMessageAndExit(final Activity activity, String msg, LockAccess locker,
-            Exception e) {
-        // Do not execute if activity is Fishing
-        if (activity.isFinishing()) {
-            return;
-        }
-        // Do not execute if already executed once
-        if (locker != null && !locker.tryLock()) {
-            return;
-        }
-
-        if (e != null) {
-            Log.e(LOGTAG, "Exception enforces exit of activity!");
-            Log.e(LOGTAG, ExceptionUtil.getFullStackTrace(e));
-        } else {
-            if (LogUtils.isActive) {
-                Log.w(LOGTAG,
-                        new StringBuilder("Exit activity ").append(activity.getLocalClassName())
-                                .append(" <").append(msg).append(">").toString());
-            }
-        }
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setMessage(msg);
-        builder.setTitle(R.string.title_msg);
-        builder.setCancelable(false);
-        builder.setPositiveButton(activity.getString(R.string.label_ok),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        activity.finish();
-                    }
-                });
-        AlertDialog alert = builder.create();
-        alert.show();
-    }
-
-    /**
-     * Show an message
-     * 
-     * @param activity Activity
-     * @param msg Message to be displayed
-     * @return Dialog
-     */
-    public static AlertDialog showMessage(Activity activity, String msg) {
-        if (LogUtils.isActive) {
-            Log.w(LOGTAG, "Activity " + activity.getLocalClassName() + " message=" + msg);
-        }
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setMessage(msg);
-        builder.setTitle(R.string.title_msg);
-        builder.setCancelable(false);
-        builder.setPositiveButton(activity.getString(R.string.label_ok), null);
-        AlertDialog alert = builder.create();
-        alert.show();
-        return alert;
-    }
-
-    /**
-     * Show an exception
-     * 
-     * @param activity Activity
-     * @param e Exception to be displayed
-     * @return Dialog
-     */
-    public static AlertDialog showException(Activity activity, Exception e) {
-        Log.e(LOGTAG, ExceptionUtil.getFullStackTrace(e));
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        String message = e.getMessage();
-        builder.setMessage((message != null) ? message : "Exception occurred!");
-        builder.setTitle(R.string.title_msg);
-        builder.setCancelable(false);
-        builder.setPositiveButton(activity.getString(R.string.label_ok), null);
-        AlertDialog alert = builder.create();
-        alert.show();
-        return alert;
     }
 
     /**
@@ -246,36 +113,16 @@ public class Utils {
      * @param activity Activity
      * @param title Title of the dialog
      * @param items List of items
+     * @return dialog
      */
-    public static void showList(Activity activity, String title, Set<String> items) {
-        if (activity.isFinishing()) {
-            return;
-        }
+    public static AlertDialog showList(Activity activity, String title, Set<String> items) {
         CharSequence[] chars = items.toArray(new CharSequence[items.size()]);
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(title);
         builder.setCancelable(false);
-        builder.setPositiveButton(activity.getString(R.string.label_ok), null);
+        builder.setPositiveButton(R.string.label_ok, null);
         builder.setItems(chars, null);
-        AlertDialog alert = builder.create();
-        alert.show();
-    }
-
-    /**
-     * Show a progress dialog with the given parameters
-     * 
-     * @param activity Activity
-     * @param msg Message to be displayed
-     * @return Dialog
-     */
-    public static ProgressDialog showProgressDialog(Activity activity, String msg) {
-        ProgressDialog dlg = new ProgressDialog(activity);
-        dlg.setMessage(msg);
-        dlg.setIndeterminate(true);
-        dlg.setCancelable(true);
-        dlg.setCanceledOnTouchOutside(false);
-        dlg.show();
-        return dlg;
+        return builder.show();
     }
 
     /**

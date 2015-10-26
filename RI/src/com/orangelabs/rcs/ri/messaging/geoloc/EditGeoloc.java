@@ -22,11 +22,12 @@ import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.chat.ChatServiceConfiguration;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Criteria;
@@ -35,6 +36,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.text.InputFilter;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -43,7 +45,7 @@ import android.widget.EditText;
 /**
  * Geoloc info editor
  */
-public class EditGeoloc extends Activity {
+public class EditGeoloc extends RcsActivity {
     /**
      * Intent parameters
      */
@@ -62,6 +64,8 @@ public class EditGeoloc extends Activity {
     private long geolocExpirationTime = 0;
 
     private int geolocLabelMaxLength = 0;
+
+    private static final String LOGTAG = LogUtils.getTag(EditGeoloc.class.getSimpleName());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,15 +88,14 @@ public class EditGeoloc extends Activity {
         setMyLocation();
 
         // Register to API connection manager
-        ConnectionManager connectionManager = ConnectionManager.getInstance();
-        if (connectionManager.isServiceConnected(RcsServiceName.CHAT)) {
+        if (isServiceConnected(RcsServiceName.CHAT)) {
             try {
-                ChatServiceConfiguration configuration = connectionManager.getChatApi()
-                        .getConfiguration();
+                ChatServiceConfiguration configuration = getChatApi().getConfiguration();
                 geolocExpirationTime = configuration.getGeolocExpirationTime();
                 geolocLabelMaxLength = configuration.getGeolocLabelMaxLength();
+
             } catch (RcsServiceException e) {
-                // Ignore exception
+                Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
             }
         }
         if (geolocLabelMaxLength > 0) {
@@ -101,11 +104,6 @@ public class EditGeoloc extends Activity {
                 maxLengthFilter
             });
         }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
     }
 
     /**

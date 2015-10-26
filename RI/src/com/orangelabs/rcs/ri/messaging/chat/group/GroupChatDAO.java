@@ -23,6 +23,9 @@ import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.chat.GroupChat.State;
+import com.gsma.services.rcs.contact.ContactId;
+
+import com.orangelabs.rcs.ri.utils.ContactUtil;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -39,6 +42,8 @@ public class GroupChatDAO {
     private final String mChatId;
 
     private final Direction mDirection;
+
+    private final ContactId mContact;
 
     private final String mParticipants;
 
@@ -84,9 +89,14 @@ public class GroupChatDAO {
         return mReasonCode;
     }
 
-    private GroupChatDAO(String chatId, Direction direction, String participants, State state,
-            String subject, long timestamp, ReasonCode reasonCode) {
+    public ContactId getContact() {
+        return mContact;
+    }
+
+    private GroupChatDAO(String chatId, ContactId contact, Direction direction,
+            String participants, State state, String subject, long timestamp, ReasonCode reasonCode) {
         mChatId = chatId;
+        mContact = contact;
         mDirection = direction;
         mParticipants = participants;
         mState = state;
@@ -132,8 +142,14 @@ public class GroupChatDAO {
                     .getColumnIndexOrThrow(ChatLog.GroupChat.PARTICIPANTS));
             ReasonCode reasonCode = GroupChat.ReasonCode.valueOf(cursor.getInt(cursor
                     .getColumnIndexOrThrow(ChatLog.GroupChat.REASON_CODE)));
-            return new GroupChatDAO(chatId, dir, participants, state, subject, timestamp,
-                    reasonCode);
+            String contact = cursor.getString(cursor
+                    .getColumnIndexOrThrow(ChatLog.GroupChat.CONTACT));
+            ContactId contactId = null;
+            if (contact != null) {
+                contactId = ContactUtil.formatContact(contact);
+            }
+            return new GroupChatDAO(chatId, contactId, dir, participants, state, subject,
+                    timestamp, reasonCode);
         } finally {
             if (cursor != null) {
                 cursor.close();

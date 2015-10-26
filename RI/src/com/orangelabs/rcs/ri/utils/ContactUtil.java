@@ -53,8 +53,8 @@ public class ContactUtil {
              * This exception should not occur since RI application cannot be started if country
              * code cannot be resolved.
              */
-            String errorMessage = new StringBuilder("Failed to convert phone number '")
-                    .append(contact).append("' into contactId!").toString();
+            String errorMessage = "Failed to convert phone number '" + contact
+                    + "' into contactId!";
             throw new IllegalStateException(errorMessage, e);
         }
     }
@@ -79,8 +79,7 @@ public class ContactUtil {
              * This exception should not occur since RI application cannot be started if country
              * code cannot be resolved.
              */
-            String errorMessage = new StringBuilder("Failed to validate phone number '")
-                    .append(number).append("'!").toString();
+            String errorMessage = "Failed to validate phone number '" + number + "'!";
             Log.e(LOGTAG, errorMessage);
             return false;
         }

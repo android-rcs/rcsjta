@@ -48,7 +48,7 @@ public class TestServiceApi extends ListActivity {
                 getString(R.string.menu_registration_status),
                 getString(R.string.menu_service_configuration)
         };
-        setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
+        setListAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items));
     }
 
     @Override

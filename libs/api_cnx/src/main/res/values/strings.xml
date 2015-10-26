@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="error_not_registered">Not registered to IMS</string>
+    <string name="label_service_not_available">The service is not available. Please retry later.</string>
+
+    <string name="title_msg">Information</string>
+    <string name="label_ok">OK</string>
+	
+	<string name="error_exception_message">%1$s: see Logcat!</string>
+	<string name="error_exception">"Exception occurred! See Logcat."</string>
+
+</resources>

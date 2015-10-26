@@ -30,6 +30,7 @@ import android.os.Build;
 import android.provider.OpenableColumns;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class FileUtils {
@@ -56,19 +57,16 @@ public class FileUtils {
             cursor = context.getContentResolver().query(file, null, null, null, null);
             if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
                 if (cursor != null && cursor.moveToFirst()) {
-                    String displayName = cursor.getString(cursor
+                    return cursor.getString(cursor
                             .getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME));
-                    return displayName;
                 } else {
                     throw new IllegalArgumentException("Error in retrieving file name from the URI");
                 }
             } else if (ContentResolver.SCHEME_FILE.equals(file.getScheme())) {
                 return file.getLastPathSegment();
-            } else {
-                throw new IllegalArgumentException("Unsupported URI scheme");
             }
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Error in retrieving file name from the URI");
+            throw new IllegalArgumentException("Unsupported URI scheme");
+
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -90,19 +88,16 @@ public class FileUtils {
             cursor = context.getContentResolver().query(file, null, null, null, null);
             if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
                 if (cursor != null && cursor.moveToFirst()) {
-                    return Long.valueOf(
-                            cursor.getString(cursor.getColumnIndexOrThrow(OpenableColumns.SIZE)))
-                            .longValue();
+                    return Long.valueOf(cursor.getString(cursor
+                            .getColumnIndexOrThrow(OpenableColumns.SIZE)));
                 } else {
                     throw new IllegalArgumentException("Error in retrieving file size form the URI");
                 }
             } else if (ContentResolver.SCHEME_FILE.equals(file.getScheme())) {
                 return (new File(file.getPath())).length();
-            } else {
-                throw new IllegalArgumentException("Unsupported URI scheme");
             }
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Error in retrieving file size form the URI");
+            throw new IllegalArgumentException("Unsupported URI scheme");
+
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -113,9 +108,9 @@ public class FileUtils {
     /**
      * Open file
      * 
-     * @param activity
-     * @param mimeType
-     * @param action
+     * @param activity the activity
+     * @param mimeType the mime type
+     * @param action the action
      */
     public static void openFile(Activity activity, String mimeType, int action) {
         Intent intent;
@@ -156,7 +151,14 @@ public class FileUtils {
                     Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
             };
             takePersistableUriPermissionMethod.invoke(contentResolver, methodArgs);
-        } catch (Exception e) {
+
+        } catch (NoSuchMethodException e) {
+            throw new RcsServiceException(e);
+
+        } catch (IllegalAccessException e) {
+            throw new RcsServiceException(e);
+
+        } catch (InvocationTargetException e) {
             throw new RcsServiceException(e);
         }
     }

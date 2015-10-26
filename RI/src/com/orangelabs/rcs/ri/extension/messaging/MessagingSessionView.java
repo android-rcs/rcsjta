@@ -27,16 +27,15 @@ import com.gsma.services.rcs.extension.MultimediaSession;
 import com.gsma.services.rcs.extension.MultimediaSessionService;
 import com.gsma.services.rcs.extension.MultimediaSessionServiceConfiguration;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsContactUtil;
-import com.orangelabs.rcs.ri.utils.Utils;
+import com.orangelabs.rcs.ri.utils.RcsSessionUtil;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -60,8 +59,9 @@ import android.widget.Toast;
  * Messaging session view
  * 
  * @author Jean-Marc AUFFRET
+ * @author Philippe LEMORDANT
  */
-public class MessagingSessionView extends Activity {
+public class MessagingSessionView extends RcsActivity {
     /**
      * View mode: incoming session
      */
@@ -104,146 +104,55 @@ public class MessagingSessionView extends Activity {
 
     private Dialog mProgressDialog;
 
-    private LockAccess mExitOnce = new LockAccess();
+    private android.view.View.OnClickListener mBtnSendListener;
 
-    private ConnectionManager mCnxManager;
+    private MultimediaMessagingSessionListener mServiceListener;
+
+    private OnClickListener mAcceptBtnListener;
+
+    private OnClickListener mDeclineBtnListener;
 
     private static final String LOGTAG = LogUtils
             .getTag(MessagingSessionView.class.getSimpleName());
 
-    private MultimediaMessagingSessionListener mServiceListener = new MultimediaMessagingSessionListener() {
-
-        @Override
-        public void onStateChanged(ContactId contact, String sessionId,
-                final MultimediaSession.State state, MultimediaSession.ReasonCode reasonCode) {
-            if (LogUtils.isActive) {
-                Log.d(LOGTAG, "onStateChanged contact=" + contact + " sessionId=" + sessionId
-                        + " state=" + state + " reason=" + reasonCode);
-            }
-            /* Discard event if not for current sessionId */
-            if (mSessionId == null || !mSessionId.equals(sessionId)) {
-                return;
-            }
-            final String _reasonCode = RiApplication.sMultimediaReasonCodes[reasonCode.toInt()];
-            mHandler.post(new Runnable() {
-                public void run() {
-                    switch (state) {
-                        case STARTED:
-                            /* Session is established: hide progress dialog */
-                            hideProgressDialog();
-                            /* Activate the send button */
-                            Button sendBtn = (Button) findViewById(R.id.send_btn);
-                            sendBtn.setEnabled(true);
-                            break;
-
-                        case ABORTED:
-                            /* Session is aborted: hide progress dialog then exit. */
-                            hideProgressDialog();
-                            Utils.showMessageAndExit(MessagingSessionView.this,
-                                    getString(R.string.label_session_aborted, _reasonCode),
-                                    mExitOnce);
-                            break;
-
-                        case REJECTED:
-                            /* Session is rejected: hide progress dialog then exit. */
-                            hideProgressDialog();
-                            Utils.showMessageAndExit(MessagingSessionView.this,
-                                    getString(R.string.label_session_rejected, _reasonCode),
-                                    mExitOnce);
-                            break;
-
-                        case FAILED:
-                            /* Session failed: hide progress dialog then exit. */
-                            hideProgressDialog();
-                            Utils.showMessageAndExit(MessagingSessionView.this,
-                                    getString(R.string.label_session_failed, _reasonCode),
-                                    mExitOnce);
-                            break;
-
-                        default:
-                            if (LogUtils.isActive) {
-                                Log.d(LOGTAG,
-                                        "onStateChanged "
-                                                + getString(R.string.label_mms_state_changed,
-                                                        RiApplication.sMultimediaStates[state
-                                                                .toInt()], _reasonCode));
-                            }
-                    }
-                }
-            });
-        }
-
-        @Override
-        public void onMessageReceived(ContactId contact, String sessionId, byte[] content) {
-            if (LogUtils.isActive) {
-                Log.d(LOGTAG, "onMessageReceived contact=" + contact + " sessionId=" + sessionId);
-            }
-            /* Discard event if not for current sessionId */
-            if (mSessionId == null || !mSessionId.equals(sessionId)) {
-                return;
-            }
-            final String data = new String(content);
-
-            mHandler.post(new Runnable() {
-                public void run() {
-                    /* Display received data */
-                    TextView txt = (TextView) MessagingSessionView.this
-                            .findViewById(R.id.recv_data);
-                    txt.setText(data);
-                }
-            });
-        }
-    };
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        mCnxManager = ConnectionManager.getInstance();
-
-        /* Set layout */
+        initialize();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.extension_session_view);
 
         /* Set buttons callback */
         Button sendBtn = (Button) findViewById(R.id.send_btn);
-        sendBtn.setOnClickListener(btnSendListener);
+        sendBtn.setOnClickListener(mBtnSendListener);
         sendBtn.setEnabled(false);
 
         /* Register to API connection manager */
-        if (!mCnxManager.isServiceConnected(RcsServiceName.MULTIMEDIA, RcsServiceName.CONTACT)) {
-            Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
-                    mExitOnce);
+        if (!isServiceConnected(RcsServiceName.MULTIMEDIA, RcsServiceName.CONTACT)) {
+            showMessageThenExit(R.string.label_service_not_available);
             return;
         }
-        mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.MULTIMEDIA,
-                RcsServiceName.CONTACT);
+        startMonitorServices(RcsServiceName.MULTIMEDIA, RcsServiceName.CONTACT);
         try {
-            /* Add service listener */
-            mCnxManager.getMultimediaSessionApi().addEventListener(mServiceListener);
-
+            getMultimediaSessionApi().addEventListener(mServiceListener);
             initialiseMessagingSession(getIntent());
         } catch (RcsServiceException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+            showExceptionThenExit(e);
         }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mCnxManager.stopMonitorServices(this);
-        if (mCnxManager.isServiceConnected(RcsServiceName.MULTIMEDIA)) {
+        if (isServiceConnected(RcsServiceName.MULTIMEDIA)) {
             try {
-                mCnxManager.getMultimediaSessionApi().removeEventListener(mServiceListener);
-            } catch (Exception e) {
-                Log.w(LOGTAG, "Failed to remove listener!", e);
+                getMultimediaSessionApi().removeEventListener(mServiceListener);
+            } catch (RcsServiceException e) {
+                Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
             }
         }
     }
 
-    /**
-     * Accept invitation
-     */
     private void acceptInvitation() {
         try {
             mSession.acceptInvitation();
@@ -251,25 +160,23 @@ public class MessagingSessionView extends Activity {
              * Wait for the SIP-ACK to allow the user to send message once session is established.
              */
             showProgressDialog();
-        } catch (Exception e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce,
-                    e);
+
+        } catch (RcsServiceException e) {
+            showExceptionThenExit(e);
         }
     }
 
-    /**
-     * Reject invitation
-     */
     private void rejectInvitation() {
         try {
             mSession.rejectInvitation();
-        } catch (Exception e) {
-            Log.e(LOGTAG, "Failed to reject session!", e);
+
+        } catch (RcsServiceException e) {
+            showExceptionThenExit(e);
         }
     }
 
     private void initialiseMessagingSession(Intent intent) {
-        MultimediaSessionService sessionApi = mCnxManager.getMultimediaSessionApi();
+        MultimediaSessionService sessionApi = getMultimediaSessionApi();
         try {
             MultimediaSessionServiceConfiguration config = sessionApi.getConfiguration();
             if (LogUtils.isActive) {
@@ -280,8 +187,7 @@ public class MessagingSessionView extends Activity {
             if (mode == MessagingSessionView.MODE_OUTGOING) {
                 /* Outgoing session: Check if the service is available. */
                 if (!sessionApi.isServiceRegistered()) {
-                    Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
-                            mExitOnce);
+                    showMessageThenExit(R.string.error_not_registered);
                     return;
                 }
                 mContact = intent.getParcelableExtra(MessagingSessionView.EXTRA_CONTACT);
@@ -295,8 +201,7 @@ public class MessagingSessionView extends Activity {
                 mSessionId = intent.getStringExtra(MessagingSessionView.EXTRA_SESSION_ID);
                 mSession = sessionApi.getMessagingSession(mSessionId);
                 if (mSession == null) {
-                    Utils.showMessageAndExit(this, getString(R.string.label_session_has_expired),
-                            mExitOnce);
+                    showMessageThenExit(R.string.label_session_has_expired);
                     return;
                 }
                 mContact = mSession.getRemoteContact();
@@ -307,8 +212,7 @@ public class MessagingSessionView extends Activity {
                         .getStringExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID);
                 mSession = sessionApi.getMessagingSession(mSessionId);
                 if (mSession == null) {
-                    Utils.showMessageAndExit(this, getString(R.string.label_session_has_expired),
-                            mExitOnce);
+                    showMessageThenExit(R.string.label_session_has_expired);
                     return;
                 }
                 mContact = mSession.getRemoteContact();
@@ -320,9 +224,9 @@ public class MessagingSessionView extends Activity {
                 builder.setMessage(getString(R.string.label_mm_from_id, from, mServiceId));
                 builder.setCancelable(false);
                 builder.setIcon(R.drawable.ri_notif_mm_session_icon);
-                builder.setPositiveButton(getString(R.string.label_accept), acceptBtnListener);
-                builder.setNegativeButton(getString(R.string.label_decline), declineBtnListener);
-                builder.show();
+                builder.setPositiveButton(R.string.label_accept, mAcceptBtnListener);
+                builder.setNegativeButton(R.string.label_decline, mDeclineBtnListener);
+                registerDialog(builder.show());
             }
             /* Display session info */
             TextView featureTagEdit = (TextView) findViewById(R.id.feature_tag);
@@ -335,31 +239,24 @@ public class MessagingSessionView extends Activity {
             if (MultimediaSession.State.STARTED == mSession.getState()) {
                 sendBtn.setEnabled(true);
             }
-
         } catch (RcsServiceException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+            showExceptionThenExit(e);
         }
     }
 
-    /**
-     * Start session
-     */
     private void startSession() {
         try {
-            mSession = mCnxManager.getMultimediaSessionApi().initiateMessagingSession(mServiceId,
-                    mContact);
+            mSession = getMultimediaSessionApi().initiateMessagingSession(mServiceId, mContact);
             mSessionId = mSession.getSessionId();
-        } catch (Exception e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce,
-                    e);
-            return;
+            showProgressDialog();
+
+        } catch (RcsServiceException e) {
+            showExceptionThenExit(e);
         }
-        showProgressDialog();
     }
 
     private void showProgressDialog() {
-        mProgressDialog = Utils.showProgressDialog(MessagingSessionView.this,
-                getString(R.string.label_command_in_progress));
+        mProgressDialog = showProgressDialog(getString(R.string.label_command_in_progress));
         mProgressDialog.setOnCancelListener(new OnCancelListener() {
             public void onCancel(DialogInterface dialog) {
                 Toast.makeText(MessagingSessionView.this,
@@ -376,66 +273,46 @@ public class MessagingSessionView extends Activity {
         }
     }
 
-    /**
-     * Accept button listener
-     */
-    private OnClickListener acceptBtnListener = new OnClickListener() {
-        public void onClick(DialogInterface dialog, int which) {
-            acceptInvitation();
-        }
-    };
+    private void quitSession() {
+        try {
+            if (mSession != null && RcsSessionUtil.isAllowedToAbortMultimediaSession(mSession)) {
+                mSession.abortSession();
+            }
+        } catch (RcsServiceException e) {
+            showException(e);
 
-    /**
-     * Reject button listener
-     */
-    private OnClickListener declineBtnListener = new OnClickListener() {
-        public void onClick(DialogInterface dialog, int which) {
-            rejectInvitation();
-            /* Exit activity */
+        } finally {
+            mSession = null;
             finish();
         }
-    };
-
-    private void quitSession() {
-        if (mSession != null) {
-            try {
-                mSession.abortSession();
-            } catch (Exception e) {
-                Log.w(LOGTAG, "Failed to abort session!", e);
-            }
-            mSession = null;
-        }
-        finish();
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_BACK:
-                if (mSession != null) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setTitle(getString(R.string.label_confirm_close));
-                    builder.setPositiveButton(getString(R.string.label_ok),
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    // Quit the session
-                                    quitSession();
-                                }
-                            });
-                    builder.setNegativeButton(getString(R.string.label_cancel),
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    finish();
-                                }
-                            });
-                    builder.setCancelable(true);
-                    builder.show();
-                } else {
-                    finish();
-                }
-                return true;
-        }
+        if (KeyEvent.KEYCODE_BACK == keyCode) {
+            if (mSession != null) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.label_confirm_close);
+                builder.setPositiveButton(R.string.label_ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Quit the session
+                        quitSession();
+                    }
+                });
+                builder.setNegativeButton(R.string.label_cancel,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                finish();
+                            }
+                        });
+                builder.setCancelable(true);
+                registerDialog(builder.show());
 
+            } else {
+                finish();
+            }
+            return true;
+        }
         return super.onKeyDown(keyCode, event);
     }
 
@@ -456,19 +333,110 @@ public class MessagingSessionView extends Activity {
         return true;
     }
 
-    /**
-     * Send button callback
-     */
-    private android.view.View.OnClickListener btnSendListener = new android.view.View.OnClickListener() {
-        private int i = 0;
+    private void initialize() {
+        mBtnSendListener = new android.view.View.OnClickListener() {
+            private int i = 0;
 
-        public void onClick(View v) {
-            try {
-                String data = "data".concat(String.valueOf(i++));
-                mSession.sendMessage(data.getBytes());
-            } catch (Exception e) {
-                Log.e(LOGTAG, "Failed to send message!", e);
+            public void onClick(View v) {
+                try {
+                    String data = "data".concat(String.valueOf(i++));
+                    mSession.sendMessage(data.getBytes());
+
+                } catch (RcsServiceException e) {
+                    showExceptionThenExit(e);
+                }
             }
-        }
-    };
+        };
+
+        mServiceListener = new MultimediaMessagingSessionListener() {
+
+            @Override
+            public void onStateChanged(ContactId contact, String sessionId,
+                    final MultimediaSession.State state, MultimediaSession.ReasonCode reasonCode) {
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "onStateChanged contact=" + contact + " sessionId=" + sessionId
+                            + " state=" + state + " reason=" + reasonCode);
+                }
+                /* Discard event if not for current sessionId */
+                if (mSessionId == null || !mSessionId.equals(sessionId)) {
+                    return;
+                }
+                final String _reasonCode = RiApplication.sMultimediaReasonCodes[reasonCode.toInt()];
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        switch (state) {
+                            case STARTED:
+                                /* Session is established: hide progress dialog */
+                                hideProgressDialog();
+                                /* Activate the send button */
+                                Button sendBtn = (Button) findViewById(R.id.send_btn);
+                                sendBtn.setEnabled(true);
+                                break;
+
+                            case ABORTED:
+                                showMessageThenExit(getString(R.string.label_session_aborted,
+                                        _reasonCode));
+                                break;
+
+                            case REJECTED:
+                                showMessageThenExit(getString(R.string.label_session_rejected,
+                                        _reasonCode));
+                                break;
+
+                            case FAILED:
+                                showMessageThenExit(getString(R.string.label_session_failed,
+                                        _reasonCode));
+                                break;
+
+                            default:
+                                if (LogUtils.isActive) {
+                                    Log.d(LOGTAG,
+                                            "onStateChanged "
+                                                    + getString(R.string.label_mms_state_changed,
+                                                            RiApplication.sMultimediaStates[state
+                                                                    .toInt()], _reasonCode));
+                                }
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onMessageReceived(ContactId contact, String sessionId, byte[] content) {
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "onMessageReceived contact=" + contact + " sessionId="
+                            + sessionId);
+                }
+                /* Discard event if not for current sessionId */
+                if (mSessionId == null || !mSessionId.equals(sessionId)) {
+                    return;
+                }
+                final String data = new String(content);
+
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        /* Display received data */
+                        TextView txt = (TextView) MessagingSessionView.this
+                                .findViewById(R.id.recv_data);
+                        txt.setText(data);
+                    }
+                });
+            }
+        };
+
+        mAcceptBtnListener = new OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                acceptInvitation();
+            }
+        };
+
+        mDeclineBtnListener = new OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                rejectInvitation();
+                /* Exit activity */
+                finish();
+            }
+        };
+    }
+
 }

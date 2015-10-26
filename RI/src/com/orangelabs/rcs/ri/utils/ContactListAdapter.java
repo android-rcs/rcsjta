@@ -18,11 +18,13 @@
 
 package com.orangelabs.rcs.ri.utils;
 
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactService;
 import com.gsma.services.rcs.contact.RcsContact;
 
 import com.orangelabs.rcs.api.connection.ConnectionManager;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
 import com.orangelabs.rcs.ri.R;
 
 import android.content.ContentResolver;
@@ -54,18 +56,16 @@ public class ContactListAdapter extends CursorAdapter {
         Contacts.DISPLAY_NAME
     };
 
-    private static String WHERE_CLAUSE_PHONE = new StringBuilder(Phone.NUMBER).append("!='null'")
-            .toString();
+    private static String WHERE_CLAUSE_PHONE = Phone.NUMBER + "!='null'";
 
-    private static String WHERE_CLAUSE_CONTACT = new StringBuilder(Contacts._ID).append("=?")
-            .toString();
+    private static String WHERE_CLAUSE_CONTACT = Contacts._ID + "=?";
 
     private static final String LOGTAG = LogUtils.getTag(ContactListAdapter.class.getSimpleName());
 
     /**
      * Create a contact selector based on the native address book
      * 
-     * @param context
+     * @param context the context
      * @return List adapter
      */
     public static ContactListAdapter createContactListAdapter(Context context) {
@@ -76,8 +76,8 @@ public class ContactListAdapter extends CursorAdapter {
      * Create a contact selector based on the native address book. This selector adds a default
      * value to allow no contact selection
      * 
-     * @param context
-     * @param defaultValue
+     * @param context the context
+     * @param defaultValue default value for no contact selection
      * @return List adapter
      */
     public static ContactListAdapter createContactListAdapter(Context context, String defaultValue) {
@@ -86,7 +86,7 @@ public class ContactListAdapter extends CursorAdapter {
         try {
             cursor = content.query(Phone.CONTENT_URI, PROJECTION_PHONE, WHERE_CLAUSE_PHONE, null,
                     null);
-            Set<ContactId> treatedNumbers = new HashSet<ContactId>();
+            Set<ContactId> treatedNumbers = new HashSet<>();
             MatrixCursor matrix = new MatrixCursor(PROJECTION_PHONE);
             if (defaultValue != null) {
                 matrix.addRow(new Object[] {
@@ -126,7 +126,7 @@ public class ContactListAdapter extends CursorAdapter {
     /**
      * Create a contact selector with RCS capable contacts
      * 
-     * @param context
+     * @param context the context
      * @return List adapter
      */
     public static ContactListAdapter createRcsContactListAdapter(Context context) {
@@ -140,14 +140,14 @@ public class ContactListAdapter extends CursorAdapter {
             Set<RcsContact> rcsContacts = contactsApi.getRcsContacts();
             // Is there any RCS contacts ?
             if (rcsContacts != null && !rcsContacts.isEmpty()) {
-                Set<ContactId> rcsContactIds = new HashSet<ContactId>();
+                Set<ContactId> rcsContactIds = new HashSet<>();
                 for (RcsContact rcsContact : rcsContacts) {
                     rcsContactIds.add(rcsContact.getContactId());
                 }
                 // Query all phone numbers
                 cursor = content.query(Phone.CONTENT_URI, PROJECTION_PHONE, WHERE_CLAUSE_PHONE,
                         null, null);
-                Set<ContactId> treatedContactIDs = new HashSet<ContactId>();
+                Set<ContactId> treatedContactIDs = new HashSet<>();
                 int columnIdxId = cursor.getColumnIndexOrThrow(Phone._ID);
                 int columIdxLabel = cursor.getColumnIndexOrThrow(Phone.LABEL);
                 int columnIdxType = cursor.getColumnIndexOrThrow(Phone.TYPE);
@@ -174,11 +174,11 @@ public class ContactListAdapter extends CursorAdapter {
                 }
             }
             return new ContactListAdapter(context, matrix);
-        } catch (Exception e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "createRcsContactListAdapter", e);
-            }
+
+        } catch (RcsServiceException e) {
+            Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
             return null;
+
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -200,7 +200,7 @@ public class ContactListAdapter extends CursorAdapter {
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(context);
         TextView view = (TextView) inflater.inflate(R.layout.utils_spinner_item, parent, false);
-        view.setTag(new ViewHolder(view, cursor));
+        view.setTag(new ViewHolder(cursor));
         return view;
     }
 
@@ -209,7 +209,7 @@ public class ContactListAdapter extends CursorAdapter {
         LayoutInflater inflater = LayoutInflater.from(context);
         TextView view = (TextView) inflater.inflate(android.R.layout.simple_dropdown_item_1line,
                 parent, false);
-        view.setTag(new ViewHolder(view, cursor));
+        view.setTag(new ViewHolder(cursor));
         return view;
     }
 
@@ -256,7 +256,7 @@ public class ContactListAdapter extends CursorAdapter {
             return c.getString(holder.columnNumber);
         } else {
             // Return "name (phone label)"
-            return new StringBuilder(name).append(" (").append(label).append(")").toString();
+            return name + " (" + label + ")";
         }
     }
 
@@ -278,7 +278,7 @@ public class ContactListAdapter extends CursorAdapter {
         // Store number to get it upon selection
         String number;
 
-        ViewHolder(View base, Cursor cursor) {
+        ViewHolder(Cursor cursor) {
             columnID = cursor.getColumnIndexOrThrow(Phone._ID);
             columnNumber = cursor.getColumnIndexOrThrow(Phone.NUMBER);
             columnLabel = cursor.getColumnIndexOrThrow(Phone.LABEL);
@@ -291,7 +291,7 @@ public class ContactListAdapter extends CursorAdapter {
     /**
      * Get the selected phone number
      * 
-     * @param view
+     * @param view the view
      * @return the phone number
      */
     public String getSelectedNumber(View view) {

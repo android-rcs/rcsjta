@@ -35,9 +35,6 @@ public class LogUtils {
      * @return the log tag
      */
     public static String getTag(final String classname) {
-        StringBuilder sb = new StringBuilder("[RI][");
-        sb.append(classname);
-        sb.append("]");
-        return sb.toString();
+        return "[RI][" + classname + "]";
     }
 }

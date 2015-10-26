@@ -21,25 +21,22 @@ package com.orangelabs.rcs.ri.sharing.geoloc;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingIntent;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingListener;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingService;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.messaging.geoloc.ShowGeoloc;
-import com.orangelabs.rcs.ri.utils.ExceptionUtil;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -63,7 +60,7 @@ import java.util.Set;
  * @author vfml3370
  * @author yplo6403
  */
-public class ReceiveGeolocSharing extends Activity {
+public class ReceiveGeolocSharing extends RcsActivity {
     /**
      * UI handler
      */
@@ -77,13 +74,6 @@ public class ReceiveGeolocSharing extends Activity {
      * Geoloc sharing session
      */
     private GeolocSharing mGeolocSharing;
-
-    /**
-     * A locker to exit only once
-     */
-    private LockAccess mExitOnce = new LockAccess();
-
-    private ConnectionManager mCnxManager;
 
     private Geoloc mGeoloc;
 
@@ -102,32 +92,28 @@ public class ReceiveGeolocSharing extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initialize();
-        mCnxManager = ConnectionManager.getInstance();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.geoloc_sharing_receive);
 
         /* Register to API connection manager */
-        if (!mCnxManager.isServiceConnected(RcsServiceName.GEOLOC_SHARING, RcsServiceName.CONTACT)) {
-            Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
-                    mExitOnce);
+        if (!isServiceConnected(RcsServiceName.GEOLOC_SHARING, RcsServiceName.CONTACT)) {
+            showMessageThenExit(R.string.label_service_not_available);
             return;
         }
-        mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.GEOLOC_SHARING,
-                RcsServiceName.CONTACT);
+        startMonitorServices(RcsServiceName.GEOLOC_SHARING, RcsServiceName.CONTACT);
         processIntent(getIntent());
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mCnxManager.stopMonitorServices(this);
-        if (!mCnxManager.isServiceConnected(RcsServiceName.GEOLOC_SHARING)) {
+        if (!isServiceConnected(RcsServiceName.GEOLOC_SHARING)) {
             return;
         }
         try {
-            mCnxManager.getGeolocSharingApi().removeEventListener(mListener);
-        } catch (Exception e) {
-            Log.d(LOGTAG, ExceptionUtil.getFullStackTrace(e));
+            getGeolocSharingApi().removeEventListener(mListener);
+        } catch (RcsServiceException e) {
+            Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
         }
     }
 
@@ -145,7 +131,7 @@ public class ReceiveGeolocSharing extends Activity {
     }
 
     private void initiateGeolocSharing() {
-        GeolocSharingService gshApi = mCnxManager.getGeolocSharingApi();
+        GeolocSharingService gshApi = getGeolocSharingApi();
         try {
             gshApi.addEventListener(mListener);
 
@@ -153,33 +139,30 @@ public class ReceiveGeolocSharing extends Activity {
             mGeolocSharing = gshApi.getGeolocSharing(mSharingId);
             if (mGeolocSharing == null) {
                 // Session not found or expired
-                Utils.showMessageAndExit(this, getString(R.string.label_session_not_found),
-                        mExitOnce);
+                showMessageThenExit(R.string.label_session_not_found);
                 return;
             }
 
             /* Display sharing infos */
             TextView fromTextView = (TextView) findViewById(R.id.from);
             String from = RcsContactUtil.getInstance(this).getDisplayName(mRemoteContact);
-            fromTextView.setText(getString(R.string.label_from_args, from));
+            String fromText = getString(R.string.label_from_args, from);
+            fromTextView.setText(fromText);
 
             mProgressBar.setProgress(0);
 
             /* Display accept/reject dialog */
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.title_geoloc_sharing);
-            builder.setMessage(getString(R.string.label_from_args, from));
+            builder.setMessage(fromText);
             builder.setCancelable(false);
             builder.setIcon(R.drawable.ri_notif_gsh_icon);
-            builder.setPositiveButton(getString(R.string.label_accept), mAcceptBtnListener);
-            builder.setNegativeButton(getString(R.string.label_decline), mDeclineBtnListener);
-            builder.show();
-
-        } catch (RcsServiceNotAvailableException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce, e);
+            builder.setPositiveButton(R.string.label_accept, mAcceptBtnListener);
+            builder.setNegativeButton(R.string.label_decline, mDeclineBtnListener);
+            registerDialog(builder.show());
 
         } catch (RcsServiceException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+            showExceptionThenExit(e);
         }
     }
 
@@ -187,8 +170,7 @@ public class ReceiveGeolocSharing extends Activity {
         try {
             mGeolocSharing.acceptInvitation();
         } catch (RcsGenericException e) {
-            Utils.showMessageAndExit(ReceiveGeolocSharing.this,
-                    getString(R.string.label_invitation_failed), mExitOnce, e);
+            showExceptionThenExit(e);
         }
     }
 
@@ -196,7 +178,7 @@ public class ReceiveGeolocSharing extends Activity {
         try {
             mGeolocSharing.rejectInvitation();
         } catch (RcsGenericException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+            showExceptionThenExit(e);
         }
     }
 
@@ -213,7 +195,7 @@ public class ReceiveGeolocSharing extends Activity {
                 mGeolocSharing.abortSharing();
             }
         } catch (RcsServiceException e) {
-            Log.d(LOGTAG, ExceptionUtil.getFullStackTrace(e));
+            showException(e);
         } finally {
             mGeolocSharing = null;
             /* Exit activity */
@@ -223,10 +205,9 @@ public class ReceiveGeolocSharing extends Activity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_BACK:
-                quitSession();
-                return true;
+        if (KeyEvent.KEYCODE_BACK == keyCode) {
+            quitSession();
+            return true;
         }
         return super.onKeyDown(keyCode, event);
     }
@@ -269,10 +250,8 @@ public class ReceiveGeolocSharing extends Activity {
             public void onStateChanged(final ContactId contact, final String sharingId,
                     final GeolocSharing.State state, GeolocSharing.ReasonCode reasonCode) {
                 if (LogUtils.isActive) {
-                    Log.d(LOGTAG,
-                            new StringBuilder("onStateChanged contact=").append(contact.toString())
-                                    .append(" sharingId=").append(sharingId).append(" state=")
-                                    .append(state).append(" reason=").append(reasonCode).toString());
+                    Log.d(LOGTAG, "onStateChanged contact=" + contact.toString() + " sharingId="
+                            + sharingId + " state=" + state + " reason=" + reasonCode);
                 }
                 /* Discard event if not for current sharingId */
                 if (mSharingId == null || !mSharingId.equals(sharingId)) {
@@ -285,17 +264,13 @@ public class ReceiveGeolocSharing extends Activity {
                         TextView statusView = (TextView) findViewById(R.id.progress_status);
                         switch (state) {
                             case ABORTED:
-                                // Session is aborted: display session status
-                                Utils.showMessageAndExit(ReceiveGeolocSharing.this,
-                                        getString(R.string.label_sharing_aborted, _reasonCode),
-                                        mExitOnce);
+                                showMessageThenExit(getString(R.string.label_sharing_aborted,
+                                        _reasonCode));
                                 break;
 
                             case FAILED:
-                                /* Session is failed: exit */
-                                Utils.showMessageAndExit(ReceiveGeolocSharing.this,
-                                        getString(R.string.label_sharing_failed, _reasonCode),
-                                        mExitOnce);
+                                showMessageThenExit(getString(R.string.label_sharing_failed,
+                                        _reasonCode));
                                 break;
 
                             case TRANSFERRED:
@@ -331,9 +306,7 @@ public class ReceiveGeolocSharing extends Activity {
             @Override
             public void onDeleted(ContactId contact, Set<String> sharingIds) {
                 if (LogUtils.isActive) {
-                    Log.w(LOGTAG,
-                            new StringBuilder("onDeleted contact=").append(contact)
-                                    .append(" sharingIds=").append(sharingIds).toString());
+                    Log.w(LOGTAG, "onDeleted contact=" + contact + " sharingIds=" + sharingIds);
                 }
             }
 

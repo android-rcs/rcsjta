@@ -21,14 +21,11 @@ package com.orangelabs.rcs.ri.messaging.chat;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.chat.ChatServiceConfiguration;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.LockAccess;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.Utils;
 
-import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.util.Log;
@@ -42,25 +39,12 @@ import android.widget.TextView;
  * 
  * @author Philippe LEMORDANT
  */
-public class ChatServiceConfigActivity extends Activity {
-
-    /**
-     * API connection manager
-     */
-    private ConnectionManager mCnxManager;
+public class ChatServiceConfigActivity extends RcsActivity {
 
     private ChatServiceConfiguration mConfig;
 
-    /**
-     * A locker to exit only once
-     */
-    private LockAccess mExitOnce = new LockAccess();
-
     private CheckBox mRespondToDisplayReports;
 
-    /**
-     * The log tag for this class
-     */
     private static final String LOGTAG = LogUtils.getTag(ChatServiceConfigActivity.class
             .getSimpleName());
 
@@ -68,28 +52,21 @@ public class ChatServiceConfigActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.chat_service_config);
 
         // Register to API connection manager
-        mCnxManager = ConnectionManager.getInstance();
-        if (!mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
-            Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
-                    mExitOnce);
+        if (!isServiceConnected(RcsServiceName.CHAT)) {
+            showMessageThenExit(R.string.label_service_not_available);
             return;
-
         }
         try {
-            mConfig = mCnxManager.getChatApi().getConfiguration();
+            mConfig = getChatApi().getConfiguration();
         } catch (RcsServiceException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce);
+            showExceptionThenExit(e);
             return;
-
         }
-
-        mCnxManager.startMonitorServices(this, null, RcsServiceName.CHAT);
-
+        startMonitorServices(RcsServiceName.CHAT);
         mRespondToDisplayReports = (CheckBox) findViewById(R.id.RespondToDisplayReports);
         mRespondToDisplayReports.setOnClickListener(new OnClickListener() {
             @Override
@@ -101,8 +78,7 @@ public class ChatServiceConfigActivity extends Activity {
                         Log.d(LOGTAG, "onClick RespondToDisplayReports ".concat(enable.toString()));
                     }
                 } catch (RcsServiceException e) {
-                    Utils.showMessageAndExit(ChatServiceConfigActivity.this,
-                            getString(R.string.label_api_failed), mExitOnce, e);
+                    showExceptionThenExit(e);
                 }
 
             }
@@ -112,21 +88,15 @@ public class ChatServiceConfigActivity extends Activity {
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mCnxManager.stopMonitorServices(this);
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
-        if (mExitOnce.isLocked()) {
+        if (isExiting()) {
             return;
         }
         try {
             displayChatServiceConfig();
         } catch (RcsServiceException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+            showExceptionThenExit(e);
         }
     }
 
