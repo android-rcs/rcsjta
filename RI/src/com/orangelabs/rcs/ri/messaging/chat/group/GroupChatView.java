@@ -221,7 +221,7 @@ public class GroupChatView extends ChatView {
                     /* Set list of participants */
                     mParticipants = mGroupChat.getParticipants().keySet();
                     if (LogUtils.isActive) {
-                        Log.e(LOGTAG, "processIntent chatId=" + mChatId + " subject='" + mSubject
+                        Log.i(LOGTAG, "processIntent chatId=" + mChatId + " subject='" + mSubject
                                 + "'");
                     }
                     return true;

@@ -264,9 +264,10 @@ public class SingleChatView extends ChatView {
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         /* Create a new CursorLoader with the following query parameters. */
-        return new CursorLoader(this, mUriHistoryProvider, null, WHERE_CLAUSE, new String[] {
-            mContact.toString()
-        }, ORDER_CHAT_MSG);
+        return new CursorLoader(this, mUriHistoryProvider, PROJ_CHAT_MSG, WHERE_CLAUSE,
+                new String[] {
+                    mContact.toString()
+                }, ORDER_CHAT_MSG);
     }
 
     @Override
