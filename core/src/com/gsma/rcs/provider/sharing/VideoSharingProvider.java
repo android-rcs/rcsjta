@@ -26,11 +26,9 @@ import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.history.HistoryMemberBaseIdCreator;
 import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.DatabaseUtils;
-import com.gsma.services.rcs.history.HistoryLog;
 import com.gsma.services.rcs.sharing.video.VideoSharingLog;
 
 import android.content.ContentProvider;
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
@@ -259,9 +257,7 @@ public class VideoSharingProvider extends ContentProvider {
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.update(TABLE, values, selection, selectionArgs);
                 if (count > 0) {
-                    ContentResolver resolver = getContext().getContentResolver();
-                    resolver.notifyChange(notificationUri, null);
-                    resolver.notifyChange(HistoryLog.CONTENT_URI, null);
+                    getContext().getContentResolver().notifyChange(notificationUri, null);
                 }
                 return count;
 
@@ -293,9 +289,7 @@ public class VideoSharingProvider extends ContentProvider {
                             .toString());
                 }
                 Uri notificationUri = Uri.withAppendedPath(VideoSharingLog.CONTENT_URI, sharingId);
-                ContentResolver resolver = getContext().getContentResolver();
-                resolver.notifyChange(notificationUri, null);
-                resolver.notifyChange(HistoryLog.CONTENT_URI, null);
+                getContext().getContentResolver().notifyChange(notificationUri, null);
                 return notificationUri;
 
             case UriType.VideoSharing.VIDEO_SHARING_WITH_ID:
@@ -325,9 +319,7 @@ public class VideoSharingProvider extends ContentProvider {
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.delete(TABLE, selection, selectionArgs);
                 if (count > 0) {
-                    ContentResolver resolver = getContext().getContentResolver();
-                    resolver.notifyChange(notificationUri, null);
-                    resolver.notifyChange(HistoryLog.CONTENT_URI, null);
+                    getContext().getContentResolver().notifyChange(notificationUri, null);
                 }
                 return count;
 

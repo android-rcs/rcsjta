@@ -98,9 +98,7 @@ public class HistoryProvider extends MultiDbProvider {
         if (sort != null) {
             query.append(" ORDER BY ").append(sort);
         }
-        Cursor cursor = executeReadQuery(query.toString(), selectionArgs);
-        cursor.setNotificationUri(getContext().getContentResolver(), uri);
-        return cursor;
+        return executeReadQuery(query.toString(), selectionArgs);
     }
 
     @Override

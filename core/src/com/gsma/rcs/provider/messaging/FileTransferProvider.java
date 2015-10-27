@@ -27,10 +27,8 @@ import com.gsma.rcs.provider.history.HistoryMemberBaseIdCreator;
 import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.DatabaseUtils;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
-import com.gsma.services.rcs.history.HistoryLog;
 
 import android.content.ContentProvider;
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
@@ -318,9 +316,7 @@ public class FileTransferProvider extends ContentProvider {
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.update(TABLE, values, selection, selectionArgs);
                 if (count > 0) {
-                    ContentResolver resolver = getContext().getContentResolver();
-                    resolver.notifyChange(notificationUri, null);
-                    resolver.notifyChange(HistoryLog.CONTENT_URI, null);
+                    getContext().getContentResolver().notifyChange(notificationUri, null);
                 }
                 return count;
 
@@ -352,9 +348,7 @@ public class FileTransferProvider extends ContentProvider {
                             .toString());
                 }
                 Uri notificationUri = Uri.withAppendedPath(FileTransferLog.CONTENT_URI, ftId);
-                ContentResolver resolver = getContext().getContentResolver();
-                resolver.notifyChange(notificationUri, null);
-                resolver.notifyChange(HistoryLog.CONTENT_URI, null);
+                getContext().getContentResolver().notifyChange(notificationUri, null);
                 return notificationUri;
 
             case UriType.FileTransfer.FILE_TRANSFER_WITH_ID:
@@ -384,9 +378,7 @@ public class FileTransferProvider extends ContentProvider {
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.delete(TABLE, selection, selectionArgs);
                 if (count > 0) {
-                    ContentResolver resolver = getContext().getContentResolver();
-                    resolver.notifyChange(notificationUri, null);
-                    resolver.notifyChange(HistoryLog.CONTENT_URI, null);
+                    getContext().getContentResolver().notifyChange(notificationUri, null);
                 }
                 return count;
 

@@ -37,6 +37,7 @@ import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -61,6 +62,8 @@ import android.widget.TextView;
 
 /**
  * Chat view
+ *
+ * @author yplo6403
  */
 public abstract class ChatView extends RcsFragmentActivity implements
         LoaderManager.LoaderCallbacks<Cursor>, IChatView {
@@ -100,6 +103,8 @@ public abstract class ChatView extends RcsFragmentActivity implements
     protected Uri mUriHistoryProvider;
 
     protected FileTransferService mFileTransferService;
+
+    private ChatCursorObserver mObserver;
 
     /**
      * Chat message projection
@@ -262,17 +267,34 @@ public abstract class ChatView extends RcsFragmentActivity implements
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        /* A switch-case is useful when dealing with multiple Loaders/IDs */
-        switch (loader.getId()) {
-            case LOADER_ID:
-                /*
-                 * The asynchronous load is complete and the data is now available for use. Only now
-                 * can we associate the queried Cursor with the CursorAdapter.
-                 */
-                mAdapter.swapCursor(cursor);
-                break;
+        if (LOADER_ID != loader.getId()) {
+            return;
         }
-        /* The listview now displays the queried data. */
+
+        /*
+         * The asynchronous load is complete and the data is now available for use. Only now can we
+         * associate the queried Cursor with the CursorAdapter.
+         */
+        mAdapter.swapCursor(cursor);
+        /**
+         * Registering content observer for chat message and file transfer content URIs. When these
+         * content URIs will change, this will notify the loader to reload its data.
+         */
+        if (mObserver != null && !mObserver.getLoader().equals(loader)) {
+            ContentResolver resolver = getContentResolver();
+            resolver.unregisterContentObserver(mObserver);
+            resolver.unregisterContentObserver(mObserver);
+            mObserver = null;
+        }
+        if (mObserver == null) {
+            if (LogUtils.isActive) {
+                Log.d(LOGTAG, "onLoadFinished: register content observer");
+            }
+            mObserver = new ChatCursorObserver(new Handler(), loader);
+            ContentResolver resolver = getContentResolver();
+            resolver.registerContentObserver(ChatLog.Message.CONTENT_URI, true, mObserver);
+            resolver.registerContentObserver(FileTransferLog.CONTENT_URI, true, mObserver);
+        }
     }
 
     @Override
