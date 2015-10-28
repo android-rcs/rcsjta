@@ -35,7 +35,9 @@ import com.orangelabs.rcs.core.control.R;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
@@ -52,10 +54,11 @@ import android.util.Log;
 public class SettingsDisplay extends RcsPreferenceActivity implements
         Preference.OnPreferenceChangeListener {
 
+    private static final int PROGRESS_INIT_INCREMENT = 100;
+
     private final static int SERVICE_DEACTIVATION_CONFIRMATION_DIALOG = 1;
 
-    private static final String LOGTAG = "[Core-ctrl][" + SettingsDisplay.class.getSimpleName()
-            + "]";
+    private static final String LOGTAG = "[SET][" + SettingsDisplay.class.getSimpleName() + "]";
 
     private RcsServiceControl mRcsServiceControl;
 
@@ -63,48 +66,25 @@ public class SettingsDisplay extends RcsPreferenceActivity implements
 
     private ListPreference mBatteryLevel;
 
-    private RcsServiceListener mRcsServiceListener = new RcsServiceListener() {
-
-        @Override
-        public void onServiceConnected() {
-            try {
-                enablePreferences(true);
-                initCheckbox(mRcsActivationCheckbox, true,
-                        mRcsServiceControl.isActivationModeChangeable());
-                initBatteryLevel(getFileTransferApi().getCommonConfiguration());
-
-            } catch (RcsServiceNotAvailableException ignore) {
-
-            } catch (RcsServiceException e) {
-                Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ReasonCode reasonCode) {
-            boolean changeable;
-            try {
-                changeable = mRcsServiceControl.isActivationModeChangeable();
-
-            } catch (RcsGenericException e) {
-                Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
-                changeable = true;
-            }
-            enablePreferences(false);
-            initCheckbox(mRcsActivationCheckbox, false, changeable);
-        }
-    };
+    private RcsServiceListener mRcsServiceListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.rcs_settings_preferences);
 
+        initialize();
+
         mRcsActivationCheckbox = (CheckBoxPreference) getPreferenceScreen().findPreference(
                 "rcs_activation");
         mBatteryLevel = (ListPreference) findPreference("min_battery_level");
 
         mRcsServiceControl = CoreControlApplication.getRcsServiceControl();
+
+        if (!CoreControlApplication.sCnxManagerStarted) {
+            new WaitForConnectionManagerStart()
+                    .execute(CoreControlApplication.DELAY_FOR_STARTING_CNX_MANAGER);
+        }
     }
 
     @Override
@@ -235,6 +215,40 @@ public class SettingsDisplay extends RcsPreferenceActivity implements
         checkbox.setEnabled(enabled);
     }
 
+    private void initialize() {
+        mRcsServiceListener = new RcsServiceListener() {
+
+            @Override
+            public void onServiceConnected() {
+                try {
+                    enablePreferences(true);
+                    initCheckbox(mRcsActivationCheckbox, true,
+                            mRcsServiceControl.isActivationModeChangeable());
+                    initBatteryLevel(getFileTransferApi().getCommonConfiguration());
+
+                } catch (RcsServiceNotAvailableException ignore) {
+
+                } catch (RcsServiceException e) {
+                    Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
+                }
+            }
+
+            @Override
+            public void onServiceDisconnected(ReasonCode reasonCode) {
+                boolean changeable;
+                try {
+                    changeable = mRcsServiceControl.isActivationModeChangeable();
+
+                } catch (RcsGenericException e) {
+                    Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
+                    changeable = true;
+                }
+                enablePreferences(false);
+                initCheckbox(mRcsActivationCheckbox, false, changeable);
+            }
+        };
+    }
+
     /**
      * Enable / disable preferences
      * 
@@ -257,6 +271,38 @@ public class SettingsDisplay extends RcsPreferenceActivity implements
         mBatteryLevel.setPersistent(false);
         mBatteryLevel.setOnPreferenceChangeListener(this);
         mBatteryLevel.setValue(String.valueOf(configuration.getMinimumBatteryLevel().toInt()));
+    }
+
+    private class WaitForConnectionManagerStart extends AsyncTask<Long, Void, Void> {
+
+        private ProgressDialog mProgressDialog;
+
+        @Override
+        protected void onPreExecute() {
+            mProgressDialog = SettingsDisplay.this.showProgressDialog(SettingsDisplay.this
+                    .getString(R.string.rcs_settings_label_wait_cnx_start));
+        }
+
+        @Override
+        protected Void doInBackground(Long... duration) {
+            long delay = (duration[0] / PROGRESS_INIT_INCREMENT);
+            for (int i = 0; i < PROGRESS_INIT_INCREMENT; i++) {
+                try {
+                    Thread.sleep(delay);
+                    if (CoreControlApplication.sCnxManagerStarted) {
+                        break;
+                    }
+                } catch (InterruptedException ignore) {
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void res) {
+            mProgressDialog.cancel();
+        }
+
     }
 
 }

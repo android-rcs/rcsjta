@@ -36,11 +36,14 @@ import com.orangelabs.rcs.ri.utils.LogUtils;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 /**
  * RI application
@@ -49,7 +52,15 @@ import android.widget.ListView;
  */
 public class RI extends RcsListActivity {
 
+    private static final int PROGRESS_INIT_INCREMENT = 100;
+
     private static final String LOGTAG = LogUtils.getTag(RI.class.getSimpleName());
+
+    private ListView mListView;
+
+    private ProgressBar mProgressBar;
+
+    private LinearLayout mInitLayout;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,6 +68,11 @@ public class RI extends RcsListActivity {
 
         /* Set layout */
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setContentView(R.layout.ri_list);
+
+        mListView = (ListView) findViewById(android.R.id.list);
+        mProgressBar = (ProgressBar) findViewById(android.R.id.progress);
+        mInitLayout = (LinearLayout) findViewById(R.id.wait_cnx_start);
 
         /* Set items */
         String[] items = {
@@ -80,6 +96,17 @@ public class RI extends RcsListActivity {
             Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
             /* We should not be allowed to continue if this exception occurs */
             showMessageThenExit(R.string.error_api_permission_denied);
+        }
+        /*
+         * The initialization of the connection manager is delayed to avoid non response during
+         * application initialization after installation. The application waits until end of
+         * connection manager initialization.
+         */
+        if (!RiApplication.sCnxManagerStarted) {
+            new WaitForConnectionManagerStart()
+                    .execute(RiApplication.DELAY_FOR_STARTING_CNX_MANAGER);
+        } else {
+            mInitLayout.setVisibility(View.GONE);
         }
     }
 
@@ -126,6 +153,43 @@ public class RI extends RcsListActivity {
                 startActivity(new Intent(this, AboutRI.class));
                 break;
         }
+    }
+
+    private class WaitForConnectionManagerStart extends AsyncTask<Long, Integer, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            mInitLayout.setVisibility(View.VISIBLE);
+            mListView.setVisibility(View.GONE);
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... progress) {
+            mProgressBar.setProgress(progress[0]);
+        }
+
+        @Override
+        protected Void doInBackground(Long... duration) {
+            long delay = (duration[0] / PROGRESS_INIT_INCREMENT);
+            for (int i = 0; i < PROGRESS_INIT_INCREMENT; i++) {
+                try {
+                    Thread.sleep(delay);
+                    publishProgress((int) (delay * (i + 1) * 100 / duration[0]));
+                    if (RiApplication.sCnxManagerStarted) {
+                        break;
+                    }
+                } catch (InterruptedException ignore) {
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void res) {
+            mInitLayout.setVisibility(View.GONE);
+            mListView.setVisibility(View.VISIBLE);
+        }
+
     }
 
 }

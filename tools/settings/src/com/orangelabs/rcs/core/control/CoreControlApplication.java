@@ -35,10 +35,12 @@ import android.os.Looper;
  */
 public class CoreControlApplication extends Application {
 
-    /*
-     * Delay before creating connection manager.
+    /**
+     * Delay (ms) before starting connection manager.
      */
-    private static final long DELAY_FOR_MANAGING_CONNECTION = 5000;
+    public static final long DELAY_FOR_STARTING_CNX_MANAGER = 5000;
+
+    public static boolean sCnxManagerStarted = false;
 
     private static RcsServiceControl mRcsServiceControl;
 
@@ -59,8 +61,9 @@ public class CoreControlApplication extends Application {
             @Override
             public void run() {
                 cnxManager.start();
+                sCnxManagerStarted = true;
             }
-        }, DELAY_FOR_MANAGING_CONNECTION);
+        }, DELAY_FOR_STARTING_CNX_MANAGER);
     }
 
     /**
