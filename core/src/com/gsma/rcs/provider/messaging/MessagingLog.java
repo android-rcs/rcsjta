@@ -134,8 +134,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public boolean setGroupChatRejoinId(String chatId, String rejoinId) {
-        return mGroupChatLog.setGroupChatRejoinId(chatId, rejoinId);
+    public boolean setGroupChatRejoinId(String chatId, String rejoinId, boolean updateStateToStarted) {
+        return mGroupChatLog.setGroupChatRejoinId(chatId, rejoinId, updateStateToStarted);
     }
 
     @Override
