@@ -207,8 +207,8 @@ public class GroupChatPersistedStorageAccessor {
         return mMessagingLog.isDisplayedByAllRecipients(msgId);
     }
 
-    public boolean setRejoinId(String rejoinId) {
-        return mMessagingLog.setGroupChatRejoinId(mChatId, rejoinId);
+    public boolean setRejoinId(String rejoinId, boolean updateStateToStarted) {
+        return mMessagingLog.setGroupChatRejoinId(mChatId, rejoinId, updateStateToStarted);
     }
 
     public void addGroupChat(ContactId contact, String subject,

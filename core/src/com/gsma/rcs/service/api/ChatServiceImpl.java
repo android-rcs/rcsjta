@@ -1116,6 +1116,18 @@ public class ChatServiceImpl extends IChatService.Stub {
     }
 
     /**
+     * Broadcasts Group Chat state change
+     * 
+     * @param chatId
+     * @param state
+     * @param reasonCode
+     */
+    public void broadcastGroupChatStateChange(String chatId, State state,
+            GroupChat.ReasonCode reasonCode) {
+        mGroupChatEventBroadcaster.broadcastStateChanged(chatId, state, reasonCode);
+    }
+
+    /**
      * Checks if the group chat with specific chatId is active
      * 
      * @param chatId

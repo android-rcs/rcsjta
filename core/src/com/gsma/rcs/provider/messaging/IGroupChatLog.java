@@ -101,9 +101,10 @@ public interface IGroupChatLog {
      * 
      * @param chatId Chat ID
      * @param rejoinId Rejoin ID
+     * @param updateStateToStarted True if session state must be updated to started
      * @return True if an entry was updated, otherwise false
      */
-    public boolean setGroupChatRejoinId(String chatId, String rejoinId);
+    public boolean setGroupChatRejoinId(String chatId, String rejoinId, boolean updateStateToStarted);
 
     /**
      * Get the group chat info

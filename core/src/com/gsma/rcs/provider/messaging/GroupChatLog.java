@@ -238,12 +238,16 @@ public class GroupChatLog implements IGroupChatLog {
     }
 
     @Override
-    public boolean setGroupChatRejoinId(String chatId, String rejoinId) {
+    public boolean setGroupChatRejoinId(String chatId, String rejoinId, boolean updateStateToStarted) {
         if (sLogger.isActivated()) {
             sLogger.debug("Update group chat rejoin ID to ".concat(rejoinId));
         }
         ContentValues values = new ContentValues();
         values.put(GroupChatData.KEY_REJOIN_ID, rejoinId);
+        if (updateStateToStarted) {
+            values.put(GroupChatData.KEY_STATE, State.STARTED.toInt());
+            values.put(GroupChatData.KEY_REASON_CODE, ReasonCode.UNSPECIFIED.toInt());
+        }
         return mLocalContentResolver.update(
                 Uri.withAppendedPath(GroupChatData.CONTENT_URI, chatId), values, null, null) > 0;
     }
