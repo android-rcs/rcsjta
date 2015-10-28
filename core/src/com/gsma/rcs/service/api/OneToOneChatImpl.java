@@ -429,8 +429,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         try {
             long timestamp = System.currentTimeMillis();
             /** For outgoing message, timestampSent = timestamp */
-            final ChatMessage geolocMsg = ChatUtils.createGeolocMessage(mContact, geoloc, timestamp,
-                    timestamp);
+            final ChatMessage geolocMsg = ChatUtils.createGeolocMessage(mContact, geoloc,
+                    timestamp, timestamp);
             ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
                     mMessagingLog, geolocMsg.getMessageId(), geolocMsg.getRemoteContact(),
                     geolocMsg.getContent(), geolocMsg.getMimeType(), mContact.toString(),
@@ -859,7 +859,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     }
 
     @Override
-    public void onMessageReceived(final ChatMessage msg, final boolean imdnDisplayedRequested) {
+    public void onMessageReceived(final ChatMessage msg, final boolean imdnDisplayedRequested,
+            final boolean deliverySuccess) {
         mImService.scheduleImOperation(new Runnable() {
             @Override
             public void run() {
@@ -885,7 +886,12 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                             mBroadcaster.broadcastMessageReceived(msg.getMimeType(), msgId);
                             return;
                         }
-                        mMessagingLog.addIncomingOneToOneChatMessage(msg, imdnDisplayedRequested);
+                        if (deliverySuccess) {
+                            mMessagingLog.addIncomingOneToOneChatMessage(msg,
+                                    imdnDisplayedRequested);
+                        } else {
+                            mMessagingLog.addOneToOneFailedDeliveryMessage(msg);
+                        }
                         mBroadcaster.broadcastMessageReceived(msg.getMimeType(), msgId);
                     }
                 } catch (NetworkException e) {
@@ -1094,4 +1100,5 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                     ImdnDocument.DELIVERY_STATUS_DISPLAYED, System.currentTimeMillis());
         }
     }
+
 }
