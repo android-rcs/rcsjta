@@ -37,8 +37,10 @@ public interface ChatSessionListener extends ImsSessionListener {
      * 
      * @param msg Chat message
      * @param imdnDisplayedRequested Indicates whether display notification is requested
+     * @param deliverySuccess True is delivery report succeeded
      */
-    public void onMessageReceived(ChatMessage msg, boolean imdnDisplayedRequested);
+    public void onMessageReceived(ChatMessage msg, boolean imdnDisplayedRequested,
+            boolean deliverySuccess);
 
     /**
      * Is composing event

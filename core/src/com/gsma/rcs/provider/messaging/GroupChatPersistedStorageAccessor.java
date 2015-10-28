@@ -228,8 +228,7 @@ public class GroupChatPersistedStorageAccessor {
         mMessagingLog.addGroupChatEvent(mChatId, contact, status, timestamp);
     }
 
-    public void addIncomingGroupChatMessage(ChatMessage msg, boolean imdnDisplayedRequested)
-            throws PayloadException {
+    public void addIncomingGroupChatMessage(ChatMessage msg, boolean imdnDisplayedRequested) {
         mMessagingLog.addIncomingGroupChatMessage(mChatId, msg, imdnDisplayedRequested);
     }
 
@@ -258,5 +257,9 @@ public class GroupChatPersistedStorageAccessor {
             long timestampDisplayed) {
         return mMessagingLog.setGroupChatDeliveryInfoDisplayed(chatId, contact, msgId,
                 timestampDisplayed);
+    }
+
+    public void addGroupChatFailedDeliveryMessage(ChatMessage msg) {
+        mMessagingLog.addGroupChatFailedDeliveryMessage(mChatId, msg);
     }
 }

@@ -1546,7 +1546,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     }
 
     @Override
-    public void onMessageReceived(ChatMessage msg, boolean imdnDisplayedRequested) {
+    public void onMessageReceived(ChatMessage msg, boolean imdnDisplayedRequested,
+            boolean deliverySuccess) {
         String msgId = null;
         ContactId remote = null;
         try {
@@ -1557,12 +1558,16 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                         .append("' received from ").append(remote).toString());
             }
             synchronized (mLock) {
-                mPersistedStorage.addIncomingGroupChatMessage(msg, imdnDisplayedRequested);
-                if (remote != null) {
-                    mContactManager.mergeContactCapabilities(remote, new CapabilitiesBuilder()
-                            .setImSession(true).setTimestampOfLastResponse(msg.getTimestamp())
-                            .build(), RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE,
-                            msg.getDisplayName());
+                if (deliverySuccess) {
+                    mPersistedStorage.addIncomingGroupChatMessage(msg, imdnDisplayedRequested);
+                    if (remote != null) {
+                        mContactManager.mergeContactCapabilities(remote, new CapabilitiesBuilder()
+                                .setImSession(true).setTimestampOfLastResponse(msg.getTimestamp())
+                                .build(), RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE,
+                                msg.getDisplayName());
+                    }
+                } else {
+                    mPersistedStorage.addGroupChatFailedDeliveryMessage(msg);
                 }
                 mBroadcaster.broadcastMessageReceived(msg.getMimeType(), msgId);
             }
@@ -1572,10 +1577,6 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     .append("' received from ").append(remote).toString(), e);
 
         } catch (FileAccessException e) {
-            sLogger.error(new StringBuilder("Failed to handle new IM with Id '").append(msgId)
-                    .append("' received from ").append(remote).toString(), e);
-
-        } catch (PayloadException e) {
             sLogger.error(new StringBuilder("Failed to handle new IM with Id '").append(msgId)
                     .append("' received from ").append(remote).toString(), e);
 
@@ -1937,4 +1938,5 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     ImdnDocument.DELIVERY_STATUS_DISPLAYED, System.currentTimeMillis());
         }
     }
+
 }

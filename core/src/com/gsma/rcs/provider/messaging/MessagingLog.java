@@ -23,7 +23,6 @@
 package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.core.content.MmContent;
-import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
@@ -144,32 +143,30 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public void addOneToOneSpamMessage(ChatMessage msg) throws PayloadException {
+    public void addOneToOneSpamMessage(ChatMessage msg) {
         mMessageLog.addOneToOneSpamMessage(msg);
     }
 
     @Override
-    public void addIncomingOneToOneChatMessage(ChatMessage msg, boolean imdnDisplayedRequested)
-            throws PayloadException {
+    public void addIncomingOneToOneChatMessage(ChatMessage msg, boolean imdnDisplayedRequested) {
         mMessageLog.addIncomingOneToOneChatMessage(msg, imdnDisplayedRequested);
     }
 
     @Override
     public void addOutgoingOneToOneChatMessage(ChatMessage msg, Status status,
-            Content.ReasonCode reasonCode, long deliveryExpiration) throws PayloadException {
+            Content.ReasonCode reasonCode, long deliveryExpiration) {
         mMessageLog.addOutgoingOneToOneChatMessage(msg, status, reasonCode, deliveryExpiration);
     }
 
     @Override
     public void addIncomingGroupChatMessage(String chatId, ChatMessage msg,
-            boolean imdnDisplayedRequested) throws PayloadException {
+            boolean imdnDisplayedRequested) {
         mMessageLog.addIncomingGroupChatMessage(chatId, msg, imdnDisplayedRequested);
     }
 
     @Override
     public void addOutgoingGroupChatMessage(String chatId, ChatMessage msg,
-            Set<ContactId> recipients, Status status, Content.ReasonCode reasonCode)
-            throws PayloadException {
+            Set<ContactId> recipients, Status status, Content.ReasonCode reasonCode) {
         mMessageLog.addOutgoingGroupChatMessage(chatId, msg, recipients, status, reasonCode);
     }
 
@@ -623,5 +620,15 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     @Override
     public Long getFileTransferProgress(String fileTransferId) {
         return mFileTransferLog.getFileTransferProgress(fileTransferId);
+    }
+
+    @Override
+    public void addOneToOneFailedDeliveryMessage(ChatMessage msg) {
+        mMessageLog.addOneToOneFailedDeliveryMessage(msg);
+    }
+
+    @Override
+    public void addGroupChatFailedDeliveryMessage(String chatId, ChatMessage msg) {
+        mMessageLog.addGroupChatFailedDeliveryMessage(chatId, msg);
     }
 }

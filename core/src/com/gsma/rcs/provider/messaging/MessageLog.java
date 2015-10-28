@@ -23,7 +23,6 @@
 package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.core.ims.network.NetworkException;
-import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.LocalContentResolver;
@@ -118,8 +117,7 @@ public class MessageLog implements IMessageLog {
         mRcsSettings = rcsSettings;
     }
 
-    private void addIncomingOneToOneMessage(ChatMessage msg, Status status, ReasonCode reasonCode)
-            throws PayloadException {
+    private void addIncomingOneToOneMessage(ChatMessage msg, Status status, ReasonCode reasonCode) {
         ContactId contact = msg.getRemoteContact();
         String msgId = msg.getMessageId();
         if (sLogger.isActivated()) {
@@ -156,11 +154,10 @@ public class MessageLog implements IMessageLog {
      * @param status Status
      * @param reasonCode Reason code
      * @param deliveryExpiration
-     * @throws PayloadException
      */
     @Override
     public void addOutgoingOneToOneChatMessage(ChatMessage msg, Status status,
-            ReasonCode reasonCode, long deliveryExpiration) throws PayloadException {
+            ReasonCode reasonCode, long deliveryExpiration) {
         ContactId contact = msg.getRemoteContact();
         String msgId = msg.getMessageId();
         if (sLogger.isActivated()) {
@@ -189,8 +186,13 @@ public class MessageLog implements IMessageLog {
     }
 
     @Override
-    public void addOneToOneSpamMessage(ChatMessage msg) throws PayloadException {
+    public void addOneToOneSpamMessage(ChatMessage msg) {
         addIncomingOneToOneMessage(msg, Status.REJECTED, ReasonCode.REJECTED_SPAM);
+    }
+
+    @Override
+    public void addOneToOneFailedDeliveryMessage(ChatMessage msg) {
+        addIncomingOneToOneMessage(msg, Status.FAILED, ReasonCode.FAILED_DELIVERY);
     }
 
     /**
@@ -198,11 +200,9 @@ public class MessageLog implements IMessageLog {
      * 
      * @param msg Chat message
      * @param imdnDisplayedRequested Indicates whether IMDN display was requested
-     * @throws PayloadException
      */
     @Override
-    public void addIncomingOneToOneChatMessage(ChatMessage msg, boolean imdnDisplayedRequested)
-            throws PayloadException {
+    public void addIncomingOneToOneChatMessage(ChatMessage msg, boolean imdnDisplayedRequested) {
         if (imdnDisplayedRequested) {
             addIncomingOneToOneMessage(msg, Status.DISPLAY_REPORT_REQUESTED, ReasonCode.UNSPECIFIED);
 
@@ -217,11 +217,10 @@ public class MessageLog implements IMessageLog {
      * @param chatId Chat ID
      * @param msg Chat message
      * @param imdnDisplayedRequested Indicates whether IMDN display was requested
-     * @throws PayloadException
      */
     @Override
     public void addIncomingGroupChatMessage(String chatId, ChatMessage msg,
-            boolean imdnDisplayedRequested) throws PayloadException {
+            boolean imdnDisplayedRequested) {
         Status chatMessageStatus = imdnDisplayedRequested ? Status.DISPLAY_REPORT_REQUESTED
                 : Status.RECEIVED;
         addGroupChatMessage(chatId, msg, Direction.INCOMING, null, chatMessageStatus,
@@ -236,12 +235,10 @@ public class MessageLog implements IMessageLog {
      * @param status Status
      * @param reasonCode Reason code
      * @throws NetworkException
-     * @throws PayloadException
      */
     @Override
     public void addOutgoingGroupChatMessage(String chatId, ChatMessage msg,
-            Set<ContactId> recipients, Status status, ReasonCode reasonCode)
-            throws PayloadException {
+            Set<ContactId> recipients, Status status, ReasonCode reasonCode) {
         addGroupChatMessage(chatId, msg, Direction.OUTGOING, recipients, status, reasonCode);
     }
 
@@ -253,11 +250,9 @@ public class MessageLog implements IMessageLog {
      * @param direction Direction
      * @param status Status
      * @param reasonCode Reason code
-     * @throws PayloadException
      */
     private void addGroupChatMessage(String chatId, ChatMessage msg, Direction direction,
-            Set<ContactId> recipients, Status status, ReasonCode reasonCode)
-            throws PayloadException {
+            Set<ContactId> recipients, Status status, ReasonCode reasonCode) {
         String msgId = msg.getMessageId();
         ContactId contact = msg.getRemoteContact();
         if (sLogger.isActivated()) {
@@ -717,5 +712,11 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_TIMESTAMP_SENT, timestampSent);
         return mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
                 values, null, null) > 0;
+    }
+
+    @Override
+    public void addGroupChatFailedDeliveryMessage(String chatId, ChatMessage msg) {
+        addGroupChatMessage(chatId, msg, Direction.INCOMING, null, Status.FAILED,
+                ReasonCode.FAILED_DELIVERY);
     }
 }

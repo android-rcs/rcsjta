@@ -164,12 +164,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param imdnDisplayedRequested Indicates whether display report was requested
      * @param cpimMsgId Cpim message Id
      * @param timestamp Message receive time
-     * @throws PayloadException
-     * @throws NetworkException
      */
     protected void receive(ChatMessage msg, ContactId remoteId, boolean msgSupportsImdnReport,
-            boolean imdnDisplayedRequested, String cpimMsgId, long timestamp)
-            throws PayloadException, NetworkException {
+            boolean imdnDisplayedRequested, String cpimMsgId, long timestamp) {
         if (mMessagingLog.isMessagePersisted(msg.getMessageId())) {
             // Message already received
             return;
@@ -179,12 +176,20 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         mIsComposingMgr.receiveIsComposingEvent(msg.getRemoteContact(), false);
 
         if (msgSupportsImdnReport && mImdnManager.isDeliveryDeliveredReportsEnabled()) {
-            sendMsrpMessageDeliveryStatus(remoteId, cpimMsgId,
-                    ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
-        }
+            try {
+                sendMsrpMessageDeliveryStatus(remoteId, cpimMsgId,
+                        ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
+                for (ImsSessionListener listener : getListeners()) {
+                    ((ChatSessionListener) listener).onMessageReceived(msg, imdnDisplayedRequested,
+                            true);
+                }
 
-        for (ImsSessionListener listener : getListeners()) {
-            ((ChatSessionListener) listener).onMessageReceived(msg, imdnDisplayedRequested);
+            } catch (NetworkException e) {
+                for (ImsSessionListener listener : getListeners()) {
+                    ((ChatSessionListener) listener).onMessageReceived(msg, imdnDisplayedRequested,
+                            false);
+                }
+            }
         }
     }
 
@@ -245,7 +250,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param tags Feature tags
      */
     public void setFeatureTags(List<String> tags) {
-        this.mFeatureTags = tags;
+        mFeatureTags = tags;
     }
 
     /**
@@ -254,7 +259,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param tags Feature tags
      */
     public void setAcceptContactTags(List<String> tags) {
-        this.mAcceptContactTags = tags;
+        mAcceptContactTags = tags;
     }
 
     /**
@@ -272,7 +277,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param types Accept types
      */
     public void setAcceptTypes(String types) {
-        this.mAcceptTypes = types;
+        mAcceptTypes = types;
     }
 
     /**
@@ -290,7 +295,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param types Wrapped types
      */
     public void setWrappedTypes(String types) {
-        this.mWrappedTypes = types;
+        mWrappedTypes = types;
     }
 
     /**
@@ -335,7 +340,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param id Contribution ID
      */
     public void setContributionID(String id) {
-        this.mContributionId = id;
+        mContributionId = id;
     }
 
     /**
@@ -374,7 +379,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param supported Supported
      */
     public void setGeolocSupportedByRemote(boolean supported) {
-        this.mGeolocSupportedByRemote = supported;
+        mGeolocSupportedByRemote = supported;
     }
 
     /**
@@ -392,7 +397,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param supported Supported
      */
     public void setFileTransferSupportedByRemote(boolean supported) {
-        this.mFtSupportedByRemote = supported;
     }
 
     /**
