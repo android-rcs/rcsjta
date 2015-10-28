@@ -45,10 +45,10 @@ import java.util.Map;
  */
 public class RiApplication extends Application {
 
-    /*
-     * Delay before creating connection manager.
+    /**
+     * Delay (ms) before starting connection manager.
      */
-    private static final long DELAY_FOR_MANAGING_CONNECTION = 5000;
+    /* package private */static final long DELAY_FOR_STARTING_CNX_MANAGER = 5000;
 
     private static Context mContext;
 
@@ -156,6 +156,8 @@ public class RiApplication extends Application {
         return sDirectionToString.get(direction);
     }
 
+    /* package private */static boolean sCnxManagerStarted = false;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -201,8 +203,9 @@ public class RiApplication extends Application {
             @Override
             public void run() {
                 cnxManager.start();
+                sCnxManagerStarted = true;
             }
-        }, DELAY_FOR_MANAGING_CONNECTION);
+        }, DELAY_FOR_STARTING_CNX_MANAGER);
     }
 
     /**
