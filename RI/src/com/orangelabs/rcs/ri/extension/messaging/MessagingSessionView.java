@@ -120,7 +120,7 @@ public class MessagingSessionView extends RcsActivity {
         super.onCreate(savedInstanceState);
         initialize();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        setContentView(R.layout.extension_session_view);
+        setContentView(R.layout.extension_messaging_session_view);
 
         /* Set buttons callback */
         Button sendBtn = (Button) findViewById(R.id.send_btn);

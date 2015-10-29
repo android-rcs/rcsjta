@@ -54,9 +54,13 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Streaming session view
- * 
+ *
  * @author Jean-Marc AUFFRET
  * @author Philippe LEMORDANT
  */
@@ -104,7 +108,7 @@ public class StreamingSessionView extends RcsActivity {
 
     private Dialog mProgressDialog;
 
-    private android.view.View.OnClickListener mBtnSendListener;
+    private android.view.View.OnClickListener mBtnStartStopListener;
 
     private OnClickListener mAcceptBtnListener;
 
@@ -112,29 +116,50 @@ public class StreamingSessionView extends RcsActivity {
 
     private MultimediaStreamingSessionListener mServiceListener;
 
+    private boolean mStarted = false;
+
+    private Button mStartStopBtn;
+
+    private TextView mTxDataView;
+
+    private TextView mRxDataView;
+
+    private Integer mCounter = 0;
+
+    private ScheduledExecutorService mPeriodicWorker;
+
+    private Runnable mPeriodicRtpSendTask;
+
+    private MultimediaSessionService mSessionService;
+
     private static final String LOGTAG = LogUtils
             .getTag(StreamingSessionView.class.getSimpleName());
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        intialize();
+        initialize();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        setContentView(R.layout.extension_session_view);
+        setContentView(R.layout.extension_streaming_session_view);
 
         /* Set buttons callback */
-        Button sendBtn = (Button) findViewById(R.id.send_btn);
-        sendBtn.setOnClickListener(mBtnSendListener);
-        sendBtn.setEnabled(false);
+        mStartStopBtn = (Button) findViewById(R.id.start_stop_btn);
+        mStartStopBtn.setOnClickListener(mBtnStartStopListener);
+        mStartStopBtn.setEnabled(false);
 
+        mTxDataView = (TextView) findViewById(R.id.tx_data);
+        mRxDataView = (TextView) findViewById(R.id.rx_data);
+
+        mSessionService = getMultimediaSessionApi();
         /* Register to API connection manager */
-        if (!isServiceConnected(RcsServiceName.MULTIMEDIA, RcsServiceName.CONTACT)) {
+        if (mSessionService == null
+                || !isServiceConnected(RcsServiceName.MULTIMEDIA, RcsServiceName.CONTACT)) {
             showMessageThenExit(R.string.label_service_not_available);
             return;
         }
         startMonitorServices(RcsServiceName.MULTIMEDIA, RcsServiceName.CONTACT);
         try {
-            getMultimediaSessionApi().addEventListener(mServiceListener);
+            mSessionService.addEventListener(mServiceListener);
             initialiseStreamingSession(getIntent());
         } catch (RcsServiceException e) {
             showExceptionThenExit(e);
@@ -144,12 +169,15 @@ public class StreamingSessionView extends RcsActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (isServiceConnected(RcsServiceName.MULTIMEDIA)) {
+        if (mSessionService != null && isServiceConnected(RcsServiceName.MULTIMEDIA)) {
             try {
-                getMultimediaSessionApi().removeEventListener(mServiceListener);
+                mSessionService.removeEventListener(mServiceListener);
             } catch (RcsServiceException e) {
                 Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
             }
+        }
+        if (mPeriodicWorker != null) {
+            mPeriodicWorker.shutdown();
         }
     }
 
@@ -174,12 +202,11 @@ public class StreamingSessionView extends RcsActivity {
     }
 
     private void initialiseStreamingSession(Intent intent) {
-        MultimediaSessionService sessionApi = getMultimediaSessionApi();
         try {
             int mode = intent.getIntExtra(StreamingSessionView.EXTRA_MODE, -1);
             if (mode == StreamingSessionView.MODE_OUTGOING) {
                 /* Outgoing session: Check if the service is available. */
-                if (!sessionApi.isServiceRegistered()) {
+                if (!mSessionService.isServiceRegistered()) {
                     showMessageThenExit(R.string.error_not_registered);
                     return;
                 }
@@ -189,7 +216,7 @@ public class StreamingSessionView extends RcsActivity {
             } else if (mode == StreamingSessionView.MODE_OPEN) {
                 /* Open an existing session. */
                 mSessionId = intent.getStringExtra(StreamingSessionView.EXTRA_SESSION_ID);
-                mSession = sessionApi.getStreamingSession(mSessionId);
+                mSession = mSessionService.getStreamingSession(mSessionId);
                 if (mSession == null) {
                     showMessageThenExit(R.string.label_session_has_expired);
                     return;
@@ -201,7 +228,7 @@ public class StreamingSessionView extends RcsActivity {
                 mSessionId = intent
                         .getStringExtra(MultimediaStreamingSessionIntent.EXTRA_SESSION_ID);
 
-                mSession = sessionApi.getStreamingSession(mSessionId);
+                mSession = mSessionService.getStreamingSession(mSessionId);
                 if (mSession == null) {
                     showMessageThenExit(R.string.label_session_has_expired);
                     return;
@@ -237,7 +264,7 @@ public class StreamingSessionView extends RcsActivity {
 
     private void startSession() {
         try {
-            mSession = getMultimediaSessionApi().initiateStreamingSession(mServiceId, mContact);
+            mSession = mSessionService.initiateStreamingSession(mServiceId, mContact);
             mSessionId = mSession.getSessionId();
             showProgressDialog();
 
@@ -325,17 +352,45 @@ public class StreamingSessionView extends RcsActivity {
         return true;
     }
 
-    private void intialize() {
-        mBtnSendListener = new android.view.View.OnClickListener() {
-            private int i = 0;
-
-            public void onClick(View v) {
+    private void initialize() {
+        mPeriodicRtpSendTask = new Runnable() {
+            public void run() {
+                if (mSession == null) {
+                    return;
+                }
+                mCounter++;
+                final String data = "data".concat(mCounter.toString());
                 try {
-                    String data = "data".concat(String.valueOf(i++));
                     mSession.sendPayload(data.getBytes());
-
+                    handler.post(new Runnable() {
+                        public void run() {
+                            /* Display Transmitted data */
+                            mTxDataView.setText(data);
+                        }
+                    });
                 } catch (RcsServiceException e) {
                     showExceptionThenExit(e);
+                }
+
+            }
+        };
+        mBtnStartStopListener = new android.view.View.OnClickListener() {
+
+            public void onClick(View v) {
+                mStarted = !mStarted;
+                handler.post(new Runnable() {
+                    public void run() {
+                        mStartStopBtn
+                                .setText(mStarted ? R.string.label_stop : R.string.label_start);
+                    }
+                });
+                if (mStarted) {
+                    mPeriodicWorker = Executors.newSingleThreadScheduledExecutor();
+                    mPeriodicWorker.scheduleAtFixedRate(mPeriodicRtpSendTask, 0, 1,
+                            TimeUnit.SECONDS);
+                } else {
+                    mPeriodicWorker.shutdown();
+                    mPeriodicWorker = null;
                 }
             }
         };
@@ -377,8 +432,7 @@ public class StreamingSessionView extends RcsActivity {
                                 /* Session is established: hide progress dialog. */
                                 hideProgressDialog();
                                 /* Activate sen button. */
-                                Button sendBtn = (Button) findViewById(R.id.send_btn);
-                                sendBtn.setEnabled(true);
+                                mStartStopBtn.setEnabled(true);
                                 break;
 
                             case ABORTED:
@@ -410,21 +464,17 @@ public class StreamingSessionView extends RcsActivity {
             }
 
             @Override
-            public void onPayloadReceived(ContactId contact, String sessionId, byte[] content) {
+            public void onPayloadReceived(ContactId contact, String sessionId, final byte[] content) {
                 if (LogUtils.isActive) {
                     Log.d(LOGTAG, "onNewMessage contact=" + contact + " sessionId=" + sessionId);
                 }
                 if (mSessionId == null || !mSessionId.equals(sessionId)) {
                     return;
                 }
-                final String data = new String(content);
-
                 handler.post(new Runnable() {
                     public void run() {
-                        // Display received data
-                        TextView txt = (TextView) StreamingSessionView.this
-                                .findViewById(R.id.recv_data);
-                        txt.setText(data);
+                        /* Display received data */
+                        mRxDataView.setText(new String(content));
                     }
                 });
             }
