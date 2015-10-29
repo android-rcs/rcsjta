@@ -275,9 +275,14 @@
     <string name="title_streaming_session">Streaming session</string>
     <string name="label_session">Session %s</string>
     <string name="label_send_data">Send data</string>
+    <string name="label_start">Start RTP streaming</string>
+    <string name="label_stop">Stop RTP streaming</string>
+    <string name="label_streaming_info">To enable data streaming, both sides must send data. NAT binding is maintained by sending data periodically (1 packet per second).</string>
     <string name="label_recv_data">Receive data:</string>
     <string name="label_mms_state_changed">MMS state %1$s (%2$s)</string>
     <string name="label_mm_from_id">From: %1$s\nService ID: %2$s</string>
+    <string name="label_rx_count">RX :</string>
+    <string name="label_tx_count">TX :</string>
 
     <!-- Geolocation push -->
     <string name="label_select_geoloc">Select from google map\n(Internet connectivity required)</string>
