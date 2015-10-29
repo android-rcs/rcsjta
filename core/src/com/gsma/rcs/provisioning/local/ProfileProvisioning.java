@@ -23,16 +23,16 @@
 package com.gsma.rcs.provisioning.local;
 
 import static com.gsma.rcs.provisioning.local.Provisioning.saveCheckBoxParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.saveContactIdEditTextParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.saveIntegerEditTextParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.saveStringEditTextParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.saveUriEditTextParam;
-import static com.gsma.rcs.provisioning.local.Provisioning.saveContactIdEditTextParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.setCheckBoxParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.setContactIdEditTextParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.setIntegerEditTextParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.setSpinnerParameter;
 import static com.gsma.rcs.provisioning.local.Provisioning.setStringEditTextParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.setUriEditTextParam;
-import static com.gsma.rcs.provisioning.local.Provisioning.setContactIdEditTextParam;
 
 import com.gsma.rcs.R;
 import com.gsma.rcs.provider.LocalContentResolver;
@@ -205,7 +205,9 @@ public class ProfileProvisioning extends Activity {
 
         setCheckBoxParam(R.id.image_sharing, RcsSettingsData.CAPABILITY_IMAGE_SHARING, helper);
         setCheckBoxParam(R.id.video_sharing, RcsSettingsData.CAPABILITY_VIDEO_SHARING, helper);
-        setCheckBoxParam(R.id.file_transfer, RcsSettingsData.CAPABILITY_FILE_TRANSFER, helper);
+        setCheckBoxParam(R.id.file_transfer_msrp, RcsSettingsData.CAPABILITY_FILE_TRANSFER, helper);
+        setCheckBoxParam(R.id.file_transfer_http, RcsSettingsData.CAPABILITY_FILE_TRANSFER_HTTP,
+                helper);
         setCheckBoxParam(R.id.im, RcsSettingsData.CAPABILITY_IM_SESSION, helper);
         setCheckBoxParam(R.id.im_group, RcsSettingsData.CAPABILITY_IM_GROUP_SESSION, helper);
         setCheckBoxParam(R.id.ipvoicecall, RcsSettingsData.CAPABILITY_IP_VOICE_CALL, helper);
@@ -317,7 +319,9 @@ public class ProfileProvisioning extends Activity {
         // Save capabilities
         saveCheckBoxParam(R.id.image_sharing, RcsSettingsData.CAPABILITY_IMAGE_SHARING, helper);
         saveCheckBoxParam(R.id.video_sharing, RcsSettingsData.CAPABILITY_VIDEO_SHARING, helper);
-        saveCheckBoxParam(R.id.file_transfer, RcsSettingsData.CAPABILITY_FILE_TRANSFER, helper);
+        saveCheckBoxParam(R.id.file_transfer_msrp, RcsSettingsData.CAPABILITY_FILE_TRANSFER, helper);
+        saveCheckBoxParam(R.id.file_transfer_http, RcsSettingsData.CAPABILITY_FILE_TRANSFER_HTTP,
+                helper);
         saveCheckBoxParam(R.id.im, RcsSettingsData.CAPABILITY_IM_SESSION, helper);
         saveCheckBoxParam(R.id.im_group, RcsSettingsData.CAPABILITY_IM_GROUP_SESSION, helper);
         saveCheckBoxParam(R.id.ipvoicecall, RcsSettingsData.CAPABILITY_IP_VOICE_CALL, helper);

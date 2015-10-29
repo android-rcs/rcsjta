@@ -392,11 +392,19 @@
                 android:textStyle="bold" />
 
             <CheckBox
-                android:id="@+id/file_transfer"
+                android:id="@+id/file_transfer_msrp"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:enabled="true"
-                android:text="@string/File_transfer"
+                android:text="@string/File_transfer_MSRP"
+                android:textStyle="bold" />
+           
+            <CheckBox
+                android:id="@+id/file_transfer_http"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:enabled="true"
+                android:text="@string/File_transfer_HTTP"
                 android:textStyle="bold" />
 
             <CheckBox
