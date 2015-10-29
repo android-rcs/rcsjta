@@ -44,7 +44,7 @@
     <string name="Capabilities">Capabilities:</string>
     <string name="Image_sharing">Image sharing</string>
     <string name="Video_sharing">Video sharing</string>
-    <string name="File_transfer">File transfer</string>
+    <string name="File_transfer_MSRP">File transfer MSRP</string>
     <string name="File_transfer_HTTP">File transfer HTTP</string>
     <string name="IM_session">IM session</string>
     <string name="IM_Group_session">IM Group session</string>
