@@ -116,11 +116,6 @@ public class GroupChatView extends ChatView {
 
     private Set<ContactId> mParticipants = new HashSet<>();
 
-    /**
-     * Chat ID of the displayed conversation
-     */
-    /* package private */static String chatIdOnForeground;
-
     private static final String LOGTAG = LogUtils.getTag(GroupChatView.class.getSimpleName());
 
     private static final String OPEN_GROUPCHAT = "OPEN_GROUPCHAT";
@@ -170,7 +165,18 @@ public class GroupChatView extends ChatView {
             }
         }
         super.onDestroy();
-        chatIdOnForeground = null;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        sChatIdOnForeground = mChatId;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        sChatIdOnForeground = null;
     }
 
     @Override
@@ -215,7 +221,7 @@ public class GroupChatView extends ChatView {
                         return false;
                     }
                     setCursorLoader(oldChatId == null);
-                    chatIdOnForeground = mChatId;
+                    sChatIdOnForeground = mChatId;
                     mSubject = mGroupChat.getSubject();
                     updateGroupChatViewTitle(mSubject);
                     /* Set list of participants */
@@ -239,7 +245,7 @@ public class GroupChatView extends ChatView {
                         return false;
                     }
                     setCursorLoader(oldChatId == null);
-                    chatIdOnForeground = mChatId;
+                    sChatIdOnForeground = mChatId;
                     ContactId contact = mGroupChat.getRemoteContact();
                     mSubject = mGroupChat.getSubject();
                     updateGroupChatViewTitle(mSubject);
@@ -393,7 +399,7 @@ public class GroupChatView extends ChatView {
             mGroupChat = mChatService.initiateGroupChat(new HashSet<>(mParticipants), mSubject);
             mChatId = mGroupChat.getChatId();
             setCursorLoader(firstLoad);
-            chatIdOnForeground = mChatId;
+            sChatIdOnForeground = mChatId;
         } catch (RcsServiceException e) {
             showExceptionThenExit(e);
             return false;

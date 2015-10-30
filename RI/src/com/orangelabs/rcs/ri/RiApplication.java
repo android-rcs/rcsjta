@@ -48,7 +48,7 @@ public class RiApplication extends Application {
     /**
      * Delay (ms) before starting connection manager.
      */
-    /* package private */static final long DELAY_FOR_STARTING_CNX_MANAGER = 5000;
+    /* package private */static final long DELAY_FOR_STARTING_CNX_MANAGER = 2500;
 
     private static Context mContext;
 

@@ -91,8 +91,6 @@ public abstract class ChatView extends RcsFragmentActivity implements
      */
     protected IsComposingManager mComposingManager;
 
-    private static boolean sActivityDisplayed = false;
-
     /**
      * UI handler
      */
@@ -105,6 +103,8 @@ public abstract class ChatView extends RcsFragmentActivity implements
     protected FileTransferService mFileTransferService;
 
     private ChatCursorObserver mObserver;
+
+    public static String sChatIdOnForeground;
 
     /**
      * Chat message projection
@@ -231,27 +231,6 @@ public abstract class ChatView extends RcsFragmentActivity implements
                 Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
             }
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        sActivityDisplayed = true;
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        sActivityDisplayed = false;
-    }
-
-    /**
-     * Return true if the activity is currently displayed or not
-     * 
-     * @return Boolean
-     */
-    public static boolean isDisplayed() {
-        return sActivityDisplayed;
     }
 
     @Override

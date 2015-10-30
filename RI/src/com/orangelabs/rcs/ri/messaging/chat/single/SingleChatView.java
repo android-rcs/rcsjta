@@ -36,6 +36,7 @@ import com.gsma.services.rcs.chat.OneToOneChatIntent;
 import com.gsma.services.rcs.chat.OneToOneChatListener;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.services.rcs.filetransfer.FileTransferIntent;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 import com.gsma.services.rcs.history.HistoryLog;
 
@@ -88,14 +89,13 @@ public class SingleChatView extends ChatView {
         ChatLog.Message.MESSAGE_ID
     };
 
+    private final static String[] PROJ_UNDELIVERED_FT = new String[] {
+        FileTransferLog.FT_ID
+    };
+
     private ContactId mContact;
 
     private OneToOneChat mChat;
-
-    /**
-     * ContactId of the displayed single chat
-     */
-    /* private package */static ContactId contactOnForeground;
 
     /**
      * List of items for contextual menu
@@ -123,15 +123,20 @@ public class SingleChatView extends ChatView {
     private static final String SEL_UNDELIVERED_MESSAGES = ChatLog.Message.CHAT_ID + "=? AND "
             + ChatLog.Message.EXPIRED_DELIVERY + "='1'";
 
+    private static final String SEL_UNDELIVERED_FTS = FileTransferLog.CHAT_ID + "=? AND "
+            + FileTransferLog.EXPIRED_DELIVERY + "='1'";
+
     private OneToOneChatListener mChatListener;
 
     private CapabilityService mCapabilityService;
 
     private AlertDialog mClearUndeliveredAlertDialog;
 
-    private OnCancelListener mClearUndeliveredMessageCancelListener;
+    private OnCancelListener mClearUndeliveredCancelListener;
 
     private OnClickListener mClearUndeliveredMessageClickListener;
+
+    private OnClickListener mClearUndeliveredFileTransferClickListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -175,7 +180,20 @@ public class SingleChatView extends ChatView {
             }
         }
         super.onDestroy();
-        contactOnForeground = null;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mContact != null) {
+            sChatIdOnForeground = mContact.toString();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        sChatIdOnForeground = null;
     }
 
     @Override
@@ -217,11 +235,25 @@ public class SingleChatView extends ChatView {
             if (OneToOneChatIntent.ACTION_MESSAGE_DELIVERY_EXPIRED.equals(intent.getAction())) {
                 processUndeliveredMessages(displayName);
             }
+            if (FileTransferIntent.ACTION_FILE_TRANSFER_DELIVERY_EXPIRED.equals(intent.getAction())) {
+                processUndeliveredFileTransfers(displayName);
+            }
             return true;
 
         } catch (RcsServiceException e) {
             showExceptionThenExit(e);
             return false;
+        }
+    }
+
+    private void processUndeliveredFileTransfers(String displayName) {
+        /* Do not propose to clear undelivered if a dialog is already opened */
+        if (mClearUndeliveredAlertDialog == null) {
+            mClearUndeliveredAlertDialog = popUpToClearMessageDeliveryExpiration(this,
+                    getString(R.string.title_undelivered_filetransfer),
+                    getString(R.string.label_undelivered_filetransfer, displayName),
+                    mClearUndeliveredFileTransferClickListener, mClearUndeliveredCancelListener);
+            registerDialog(mClearUndeliveredAlertDialog);
         }
     }
 
@@ -231,7 +263,7 @@ public class SingleChatView extends ChatView {
             mClearUndeliveredAlertDialog = popUpToClearMessageDeliveryExpiration(this,
                     getString(R.string.title_undelivered_message),
                     getString(R.string.label_undelivered_message, displayName),
-                    mClearUndeliveredMessageClickListener, mClearUndeliveredMessageCancelListener);
+                    mClearUndeliveredMessageClickListener, mClearUndeliveredCancelListener);
             registerDialog(mClearUndeliveredAlertDialog);
         }
     }
@@ -248,7 +280,7 @@ public class SingleChatView extends ChatView {
         mChat = mChatService.getOneToOneChat(mContact);
         setCursorLoader(firstLoad);
 
-        contactOnForeground = mContact;
+        sChatIdOnForeground = mContact.toString();
         if (mCapabilityService == null) {
             mCapabilityService = getCapabilityApi();
         }
@@ -515,6 +547,30 @@ public class SingleChatView extends ChatView {
         }
     }
 
+    private Set<String> getUndeliveredFileTransfers(ContactId contact) {
+        Set<String> ids = new HashSet<>();
+        Cursor cursor = null;
+        try {
+            cursor = this.getContentResolver().query(FileTransferLog.CONTENT_URI,
+                    PROJ_UNDELIVERED_FT, SEL_UNDELIVERED_FTS, new String[] {
+                        contact.toString()
+                    }, null);
+            if (!cursor.moveToFirst()) {
+                return ids;
+            }
+            int idColumnIdx = cursor.getColumnIndexOrThrow(FileTransferLog.FT_ID);
+            do {
+                ids.add(cursor.getString(idColumnIdx));
+            } while (cursor.moveToNext());
+            return ids;
+
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
     private AlertDialog popUpToClearMessageDeliveryExpiration(Context ctx, String title,
             String msg, OnClickListener onClickiLstener, OnCancelListener onCancelListener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
@@ -545,7 +601,27 @@ public class SingleChatView extends ChatView {
 
             }
         };
-        mClearUndeliveredMessageCancelListener = new OnCancelListener() {
+
+        mClearUndeliveredFileTransferClickListener = new OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                try {
+                    Set<String> fileTransfersIds = getUndeliveredFileTransfers(mContact);
+                    mFileTransferService.clearFileTransferDeliveryExpiration(fileTransfersIds);
+                    if (LogUtils.isActive) {
+                        Log.d(LOGTAG, "clearFileTransferDeliveryExpiration "
+                                .concat(fileTransfersIds.toString()));
+                    }
+                } catch (RcsServiceException e) {
+                    showException(e);
+                } finally {
+                    mClearUndeliveredAlertDialog = null;
+                }
+
+            }
+        };
+        mClearUndeliveredCancelListener = new OnCancelListener() {
 
             @Override
             public void onCancel(DialogInterface dialog) {
