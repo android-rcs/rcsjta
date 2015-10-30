@@ -40,6 +40,7 @@ import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
@@ -77,6 +78,8 @@ public class InitiateFileTransfer extends RcsActivity {
     private final static int SELECT_IMAGE = 0;
 
     private final static int SELECT_TEXT_FILE = 1;
+
+    private static final String BUNDLE_FTDAO_ID = "ftdao";
 
     /**
      * UI handler
@@ -167,7 +170,7 @@ public class InitiateFileTransfer extends RcsActivity {
             if (resuming) {
                 /* Get resuming info */
                 FileTransferDAO ftdao = (FileTransferDAO) (intent.getExtras()
-                        .getSerializable(FileTransferIntentService.BUNDLE_FTDAO_ID));
+                        .getSerializable(BUNDLE_FTDAO_ID));
                 if (ftdao == null) {
                     if (LogUtils.isActive) {
                         Log.e(LOGTAG, "onCreate cannot read File Transfer resuming info");
@@ -596,5 +599,23 @@ public class InitiateFileTransfer extends RcsActivity {
                 }
             }
         };
+    }
+
+    /**
+     * Forge intent to resume Originating File Transfer
+     * 
+     * @param ctx The context
+     * @param ftDao The FileTransfer DAO
+     * @param resume intent
+     * @return intent
+     */
+    public static Intent forgeResumeIntent(Context ctx, FileTransferDAO ftDao, Intent resume) {
+        resume.setClass(ctx, InitiateFileTransfer.class);
+        resume.addFlags(Intent.FLAG_FROM_BACKGROUND | Intent.FLAG_ACTIVITY_NEW_TASK);
+        /* Save FileTransferDAO into intent */
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(BUNDLE_FTDAO_ID, ftDao);
+        resume.putExtras(bundle);
+        return resume;
     }
 }

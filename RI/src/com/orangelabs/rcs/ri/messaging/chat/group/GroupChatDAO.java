@@ -57,10 +57,6 @@ public class GroupChatDAO {
 
     private final GroupChat.ReasonCode mReasonCode;
 
-    private static final String[] PROJECTION_CHAT_ID = new String[] {
-        ChatLog.GroupChat.CHAT_ID
-    };
-
     public GroupChat.State getState() {
         return mState;
     }
@@ -158,26 +154,13 @@ public class GroupChatDAO {
     }
 
     /**
-     * Checks if group chat exists for chat ID
+     * Checks if chatId is a group chat Id
      * 
-     * @param context
      * @param chatId
-     * @return true if group chat exists for chat ID
+     * @param contact
+     * @return True chatId is a group chat Id
      */
-    public static boolean isGroupChat(Context context, String chatId) {
-        if (sContentResolver == null) {
-            sContentResolver = context.getContentResolver();
-        }
-        Cursor cursor = null;
-        try {
-            cursor = sContentResolver.query(
-                    Uri.withAppendedPath(ChatLog.GroupChat.CONTENT_URI, chatId),
-                    PROJECTION_CHAT_ID, null, null, null);
-            return cursor.moveToFirst();
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
+    public static boolean isGroupChat(String chatId, ContactId contact) {
+        return (contact == null) || !chatId.equals(contact.toString());
     }
 }

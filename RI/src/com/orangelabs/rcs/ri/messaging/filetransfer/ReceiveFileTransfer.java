@@ -34,12 +34,14 @@ import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
 import com.orangelabs.rcs.api.connection.utils.RcsActivity;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.messaging.chat.group.GroupChatDAO;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.RcsSessionUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -109,6 +111,8 @@ public class ReceiveFileTransfer extends RcsActivity {
 
     private static final String VCARD_MIME_TYPE = "text/x-vcard";
 
+    private static final String BUNDLE_FTDAO_ID = "ftdao";
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -169,7 +173,7 @@ public class ReceiveFileTransfer extends RcsActivity {
     }
 
     boolean processIntent(Intent intent, boolean newIntent) {
-        mFtDao = intent.getExtras().getParcelable(FileTransferIntentService.BUNDLE_FTDAO_ID);
+        mFtDao = intent.getExtras().getParcelable(BUNDLE_FTDAO_ID);
         if (mFtDao == null) {
             if (LogUtils.isActive) {
                 Log.e(LOGTAG, "processIntent cannot read File Transfer invitation (newIntent="
@@ -183,12 +187,12 @@ public class ReceiveFileTransfer extends RcsActivity {
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "processIntent (newIntent=" + newIntent + ") " + mFtDao);
         }
+        ContactId contact = mFtDao.getContact();
         /* Get invitation info */
         boolean resuming = FileTransferIntent.ACTION_RESUME.equals(intent.getAction());
-        mGroupFileTransfer = intent.getBooleanExtra(FileTransferIntentService.EXTRA_GROUP_FILE,
-                false);
+        mGroupFileTransfer = GroupChatDAO.isGroupChat(mFtDao.getChatId(), contact);
 
-        String from = RcsContactUtil.getInstance(this).getDisplayName(mFtDao.getContact());
+        String from = RcsContactUtil.getInstance(this).getDisplayName(contact);
         TextView fromTextView = (TextView) findViewById(R.id.from);
         fromTextView.setText(getString(R.string.label_from_args, from));
 
@@ -699,4 +703,41 @@ public class ReceiveFileTransfer extends RcsActivity {
             }
         };
     }
+
+    /**
+     * Forge invitation intent to start ReceiveFileTransfer activity
+     * 
+     * @param ctx The context
+     * @param ftDao The FileTransfer DAO
+     * @param invitation intent
+     * @return intent
+     */
+    public static Intent forgeInvitationIntent(Context ctx, FileTransferDAO ftDao, Intent invitation) {
+        invitation.setClass(ctx, ReceiveFileTransfer.class);
+        invitation.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        /* Save FileTransferDAO into intent */
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(BUNDLE_FTDAO_ID, ftDao);
+        invitation.putExtras(bundle);
+        return invitation;
+    }
+
+    /**
+     * Forge resume intent to start ReceiveFileTransfer activity
+     * 
+     * @param ctx The context
+     * @param ftDao The FileTransfer DAO
+     * @param resume intent
+     * @return intent
+     */
+    public static Intent forgeResumeIntent(Context ctx, FileTransferDAO ftDao, Intent resume) {
+        resume.setClass(ctx, ReceiveFileTransfer.class);
+        resume.addFlags(Intent.FLAG_FROM_BACKGROUND | Intent.FLAG_ACTIVITY_NEW_TASK);
+        /* Save FileTransferDAO into intent */
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(BUNDLE_FTDAO_ID, ftDao);
+        resume.putExtras(bundle);
+        return resume;
+    }
+
 }

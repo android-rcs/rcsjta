@@ -207,8 +207,10 @@
     <string name="label_GeolocExpireTime">Geoloc Expire Timeout:</string>
     <string name="label_GroupChatSupported">GC supported:</string>
     <string name="label_NotAllowedToInitiateGroupChat">Not allowed to initiate Group Chat</string>
-    <string name="title_undelivered_message">Undelivered messages!</string>
-    <string name="label_undelivered_message">%1$s did not receive your messages</string>
+    <string name="title_undelivered_message">Undelivered message(s)!</string>
+    <string name="label_undelivered_message">%1$s did not receive your message(s)</string>
+    <string name="title_undelivered_filetransfer">Undelivered file(s)!</string>
+    <string name="label_undelivered_filetransfer">%1$s did not receive your file(s)</string>
 
     <!-- Sharing menu -->
     <string name="menu_sharing">Sharing</string>
