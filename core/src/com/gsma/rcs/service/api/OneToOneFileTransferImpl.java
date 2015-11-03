@@ -96,11 +96,9 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
      * @param imService InstantMessagingService
      * @param persistentStorage FileTransferPersistedStorageAccessor
      * @param fileTransferService FileTransferServiceImpl
-     * @param rcsSettings RcsSettings
-     * @param core Core
-     * @param messagingLog
-     * @param contactManager
-     * @param undeliveredManager
+     * @param rcsSettings The RCS settings accessor
+     * @param messagingLog The messaging log accessor
+     * @param contactManager The contact manager accessor
      */
     public OneToOneFileTransferImpl(InstantMessagingService imService, String transferId,
             IOneToOneFileTransferBroadcaster broadcaster,
@@ -509,11 +507,13 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                     if (resume == null) {
                         sLogger.error("Cannot find session sith file transfer ID="
                                 .concat(mFileTransferId));
+                        return;
                     }
                     if (!(resume instanceof FtHttpResumeDownload)) {
                         sLogger.error(new StringBuilder(
                                 "Cannot accept transfer with fileTransferId '")
                                 .append(mFileTransferId).append("': wrong direction").toString());
+                        return;
                     }
                     FtHttpResumeDownload download = (FtHttpResumeDownload) resume;
                     if (download.isAccepted()) {
@@ -582,6 +582,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                             default:
                                 sLogger.error("Illegal state to reject file transfer with ID="
                                         .concat(mFileTransferId));
+                                return;
                         }
                     }
                     session.rejectSession(InvitationStatus.INVITATION_REJECTED_DECLINE);
@@ -639,11 +640,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                     if (sLogger.isActivated()) {
                         sLogger.debug(e.getMessage());
                     }
-                } catch (PayloadException e) {
-                    sLogger.error(
-                            new StringBuilder("Failed to terminate session with fileTransferId : ")
-                                    .append(mFileTransferId).toString(), e);
-                } catch (RemoteException e) {
+                } catch (PayloadException | RemoteException e) {
                     sLogger.error(
                             new StringBuilder("Failed to terminate session with fileTransferId : ")
                                     .append(mFileTransferId).toString(), e);
@@ -1080,11 +1077,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         mImService.tryToDequeueFileTransfers();
     }
 
-    /**
-     * Session is started
-     * 
-     * @param contact
-     */
+    @Override
     public void onSessionStarted(ContactId contact) {
         if (sLogger.isActivated()) {
             sLogger.info("Session started");
@@ -1122,12 +1115,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         mImService.tryToDequeueFileTransfers();
     }
 
-    /**
-     * Session has been aborted
-     * 
-     * @param contact
-     * @param reason Termination reason
-     */
+    @Override
     public void onSessionAborted(ContactId contact, TerminationReason reason) {
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("Session aborted (reason ").append(reason).append(")")
@@ -1168,7 +1156,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
     /**
      * Session has been terminated by remote
      * 
-     * @param contact
+     * @param contact The remote contact
      */
     public void onSessionTerminatedByRemote(ContactId contact) {
         if (sLogger.isActivated()) {
@@ -1187,12 +1175,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         mImService.tryToDequeueFileTransfers();
     }
 
-    /**
-     * File transfer error
-     * 
-     * @param error Error
-     * @param contact
-     */
+    @Override
     public void onTransferError(FileSharingError error, ContactId contact) {
         if (sLogger.isActivated()) {
             sLogger.info("Sharing error " + error.getErrorCode());
@@ -1208,13 +1191,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         mImService.tryToDequeueFileTransfers();
     }
 
-    /**
-     * File transfer progress
-     * 
-     * @param contact
-     * @param currentSize Data size transferred
-     * @param totalSize Total size to be transferred
-     */
+    @Override
     public void onTransferProgress(ContactId contact, long currentSize, long totalSize) {
         synchronized (mLock) {
             if (mPersistentStorage.setProgress(currentSize)) {
@@ -1224,9 +1201,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
     }
 
-    /**
-     * File transfer not allowed to send
-     */
     @Override
     public void onTransferNotAllowedToSend(ContactId contact) {
         synchronized (mLock) {
@@ -1236,17 +1210,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         mImService.tryToDequeueFileTransfers();
     }
 
-    /**
-     * File has been transfered
-     * 
-     * @param content MmContent associated to the received file
-     * @param contact
-     * @param fileExpiration the time when file on the content server is no longer valid to download
-     * @param fileIconExpiration the time when icon file on the content server is no longer valid to
-     *            download
-     * @param ftProtocol
-     */
-    public void onFileTransfered(MmContent content, ContactId contact, long fileExpiration,
+    @Override
+    public void onFileTransferred(MmContent content, ContactId contact, long fileExpiration,
             long fileIconExpiration, FileTransferProtocol ftProtocol) {
         if (sLogger.isActivated()) {
             sLogger.info("Content transferred");
@@ -1274,11 +1239,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         mImService.tryToDequeueFileTransfers();
     }
 
-    /**
-     * File transfer has been paused by user
-     * 
-     * @param contact
-     */
+    @Override
     public void onFileTransferPausedByUser(ContactId contact) {
         if (sLogger.isActivated()) {
             sLogger.info("Transfer paused by user");
@@ -1288,11 +1249,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
     }
 
-    /**
-     * File transfer has been paused by system
-     * 
-     * @param contact
-     */
+    @Override
     public void onFileTransferPausedBySystem(ContactId contact) {
         if (sLogger.isActivated()) {
             sLogger.info("Transfer paused by system");
@@ -1303,11 +1260,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
     }
 
-    /**
-     * File transfer has been resumed
-     * 
-     * @param contact
-     */
+    @Override
     public void onFileTransferResumed(ContactId contact) {
         if (sLogger.isActivated()) {
             sLogger.info("Transfer resumed");
@@ -1443,5 +1396,10 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
+    }
+
+    @Override
+    public void onHttpDownloadInfoAvailable() {
+        mImService.tryToDequeueFileTransfers();
     }
 }

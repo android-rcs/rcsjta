@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
@@ -74,9 +75,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     /**
      * Create instance
      * 
-     * @param context Context
      * @param localContentResolver Local content resolver
-     * @param rcsSettings
+     * @param rcsSettings the RCS settings accessor
      * @return singleton instance
      */
     public static MessagingLog createInstance(LocalContentResolver localContentResolver,
@@ -95,9 +95,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     /**
      * Constructor
      * 
-     * @param context Application context
      * @param localContentResolver Local content provider
-     * @param rcsSettings
+     * @param rcsSettings the RCS settings accessor
      */
     private MessagingLog(LocalContentResolver localContentResolver, RcsSettings rcsSettings) {
         mLocalContentResolver = localContentResolver;
@@ -181,17 +180,6 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
         mMessageLog.markMessageAsRead(msgId);
     }
 
-    /**
-     * Set chat message status and reason code. Note that this method should not be used for
-     * Status.DELIVERED and Status.DISPLAYED. These states require timestamps and should be set
-     * through setChatMessageStatusDelivered and setChatMessageStatusDisplayed respectively.
-     * 
-     * @param msgId Message ID
-     * @param status Message status (See restriction above)
-     * @param reasonCode Message status reason code
-     * @return true if the entry has been updated
-     */
-    @Override
     public boolean setChatMessageStatusAndReasonCode(String msgId, Status status,
             Content.ReasonCode reasonCode) {
         return mMessageLog.setChatMessageStatusAndReasonCode(msgId, status, reasonCode);
@@ -231,16 +219,6 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
                 fileIconExpiration);
     }
 
-    /**
-     * Set file transfer state and reason code. Note that this method should not be used for
-     * State.DELIVERED and State.DISPLAYED. These states require timestamps and should be set
-     * through setFileTransferDelivered and setFileTransferDisplayed respectively.
-     * 
-     * @param fileTransferId File transfer ID
-     * @param state File transfer state (see restriction above)
-     * @param reasonCode File transfer state reason code
-     * @return the number of updated rows
-     */
     @Override
     public boolean setFileTransferStateAndReasonCode(String fileTransferId,
             FileTransfer.State state, FileTransfer.ReasonCode reasonCode) {
@@ -596,8 +574,15 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public FileTransferHttpInfoDocument getGroupFileDownloadInfo(String fileTransferId) {
-        return mFileTransferLog.getGroupFileDownloadInfo(fileTransferId);
+    public FileTransferHttpInfoDocument getFileDownloadInfo(String fileTransferId)
+            throws FileAccessException {
+        return mFileTransferLog.getFileDownloadInfo(fileTransferId);
+    }
+
+    @Override
+    public FileTransferHttpInfoDocument getFileDownloadInfo(Cursor cursor)
+            throws FileAccessException {
+        return mFileTransferLog.getFileDownloadInfo(cursor);
     }
 
     @Override

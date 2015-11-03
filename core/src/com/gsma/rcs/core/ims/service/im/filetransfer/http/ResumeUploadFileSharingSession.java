@@ -52,9 +52,9 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
      * @param imService InstantMessagingService
      * @param content the content (url, mime-type and size)
      * @param resumeUpload the data object in DB
-     * @param rcsSettings
-     * @param messagingLog
-     * @param contactManager
+     * @param rcsSettings The RCS settings accessor
+     * @param messagingLog The messaging log accessor
+     * @param contactManager The contact manager accessor
      */
     public ResumeUploadFileSharingSession(InstantMessagingService imService, MmContent content,
             FtHttpResumeUpload resumeUpload, RcsSettings rcsSettings, MessagingLog messagingLog,
@@ -68,7 +68,6 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
                 messagingLog, 
                 rcsSettings,
                 resumeUpload.getTimestamp(), 
-                resumeUpload.getTimestampSent(), 
                 contactManager);
         // @formatter:on
     }
@@ -82,8 +81,7 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
         try {
             onHttpTransferStarted();
             /* Resume the file upload to the HTTP server */
-            byte[] result = mUploadManager.resumeUpload();
-            sendResultToContact(result);
+            processHttpUploadResponse(mUploadManager.resumeUpload());
 
         } catch (IOException e) {
             /* Don't call handleError in case of Pause or Cancel */

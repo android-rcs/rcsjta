@@ -88,10 +88,9 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
      * @param imService InstantMessagingService
      * @param persistedStorage FileTransferPersistedStorageAccessor
      * @param fileTransferService FileTransferServiceImpl
-     * @param rcsSettings RcsSettings
-     * @param core Core
-     * @param messagingLog
-     * @param contactManager
+     * @param rcsSettings The RCS settings accessor
+     * @param messagingLog The messaging log accessor
+     * @param contactManager The contact manager accessor
      * @param chatId Chat Id
      */
     public GroupFileTransferImpl(InstantMessagingService imService, String transferId,
@@ -490,11 +489,13 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                     if (resume == null) {
                         sLogger.error("Cannot find session with file transfer ID= "
                                 .concat(mFileTransferId));
+                        return;
                     }
                     if (!(resume instanceof FtHttpResumeDownload)) {
                         sLogger.error(new StringBuilder(
                                 "Cannot accept transfer with fileTransferId '")
                                 .append(mFileTransferId).append("': wrong direction").toString());
+                        return;
                     }
                     FtHttpResumeDownload download = (FtHttpResumeDownload) resume;
                     if (download.isAccepted()) {
@@ -987,7 +988,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
     /**
      * Session has been terminated by remote
      * 
-     * @param contact
+     * @param contact The contact
      */
     public void onSessionTerminatedByRemote(ContactId contact) {
         if (sLogger.isActivated()) {
@@ -1041,7 +1042,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
     }
 
     @Override
-    public void onFileTransfered(MmContent content, ContactId contact, long fileExpiration,
+    public void onFileTransferred(MmContent content, ContactId contact, long fileExpiration,
             long fileIconExpiration, FileTransferProtocol ftProtocol) {
         if (sLogger.isActivated()) {
             sLogger.info("Content transferred");
@@ -1198,5 +1199,10 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
     public boolean isExpiredDelivery() throws RemoteException {
         /* Delivery expiration is not applicable for group file transfers. */
         return false;
+    }
+
+    @Override
+    public void onHttpDownloadInfoAvailable() {
+        mImService.tryToDequeueFileTransfers();
     }
 }

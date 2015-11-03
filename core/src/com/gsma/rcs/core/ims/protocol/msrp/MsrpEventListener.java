@@ -35,11 +35,11 @@ import com.gsma.rcs.provider.contact.ContactManagerException;
  */
 public interface MsrpEventListener {
     /**
-     * Data has been transfered
+     * Data has been transferred
      * 
      * @param msgId Message ID
      */
-    public void msrpDataTransfered(String msgId);
+    void msrpDataTransferred(String msgId);
 
     /**
      * Data has been received
@@ -51,8 +51,8 @@ public interface MsrpEventListener {
      * @throws NetworkException
      * @throws ContactManagerException
      */
-    public void receiveMsrpData(String msgId, byte[] data, String mimeType)
-            throws PayloadException, NetworkException, ContactManagerException;
+    void receiveMsrpData(String msgId, byte[] data, String mimeType) throws PayloadException,
+            NetworkException, ContactManagerException;
 
     /**
      * Data transfer in progress
@@ -60,7 +60,7 @@ public interface MsrpEventListener {
      * @param currentSize Current transfered size in bytes
      * @param totalSize Total size in bytes
      */
-    public void msrpTransferProgress(long currentSize, long totalSize);
+    void msrpTransferProgress(long currentSize, long totalSize);
 
     /**
      * Data transfer in progress
@@ -71,12 +71,12 @@ public interface MsrpEventListener {
      * @return true if data are processed and can be delete in cache. If false, so data were stored
      *         in MsrpSession cache until msrpDataReceived is called.
      */
-    public boolean msrpTransferProgress(long currentSize, long totalSize, byte[] data);
+    boolean msrpTransferProgress(long currentSize, long totalSize, byte[] data);
 
     /**
      * Data transfer has been aborted
      */
-    public void msrpTransferAborted();
+    void msrpTransferAborted();
 
     // Changed by Deutsche Telekom
     /**
@@ -86,5 +86,5 @@ public interface MsrpEventListener {
      * @param error Error code
      * @param typeMsrpChunk Type of MSRP chunk
      */
-    public void msrpTransferError(String msgId, String error, TypeMsrpChunk typeMsrpChunk);
+    void msrpTransferError(String msgId, String error, TypeMsrpChunk typeMsrpChunk);
 }

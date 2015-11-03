@@ -54,11 +54,6 @@ public class FtHttpResumeManager implements Runnable {
      */
     private LinkedList<FtHttpResume> mListOfFtHttpResume;
 
-    /**
-     * FT HTTP session being resumed
-     */
-    private FtHttpResume mFtHttpResume;
-
     private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
 
     private final RcsSettings mRcsSettings;
@@ -69,11 +64,11 @@ public class FtHttpResumeManager implements Runnable {
 
     /**
      * Constructor
-     * 
+     *
      * @param instantMessagingService IMS service
-     * @param rcsSettings
-     * @param messagingLog
-     * @param contactManager
+     * @param rcsSettings the RCS setting accessor
+     * @param messagingLog the messaging log accessor
+     * @param contactManager the contact manager accessor
      */
     public FtHttpResumeManager(InstantMessagingService instantMessagingService,
             RcsSettings rcsSettings, MessagingLog messagingLog, ContactManager contactManager) {
@@ -90,7 +85,7 @@ public class FtHttpResumeManager implements Runnable {
             List<FtHttpResume> transfersToResume = mMessagingLog
                     .retrieveFileTransfersPausedBySystem();
             if (!transfersToResume.isEmpty()) {
-                mListOfFtHttpResume = new LinkedList<FtHttpResume>(transfersToResume);
+                mListOfFtHttpResume = new LinkedList<>(transfersToResume);
                 processNext();
             }
 
@@ -118,14 +113,17 @@ public class FtHttpResumeManager implements Runnable {
         if (mListOfFtHttpResume.isEmpty())
             return;
         // Remove the oldest session from the list
-        mFtHttpResume = mListOfFtHttpResume.poll();
+        /*
+         * FT HTTP session being resumed
+         */
+        FtHttpResume ftHttpResume = mListOfFtHttpResume.poll();
         if (mLogger.isActivated()) {
-            mLogger.debug("Resume FT HTTP ".concat(mFtHttpResume.toString()));
+            mLogger.debug("Resume FT HTTP ".concat(ftHttpResume.toString()));
         }
-        switch (mFtHttpResume.getDirection()) {
+        switch (ftHttpResume.getDirection()) {
             case INCOMING:
-                FtHttpResumeDownload downloadInfo = (FtHttpResumeDownload) mFtHttpResume;
-                MmContent downloadContent = ContentManager.createMmContent(mFtHttpResume.getFile(),
+                FtHttpResumeDownload downloadInfo = (FtHttpResumeDownload) ftHttpResume;
+                MmContent downloadContent = ContentManager.createMmContent(ftHttpResume.getFile(),
                         downloadInfo.getSize(), downloadInfo.getFileName());
                 final DownloadFromResumeFileSharingSession resumeDownload = new DownloadFromResumeFileSharingSession(
                         mImsService, downloadContent, downloadInfo, mRcsSettings, mMessagingLog,
@@ -137,10 +135,10 @@ public class FtHttpResumeManager implements Runnable {
                 break;
 
             case OUTGOING:
-                FtHttpResumeUpload uploadInfo = (FtHttpResumeUpload) mFtHttpResume;
+                FtHttpResumeUpload uploadInfo = (FtHttpResumeUpload) ftHttpResume;
                 MmContent uploadContent = ContentManager.createMmContent(uploadInfo.getFile(),
                         uploadInfo.getSize(), uploadInfo.getFileName());
-                if (!mFtHttpResume.isGroupTransfer()) {
+                if (!ftHttpResume.isGroupTransfer()) {
                     final ResumeUploadFileSharingSession resumeUpload = new ResumeUploadFileSharingSession(
                             mImsService, uploadContent, uploadInfo, mRcsSettings, mMessagingLog,
                             mContactManager);
@@ -199,7 +197,7 @@ public class FtHttpResumeManager implements Runnable {
             }
 
             @Override
-            public void onFileTransfered(MmContent content, ContactId contact, long fileExpiration,
+            public void onFileTransferred(MmContent content, ContactId contact, long fileExpiration,
                     long fileIconExpiration, FileTransferProtocol ftProtocol) {
                 if (fired.compareAndSet(false, true)) {
                     processNext();
@@ -235,6 +233,11 @@ public class FtHttpResumeManager implements Runnable {
             public void onSessionAutoAccepted(ContactId contact, MmContent file,
                     MmContent fileIcon, long timestamp, long timestampSent, long fileExpiration,
                     long fileIconExpiration) {
+            }
+
+            @Override
+            public void onHttpDownloadInfoAvailable() {
+
             }
         };
     }

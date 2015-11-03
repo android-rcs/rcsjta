@@ -45,6 +45,7 @@ import android.net.Uri;
  * Abstract file transfer HTTP session
  * 
  * @author jexa7410
+ * @author Philippe LEMORDANT
  */
 public abstract class HttpFileTransferSession extends FileSharingSession implements
         HttpTransferEventListener {
@@ -62,7 +63,7 @@ public abstract class HttpFileTransferSession extends FileSharingSession impleme
         /**
          * Session has been established (i.e. 200 OK/ACK exchanged)
          */
-        ESTABLISHED;
+        ESTABLISHED
     }
 
     private State mSessionState;
@@ -86,12 +87,12 @@ public abstract class HttpFileTransferSession extends FileSharingSession impleme
      * @param fileIcon Content of file icon
      * @param chatContributionId Chat contribution Id
      * @param fileTransferId File transfer Id
-     * @param rcsSettings
-     * @param messagingLog
+     * @param rcsSettings The RCS settings accessor
+     * @param messagingLog The messaging log accessor
      * @param timestamp Local timestamp for the session
-     * @param fileExpiration
-     * @param iconExpiration
-     * @param contactManager
+     * @param fileExpiration The file expiration
+     * @param iconExpiration The file icon expiration
+     * @param contactManager The contact manager accessor
      */
     public HttpFileTransferSession(InstantMessagingService imService, MmContent content,
             ContactId contact, Uri remoteContact, MmContent fileIcon, String chatContributionId,
@@ -112,30 +113,17 @@ public abstract class HttpFileTransferSession extends FileSharingSession impleme
         return true;
     }
 
-    /**
-     * Returns the time when file on the content server is no longer valid to download.
-     * 
-     * @return the time
-     */
+    @Override
     public long getFileExpiration() {
         return mFileExpiration;
     }
 
-    /**
-     * Returns the time when file icon on the content server is no longer valid to download.
-     * 
-     * @return the time
-     */
+    @Override
     public long getIconExpiration() {
         return mIconExpiration;
     }
 
-    /**
-     * Create an INVITE request
-     * 
-     * @return the INVITE request
-     * @throws PayloadException
-     */
+    @Override
     public SipRequest createInvite() throws PayloadException {
         // Not used here
         return null;
@@ -199,7 +187,7 @@ public abstract class HttpFileTransferSession extends FileSharingSession impleme
         long fileExpiration = getFileExpiration();
         long fileIconExpiration = getIconExpiration();
         for (ImsSessionListener listener : getListeners()) {
-            ((FileSharingSessionListener) listener).onFileTransfered(content, contact,
+            ((FileSharingSessionListener) listener).onFileTransferred(content, contact,
                     fileExpiration, fileIconExpiration, FileTransferProtocol.HTTP);
         }
     }
@@ -226,7 +214,7 @@ public abstract class HttpFileTransferSession extends FileSharingSession impleme
         mSessionState = State.ESTABLISHED;
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
-            ((FileSharingSessionListener) listener).onSessionStarted(contact);
+            listener.onSessionStarted(contact);
         }
     }
 
@@ -251,6 +239,15 @@ public abstract class HttpFileTransferSession extends FileSharingSession impleme
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
             ((FileSharingSessionListener) listener).onFileTransferResumed(contact);
+        }
+    }
+
+    /**
+     * Handle the HTTP download information availability event for upload file transfer.
+     */
+    public void handleHttpDownloadInfoAvailable() {
+        for (ImsSessionListener listener : getListeners()) {
+            ((FileSharingSessionListener) listener).onHttpDownloadInfoAvailable();
         }
     }
 

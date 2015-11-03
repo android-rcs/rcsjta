@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
@@ -71,8 +72,9 @@ public class FileTransferLog implements IFileTransferLog {
     private static final String SELECTION_BY_QUEUED_AND_UPLOADED_BUT_NOT_TRANSFERRED_FILE_TRANSFERS = new StringBuilder(
             FileTransferData.KEY_STATE).append("=").append(State.QUEUED.toInt()).append(" OR (")
             .append(FileTransferData.KEY_STATE).append("=").append(State.STARTED.toInt())
-            .append(" AND ").append(FileTransferData.KEY_FILESIZE).append("=")
-            .append(FileTransferData.KEY_TRANSFERRED).append(")").toString();
+            .append(" AND ").append(FileTransferData.KEY_DIRECTION).append("=")
+            .append(Direction.OUTGOING.toInt()).append(" AND ")
+            .append(FileTransferData.KEY_DOWNLOAD_URI).append(" IS NOT NULL)").toString();
 
     private static final String SELECTION_BY_INTERRUPTED_FILE_TRANSFERS = new StringBuilder(
             FileTransferData.KEY_STATE).append(" IN ('").append(State.STARTED.toInt())
@@ -458,7 +460,7 @@ public class FileTransferLog implements IFileTransferLog {
             int remoteSipIdColumnIdx = cursor
                     .getColumnIndexOrThrow(FileTransferData.KEY_REMOTE_SIP_ID);
 
-            List<FtHttpResume> fileTransfers = new ArrayList<FtHttpResume>();
+            List<FtHttpResume> fileTransfers = new ArrayList<>();
             do {
                 long size = cursor.getLong(sizeColumnIdx);
                 String mimeType = cursor.getString(mimeTypeColumnIdx);
@@ -810,6 +812,7 @@ public class FileTransferLog implements IFileTransferLog {
                 null) > 0;
     }
 
+    @Override
     public boolean setFileTransferDelivered(String fileTransferId, long timestampDelivered) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("setFileTransferDelivered fileTransferId=")
@@ -828,6 +831,7 @@ public class FileTransferLog implements IFileTransferLog {
                 SELECTION_BY_NOT_DISPLAYED, null) > 0;
     }
 
+    @Override
     public boolean setFileTransferDisplayed(String fileTransferId, long timestampDisplayed) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("setFileTransferDisplayed fileTransferId=")
@@ -902,38 +906,50 @@ public class FileTransferLog implements IFileTransferLog {
     }
 
     @Override
-    public FileTransferHttpInfoDocument getGroupFileDownloadInfo(String fileTransferId) {
+    public FileTransferHttpInfoDocument getFileDownloadInfo(Cursor cursor)
+            throws FileAccessException {
+        String fileTransferId = cursor.getString(cursor
+                .getColumnIndexOrThrow(FileTransferData.KEY_FT_ID));
+        String file = cursor.getString(cursor
+                .getColumnIndexOrThrow(FileTransferData.KEY_DOWNLOAD_URI));
+        if (file == null) {
+            throw new FileAccessException(
+                    "File download URI not available for file transfer ID=".concat(fileTransferId));
+        }
+        String fileName = cursor.getString(cursor
+                .getColumnIndexOrThrow(FileTransferData.KEY_FILENAME));
+        int size = cursor.getInt(cursor.getColumnIndexOrThrow(FileTransferData.KEY_TRANSFERRED));
+        String mimeType = cursor.getString(cursor
+                .getColumnIndexOrThrow(FileTransferData.KEY_MIME_TYPE));
+        long fileExpiration = cursor.getLong(cursor
+                .getColumnIndexOrThrow(FileTransferData.KEY_FILE_EXPIRATION));
+        long fileIconExpiration = cursor.getLong(cursor
+                .getColumnIndexOrThrow(FileTransferData.KEY_FILEICON_EXPIRATION));
+        String fileIcon = cursor.getString(cursor
+                .getColumnIndexOrThrow(FileTransferData.KEY_FILEICON_DOWNLOAD_URI));
+        int fileIconSize = cursor.getInt(cursor
+                .getColumnIndexOrThrow(FileTransferData.KEY_FILEICON_SIZE));
+        String fileIconMimeType = cursor.getString(cursor
+                .getColumnIndexOrThrow(FileTransferData.KEY_FILEICON_MIME_TYPE));
+        FileTransferHttpThumbnail fileIconData = fileIcon != null ? new FileTransferHttpThumbnail(
+                mRcsSettings, Uri.parse(fileIcon), fileIconMimeType, fileIconSize,
+                fileIconExpiration) : null;
+        return new FileTransferHttpInfoDocument(mRcsSettings, Uri.parse(file), fileName, size,
+                mimeType, fileExpiration, fileIconData);
+    }
+
+    @Override
+    public FileTransferHttpInfoDocument getFileDownloadInfo(String fileTransferId)
+            throws FileAccessException {
         Cursor cursor = null;
         try {
             Uri contentUri = Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId);
-            cursor = mLocalContentResolver.query(contentUri, null, null, null, null);
             CursorUtil.assertCursorIsNotNull(cursor, FileTransferData.CONTENT_URI);
+            cursor = mLocalContentResolver.query(contentUri, null, null, null, null);
             if (!cursor.moveToNext()) {
                 return null;
             }
-            String fileName = cursor.getString(cursor
-                    .getColumnIndexOrThrow(FileTransferData.KEY_FILENAME));
-            int size = cursor
-                    .getInt(cursor.getColumnIndexOrThrow(FileTransferData.KEY_TRANSFERRED));
-            String mimeType = cursor.getString(cursor
-                    .getColumnIndexOrThrow(FileTransferData.KEY_MIME_TYPE));
-            long fileExpiration = cursor.getLong(cursor
-                    .getColumnIndexOrThrow(FileTransferData.KEY_FILE_EXPIRATION));
-            long fileIconExpiration = cursor.getLong(cursor
-                    .getColumnIndexOrThrow(FileTransferData.KEY_FILEICON_EXPIRATION));
-            String file = cursor.getString(cursor
-                    .getColumnIndexOrThrow(FileTransferData.KEY_DOWNLOAD_URI));
-            String fileIcon = cursor.getString(cursor
-                    .getColumnIndexOrThrow(FileTransferData.KEY_FILEICON_DOWNLOAD_URI));
-            int fileIconSize = cursor.getInt(cursor
-                    .getColumnIndexOrThrow(FileTransferData.KEY_FILEICON_SIZE));
-            String fileIconMimeType = cursor.getString(cursor
-                    .getColumnIndexOrThrow(FileTransferData.KEY_FILEICON_MIME_TYPE));
-            FileTransferHttpThumbnail fileIconData = fileIcon != null ? new FileTransferHttpThumbnail(
-                    mRcsSettings, Uri.parse(fileIcon), fileIconMimeType, fileIconSize,
-                    fileIconExpiration) : null;
-            return new FileTransferHttpInfoDocument(mRcsSettings, Uri.parse(file), fileName, size,
-                    mimeType, fileExpiration, fileIconData);
+            return getFileDownloadInfo(cursor);
 
         } finally {
             CursorUtil.close(cursor);
@@ -947,7 +963,6 @@ public class FileTransferLog implements IFileTransferLog {
                     .append(fileTransferId).append(", timestamp=").append(timestamp)
                     .append(", timestampSent=").append(timestampSent).toString());
         }
-
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_TIMESTAMP, timestamp);
         values.put(FileTransferData.KEY_TIMESTAMP_SENT, timestampSent);
