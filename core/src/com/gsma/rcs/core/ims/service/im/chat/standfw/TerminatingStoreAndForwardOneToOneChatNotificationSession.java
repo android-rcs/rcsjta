@@ -76,7 +76,7 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp for the session
-     * @param contactManager
+     * @param contactManager The contact manager accessor
      */
     public TerminatingStoreAndForwardOneToOneChatNotificationSession(
             InstantMessagingService imService, SipRequest invite, ContactId contact,
@@ -98,9 +98,7 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
         createTerminatingDialogPath(invite);
     }
 
-    /**
-     * Background processing
-     */
+    @Override
     public void run() {
         final boolean logActivated = sLogger.isActivated();
         try {
@@ -243,18 +241,12 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
         }
     }
 
-    /**
-     * Returns the MSRP manager
-     * 
-     * @return MSRP manager
-     */
+    @Override
     public MsrpManager getMsrpMgr() {
         return mMsrpMgr;
     }
 
-    /**
-     * Close the MSRP session
-     */
+    @Override
     public void closeMsrpSession() {
         if (getMsrpMgr() != null) {
             getMsrpMgr().closeSession();
@@ -264,11 +256,7 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
         }
     }
 
-    /**
-     * Handle error
-     * 
-     * @param error Error
-     */
+    @Override
     public void handleError(ImsServiceError error) {
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("Session error: ").append(error.getErrorCode())
@@ -279,24 +267,12 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
         removeSession();
     }
 
-    /**
-     * Data has been transfered
-     * 
-     * @param msgId Message ID
-     */
-    public void msrpDataTransfered(String msgId) {
+    @Override
+    public void msrpDataTransferred(String msgId) {
         // Not used in terminating side
     }
 
-    /**
-     * Data transfer has been received
-     * 
-     * @param msgId Message ID
-     * @param data Received data
-     * @param mimeType Data mime-type
-     * @throws NetworkException
-     * @throws PayloadException
-     */
+    @Override
     public void receiveMsrpData(String msgId, byte[] data, String mimeType)
             throws PayloadException, NetworkException {
         final boolean logActivated = sLogger.isActivated();
@@ -337,19 +313,12 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
         }
     }
 
-    /**
-     * Data transfer in progress
-     * 
-     * @param currentSize Current transfered size in bytes
-     * @param totalSize Total size in bytes
-     */
+    @Override
     public void msrpTransferProgress(long currentSize, long totalSize) {
         // Not used by S&F
     }
 
-    /**
-     * Data transfer has been aborted
-     */
+    @Override
     public void msrpTransferAborted() {
         // Not used by S&F
     }
@@ -366,16 +335,11 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
         }
     }
 
-    /**
-     * Send an empty data chunk
-     * 
-     * @throws NetworkException
-     */
+    @Override
     public void sendEmptyDataChunk() throws NetworkException {
         mMsrpMgr.sendEmptyChunk();
     }
 
-    // Changed by Deutsche Telekom
     @Override
     public String getSdpDirection() {
         return SdpUtils.DIRECTION_RECVONLY;

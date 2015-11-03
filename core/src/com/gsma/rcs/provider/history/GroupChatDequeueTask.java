@@ -18,6 +18,7 @@
 package com.gsma.rcs.provider.history;
 
 import com.gsma.rcs.core.Core;
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
@@ -188,7 +189,7 @@ public class GroupChatDequeueTask extends DequeueTask {
                                             .getOrCreateGroupFileTransfer(mChatId, id);
                                     String fileInfo = FileTransferUtils
                                             .createHttpFileTransferXml(mMessagingLog
-                                                    .getGroupFileDownloadInfo(id));
+                                                    .getFileDownloadInfo(id));
                                     groupChat.dequeueGroupFileInfo(id, fileInfo,
                                             displayedReportEnabled, deliveryReportEnabled,
                                             groupFileTransfer);
@@ -202,14 +203,7 @@ public class GroupChatDequeueTask extends DequeueTask {
                             break;
                     }
 
-                } catch (SessionNotEstablishedException e) {
-                    if (logActivated) {
-                        mLogger.debug(new StringBuilder(
-                                "Failed to dequeue group chat entry with id '").append(id)
-                                .append("' on group chat '").append(mChatId).append("' due to: ")
-                                .append(e.getMessage()).toString());
-                    }
-                } catch (NetworkException e) {
+                } catch (SessionNotEstablishedException | FileAccessException | NetworkException e) {
                     if (logActivated) {
                         mLogger.debug(new StringBuilder(
                                 "Failed to dequeue group chat entry with id '").append(id)
@@ -245,7 +239,7 @@ public class GroupChatDequeueTask extends DequeueTask {
              */
             mLogger.error(
                     new StringBuilder(
-                            "Exception occured while dequeueing group chat message and group file transfer with id '")
+                            "Exception occurred while dequeueing group chat message and group file transfer with id '")
                             .append(id).append("' and chatId '").append(mChatId).append("'")
                             .toString(), e);
             if (id == null) {

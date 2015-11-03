@@ -217,7 +217,7 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
     }
 
     @Override
-    public void msrpDataTransfered(String msgId) {
+    public void msrpDataTransferred(String msgId) {
         if (sLogger.isActivated()) {
             sLogger.info("Data transferred");
         }

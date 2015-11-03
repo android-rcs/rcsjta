@@ -81,10 +81,10 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
      * @param parent Richcall service
      * @param invite Initial INVITE request
      * @param contact Contact ID
-     * @param rcsSettings
+     * @param rcsSettings The RCS settings accessor
      * @param timestamp Local timestamp for the session
-     * @param contactManager
-     * @param capabilityService
+     * @param contactManager The contact manager accessor
+     * @param capabilityService The capability service
      * @throws PayloadException
      * @throws FileAccessException
      */
@@ -338,7 +338,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
     }
 
     @Override
-    public void msrpDataTransfered(String msgId) {
+    public void msrpDataTransferred(String msgId) {
         // Not used in terminating side
     }
 

@@ -21,6 +21,7 @@ import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.MessageData;
 import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.contact.ContactId;
@@ -56,8 +57,9 @@ public class HistoryLog {
             .append(FileTransferData.HISTORYLOG_MEMBER_ID).append(" AND ")
             .append(HistoryLogData.KEY_STATUS).append("=")
             .append(FileTransfer.State.STARTED.toInt()).append(" AND ")
-            .append(HistoryLogData.KEY_FILESIZE).append("=").append(HistoryLogData.KEY_TRANSFERRED)
-            .append(")").toString();
+            .append(HistoryLogData.KEY_DIRECTION).append("=").append(Direction.OUTGOING.toInt())
+            .append(" AND ").append(HistoryLogData.KEY_FILESIZE).append("=")
+            .append(HistoryLogData.KEY_TRANSFERRED).append(")").toString();
 
     private static final String SELECTION_QUEUED_GROUPCHATMESSAGES_AND_GROUPFILETRANSFERS = new StringBuilder(
             HistoryLogData.KEY_CHAT_ID).append("=? AND (")

@@ -97,12 +97,12 @@ public class ImsModule implements SipEventListener {
      * 
      * @param core Core
      * @param ctx The context this module is part of
-     * @param localContentResolver
+     * @param localContentResolver The local content resolver
      * @param rcsSettings RCSsettings instance
      * @param contactManager Contact manager accessor
      * @param messagingLog Messaging log accessor
-     * @param historyLog
-     * @param richCallHistory
+     * @param historyLog The history log accessor
+     * @param richCallHistory The rich call accessor
      * @param addressBookManager The address book manager instance
      */
     public ImsModule(Core core, Context ctx, LocalContentResolver localContentResolver,
@@ -116,7 +116,7 @@ public class ImsModule implements SipEventListener {
         mCnxManager = new ImsConnectionManager(this, ctx, mCore, rcsSettings);
         mCallManager = new CallManager(this, ctx);
 
-        mServices = new HashMap<ImsServiceType, ImsService>();
+        mServices = new HashMap<>();
         mServices.put(ImsServiceType.TERMS_CONDITIONS,
                 new TermsConditionsService(this, rcsSettings));
         CapabilityService capabilityService = new CapabilityService(this, rcsSettings,
@@ -125,9 +125,10 @@ public class ImsModule implements SipEventListener {
         mServices.put(ImsServiceType.INSTANT_MESSAGING, new InstantMessagingService(this,
                 rcsSettings, contactManager, messagingLog, historyLog, localContentResolver, ctx,
                 core));
-        mServices.put(ImsServiceType.RICHCALL, new RichcallService(this, richCallHistory,
-                contactManager, rcsSettings, mCallManager, localContentResolver,
-                capabilityService));
+        mServices
+                .put(ImsServiceType.RICHCALL, new RichcallService(this, richCallHistory,
+                        contactManager, rcsSettings, mCallManager, localContentResolver,
+                        capabilityService));
         mServices.put(ImsServiceType.PRESENCE, new PresenceService(this, ctx, rcsSettings,
                 contactManager, addressBookManager));
         mServices.put(ImsServiceType.SIP, new SipService(this, contactManager, rcsSettings));
@@ -299,9 +300,6 @@ public class ImsModule implements SipEventListener {
     public void checkImsServices() {
         for (ImsService imsService : mServices.values()) {
             if (imsService.isActivated()) {
-                if (sLogger.isActivated()) {
-                    sLogger.info("Check IMS service: ".concat(imsService.getClass().getName()));
-                }
                 imsService.check();
             }
         }
@@ -453,7 +451,7 @@ public class ImsModule implements SipEventListener {
     /**
      * Sets IMS user profile
      * 
-     * @param profile
+     * @param profile The user profile
      */
     public static void setImsUserProfile(UserProfile profile) {
         sImsUserProfile = profile;

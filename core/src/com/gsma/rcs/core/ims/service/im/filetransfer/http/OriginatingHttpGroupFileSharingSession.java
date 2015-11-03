@@ -22,18 +22,11 @@
 
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
-import static com.gsma.rcs.utils.StringUtils.UTF8;
-
 import com.gsma.rcs.core.content.MmContent;
-import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
-import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
-import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
-import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
-import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
@@ -42,7 +35,6 @@ import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -60,21 +52,6 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 
     protected HttpUploadManager mUploadManager;
 
-    /**
-     * File information to send via chat
-     */
-    private String mFileInfo;
-
-    private ChatSession mChatSession;
-
-    /**
-     * The timestamp to be sent in payload when the file sharing was initiated for outgoing group
-     * file sharing
-     */
-    private long mTimestampSent;
-
-    private InstantMessagingService mImService;
-
     private static final Logger sLogger = Logger
             .getLogger(OriginatingHttpGroupFileSharingSession.class.getName());
 
@@ -84,21 +61,19 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
      * @param imService InstantMessagingService
      * @param fileTransferId File transfer Id
      * @param content The file content to share
-     * @param fileIcon Content of fileicon
+     * @param fileIcon Content of file icon
      * @param conferenceId Conference ID
      * @param chatContributionId Chat contribution Id
      * @param tId TID of the upload
-     * @param rcsSettings
-     * @param messagingLog
+     * @param rcsSettings The RCS settings accessor
+     * @param messagingLog The messaging log accessor
      * @param timestamp Local timestamp for the session
-     * @param timestampSent the timestamp sent in payload for the group file sharing
-     * @param contactManager
+     * @param contactManager The contact manager accessor
      */
     public OriginatingHttpGroupFileSharingSession(InstantMessagingService imService,
             String fileTransferId, MmContent content, MmContent fileIcon, Uri conferenceId,
             String chatContributionId, String tId, RcsSettings rcsSettings,
-            MessagingLog messagingLog, long timestamp, long timestampSent,
-            ContactManager contactManager) {
+            MessagingLog messagingLog, long timestamp, ContactManager contactManager) {
         // @formatter:off
         super(imService, 
                 content, 
@@ -114,8 +89,6 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                 FileTransferData.UNKNOWN_EXPIRATION,
                 contactManager);
         // @formatter:ofn
-        mImService = imService;
-        mTimestampSent = timestampSent;
         mUploadManager = new HttpUploadManager(getContent(), fileIcon, this, tId, rcsSettings);
     }
 
@@ -125,8 +98,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
             sLogger.info("Initiate a new HTTP group file transfer session as originating");
         }
         try {
-            byte[] result = mUploadManager.uploadFile();
-            sendResultToContact(result);
+            processHttpUploadResponse(mUploadManager.uploadFile());
 
         } catch (NetworkException e) {
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
@@ -169,90 +141,26 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
     }
 
     /**
-     * Send the file transfer information
+     * Process the HTTP upload response
      * 
-     * @throws NetworkException
-     */
-    private void sendFileTransferInfo() throws NetworkException {
-        String from = ImsModule.getImsUserProfile().getPublicAddress();
-        String networkContent;
-        String msgId = getFileTransferId();
-
-        if (mImdnManager.isRequestGroupDeliveryDisplayedReportsEnabled()) {
-            networkContent = ChatUtils.buildCpimMessageWithImdn(from, ChatUtils.ANONYMOUS_URI,
-                    msgId, mFileInfo, FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);
-        } else if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
-            networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from,
-                    ChatUtils.ANONYMOUS_URI, msgId, mFileInfo,
-                    FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);
-        } else {
-            networkContent = ChatUtils.buildCpimMessage(from, ChatUtils.ANONYMOUS_URI, mFileInfo,
-                    FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);
-        }
-
-        mChatSession.sendDataChunks(IdGenerator.generateMessageID(), networkContent,
-                CpimMessage.MIME_TYPE, TypeMsrpChunk.HttpFileSharing);
-    }
-
-    /**
-     * Prepare to send the info to terminating side
-     * 
-     * @param result byte[] which contains the result of the 200 OK from the content server
+     * @param response byte[] which contains the result of the 200 OK from the content server
      * @throws PayloadException
      * @throws NetworkException
      */
-    protected void sendResultToContact(byte[] result) throws PayloadException, NetworkException {
+    protected void processHttpUploadResponse(byte[] response) throws PayloadException, NetworkException {
         if (mUploadManager.isCancelled()) {
             return;
         }
         FileTransferHttpInfoDocument infoDocument;
-        boolean logActivated = sLogger.isActivated();
-        if (result == null
-                || (infoDocument = FileTransferUtils.parseFileTransferHttpDocument(result,
+        if (response == null
+                || (infoDocument = FileTransferUtils.parseFileTransferHttpDocument(response,
                         mRcsSettings)) == null) {
             handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED));
             return;
         }
-        mFileInfo = new String(result, UTF8);
-        if (logActivated) {
-            sLogger.debug("Upload done with success: ".concat(mFileInfo.toString()));
-        }
-        setFileExpiration(infoDocument.getExpiration());
-        FileTransferHttpThumbnail thumbnail = infoDocument.getFileThumbnail();
-        if (thumbnail != null) {
-            setIconExpiration(thumbnail.getExpiration());
-        } else {
-            setIconExpiration(FileTransferData.UNKNOWN_EXPIRATION);
-        }
-
-        String chatId = getContributionID();
-        mChatSession = mImService.getGroupChatSession(chatId);
-        if (mChatSession != null && mChatSession.isMediaEstablished()) {
-            if (logActivated) {
-                sLogger.debug("Send file transfer info via an existing chat session");
-            }
-            sendFileTransferInfo();
-            handleFileTransferred();
-
-        } else {
-            mMessagingLog.setFileTransferDownloadInfo(getFileTransferId(), infoDocument);
-            removeSession();
-            /*
-             * If group chat session does not exist, try to rejoin group chat and on success dequeue
-             * the file transfer message
-             */
-            if (mChatSession == null) {
-                mImService.rejoinGroupChatAsPartOfSendOperation(chatId);
-
-            } else if (!mChatSession.isMediaEstablished() && mChatSession.isInitiatedByRemote()) {
-                if (logActivated) {
-                    sLogger.debug(new StringBuilder("Group chat session with chatId '")
-                            .append(chatId).append("' is pending for acceptance, accept it.")
-                            .toString());
-                }
-                mChatSession.acceptSession();
-            }
-        }
+        mMessagingLog.setFileTransferDownloadInfo(getFileTransferId(), infoDocument);
+        removeSession();
+        handleHttpDownloadInfoAvailable();
     }
 
     @Override
@@ -288,22 +196,15 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                     FtHttpResumeUpload upload = mMessagingLog
                             .retrieveFtHttpResumeUpload(mUploadManager.getTId());
                     if (upload != null) {
-                        sendResultToContact(mUploadManager.resumeUpload());
+                        processHttpUploadResponse(mUploadManager.resumeUpload());
                     } else {
-                        sendResultToContact(null);
+                        processHttpUploadResponse(null);
                     }
 
                 } catch (NetworkException e) {
                     handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
 
-                } catch (IOException e) {
-                    sLogger.error(
-                            new StringBuilder("Failed to resume upload for sessionId : ")
-                                     .append(getSessionID()).append(" with fileTransferId : ")
-                                    .append(getFileTransferId()).toString(), e);
-                    handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
-
-                } catch (PayloadException e) {
+                } catch (IOException | PayloadException e) {
                     sLogger.error(
                             new StringBuilder("Failed to resume upload for sessionId : ")
                                      .append(getSessionID()).append(" with fileTransferId : ")
@@ -338,7 +239,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
     /**
      * Sets the timestamp when file icon on the content server is no longer valid to download.
      * 
-     * @param timestamp
+     * @param timestamp The timestamp
      */
     public void setIconExpiration(long timestamp) {
         mIconExpiration = timestamp;
@@ -347,7 +248,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
     /**
      * Sets the timestamp when file on the content server is no longer valid to download.
      * 
-     * @param timestamp
+     * @param timestamp The timestamp
      */
     public void setFileExpiration(long timestamp) {
         mFileExpiration = timestamp;

@@ -22,6 +22,8 @@
 
 package com.gsma.rcs.core.ims.service.im;
 
+import static com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession.isFileCapacityAcceptable;
+
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ParseFailureException;
@@ -122,7 +124,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.xml.parsers.ParserConfigurationException;
-
 import javax2.sip.header.ContactHeader;
 import javax2.sip.message.Response;
 
@@ -150,47 +151,47 @@ public class InstantMessagingService extends ImsService {
     /**
      * OneToOneChatSessionCache with ContactId as key
      */
-    private Map<ContactId, OneToOneChatSession> mOneToOneChatSessionCache = new HashMap<ContactId, OneToOneChatSession>();
+    private Map<ContactId, OneToOneChatSession> mOneToOneChatSessionCache = new HashMap<>();
 
     /**
      * StoreAndForwardMsgSessionCache with ContactId as key
      */
-    private Map<ContactId, TerminatingStoreAndForwardOneToOneChatMessageSession> mStoreAndForwardMsgSessionCache = new HashMap<ContactId, TerminatingStoreAndForwardOneToOneChatMessageSession>();
+    private Map<ContactId, TerminatingStoreAndForwardOneToOneChatMessageSession> mStoreAndForwardMsgSessionCache = new HashMap<>();
 
     /**
      * StoreAndForwardNotifSessionCache with ContactId as key
      */
-    private Map<ContactId, TerminatingStoreAndForwardOneToOneChatNotificationSession> mStoreAndForwardNotifSessionCache = new HashMap<ContactId, TerminatingStoreAndForwardOneToOneChatNotificationSession>();
+    private Map<ContactId, TerminatingStoreAndForwardOneToOneChatNotificationSession> mStoreAndForwardNotifSessionCache = new HashMap<>();
 
     /**
      * GroupChatSessionCache with ChatId as key
      */
-    private Map<String, GroupChatSession> mGroupChatSessionCache = new HashMap<String, GroupChatSession>();
+    private Map<String, GroupChatSession> mGroupChatSessionCache = new HashMap<>();
 
     /**
      * FileSharingSessionCache with FileTransferId as key
      */
-    private Map<String, FileSharingSession> mFileTransferSessionCache = new HashMap<String, FileSharingSession>();
+    private Map<String, FileSharingSession> mFileTransferSessionCache = new HashMap<>();
 
     /**
      * FileUploadSessionCache with UploadId as key
      */
-    private Map<String, FileUploadSession> mFileUploadSessionCache = new HashMap<String, FileUploadSession>();
+    private Map<String, FileUploadSession> mFileUploadSessionCache = new HashMap<>();
 
     /**
      * GroupChatConferenceSubscriberCache with Conference subscriber's dialog path CallId as key
      */
-    private Map<String, GroupChatSession> mGroupChatConferenceSubscriberCache = new HashMap<String, GroupChatSession>();
+    private Map<String, GroupChatSession> mGroupChatConferenceSubscriberCache = new HashMap<>();
 
     /**
      * Group Chat composing status to notify upon MSRP session restart
      */
-    private final Map<String, Boolean> mGroupChatComposingStatusToNotify = new HashMap<String, Boolean>();
+    private final Map<String, Boolean> mGroupChatComposingStatusToNotify = new HashMap<>();
 
     /**
      * One-to-One Chat composing status to notify upon MSRP session restart
      */
-    private final Map<ContactId, Boolean> mOneToOneChatComposingStatusToNotify = new HashMap<ContactId, Boolean>();
+    private final Map<ContactId, Boolean> mOneToOneChatComposingStatusToNotify = new HashMap<>();
 
     /**
      * Chat features tags
@@ -232,11 +233,12 @@ public class InstantMessagingService extends ImsService {
      * Constructor
      * 
      * @param parent IMS module
-     * @param core Core
      * @param rcsSettings RcsSettings
      * @param contactsManager ContactManager
-     * @param messagingLog MessagingLog
-     * @param backgroundHandler Handler
+     * @param messagingLog Messaging log accessor
+     * @param historyLog History log accessor
+     * @param localContentResolver local content resolver
+     * @param core Core
      */
     public InstantMessagingService(ImsModule parent, RcsSettings rcsSettings,
             ContactManager contactsManager, MessagingLog messagingLog, HistoryLog historyLog,
@@ -560,11 +562,8 @@ public class InstantMessagingService extends ImsService {
              * disabled
              */
             int maxChatSessions = mRcsSettings.getMaxChatSessions();
-            if (maxChatSessions == 0) {
-                return true;
-            }
-
-            return mOneToOneChatSessionCache.size() + mGroupChatSessionCache.size() < maxChatSessions;
+            return maxChatSessions == 0
+                    || mOneToOneChatSessionCache.size() + mGroupChatSessionCache.size() < maxChatSessions;
         }
     }
 
@@ -572,7 +571,7 @@ public class InstantMessagingService extends ImsService {
      * Assert if it is allowed to initiate a new chat session right now or the allowed limit has
      * been reached.
      * 
-     * @param errorMessage
+     * @param errorMessage The error message
      */
     public void assertAvailableChatSession(String errorMessage) {
         if (!isChatSessionAvailable()) {
@@ -671,11 +670,8 @@ public class InstantMessagingService extends ImsService {
              * sessions in use is disabled
              */
             int maxFileTransferSessions = mRcsSettings.getMaxFileTransferSessions();
-            if (maxFileTransferSessions == 0) {
-                return true;
-            }
-
-            return mFileTransferSessionCache.size() + mFileUploadSessionCache.size() < maxFileTransferSessions;
+            return maxFileTransferSessions == 0
+                    || mFileTransferSessionCache.size() + mFileUploadSessionCache.size() < maxFileTransferSessions;
         }
     }
 
@@ -734,13 +730,11 @@ public class InstantMessagingService extends ImsService {
      * @param content Content of file to sent
      * @param fileIcon Content of fileicon
      * @param timestamp the local timestamp when initiating the file transfer
-     * @param timestampSent the timestamp sent in payload for the file transfer
      * @param ftProtocol FileTransferProtocol
      * @return File transfer session
      */
     public FileSharingSession createFileTransferSession(String fileTransferId, ContactId contact,
-            MmContent content, MmContent fileIcon, long timestamp, long timestampSent,
-            FileTransferProtocol ftProtocol) {
+            MmContent content, MmContent fileIcon, long timestamp, FileTransferProtocol ftProtocol) {
         if (sLogger.isActivated()) {
             sLogger.info("Initiate a file transfer session with contact " + contact + ", file "
                     + content.toString());
@@ -749,7 +743,7 @@ public class InstantMessagingService extends ImsService {
             case HTTP:
                 return new OriginatingHttpFileSharingSession(this, fileTransferId, content,
                         contact, fileIcon, UUID.randomUUID().toString(), mMessagingLog,
-                        mRcsSettings, timestamp, timestampSent, mContactManager);
+                        mRcsSettings, timestamp, mContactManager);
             case MSRP:
                 /*
                  * Since in MSRP communication we do not have a timestampSent to be sent in payload,
@@ -771,20 +765,16 @@ public class InstantMessagingService extends ImsService {
      * @param fileIcon Content of fileicon
      * @param groupChatId Chat contribution ID
      * @param timestamp the local timestamp when initiating the file transfer
-     * @param timestampSent the timestamp sent in payload for the file transfer
      * @return File transfer session
      */
     public FileSharingSession createGroupFileTransferSession(String fileTransferId,
-            MmContent content, MmContent fileIcon, String groupChatId, long timestamp,
-            long timestampSent) {
+            MmContent content, MmContent fileIcon, String groupChatId, long timestamp) {
         if (sLogger.isActivated()) {
             sLogger.info("Send file " + content.toString() + " to " + groupChatId);
         }
-        FileSharingSession session = new OriginatingHttpGroupFileSharingSession(this,
-                fileTransferId, content, fileIcon, ImsModule.getImsUserProfile()
-                        .getImConferenceUri(), groupChatId, UUID.randomUUID().toString(),
-                mRcsSettings, mMessagingLog, timestamp, timestampSent, mContactManager);
-        return session;
+        return new OriginatingHttpGroupFileSharingSession(this, fileTransferId, content, fileIcon,
+                ImsModule.getImsUserProfile().getImConferenceUri(), groupChatId, UUID.randomUUID()
+                        .toString(), mRcsSettings, mMessagingLog, timestamp, mContactManager);
     }
 
     /**
@@ -870,8 +860,8 @@ public class InstantMessagingService extends ImsService {
                      * enable prior handling by the application.
                      */
                     MmContent content = ContentManager.createMmContentFromSdp(invite, mRcsSettings);
-                    FileSharingError error = FileSharingSession.isFileCapacityAcceptable(
-                            content.getSize(), mRcsSettings);
+                    FileSharingError error = isFileCapacityAcceptable(content.getSize(),
+                            mRcsSettings);
                     if (error != null) {
                         /*
                          * Extract of GSMA specification: If the file is bigger than FT MAX SIZE, a
@@ -917,15 +907,7 @@ public class InstantMessagingService extends ImsService {
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
 
-                } catch (FileAccessException e) {
-                    sLogger.error("Failed to receive msrp file transfer invitation!", e);
-                    tryToSendErrorResponse(invite, Response.DECLINE);
-
-                } catch (ContactManagerException e) {
-                    sLogger.error("Failed to receive msrp file transfer invitation!", e);
-                    tryToSendErrorResponse(invite, Response.DECLINE);
-
-                } catch (PayloadException e) {
+                } catch (FileAccessException | ContactManagerException | PayloadException e) {
                     sLogger.error("Failed to receive msrp file transfer invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
 
@@ -1111,15 +1093,7 @@ public class InstantMessagingService extends ImsService {
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
 
-                } catch (FileAccessException e) {
-                    sLogger.error("Failed to receive o2o chat invitation!", e);
-                    tryToSendErrorResponse(invite, Response.DECLINE);
-
-                } catch (ContactManagerException e) {
-                    sLogger.error("Failed to receive o2o chat invitation!", e);
-                    tryToSendErrorResponse(invite, Response.DECLINE);
-
-                } catch (PayloadException e) {
+                } catch (FileAccessException | ContactManagerException | PayloadException e) {
                     sLogger.error("Failed to receive o2o chat invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
 
@@ -1153,10 +1127,9 @@ public class InstantMessagingService extends ImsService {
         }
         Map<ContactId, ParticipantStatus> participants = ChatUtils.getParticipants(contacts,
                 ParticipantStatus.INVITING);
-        OriginatingAdhocGroupChatSession session = new OriginatingAdhocGroupChatSession(this,
-                ImsModule.getImsUserProfile().getImConferenceUri(), subject, participants,
-                mRcsSettings, mMessagingLog, timestamp, mContactManager);
-        return session;
+        return new OriginatingAdhocGroupChatSession(this, ImsModule.getImsUserProfile()
+                .getImConferenceUri(), subject, participants, mRcsSettings, mMessagingLog,
+                timestamp, mContactManager);
     }
 
     /**
@@ -1254,15 +1227,7 @@ public class InstantMessagingService extends ImsService {
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
 
-                } catch (FileAccessException e) {
-                    sLogger.error("Failed to receive group chat invitation!", e);
-                    tryToSendErrorResponse(invite, Response.DECLINE);
-
-                } catch (ContactManagerException e) {
-                    sLogger.error("Failed to receive group chat invitation!", e);
-                    tryToSendErrorResponse(invite, Response.DECLINE);
-
-                } catch (PayloadException e) {
+                } catch (FileAccessException | ContactManagerException | PayloadException e) {
                     sLogger.error("Failed to receive group chat invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
 
@@ -1373,10 +1338,7 @@ public class InstantMessagingService extends ImsService {
                                 timestamp);
                     }
 
-                } catch (PayloadException e) {
-                    sLogger.error("Failed to receive group conference notification!", e);
-
-                } catch (RuntimeException e) {
+                } catch (PayloadException | RuntimeException e) {
                     sLogger.error("Failed to receive group conference notification!", e);
                 }
             }
@@ -1445,14 +1407,10 @@ public class InstantMessagingService extends ImsService {
                         sLogger.debug("Failed to receive chat message delivery report! ("
                                 + e.getMessage() + ")");
                     }
-                } catch (ParserConfigurationException e) {
+                } catch (ParserConfigurationException | ParseFailureException | SAXException
+                        | PayloadException e) {
                     sLogger.error("Failed to receive chat message delivery report!", e);
-                } catch (ParseFailureException e) {
-                    sLogger.error("Failed to receive chat message delivery report!", e);
-                } catch (SAXException e) {
-                    sLogger.error("Failed to receive chat message delivery report!", e);
-                } catch (PayloadException e) {
-                    sLogger.error("Failed to receive chat message delivery report!", e);
+
                 } catch (RuntimeException e) {
                     /*
                      * Normally we are not allowed to catch runtime exceptions as these are genuine
@@ -1735,8 +1693,8 @@ public class InstantMessagingService extends ImsService {
                      * control should be done on UI. It is done after end user accepts invitation to
                      * enable prior handling by the application.
                      */
-                    FileSharingError error = FileSharingSession.isFileCapacityAcceptable(
-                            ftinfo.getSize(), mRcsSettings);
+                    FileSharingError error = isFileCapacityAcceptable(ftinfo.getSize(),
+                            mRcsSettings);
                     if (error != null) {
                         sendErrorResponse(invite, Response.DECLINE);
                         int errorCode = error.getErrorCode();
@@ -1839,15 +1797,11 @@ public class InstantMessagingService extends ImsService {
                                 + e.getMessage() + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
-                } catch (FileAccessException e) {
+
+                } catch (FileAccessException | PayloadException | ContactManagerException e) {
                     sLogger.error("Failed to receive http o2o file transfer invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
-                } catch (PayloadException e) {
-                    sLogger.error("Failed to receive http o2o file transfer invitation!", e);
-                    tryToSendErrorResponse(invite, Response.DECLINE);
-                } catch (ContactManagerException e) {
-                    sLogger.error("Failed to receive http o2o file transfer invitation!", e);
-                    tryToSendErrorResponse(invite, Response.DECLINE);
+
                 } catch (RuntimeException e) {
                     /*
                      * Normally we are not allowed to catch runtime exceptions as these are genuine
@@ -2017,32 +1971,25 @@ public class InstantMessagingService extends ImsService {
     public boolean isFileSizeExceeded(long size) {
         // Auto reject if file too big
         long maxSize = mRcsSettings.getMaxFileTransferSize();
-        if (maxSize > 0 && size > maxSize) {
-            return true;
-        }
-
-        return false;
+        return maxSize > 0 && size > maxSize;
     }
 
     /**
      * Check if the capabilities are valid based on msgCapValidity paramter
      * 
-     * @param capabilities
+     * @param capabilities The capabilities
      * @return {@code true} if valid, otherwise {@code false}
      */
     public boolean isCapabilitiesValid(Capabilities capabilities) {
         long msgCapValidityPeriod = mRcsSettings.getMsgCapValidityPeriod();
-        if (System.currentTimeMillis() > capabilities.getTimestampOfLastResponse()
-                + msgCapValidityPeriod) {
-            return false;
-        }
-        return true;
+        return System.currentTimeMillis() <= capabilities.getTimestampOfLastResponse()
+                + msgCapValidityPeriod;
     }
 
     /**
      * Removes the group chat composing status from the map
      * 
-     * @param chatId
+     * @param chatId The chat ID
      */
     public void removeGroupChatComposingStatus(final String chatId) {
         synchronized (getImsServiceSessionOperationLock()) {
@@ -2066,7 +2013,7 @@ public class InstantMessagingService extends ImsService {
     /**
      * Gets the group chat composing status
      * 
-     * @param chatId
+     * @param chatId the chat ID
      * @return the group chat composing status if previous sending failed or null if network is
      *         aligned with client composing status
      */
@@ -2116,7 +2063,7 @@ public class InstantMessagingService extends ImsService {
     /**
      * Accept store and forward message session with this remoteContact that is not yet accepted.
      * 
-     * @param remoteContact
+     * @param remoteContact The remote contact
      */
     public void acceptStoreAndForwardMessageSessionIfSuchExists(ContactId remoteContact) {
         TerminatingStoreAndForwardOneToOneChatMessageSession session = getStoreAndForwardMsgSession(remoteContact);
@@ -2136,7 +2083,7 @@ public class InstantMessagingService extends ImsService {
     /**
      * Is file transfer already ongoing with specific fileTransferId.
      * 
-     * @param fileTransferId
+     * @param fileTransferId the file transfer ID
      * @return boolean
      */
     public boolean isFileTransferAlreadyOngoing(String fileTransferId) {
@@ -2146,20 +2093,18 @@ public class InstantMessagingService extends ImsService {
     /**
      * Is file transfer resent and not already ongoing.
      * 
-     * @param fileTransferId
+     * @param fileTransferId the file transfer ID
      * @return boolean
      */
     public boolean isFileTransferResentAndNotAlreadyOngoing(String fileTransferId) {
-        if (isFileTransferAlreadyOngoing(fileTransferId)) {
-            return false;
-        }
-        return mMessagingLog.isFileTransfer(fileTransferId);
+        return !isFileTransferAlreadyOngoing(fileTransferId)
+                && mMessagingLog.isFileTransfer(fileTransferId);
     }
 
     /**
      * Try to dequeue of one-to-one chat messages for specific contact
      * 
-     * @param contact
+     * @param contact the contact ID
      */
     public void tryToDequeueOneToOneChatMessages(ContactId contact) {
         mImOperationHandler.post(new OneToOneChatMessageDequeueTask(mCtx, mCore, contact,
@@ -2169,7 +2114,7 @@ public class InstantMessagingService extends ImsService {
     /**
      * Try to dequeue group chat messages and group file transfers
      * 
-     * @param chatId
+     * @param chatId the chat ID
      */
     public void tryToDequeueGroupChatMessagesAndGroupFileTransfers(String chatId) {
         mImOperationHandler.post(new GroupChatDequeueTask(mCtx, mCore, mMessagingLog, mChatService,
@@ -2196,7 +2141,7 @@ public class InstantMessagingService extends ImsService {
      * Try to mark all queued group chat messages and group file transfers corresponding to contact
      * as failed
      * 
-     * @param chatId
+     * @param chatId the chat ID
      */
     public void tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(String chatId) {
         mImOperationHandler.post(new GroupChatTerminalExceptionTask(chatId, mChatService,
@@ -2214,7 +2159,7 @@ public class InstantMessagingService extends ImsService {
     /**
      * Try to invite queued group chat participants
      * 
-     * @param chatId
+     * @param chatId the chat ID
      */
     public void tryToInviteQueuedGroupChatParticipantInvitations(String chatId) {
         mImOperationHandler.post(new GroupChatInviteQueuedParticipantsTask(chatId, mChatService,
@@ -2224,7 +2169,7 @@ public class InstantMessagingService extends ImsService {
     /**
      * Handle auto rejoin group chat
      * 
-     * @param chatId
+     * @param chatId the chat ID
      * @throws NetworkException
      * @throws PayloadException
      */
@@ -2235,7 +2180,7 @@ public class InstantMessagingService extends ImsService {
     /**
      * Handle rejoin group chat as part of send operation
      * 
-     * @param chatId
+     * @param chatId the chat ID
      * @throws NetworkException
      * @throws PayloadException
      */
@@ -2247,9 +2192,9 @@ public class InstantMessagingService extends ImsService {
     /**
      * Handle one-one file transfer failure
      * 
-     * @param fileTransferId
-     * @param contact
-     * @param reasonCode
+     * @param fileTransferId the file transfer ID
+     * @param contact the contact
+     * @param reasonCode the reason code
      */
     public void setOneToOneFileTransferFailureReasonCode(String fileTransferId, ContactId contact,
             FileTransfer.ReasonCode reasonCode) {
@@ -2260,8 +2205,6 @@ public class InstantMessagingService extends ImsService {
     /**
      * Deletes all one to one chat from history and abort/reject any associated ongoing session if
      * such exists.
-     * 
-     * @param imService
      */
     public void tryToDeleteOneToOneChats() {
         mImDeleteOperationHandler.post(new OneToOneFileTransferDeleteTask(mFileTransferService,
@@ -2287,7 +2230,7 @@ public class InstantMessagingService extends ImsService {
      * Deletes a one to one chat with a given contact from history and abort/reject any associated
      * ongoing session if such exists.
      * 
-     * @param contact
+     * @param contact the contact ID
      */
     public void tryToDeleteOneToOneChat(ContactId contact) {
         mImDeleteOperationHandler.post(new OneToOneFileTransferDeleteTask(mFileTransferService,
@@ -2300,7 +2243,7 @@ public class InstantMessagingService extends ImsService {
      * Delete a group chat by its chat id from history and abort/reject any associated ongoing
      * session if such exists.
      * 
-     * @param chatId
+     * @param chatId the chat ID
      */
     public void tryToDeleteGroupChat(String chatId) {
         mImDeleteOperationHandler.post(new GroupChatMessageDeleteTask(mChatService, this,
@@ -2315,7 +2258,7 @@ public class InstantMessagingService extends ImsService {
      * Delete a message from its message id from history. Will resolve if the message is one to one
      * or from a group chat.
      * 
-     * @param msgId
+     * @param msgId the message ID
      */
     public void tryToDeleteChatMessage(String msgId) {
         if (mMessagingLog.isOneToOneChatMessage(msgId)) {
@@ -2331,7 +2274,7 @@ public class InstantMessagingService extends ImsService {
      * Delete a file transfer from its transfer id from history. Will resolve if the message is one
      * to one or from a group chat.
      * 
-     * @param msgId
+     * @param transferId the file transfer ID
      */
     public void tryToDeleteFileTransfer(String transferId) {
         if (mMessagingLog.isGroupFileTransfer(transferId)) {
@@ -2348,7 +2291,7 @@ public class InstantMessagingService extends ImsService {
      * Try to delete file transfer corresponding to a given one to one chat specified by contact
      * from history and abort/reject any associated ongoing session if such exists.
      * 
-     * @param contact
+     * @param contact the contact ID
      */
     public void tryToDeleteFileTransfers(ContactId contact) {
         mImDeleteOperationHandler.post(new OneToOneFileTransferDeleteTask(mFileTransferService,
@@ -2394,9 +2337,9 @@ public class InstantMessagingService extends ImsService {
     /**
      * Handle resend file transfer invitation
      * 
-     * @param session
-     * @param contact
-     * @param displayName
+     * @param session the session
+     * @param contact the contact ID
+     * @param displayName the display name of the remote contact
      */
     public void receiveResendFileTransferInvitation(FileSharingSession session, ContactId contact,
             String displayName) {
@@ -2411,8 +2354,6 @@ public class InstantMessagingService extends ImsService {
      * 
      * @param session File transfer session
      * @param isGroup is group file transfer
-     * @param chatSessionId corresponding chatSessionId
-     * @param chatId corresponding chatId
      */
     public void resumeIncomingFileTransfer(FileSharingSession session, boolean isGroup) {
         if (sLogger.isActivated()) {
@@ -2450,7 +2391,7 @@ public class InstantMessagingService extends ImsService {
     /**
      * Handle store and forward notification session invitation
      * 
-     * @param session
+     * @param session the session
      */
     public void receiveStoreAndForwardNotificationSessionInvitation(
             TerminatingStoreAndForwardOneToOneChatNotificationSession session) {
@@ -2464,7 +2405,7 @@ public class InstantMessagingService extends ImsService {
      * New file delivery status
      * 
      * @param contact who notified status
-     * @param imdn Imdn document
+     * @param imdn IMDN document
      */
     public void receiveOneToOneFileDeliveryStatus(ContactId contact, ImdnDocument imdn) {
         if (sLogger.isActivated()) {
@@ -2480,7 +2421,7 @@ public class InstantMessagingService extends ImsService {
      * 
      * @param chatId Chat Id
      * @param contact who notified status
-     * @param imdn Imdn document
+     * @param imdn IMDN document
      */
     public void receiveGroupFileDeliveryStatus(String chatId, ContactId contact, ImdnDocument imdn) {
         if (sLogger.isActivated()) {
@@ -2494,9 +2435,9 @@ public class InstantMessagingService extends ImsService {
     /**
      * Handle imdn DISPLAY report sent for message
      * 
-     * @param chatId ChatId
-     * @param contactId Remote contact
-     * @param msgId
+     * @param chatId the chat ID
+     * @param remote the remote contact
+     * @param msgId the message ID
      */
     public void onChatMessageDisplayReportSent(String chatId, ContactId remote, String msgId) {
         mChatService.onDisplayReportSent(chatId, remote, msgId);
@@ -2514,7 +2455,7 @@ public class InstantMessagingService extends ImsService {
     /**
      * Handle the case of rejected resend file transfer
      * 
-     * @param fileTransferId
+     * @param fileTransferId the file transfer ID
      * @param remoteContact Remote contact
      * @param reasonCode Rejected reason code
      * @param timestamp Local timestamp when got file transfer invitation
@@ -2532,15 +2473,15 @@ public class InstantMessagingService extends ImsService {
      * 
      * @param remoteContact Remote contact
      * @param content File content
-     * @param fileIcon Fileicon content
+     * @param fileIcon File icon content
      * @param reasonCode Rejected reason code
      * @param timestamp Local timestamp when got file transfer invitation
      * @param timestampSent Remote timestamp sent in payload for the file transfer
      */
     public void addFileTransferInvitationRejected(ContactId remoteContact, MmContent content,
-            MmContent fileicon, FileTransfer.ReasonCode reasonCode, long timestamp,
+            MmContent fileIcon, FileTransfer.ReasonCode reasonCode, long timestamp,
             long timestampSent) {
-        mFileTransferService.addFileTransferInvitationRejected(remoteContact, content, fileicon,
+        mFileTransferService.addFileTransferInvitationRejected(remoteContact, content, fileIcon,
                 reasonCode, timestamp, timestampSent);
     }
 

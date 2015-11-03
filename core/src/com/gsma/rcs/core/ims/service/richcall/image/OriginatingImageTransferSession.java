@@ -86,10 +86,10 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
      * @param content Content to be shared
      * @param contact Remote contact Id
      * @param thumbnail Thumbnail content option
-     * @param rcsSettings
+     * @param rcsSettings The RCS settings accessor
      * @param timestamp Local timestamp for the session
-     * @param contactManager
-     * @param capabilityService
+     * @param contactManager The contact manager accessor
+     * @param capabilityService The capability service
      */
     public OriginatingImageTransferSession(RichcallService parent, MmContent content,
             ContactId contact, MmContent thumbnail, RcsSettings rcsSettings, long timestamp,
@@ -217,26 +217,11 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
             // Send INVITE request
             sendInvite(invite);
 
-        } catch (InvalidArgumentException e) {
+        } catch (InvalidArgumentException | ParseException | FileAccessException | PayloadException e) {
             sLogger.error("Failed to send invite!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
 
-        } catch (ParseException e) {
-            sLogger.error("Failed to send invite!", e);
-            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
-
-        } catch (IOException e) {
-            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
-
-        } catch (FileAccessException e) {
-            sLogger.error("Failed to send invite!", e);
-            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
-
-        } catch (PayloadException e) {
-            sLogger.error("Failed to send invite!", e);
-            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
-
-        } catch (NetworkException e) {
+        } catch (IOException | NetworkException e) {
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
 
         } catch (RuntimeException e) {
@@ -298,7 +283,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
     }
 
     @Override
-    public void msrpDataTransfered(String msgId) {
+    public void msrpDataTransferred(String msgId) {
         try {
             if (sLogger.isActivated()) {
                 sLogger.info("Data transferred");

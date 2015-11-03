@@ -17,6 +17,7 @@
 package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.core.Core;
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
@@ -160,6 +161,7 @@ public class FileTransferDequeueTask extends DequeueTask {
                                         content, fileIconContent);
                             }
                             break;
+
                         case STARTED:
                             if (groupFile) {
                                 if (!isPossibleToDequeueGroupChatMessagesAndGroupFileTransfers(chatId)) {
@@ -177,7 +179,7 @@ public class FileTransferDequeueTask extends DequeueTask {
                             }
                             String fileInfo = FileTransferUtils
                                     .createHttpFileTransferXml(mMessagingLog
-                                            .getGroupFileDownloadInfo(id));
+                                            .getFileDownloadInfo(cursor));
                             if (groupFile) {
                                 GroupChatImpl groupChat = mChatService.getOrCreateGroupChat(chatId);
                                 GroupFileTransferImpl groupFileTransfer = mFileTransferService
@@ -195,25 +197,13 @@ public class FileTransferDequeueTask extends DequeueTask {
                                         oneToOneFileTransfer);
                             }
                             break;
+
                         default:
                             break;
                     }
 
-                } catch (SessionUnavailableException e) {
-                    if (logActivated) {
-                        mLogger.debug(new StringBuilder(
-                                "Failed to dequeue file transfer with fileTransferId '").append(id)
-                                .append("' on chat '").append(chatId).append("' due to: ")
-                                .append(e.getMessage()).toString());
-                    }
-                } catch (SessionNotEstablishedException e) {
-                    if (logActivated) {
-                        mLogger.debug(new StringBuilder(
-                                "Failed to dequeue file transfer with fileTransferId '").append(id)
-                                .append("' on chat '").append(chatId).append("' due to: ")
-                                .append(e.getMessage()).toString());
-                    }
-                } catch (NetworkException e) {
+                } catch (SessionUnavailableException | SessionNotEstablishedException
+                        | FileAccessException | NetworkException e) {
                     if (logActivated) {
                         mLogger.debug(new StringBuilder(
                                 "Failed to dequeue file transfer with fileTransferId '").append(id)
@@ -248,9 +238,11 @@ public class FileTransferDequeueTask extends DequeueTask {
              * can then be properly tracked down and fixed. We also mark the respective entry that
              * failed to dequeue as FAILED.
              */
-            mLogger.error(new StringBuilder(
-                    "Exception occured while dequeueing file transfer with transferId '")
-                    .append(id).append("' and chatId '").append(chatId).append("'!").toString(), e);
+            mLogger.error(
+                    new StringBuilder(
+                            "Exception occurred while dequeueing file transfer with transferId '")
+                            .append(id).append("' and chatId '").append(chatId).append("'!")
+                            .toString(), e);
             if (id == null) {
                 return;
             }

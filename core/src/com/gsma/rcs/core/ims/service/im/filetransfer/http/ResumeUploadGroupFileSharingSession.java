@@ -50,11 +50,9 @@ public class ResumeUploadGroupFileSharingSession extends OriginatingHttpGroupFil
      * @param imService InstantMessagingService
      * @param content the content (url, mime-type and size)
      * @param resumeUpload the data object in DB
-     * @param rcsSettings
-     * @param messagingLog
-     * @param contactManager
-     * @param chatSessionId
-     * @param chatContributionId
+     * @param rcsSettings The RCS settings accessor
+     * @param messagingLog The messaging log accessor
+     * @param contactManager The contact manager accessor
      */
     public ResumeUploadGroupFileSharingSession(InstantMessagingService imService,
             MmContent content, FtHttpResumeUpload resumeUpload, RcsSettings rcsSettings,
@@ -70,7 +68,6 @@ public class ResumeUploadGroupFileSharingSession extends OriginatingHttpGroupFil
                 rcsSettings, 
                 messagingLog, 
                 resumeUpload.getTimestamp(),
-                resumeUpload.getTimestampSent(), 
                 contactManager);
         // @formatter:on
     }
@@ -84,8 +81,7 @@ public class ResumeUploadGroupFileSharingSession extends OriginatingHttpGroupFil
         try {
             onHttpTransferStarted();
             /* Resume the file upload to the HTTP server */
-            byte[] result = mUploadManager.resumeUpload();
-            sendResultToContact(result);
+            processHttpUploadResponse(mUploadManager.resumeUpload());
 
         } catch (IOException e) {
             /* Don't call handleError in case of Pause or Cancel */
@@ -94,10 +90,7 @@ public class ResumeUploadGroupFileSharingSession extends OriginatingHttpGroupFil
             }
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
 
-        } catch (PayloadException e) {
-            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
-
-        } catch (NetworkException e) {
+        } catch (PayloadException | NetworkException e) {
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
 
         } catch (RuntimeException e) {

@@ -40,7 +40,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Random;
-import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -50,7 +49,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class MsrpSession {
 
-    // Changed by Deutsche Telekom
     /**
      * Transaction info expiry timeout in milliseconds
      */
@@ -58,7 +56,6 @@ public class MsrpSession {
 
     private static final byte[] NEW_LINE = MsrpConstants.NEW_LINE.getBytes(UTF8);
 
-    // Changed by Deutsche Telekom
     /**
      * MSRP Chunk type
      */
@@ -66,7 +63,6 @@ public class MsrpSession {
         TextMessage, IsComposing, MessageDisplayedReport, MessageDeliveredReport, OtherMessageDeliveredReportStatus, FileSharing, HttpFileSharing, ImageTransfer, EmptyChunk, GeoLocation, StatusReport, Unknown
     }
 
-    // Changed by Deutsche Telekom
     /**
      * MSRP transaction object that encapsulates the and map the msgId and if the origin was from
      * displayed status message
@@ -113,7 +109,7 @@ public class MsrpSession {
 
     private boolean mSuccessReportOption = false;
 
-    private MsrpConnection connection;
+    private MsrpConnection mConnection;
 
     /**
      * From path
@@ -145,31 +141,27 @@ public class MsrpSession {
     /**
      * File transfer progress
      */
-    private Vector<Long> mProgress = new Vector<Long>();
+    private List<Long> mProgress = new ArrayList<>();
 
     private long mTotalSize;
 
     private static final Logger sLogger = Logger.getLogger(MsrpSession.class.getSimpleName());
 
-    // Changed by Deutsche Telekom
     /**
      * Transaction info table
      */
     private ConcurrentHashMap<String, MsrpTransactionInfo> mTransactionInfoMap;
 
-    // Changed by Deutsche Telekom
     /**
      * Mapping of messages to transactions
      */
     private ConcurrentHashMap<String, String> mMessageTransactionMap;
 
-    // Changed by Deutsche Telekom
     /**
      * Transaction info table locking object
      */
-    private Object mTransactionMsgIdMapLock = new Object();
+    private final Object mTransactionMsgIdMapLock;
 
-    // Changed by Deutsche Telekom
     /**
      * Controls if is to map the msgId from transactionId if not present on received MSRP messages
      */
@@ -185,22 +177,20 @@ public class MsrpSession {
     /**
      * Constructor
      * 
-     * @param rcsSettings
+     * @param rcsSettings The RCS settings accessor
      */
     public MsrpSession(RcsSettings rcsSettings) {
-        // Changed by Deutsche Telekom
+        mTransactionMsgIdMapLock = new Object();
         setMapMsgIdFromTransationId(true);
         mRcsSettings = rcsSettings;
     }
 
-    // Changed by Deutsche Telekom
     /**
      * On destroy this instance
      */
     @Override
     protected void finalize() throws Throwable {
         setMapMsgIdFromTransationId(false);
-
         super.finalize();
     }
 
@@ -228,7 +218,7 @@ public class MsrpSession {
      * @param failureReportOption Boolean flag
      */
     public void setFailureReportOption(boolean failureReportOption) {
-        this.mFailureReportOption = failureReportOption;
+        mFailureReportOption = failureReportOption;
     }
 
     /**
@@ -246,7 +236,7 @@ public class MsrpSession {
      * @param successReportOption Boolean flag
      */
     public void setSuccessReportOption(boolean successReportOption) {
-        this.mSuccessReportOption = successReportOption;
+        mSuccessReportOption = successReportOption;
     }
 
     /**
@@ -255,7 +245,7 @@ public class MsrpSession {
      * @param connection MSRP connection
      */
     public void setConnection(MsrpConnection connection) {
-        this.connection = connection;
+        mConnection = connection;
     }
 
     /**
@@ -264,7 +254,7 @@ public class MsrpSession {
      * @return MSRP connection
      */
     public MsrpConnection getConnection() {
-        return connection;
+        return mConnection;
     }
 
     /**
@@ -282,7 +272,7 @@ public class MsrpSession {
      * @param listener Listener
      */
     public void addMsrpEventListener(MsrpEventListener listener) {
-        this.mMsrpEventListener = listener;
+        mMsrpEventListener = listener;
     }
 
     /**
@@ -300,7 +290,7 @@ public class MsrpSession {
      * @param from From path
      */
     public void setFrom(String from) {
-        this.mFrom = from;
+        mFrom = from;
     }
 
     /**
@@ -318,7 +308,7 @@ public class MsrpSession {
      * @param to To path
      */
     public void setTo(String to) {
-        this.mTo = to;
+        mTo = to;
     }
 
     /**
@@ -333,8 +323,8 @@ public class MsrpSession {
         mCancelTransfer = true;
 
         // Close the connection
-        if (connection != null) {
-            connection.close();
+        if (mConnection != null) {
+            mConnection.close();
         }
 
         // Unblock request transaction
@@ -353,7 +343,6 @@ public class MsrpSession {
         }
     }
 
-    // Changed by Deutsche Telekom
     /**
      * Send chunks
      * 
@@ -370,7 +359,7 @@ public class MsrpSession {
             sLogger.info("Send content (" + contentType + " - MSRP chunk type: " + typeMsrpChunk
                     + ")");
         }
-        this.mTotalSize = totalSize;
+        mTotalSize = totalSize;
         try {
             byte data[] = new byte[MsrpConstants.CHUNK_MAX_SIZE];
             long firstByte = 1;
@@ -387,7 +376,6 @@ public class MsrpSession {
                 mMsrpTransaction = null;
             }
 
-            // Changed by Deutsche Telekom
             // Calculate number of needed chunks
             final int totalChunks = (int) Math.ceil(totalSize
                     / (double) MsrpConstants.CHUNK_MAX_SIZE);
@@ -414,10 +402,8 @@ public class MsrpSession {
 
             }).start();
 
-            // Changed by Deutsche Telekom
-            String newTransactionId = null;
+            String newTransactionId;
 
-            // Changed by Deutsche Telekom
             // RFC4975, section 7.1.1. Sending SEND Requests
             // When an endpoint has a message to deliver, it first generates a new
             // Message-ID. The value MUST be highly unlikely to be repeated by
@@ -431,12 +417,10 @@ public class MsrpSession {
                 // Update upper byte range
                 lastByte += i;
 
-                // Changed by Deutsche Telekom
                 newTransactionId = generateTransactionId();
                 addMsrpTransactionInfo(newTransactionId, msrpMsgId, msgId, typeMsrpChunk);
 
                 // Send a chunk
-                // Changed by Deutsche Telekom
                 sendMsrpSendRequest(newTransactionId, mTo, mFrom, msrpMsgId, contentType, i, data,
                         firstByte, lastByte, totalSize);
 
@@ -467,10 +451,9 @@ public class MsrpSession {
 
                 // Notify event listener
                 if (mMsrpTransaction.isAllResponsesReceived()) {
-                    mMsrpEventListener.msrpDataTransfered(msgId);
+                    mMsrpEventListener.msrpDataTransferred(msgId);
                 } else {
                     if (!mMsrpTransaction.isTerminated()) {
-                        // Changed by Deutsche Telekom
                         mMsrpEventListener.msrpTransferError(msgId, "response timeout 408",
                                 typeMsrpChunk);
                     }
@@ -490,9 +473,8 @@ public class MsrpSession {
 
                 // Notify event listener
                 if (mReportTransaction.getStatusCode() == 200) {
-                    mMsrpEventListener.msrpDataTransfered(msgId);
+                    mMsrpEventListener.msrpDataTransferred(msgId);
                 } else {
-                    // Changed by Deutsche Telekom
                     mMsrpEventListener.msrpTransferError(msgId, "error report "
                             + mReportTransaction.getStatusCode(), typeMsrpChunk);
                 }
@@ -501,7 +483,7 @@ public class MsrpSession {
             // No transaction
             if (mMsrpTransaction == null && mReportTransaction == null) {
                 // Notify event listener
-                mMsrpEventListener.msrpDataTransfered(msgId);
+                mMsrpEventListener.msrpDataTransferred(msgId);
             }
         } catch (IOException e) {
             throw new NetworkException(new StringBuilder("Send chunk failed for msgId : ").append(
@@ -542,7 +524,6 @@ public class MsrpSession {
      * @param totalSize Total size
      * @throws NetworkException
      */
-    // Changed by Deutsche Telekom
     private void sendMsrpSendRequest(String txId, String to, String from, String msrpMsgId,
             String contentType, int dataSize, byte data[], long firstByte, long lastByte,
             long totalSize) throws NetworkException {
@@ -563,7 +544,6 @@ public class MsrpSession {
             String fromHeader = MsrpConstants.HEADER_FROM_PATH + ": " + from
                     + MsrpConstants.NEW_LINE;
             buffer.write(fromHeader.getBytes(UTF8));
-            // Changed by Deutsche Telekom
             String msgIdHeader = MsrpConstants.HEADER_MESSAGE_ID + ": " + msrpMsgId
                     + MsrpConstants.NEW_LINE;
             buffer.write(msgIdHeader.getBytes(UTF8));
@@ -574,7 +554,6 @@ public class MsrpSession {
             buffer.write(byteRange.getBytes(UTF8));
 
             // Write optional headers
-            // Changed by Deutsche Telekom
             // According with GSMA guidelines
             if (mFailureReportOption) {
                 String header = MsrpConstants.HEADER_FAILURE_REPORT + ": yes"
@@ -621,7 +600,7 @@ public class MsrpSession {
                 } else {
                     mRequestTransaction = new RequestTransaction(mRcsSettings);
                 }
-                connection.sendChunk(buffer.toByteArray());
+                mConnection.sendChunk(buffer.toByteArray());
                 buffer.close();
                 if (mRequestTransaction != null) {
                     mRequestTransaction.waitResponse();
@@ -630,7 +609,7 @@ public class MsrpSession {
                     }
                 }
             } else {
-                connection.sendChunk(buffer.toByteArray());
+                mConnection.sendChunk(buffer.toByteArray());
                 buffer.close();
                 if (mMsrpTransaction != null) {
                     mMsrpTransaction.handleRequest();
@@ -653,7 +632,6 @@ public class MsrpSession {
      * @param msrpMsgId Message ID header
      * @throws NetworkException
      */
-    // Changed by Deutsche Telekom
     private void sendEmptyMsrpSendRequest(String txId, String to, String from, String msrpMsgId)
             throws NetworkException {
         ByteArrayOutputStream buffer = null;
@@ -671,7 +649,6 @@ public class MsrpSession {
             String fromHeader = MsrpConstants.HEADER_FROM_PATH + ": " + from
                     + MsrpConstants.NEW_LINE;
             buffer.write(fromHeader.getBytes(UTF8));
-            // Changed by Deutsche Telekom
             String msgIdHeader = MsrpConstants.HEADER_MESSAGE_ID + ": " + msrpMsgId
                     + MsrpConstants.NEW_LINE;
             buffer.write(msgIdHeader.getBytes(UTF8));
@@ -684,7 +661,7 @@ public class MsrpSession {
             buffer.write(NEW_LINE);
 
             mRequestTransaction = new RequestTransaction(mRcsSettings);
-            connection.sendChunkImmediately(buffer.toByteArray());
+            mConnection.sendChunkImmediately(buffer.toByteArray());
 
             mRequestTransaction.waitResponse();
             if (!mRequestTransaction.isResponseReceived()) {
@@ -735,7 +712,7 @@ public class MsrpSession {
             buffer.write(MsrpConstants.FLAG_LAST_CHUNK);
             buffer.write(NEW_LINE);
 
-            connection.sendChunk(buffer.toByteArray());
+            mConnection.sendChunk(buffer.toByteArray());
         } catch (IOException e) {
             throw new NetworkException("Failed to send Msrp response!", e);
 
@@ -803,7 +780,7 @@ public class MsrpSession {
 
             // Send request
             mRequestTransaction = new RequestTransaction(mRcsSettings);
-            connection.sendChunk(buffer.toByteArray());
+            mConnection.sendChunk(buffer.toByteArray());
         } catch (IOException e) {
             throw new NetworkException("Failed to send Msrp report request!", e);
 
@@ -910,8 +887,8 @@ public class MsrpSession {
         if (mFailureReportOption) {
             // Notify progress
             if (!mCancelTransfer && mProgress.size() > 0) {
-                mMsrpEventListener.msrpTransferProgress(mProgress.elementAt(0), mTotalSize);
-                mProgress.removeElementAt(0);
+                mMsrpEventListener.msrpTransferProgress(mProgress.get(0), mTotalSize);
+                mProgress.remove(0);
             }
         }
 
@@ -927,7 +904,6 @@ public class MsrpSession {
 
         // Notify event listener
         if (code != 200) {
-            // Changed by Deutsche Telekom
             String cpimMsgId = null;
             TypeMsrpChunk typeMsrpChunk = TypeMsrpChunk.Unknown;
             MsrpTransactionInfo msrpTransactionInfo = getMsrpTransactionInfo(txId);
@@ -938,7 +914,6 @@ public class MsrpSession {
             mMsrpEventListener
                     .msrpTransferError(cpimMsgId, "error response " + code, typeMsrpChunk);
 
-            // Changed by Deutsche Telekom
             // If an error is received it couldn't get any better nor worse; transaction has reached
             // final state
             removeMsrpTransactionInfo(txId);
@@ -957,7 +932,6 @@ public class MsrpSession {
      */
     public void receiveMsrpReport(String txId, Hashtable<String, String> headers)
             throws FileAccessException, NetworkException {
-        // Changed by Deutsche Telekom
         // Example of an MSRP REPORT request:
         // MSRP b276bb5b0adb22f6 SEND
         // To-Path: msrp://10.108.25.89:19494/n02s00i2t0+519;tcp
@@ -996,7 +970,6 @@ public class MsrpSession {
             sLogger.info("REPORT request received (transaction=" + txId + ")");
         }
 
-        // Changed by Deutsche Telekom
         String msrpMsgId = headers.get(MsrpConstants.HEADER_MESSAGE_ID);
         String cpimMsgId = null;
 
@@ -1014,7 +987,6 @@ public class MsrpSession {
             }
         }
 
-        // Changed by Deutsche Telekom
         // Test if a failure report is needed
         boolean failureReportNeeded = true;
         String failureHeader = headers.get(MsrpConstants.HEADER_FAILURE_REPORT);
@@ -1030,7 +1002,6 @@ public class MsrpSession {
         // Check status code
         int statusCode = ReportTransaction.parseStatusCode(headers);
         if (statusCode != 200) {
-            // Changed by Deutsche Telekom
             mMsrpEventListener.msrpTransferError(cpimMsgId, "error report " + statusCode,
                     typeMsrpChunk);
         }
@@ -1040,24 +1011,22 @@ public class MsrpSession {
             mReportTransaction.notifyReport(statusCode, headers);
         }
 
-        // Changed by Deutsche Telekom
         // Remove transaction info from list as transaction has reached a final state
         removeMsrpTransactionInfo(originalTransactionId);
     }
 
-    // Changed by Deutsche Telekom
     /**
      * Set the control if is to map the msgId from transactionId if not present on received MSRP
      * messages
      * 
-     * @param mapMsgIdFromTransationId
+     * @param mapMsgIdFromTransationId boolean
      */
     public void setMapMsgIdFromTransationId(boolean mapMsgIdFromTransationId) {
         if (mMapMsgIdFromTransationId != mapMsgIdFromTransationId) {
             synchronized (mTransactionMsgIdMapLock) {
                 if (mapMsgIdFromTransationId) {
-                    mTransactionInfoMap = new ConcurrentHashMap<String, MsrpSession.MsrpTransactionInfo>();
-                    mMessageTransactionMap = new ConcurrentHashMap<String, String>();
+                    mTransactionInfoMap = new ConcurrentHashMap<>();
+                    mMessageTransactionMap = new ConcurrentHashMap<>();
                 } else {
                     if (mTransactionInfoMap != null) {
                         mTransactionInfoMap.clear();
@@ -1073,7 +1042,6 @@ public class MsrpSession {
         }
     }
 
-    // Changed by Deutsche Telekom
     /**
      * Add transaction info item to list
      * 
@@ -1095,11 +1063,10 @@ public class MsrpSession {
         }
     }
 
-    // Changed by Deutsche Telekom
     /**
      * Remove transaction info item from list
      * 
-     * @param transactionId
+     * @param transactionId The transaction ID
      */
     public void removeMsrpTransactionInfo(String transactionId) {
         if (mTransactionInfoMap != null && transactionId != null) {
@@ -1115,7 +1082,6 @@ public class MsrpSession {
         }
     }
 
-    // Changed by Deutsche Telekom
     /**
      * Get the transactions info
      */
@@ -1129,7 +1095,6 @@ public class MsrpSession {
         return null;
     }
 
-    // Changed by Deutsche Telekom
     /**
      * Get the transactions info for a specific MSRP message ID
      * 
@@ -1153,12 +1118,11 @@ public class MsrpSession {
      */
     public void checkMsrpTransactionInfo() {
         if (mTransactionInfoMap != null) {
-            List<MsrpTransactionInfo> msrpTransactionInfos = null;
+            List<MsrpTransactionInfo> msrpTransactionInfos;
             synchronized (mTransactionMsgIdMapLock) {
                 // Copy the transaction info items to accelerate the locking while doing
                 // expiring process
-                msrpTransactionInfos = new ArrayList<MsrpTransactionInfo>(
-                        mTransactionInfoMap.values());
+                msrpTransactionInfos = new ArrayList<>(mTransactionInfoMap.values());
             }
             for (MsrpTransactionInfo msrpTransactionInfo : msrpTransactionInfos) {
                 long delta = System.currentTimeMillis() - msrpTransactionInfo.mTimestamp;

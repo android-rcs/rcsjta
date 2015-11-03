@@ -17,6 +17,7 @@
 package com.gsma.rcs.provider.history;
 
 import com.gsma.rcs.core.Core;
+import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
@@ -183,7 +184,7 @@ public class OneToOneChatDequeueTask extends DequeueTask {
                                     }
                                     String fileInfo = FileTransferUtils
                                             .createHttpFileTransferXml(mMessagingLog
-                                                    .getGroupFileDownloadInfo(id));
+                                                    .getFileDownloadInfo(id));
                                     OneToOneFileTransferImpl oneToOneFileTransfer = mFileTransferService
                                             .getOrCreateOneToOneFileTransfer(id);
                                     oneToOneChat.dequeueOneToOneFileInfo(id, fileInfo,
@@ -197,18 +198,13 @@ public class OneToOneChatDequeueTask extends DequeueTask {
                         default:
                             break;
                     }
-                } catch (SessionUnavailableException e) {
+                } catch (SessionUnavailableException | FileAccessException | NetworkException e) {
                     if (logActivated) {
                         mLogger.debug(new StringBuilder("Failed to dequeue one-one entry with id '")
                                 .append(id).append("' for contact '").append(contact)
                                 .append("' due to: ").append(e.getMessage()).toString());
                     }
-                } catch (NetworkException e) {
-                    if (logActivated) {
-                        mLogger.debug(new StringBuilder("Failed to dequeue one-one entry with id '")
-                                .append(id).append("' for contact '").append(contact)
-                                .append("' due to: ").append(e.getMessage()).toString());
-                    }
+
                 } catch (PayloadException e) {
                     mLogger.error(new StringBuilder("Failed to dequeue one-one entry with id '")
                             .append(id).append("' for contact '").append(contact).toString(), e);
@@ -237,7 +233,7 @@ public class OneToOneChatDequeueTask extends DequeueTask {
              */
             mLogger.error(
                     new StringBuilder(
-                            "Exception occured while dequeueing one-to-one chat message and one-to-one file transfer with id '")
+                            "Exception occurred while dequeueing one-to-one chat message and one-to-one file transfer with id '")
                             .append(id).append("' for contact '").append(contact).append("'!")
                             .toString(), e);
             if (id == null) {

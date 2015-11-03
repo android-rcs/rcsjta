@@ -93,7 +93,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * @param rcsSettings RCS settings
      * @param timestamp Local timestamp for the session
      * @param timestampSent the remote timestamp sent in payload for the file sharing
-     * @param contactManager
+     * @param contactManager The contact manager accessor
      * @throws PayloadException
      * @throws FileAccessException
      */
@@ -238,7 +238,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                         setSessionAccepted();
 
                         for (ImsSessionListener listener : listeners) {
-                            ((FileSharingSessionListener) listener).onSessionAccepting(contact);
+                             listener.onSessionAccepting(contact);
                         }
                         break;
 
@@ -422,7 +422,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
     }
 
     @Override
-    public void msrpDataTransfered(String msgId) {
+    public void msrpDataTransferred(String msgId) {
         // Not used in terminating side
     }
 
@@ -439,7 +439,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
             file.writeData2File(data);
             file.closeFile();
             for (ImsSessionListener listener : listeners) {
-                ((FileSharingSessionListener) listener).onFileTransfered(file, contact,
+                ((FileSharingSessionListener) listener).onFileTransferred(file, contact,
                         FileTransferData.UNKNOWN_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION,
                         FileTransferProtocol.MSRP);
             }

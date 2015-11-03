@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.service.im.chat;
 
+import static com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession.isFileCapacityAcceptable;
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.FileAccessException;
@@ -52,7 +53,6 @@ import com.gsma.rcs.core.ims.service.im.chat.iscomposing.IsComposingManager;
 import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatMessageSession;
 import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatNotificationSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
-import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.DownloadFromInviteFileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
@@ -85,14 +85,9 @@ import javax.xml.parsers.ParserConfigurationException;
  * @author jexa7410
  */
 public abstract class ChatSession extends ImsServiceSession implements MsrpEventListener {
-    /**
-     * Subject
-     */
+
     private String mSubject;
 
-    /**
-     * MSRP manager
-     */
     private final MsrpManager mMsrpMgr;
 
     /**
@@ -105,20 +100,17 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      */
     private final SessionActivityManager mActivityMgr;
 
-    /**
-     * Contribution ID
-     */
     private String mContributionId;
 
     /**
      * Feature tags
      */
-    private List<String> mFeatureTags = new ArrayList<String>();
+    private List<String> mFeatureTags = new ArrayList<>();
 
     /**
      * Feature tags
      */
-    private List<String> mAcceptContactTags = new ArrayList<String>();
+    private List<String> mAcceptContactTags = new ArrayList<>();
 
     /**
      * Accept types
@@ -142,9 +134,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 
     private static final Logger sLogger = Logger.getLogger(ChatSession.class.getSimpleName());
 
-    /**
-     * Messaging log
-     */
     protected final MessagingLog mMessagingLog;
 
     /**
@@ -203,7 +192,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param messagingLog Messaging log
      * @param firstMsg First message in session
      * @param timestamp Local timestamp for the session
-     * @param contactManager
+     * @param contactManager The contact manager accessor
      */
     public ChatSession(InstantMessagingService imService, ContactId contact, Uri remoteContact,
             RcsSettings rcsSettings, MessagingLog messagingLog, ChatMessage firstMsg,
@@ -452,7 +441,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * 
      * @param msgId Message ID
      */
-    public void msrpDataTransfered(String msgId) {
+    public void msrpDataTransferred(String msgId) {
         if (sLogger.isActivated()) {
             sLogger.info("Data transfered");
         }
@@ -722,8 +711,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             }
 
             /* Auto reject if file too big or size exceeds device storage capacity. */
-            FileSharingError error = FileSharingSession.isFileCapacityAcceptable(
-                    fileTransferInfo.getSize(), mRcsSettings);
+            FileSharingError error = isFileCapacityAcceptable(fileTransferInfo.getSize(),
+                    mRcsSettings);
             if (error != null) {
                 if (sLogger.isActivated()) {
                     sLogger.debug("File is too big or exceeds storage capacity, "
@@ -854,11 +843,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @return Boolean
      */
     public boolean isStoreAndForward() {
-        if (this instanceof TerminatingStoreAndForwardOneToOneChatMessageSession
-                || this instanceof TerminatingStoreAndForwardOneToOneChatNotificationSession) {
-            return true;
-        }
-        return false;
+        return this instanceof TerminatingStoreAndForwardOneToOneChatMessageSession
+                || this instanceof TerminatingStoreAndForwardOneToOneChatNotificationSession;
     }
 
     /**
@@ -947,20 +933,11 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     public void onDeliveryStatusReceived(ContactId contact, String xml) throws PayloadException {
         try {
             ImdnDocument imdn = ChatUtils.parseDeliveryReport(xml);
-
             for (ImsSessionListener listener : getListeners()) {
                 ((ChatSessionListener) listener).onDeliveryStatusReceived(mContributionId, contact,
                         imdn);
             }
-        } catch (SAXException e) {
-            throw new PayloadException(new StringBuilder(
-                    "Failed to parse IMDN document for contact : ").append(contact).toString(), e);
-
-        } catch (ParserConfigurationException e) {
-            throw new PayloadException(new StringBuilder(
-                    "Failed to parse IMDN document for contact : ").append(contact).toString(), e);
-
-        } catch (ParseFailureException e) {
+        } catch (SAXException | ParserConfigurationException | ParseFailureException e) {
             throw new PayloadException(new StringBuilder(
                     "Failed to parse IMDN document for contact : ").append(contact).toString(), e);
         }

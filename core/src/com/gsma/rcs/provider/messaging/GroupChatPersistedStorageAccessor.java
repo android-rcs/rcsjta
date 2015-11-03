@@ -16,7 +16,6 @@
 
 package com.gsma.rcs.provider.messaging;
 
-import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
@@ -233,7 +232,7 @@ public class GroupChatPersistedStorageAccessor {
     }
 
     public void addOutgoingGroupChatMessage(ChatMessage msg, Set<ContactId> recipients,
-            Status status, Content.ReasonCode reasonCode) throws PayloadException {
+            Status status, Content.ReasonCode reasonCode) {
         mMessagingLog.addOutgoingGroupChatMessage(mChatId, msg, recipients, status, reasonCode);
     }
 
