@@ -90,16 +90,17 @@ public class ChatCursorAdapter extends CursorAdapter {
     }
 
     private int getItemViewType(Cursor cursor) {
-        String mimetype = cursor.getString(cursor.getColumnIndexOrThrow(HistoryLog.MIME_TYPE));
-        if (ChatLog.Message.MimeType.GEOLOC_MESSAGE.equals(mimetype)
-                || ChatLog.Message.MimeType.TEXT_MESSAGE.equals(mimetype)) {
-            return CHAT_MESSAGE;
+        String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(HistoryLog.MIME_TYPE));
+        switch (mimeType) {
+            case ChatLog.Message.MimeType.GEOLOC_MESSAGE:
+            case ChatLog.Message.MimeType.TEXT_MESSAGE:
+                return CHAT_MESSAGE;
 
-        } else if (ChatLog.Message.MimeType.GROUPCHAT_EVENT.equals(mimetype)) {
-            return GROUPCHAT_EVENT;
+            case ChatLog.Message.MimeType.GROUPCHAT_EVENT:
+                return GROUPCHAT_EVENT;
 
-        } else {
-            return FILETRANSFER_MESSAGE;
+            default:
+                return FILETRANSFER_MESSAGE;
         }
     }
 
@@ -119,18 +120,22 @@ public class ChatCursorAdapter extends CursorAdapter {
         View view;
         String mimetype = cursor.getString(cursor.getColumnIndexOrThrow(HistoryLog.MIME_TYPE));
 
-        if (ChatLog.Message.MimeType.GEOLOC_MESSAGE.equals(mimetype)
-                || ChatLog.Message.MimeType.TEXT_MESSAGE.equals(mimetype)) {
-            view = mInflater.inflate(R.layout.chat_view_item, parent, false);
-            view.setTag(new ViewHolderChatMessage(view, cursor));
+        switch (mimetype) {
+            case ChatLog.Message.MimeType.GEOLOC_MESSAGE:
+            case ChatLog.Message.MimeType.TEXT_MESSAGE:
+                view = mInflater.inflate(R.layout.chat_view_item, parent, false);
+                view.setTag(new ViewHolderChatMessage(view, cursor));
+                break;
 
-        } else if (ChatLog.Message.MimeType.GROUPCHAT_EVENT.equals(mimetype)) {
-            view = mInflater.inflate(R.layout.groupchat_event_view_item, parent, false);
-            view.setTag(new ViewHolder(view, cursor));
+            case ChatLog.Message.MimeType.GROUPCHAT_EVENT:
+                view = mInflater.inflate(R.layout.groupchat_event_view_item, parent, false);
+                view.setTag(new ViewHolder(view, cursor));
+                break;
 
-        } else {
-            view = mInflater.inflate(R.layout.filetransfer_view_item, parent, false);
-            view.setTag(new ViewHolderFileTransfer(view, cursor));
+            default:
+                view = mInflater.inflate(R.layout.filetransfer_view_item, parent, false);
+                view.setTag(new ViewHolderFileTransfer(view, cursor));
+                break;
         }
         return view;
     }

@@ -215,7 +215,9 @@ public class GroupChatList extends RcsFragmentActivity implements
                         sb.append(participant.toString());
                     }
                 }
-                holder.participantsText.setText(sb.toString());
+                if (sb != null) {
+                    holder.participantsText.setText(sb.toString());
+                }
             } catch (RcsPermissionDeniedException e) {
                 if (LogUtils.isActive) {
                     Log.e(LOGTAG, "getParticipants failed", e);

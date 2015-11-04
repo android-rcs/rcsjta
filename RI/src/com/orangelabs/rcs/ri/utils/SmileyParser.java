@@ -33,7 +33,7 @@ public class SmileyParser extends AbstractMessageParser {
     private Smileys mRes;
 
     public SmileyParser(String text, Smileys res) {
-        super(text, true, // smilies
+        super(text, true, // smileys
                 false, // acronyms
                 false, // formatting
                 false, // urls
