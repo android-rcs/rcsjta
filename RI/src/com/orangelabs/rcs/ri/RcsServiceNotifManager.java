@@ -26,8 +26,10 @@ import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.RcsServiceRegistrationListener;
 import com.gsma.services.rcs.capability.CapabilityService;
 
+import com.orangelabs.rcs.api.connection.utils.TimerUtils;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -58,18 +60,40 @@ public class RcsServiceNotifManager extends Service {
 
     private RcsService mServiceApi;
 
+    private Context mCtx;
+
+    private PendingIntent mCnxIntent;
+
+    private int mRetryCount;
+
+    private AlarmManager mAlarmManager;
+
     private static final String ACTION_VIEW_SETTINGS = "com.gsma.services.rcs.action.VIEW_SETTINGS";
+
+    private static final String ACTION_API_CONNECT = "com.orangelabs.rcs.ri.ACTION_API_CONNECT";
+
+    private static final long API_DELAY_TO_CONNECT = 5000;
+
+    private static final int MAX_RETRY_API_CNX = 4;
 
     @Override
     public void onCreate() {
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "Service started");
         }
+        mCtx = this;
+        mCnxIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_API_CONNECT), 0);
+        mAlarmManager = (AlarmManager) mCtx.getSystemService(Context.ALARM_SERVICE);
+
         notifyImsUnregistered(RcsServiceRegistration.ReasonCode.UNSPECIFIED);
 
         mStartupEventReceiver = new RcsServiceStartupListener();
         registerReceiver(mStartupEventReceiver, new IntentFilter(RcsService.ACTION_SERVICE_UP));
 
+        /* Register the broadcast receiver to pool periodically the API connections */
+        registerReceiver(new ReceiveTimerToReConnectApi(), new IntentFilter(ACTION_API_CONNECT));
+
+        mRetryCount = 0;
         connectToService(this);
     }
 
@@ -99,9 +123,18 @@ public class RcsServiceNotifManager extends Service {
             }
             mServiceApi = new CapabilityService(ctx, newRcsServiceListener());
             mServiceApi.connect();
+
         } catch (RcsServiceException e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "Cannot connect service API", e);
+            Log.w(LOGTAG, "Cannot connect service API: ".concat(e.getMessage()));
+            mRetryCount++;
+            if (mRetryCount < MAX_RETRY_API_CNX) {
+                TimerUtils.setExactTimer(mAlarmManager, System.currentTimeMillis()
+                        + API_DELAY_TO_CONNECT, mCnxIntent);
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "Set timer to retry API connection");
+                }
+            } else {
+                Log.e(LOGTAG, "Maximum attempts to connect API is reached");
             }
         }
     }
@@ -116,7 +149,12 @@ public class RcsServiceNotifManager extends Service {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG, "Service UP");
             }
-            connectToService(context);
+            mRetryCount = 0;
+            TimerUtils.setExactTimer(mAlarmManager, System.currentTimeMillis()
+                    + API_DELAY_TO_CONNECT, mCnxIntent);
+            if (LogUtils.isActive) {
+                Log.d(LOGTAG, "Set timer to connect API");
+            }
         }
     }
 
@@ -136,6 +174,7 @@ public class RcsServiceNotifManager extends Service {
                     Log.d(LOGTAG, "Service API connected");
                 }
                 try {
+                    mRetryCount = 0;
                     mServiceApi.addEventListener(mRcsRegistrationListener);
                     if (mServiceApi.isServiceRegistered()) {
                         if (LogUtils.isActive) {
@@ -232,5 +271,24 @@ public class RcsServiceNotifManager extends Service {
         notif.setContentTitle(title);
         notif.setContentText(message);
         return notif.build();
+    }
+
+    private class ReceiveTimerToReConnectApi extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            new Thread() {
+                public void run() {
+                    try {
+                        connectToService(mCtx);
+                    } catch (RuntimeException e) {
+                        /*
+                         * Intentionally catch runtime exceptions as else it will abruptly end the
+                         * thread and eventually bring the whole system down, which is not intended.
+                         */
+                        Log.e(LOGTAG, "Failed to pool connection to RCS service!", e);
+                    }
+                }
+            }.start();
+        }
     }
 }

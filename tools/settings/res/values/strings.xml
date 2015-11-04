@@ -33,7 +33,7 @@
     <string name="rcs_settings_label_albatros_20">Albatros 2.0</string>
     <string name="rcs_settings_label_blackbird_15">Blackbird 1.5</string>
     <string name="rcs_settings_label_unknown">Unknown</string>
-	<string name="rcs_settings_label_wait_cnx_start">Waiting end of initialization</string>
+	<string name="rcs_settings_label_wait_cnx_start">Initializing...</string>
 	
     <!-- About menu -->
     <string name="label_about_title">RCS Core stack</string>

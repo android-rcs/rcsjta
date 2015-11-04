@@ -162,7 +162,7 @@ public class InitiateImageSharing extends RcsActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (RESULT_OK != requestCode || SELECT_IMAGE != requestCode) {
+        if (RESULT_OK != resultCode || SELECT_IMAGE != requestCode) {
             return;
         }
         if (data != null && data.getData() != null) {
