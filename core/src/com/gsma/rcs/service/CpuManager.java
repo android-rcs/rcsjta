@@ -46,7 +46,7 @@ public class CpuManager {
     /**
      * Constructor
      * 
-     * @param rcsSettings
+     * @param rcsSettings The RCS settings accessor
      */
     public CpuManager(RcsSettings rcsSettings) {
         mRcsSettings = rcsSettings;
