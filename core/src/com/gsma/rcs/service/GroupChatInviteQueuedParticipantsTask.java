@@ -32,7 +32,7 @@ import java.util.Set;
 
 public class GroupChatInviteQueuedParticipantsTask implements Runnable {
 
-    private static final Set<ParticipantStatus> INVITE_QUEUED_STATUSES = new HashSet<ParticipantStatus>();
+    private static final Set<ParticipantStatus> INVITE_QUEUED_STATUSES = new HashSet<>();
     static {
         INVITE_QUEUED_STATUSES.add(ParticipantStatus.INVITE_QUEUED);
     }
@@ -59,7 +59,7 @@ public class GroupChatInviteQueuedParticipantsTask implements Runnable {
             GroupChatImpl groupChat = mChatService.getOrCreateGroupChat(mChatId);
             final Set<ContactId> participantsToBeInvited = groupChat.getParticipants(
                     INVITE_QUEUED_STATUSES).keySet();
-            if (participantsToBeInvited == null || participantsToBeInvited.size() == 0) {
+            if (participantsToBeInvited.size() == 0) {
                 return;
             }
 

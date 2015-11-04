@@ -511,7 +511,7 @@ public class RcsCoreService extends Service implements CoreListener {
     /**
      * Notify unregistration to API
      * 
-     * @param reasonCode
+     * @param reason reason Code
      */
     private void notifyUnRegistrationToApi(RcsServiceRegistration.ReasonCode reason) {
         if (mCapabilityApi != null) {

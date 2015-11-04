@@ -81,17 +81,12 @@ public class RcsServiceControlReceiver extends BroadcastReceiver {
              * For the 1rst release of the core stack this method is common to all services so we
              * don't check the service name
              */
-            if (RcsService.Build.API_VERSION != version) {
-                return false;
-            }
-            if (RcsService.Build.API_INCREMENTAL != increment) {
-                return false;
-            }
-            return true;
+            return RcsService.Build.API_VERSION == version
+                    && RcsService.Build.API_INCREMENTAL == increment;
         }
     };
 
-    private static final Map<String, IRcsCompatibility> sServiceCompatibilityMap = new HashMap<String, IRcsCompatibility>();
+    private static final Map<String, IRcsCompatibility> sServiceCompatibilityMap = new HashMap<>();
     static {
         sServiceCompatibilityMap.put(CapabilityService.class.getSimpleName(), sRcsCompatibility);
         sServiceCompatibilityMap.put(ContactService.class.getSimpleName(), sRcsCompatibility);
@@ -125,10 +120,7 @@ public class RcsServiceControlReceiver extends BroadcastReceiver {
     private boolean isDataRoamingEnabled(Context ctx) {
         ConnectivityManager cm = (ConnectivityManager) ctx
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (cm.getActiveNetworkInfo() == null) {
-            return false;
-        }
-        return cm.getActiveNetworkInfo().isRoaming();
+        return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isRoaming();
     }
 
     private boolean setActivationMode(Context ctx, boolean active) {
@@ -169,10 +161,8 @@ public class RcsServiceControlReceiver extends BroadcastReceiver {
         }
 
         IRcsCompatibility iRcsCompatibility = sServiceCompatibilityMap.get(serviceName);
-        if (iRcsCompatibility == null) {
-            return false;
-        }
-        return iRcsCompatibility.isCompatible(serviceName, codename, version, increment);
+        return iRcsCompatibility != null
+                && iRcsCompatibility.isCompatible(serviceName, codename, version, increment);
     }
 
     private class IntentProcessor extends Thread {
@@ -193,47 +183,63 @@ public class RcsServiceControlReceiver extends BroadcastReceiver {
         public void run() {
             String action = mIntent.getAction();
             synchronized (mResult) {
-                if (Intents.Service.ACTION_GET_ACTIVATION_MODE.equals(action)) {
-                    boolean activationMode = getActivationMode();
-                    mResult.putBoolean(Intents.Service.EXTRA_GET_ACTIVATION_MODE, activationMode);
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("isActivated() -> " + activationMode);
-                    }
-                } else if (Intents.Service.ACTION_GET_COMPATIBILITY.equals(action)) {
-                    String servicename = mIntent
-                            .getStringExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_SERVICE);
-                    String codename = mIntent
-                            .getStringExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_CODENAME);
-                    int version = mIntent.getIntExtra(
-                            Intents.Service.EXTRA_GET_COMPATIBILITY_VERSION, INVALID_EXTRA);
-                    int increment = mIntent.getIntExtra(
-                            Intents.Service.EXTRA_GET_COMPATIBILITY_INCREMENT, INVALID_EXTRA);
-                    boolean compatible = isCompatible(servicename, codename, version, increment);
-                    mResult.putBoolean(Intents.Service.EXTRA_GET_COMPATIBILITY_RESPONSE, compatible);
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("isCompatible(" + servicename + ") -> " + compatible);
-                    }
-                } else if (Intents.Service.ACTION_GET_SERVICE_STARTING_STATE.equals(action)) {
-                    Core core = Core.getInstance();
-                    boolean started = core != null && core.isStarted();
-                    mResult.putBoolean(Intents.Service.EXTRA_GET_SERVICE_STARTING_STATE, started);
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("isServiceStarted() -> " + started);
-                    }
-                } else if (Intents.Service.ACTION_GET_ACTIVATION_MODE_CHANGEABLE.equals(action)) {
-                    boolean activationModeChangeable = getActivationModeChangeable(mCtx);
-                    mResult.putBoolean(Intents.Service.EXTRA_GET_ACTIVATION_MODE_CHANGEABLE,
-                            activationModeChangeable);
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("isActivationModeChangeAble() -> " + activationModeChangeable);
-                    }
-                } else if (Intents.Service.ACTION_SET_ACTIVATION_MODE.equals(action)) {
-                    boolean active = mIntent.getBooleanExtra(
-                            Intents.Service.EXTRA_SET_ACTIVATION_MODE, true);
-                    boolean activationMode = setActivationMode(mCtx, active);
-                    mResult.putBoolean(Intents.Service.EXTRA_SET_ACTIVATION_MODE, activationMode);
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("setActivationMode(" + active + ") -> " + activationMode);
+                switch (action) {
+                    case Intents.Service.ACTION_GET_ACTIVATION_MODE:
+                        boolean activationMode = getActivationMode();
+                        mResult.putBoolean(Intents.Service.EXTRA_GET_ACTIVATION_MODE,
+                                activationMode);
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("isActivated() -> " + activationMode);
+                        }
+                        break;
+
+                    case Intents.Service.ACTION_GET_COMPATIBILITY:
+                        String serviceName = mIntent
+                                .getStringExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_SERVICE);
+                        String codename = mIntent
+                                .getStringExtra(Intents.Service.EXTRA_GET_COMPATIBILITY_CODENAME);
+                        int version = mIntent.getIntExtra(
+                                Intents.Service.EXTRA_GET_COMPATIBILITY_VERSION, INVALID_EXTRA);
+                        int increment = mIntent.getIntExtra(
+                                Intents.Service.EXTRA_GET_COMPATIBILITY_INCREMENT, INVALID_EXTRA);
+                        boolean compatible = isCompatible(serviceName, codename, version, increment);
+                        mResult.putBoolean(Intents.Service.EXTRA_GET_COMPATIBILITY_RESPONSE,
+                                compatible);
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("isCompatible(" + serviceName + ") -> " + compatible);
+                        }
+                        break;
+
+                    case Intents.Service.ACTION_GET_SERVICE_STARTING_STATE:
+                        Core core = Core.getInstance();
+                        boolean started = core != null && core.isStarted();
+                        mResult.putBoolean(Intents.Service.EXTRA_GET_SERVICE_STARTING_STATE,
+                                started);
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("isServiceStarted() -> " + started);
+                        }
+                        break;
+
+                    case Intents.Service.ACTION_GET_ACTIVATION_MODE_CHANGEABLE:
+                        boolean activationModeChangeable = getActivationModeChangeable(mCtx);
+                        mResult.putBoolean(Intents.Service.EXTRA_GET_ACTIVATION_MODE_CHANGEABLE,
+                                activationModeChangeable);
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("isActivationModeChangeAble() -> "
+                                    + activationModeChangeable);
+                        }
+                        break;
+
+                    case Intents.Service.ACTION_SET_ACTIVATION_MODE: {
+                        boolean active = mIntent.getBooleanExtra(
+                                Intents.Service.EXTRA_SET_ACTIVATION_MODE, true);
+                        activationMode = setActivationMode(mCtx, active);
+                        mResult.putBoolean(Intents.Service.EXTRA_SET_ACTIVATION_MODE,
+                                activationMode);
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("setActivationMode(" + active + ") -> " + activationMode);
+                        }
+                        break;
                     }
                 }
                 mHaveResult = true;
