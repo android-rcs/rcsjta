@@ -152,13 +152,7 @@ public class FileUtils {
             };
             takePersistableUriPermissionMethod.invoke(contentResolver, methodArgs);
 
-        } catch (NoSuchMethodException e) {
-            throw new RcsServiceException(e);
-
-        } catch (IllegalAccessException e) {
-            throw new RcsServiceException(e);
-
-        } catch (InvocationTargetException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             throw new RcsServiceException(e);
         }
     }

@@ -110,8 +110,8 @@ public class GroupChatDAO {
     /**
      * Gets instance of Group Chat from RCS provider
      * 
-     * @param ctx
-     * @param chatId
+     * @param ctx The context
+     * @param chatId The chat ID
      * @return instance or null if entry not found
      */
     public static GroupChatDAO getGroupChatDao(Context ctx, String chatId) {
@@ -156,8 +156,8 @@ public class GroupChatDAO {
     /**
      * Checks if chatId is a group chat Id
      * 
-     * @param chatId
-     * @param contact
+     * @param chatId the chat ID
+     * @param contact The contact
      * @return True chatId is a group chat Id
      */
     public static boolean isGroupChat(String chatId, ContactId contact) {

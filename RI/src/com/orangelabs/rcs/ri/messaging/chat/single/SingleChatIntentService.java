@@ -81,16 +81,20 @@ public class SingleChatIntentService extends IntentService {
             }
             return;
         }
-        if (OneToOneChatIntent.ACTION_NEW_ONE_TO_ONE_CHAT_MESSAGE.equals(action)) {
-            handleNewOneToOneChatMessage(intent, msgId);
+        switch (action) {
+            case OneToOneChatIntent.ACTION_NEW_ONE_TO_ONE_CHAT_MESSAGE:
+                handleNewOneToOneChatMessage(intent, msgId);
+                break;
 
-        } else if (OneToOneChatIntent.ACTION_MESSAGE_DELIVERY_EXPIRED.equals(action)) {
-            handleUndeliveredMessage(intent, msgId);
+            case OneToOneChatIntent.ACTION_MESSAGE_DELIVERY_EXPIRED:
+                handleUndeliveredMessage(intent, msgId);
+                break;
 
-        } else {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "Unknown action ".concat(action));
-            }
+            default:
+                if (LogUtils.isActive) {
+                    Log.e(LOGTAG, "Unknown action ".concat(action));
+                }
+                break;
         }
     }
 
@@ -105,7 +109,7 @@ public class SingleChatIntentService extends IntentService {
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "Undelivered message ID=" + msgId + " for contact " + contact);
         }
-        forwardUndeliveredMessage2UI(intent, contact, msgId);
+        forwardUndeliveredMessage2UI(intent, contact);
     }
 
     /**
@@ -152,23 +156,27 @@ public class SingleChatIntentService extends IntentService {
             String title = getString(R.string.title_recv_chat, displayName);
             String mimeType = message.getMimeType();
             String msg;
-            if (ChatLog.Message.MimeType.GEOLOC_MESSAGE.equals(mimeType)) {
-                msg = getString(R.string.label_geoloc_msg);
-            } else if (ChatLog.Message.MimeType.TEXT_MESSAGE.equals(mimeType)) {
-                msg = content;
-            } else {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "Discard message type '".concat(mimeType));
-                }
-                return;
+            switch (mimeType) {
+                case ChatLog.Message.MimeType.GEOLOC_MESSAGE:
+                    msg = getString(R.string.label_geoloc_msg);
+                    break;
+
+                case ChatLog.Message.MimeType.TEXT_MESSAGE:
+                    msg = content;
+                    break;
+
+                default:
+                    if (LogUtils.isActive) {
+                        Log.e(LOGTAG, "Discard message type '".concat(mimeType));
+                    }
+                    return;
             }
             Notification notif = buildNotification(contentIntent, title, msg);
             mChatPendingIntentManager.postNotification(uniqueId, notif);
         }
     }
 
-    private void forwardUndeliveredMessage2UI(Intent undeliveredMessageIntent, ContactId contact,
-            String msgId) {
+    private void forwardUndeliveredMessage2UI(Intent undeliveredMessageIntent, ContactId contact) {
         Intent intent = SingleChatView.forgeIntentOnStackEvent(this, contact,
                 undeliveredMessageIntent);
         Integer uniqueId = mChatPendingIntentManager.tryContinueChatConversation(intent,

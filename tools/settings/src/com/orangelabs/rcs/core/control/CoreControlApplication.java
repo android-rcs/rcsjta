@@ -38,7 +38,7 @@ public class CoreControlApplication extends Application {
     /**
      * Delay (ms) before starting connection manager.
      */
-    public static final long DELAY_FOR_STARTING_CNX_MANAGER = 5000;
+    public static final long DELAY_FOR_STARTING_CNX_MANAGER = 2000;
 
     public static boolean sCnxManagerStarted = false;
 

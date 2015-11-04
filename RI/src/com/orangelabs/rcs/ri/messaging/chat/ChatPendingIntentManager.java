@@ -130,10 +130,8 @@ public class ChatPendingIntentManager {
 
                             @Override
                             public boolean isConversationOnForeground(String chatId) {
-                                if (ChatView.sChatIdOnForeground == null) {
-                                    return false;
-                                }
-                                return chatId.equals(ChatView.sChatIdOnForeground.toString());
+                                return ChatView.sChatIdOnForeground != null
+                                        && chatId.equals(ChatView.sChatIdOnForeground.toString());
                             }
                         });
             }

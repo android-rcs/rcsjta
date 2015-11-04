@@ -5,15 +5,15 @@
     <string name="app_name">RCS RI</string>
     <string name="menu_about">About</string>
     <string name="label_ab_not_found">The address book is not found, launch it manually from your device home screen.</string>
-    <string name="label_wait_cnx_start">Initializing...</string>
+    <string name="label_wait_cnx_start">Initializing…</string>
 
     <!-- Commons -->
     <string name="label_service_not_available">The service is not available. Please retry later.</string>
-    <string name="label_confirm_close">Do you want to close the session on quit?</string>
+    <string name="label_confirm_close">Do you confirm ?\nThis will close the session.</string>
     <string name="menu_close_session">Quit</string>
     <string name="menu_clear_log">Clear log</string>
     <string name="label_file_size">Size: %1$s Kb</string>
-    <string name="label_command_in_progress">Command in progress...</string>
+    <string name="label_command_in_progress">Command in progress…</string>
     <string name="label_session_not_found">Session not found</string>
     <string name="label_api_not_compatible">API is not compatible</string>
     <string name="label_ok">OK</string>
@@ -169,7 +169,7 @@
     <string name="menu_add_participant">Add participant</string>
     <string name="label_chat_failed">Chat session failed (%1$s)</string>
     <string name="label_contacts">Contacts:</string>
-    <string name="label_contact_is_composing">%1$s is typing...</string>
+    <string name="label_contact_is_composing">%1$s is typing…</string>
     <string name="label_select_contacts">Select contacts</string>
     <string name="label_chat_initiation_canceled">Chat session has been canceled</string>
     <string name="label_select_quicktext">Quick text</string>
@@ -252,7 +252,7 @@
     <string name="menu_initiate_geoloc_sharing">Initiate geoloc sharing</string>
     <string name="title_geoloc_sharing">Geoloc sharing</string>
     <string name="label_gsh_state_changed">GSH state %1$s (%2$s)</string>
-    <string name="label_gsh_default_label"></string>
+    <string name="label_gsh_default_label"/>
     <string name="label_gsh_default_latitude">0.0</string>
     <string name="label_gsh_default_longitude">0.0</string>
     <string name="label_gsh_default_accuracy">0</string>
@@ -401,7 +401,7 @@
         <item>DISPLAYED</item>
     </string-array>
     <string-array name="file_transfer_reason_codes">
-        <item></item>
+        <item/>
         <item>ABORTED_BY_USER</item>
         <item>ABORTED_BY_REMOTE</item>
         <item>ABORTED_BY_SYSTEM</item>
@@ -444,7 +444,7 @@
         <item>FAILED</item>
     </string-array>
     <string-array name="delivery_reason_codes">
-        <item></item>
+        <item/>
         <item>FAILED_DELIVERY</item>
         <item>FAILED_DISPLAY</item>
     </string-array>
@@ -458,7 +458,7 @@
         <item>REJECTED</item>
     </string-array>
     <string-array name="group_chat_reason_codes">
-        <item></item>
+        <item/>
         <item>ABORTED_BY_USER</item>
         <item>ABORTED_BY_REMOTE</item>
         <item>ABORTED_BY_INACTIVITY</item>
@@ -482,7 +482,7 @@
         <item>DISPLAYED</item>
     </string-array>
     <string-array name="message_reason_codes">
-        <item></item>
+        <item/>
         <item>FAILED_SEND</item>
         <item>FAILED_DELIVERY</item>
         <item>FAILED_DISPLAY</item>
@@ -500,7 +500,7 @@
         <item>ACCEPTING</item>
     </string-array>
     <string-array name="ish_reason_codes">
-        <item></item>
+        <item/>
         <item>ABORTED_BY_USER</item>
         <item>ABORTED_BY_REMOTE</item>
         <item>ABORTED_BY_SYSTEM</item>
@@ -528,7 +528,7 @@
         <item>ACCEPTING</item>
     </string-array>
     <string-array name="vsh_reason_codes">
-        <item></item>
+        <item/>
         <item>ABORTED_BY_USER</item>
         <item>ABORTED_BY_REMOTE</item>
         <item>ABORTED_BY_SYSTEM</item>
@@ -554,7 +554,7 @@
         <item>ACCEPTING</item>
     </string-array>
     <string-array name="gsh_reason_codes">
-        <item></item>
+        <item/>
         <item>ABORTED_BY_USER</item>
         <item>ABORTED_BY_REMOTE</item>
         <item>ABORTED_BY_SYSTEM</item>
@@ -579,7 +579,7 @@
         <item>ACCEPTING</item>
     </string-array>
     <string-array name="mms_reason_codes">
-        <item></item>
+        <item/>
         <item>ABORTED_BY_USER</item>
         <item>ABORTED_BY_REMOTE</item>
         <item>ABORTED_BY_SYSTEM</item>

@@ -50,7 +50,7 @@ public class RiApplication extends Application {
     /**
      * Delay (ms) before starting connection manager.
      */
-    /* package private */static final long DELAY_FOR_STARTING_CNX_MANAGER = 2500;
+    /* package private */static final long DELAY_FOR_STARTING_CNX_MANAGER = 2000;
 
     private static Context mContext;
 
@@ -220,7 +220,7 @@ public class RiApplication extends Application {
     /**
      * Convert to lower case and readable strings
      * 
-     * @param strings
+     * @param strings array of strings to be converted
      * @return converted strings
      */
     private String[] convertForUI(String[] strings) {

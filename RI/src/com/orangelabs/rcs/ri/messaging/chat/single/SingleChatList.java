@@ -83,12 +83,10 @@ public class SingleChatList extends RcsFragmentActivity implements
     /**
      * One to one chat are raws where chat_id equals contact.
      */
-    private static final String WHERE_CLAUSE_GROUPED = new StringBuilder(Message.CHAT_ID)
-            .append("=").append(Message.CONTACT).append(" GROUP BY ").append(Message.CONTACT)
-            .toString();
+    private static final String WHERE_CLAUSE_GROUPED = Message.CHAT_ID + "=" + Message.CONTACT
+            + " GROUP BY " + Message.CONTACT;
 
-    private static final String SORT_ORDER = new StringBuilder(Message.TIMESTAMP).append(" DESC")
-            .toString();
+    private static final String SORT_ORDER = Message.TIMESTAMP + " DESC";
 
     private ListView mListView;
 
