@@ -23,6 +23,7 @@ import com.gsma.services.rcs.RcsServiceControl;
 
 import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 
 import android.app.Application;
 import android.content.Context;
@@ -30,6 +31,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -146,6 +148,8 @@ public class RiApplication extends Application {
 
     private static RcsServiceControl mRcsServiceControl;
 
+    private static final String LOGTAG = LogUtils.getTag(RiApplication.class.getSimpleName());
+
     /**
      * Gets direction
      * 
@@ -202,8 +206,13 @@ public class RiApplication extends Application {
         mainThreadHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                cnxManager.start();
-                sCnxManagerStarted = true;
+                try {
+                    cnxManager.start();
+                    sCnxManagerStarted = true;
+
+                } catch (RuntimeException e) {
+                    Log.e(LOGTAG, "Failed to start connection manager!", e);
+                }
             }
         }, DELAY_FOR_STARTING_CNX_MANAGER);
     }

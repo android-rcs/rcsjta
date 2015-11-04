@@ -5,7 +5,7 @@
     <string name="app_name">RCS RI</string>
     <string name="menu_about">About</string>
     <string name="label_ab_not_found">The address book is not found, launch it manually from your device home screen.</string>
-    <string name="label_wait_cnx_start">Waiting end of initialization</string>
+    <string name="label_wait_cnx_start">Initializing...</string>
 
     <!-- Commons -->
     <string name="label_service_not_available">The service is not available. Please retry later.</string>

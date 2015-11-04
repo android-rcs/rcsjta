@@ -321,9 +321,6 @@
             android:name=".messaging.geoloc.DisplayGeoloc"
             android:label="@string/title_display_geoloc" />
         <activity
-            android:name=".messaging.geoloc.ShowUsInMap"
-            android:label="@string/menu_showus_map" />
-        <activity
             android:name="com.orangelabs.rcs.ri.messaging.chat.group.SendGroupFile"
             android:icon="@drawable/ri_quick_ft_icon"
             android:label="@string/menu_transfer_file" />
