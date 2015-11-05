@@ -79,7 +79,7 @@ import com.orangelabs.rcs.api.connection.R;
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setMessage(msg);
-        builder.setTitle(R.string.title_msg);
+        builder.setTitle((e == null) ? R.string.title_msg : R.string.error_exception);
         builder.setCancelable(false);
         builder.setPositiveButton(R.string.label_ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
@@ -97,7 +97,7 @@ import com.orangelabs.rcs.api.connection.R;
      * @param locker a locker to only execute once
      */
     public static void showExceptionThenExit(final Activity activity, Exception e, LockAccess locker) {
-        showMessageThenExit(activity, null, locker, e);
+        showMessageThenExit(activity, e.getMessage(), locker, e);
     }
 
     /**
