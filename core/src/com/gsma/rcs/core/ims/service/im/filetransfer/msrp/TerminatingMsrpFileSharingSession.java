@@ -485,7 +485,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
         if (sLogger.isActivated()) {
             sLogger.info("Data transfer aborted");
         }
-        if (!isFileTransfered()) {
+        if (!isFileTransferred()) {
             deleteFile();
         }
     }
@@ -513,7 +513,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                 sLogger.debug("MSRP session has been closed");
             }
         }
-        if (!isFileTransfered()) {
+        if (!isFileTransferred()) {
             deleteFile();
         }
     }

@@ -195,7 +195,7 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
 
             removeSession();
 
-            if (isFileTransfered()) {
+            if (isFileTransferred()) {
                 return;
             }
             ContactId contact = getRemoteContact();
@@ -244,7 +244,7 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
          * and perform the clean up activities of the session. We will broadcast the state as
          * ABORTED and ABORTED_BY_REMOTE only if the file was not received successfully.
          */
-        if (!isFileTransfered()) {
+        if (!isFileTransferred()) {
             for (ImsSessionListener listener : getListeners()) {
                 listener.onSessionAborted(contact, TerminationReason.TERMINATION_BY_REMOTE);
             }
