@@ -48,9 +48,6 @@ import java.util.Map;
  */
 public abstract class FileSharingSession extends ImsServiceSession {
 
-    /**
-     * Contribution ID
-     */
     private String mContributionId;
 
     /**
@@ -58,36 +55,18 @@ public abstract class FileSharingSession extends ImsServiceSession {
      */
     private MmContent mContent;
 
-    /**
-     * File transfered
-     */
-    private boolean mFileTransfered = false;
+    private boolean mFileTransferred = false;
 
-    /**
-     * Participants
-     */
     protected Map<ContactId, ParticipantStatus> mParticipants = new HashMap<ContactId, ParticipantStatus>();
 
-    /**
-     * Fileicon
-     */
     private MmContent mFileIcon;
 
-    /**
-     * File transfer paused
-     */
     private boolean mFileTransferPaused = false;
 
-    /**
-     * File transfer Id
-     */
     private String mFiletransferId;
 
     protected final ImdnManager mImdnManager;
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger
             .getLogger(FileSharingSession.class.getSimpleName());
 
@@ -177,20 +156,20 @@ public abstract class FileSharingSession extends ImsServiceSession {
     }
 
     /**
-     * File has been transfered
+     * File has been transferred
      */
     public void fileTransfered() {
-        mFileTransfered = true;
+        mFileTransferred = true;
 
     }
 
     /**
-     * Is file transfered
+     * Is file transferred
      * 
      * @return Boolean
      */
-    public boolean isFileTransfered() {
-        return mFileTransfered;
+    public boolean isFileTransferred() {
+        return mFileTransferred;
     }
 
     /**

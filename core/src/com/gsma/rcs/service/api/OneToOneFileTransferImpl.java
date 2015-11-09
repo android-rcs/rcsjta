@@ -123,11 +123,10 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                 if (isSessionPaused(session)) {
                     return State.PAUSED;
                 }
-
                 return State.STARTED;
             }
         } else if (session instanceof ImsFileSharingSession) {
-            if (session.isFileTransfered()) {
+            if (session.isFileTransferred()) {
                 return State.TRANSFERRED;
             }
             SipDialogPath dialogPath = session.getDialogPath();
@@ -176,19 +175,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
 
     @Override
     public String getTransferId() throws RemoteException {
-        try {
-            return mFileTransferId;
-
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
-
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
+        return mFileTransferId;
     }
 
     @Override
@@ -490,14 +477,14 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                                     "Cannot accept transfer with fileTransferId '")
                                     .append(mFileTransferId).append("': wrong direction")
                                     .toString());
-
+                            return;
                         }
                         if (ongoingSession.isSessionAccepted()) {
                             sLogger.error(new StringBuilder(
                                     "Cannot accept transfer with fileTransferId '")
                                     .append(mFileTransferId).append("': already accepted")
                                     .toString());
-
+                            return;
                         }
                         ongoingSession.acceptSession();
                         return;
@@ -520,11 +507,13 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                         sLogger.error(new StringBuilder(
                                 "Cannot accept transfer with fileTransferId '")
                                 .append(mFileTransferId).append("': already accepted").toString());
+                        return;
                     }
                     if (download.getFileExpiration() < System.currentTimeMillis()) {
                         sLogger.error(new StringBuilder(
                                 "Cannot accept transfer with fileTransferId '")
                                 .append(mFileTransferId).append("': file has expired").toString());
+                        return;
                     }
                     FileSharingSession session = new DownloadFromAcceptFileSharingSession(
                             mImService, ContentManager.createMmContent(resume.getFile(),
@@ -563,7 +552,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                                     "Cannot reject transfer with fileTransferId '")
                                     .append(mFileTransferId).append("': wrong direction")
                                     .toString());
-
+                            return;
                         }
                         State state = mPersistentStorage.getState();
                         switch (state) {
@@ -629,7 +618,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                                 return;
                         }
                     }
-                    if (session.isFileTransfered()) {
+                    if (session.isFileTransferred()) {
                         /* File already transferred and session automatically closed after transfer */
                         sLogger.error("Cannot abort as file is already transferred!");
                         return;
@@ -672,10 +661,14 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
 
     @Override
     public boolean isAllowedToPauseTransfer() throws RemoteException {
+        return isAllowedToPauseTransfer(false);
+    }
+
+    private boolean isAllowedToPauseTransfer(boolean internalRequest) {
         try {
             FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
             if (session == null) {
-                if (sLogger.isActivated()) {
+                if (internalRequest && sLogger.isActivated()) {
                     sLogger.debug(new StringBuilder("Cannot pause transfer with file transfer Id '")
                             .append(mFileTransferId)
                             .append("' as there is no ongoing session corresponding to the fileTransferId.")
@@ -684,7 +677,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                 return false;
             }
             if (!session.isHttpTransfer()) {
-                if (sLogger.isActivated()) {
+                if (internalRequest && sLogger.isActivated()) {
                     sLogger.debug(new StringBuilder("Cannot pause transfer with file transfer Id '")
                             .append(mFileTransferId).append("' as it is not a HTTP File transfer.")
                             .toString());
@@ -693,7 +686,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             }
             State state = getRcsState(session);
             if (State.STARTED != state) {
-                if (sLogger.isActivated()) {
+                if (internalRequest && sLogger.isActivated()) {
                     sLogger.debug(new StringBuilder("Cannot pause transfer with file transfer Id '")
                             .append(mFileTransferId).append("' as it is in state ").append(state)
                             .toString());
@@ -701,7 +694,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                 return false;
             }
             if (mPersistentStorage.getFileTransferProgress() == mPersistentStorage.getFileSize()) {
-                if (sLogger.isActivated()) {
+                if (internalRequest && sLogger.isActivated()) {
                     sLogger.debug(new StringBuilder("Cannot pause transfer with file transfer Id '")
                             .append(mFileTransferId).append("' as full content is transferred")
                             .toString());
@@ -724,7 +717,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
 
     @Override
     public void pauseTransfer() throws RemoteException {
-        if (!isAllowedToPauseTransfer()) {
+        if (!isAllowedToPauseTransfer(true)) {
             throw new ServerApiPermissionDeniedException("Not allowed to pause transfer.");
         }
         mImService.scheduleImOperation(new Runnable() {
@@ -773,6 +766,10 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
 
     @Override
     public boolean isAllowedToResumeTransfer() throws RemoteException {
+        return isAllowedToResumeTransfer(false);
+    }
+
+    private boolean isAllowedToResumeTransfer(boolean internalRequest) throws RemoteException {
         try {
             ReasonCode reasonCode;
             FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
@@ -782,7 +779,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                 reasonCode = mPersistentStorage.getReasonCode();
             }
             if (ReasonCode.PAUSED_BY_USER != reasonCode) {
-                if (sLogger.isActivated()) {
+                if (internalRequest && sLogger.isActivated()) {
                     sLogger.debug(new StringBuilder(
                             "Cannot resume transfer with file transfer Id '")
                             .append(mFileTransferId).append("' as it is ").append(reasonCode)
@@ -791,7 +788,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                 return false;
             }
             if (!ServerApiUtils.isImsConnected()) {
-                if (sLogger.isActivated()) {
+                if (internalRequest && sLogger.isActivated()) {
                     sLogger.debug(new StringBuilder(
                             "Cannot resume transfer with file transfer Id '")
                             .append(mFileTransferId)
@@ -801,7 +798,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             }
             if (session == null) {
                 if (!mImService.isFileTransferSessionAvailable()) {
-                    if (sLogger.isActivated()) {
+                    if (internalRequest && sLogger.isActivated()) {
                         sLogger.debug(new StringBuilder(
                                 "Cannot resume transfer with file transfer Id '")
                                 .append(mFileTransferId)
@@ -812,7 +809,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                 }
                 if (Direction.OUTGOING == mPersistentStorage.getDirection()) {
                     if (mImService.isMaxConcurrentOutgoingFileTransfersReached()) {
-                        if (sLogger.isActivated()) {
+                        if (internalRequest && sLogger.isActivated()) {
                             sLogger.debug(new StringBuilder(
                                     "Cannot resume transfer with file transfer Id '")
                                     .append(mFileTransferId)
@@ -839,7 +836,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
 
     @Override
     public void resumeTransfer() throws RemoteException {
-        if (!isAllowedToResumeTransfer()) {
+        if (!isAllowedToResumeTransfer(true)) {
             throw new ServerApiPermissionDeniedException("Not allowed to resume transfer.");
         }
         mImService.scheduleImOperation(new Runnable() {
@@ -899,10 +896,14 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
 
     @Override
     public boolean isAllowedToResendTransfer() throws RemoteException {
+        return isAllowedToResendTransfer(false);
+    }
+
+    private boolean isAllowedToResendTransfer(boolean internalRequest) throws RemoteException {
         try {
             FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
             if (session != null) {
-                if (sLogger.isActivated()) {
+                if (internalRequest && sLogger.isActivated()) {
                     sLogger.debug(new StringBuilder("Cannot resend transfer with fileTransferId ")
                             .append(mFileTransferId)
                             .append(" as there is already an ongoing session corresponding to this fileTransferId")
@@ -925,7 +926,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                         case REJECTED_BY_SYSTEM:
                             return true;
                         default:
-                            if (sLogger.isActivated()) {
+                            if (internalRequest && sLogger.isActivated()) {
                                 sLogger.debug(new StringBuilder(
                                         "Cannot resend transfer with fileTransferId ")
                                         .append(mFileTransferId).append(" as reasonCode=")
@@ -939,7 +940,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                         case ABORTED_BY_USER:
                             return true;
                         default:
-                            if (sLogger.isActivated()) {
+                            if (internalRequest && sLogger.isActivated()) {
                                 sLogger.debug(new StringBuilder(
                                         "Cannot resend transfer with fileTransferId ")
                                         .append(mFileTransferId).append(" as reasonCode=")
@@ -948,7 +949,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                             return false;
                     }
                 default:
-                    if (sLogger.isActivated()) {
+                    if (internalRequest && sLogger.isActivated()) {
                         sLogger.debug(new StringBuilder(
                                 "Cannot resend transfer with fileTransferId ")
                                 .append(mFileTransferId).append(" as state=").append(rcsState)
@@ -970,7 +971,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
 
     @Override
     public void resendTransfer() throws RemoteException {
-        if (!isAllowedToResendTransfer()) {
+        if (!isAllowedToResendTransfer(true)) {
             throw new ServerApiPermissionDeniedException(new StringBuilder(
                     "Unable to resend file with fileTransferId ").append(mFileTransferId)
                     .toString());
