@@ -40,7 +40,7 @@ import java.util.Set;
  */
 public class OneToOneChatEventBroadcaster implements IOneToOneChatEventBroadcaster {
 
-    private final RemoteCallbackList<IOneToOneChatListener> mOneToOneChatListeners = new RemoteCallbackList<IOneToOneChatListener>();
+    private final RemoteCallbackList<IOneToOneChatListener> mOneToOneChatListeners = new RemoteCallbackList<>();
 
     private final Logger logger = Logger.getLogger(getClass().getName());
 
@@ -98,7 +98,7 @@ public class OneToOneChatEventBroadcaster implements IOneToOneChatEventBroadcast
     }
 
     public void broadcastMessagesDeleted(ContactId contact, Set<String> msgIds) {
-        List<String> ids = new ArrayList<String>(msgIds);
+        List<String> ids = new ArrayList<>(msgIds);
         final int N = mOneToOneChatListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {

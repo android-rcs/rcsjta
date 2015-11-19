@@ -40,7 +40,7 @@ import java.util.Set;
  */
 public class OneToOneFileTransferBroadcaster implements IOneToOneFileTransferBroadcaster {
 
-    private final RemoteCallbackList<IOneToOneFileTransferListener> mOneToOneFileTransferListeners = new RemoteCallbackList<IOneToOneFileTransferListener>();
+    private final RemoteCallbackList<IOneToOneFileTransferListener> mOneToOneFileTransferListeners = new RemoteCallbackList<>();
 
     private final Logger logger = Logger.getLogger(getClass().getName());
 
@@ -106,7 +106,7 @@ public class OneToOneFileTransferBroadcaster implements IOneToOneFileTransferBro
     }
 
     public void broadcastFileTransferDeleted(ContactId contact, Set<String> filetransferIds) {
-        List<String> ids = new ArrayList<String>(filetransferIds);
+        List<String> ids = new ArrayList<>(filetransferIds);
         final int N = mOneToOneFileTransferListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {

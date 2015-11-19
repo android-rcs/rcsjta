@@ -262,6 +262,8 @@ public class RcsServiceControlReceiver extends BroadcastReceiver {
         IntentProcessor intentProcessor = new IntentProcessor(ctx, intent, result);
         intentProcessor.start();
         long endTime = System.currentTimeMillis() + INTENT_RESPONSE_TIMEOUT;
+        // TODO Such synchronization has little effect, since different threads usually will have
+        // different values for the local variable or parameter.
         synchronized (result) {
             while (!intentProcessor.mHaveResult) {
                 long delay = endTime - System.currentTimeMillis();

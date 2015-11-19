@@ -40,7 +40,7 @@ import java.util.Set;
  */
 public class GeolocSharingEventBroadcaster implements IGeolocSharingEventBroadcaster {
 
-    private final RemoteCallbackList<IGeolocSharingListener> mGeolocSharingListeners = new RemoteCallbackList<IGeolocSharingListener>();
+    private final RemoteCallbackList<IGeolocSharingListener> mGeolocSharingListeners = new RemoteCallbackList<>();
 
     private final Logger logger = Logger.getLogger(getClass().getName());
 
@@ -65,6 +65,9 @@ public class GeolocSharingEventBroadcaster implements IGeolocSharingEventBroadca
                 mGeolocSharingListeners.getBroadcastItem(i).onStateChanged(contact, sharingId,
                         rcsState, rcsReasonCode);
             } catch (RemoteException e) {
+                if (logger.isActivated()) {
+                    logger.error("Can't notify listener", e);
+                }
             }
         }
         mGeolocSharingListeners.finishBroadcast();
@@ -95,12 +98,15 @@ public class GeolocSharingEventBroadcaster implements IGeolocSharingEventBroadca
     }
 
     public void broadcastDeleted(ContactId contact, Set<String> sharingIds) {
-        List<String> ids = new ArrayList<String>(sharingIds);
+        List<String> ids = new ArrayList<>(sharingIds);
         final int N = mGeolocSharingListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {
                 mGeolocSharingListeners.getBroadcastItem(i).onDeleted(contact, ids);
             } catch (RemoteException e) {
+                if (logger.isActivated()) {
+                    logger.error("Can't notify listener", e);
+                }
             }
         }
         mGeolocSharingListeners.finishBroadcast();

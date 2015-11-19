@@ -91,8 +91,8 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      * Constructor
      * 
      * @param contactManager Contacts manager
-     * @param rcsSettings
-     * @param capabilityService
+     * @param rcsSettings RCS settings accessor
+     * @param capabilityService Capacility service
      */
     public CapabilityServiceImpl(CapabilityService capabilityService,
             ContactManager contactManager, RcsSettings rcsSettings) {

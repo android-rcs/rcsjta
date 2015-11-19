@@ -95,8 +95,8 @@ public abstract class DequeueTask implements Runnable {
     /**
      * Check if it is possible to dequeue and transfer one-one file
      * 
-     * @param contact
-     * @param fileTransferService
+     * @param contact Remote contact
+     * @param fileTransferService File transfer service
      * @return boolean
      */
     protected boolean isAllowedToDequeueOneToOneFileTransfer(ContactId contact,
@@ -124,8 +124,8 @@ public abstract class DequeueTask implements Runnable {
     /**
      * Check if dequeueing and sending of 1-1 chat messages to specified contact is allowed
      * 
-     * @param contact
-     * @return
+     * @param contact Remote contact
+     * @return boolean
      */
     protected boolean isAllowedToDequeueOneToOneChatMessage(ContactId contact) {
         Capabilities remoteCapabilities = mContactManager.getContactCapabilities(contact);
@@ -143,7 +143,7 @@ public abstract class DequeueTask implements Runnable {
     /**
      * Check if dequeueing and sending of 1-1 chat messages to specified contact is possible
      * 
-     * @param contact
+     * @param contact Remote contact
      * @return boolean
      */
     protected boolean isPossibleToDequeueOneToOneChatMessage(ContactId contact) {
@@ -162,7 +162,7 @@ public abstract class DequeueTask implements Runnable {
     /**
      * Check if it is possible to dequeue group chat messages and group file transfers
      * 
-     * @param chatId
+     * @param chatId Chat ID
      * @return boolean
      */
     protected boolean isPossibleToDequeueGroupChatMessagesAndGroupFileTransfers(String chatId) {
@@ -237,9 +237,9 @@ public abstract class DequeueTask implements Runnable {
     /**
      * Check if it is possible to dequeue one-one file transfer
      * 
-     * @param contact
-     * @param file
-     * @param size
+     * @param contact Remote contact
+     * @param file file Uri
+     * @param size file size
      * @return boolean
      */
     protected boolean isPossibleToDequeueOneToOneFileTransfer(ContactId contact, Uri file, long size) {
@@ -252,18 +252,15 @@ public abstract class DequeueTask implements Runnable {
             }
             return false;
         }
-        if (!isPossibleToDequeueFileTransfer(file, size)) {
-            return false;
-        }
-        return true;
+        return isPossibleToDequeueFileTransfer(file, size);
     }
 
     /**
      * Check if it is possible to dequeue group file transfer
      * 
-     * @param chatId
-     * @param file
-     * @param size
+     * @param chatId Chat ID
+     * @param file file Uri
+     * @param size file size
      * @return boolean
      */
     protected boolean isPossibleToDequeueGroupFileTransfer(String chatId, Uri file, long size) {
@@ -285,9 +282,9 @@ public abstract class DequeueTask implements Runnable {
     /**
      * Set one-one chat message as failed
      * 
-     * @param contact
-     * @param msgId
-     * @param mimeType
+     * @param contact Remote contact
+     * @param msgId message ID
+     * @param mimeType mime type
      */
     protected void setOneToOneChatMessageAsFailedDequeue(ContactId contact, String msgId,
             String mimeType) {
@@ -298,9 +295,9 @@ public abstract class DequeueTask implements Runnable {
     /**
      * Set group chat message as failed
      * 
-     * @param chatId
-     * @param msgId
-     * @param mimeType
+     * @param chatId Chat ID
+     * @param msgId Message ID
+     * @param mimeType mime type
      */
     protected void setGroupChatMessageAsFailedDequeue(String chatId, String msgId, String mimeType) {
         mChatService.setGroupChatMessageStatusAndReasonCode(msgId, mimeType, chatId, Status.FAILED,
@@ -310,8 +307,8 @@ public abstract class DequeueTask implements Runnable {
     /**
      * Set one-one file transfer as failed
      * 
-     * @param contact
-     * @param fileTransferId
+     * @param contact Remote contact
+     * @param fileTransferId File transfer ID
      */
     protected void setOneToOneFileTransferAsFailedDequeue(ContactId contact, String fileTransferId) {
         mFileTransferService.setOneToOneFileTransferStateAndReasonCode(fileTransferId, contact,
@@ -321,8 +318,8 @@ public abstract class DequeueTask implements Runnable {
     /**
      * Set group file transfer as failed
      * 
-     * @param chatId
-     * @param fileTransferId
+     * @param chatId Chat ID
+     * @param fileTransferId File transfer ID
      */
     protected void setGroupFileTransferAsFailedDequeue(String chatId, String fileTransferId) {
         mFileTransferService.setGroupFileTransferStateAndReasonCode(fileTransferId, chatId,

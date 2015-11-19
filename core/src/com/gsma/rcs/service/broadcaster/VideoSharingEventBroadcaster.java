@@ -40,7 +40,7 @@ import java.util.Set;
  */
 public class VideoSharingEventBroadcaster implements IVideoSharingEventBroadcaster {
 
-    private final RemoteCallbackList<IVideoSharingListener> mVideoSharingListeners = new RemoteCallbackList<IVideoSharingListener>();
+    private final RemoteCallbackList<IVideoSharingListener> mVideoSharingListeners = new RemoteCallbackList<>();
 
     private final Logger logger = Logger.getLogger(getClass().getName());
 
@@ -82,7 +82,7 @@ public class VideoSharingEventBroadcaster implements IVideoSharingEventBroadcast
     }
 
     public void broadcastDeleted(ContactId contact, Set<String> sharingIds) {
-        List<String> ids = new ArrayList<String>(sharingIds);
+        List<String> ids = new ArrayList<>(sharingIds);
         final int N = mVideoSharingListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {

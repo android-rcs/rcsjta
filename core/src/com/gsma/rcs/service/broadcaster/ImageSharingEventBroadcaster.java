@@ -40,7 +40,7 @@ import java.util.Set;
  */
 public class ImageSharingEventBroadcaster implements IImageSharingEventBroadcaster {
 
-    private final RemoteCallbackList<IImageSharingListener> mImageSharingListeners = new RemoteCallbackList<IImageSharingListener>();
+    private final RemoteCallbackList<IImageSharingListener> mImageSharingListeners = new RemoteCallbackList<>();
 
     private final Logger logger = Logger.getLogger(getClass().getName());
 
@@ -98,12 +98,15 @@ public class ImageSharingEventBroadcaster implements IImageSharingEventBroadcast
     }
 
     public void broadcastDeleted(ContactId contact, Set<String> sharingIds) {
-        List<String> ids = new ArrayList<String>(sharingIds);
+        List<String> ids = new ArrayList<>(sharingIds);
         final int N = mImageSharingListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {
                 mImageSharingListeners.getBroadcastItem(i).onDeleted(contact, ids);
             } catch (RemoteException e) {
+                if (logger.isActivated()) {
+                    logger.error("Can't notify listener", e);
+                }
             }
         }
         mImageSharingListeners.finishBroadcast();

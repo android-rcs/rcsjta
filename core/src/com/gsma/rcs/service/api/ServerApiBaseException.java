@@ -50,8 +50,8 @@ public abstract class ServerApiBaseException extends IllegalStateException {
      * reason for the thrown exception
      * </p>
      * 
-     * @param message
-     * @return
+     * @param message message
+     * @return String
      */
     private static String validateExceptionMessage(String message) {
         if (TextUtils.isEmpty(message)) {

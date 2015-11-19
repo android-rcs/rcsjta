@@ -60,18 +60,15 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 
     private final InstantMessagingService mImService;
 
-    private final Map<String, IFileUpload> mFileUploadCache = new HashMap<String, IFileUpload>();
+    private final Map<String, IFileUpload> mFileUploadCache = new HashMap<>();
 
-    /**
-     * The sLogger
-     */
     private static final Logger sLogger = Logger.getLogger(FileUploadServiceImpl.class
             .getSimpleName());
 
     /**
      * Lock used for synchronization
      */
-    private Object lock = new Object();
+    private final Object lock = new Object();
 
     private final RcsSettings mRcsSettings;
 
@@ -79,7 +76,7 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      * Constructor
      * 
      * @param imService InstantMessagingService
-     * @param rcsSettings
+     * @param rcsSettings RCS settings accessor
      */
     public FileUploadServiceImpl(InstantMessagingService imService, RcsSettings rcsSettings) {
         if (sLogger.isActivated()) {
@@ -103,7 +100,6 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      * Add a file upload in the list
      * 
      * @param filUpload File upload
-     * @throws RemoteException
      */
     private void addFileUpload(String sessionId, FileUploadImpl filUpload) {
         if (sLogger.isActivated()) {
@@ -115,7 +111,7 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
     /**
      * Remove a file upload from the list
      * 
-     * @param uploadId Upload ID
+     * @param sessionId Upload ID
      */
     /* package private */void removeFileUpload(String sessionId) {
         if (sLogger.isActivated()) {
@@ -271,7 +267,7 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
             sLogger.info("Get file upload sessions");
         }
         try {
-            List<IBinder> fileUploads = new ArrayList<IBinder>(mFileUploadCache.size());
+            List<IBinder> fileUploads = new ArrayList<>(mFileUploadCache.size());
             for (IFileUpload fileUpload : mFileUploadCache.values()) {
                 fileUploads.add(fileUpload.asBinder());
             }
@@ -292,7 +288,7 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
     /**
      * Returns a current file upload from its unique ID
      * 
-     * @param uploadId
+     * @param uploadId session ID
      * @return File upload
      * @throws RemoteException
      */

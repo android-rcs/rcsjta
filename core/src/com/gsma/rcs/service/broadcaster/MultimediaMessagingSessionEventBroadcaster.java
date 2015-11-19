@@ -37,7 +37,7 @@ import android.os.RemoteException;
 public class MultimediaMessagingSessionEventBroadcaster implements
         IMultimediaMessagingSessionEventBroadcaster {
 
-    private final RemoteCallbackList<IMultimediaMessagingSessionListener> mMultimediaMessagingListeners = new RemoteCallbackList<IMultimediaMessagingSessionListener>();
+    private final RemoteCallbackList<IMultimediaMessagingSessionListener> mMultimediaMessagingListeners = new RemoteCallbackList<>();
 
     private final Logger logger = Logger.getLogger(getClass().getName());
 

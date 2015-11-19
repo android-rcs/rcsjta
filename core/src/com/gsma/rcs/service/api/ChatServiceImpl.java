@@ -93,13 +93,10 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     private final ContactManager mContactManager;
 
-    private final Map<ContactId, OneToOneChatImpl> mOneToOneChatCache = new HashMap<ContactId, OneToOneChatImpl>();
+    private final Map<ContactId, OneToOneChatImpl> mOneToOneChatCache = new HashMap<>();
 
-    private final Map<String, GroupChatImpl> mGroupChatCache = new HashMap<String, GroupChatImpl>();
+    private final Map<String, GroupChatImpl> mGroupChatCache = new HashMap<>();
 
-    /**
-     * The sLogger
-     */
     private static final Logger sLogger = Logger.getLogger(ChatServiceImpl.class.getSimpleName());
 
     /**
@@ -115,11 +112,6 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param historyLog HistoryLog
      * @param rcsSettings RcsSettings
      * @param contactManager ContactManager
-     * @param core Core
-     * @param imOperationExecutor im operation ExecutorService
-     * @param imsLock ims operations lock
-     * @param fileTransferService FileTransferServiceImpl
-     * @param oneToOneUndeliveredImManager OneToOneUndeliveredImManager
      */
     public ChatServiceImpl(InstantMessagingService imService, MessagingLog messagingLog,
             HistoryLog historyLog, RcsSettings rcsSettings, ContactManager contactManager) {
@@ -345,20 +337,6 @@ public class ChatServiceImpl extends IChatService.Stub {
     }
 
     /**
-     * Add a oneToOne chat in the list
-     * 
-     * @param contact Contact ID
-     * @param oneToOneChat OneToOne Chat
-     */
-    public void addOneToOneChat(ContactId contact, OneToOneChatImpl oneToOneChat) {
-        mOneToOneChatCache.put(contact, oneToOneChat);
-        if (sLogger.isActivated()) {
-            sLogger.debug("Add oneToOne chat to list (size=" + mOneToOneChatCache.size() + ") for "
-                    + contact);
-        }
-    }
-
-    /**
      * Remove a oneToOne chat from the list
      * 
      * @param contact Contact ID
@@ -375,7 +353,7 @@ public class ChatServiceImpl extends IChatService.Stub {
         OneToOneChatImpl oneToOneChat = mOneToOneChatCache.get(contact);
         if (oneToOneChat == null) {
             oneToOneChat = new OneToOneChatImpl(mImService, contact, mOneToOneChatEventBroadcaster,
-                    mMessagingLog, mHistoryLog, mRcsSettings, this, mContactManager);
+                    mMessagingLog, mRcsSettings, this, mContactManager);
             mOneToOneChatCache.put(contact, oneToOneChat);
         }
         return oneToOneChat;
@@ -485,7 +463,7 @@ public class ChatServiceImpl extends IChatService.Stub {
         try {
             long timestamp = System.currentTimeMillis();
             final GroupChatSession session = mImService.createOriginatingAdHocGroupChatSession(
-                    new HashSet<ContactId>(contacts), subject, timestamp);
+                    new HashSet<>(contacts), subject, timestamp);
             final String chatId = session.getContributionID();
             final GroupChatImpl groupChat = getOrCreateGroupChat(chatId);
 
@@ -638,7 +616,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * Returns true if it's possible to initiate a new group chat with the specified contactId right
      * now, else returns false.
      * 
-     * @param contact
+     * @param contact Remote contact
      * @return true if it's possible to initiate a new group chat
      * @throws RemoteException
      */
@@ -715,7 +693,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * Deletes a one to one chat with a given contact from history and abort/reject any associated
      * ongoing session if such exists.
      * 
-     * @param contact
+     * @param contact Remote contact
      */
     @Override
     public void deleteOneToOneChat(ContactId contact) {
@@ -726,7 +704,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * Delete a group chat by its chat id from history and abort/reject any associated ongoing
      * session if such exists.
      * 
-     * @param chatId
+     * @param chatId Chat id
      */
     @Override
     public void deleteGroupChat(String chatId) {
@@ -737,7 +715,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * Delete a message from its message id from history. Will resolve if the message is one to one
      * or from a group chat.
      * 
-     * @param msgId
+     * @param msgId Message Id
      */
     @Override
     public void deleteMessage(String msgId) {
@@ -748,7 +726,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * Disables and clears any delivery expiration for a set of chat messages regardless if the
      * delivery of them has expired already or not.
      * 
-     * @param msgIds
+     * @param msgIds Message ID
      * @throws RemoteException
      */
     @Override
@@ -995,7 +973,7 @@ public class ChatServiceImpl extends IChatService.Stub {
     /**
      * Returns a chat message from its unique ID
      * 
-     * @param msgId
+     * @param msgId Message Id
      * @return IChatMessage
      * @throws RemoteException
      */
@@ -1024,7 +1002,7 @@ public class ChatServiceImpl extends IChatService.Stub {
     /**
      * Handle rejoin group chat as part of send operation
      * 
-     * @param chatId
+     * @param chatId Chat Id
      */
     public void rejoinGroupChatAsPartOfSendOperation(String chatId) throws PayloadException,
             NetworkException {
@@ -1036,7 +1014,7 @@ public class ChatServiceImpl extends IChatService.Stub {
     /**
      * Handle rejoin group chat
      * 
-     * @param chatId
+     * @param chatId Chat Id
      * @throws NetworkException
      * @throws PayloadException
      */
@@ -1058,11 +1036,11 @@ public class ChatServiceImpl extends IChatService.Stub {
     /**
      * Set one-one chat message status and reason code
      * 
-     * @param msgId
-     * @param mimeType
-     * @param contact
-     * @param status
-     * @param reasonCode
+     * @param msgId Message Id
+     * @param mimeType Mime type
+     * @param contact Remote contact
+     * @param status Status
+     * @param reasonCode Reason code
      */
     public void setOneToOneChatMessageStatusAndReasonCode(String msgId, String mimeType,
             ContactId contact, Status status, ReasonCode reasonCode) {
@@ -1075,11 +1053,11 @@ public class ChatServiceImpl extends IChatService.Stub {
     /**
      * Set group chat message status and reason code
      * 
-     * @param msgId
-     * @param mimeType
-     * @param chatId
-     * @param status
-     * @param reasonCode
+     * @param msgId Message Id
+     * @param mimeType Mime type
+     * @param chatId Chat id
+     * @param status Status
+     * @param reasonCode Reason code
      */
     public void setGroupChatMessageStatusAndReasonCode(String msgId, String mimeType,
             String chatId, Status status, ReasonCode reasonCode) {
@@ -1104,9 +1082,9 @@ public class ChatServiceImpl extends IChatService.Stub {
     /**
      * Set group chat state and reason code
      * 
-     * @param chatId
-     * @param state
-     * @param reasonCode
+     * @param chatId Chat id
+     * @param state State
+     * @param reasonCode Reason code
      */
     public void setGroupChatStateAndReasonCode(String chatId, State state,
             GroupChat.ReasonCode reasonCode) {
@@ -1118,9 +1096,9 @@ public class ChatServiceImpl extends IChatService.Stub {
     /**
      * Broadcasts Group Chat state change
      * 
-     * @param chatId
-     * @param state
-     * @param reasonCode
+     * @param chatId Chat id
+     * @param state State
+     * @param reasonCode Reason code
      */
     public void broadcastGroupChatStateChange(String chatId, State state,
             GroupChat.ReasonCode reasonCode) {
@@ -1130,7 +1108,7 @@ public class ChatServiceImpl extends IChatService.Stub {
     /**
      * Checks if the group chat with specific chatId is active
      * 
-     * @param chatId
+     * @param chatId Chat id
      * @return boolean
      */
     public boolean isGroupChatActive(String chatId) {
@@ -1140,7 +1118,7 @@ public class ChatServiceImpl extends IChatService.Stub {
     /**
      * Checks if the group chat is abandoned and can never be used to send or receive messages.
      * 
-     * @param chatId
+     * @param chatId Chat id
      * @return boolean
      */
     public boolean isGroupChatAbandoned(String chatId) {

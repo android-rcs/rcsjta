@@ -41,7 +41,7 @@ import java.util.Set;
  */
 public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcaster {
 
-    private final RemoteCallbackList<IGroupFileTransferListener> mGroupFileTransferListeners = new RemoteCallbackList<IGroupFileTransferListener>();
+    private final RemoteCallbackList<IGroupFileTransferListener> mGroupFileTransferListeners = new RemoteCallbackList<>();
 
     private final Logger logger = Logger.getLogger(getClass().getName());
 
@@ -125,7 +125,7 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
     }
 
     public void broadcastFileTransfersDeleted(String chatId, Set<String> transferIds) {
-        List<String> ids = new ArrayList<String>(transferIds);
+        List<String> ids = new ArrayList<>(transferIds);
         final int N = mGroupFileTransferListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {

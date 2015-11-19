@@ -35,13 +35,10 @@ import android.text.TextUtils;
 /**
  * A class that implements interface to allow access to common service configuration from APIs
  * 
- * @author yplo6403
+ * @author Philippe LEMORDANT
  */
 public class CommonServiceConfigurationImpl extends ICommonServiceConfiguration.Stub {
 
-    /**
-     * The sLogger
-     */
     private static final Logger sLogger = Logger.getLogger(CommonServiceConfigurationImpl.class
             .getSimpleName());
 
@@ -50,7 +47,7 @@ public class CommonServiceConfigurationImpl extends ICommonServiceConfiguration.
     /**
      * Constructor
      * 
-     * @param rcsSettings
+     * @param rcsSettings RCS settings accessor
      */
     public CommonServiceConfigurationImpl(RcsSettings rcsSettings) {
         mRcsSettings = rcsSettings;

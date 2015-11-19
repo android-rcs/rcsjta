@@ -36,7 +36,7 @@ import android.os.RemoteException;
  */
 public class FileUploadEventBroadcaster implements IFileUploadEventBroadcaster {
 
-    private final RemoteCallbackList<IFileUploadListener> mFileUploadListeners = new RemoteCallbackList<IFileUploadListener>();
+    private final RemoteCallbackList<IFileUploadListener> mFileUploadListeners = new RemoteCallbackList<>();
 
     private final Logger logger = Logger.getLogger(getClass().getName());
 

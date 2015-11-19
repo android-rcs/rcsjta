@@ -310,8 +310,9 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
                     final VideoStreamingSession session = mRichcallService
                             .getVideoSharingSession(mSharingId);
                     if (session == null) {
-                        sLogger.debug("Cannot accept sharing: no session with ID="
+                        sLogger.error("Cannot accept sharing: no session with ID="
                                 .concat(mSharingId));
+                        return;
                     }
                     session.setPlayer(player);
                     session.acceptSession();
@@ -347,8 +348,9 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
                     final VideoStreamingSession session = mRichcallService
                             .getVideoSharingSession(mSharingId);
                     if (session == null) {
-                        sLogger.debug("Cannot reject sharing: so session with ID="
+                        sLogger.error("Cannot reject sharing: so session with ID="
                                 .concat(mSharingId));
+                        return;
                     }
                     session.rejectSession(InvitationStatus.INVITATION_REJECTED_DECLINE);
 

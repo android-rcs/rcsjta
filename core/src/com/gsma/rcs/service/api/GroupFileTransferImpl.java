@@ -732,7 +732,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                     "Unable to check if transfer is paused since session with file transfer ID '")
                     .append(mFileTransferId).append("' not available!").toString());
         }
-        return ((HttpFileTransferSession) session).isFileTransferPaused();
+        return session.isFileTransferPaused();
     }
 
     @Override

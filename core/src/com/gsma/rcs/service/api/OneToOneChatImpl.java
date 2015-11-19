@@ -39,7 +39,6 @@ import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatMessageSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.contact.ContactManager;
-import com.gsma.rcs.provider.history.HistoryLog;
 import com.gsma.rcs.provider.messaging.ChatMessagePersistedStorageAccessor;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -86,9 +85,6 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      */
     private final Object mLock = new Object();
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(OneToOneChatImpl.class.getName());
 
     /**
@@ -98,17 +94,13 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * @param broadcaster IChatEventBroadcaster
      * @param imService InstantMessagingService
      * @param messagingLog MessagingLog
-     * @param historyLog HistoryLog
      * @param rcsSettings RcsSettings
      * @param chatService ChatServiceImpl
      * @param contactManager ContactManager
-     * @param core Core
-     * @param undeliveredImManager OneToOneUndeliveredImManager
      */
     public OneToOneChatImpl(InstantMessagingService imService, ContactId contact,
             IOneToOneChatEventBroadcaster broadcaster, MessagingLog messagingLog,
-            HistoryLog historyLog, RcsSettings rcsSettings, ChatServiceImpl chatService,
-            ContactManager contactManager) {
+            RcsSettings rcsSettings, ChatServiceImpl chatService, ContactManager contactManager) {
         mImService = imService;
         mContact = contact;
         mBroadcaster = broadcaster;
@@ -297,7 +289,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * Add chat message to Db
      * 
      * @param msg InstantMessage
-     * @param state state of message
+     * @param status status of message
      * @throws PayloadException
      * @throws NetworkException
      */
@@ -318,10 +310,10 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     /**
      * Set chat message status
      * 
-     * @param msgId
-     * @param mimeType
-     * @param state state of message
-     * @param reasonCode
+     * @param msgId message ID
+     * @param mimeType mime type
+     * @param status status of message
+     * @param reasonCode Reason code
      */
     private void setChatMessageStatusAndReasonCode(String msgId, String mimeType, Status status,
             ReasonCode reasonCode) {
@@ -336,8 +328,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     /**
      * Set chat message status and timestamp
      * 
-     * @param ChatMessage
-     * @param state state of message
+     * @param msg Chat message
+     * @param status status of message
      */
     private void setChatMessageStatusAndTimestamp(ChatMessage msg, Status status) {
         String msgId = msg.getMessageId();
@@ -456,7 +448,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     /**
      * Dequeue one-one chat message
      * 
-     * @param msg
+     * @param msg Chat message
      * @throws SessionUnavailableException
      * @throws PayloadException
      * @throws NetworkException
@@ -502,9 +494,9 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     /**
      * Send file info in a new one-one chat session
      * 
-     * @param fileTransferId
-     * @param fileInfo
-     * @param oneToOneFileTransfer
+     * @param fileTransferId File transfer ID
+     * @param fileInfo File information
+     * @param oneToOneFileTransfer One to one file transfer implementation
      * @throws PayloadException
      * @throws NetworkException
      */
@@ -527,11 +519,11 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     /**
      * Dequeue one-one file info
      * 
-     * @param fileTransferId
-     * @param fileInfo
-     * @param displayReportsEnabled
-     * @param deliverReportsEnabled
-     * @param oneToOneFileTransfer
+     * @param fileTransferId File transfer ID
+     * @param fileInfo File information
+     * @param displayReportsEnabled Display report enabled
+     * @param deliverReportsEnabled Deliver report enabled
+     * @param oneToOneFileTransfer One to one file transfer implementation
      * @throws PayloadException
      * @throws NetworkException
      * @throws SessionUnavailableException
@@ -607,7 +599,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * Sends an is-composing event. The status is set to true when typing a message, else it is set
      * to false.
      * 
-     * @param status
+     * @param status Composing status
      * @throws RemoteException
      */
     @Override
@@ -753,7 +745,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     /**
      * Resend a message which previously failed.
      * 
-     * @param msgId
+     * @param msgId message ID
      * @throws RemoteException
      */
     @Override
@@ -780,12 +772,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                         setChatMessageStatusAndReasonCode(msgId, mimeType, Status.QUEUED,
                                 ReasonCode.UNSPECIFIED);
                     }
-                } catch (FileAccessException e) {
-                    sLogger.error(new StringBuilder("Failed to send chat message with msgId '")
-                            .append(msgId).append("'").toString(), e);
-                    setChatMessageStatusAndReasonCode(msgId, mimeType, Status.FAILED,
-                            ReasonCode.FAILED_SEND);
-                } catch (PayloadException e) {
+                } catch (FileAccessException | PayloadException e) {
                     sLogger.error(new StringBuilder("Failed to send chat message with msgId '")
                             .append(msgId).append("'").toString(), e);
                     setChatMessageStatusAndReasonCode(msgId, mimeType, Status.FAILED,

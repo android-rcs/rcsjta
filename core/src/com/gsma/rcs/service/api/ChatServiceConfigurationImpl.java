@@ -35,9 +35,6 @@ import android.os.RemoteException;
  */
 public class ChatServiceConfigurationImpl extends IChatServiceConfiguration.Stub {
 
-    /**
-     * The sLogger
-     */
     private static final Logger sLogger = Logger.getLogger(ChatServiceConfigurationImpl.class
             .getSimpleName());
 
@@ -46,7 +43,7 @@ public class ChatServiceConfigurationImpl extends IChatServiceConfiguration.Stub
     /**
      * Constructor
      * 
-     * @param rcsSettings
+     * @param rcsSettings RCS settings accessor
      */
     public ChatServiceConfigurationImpl(RcsSettings rcsSettings) {
         mRcsSettings = rcsSettings;

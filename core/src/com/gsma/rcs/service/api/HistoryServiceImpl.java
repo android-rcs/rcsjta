@@ -42,7 +42,7 @@ import java.util.Set;
  */
 public class HistoryServiceImpl extends IHistoryService.Stub {
 
-    private static final Set<Integer> INTERNAL_MEMBER_IDS = new HashSet<Integer>(Arrays.asList(
+    private static final Set<Integer> INTERNAL_MEMBER_IDS = new HashSet<>(Arrays.asList(
             MessageData.HISTORYLOG_MEMBER_ID, FileTransferData.HISTORYLOG_MEMBER_ID,
             ImageSharingData.HISTORYLOG_MEMBER_ID, VideoSharingData.HISTORYLOG_MEMBER_ID,
             GeolocSharingData.HISTORYLOG_MEMBER_ID));
@@ -75,10 +75,10 @@ public class HistoryServiceImpl extends IHistoryService.Stub {
     /**
      * Validates that the provided map is of generic type Map<String, String>.
      * 
-     * @param columnMapping
+     * @param columnMapping column mapping
      */
     /* Only raw map types are supported by AIDL. */
-    private static final void assertMapTypeOfString(@SuppressWarnings("rawtypes") Map columnMapping) {
+    private static void assertMapTypeOfString(@SuppressWarnings("rawtypes") Map columnMapping) {
         if (columnMapping == null) {
             throw new ServerApiIllegalArgumentException(
                     "Column mapping of history log field names to internal field names must not be null!");
@@ -102,10 +102,11 @@ public class HistoryServiceImpl extends IHistoryService.Stub {
     /**
      * Registers an external history log member.
      * 
-     * @param int Id of provider
-     * @param Uri Database URI
-     * @param String Table name
-     * @param Map<String, String> Translator of history log field names to internal field names
+     * @param providerId Id of provider
+     * @param providerUri Provider URI
+     * @param databaseUri Database URI
+     * @param table Table name
+     * @param columnMapping Translator of history log field names to internal field names
      * @throws RemoteException
      */
     /*
@@ -136,7 +137,7 @@ public class HistoryServiceImpl extends IHistoryService.Stub {
     /**
      * Unregisters an external history log member.
      * 
-     * @param int Id of history log member
+     * @param providerId Id of history log member
      * @throws RemoteException
      */
     @Override

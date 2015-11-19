@@ -179,10 +179,6 @@
             </intent-filter>
         </receiver>
 
-        <!-- SMS for Provisioning -->
-        <receiver android:name="com.gsma.rcs.provisioning.https.HttpsProvisioningSMS" >
-        </receiver>
-
         <!-- HTTPS provisioning service -->
         <service android:name="com.gsma.rcs.provisioning.https.HttpsProvisioningService" >
         </service>

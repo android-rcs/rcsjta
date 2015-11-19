@@ -208,7 +208,7 @@ public class SipService extends ImsService {
                 @Override
                 public void run() {
                     try {
-                        mMmSessionService.receiveSipMsrpSessionInvitation(sessionInvite, session);
+                        mMmSessionService.receiveSipMsrpSessionInvitation(session);
                         session.startSession();
 
                     } catch (RuntimeException e) {
@@ -300,7 +300,7 @@ public class SipService extends ImsService {
                 @Override
                 public void run() {
                     try {
-                        mMmSessionService.receiveSipRtpSessionInvitation(sessionInvite, session);
+                        mMmSessionService.receiveSipRtpSessionInvitation(session);
                         session.startSession();
 
                     } catch (RuntimeException e) {

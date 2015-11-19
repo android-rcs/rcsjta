@@ -25,9 +25,6 @@ import android.os.RemoteException;
 
 public class ChatMessageImpl extends IChatMessage.Stub {
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(ChatMessageImpl.class.getSimpleName());
 
     private final ChatMessagePersistedStorageAccessor mPersistentStorage;
