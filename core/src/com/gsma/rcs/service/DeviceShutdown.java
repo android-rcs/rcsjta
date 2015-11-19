@@ -30,9 +30,7 @@ import android.content.Intent;
  * @author jexa7410
  */
 public class DeviceShutdown extends BroadcastReceiver {
-    /**
-     * The logger
-     */
+
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
     @Override
@@ -40,8 +38,6 @@ public class DeviceShutdown extends BroadcastReceiver {
         if (logger.isActivated()) {
             logger.debug("Device shutdown");
         }
-
-        // Stop the RCS service
         LauncherUtils.stopRcsService(context);
     }
 }

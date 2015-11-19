@@ -47,18 +47,6 @@ public class ServerApiUnsupportedOperationException extends ServerApiBaseExcepti
     }
 
     /**
-     * Constructor
-     * 
-     * @param message Error message obtained either from a constant string or through e.getMessage()
-     * @param cause the cause (which is saved for later retrieval by the Throwable.getCause()
-     *            method). (A null value is permitted, and indicates that the cause is nonexistent
-     *            or unknown.)
-     */
-    public ServerApiUnsupportedOperationException(String message, Throwable cause) {
-        super(RcsUnsupportedOperationException.class, message, cause);
-    }
-
-    /**
      * Api for the subclasses to decide if this exception should be treated as a bug and hence to be
      * get logged or not in the service layer just before AIDL connection to client.
      * 

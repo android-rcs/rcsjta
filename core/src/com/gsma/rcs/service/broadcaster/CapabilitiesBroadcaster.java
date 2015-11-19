@@ -30,11 +30,11 @@ import java.util.HashMap;
  * CapabilitiesBroadcaster maintains the registering and unregistering of ICapabilitiesListener and
  * also performs broadcast events on these listeners upon the trigger of corresponding callbacks.
  */
-public class CapabilitiesBroadcaster implements ICapabilitiesBroadcaster {
+public class CapabilitiesBroadcaster {
 
-    private RemoteCallbackList<ICapabilitiesListener> mCapabilitiesListeners = new RemoteCallbackList<ICapabilitiesListener>();
+    private RemoteCallbackList<ICapabilitiesListener> mCapabilitiesListeners = new RemoteCallbackList<>();
 
-    private HashMap<ContactId, RemoteCallbackList<ICapabilitiesListener>> mCapalitiesListenersPerContact = new HashMap<ContactId, RemoteCallbackList<ICapabilitiesListener>>();
+    private HashMap<ContactId, RemoteCallbackList<ICapabilitiesListener>> mCapalitiesListenersPerContact = new HashMap<>();
 
     private final Logger logger = Logger.getLogger(getClass().getName());
 
@@ -90,7 +90,7 @@ public class CapabilitiesBroadcaster implements ICapabilitiesBroadcaster {
         RemoteCallbackList<ICapabilitiesListener> capabilitiesListeners = mCapalitiesListenersPerContact
                 .get(contact);
         if (capabilitiesListeners == null) {
-            capabilitiesListeners = new RemoteCallbackList<ICapabilitiesListener>();
+            capabilitiesListeners = new RemoteCallbackList<>();
             mCapalitiesListenersPerContact.put(contact, capabilitiesListeners);
         }
         capabilitiesListeners.register(listener);

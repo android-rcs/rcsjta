@@ -61,10 +61,7 @@ public class ServerApiUtils {
             return false;
         }
         ImsNetworkInterface networkInterface = core.getImsModule().getCurrentNetworkInterface();
-        if (networkInterface == null) {
-            return false;
-        }
-        return networkInterface.isRegistered();
+        return networkInterface != null && networkInterface.isRegistered();
     }
 
     /**

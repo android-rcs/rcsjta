@@ -177,21 +177,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     }
 
     /**
-     * Add a 1-2-1 file transfer in the list
-     * 
-     * @param fileTransferId the file transfer ID
-     * @param oneToOneFileTransfer 1-2-1 File transfer
-     */
-    public void addOneToOneFileTransfer(String fileTransferId,
-            OneToOneFileTransferImpl oneToOneFileTransfer) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Add a file transfer in the list (size="
-                    + mOneToOneFileTransferCache.size() + ")");
-        }
-        mOneToOneFileTransferCache.put(fileTransferId, oneToOneFileTransfer);
-    }
-
-    /**
      * Remove a 1-2-1 file transfer from the list
      * 
      * @param fileTransferId File transfer ID
@@ -203,20 +188,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         }
 
         mOneToOneFileTransferCache.remove(fileTransferId);
-    }
-
-    /**
-     * Add a group file transfer in the list
-     * 
-     * @param fileTransferId the file transfer ID
-     * @param groupFileTransfer Group File transfer
-     */
-    public void addGroupFileTransfer(String fileTransferId, GroupFileTransferImpl groupFileTransfer) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Add a file transfer in the list (size=" + mGroupFileTransferCache.size()
-                    + ")");
-        }
-        mGroupFileTransferCache.put(fileTransferId, groupFileTransfer);
     }
 
     /**
@@ -577,7 +548,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * Returns true if it is possible to initiate file transfer to the contact specified by the
      * contact parameter, else returns false.
      * 
-     * @param contact
+     * @param contact Remote contact
      * @return boolean
      * @throws RemoteException
      */
@@ -1407,12 +1378,11 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     /**
      * Set and broadcast resend file transfer invitation rejections
      * 
-     * @param contact Contact
      * @param reasonCode Reason code
      * @param timestamp Local timestamp when got invitation
      * @param timestampSent Timestamp sent in payload for the file transfer
      */
-    public void setResendFileTransferInvitationRejected(String fileTransferId, ContactId contact,
+    public void setResendFileTransferInvitationRejected(String fileTransferId,
             ReasonCode reasonCode, long timestamp, long timestampSent) {
         mMessagingLog.setFileTransferStateAndTimestamp(fileTransferId, State.REJECTED, reasonCode,
                 timestamp, timestampSent);

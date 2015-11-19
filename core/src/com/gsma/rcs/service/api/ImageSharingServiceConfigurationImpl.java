@@ -42,7 +42,7 @@ public class ImageSharingServiceConfigurationImpl extends IImageSharingServiceCo
     /**
      * Constructor
      * 
-     * @param rcsSettings
+     * @param rcsSettings RCS settings accessor
      */
     public ImageSharingServiceConfigurationImpl(RcsSettings rcsSettings) {
         mRcsSettings = rcsSettings;

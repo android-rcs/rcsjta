@@ -32,7 +32,7 @@ import com.gsma.services.rcs.RcsServiceRegistration;
 public class RcsServiceRegistrationEventBroadcaster implements
         IRcsServiceRegistrationEventBroadcaster {
 
-    private final RemoteCallbackList<IRcsServiceRegistrationListener> mServiceRegistrationListeners = new RemoteCallbackList<IRcsServiceRegistrationListener>();
+    private final RemoteCallbackList<IRcsServiceRegistrationListener> mServiceRegistrationListeners = new RemoteCallbackList<>();
 
     private final Logger logger = Logger.getLogger(getClass().getName());
 

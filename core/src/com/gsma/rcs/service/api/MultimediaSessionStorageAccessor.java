@@ -39,10 +39,10 @@ public class MultimediaSessionStorageAccessor {
     /**
      * Constructor
      * 
-     * @param direction
-     * @param remoteContact
-     * @param serviceId
-     * @param state
+     * @param direction Direction
+     * @param remoteContact Remote contact
+     * @param serviceId Service ID
+     * @param state State
      */
     public MultimediaSessionStorageAccessor(Direction direction, ContactId remoteContact,
             String serviceId, State state) {
@@ -96,6 +96,7 @@ public class MultimediaSessionStorageAccessor {
      */
     public void setStateAndReasonCode(State state, ReasonCode reason) {
         mState = state;
+        mReason = reason;
     }
 
     /**

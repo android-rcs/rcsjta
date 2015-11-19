@@ -72,9 +72,9 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
      * @param broadcaster IMultimediaMessagingSessionEventBroadcaster
      * @param sipService SipService
      * @param multimediaSessionService MultimediaSessionServiceImpl
-     * @param direction
+     * @param direction Direction
      * @param contact remote contact
-     * @param serviceId
+     * @param serviceId Service ID
      * @param state State of the multimedia session
      */
     public MultimediaMessagingSessionImpl(String sessionId,

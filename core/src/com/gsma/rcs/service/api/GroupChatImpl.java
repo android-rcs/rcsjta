@@ -104,7 +104,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     private boolean mGroupChatRejoinedAsPartOfSendOperation = false;
 
-    private static final Set<ParticipantStatus> RECIPIENT_STATUSES = new HashSet<ParticipantStatus>();
+    private static final Set<ParticipantStatus> RECIPIENT_STATUSES = new HashSet<>();
     static {
         RECIPIENT_STATUSES.add(ParticipantStatus.INVITE_QUEUED);
         RECIPIENT_STATUSES.add(ParticipantStatus.INVITING);
@@ -131,7 +131,6 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * @param chatService ChatServiceImpl
      * @param messagingLog MessagingLog
      * @param historyLog HistoryLog
-     * @param core Core
      */
     public GroupChatImpl(InstantMessagingService imService, String chatId,
             IGroupChatEventBroadcaster broadcaster,
@@ -415,10 +414,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      */
     public boolean isGroupChatActive() {
         GroupChatSession session = mImService.getGroupChatSession(mChatId);
-        if (session != null) {
-            return true;
-        }
-        return State.STARTED == mPersistedStorage.getState();
+        return session != null || State.STARTED == mPersistedStorage.getState();
     }
 
     /**
@@ -604,23 +600,6 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
-    }
-
-    /**
-     * Is Store & Forward
-     * 
-     * @return Boolean
-     */
-    public boolean isStoreAndForward() {
-        GroupChatSession session = mImService.getGroupChatSession(mChatId);
-        if (session == null) {
-            /*
-             * no session means always not "store and forward" as we do not persist this
-             * information.
-             */
-            return false;
-        }
-        return session.isStoreAndForward();
     }
 
     /**
@@ -865,13 +844,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             return false;
         }
         try {
-            if (!isParticipantEligibleToBeInvited(participant)) {
-                return false;
-            }
-            if (!isParticipantCapableToBeInvited(participant)) {
-                return false;
-            }
-            return true;
+            return isParticipantEligibleToBeInvited(participant)
+                    && isParticipantCapableToBeInvited(participant);
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -899,7 +873,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         }
         if (!isGroupChatCapableOfReceivingParticipantInvitations()) {
             throw new ServerApiUnsupportedOperationException(
-                    "Not capable of receiving particpant invitations!");
+                    "Not capable of receiving participant invitations!");
         }
         try {
             for (ContactId participant : participants) {
@@ -915,23 +889,20 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     try {
                         boolean mediaEstablished = (session != null && session.isMediaEstablished());
                         if (mediaEstablished) {
-                            inviteParticipants(session, new HashSet<ContactId>(participants));
+                            inviteParticipants(session, new HashSet<>(participants));
                             return;
                         }
-                        if (session == null || !mediaEstablished) {
-                            Map<ContactId, ParticipantStatus> participantsToStore = mMessagingLog
-                                    .getParticipants(mChatId);
+                        Map<ContactId, ParticipantStatus> participantsToStore = mMessagingLog
+                                .getParticipants(mChatId);
 
-                            for (ContactId contact : participants) {
-                                participantsToStore.put(contact, ParticipantStatus.INVITE_QUEUED);
-                            }
+                        for (ContactId contact : participants) {
+                            participantsToStore.put(contact, ParticipantStatus.INVITE_QUEUED);
+                        }
 
-                            if (session != null) {
-                                session.updateParticipants(participantsToStore);
-                            } else {
-                                mMessagingLog
-                                        .setGroupChatParticipants(mChatId, participantsToStore);
-                            }
+                        if (session != null) {
+                            session.updateParticipants(participantsToStore);
+                        } else {
+                            mMessagingLog.setGroupChatParticipants(mChatId, participantsToStore);
                         }
                         if (session == null) {
                             if (isGroupChatRejoinable() && ServerApiUtils.isImsConnected()) {
@@ -939,11 +910,12 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                             }
                         }
 
-                    } catch (PayloadException e) {
-                        session.handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
-
-                    } catch (NetworkException e) {
-                        session.handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
+                    } catch (PayloadException | NetworkException e) {
+                        if (session != null) {
+                            session.handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
+                        } else {
+                            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+                        }
 
                     } catch (RuntimeException e) {
                         /*
@@ -953,7 +925,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                          * exceptions will eventually lead to exit the system and thus can bring the
                          * whole system down, which is not intended.
                          */
-                        session.handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
+                        if (session != null) {
+                            session.handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
+                        } else {
+                            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+                        }
                     }
                 }
             });
@@ -973,8 +949,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     /**
      * Invite additional participants to this group chat inviteParticipants
      * 
-     * @param session
-     * @param participants
+     * @param session Group session
+     * @param participants Set of participants
      * @throws NetworkException
      * @throws PayloadException
      */
@@ -1005,8 +981,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     /**
      * Set chat message status and timestamp
      * 
-     * @param ChatMessage
-     * @param state state of message
+     * @param msg Chat message
+     * @param status status of message
      */
     private void setChatMessageStatusAndTimestamp(ChatMessage msg, Status status) {
         String msgId = msg.getMessageId();
@@ -1022,7 +998,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     /**
      * Dequeue group chat message
      * 
-     * @param msg
+     * @param msg Chat message
      * @throws NetworkException
      * @throws PayloadException
      * @throws SessionNotEstablishedException
@@ -1032,16 +1008,18 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         final GroupChatSession session = mImService.getGroupChatSession(mChatId);
         if (session == null) {
             mImService.rejoinGroupChatAsPartOfSendOperation(mChatId);
-            return;
+
         } else if (session.isMediaEstablished()) {
             setChatMessageStatusAndTimestamp(msg, Status.SENDING);
             sendChatMessageWithinSession(session, msg);
+
         } else if (session.isInitiatedByRemote()) {
             if (sLogger.isActivated()) {
                 sLogger.debug(new StringBuilder("Group chat session with chatId '").append(mChatId)
                         .append("' is pending for acceptance, accept it.").toString());
             }
             session.acceptSession();
+
         } else {
             throw new SessionNotEstablishedException(new StringBuilder(
                     "The existing group chat session with chatId '").append(mChatId)
@@ -1052,11 +1030,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     /**
      * Dequeue group file info
      * 
-     * @param fileTransferId
-     * @param fileInfo
-     * @param displayedReportEnabled
-     * @param deliveredReportEnabled
-     * @param groupFileTransfer
+     * @param fileTransferId File transfer ID
+     * @param fileInfo File information
+     * @param displayedReportEnabled Display report enabled
+     * @param deliveredReportEnabled Delivery report enabled
+     * @param groupFileTransfer Group file implementation
      * @throws NetworkException
      * @throws PayloadException
      * @throws SessionNotEstablishedException
@@ -1068,16 +1046,18 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         GroupChatSession session = mImService.getGroupChatSession(mChatId);
         if (session == null) {
             mImService.rejoinGroupChatAsPartOfSendOperation(mChatId);
-            return;
+
         } else if (session.isMediaEstablished()) {
             session.sendFileInfo(groupFileTransfer, fileTransferId, fileInfo,
                     displayedReportEnabled, deliveredReportEnabled);
+
         } else if (session.isInitiatedByRemote()) {
             if (sLogger.isActivated()) {
                 sLogger.debug(new StringBuilder("Group chat session with chatId '").append(mChatId)
                         .append("' is pending for acceptance, accept it.").toString());
             }
             session.acceptSession();
+
         } else {
             throw new SessionNotEstablishedException(new StringBuilder(
                     "The existing group chat session with chatId '").append(mChatId)
@@ -1264,7 +1244,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * Sends an is-composing event. The status is set to true when typing a message, else it is set
      * to false.
      * 
-     * @param status
+     * @param status Composing status
      * @throws RemoteException
      */
     @Override
@@ -1437,7 +1417,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     }
 
     /**
-     * @param enable
+     * @param enable Enable rejoin as part of send operation
      */
     public void setRejoinedAsPartOfSendOperation(boolean enable) {
         mGroupChatRejoinedAsPartOfSendOperation = enable;
@@ -1572,11 +1552,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 mBroadcaster.broadcastMessageReceived(msg.getMimeType(), msgId);
             }
 
-        } catch (ContactManagerException e) {
-            sLogger.error(new StringBuilder("Failed to handle new IM with Id '").append(msgId)
-                    .append("' received from ").append(remote).toString(), e);
-
-        } catch (FileAccessException e) {
+        } catch (ContactManagerException | FileAccessException e) {
             sLogger.error(new StringBuilder("Failed to handle new IM with Id '").append(msgId)
                     .append("' received from ").append(remote).toString(), e);
 
@@ -1755,22 +1731,25 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         String status = imdn.getStatus();
         String msgId = imdn.getMsgId();
         long timestamp = imdn.getDateTime();
-
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("Handling message delivery status; contact=")
                     .append(contact).append(", msgId=").append(msgId).append(", status=")
                     .append(status).append(", notificationType=")
                     .append(imdn.getNotificationType()).toString());
         }
-        if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
-            onMessageDeliveryStatusDelivered(contact, msgId, timestamp);
-        } else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
-            onMessageDeliveryStatusDisplayed(contact, msgId, timestamp);
-        } else if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)
-                || ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)
-                || ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
-            Content.ReasonCode reasonCode = imdnToMessageFailedReasonCode(imdn);
-            onMessageDeliveryStatusFailed(contact, msgId, reasonCode);
+        switch (status) {
+            case ImdnDocument.DELIVERY_STATUS_DELIVERED:
+                onMessageDeliveryStatusDelivered(contact, msgId, timestamp);
+                break;
+            case ImdnDocument.DELIVERY_STATUS_DISPLAYED:
+                onMessageDeliveryStatusDisplayed(contact, msgId, timestamp);
+                break;
+            case ImdnDocument.DELIVERY_STATUS_ERROR:
+            case ImdnDocument.DELIVERY_STATUS_FAILED:
+            case ImdnDocument.DELIVERY_STATUS_FORBIDDEN:
+                Content.ReasonCode reasonCode = imdnToMessageFailedReasonCode(imdn);
+                onMessageDeliveryStatusFailed(contact, msgId, reasonCode);
+                break;
         }
     }
 
@@ -1784,12 +1763,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             onMessageDeliveryStatusReceived(contact, imdn);
             return;
         }
-
         if (mMessagingLog.isFileTransfer(msgId)) {
             mImService.receiveGroupFileDeliveryStatus(contributionId, contact, imdn);
             return;
         }
-
         sLogger.error(new StringBuilder(
                 "Imdn delivery report received referencing an entry that was ")
                 .append("not found in our database. Message id ").append(msgId)
@@ -1806,7 +1783,6 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         if (sLogger.isActivated()) {
             sLogger.info("Add participant request has failed " + reason);
         }
-
         synchronized (mLock) {
             mBroadcaster.broadcastParticipantStatusChanged(mChatId, contact,
                     ParticipantStatus.FAILED);
@@ -1890,7 +1866,6 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 return;
             }
         }
-
         for (Map.Entry<ContactId, ParticipantStatus> updatedParticipant : updatedParticipants
                 .entrySet()) {
             ContactId contact = updatedParticipant.getKey();

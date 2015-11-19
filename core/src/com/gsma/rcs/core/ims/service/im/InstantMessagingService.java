@@ -1626,8 +1626,7 @@ public class InstantMessagingService extends ImsService {
                         }
                         sendErrorResponse(invite, Response.DECLINE);
                         if (fileResent) {
-                            setResendFileTransferInvitationRejected(fileTransferId, remote,
-                                    FileTransfer.ReasonCode.REJECTED_SPAM, timestamp, timestampSent);
+                            setResendFileTransferInvitationRejected(fileTransferId,                                     FileTransfer.ReasonCode.REJECTED_SPAM, timestamp, timestampSent);
                             return;
                         }
                         MmContent fileContent = ftinfo.getLocalMmContent();
@@ -1650,7 +1649,7 @@ public class InstantMessagingService extends ImsService {
                          * the client need not be aware of chat session dependency here.
                          */
                         if (fileResent) {
-                            setResendFileTransferInvitationRejected(fileTransferId, remote,
+                            setResendFileTransferInvitationRejected(fileTransferId,
                                     FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp,
                                     timestampSent);
                             return;
@@ -1678,12 +1677,12 @@ public class InstantMessagingService extends ImsService {
                         }
                         sendErrorResponse(invite, Response.DECLINE);
                         if (fileResent) {
-                            setResendFileTransferInvitationRejected(fileTransferId, remote,
+                            setResendFileTransferInvitationRejected(fileTransferId,
                                     FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp,
                                     timestampSent);
                             return;
                         }
-                        setResendFileTransferInvitationRejected(fileTransferId, remote,
+                        setResendFileTransferInvitationRejected(fileTransferId,
                                 FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp,
                                 timestampSent);
                         return;
@@ -1705,7 +1704,7 @@ public class InstantMessagingService extends ImsService {
                         switch (errorCode) {
                             case FileSharingError.MEDIA_SIZE_TOO_BIG:
                                 if (fileResent) {
-                                    setResendFileTransferInvitationRejected(fileTransferId, remote,
+                                    setResendFileTransferInvitationRejected(fileTransferId,
                                             FileTransfer.ReasonCode.REJECTED_MAX_SIZE, timestamp,
                                             timestampSent);
                                     break;
@@ -1716,7 +1715,7 @@ public class InstantMessagingService extends ImsService {
                                 break;
                             case FileSharingError.NOT_ENOUGH_STORAGE_SPACE:
                                 if (fileResent) {
-                                    setResendFileTransferInvitationRejected(fileTransferId, remote,
+                                    setResendFileTransferInvitationRejected(fileTransferId,
                                             FileTransfer.ReasonCode.REJECTED_LOW_SPACE, timestamp,
                                             timestampSent);
                                     break;
@@ -1750,7 +1749,7 @@ public class InstantMessagingService extends ImsService {
                             }
                             sendErrorResponse(invite, Response.DECLINE);
                             if (fileResent) {
-                                setResendFileTransferInvitationRejected(fileTransferId, remote,
+                                setResendFileTransferInvitationRejected(fileTransferId,
                                         FileTransfer.ReasonCode.REJECTED_MEDIA_FAILED, timestamp,
                                         timestampSent);
                                 return;
@@ -1767,7 +1766,7 @@ public class InstantMessagingService extends ImsService {
                             sLogger.error("Failed to download file icon", e);
                             sendErrorResponse(invite, Response.DECLINE);
                             if (fileResent) {
-                                setResendFileTransferInvitationRejected(fileTransferId, remote,
+                                setResendFileTransferInvitationRejected(fileTransferId,
                                         FileTransfer.ReasonCode.REJECTED_MEDIA_FAILED, timestamp,
                                         timestampSent);
                                 return;
@@ -1861,7 +1860,7 @@ public class InstantMessagingService extends ImsService {
                          * the client need not be aware of chat session dependency here.
                          */
                         if (fileResent) {
-                            setResendFileTransferInvitationRejected(fileTransferId, remote,
+                            setResendFileTransferInvitationRejected(fileTransferId,
                                     FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp,
                                     timestampSent);
                             return;
@@ -2456,15 +2455,14 @@ public class InstantMessagingService extends ImsService {
      * Handle the case of rejected resend file transfer
      * 
      * @param fileTransferId the file transfer ID
-     * @param remoteContact Remote contact
      * @param reasonCode Rejected reason code
      * @param timestamp Local timestamp when got file transfer invitation
      * @param timestampSent Remote timestamp sent in payload for the file transfer
      */
     public void setResendFileTransferInvitationRejected(String fileTransferId,
-            ContactId remoteContact, FileTransfer.ReasonCode reasonCode, long timestamp,
+            FileTransfer.ReasonCode reasonCode, long timestamp,
             long timestampSent) {
-        mFileTransferService.setResendFileTransferInvitationRejected(fileTransferId, remoteContact,
+        mFileTransferService.setResendFileTransferInvitationRejected(fileTransferId,
                 reasonCode, timestamp, timestampSent);
     }
 

@@ -650,7 +650,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     private void handleResendFileTransferInvitationRejected(String fileTransferId,
             ContactId contact, FileTransfer.ReasonCode reasonCode, long timestamp,
             long timestampSent) {
-        mImService.setResendFileTransferInvitationRejected(fileTransferId, contact, reasonCode,
+        mImService.setResendFileTransferInvitationRejected(fileTransferId, reasonCode,
                 timestamp, timestampSent);
     }
 

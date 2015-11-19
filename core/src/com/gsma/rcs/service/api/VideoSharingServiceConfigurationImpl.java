@@ -42,7 +42,7 @@ public class VideoSharingServiceConfigurationImpl extends IVideoSharingServiceCo
     /**
      * Constructor
      * 
-     * @param rcsSettings
+     * @param rcsSettings RCS settings accessor
      */
     public VideoSharingServiceConfigurationImpl(RcsSettings rcsSettings) {
         mRcsSettings = rcsSettings;

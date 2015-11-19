@@ -32,21 +32,18 @@ import android.os.RemoteException;
  * A class that implements interface to allow access to multimedia session service configuration
  * from API
  * 
- * @author yplo6403
+ * @author Philippe LEMORDANT
  */
 public class MultimediaSessionServiceConfigurationImpl extends
         IMultimediaSessionServiceConfiguration.Stub {
 
-    /**
-     * The sLogger
-     */
     private static final Logger sLogger = Logger
             .getLogger(MultimediaSessionServiceConfigurationImpl.class.getSimpleName());
 
     private final RcsSettings mRcsSettings;
 
     /**
-     * @param rcsSettings
+     * @param rcsSettings RCS settings accessor
      */
     public MultimediaSessionServiceConfigurationImpl(RcsSettings rcsSettings) {
         mRcsSettings = rcsSettings;

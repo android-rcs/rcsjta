@@ -43,7 +43,7 @@ import java.util.Set;
  */
 public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
 
-    private final RemoteCallbackList<IGroupChatListener> mGroupChatListeners = new RemoteCallbackList<IGroupChatListener>();
+    private final RemoteCallbackList<IGroupChatListener> mGroupChatListeners = new RemoteCallbackList<>();
 
     private final Logger logger = Logger.getLogger(getClass().getName());
 
@@ -158,7 +158,7 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
     }
 
     public void broadcastMessagesDeleted(String chatId, Set<String> msgIds) {
-        List<String> msgIds2 = new ArrayList<String>(msgIds);
+        List<String> msgIds2 = new ArrayList<>(msgIds);
         final int N = mGroupChatListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {
@@ -173,7 +173,7 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
     }
 
     public void broadcastGroupChatsDeleted(Set<String> chatIds) {
-        List<String> ids = new ArrayList<String>(chatIds);
+        List<String> ids = new ArrayList<>(chatIds);
         final int N = mGroupChatListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {

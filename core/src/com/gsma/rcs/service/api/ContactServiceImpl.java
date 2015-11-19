@@ -53,9 +53,7 @@ import java.util.Set;
  * @author Philippe LEMORDANT
  */
 public class ContactServiceImpl extends IContactService.Stub {
-    /**
-     * The logger
-     */
+
     private static final Logger logger = Logger.getLogger(ContactServiceImpl.class.getSimpleName());
 
     private final RcsServiceRegistrationEventBroadcaster mRcsServiceRegistrationEventBroadcaster = new RcsServiceRegistrationEventBroadcaster();
@@ -76,7 +74,7 @@ public class ContactServiceImpl extends IContactService.Stub {
      * Constructor
      * 
      * @param contactManager Contacts manager
-     * @param rcsSettings
+     * @param rcsSettings RCS settings accessor
      */
     public ContactServiceImpl(ContactManager contactManager, RcsSettings rcsSettings) {
         if (logger.isActivated()) {
@@ -235,7 +233,7 @@ public class ContactServiceImpl extends IContactService.Stub {
         /**
          * The filtering method
          * 
-         * @param contactInfo
+         * @param contactInfo Contact information
          * @return true if contactInfo is in the scope
          */
         boolean inScope(ContactInfo contactInfo);
@@ -248,8 +246,8 @@ public class ContactServiceImpl extends IContactService.Stub {
      * @return the filtered list of RcsContact
      */
     private List<RcsContact> getRcsContacts(FilterContactInfo filterContactInfo) {
-        List<RcsContact> rcsContacts = new ArrayList<RcsContact>();
-        // Read capabilities in the local database
+        List<RcsContact> rcsContacts = new ArrayList<>();
+        /* Read capabilities in the local database */
         Set<ContactId> contacts = mContactManager.getRcsContactsFromRcsContactProvider();
         for (ContactId contact : contacts) {
             ContactInfo contactInfo = mContactManager.getContactInfo(contact);

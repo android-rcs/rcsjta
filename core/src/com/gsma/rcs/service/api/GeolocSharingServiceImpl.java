@@ -75,7 +75,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 
     private final RichCallHistory mRichcallLog;
 
-    private final Map<String, IGeolocSharing> mGeolocSharingCache = new HashMap<String, IGeolocSharing>();
+    private final Map<String, IGeolocSharing> mGeolocSharingCache = new HashMap<>();
 
     private static final Logger sLogger = Logger.getLogger(GeolocSharingServiceImpl.class
             .getSimpleName());
@@ -91,11 +91,8 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * Constructor
      * 
      * @param richcallService RichcallService
-     * @param rcsSettings RcsSettings
-     * @param richCallHistory
-     * @param localContentResolver LocalContentResolver
-     * @param imOperationExecutor IM ExecutorService
-     * @param imsLock ims lock object
+     * @param rcsSettings Rcs settings accessor
+     * @param richCallHistory Richcall history log accessor
      */
     public GeolocSharingServiceImpl(RichcallService richcallService,
             RichCallHistory richCallHistory, RcsSettings rcsSettings) {
@@ -331,7 +328,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
     /**
      * Returns a current geoloc sharing from its unique ID
      * 
-     * @param sharingId
+     * @param sharingId sharing ID
      * @return Geoloc sharing
      * @throws RemoteException
      */
@@ -478,7 +475,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * Deletes geoloc sharing with a given contact from history and abort/reject any associated
      * ongoing session if such exists.
      * 
-     * @param contact
+     * @param contact remote contact
      * @throws RemoteException
      */
     public void deleteGeolocSharings2(ContactId contact) throws RemoteException {
@@ -492,7 +489,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * Deletes a geoloc sharing by its sharing id from history and abort/reject any associated
      * ongoing session if such exists.
      * 
-     * @param sharingId
+     * @param sharingId sharing ID
      * @throws RemoteException
      */
     public void deleteGeolocSharing(String sharingId) throws RemoteException {

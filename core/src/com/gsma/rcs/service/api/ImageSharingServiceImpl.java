@@ -83,17 +83,14 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
     /**
      * Lock used for synchronization
      */
-    private Object mLock = new Object();
+    private final Object mLock = new Object();
 
     /**
      * Constructor
      * 
-     * @param richcallService RichcallService
-     * @param richCallLog RichCallHistory
-     * @param rcsSettings RcsSettings
-     * @param localContentResolver LocalContentResolver
-     * @param imOperationExecutor IM ExecutorService
-     * @param imsLock IMS lock object
+     * @param richcallService Richcall Service
+     * @param richCallLog RichCallHistory accessor
+     * @param rcsSettings RcsSettings accessor
      */
     public ImageSharingServiceImpl(RichcallService richcallService, RichCallHistory richCallLog,
             RcsSettings rcsSettings) {
@@ -110,9 +107,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * Close API
      */
     public void close() {
-        // Clear list of sessions
         mImageSharingCache.clear();
-
         if (sLogger.isActivated()) {
             sLogger.info("Image sharing service API is closed");
         }
@@ -203,7 +198,6 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * Notifies registration event
      */
     public void notifyRegistration() {
-        // Notify listeners
         synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.broadcastServiceRegistered();
         }
@@ -341,7 +335,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
     /**
      * Returns a current image sharing from its unique ID
      * 
-     * @param sharingId
+     * @param sharingId Sharing ID
      * @return Image sharing
      * @throws RemoteException
      */
@@ -462,7 +456,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * Deletes image sharing with a given contact from history and abort/reject any associated
      * ongoing session if such exists
      * 
-     * @param contact
+     * @param contact Remote contact
      * @throws RemoteException
      */
     public void deleteImageSharings2(ContactId contact) throws RemoteException {
@@ -476,7 +470,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * deletes an image sharing by its sharing id from history and abort/reject any associated
      * ongoing session if such exists.
      * 
-     * @param sharingId
+     * @param sharingId Sharing ID
      * @throws RemoteException
      */
     public void deleteImageSharing(String sharingId) throws RemoteException {

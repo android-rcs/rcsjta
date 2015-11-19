@@ -72,7 +72,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 
     private final RcsSettings mRcsSettings;
 
-    private final Map<String, IVideoSharing> mVideoSharingCache = new HashMap<String, IVideoSharing>();
+    private final Map<String, IVideoSharing> mVideoSharingCache = new HashMap<>();
 
     /**
      * Lock used for synchronization
@@ -88,11 +88,6 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @param richcallService RichcallService
      * @param richCallLog RichCallHistory
      * @param rcsSettings RcsSettings
-     * @param contactManager ContactManager
-     * @param core Core
-     * @param localContentResolver LocalContentResolver
-     * @param imOperationExecutor IM ExecutorService
-     * @param imsLock ims lock object
      */
     public VideoSharingServiceImpl(RichcallService richcallService, RichCallHistory richCallLog,
             RcsSettings rcsSettings) {
@@ -109,9 +104,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * Close API
      */
     public void close() {
-        // Clear list of sessions
         mVideoSharingCache.clear();
-
         if (sLogger.isActivated()) {
             sLogger.info("Video sharing service API is closed");
         }
@@ -128,7 +121,6 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
             sLogger.debug(new StringBuilder("Add an video sharing in the list (size=")
                     .append(mVideoSharingCache.size()).append(")").toString());
         }
-
         mVideoSharingCache.put(sharingId, videoSharing);
     }
 
@@ -141,7 +133,6 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
         if (sLogger.isActivated()) {
             sLogger.debug("Remove a video sharing");
         }
-
         mVideoSharingCache.remove(sharingId);
     }
 
@@ -213,14 +204,6 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
         synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.broadcastServiceUnRegistered(reasonCode);
         }
-    }
-
-    /* TODO: Check if really dead code (and then remove) or if it should be called by someone */
-    public void setVideoSharingStateAndReasonCode(ContactId contact, String sharingId, State state,
-            ReasonCode reasonCode, long duration) {
-        mRichCallLog.setVideoSharingStateReasonCodeAndDuration(sharingId, state, reasonCode,
-                duration);
-        mBroadcaster.broadcastStateChanged(contact, sharingId, state, reasonCode);
     }
 
     public void setVideoSharingStateAndReasonCode(ContactId contact, String sharingId, State state,
@@ -352,7 +335,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
     /**
      * Returns a current video sharing from its unique ID
      * 
-     * @param sharingId
+     * @param sharingId Sharing ID
      * @return Video sharing
      * @throws RemoteException
      */
@@ -492,7 +475,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * Delete video sharing associated with a given contact from history and abort/reject any
      * associated ongoing session if such exists.
      * 
-     * @param contact
+     * @param contact contact
      * @throws RemoteException
      */
     public void deleteVideoSharings2(ContactId contact) throws RemoteException {
@@ -506,7 +489,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * Deletes a video sharing by its sharing ID from history and abort/reject any associated
      * ongoing session if such exists.
      * 
-     * @param sharingId
+     * @param sharingId Sharing ID
      * @throws RemoteException
      */
     public void deleteVideoSharing(String sharingId) throws RemoteException {

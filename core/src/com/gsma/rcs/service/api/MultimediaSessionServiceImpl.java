@@ -26,7 +26,6 @@ import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
 import com.gsma.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
-import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.broadcaster.MultimediaMessagingSessionEventBroadcaster;
 import com.gsma.rcs.service.broadcaster.MultimediaStreamingSessionEventBroadcaster;
@@ -47,7 +46,6 @@ import com.gsma.services.rcs.extension.IMultimediaStreamingSession;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSessionListener;
 import com.gsma.services.rcs.extension.MultimediaSession.State;
 
-import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
@@ -74,9 +72,9 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 
     private final RcsSettings mRcsSettings;
 
-    private final Map<String, IMultimediaMessagingSession> mMultimediaMessagingCache = new HashMap<String, IMultimediaMessagingSession>();
+    private final Map<String, IMultimediaMessagingSession> mMultimediaMessagingCache = new HashMap<>();
 
-    private final Map<String, IMultimediaStreamingSession> mMultimediaStreamingCache = new HashMap<String, IMultimediaStreamingSession>();
+    private final Map<String, IMultimediaStreamingSession> mMultimediaStreamingCache = new HashMap<>();
 
     /**
      * Lock used for synchronization
@@ -91,10 +89,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * 
      * @param sipService SipService
      * @param rcsSettings RcsSettings
-     * @param contactManager ContactManager
      */
-    public MultimediaSessionServiceImpl(SipService sipService, RcsSettings rcsSettings,
-            ContactManager contactManager) {
+    public MultimediaSessionServiceImpl(SipService sipService, RcsSettings rcsSettings) {
         if (sLogger.isActivated()) {
             sLogger.info("Multimedia session API is loaded");
         }
@@ -118,7 +114,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
     /**
      * Add a multimedia messaging in the list
      * 
-     * @param multimediaMessaging
+     * @param multimediaMessaging Multimedia messaging implementation
      */
     private void addMultimediaMessaging(MultimediaMessagingSessionImpl multimediaMessaging) {
         if (sLogger.isActivated()) {
@@ -146,7 +142,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
     /**
      * Add a multimedia streaming in the list
      * 
-     * @param multimediaStreaming
+     * @param multimediaStreaming Multimedia streaming implementation
      */
     private void addMultimediaStreaming(MultimediaStreamingSessionImpl multimediaStreaming) {
         if (sLogger.isActivated()) {
@@ -240,11 +236,9 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
     /**
      * Receive a new SIP session invitation with MRSP media
      * 
-     * @param msrpSessionInvite Resolved intent
      * @param session SIP session
      */
-    public void receiveSipMsrpSessionInvitation(Intent msrpSessionInvite,
-            GenericSipMsrpSession session) {
+    public void receiveSipMsrpSessionInvitation(GenericSipMsrpSession session) {
         ContactId remote = session.getRemoteContact();
         MultimediaMessagingSessionImpl multimediaMessaging = new MultimediaMessagingSessionImpl(
                 session.getSessionID(), mMultimediaMessagingSessionEventBroadcaster, mSipService,
@@ -256,10 +250,9 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
     /**
      * Receive a new SIP session invitation with RTP media
      * 
-     * @param rtpSessionInvite Resolved intent
      * @param session SIP session
      */
-    public void receiveSipRtpSessionInvitation(Intent rtpSessionInvite, GenericSipRtpSession session) {
+    public void receiveSipRtpSessionInvitation(GenericSipRtpSession session) {
         ContactId remote = session.getRemoteContact();
         MultimediaStreamingSessionImpl multimediaStreaming = new MultimediaStreamingSessionImpl(
                 session.getSessionID(), mMultimediaStreamingSessionEventBroadcaster, mSipService,
@@ -344,7 +337,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
     /**
      * Returns a current messaging session from its unique session ID
      * 
-     * @param sessionId
+     * @param sessionId Session ID
      * @return Multimedia messaging session
      * @throws RemoteException
      */
@@ -385,7 +378,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
             sLogger.info("Get multimedia messaging sessions for service ".concat(serviceId));
         }
         try {
-            List<IBinder> multimediaMessagingSessions = new ArrayList<IBinder>();
+            List<IBinder> multimediaMessagingSessions = new ArrayList<>();
             for (IMultimediaMessagingSession multimediaMessagingSession : mMultimediaMessagingCache
                     .values()) {
                 if (multimediaMessagingSession.getServiceId().contains(serviceId)) {
@@ -461,7 +454,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
     /**
      * Returns a current streaming session from its unique session ID
      * 
-     * @param sessionId
+     * @param sessionId Session ID
      * @return Multimedia streaming session or null if not found
      * @throws RemoteException
      */
@@ -502,7 +495,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
             sLogger.info("Get multimedia streaming sessions for service " + serviceId);
         }
         try {
-            List<IBinder> multimediaStreamingSessions = new ArrayList<IBinder>();
+            List<IBinder> multimediaStreamingSessions = new ArrayList<>();
             for (IMultimediaStreamingSession multimediaStreamingSession : mMultimediaStreamingCache
                     .values()) {
                 if (multimediaStreamingSession.getServiceId().contains(serviceId)) {
