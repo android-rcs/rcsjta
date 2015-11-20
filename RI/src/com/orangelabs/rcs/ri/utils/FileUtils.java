@@ -18,8 +18,6 @@
 
 package com.orangelabs.rcs.ri.utils;
 
-import com.gsma.services.rcs.RcsServiceException;
-
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -30,18 +28,8 @@ import android.os.Build;
 import android.provider.OpenableColumns;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 public class FileUtils {
-
-    private static final int KITKAT_VERSION_CODE = 19;
-
-    private static final String TAKE_PERSISTABLE_URI_PERMISSION_METHOD_NAME = "takePersistableUriPermission";
-
-    private static final Class<?>[] TAKE_PERSISTABLE_URI_PERMISSION_PARAM_TYPES = new Class[] {
-            Uri.class, int.class
-    };
 
     /**
      * Fetch the file name from URI
@@ -105,6 +93,17 @@ public class FileUtils {
         }
     }
 
+    private static Intent forgeIntentToOpenFile() {
+        Intent intent;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            intent = new Intent(Intent.ACTION_GET_CONTENT, null);
+        } else {
+            intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        }
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        return intent;
+    }
+
     /**
      * Open file
      * 
@@ -113,47 +112,37 @@ public class FileUtils {
      * @param action the action
      */
     public static void openFile(Activity activity, String mimeType, int action) {
-        Intent intent;
-        if (Build.VERSION.SDK_INT < KITKAT_VERSION_CODE) {
-            intent = new Intent(Intent.ACTION_GET_CONTENT, null);
-        } else {
-            intent = new Intent("android.intent.action.OPEN_DOCUMENT");
-        }
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        Intent intent = forgeIntentToOpenFile();
         intent.setType(mimeType);
         activity.startActivityForResult(intent, action);
     }
 
+    public static void openFiles(Activity activity, String[] mimeTypes, int action) {
+        Intent intent = forgeIntentToOpenFile();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            intent.setType("*/*");
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+            intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
+        } else {
+            intent.setType(mimeTypes[0]);
+        }
+        activity.startActivityForResult(intent, action);
+    }
+
     /**
-     * Using reflection to persist Uri permission in order to support backward compatibility since
-     * this API is available only from Kitkat onwards. Try to persist Uri access permission for the
-     * client to be able to read the contents from this Uri even after the client is restarted after
-     * device reboot.
+     *  Saves the read/write permission for later use by the stack.
      * 
      * @param file Uri of file to transfer
-     * @throws RcsServiceException
      */
-    public static void tryToTakePersistableContentUriPermission(Context context, Uri file)
-            throws RcsServiceException {
+    public static void takePersistableContentUriPermission(Context context, Uri file)
+             {
         if (!(ContentResolver.SCHEME_CONTENT.equals(file.getScheme()))) {
             return;
         }
-        if (android.os.Build.VERSION.SDK_INT < KITKAT_VERSION_CODE) {
-            return;
-        }
-        try {
+        if (android.os.Build.VERSION.SDK_INT >=  Build.VERSION_CODES.KITKAT) {
             ContentResolver contentResolver = context.getContentResolver();
-            Method takePersistableUriPermissionMethod = contentResolver.getClass().getMethod(
-                    TAKE_PERSISTABLE_URI_PERMISSION_METHOD_NAME,
-                    TAKE_PERSISTABLE_URI_PERMISSION_PARAM_TYPES);
-            Object[] methodArgs = new Object[] {
-                    file,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-            };
-            takePersistableUriPermissionMethod.invoke(contentResolver, methodArgs);
-
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            throw new RcsServiceException(e);
+            contentResolver.takePersistableUriPermission(file,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         }
     }
 }

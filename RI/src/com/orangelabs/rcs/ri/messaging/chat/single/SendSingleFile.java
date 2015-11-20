@@ -18,6 +18,8 @@
 
 package com.orangelabs.rcs.ri.messaging.chat.single;
 
+import static com.orangelabs.rcs.ri.utils.FileUtils.takePersistableContentUriPermission;
+
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
@@ -27,7 +29,6 @@ import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.messaging.chat.SendFile;
-import com.orangelabs.rcs.ri.utils.FileUtils;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 
 import android.content.Context;
@@ -81,7 +82,7 @@ public class SendSingleFile extends SendFile {
                 Log.d(LOGTAG, "initiateTransfer mFilename=" + mFilename + " size=" + mFilesize);
             }
             /* Only take persistable permission for content Uris */
-            FileUtils.tryToTakePersistableContentUriPermission(getApplicationContext(), file);
+            takePersistableContentUriPermission(this, file);
             /* Initiate transfer */
             mFileTransfer = mFileTransferService.transferFile(mContact, file, fileicon);
             mTransferId = mFileTransfer.getTransferId();

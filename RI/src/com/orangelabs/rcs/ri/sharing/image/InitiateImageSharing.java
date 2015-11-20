@@ -18,6 +18,8 @@
 
 package com.orangelabs.rcs.ri.sharing.image;
 
+import static com.orangelabs.rcs.ri.utils.FileUtils.takePersistableContentUriPermission;
+
 import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
@@ -298,8 +300,7 @@ public class InitiateImageSharing extends RcsActivity {
                 }
                 try {
                     /* Only take persistable permission for content Uris */
-                    FileUtils.tryToTakePersistableContentUriPermission(getApplicationContext(),
-                            mFile);
+                    takePersistableContentUriPermission(InitiateImageSharing.this, mFile);
 
                     // Initiate sharing
                     mImageSharing = getImageSharingApi().shareImage(remote, mFile);
