@@ -18,6 +18,8 @@
 
 package com.orangelabs.rcs.ri.upload;
 
+import static com.orangelabs.rcs.ri.utils.FileUtils.takePersistableContentUriPermission;
+
 import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.upload.FileUpload;
@@ -292,8 +294,7 @@ public class InitiateFileUpload extends RcsActivity {
                     mUploadThumbnail = ftThumb.isChecked();
 
                     /* Only take persistable permission for content Uris */
-                    FileUtils.tryToTakePersistableContentUriPermission(getApplicationContext(),
-                            mFile);
+                    takePersistableContentUriPermission(InitiateFileUpload.this, mFile);
 
                     // Initiate upload
                     mUpload = getFileUploadApi().uploadFile(mFile, mUploadThumbnail);
