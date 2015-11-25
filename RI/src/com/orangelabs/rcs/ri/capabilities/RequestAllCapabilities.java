@@ -20,6 +20,7 @@ package com.orangelabs.rcs.ri.capabilities;
 
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import com.gsma.services.rcs.contact.ContactId;
 
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.api.connection.utils.RcsActivity;
@@ -31,6 +32,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+
+import java.util.Set;
 
 /**
  * Request capabilities of all contacts
@@ -78,7 +81,7 @@ public class RequestAllCapabilities extends RcsActivity {
                     }
 
                     /* Refresh all contacts */
-                    getCapabilityApi().requestAllContactsCapabilities();
+                    getCapabilityApi().requestContactCapabilities((Set<ContactId>) null);
 
                     /* Display message */
                     Utils.displayLongToast(RequestAllCapabilities.this,

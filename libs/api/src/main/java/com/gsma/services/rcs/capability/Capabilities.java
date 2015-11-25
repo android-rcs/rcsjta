@@ -62,7 +62,7 @@ public class Capabilities implements Parcelable {
     /**
      * List of supported extensions
      */
-    private Set<String> mExtensions = new HashSet<String>();
+    private Set<String> mExtensions = new HashSet<>();
 
     /**
      * Automata flag
@@ -75,8 +75,33 @@ public class Capabilities implements Parcelable {
     private long mTimestamp;
 
     /**
+     * Indicates the file transfer capability is supported.
+     */
+    public static final int CAPABILITY_FILE_TRANSFER_SUPPORT = 0x00000001;
+
+    /**
+     * Indicates the IM capability is supported.
+     */
+    public static final int CAPABILITY_IM_SUPPORT = 0x00000002;
+
+    /**
+     * Indicates the geoloc push capability is supported.
+     */
+    public static final int CAPABILITY_GEOLOC_PUSH_SUPPORT = 0x00000004;
+
+    /**
+     * Indicates the image sharing capability is supported.
+     */
+    public static final int CAPABILITY_IMAGE_SHARING_SUPPORT = 0x00000008;
+
+    /**
+     * Indicates the video sharing capability is supported.
+     */
+    public static final int CAPABILITY_VIDEO_SHARING_SUPPORT = 0x00000010;
+
+    /**
      * Constructor
-     * 
+     *
      * @param imageSharing Image sharing support
      * @param videoSharing Video sharing support
      * @param imSession IM/Chat support
@@ -102,7 +127,7 @@ public class Capabilities implements Parcelable {
 
     /**
      * Constructor
-     * 
+     *
      * @param source Parcelable source
      * @hide
      */
@@ -114,9 +139,9 @@ public class Capabilities implements Parcelable {
 
         boolean containsExtension = source.readInt() != 0;
         if (containsExtension) {
-            List<String> exts = new ArrayList<String>();
+            List<String> exts = new ArrayList<>();
             source.readStringList(exts);
-            mExtensions = new HashSet<String>(exts);
+            mExtensions = new HashSet<>(exts);
         } else {
             mExtensions = null;
         }
@@ -128,7 +153,7 @@ public class Capabilities implements Parcelable {
     /**
      * Describe the kinds of special objects contained in this Parcelable's marshalled
      * representation
-     * 
+     *
      * @return Integer
      * @hide
      */
@@ -138,7 +163,7 @@ public class Capabilities implements Parcelable {
 
     /**
      * Write parcelable object
-     * 
+     *
      * @param dest The Parcel in which the object should be written
      * @param flags Additional flags about how the object should be written
      * @hide
@@ -162,7 +187,7 @@ public class Capabilities implements Parcelable {
 
     /**
      * Parcelable creator
-     * 
+     *
      * @hide
      */
     public static final Parcelable.Creator<Capabilities> CREATOR = new Parcelable.Creator<Capabilities>() {
@@ -177,52 +202,62 @@ public class Capabilities implements Parcelable {
 
     /**
      * Is image sharing supported
-     * 
+     *
      * @return true if supported else returns false
+     * @hide
      */
+    @Deprecated
     public boolean isImageSharingSupported() {
         return mImageSharing;
     }
 
     /**
      * Is video sharing supported
-     * 
+     *
      * @return true if supported else returns false
+     * @hide
      */
+    @Deprecated
     public boolean isVideoSharingSupported() {
         return mVideoSharing;
     }
 
     /**
      * Is IM session supported
-     * 
+     *
      * @return true if supported else returns false
+     * @hide
      */
+    @Deprecated
     public boolean isImSessionSupported() {
         return mImSession;
     }
 
     /**
      * Is file transfer supported
-     * 
+     *
      * @return true if supported else returns false
+     * @hide
      */
+    @Deprecated
     public boolean isFileTransferSupported() {
         return mFileTransfer;
     }
 
     /**
      * Is geolocation push supported
-     * 
+     *
      * @return true if supported else returns false
+     * @hide
      */
+    @Deprecated
     public boolean isGeolocPushSupported() {
         return mGeolocPush;
     }
 
     /**
      * Is extension supported
-     * 
+     *
      * @param tag Feature tag
      * @return true if supported else returns false
      */
@@ -231,8 +266,8 @@ public class Capabilities implements Parcelable {
     }
 
     /**
-     * Get list of supported extensions
-     * 
+     * Gets the set of supported extensions
+     *
      * @return Set of feature tags
      */
     public Set<String> getSupportedExtensions() {
@@ -241,7 +276,7 @@ public class Capabilities implements Parcelable {
 
     /**
      * Is automata
-     * 
+     *
      * @return true if it's an automata else returns false
      */
     public boolean isAutomata() {
@@ -250,11 +285,35 @@ public class Capabilities implements Parcelable {
 
     /**
      * Timestamp of the last capability response (in milliseconds)
-     * 
+     *
      * @return the timestamp of the last capability response
      */
     public long getTimestamp() {
         return mTimestamp;
     }
 
+    private int isCapabilitySupported(boolean supported, int capabilityFlag) {
+        return (supported) ? capabilityFlag : 0;
+    }
+
+    /**
+     * Gets the combination of supported capabilities.
+     * @return the combination of supported capabilities
+     */
+    private int getSupportedCapabilities() {
+        int result = isCapabilitySupported(mFileTransfer,CAPABILITY_FILE_TRANSFER_SUPPORT);
+        result |= isCapabilitySupported(mImSession, CAPABILITY_IM_SUPPORT);
+        result |= isCapabilitySupported(mGeolocPush, CAPABILITY_GEOLOC_PUSH_SUPPORT);
+        result |= isCapabilitySupported(mImageSharing, CAPABILITY_IMAGE_SHARING_SUPPORT);
+        result |= isCapabilitySupported(mVideoSharing, CAPABILITY_VIDEO_SHARING_SUPPORT);
+        return result;
+    }
+
+    /**
+     * Tests for the support of capabilities on this instance.
+     * @return True if the capabilities are supported.
+     */
+    public boolean hasCapabilities(int  capabilities) {
+        return (getSupportedCapabilities() & capabilities) == capabilities;
+    }
 }

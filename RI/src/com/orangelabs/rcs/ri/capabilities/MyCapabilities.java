@@ -38,12 +38,10 @@ public class MyCapabilities extends RcsActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.capabilities_mine);
 
-        // Register to API connection manager
+        /* Register to API connection manager */
         if (!isServiceConnected(RcsServiceName.CAPABILITY)) {
             showMessageThenExit(R.string.label_service_not_available);
             return;
@@ -60,24 +58,23 @@ public class MyCapabilities extends RcsActivity {
         try {
             // Get the current capabilities from the RCS contacts API
             Capabilities capabilities = getCapabilityApi().getMyCapabilities();
-
             // Set capabilities
             CheckBox imageCSh = (CheckBox) findViewById(R.id.image_sharing);
-            imageCSh.setChecked(capabilities.isImageSharingSupported());
+            imageCSh.setChecked(capabilities
+                    .hasCapabilities(Capabilities.CAPABILITY_IMAGE_SHARING_SUPPORT));
             CheckBox videoCSh = (CheckBox) findViewById(R.id.video_sharing);
-            videoCSh.setChecked(capabilities.isVideoSharingSupported());
+            videoCSh.setChecked(capabilities
+                    .hasCapabilities(Capabilities.CAPABILITY_VIDEO_SHARING_SUPPORT));
             CheckBox ft = (CheckBox) findViewById(R.id.file_transfer);
-            ft.setChecked(capabilities.isFileTransferSupported());
+            ft.setChecked(capabilities
+                    .hasCapabilities(Capabilities.CAPABILITY_FILE_TRANSFER_SUPPORT));
             CheckBox im = (CheckBox) findViewById(R.id.im);
-            im.setChecked(capabilities.isImSessionSupported());
+            im.setChecked(capabilities.hasCapabilities(Capabilities.CAPABILITY_IM_SUPPORT));
             CheckBox geolocationPush = (CheckBox) findViewById(R.id.geoloc_push);
-            geolocationPush.setChecked(capabilities.isGeolocPushSupported());
-
-            // Set extensions
+            geolocationPush.setChecked(capabilities
+                    .hasCapabilities(Capabilities.CAPABILITY_GEOLOC_PUSH_SUPPORT));
             TextView extensions = (TextView) findViewById(R.id.extensions);
             extensions.setText(RequestCapabilities.getExtensions(capabilities));
-
-            // Set automata
             CheckBox automata = (CheckBox) findViewById(R.id.automata);
             automata.setChecked(capabilities.isAutomata());
 

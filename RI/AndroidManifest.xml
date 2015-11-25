@@ -105,12 +105,6 @@
             android:name=".contacts.RcsContactsList"
             android:label="@string/menu_list_rcs_contacts" />
         <activity
-            android:name=".contacts.OnlineContactsList"
-            android:label="@string/menu_list_online_contacts" />
-        <activity
-            android:name=".contacts.SupportedContactsList"
-            android:label="@string/menu_list_supported_contacts" />
-        <activity
             android:name=".contacts.ContactVCard"
             android:label="@string/menu_contact_vcard" />
         <activity

@@ -286,7 +286,9 @@ public class SingleChatView extends ChatView {
         }
         try {
             /* Request options for this new contact */
-            mCapabilityService.requestContactCapabilities(mContact);
+            Set<ContactId> setOfContact = new HashSet<>();
+            setOfContact.add(mContact);
+            mCapabilityService.requestContactCapabilities(setOfContact);
 
         } catch (RcsServiceNotRegisteredException e) {
             showMessage(R.string.error_not_registered);
