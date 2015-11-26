@@ -75,15 +75,39 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
         }
 
         public void run() {
-            mCapabilityService.requestContactCapabilities(mContact);
+            try {
+                mCapabilityService.requestContactCapabilities(mContact);
+            } catch (RuntimeException e) {
+                /*
+                 * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+                 * which should be handled/fixed within the code. However the cases when we are
+                 * executing operations on a thread unhandling such exceptions will eventually lead
+                 * to exit the system and thus can bring the whole system down, which is not
+                 * intended.
+                 */
+                sLogger.error(new StringBuilder(
+                        "Failed to handle capabilities request for contact: ").append(mContact)
+                        .toString(), e);
+            }
         }
     }
 
     private class AllCapabilitiesRequester implements Runnable {
 
         public void run() {
-            mCapabilityService.requestContactCapabilities(mContactManager
-                    .getAllContactsFromRcsContactProvider());
+            try {
+                mCapabilityService.requestContactCapabilities(mContactManager
+                        .getAllContactsFromRcsContactProvider());
+            } catch (RuntimeException e) {
+                /*
+                 * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+                 * which should be handled/fixed within the code. However the cases when we are
+                 * executing operations on a thread unhandling such exceptions will eventually lead
+                 * to exit the system and thus can bring the whole system down, which is not
+                 * intended.
+                 */
+                sLogger.error("Failed to handle capabilities request for contacts!", e);
+            }
         }
     }
 
