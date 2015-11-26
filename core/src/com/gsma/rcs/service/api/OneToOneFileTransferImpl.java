@@ -290,7 +290,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             if (session == null) {
                 return mPersistentStorage.getFileIcon();
             }
-            MmContent fileIcon = session.getContent();
+            MmContent fileIcon = session.getFileicon();
             return fileIcon != null ? fileIcon.getUri() : null;
 
         } catch (ServerApiBaseException e) {
