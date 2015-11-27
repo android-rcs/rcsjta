@@ -7,7 +7,7 @@
     <ListView
         android:id="@android:id/list"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_weight="1"
         android:divider="#FFFFFF"
         android:dividerHeight="1dp"
@@ -48,16 +48,18 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignBottom="@+id/send_button"
+                    android:layout_alignParentStart="true"
                     android:layout_alignParentLeft="true"
                     android:layout_alignTop="@+id/send_button"
+                    android:layout_toStartOf="@+id/send_button"
                     android:layout_toLeftOf="@+id/send_button"
-                    android:layout_toRightOf="@+id/send_button"
                     android:textSize="14sp" />
 
                 <Button
                     android:id="@+id/send_button"
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
+                    android:layout_alignParentEnd="true"
                     android:layout_alignParentRight="true"
                     android:text="@string/label_chat_send" />
             </RelativeLayout>
