@@ -352,15 +352,13 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
     @Override
     public void requestContactCapabilities2(List<ContactId> contacts) throws RemoteException {
-        if (contacts == null) {
-            throw new ServerApiIllegalArgumentException("contacts must not be null!");
-        }
         ServerApiUtils.testIms();
-        if (contacts.isEmpty()) {
+        if (contacts == null) {
             if (sLogger.isActivated()) {
                 sLogger.info("Request capabilities for all contacts");
             }
             mCapabilityService.scheduleCapabilityOperation(new AllCapabilitiesRequester());
+
         } else {
             if (sLogger.isActivated()) {
                 sLogger.info("Request capabilities for contacts: " + contacts);
