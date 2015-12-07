@@ -48,4 +48,4 @@ Note: the cryptography API comes from Legion of the [Bouncy Castle Inc] (https:/
 ##Standardisation:
 
 TAPI 1.6
-- see [CR Audio Message](https://github.com/android-rcs/rcsjta.build/tree/master).
+- see [CR Audio Message](https://github.com/android-rcs/rcsjta.build/tree/master/docs/tapi/CR_1.6/RCSJTA_T-API1.6_CR001_AudioMessage.doc).
