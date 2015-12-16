@@ -82,9 +82,9 @@ public class TermsAndConditionsRequest extends Activity {
         mContext = getApplicationContext();
         ContentResolver contentResolver = mContext.getContentResolver();
         mLocalContentResolver = new LocalContentResolver(contentResolver);
-        mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
-        mMessaginLog = MessagingLog.createInstance(mLocalContentResolver, mRcsSettings);
-        mContactManager = ContactManager.createInstance(mContext, contentResolver,
+        mRcsSettings = RcsSettings.getInstance(mLocalContentResolver);
+        mMessaginLog = MessagingLog.getInstance(mLocalContentResolver, mRcsSettings);
+        mContactManager = ContactManager.getInstance(mContext, contentResolver,
                 mLocalContentResolver, mRcsSettings);
 
         setContentView(R.layout.rcs_terms_and_conditions);
@@ -188,7 +188,7 @@ public class TermsAndConditionsRequest extends Activity {
             sLogger.info("User accepts terms and conditions");
         }
         String rcsAccountUsername = getString(R.string.rcs_core_account_username);
-        RcsAccountManager rcsAccountMngr = RcsAccountManager.createInstance(mContext,
+        RcsAccountManager rcsAccountMngr = RcsAccountManager.getInstance(mContext,
                 mContactManager);
         try {
             rcsAccountMngr.createRcsAccount(rcsAccountUsername, true);

@@ -93,8 +93,7 @@ public class HttpsProvisioningService extends Service {
      */
     private static final String ACTION_RETRY = "com.gsma.rcs.provisioning.https.HttpsProvisioningService.ACTION_RETRY";
 
-    private static final Logger sLogger = Logger.getLogger(HttpsProvisioningService.class
-            .getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(HttpsProvisioningService.class.getName());
 
     @Override
     public void onCreate() {
@@ -104,10 +103,10 @@ public class HttpsProvisioningService extends Service {
         mContext = getApplicationContext();
         ContentResolver contentResolver = mContext.getContentResolver();
         mLocalContentResolver = new LocalContentResolver(contentResolver);
-        mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
-        mMessagingLog = MessagingLog.createInstance(mLocalContentResolver, mRcsSettings);
+        mRcsSettings = RcsSettings.getInstance(mLocalContentResolver);
+        mMessagingLog = MessagingLog.getInstance(mLocalContentResolver, mRcsSettings);
         mRetryIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_RETRY), 0);
-        mContactManager = ContactManager.createInstance(mContext, contentResolver,
+        mContactManager = ContactManager.getInstance(mContext, contentResolver,
                 mLocalContentResolver, mRcsSettings);
     }
 
@@ -150,6 +149,7 @@ public class HttpsProvisioningService extends Service {
         mHttpsProvisioningMng = new HttpsProvisioningManager(imei, imsi, mContext,
                 mLocalContentResolver, mRetryIntent, first, user, mRcsSettings, mMessagingLog,
                 mContactManager);
+        mHttpsProvisioningMng.initialize();
         if (logActivated) {
             sLogger.debug(new StringBuilder("Provisioning (first=").append(first)
                     .append(") (user=").append(user).append(") (version=").append(version)

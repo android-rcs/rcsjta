@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2016 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.contact;
@@ -56,8 +60,8 @@ public class ContactManagerTest extends AndroidTestCase {
         Context context = getContext();
         ContentResolver contentResolver = context.getContentResolver();
         LocalContentResolver localContentResolver = new LocalContentResolver(contentResolver);
-        mRcsSettings = RcsSettings.createInstance(localContentResolver);
-        mContactManager = ContactManager.createInstance(context, contentResolver,
+        mRcsSettings = RcsSettings.getInstance(localContentResolver);
+        mContactManager = ContactManager.getInstance(context, contentResolver,
                 localContentResolver, mRcsSettings);
         ContactUtil contactUtils = ContactUtil.getInstance(new ContactUtilMockContext(context));
         mContact = contactUtils.formatContact("+33633139785");

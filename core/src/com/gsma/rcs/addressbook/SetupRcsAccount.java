@@ -48,11 +48,10 @@ public class SetupRcsAccount extends android.accounts.AccountAuthenticatorActivi
             Context ctx = getApplicationContext();
             ContentResolver contentResolver = ctx.getContentResolver();
             LocalContentResolver localContentResolver = new LocalContentResolver(contentResolver);
-            RcsSettings rcsSettings = RcsSettings.createInstance(localContentResolver);
-            ContactManager contactManager = ContactManager.createInstance(ctx, contentResolver,
+            RcsSettings rcsSettings = RcsSettings.getInstance(localContentResolver);
+            ContactManager contactManager = ContactManager.getInstance(ctx, contentResolver,
                     localContentResolver, rcsSettings);
-            RcsAccountManager rcsAccountMngr = RcsAccountManager
-                    .createInstance(ctx, contactManager);
+            RcsAccountManager rcsAccountMngr = RcsAccountManager.getInstance(ctx, contactManager);
 
             String rcsAccountUsername = getString(R.string.rcs_core_account_username);
 

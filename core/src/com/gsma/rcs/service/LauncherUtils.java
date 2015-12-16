@@ -175,7 +175,7 @@ public class LauncherUtils {
         mMessagingLog.deleteAllEntries();
 
         /* Clear all entries in Rich Call tables (image and video) */
-        RichCallHistory.createInstance(localContentResolver);
+        RichCallHistory.getInstance(localContentResolver);
         RichCallHistory.getInstance().deleteAllEntries();
 
         /*
@@ -185,7 +185,7 @@ public class LauncherUtils {
         contactManager.deleteRCSEntries();
 
         /* Remove the RCS account */
-        RcsAccountManager accountUtility = RcsAccountManager.createInstance(ctx, contactManager);
+        RcsAccountManager accountUtility = RcsAccountManager.getInstance(ctx, contactManager);
         accountUtility.removeRcsAccount(null);
         /*
          * Ensure that factory is set up properly to avoid NullPointerException in

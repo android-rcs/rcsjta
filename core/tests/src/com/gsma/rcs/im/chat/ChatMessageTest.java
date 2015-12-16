@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2016 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.im.chat;
@@ -72,9 +76,9 @@ public class ChatMessageTest extends AndroidTestCase {
         mContext = getContext();
         mContentResolver = mContext.getContentResolver();
         mLocalContentResolver = new LocalContentResolver(mContentResolver);
-        mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
+        mRcsSettings = RcsSettings.getInstance(mLocalContentResolver);
         PhoneUtils.initialize(mRcsSettings);
-        mMessagingLog = MessagingLog.createInstance(mLocalContentResolver, mRcsSettings);
+        mMessagingLog = MessagingLog.getInstance(mLocalContentResolver, mRcsSettings);
         ContactUtil contactUtils = ContactUtil.getInstance(new ContactUtilMockContext(mContext));
         mContact = contactUtils.formatContact("+339000000");
         ImsModule.setImsUserProfile(new UserProfile(mContact, "homeDomain", "privateID",
