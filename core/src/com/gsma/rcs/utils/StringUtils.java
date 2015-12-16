@@ -36,6 +36,12 @@ public class StringUtils {
 
     public static final Charset UTF8 = Charset.forName(UTF8_STR);
 
+    public static final String UTF16_STR = "utf-16";
+
+    public static final Charset UTF16 = Charset.forName(UTF16_STR);
+
+    public static final String PDUS = "pdus";
+
     /**
      * Truncate a string to a max length
      * 

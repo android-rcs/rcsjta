@@ -60,11 +60,11 @@ public class AccountChangedReceiver extends BroadcastReceiver {
                     ContentResolver contentResolver = context.getContentResolver();
                     LocalContentResolver localContentResolver = new LocalContentResolver(
                             contentResolver);
-                    RcsSettings rcsSettings = RcsSettings.createInstance(localContentResolver);
+                    RcsSettings rcsSettings = RcsSettings.getInstance(localContentResolver);
                     AndroidFactory.setApplicationContext(context, rcsSettings);
-                    ContactManager contactManager = ContactManager.createInstance(context,
+                    ContactManager contactManager = ContactManager.getInstance(context,
                             contentResolver, localContentResolver, rcsSettings);
-                    RcsAccountManager accountUtility = RcsAccountManager.createInstance(context,
+                    RcsAccountManager accountUtility = RcsAccountManager.getInstance(context,
                             contactManager);
 
                     /* Verify that the RCS account is still here */

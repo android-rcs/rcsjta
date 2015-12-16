@@ -129,7 +129,7 @@ public class ProfileProvisioning extends Activity {
         btn = (Button) findViewById(R.id.gen_btn);
         btn.setOnClickListener(genBtnListener);
 
-        mRcsSettings = RcsSettings.createInstance(new LocalContentResolver(this));
+        mRcsSettings = RcsSettings.getInstance(new LocalContentResolver(this));
 
         updateProfileProvisioningUI(savedInstanceState);
         mInFront = true;

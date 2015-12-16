@@ -73,13 +73,13 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     private final GroupDeliveryInfoLog mGroupChatDeliveryInfoLog;
 
     /**
-     * Create instance
+     * Get or Create Singleton instance of MessagingLog
      * 
      * @param localContentResolver Local content resolver
      * @param rcsSettings the RCS settings accessor
      * @return singleton instance
      */
-    public static MessagingLog createInstance(LocalContentResolver localContentResolver,
+    public static MessagingLog getInstance(LocalContentResolver localContentResolver,
             RcsSettings rcsSettings) {
         if (sInstance != null) {
             return sInstance;

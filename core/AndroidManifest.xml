@@ -179,6 +179,14 @@
             </intent-filter>
         </receiver>
 
+        <!-- Provisioning Push SMS Receiver -->
+        <receiver android:name="com.gsma.rcs.provisioning.https.ProvisioningPushSMSReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.DATA_SMS_RECEIVED" />
+                <data android:scheme="sms" android:host="localhost" android:port="37273"/>
+            </intent-filter>
+        </receiver>
+
         <!-- HTTPS provisioning service -->
         <service android:name="com.gsma.rcs.provisioning.https.HttpsProvisioningService" >
         </service>

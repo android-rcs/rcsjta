@@ -71,7 +71,7 @@ public class ServiceProvisioning extends Activity {
         // Set buttons callback
         Button btn = (Button) findViewById(R.id.save_btn);
         btn.setOnClickListener(saveBtnListener);
-        mRcsSettings = RcsSettings.createInstance(new LocalContentResolver(this));
+        mRcsSettings = RcsSettings.getInstance(new LocalContentResolver(this));
         updateView(bundle);
         mInFront = true;
     }

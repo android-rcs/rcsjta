@@ -431,7 +431,7 @@ public final class ContactManager {
     private static final Logger sLogger = Logger.getLogger(ContactManager.class.getSimpleName());
 
     /**
-     * Create a singleton instance of ContactManager
+     * Get or Create singleton instance of ContactManager
      * 
      * @param ctx Application context
      * @param contentResolver Content resolver
@@ -439,7 +439,7 @@ public final class ContactManager {
      * @param rcsSettings The accessor to RCS settings
      * @return singleton instance of ContactManager
      */
-    public static ContactManager createInstance(Context ctx, ContentResolver contentResolver,
+    public static ContactManager getInstance(Context ctx, ContentResolver contentResolver,
             LocalContentResolver localContentResolver, RcsSettings rcsSettings) {
         if (sInstance != null) {
             return sInstance;

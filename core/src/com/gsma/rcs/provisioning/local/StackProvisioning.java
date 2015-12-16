@@ -113,7 +113,7 @@ public class StackProvisioning extends Activity {
         mConfigModes = getResources().getStringArray(R.array.provisioning_config_mode);
         mNetworkAccesses = getResources().getStringArray(R.array.provisioning_network_access);
         mEnableRcseSwitch = getResources().getStringArray(R.array.provisioning_enable_rcs_switch);
-        mRcsSettings = RcsSettings.createInstance(new LocalContentResolver(this));
+        mRcsSettings = RcsSettings.getInstance(new LocalContentResolver(this));
         updateView(bundle);
         isInFront = true;
     }
