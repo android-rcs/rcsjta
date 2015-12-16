@@ -89,12 +89,12 @@ public class HistoryLog {
     }
 
     /**
-     * Create instance
+     * Get or Create Singleton instance of HistoryLog
      * 
      * @param localContentResolver Local content resolver
      * @return HistoryLog instance
      */
-    public static HistoryLog createInstance(LocalContentResolver localContentResolver) {
+    public static HistoryLog getInstance(LocalContentResolver localContentResolver) {
         if (sInstance != null) {
             return sInstance;
         }

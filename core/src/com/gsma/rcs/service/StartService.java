@@ -134,12 +134,12 @@ public class StartService extends Service {
         mCtx = getApplicationContext();
         ContentResolver contentResolver = mCtx.getContentResolver();
         mLocalContentResolver = new LocalContentResolver(mCtx);
-        mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
-        mMessagingLog = MessagingLog.createInstance(mLocalContentResolver, mRcsSettings);
+        mRcsSettings = RcsSettings.getInstance(mLocalContentResolver);
+        mMessagingLog = MessagingLog.getInstance(mLocalContentResolver, mRcsSettings);
 
-        mContactManager = ContactManager.createInstance(mCtx, contentResolver,
+        mContactManager = ContactManager.getInstance(mCtx, contentResolver,
                 mLocalContentResolver, mRcsSettings);
-        mAccountUtility = RcsAccountManager.createInstance(mCtx, mContactManager);
+        mAccountUtility = RcsAccountManager.getInstance(mCtx, mContactManager);
 
         mRcsAccountUsername = getString(R.string.rcs_core_account_username);
 

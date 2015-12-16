@@ -257,7 +257,7 @@ public class RcsServiceControlReceiver extends BroadcastReceiver {
             sLogger.debug("Received: " + action);
         }
         LocalContentResolver localContentResolver = new LocalContentResolver(ctx);
-        mRcsSettings = RcsSettings.createInstance(localContentResolver);
+        mRcsSettings = RcsSettings.getInstance(localContentResolver);
 
         Bundle result = getResultExtras(true);
         IntentProcessor intentProcessor = new IntentProcessor(ctx, intent, result);

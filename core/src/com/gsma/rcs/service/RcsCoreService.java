@@ -152,11 +152,11 @@ public class RcsCoreService extends Service implements CoreListener {
         mCtx = getApplicationContext();
         mContentResolver = mCtx.getContentResolver();
         mLocalContentResolver = new LocalContentResolver(mContentResolver);
-        mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
-        mHistoryLog = HistoryLog.createInstance(mLocalContentResolver);
-        mRichCallHistory = RichCallHistory.createInstance(mLocalContentResolver);
-        mMessagingLog = MessagingLog.createInstance(mLocalContentResolver, mRcsSettings);
-        mContactManager = ContactManager.createInstance(mCtx, mContentResolver,
+        mRcsSettings = RcsSettings.getInstance(mLocalContentResolver);
+        mHistoryLog = HistoryLog.getInstance(mLocalContentResolver);
+        mRichCallHistory = RichCallHistory.getInstance(mLocalContentResolver);
+        mMessagingLog = MessagingLog.getInstance(mLocalContentResolver, mRcsSettings);
+        mContactManager = ContactManager.getInstance(mCtx, mContentResolver,
                 mLocalContentResolver, mRcsSettings);
         AndroidFactory.setApplicationContext(mCtx, mRcsSettings);
         final HandlerThread backgroundThread = new HandlerThread(BACKGROUND_THREAD_NAME);
