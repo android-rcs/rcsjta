@@ -30,6 +30,8 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 
 import android.net.Uri;
 
+import java.io.File;
+
 /**
  * File transfer over HTTP thumbnail
  * 
@@ -146,7 +148,7 @@ public class FileTransferHttpThumbnail {
     public MmContent getLocalMmContent(String fileTransferId) {
         String iconName = FileTransferUtils.buildFileiconUrl(fileTransferId, mMimeType);
         return ContentManager.createMmContent(
-                ContentManager.generateUriForReceivedContent(iconName, mMimeType, mRcsSettings),
+                Uri.fromFile(new File(mRcsSettings.getFileIconRootDirectory().concat(iconName))),
                 mSize, iconName);
     }
 }

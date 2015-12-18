@@ -82,6 +82,7 @@
     <string name="Directory_path_to_store_photos">Directory path to store photos:</string>
     <string name="Directory_path_to_store_videos">Directory path to store videos:</string>
     <string name="Directory_path_to_store_files">Directory path to store files:</string>
+    <string name="Directory_path_to_store_fileicons">Directory path to store file icons:</string>
     <string name="SMS_fallback_service">SMS fallback service</string>
     <string name="Store_and_Forward_service_warning">Store and Forward service warning</string>
     <string name="Auto_accept_file_transfer">Auto-accept file transfer</string>

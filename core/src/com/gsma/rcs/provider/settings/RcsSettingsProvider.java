@@ -347,6 +347,8 @@ public class RcsSettingsProvider extends ContentProvider {
                     RcsSettingsData.DEFAULT_DIRECTORY_PATH_VIDEOS);
             addParameter(db, RcsSettingsData.DIRECTORY_PATH_FILES,
                     RcsSettingsData.DEFAULT_DIRECTORY_PATH_FILES);
+            addParameter(db, RcsSettingsData.DIRECTORY_PATH_FILEICONS,
+                    RcsSettingsData.DEFAULT_DIRECTORY_PATH_FILEICONS);
             addParameter(db, RcsSettingsData.SECURE_MSRP_OVER_WIFI,
                     RcsSettingsData.DEFAULT_SECURE_MSRP_OVER_WIFI);
             addParameter(db, RcsSettingsData.SECURE_RTP_OVER_WIFI,
