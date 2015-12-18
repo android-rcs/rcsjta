@@ -1230,6 +1230,13 @@ public class RcsSettingsData {
             .getExternalStorageDirectory() + "/rcs/files/";
 
     /**
+     * Directory path for file icons
+     */
+    public static final String DIRECTORY_PATH_FILEICONS = "DirectoryPathFileIcons";
+    /* package private */static final String DEFAULT_DIRECTORY_PATH_FILEICONS = Environment
+            .getExternalStorageDirectory() + "/rcs/fileicons/";
+
+    /**
      * Secure MSRP over Wi-Fi
      */
     public static final String SECURE_MSRP_OVER_WIFI = "SecureMsrpOverWifi";
