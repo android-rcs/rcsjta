@@ -459,7 +459,7 @@ public class SipStackImpl extends SIPTransactionStack implements
 	// If set to true then the application want to receive
 	// unsolicited NOTIFYs, ie NOTIFYs that don't match any dialog
 	boolean deliverUnsolicitedNotify = false;
-	
+
 	// Stack semaphore (global lock).
 	private Semaphore stackSemaphore = new Semaphore(1);
 
@@ -474,8 +474,10 @@ public class SipStackImpl extends SIPTransactionStack implements
 
 			// JvB: patch from Sebastien Mazy, issue with mismatching
 			// ciphersuites
-			"TLS_DH_anon_WITH_AES_128_CBC_SHA",
-			"SSL_DH_anon_WITH_3DES_EDE_CBC_SHA", };
+                        // Below ciphersuites are not supported anymore with Android 6.0
+                        //"TLS_DH_anon_WITH_AES_128_CBC_SHA",
+                        //"SSL_DH_anon_WITH_3DES_EDE_CBC_SHA",
+        };
 
 	// Supported protocols for TLS client: can be overridden by application
 	private String[] enabledProtocols = {
