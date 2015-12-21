@@ -7,3 +7,5 @@ How to build the project under Android Studio.
 
 **Warning: under Android Studio you need also to remove the extension"rcs" or "RCS" from the list "Ignore files and folder" in the menu "Settings / Editor / File Types".**
 
+<img src='https://github.com/android-rcs/rcsjta/blob/master/studio/ignored.jpg'>
+
