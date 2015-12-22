@@ -71,6 +71,7 @@ import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Locale;
 
 /**
  * Provisioning via network manager
@@ -81,6 +82,7 @@ import java.net.URL;
  * @author yplo6403
  */
 public class HttpsProvisioningManager {
+
     /**
      * Rate to convert from seconds to milliseconds
      */
@@ -119,6 +121,21 @@ public class HttpsProvisioningManager {
     private static final String PROVISIONING_OPERATIONS_THREAD_NAME = "ProvisioningOps";
 
     /**
+     * Result content while waiting for OTP
+     */
+    private static final String RESULT_CONTENT = "Otp sent to terminal";
+
+    /**
+     * Timer internal for OTP
+     */
+    private static final int OTP_TIME_OUT = 120000;
+
+    /**
+     * Retry max count for OTP
+     */
+    private static final int RETRY_MAX_COUNT_OTP = 10;
+
+    /**
      * First launch flag
      */
     private boolean mFirstProvAfterBoot = false;
@@ -133,6 +150,11 @@ public class HttpsProvisioningManager {
     private HttpsProvisioningSMS mSmsManager;
 
     private HttpsProvisioningConnection mNetworkCnx;
+
+    /**
+     * Waiting for OTP flag
+     */
+    private boolean mWaitingForOTP;
 
     private final LocalContentResolver mLocalContentResolver;
 
@@ -287,7 +309,7 @@ public class HttpsProvisioningManager {
                     HttpsProvisioningUtils.getRcsProfile());
             if (mRcsSettings.isEnrichCallingServiceSupported()) {
                 sHttpsReqUriBuilder.appendQueryParameter(PARAM_RCS_PROFILE,
-                    HttpsProvisioningUtils.getEnrichCallingProfile());
+                        HttpsProvisioningUtils.getEnrichCallingProfile());
             }
             sHttpsReqUriBuilder.appendQueryParameter(PARAM_CLIENT_VENDOR,
                     TerminalInfo.getClientVendor());
@@ -300,7 +322,6 @@ public class HttpsProvisioningManager {
             sHttpsReqUriBuilder.appendQueryParameter(PARAM_TERMINAL_SW_VERSION,
                     TerminalInfo.getTerminalSoftwareVersion());
         }
-
         int provisioningVersion = mRcsSettings.getProvisioningVersion();
         if (mUser && Version.DISABLED_DORMANT.toInt() == provisioningVersion) {
             provisioningVersion = LauncherUtils.getProvisioningVersion(mCtx);
@@ -319,13 +340,11 @@ public class HttpsProvisioningManager {
         if (msisdn != null) {
             uriBuilder.appendQueryParameter(PARAM_MSISDN, msisdn.toString());
         }
-
         /*
-         * RCS standard:
-         * "The token shall be stored on the device so it can be used in subsequent configuration
-         * requests over non-3GPP access." In 3GPP access, the token is only compulsory for non
-         * 3GPP access and is not used for 3GPP access. It shall then not be inserted as a URI
-         * parameter for 3GPP access.
+         * RCS standard: "The token shall be stored on the device so it can be used in subsequent
+         * configuration requests over non-3GPP access." In 3GPP access, the token is only
+         * compulsory for non 3GPP access and is not used for 3GPP access. It shall then not be
+         * inserted as a URI parameter for 3GPP access.
          */
         if (NetworkUtils.getNetworkAccessType() == NetworkUtils.NETWORK_ACCESS_WIFI) {
             /*
@@ -352,13 +371,21 @@ public class HttpsProvisioningManager {
         HttpsProvisioningResult result = new HttpsProvisioningResult();
         boolean logActivated = sLogger.isActivated();
         if (logActivated) {
-            sLogger.debug("HTTP provisioning - Send first HTTPS request to get OTP");
+            sLogger.debug("Send 1rst HTTPS request to get OTP (msisdn=" + msisdn + ")(retry_count="
+                    + mRetryCount + ")(waitingOTP=" + mWaitingForOTP + ")");
         }
         HttpURLConnection urlConnection = null;
         try {
-            if (msisdn == null) {
-                msisdn = HttpsProvisioningMSISDNInput.getInstance().displayPopupAndWaitResponse(
-                        mCtx);
+            /* Condition to check to show MSISDN popup after OTP time out */
+            if (msisdn != null && mRetryCount > 0 && mWaitingForOTP) {
+                mWaitingForOTP = false;
+                ContactId contact = mRcsSettings.getUserProfileImsUserName();
+                /* Displays a popup with previously given MSISDN to edit and retry for OTP */
+                msisdn = HttpsProvisioningMsisdnInput.getInstance().displayPopupAndWaitResponse(
+                        mCtx, contact);
+                if (!contactIdEquals(contact, msisdn)) {
+                    mRcsSettings.setUserProfileImsUserName(msisdn);
+                }
                 if (msisdn == null) {
                     if (logActivated) {
                         sLogger.warn("No MSISDN set by end user: cannot authenticate!");
@@ -370,7 +397,6 @@ public class HttpsProvisioningManager {
                     sLogger.debug("MSISDN set by end user=".concat(msisdn.toString()));
                 }
             }
-
             /* Generate the SMS port for provisioning */
             String smsPortForOTP = HttpsProvisioningSMS.generateSmsPortForProvisioning();
             /*
@@ -398,15 +424,22 @@ public class HttpsProvisioningManager {
                         sLogger.debug("HTTPS request returns with 200 OK");
                     }
                     result.content = readStream(urlConnection.getInputStream());
-
                     /*
                      * If the content is empty, means that the configuration XML is not present and
                      * the Token is invalid then we need to wait for the SMS with OTP.
                      */
-                    if (TextUtils.isEmpty(result.content)) {
-                        result.waitingForSMSOTP = true;
-                        /* Register SMS provisioning receiver */
-                        mSmsManager.registerSmsProvisioningReceiver(smsPortForOTP, primaryUri);
+                    if (TextUtils.isEmpty(result.content)
+                            || result.content.contains(RESULT_CONTENT)) {
+                        if (mRetryCount < RETRY_MAX_COUNT_OTP) {
+                            mRetryCount++;
+                            mWaitingForOTP = true;
+                            result.waitingForSMSOTP = true;
+                            /* Register SMS provisioning receiver */
+                            mSmsManager.registerSmsProvisioningReceiver(smsPortForOTP, primaryUri);
+                            /* Start retry alarm for OTP */
+                            HttpsProvisioningService.startRetryAlarm(mCtx, mRetryIntent,
+                                    OTP_TIME_OUT);
+                        }
                     }
                     return result;
 
@@ -414,7 +447,26 @@ public class HttpsProvisioningManager {
                     if (logActivated) {
                         sLogger.debug("Request to get OTP failed: Forbidden. MSISDN=" + msisdn);
                     }
-                    return sendFirstRequestsToRequireOTP(null, primaryUri, secondaryUri);
+                    if (mRetryCount < HttpsProvisioningUtils.RETRY_MAX_COUNT) {
+                        mRetryCount++;
+                        ContactId contact = mRcsSettings.getUserProfileImsUserName();
+                        msisdn = HttpsProvisioningMsisdnInput.getInstance()
+                                .displayPopupAndWaitResponse(mCtx, contact);
+                        if (!contactIdEquals(contact, msisdn)) {
+                            mRcsSettings.setUserProfileImsUserName(msisdn);
+                        }
+                        if (msisdn == null) {
+                            if (logActivated) {
+                                sLogger.warn("No MSISDN set by end user: cannot authenticate!");
+                            }
+                            result.code = HttpsProvisioningResult.UNKNOWN_MSISDN_CODE;
+                            return result;
+                        }
+                        if (logActivated) {
+                            sLogger.debug("MSISDN set by end user=".concat(msisdn.toString()));
+                        }
+                        return sendFirstRequestsToRequireOTP(msisdn, primaryUri, secondaryUri);
+                    }
 
                 case HttpURLConnection.HTTP_UNAVAILABLE:
                     result.retryAfter = getRetryAfter(urlConnection);
@@ -435,6 +487,10 @@ public class HttpsProvisioningManager {
                 mSmsManager.unregisterSmsProvisioningReceiver();
             }
         }
+    }
+
+    private boolean contactIdEquals(ContactId a, ContactId b) {
+        return a == b || (a != null && a.equals(b));
     }
 
     /**
@@ -463,8 +519,8 @@ public class HttpsProvisioningManager {
      * @return provisioning URI
      */
     private String buildProvisioningAddress() {
-        String mnc = String.format("%03d", mRcsSettings.getMobileNetworkCode());
-        String mcc = String.format("%03d", mRcsSettings.getMobileCountryCode());
+        String mnc = String.format(Locale.US, "%03d", mRcsSettings.getMobileNetworkCode());
+        String mcc = String.format(Locale.US, "%03d", mRcsSettings.getMobileCountryCode());
         return "config.rcs.mnc" + mnc + ".mcc" + mcc + ".pub.3gppnetwork.org";
     }
 
@@ -519,7 +575,6 @@ public class HttpsProvisioningManager {
             }
             CookieManager cookieManager = new CookieManager();
             CookieHandler.setDefault(cookieManager);
-
             NetworkInfo networkInfo = mNetworkCnx.getConnectionMngr().getActiveNetworkInfo();
             /* If network is not mobile network, use request with OTP */
             if (networkInfo != null && networkInfo.getType() != ConnectivityManager.TYPE_MOBILE) {
@@ -566,7 +621,6 @@ public class HttpsProvisioningManager {
             }
             urlConnection.disconnect();
             urlConnection = null;
-
             /* Format second HTTPS request */
             String request = requestUri + getHttpsRequestArguments(null, null, null);
             if (logActivated) {
@@ -622,10 +676,8 @@ public class HttpsProvisioningManager {
     /* package private */void updateConfig() throws RcsAccountException, IOException {
         // Cancel previous retry alarm
         HttpsProvisioningService.cancelRetryAlarm(mCtx, mRetryIntent);
-
         // Get config via HTTPS
         HttpsProvisioningResult result = getConfig();
-
         // Process HTTPS provisioning result
         processProvisioningResult(result);
     }
@@ -702,21 +754,17 @@ public class HttpsProvisioningManager {
         if (HttpURLConnection.HTTP_OK == result.code) {
             // Reset after 511 counter
             mRetryAfter511ErrorCount = 0;
-
             if (result.waitingForSMSOTP) {
                 if (logActivated) {
                     sLogger.debug("Waiting for SMS with OTP.");
                 }
                 return;
             }
-
             if (logActivated) {
                 sLogger.debug("Provisioning request successful");
             }
-
             // Parse the received content
             ProvisioningParser parser = new ProvisioningParser(result.content, mRcsSettings);
-
             /*
              * Save GSMA release set into the provider. The Node "SERVICES" is mandatory in GSMA
              * release Blackbird and not present in previous one (i.e. Albatros). It is the absence
@@ -735,35 +783,28 @@ public class HttpsProvisioningManager {
             mRcsSettings.setGsmaRelease(GsmaRelease.ALBATROS);
             /* Before parsing the provisioning, the client Messaging mode is set to NONE */
             mRcsSettings.setMessagingMode(MessagingMode.NONE);
-
             try {
                 parser.parse(gsmaRelease, messagingMode, mFirstProvAfterBoot);
                 // Successfully provisioned, 1st time reg finalized
                 mFirstProvAfterBoot = false;
                 ProvisioningInfo info = parser.getProvisioningInfo();
-
                 // Save version
                 int version = info.getVersion();
                 long validity = info.getValidity();
                 if (logActivated) {
                     sLogger.debug("Provisioning version=" + version + ", validity=" + validity);
                 }
-
                 // Save the latest positive version of the configuration
                 LauncherUtils.saveProvisioningVersion(mCtx, version);
-
                 // Save the validity of the configuration
                 LauncherUtils.saveProvisioningValidity(mCtx, validity);
                 mRcsSettings.setProvisioningVersion(version);
-
                 // Save token
                 String token = info.getToken();
                 mRcsSettings.setProvisioningToken(token);
-
                 mRcsSettings.setFileTransferHttpSupported(mRcsSettings.getFtHttpServer() != null
                         && mRcsSettings.getFtHttpLogin() != null
                         && mRcsSettings.getFtHttpPassword() != null);
-
                 // Reset retry alarm counter
                 mRetryCount = 0;
                 if (Version.DISABLED_DORMANT.toInt() == version) {
@@ -839,19 +880,17 @@ public class HttpsProvisioningManager {
                         LauncherUtils.launchRcsCoreService(mCtx, mRcsSettings);
                     }
                 }
-
                 IntentUtils.sendBroadcastEvent(mCtx,
                         RcsService.ACTION_SERVICE_PROVISIONING_DATA_CHANGED);
+
             } catch (SAXException e) {
                 if (logActivated) {
                     sLogger.debug("Can't parse provisioning document");
                 }
                 // Restore GSMA release saved before parsing of the provisioning
                 mRcsSettings.setGsmaRelease(gsmaRelease);
-
                 // Restore the client messaging mode saved before parsing of the provisioning
                 mRcsSettings.setMessagingMode(messagingMode);
-
                 if (mFirstProvAfterBoot) {
                     if (logActivated) {
                         sLogger.debug("As this is first launch and we do not have a valid configuration yet, retry later");
@@ -892,6 +931,7 @@ public class HttpsProvisioningManager {
                     mContactManager);
             // Reason: Provisioning forbidden
             provisioningFails(ProvisioningFailureReasons.PROVISIONING_FORBIDDEN);
+
         } else if (HTTP_STATUS_ERROR_NETWORK_AUTHENTICATION_REQUIRED == result.code) {
             // Provisioning authentication required
             if (logActivated) {
@@ -935,8 +975,9 @@ public class HttpsProvisioningManager {
             LauncherUtils.launchRcsCoreService(context, mRcsSettings);
             if (timerRetry > 0) {
                 HttpsProvisioningService.startRetryAlarm(context, mRetryIntent, timerRetry);
-            } else
+            } else {
                 retry();
+            }
         } else {
             // Only retry provisioning if service is disabled dormant (-3)
             if (Version.DISABLED_DORMANT.toInt() == version) {
@@ -966,14 +1007,11 @@ public class HttpsProvisioningManager {
             }
             return true;
         }
-
         if (sLogger.isActivated()) {
             sLogger.debug("No more retry after 511 error for provisioning");
         }
-
         // Reset after 511 counter
         mRetryAfter511ErrorCount = 0;
-
         return false;
     }
 
@@ -1043,7 +1081,6 @@ public class HttpsProvisioningManager {
     public void resetCounters() {
         // Reset retry alarm counter
         mRetryCount = 0;
-
         // Reset after 511 counter
         mRetryAfter511ErrorCount = 0;
     }
