@@ -54,6 +54,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.text.TextUtils;
@@ -81,6 +82,11 @@ import java.net.URL;
  * @author yplo6403
  */
 public class HttpsProvisioningManager {
+
+    public static final String RETRY_EXTRA = "retry-extra";
+
+    public static final String EXTRA_CONTACT = "contact";
+
     /**
      * Rate to convert from seconds to milliseconds
      */
@@ -119,6 +125,21 @@ public class HttpsProvisioningManager {
     private static final String PROVISIONING_OPERATIONS_THREAD_NAME = "ProvisioningOps";
 
     /**
+     * Result content while waiting for OTP
+     */
+    private static final String RESULT_CONTENT = "Otp sent to terminal";
+
+    /**
+     * Timer internal for OTP
+     */
+    private static final int OTP_TIME_OUT = 120000;
+
+    /**
+     * Retry max count for OTP
+     */
+    private static final int RETRY_MAX_COUNT_OTP = 10;
+
+    /**
      * First launch flag
      */
     private boolean mFirstProvAfterBoot = false;
@@ -133,6 +154,11 @@ public class HttpsProvisioningManager {
     private HttpsProvisioningSMS mSmsManager;
 
     private HttpsProvisioningConnection mNetworkCnx;
+
+    /**
+     * Waiting for OTP flag
+     */
+    private boolean mWaitingForOTP;
 
     private final LocalContentResolver mLocalContentResolver;
 
@@ -351,9 +377,18 @@ public class HttpsProvisioningManager {
         }
         HttpURLConnection urlConnection = null;
         try {
-            if (msisdn == null) {
+            /* Condition to check to show MSISDN popup after OTP time out */
+            if (msisdn != null && mRetryCount > 0 && mWaitingForOTP) {
+                mWaitingForOTP = false;
+                ContactId contact = mRcsSettings.getUserProfileImsUserName();
+
+                Bundle savedInstance = new Bundle();
+                if (contact != null) {
+                    savedInstance.putParcelable(EXTRA_CONTACT, contact);
+                }
+                /* Displays a popup with previously given MSISDN to edit and retry for OTP */
                 msisdn = HttpsProvisioningMSISDNInput.getInstance().displayPopupAndWaitResponse(
-                        mCtx);
+                        mCtx, savedInstance);
                 if (msisdn == null) {
                     if (logActivated) {
                         sLogger.warn("No MSISDN set by end user: cannot authenticate!");
@@ -398,10 +433,21 @@ public class HttpsProvisioningManager {
                      * If the content is empty, means that the configuration XML is not present and
                      * the Token is invalid then we need to wait for the SMS with OTP.
                      */
-                    if (TextUtils.isEmpty(result.content)) {
-                        result.waitingForSMSOTP = true;
-                        /* Register SMS provisioning receiver */
-                        mSmsManager.registerSmsProvisioningReceiver(smsPortForOTP, primaryUri);
+                    if (TextUtils.isEmpty(result.content)
+                            || result.content.contains(RESULT_CONTENT)) {
+                        if (mRetryCount < RETRY_MAX_COUNT_OTP) {
+                            mRetryCount++;
+                            mWaitingForOTP = true;
+                            result.waitingForSMSOTP = true;
+                            /* Register SMS provisioning receiver */
+                            mSmsManager.registerSmsProvisioningReceiver(smsPortForOTP, primaryUri);
+                            /* Start retry alarm for OTP */
+                            HttpsProvisioningService.startRetryAlarm(mCtx, mRetryIntent,
+                                    OTP_TIME_OUT);
+                            if (logActivated) {
+                                sLogger.debug("Waiting for OTP");
+                            }
+                        }
                     }
                     return result;
 
@@ -409,7 +455,28 @@ public class HttpsProvisioningManager {
                     if (logActivated) {
                         sLogger.debug("Request to get OTP failed: Forbidden. MSISDN=" + msisdn);
                     }
-                    return sendFirstRequestsToRequireOTP(null, primaryUri, secondaryUri);
+                    if (mRetryCount < HttpsProvisioningUtils.RETRY_MAX_COUNT) {
+                        mRetryCount++;
+                        ContactId contact = mRcsSettings.getUserProfileImsUserName();
+
+                        Bundle savedInstance = new Bundle();
+                        if (contact != null) {
+                            savedInstance.putParcelable(EXTRA_CONTACT, contact);
+                        }
+                        msisdn = HttpsProvisioningMSISDNInput.getInstance()
+                                .displayPopupAndWaitResponse(mCtx, savedInstance);
+                        if (msisdn == null) {
+                            if (logActivated) {
+                                sLogger.warn("No MSISDN set by end user: cannot authenticate!");
+                            }
+                            result.code = HttpsProvisioningResult.UNKNOWN_MSISDN_CODE;
+                            return result;
+                        }
+                        if (logActivated) {
+                            sLogger.debug("MSISDN set by end user=".concat(msisdn.toString()));
+                        }
+                        return sendFirstRequestsToRequireOTP(msisdn, primaryUri, secondaryUri);
+                    }
 
                 case HttpURLConnection.HTTP_UNAVAILABLE:
                     result.retryAfter = getRetryAfter(urlConnection);

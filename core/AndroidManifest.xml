@@ -68,6 +68,8 @@
 
         <activity
             android:name="com.gsma.rcs.provisioning.https.HttpsProvisioningAlertDialog"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:excludeFromRecents="true"
             android:theme="@style/Theme.UserDialog" />
 
         <!-- RCS account: authenticator service for user's account information -->
