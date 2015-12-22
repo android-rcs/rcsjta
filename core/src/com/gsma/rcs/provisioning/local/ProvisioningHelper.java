@@ -62,9 +62,9 @@ public class ProvisioningHelper {
     /**
      * Constructor
      * 
-     * @param activity
-     * @param rcsSettings
-     * @param bundle
+     * @param activity The activity
+     * @param rcsSettings the RCS settings accessor
+     * @param bundle the bundle to save provisioning settings
      */
     public ProvisioningHelper(Activity activity, RcsSettings rcsSettings, Bundle bundle) {
         mActivity = activity;

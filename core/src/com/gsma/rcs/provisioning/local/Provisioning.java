@@ -42,6 +42,7 @@ import android.widget.TabHost;
  * Main
  * 
  * @author jexa7410
+ * @author Philippe LEMORDANT
  */
 @SuppressWarnings("deprecation")
 public class Provisioning extends TabActivity {
@@ -71,11 +72,11 @@ public class Provisioning extends TabActivity {
      * 
      * @param viewID the view ID for the text edit
      * @param settingsKey the key of the RCS parameter
-     * @param helper
+     * @param helper the provisioning helper
      */
     /* package private */static void setStringEditTextParam(int viewID, String settingsKey,
             ProvisioningHelper helper) {
-        String parameter = null;
+        String parameter;
         Bundle bundle = helper.getBundle();
         if (bundle != null && bundle.containsKey(settingsKey)) {
             parameter = bundle.getString(settingsKey);
@@ -91,11 +92,11 @@ public class Provisioning extends TabActivity {
      * 
      * @param viewID the view ID for the text edit
      * @param settingsKey the key of the RCS parameter
-     * @param helper
+     * @param helper the provisioning helper
      */
     /* package private */static void setIntegerEditTextParam(int viewID, String settingsKey,
             ProvisioningHelper helper) {
-        String parameter = null;
+        String parameter;
         Bundle bundle = helper.getBundle();
         if (bundle != null && bundle.containsKey(settingsKey)) {
             parameter = bundle.getString(settingsKey);
@@ -111,11 +112,11 @@ public class Provisioning extends TabActivity {
      * 
      * @param viewID the view ID for the text edit
      * @param settingsKey the key of the RCS parameter
-     * @param helper
+     * @param helper the provisioning helper
      */
     /* package private */static void setLongEditTextParam(int viewID, String settingsKey,
             ProvisioningHelper helper) {
-        String parameter = null;
+        String parameter;
         Bundle bundle = helper.getBundle();
         if (bundle != null && bundle.containsKey(settingsKey)) {
             parameter = bundle.getString(settingsKey);
@@ -131,11 +132,11 @@ public class Provisioning extends TabActivity {
      * 
      * @param viewID the view ID for the text edit
      * @param settingsKey the key of the RCS parameter
-     * @param helper
+     * @param helper the provisioning helper
      */
     /* package private */static void setUriEditTextParam(int viewID, String settingsKey,
             ProvisioningHelper helper) {
-        String parameter = null;
+        String parameter;
         Bundle bundle = helper.getBundle();
         if (bundle != null && bundle.containsKey(settingsKey)) {
             parameter = bundle.getString(settingsKey);
@@ -152,11 +153,11 @@ public class Provisioning extends TabActivity {
      * 
      * @param viewID the view ID for the text edit
      * @param settingsKey the key of the RCS parameter
-     * @param helper
+     * @param helper the provisioning helper
      */
     /* package private */static void setContactIdEditTextParam(int viewID, String settingsKey,
             ProvisioningHelper helper) {
-        String parameter = null;
+        String parameter;
         Bundle bundle = helper.getBundle();
         if (bundle != null && bundle.containsKey(settingsKey)) {
             parameter = bundle.getString(settingsKey);
@@ -173,11 +174,11 @@ public class Provisioning extends TabActivity {
      * 
      * @param viewID the view ID for the check box
      * @param settingsKey the key of the RCS parameter
-     * @param helper
+     * @param helper the provisioning helper
      */
     /* package private */static void setCheckBoxParam(int viewID, String settingsKey,
             ProvisioningHelper helper) {
-        Boolean parameter = null;
+        Boolean parameter;
         Bundle bundle = helper.getBundle();
         if (bundle != null && bundle.containsKey(settingsKey)) {
             parameter = bundle.getBoolean(settingsKey);
@@ -195,12 +196,12 @@ public class Provisioning extends TabActivity {
      * @param settingsKey the key of the RCS parameter
      * @param isSettingInteger True is setting value is of integer type
      * @param selection table of string representing choice selection
-     * @param helper
+     * @param helper the provisioning helper
      * @return the index of the spinner selection
      */
     /* package private */static int setSpinnerParameter(final Spinner spinner, String settingsKey,
             boolean isSettingInteger, final String[] selection, ProvisioningHelper helper) {
-        Integer parameter = null;
+        Integer parameter;
         Bundle bundle = helper.getBundle();
         if (bundle != null && bundle.containsKey(settingsKey)) {
             parameter = bundle.getInt(settingsKey);
@@ -221,16 +222,16 @@ public class Provisioning extends TabActivity {
      * 
      * @param viewID the view ID
      * @param settingsKey the key of the RCS parameter
-     * @param helper
+     * @param helper the provisioning helper
      */
     /* package private */static void saveStringEditTextParam(int viewID, String settingsKey,
             ProvisioningHelper helper) {
-        EditText txt = (EditText) helper.getActivity().findViewById(viewID);
+        EditText editText = (EditText) helper.getActivity().findViewById(viewID);
         Bundle bundle = helper.getBundle();
+        String text = editText.getText().toString().trim();
         if (bundle != null) {
-            bundle.putString(settingsKey, txt.getText().toString());
+            bundle.putString(settingsKey, text);
         } else {
-            String text = txt.getText().toString();
             helper.getRcsSettings().writeString(settingsKey, "".equals(text) ? null : text);
         }
     }
@@ -240,7 +241,7 @@ public class Provisioning extends TabActivity {
      * 
      * @param viewID the view ID
      * @param settingsKey the key of the RCS parameter
-     * @param helper
+     * @param helper the provisioning helper
      */
     /* package private */static void saveContactIdEditTextParam(int viewID, String settingsKey,
             ProvisioningHelper helper) {
@@ -261,7 +262,7 @@ public class Provisioning extends TabActivity {
      * 
      * @param viewID the view ID
      * @param settingsKey the key of the RCS parameter
-     * @param helper
+     * @param helper the provisioning helper
      */
     /* package private */static void saveIntegerEditTextParam(int viewID, String settingsKey,
             ProvisioningHelper helper) {
@@ -280,7 +281,7 @@ public class Provisioning extends TabActivity {
      * 
      * @param viewID the view ID
      * @param settingsKey the key of the RCS parameter
-     * @param helper
+     * @param helper the provisioning helper
      */
     /* package private */static void saveLongEditTextParam(int viewID, String settingsKey,
             ProvisioningHelper helper) {
@@ -299,7 +300,7 @@ public class Provisioning extends TabActivity {
      * 
      * @param viewID the view ID
      * @param settingsKey the key of the RCS parameter
-     * @param helper
+     * @param helper the provisioning helper
      */
     /* package private */static void saveUriEditTextParam(int viewID, String settingsKey,
             ProvisioningHelper helper) {
@@ -318,7 +319,7 @@ public class Provisioning extends TabActivity {
      * 
      * @param viewID the view ID
      * @param settingsKey the key of the RCS parameter
-     * @param helper
+     * @param helper the provisioning helper
      */
     /* package private */static void saveCheckBoxParam(int viewID, String settingsKey,
             ProvisioningHelper helper) {

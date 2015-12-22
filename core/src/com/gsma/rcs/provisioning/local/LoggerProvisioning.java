@@ -69,7 +69,7 @@ public class LoggerProvisioning extends Activity {
     @Override
     public void onResume() {
         super.onResume();
-        if (mInFront == false) {
+        if (!mInFront) {
             mInFront = true;
             // Update UI (from DB)
             updateView(null);
@@ -85,7 +85,7 @@ public class LoggerProvisioning extends Activity {
     /**
      * Update view
      * 
-     * @param bundle
+     * @param bundle The bundle to save settings
      */
     private void updateView(Bundle bundle) {
         // Display parameters
@@ -97,11 +97,11 @@ public class LoggerProvisioning extends Activity {
         setStringEditTextParam(R.id.SipTraceFile, RcsSettingsData.SIP_TRACE_FILE, helper);
 
         Spinner spinner = (Spinner) findViewById(R.id.TraceLevel);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, TRACE_LEVEL);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-        Integer parameter = null;
+        Integer parameter;
         if (bundle != null && bundle.containsKey(RcsSettingsData.TRACE_LEVEL)) {
             parameter = bundle.getInt(RcsSettingsData.TRACE_LEVEL);
         } else {

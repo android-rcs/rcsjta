@@ -78,6 +78,7 @@ import java.io.IOException;
  * End user profile parameters provisioning
  * 
  * @author jexa7410
+ * @author Philippe LEMORDANT
  */
 public class ProfileProvisioning extends Activity {
 
@@ -137,7 +138,7 @@ public class ProfileProvisioning extends Activity {
     @Override
     public void onResume() {
         super.onResume();
-        if (mInFront == false) {
+        if (!mInFront) {
             mInFront = true;
             // Update UI (from DB)
             updateProfileProvisioningUI(null);
@@ -160,7 +161,7 @@ public class ProfileProvisioning extends Activity {
 
         // Display parameters
         Spinner spinner = (Spinner) findViewById(R.id.ImsAuthenticationProcedureForMobile);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(ProfileProvisioning.this,
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(ProfileProvisioning.this,
                 android.R.layout.simple_spinner_item, MOBILE_IMS_AUTHENT);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
@@ -168,7 +169,7 @@ public class ProfileProvisioning extends Activity {
                 MOBILE_IMS_AUTHENT, helper);
 
         spinner = (Spinner) findViewById(R.id.ImsAuthenticationProcedureForWifi);
-        adapter = new ArrayAdapter<String>(ProfileProvisioning.this,
+        adapter = new ArrayAdapter<>(ProfileProvisioning.this,
                 android.R.layout.simple_spinner_item, WIFI_IMS_AUTHENT);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
@@ -361,10 +362,8 @@ public class ProfileProvisioning extends Activity {
             mProvisionTask.execute(xMLFileContent, contact.toString());
         } catch (IOException e) {
             if (logActivated) {
-                sLogger.debug(new StringBuilder(
-                        "Loading of provisioning failed: invalid XML file '")
-                        .append(provisioningFile).append("', Message=").append(e.getMessage())
-                        .toString());
+                sLogger.debug("Loading of provisioning failed: invalid XML file '" +
+                        provisioningFile + "', Message=" + e.getMessage());
             }
             Toast.makeText(ProfileProvisioning.this, getString(R.string.label_load_failed),
                     Toast.LENGTH_LONG).show();
@@ -383,7 +382,7 @@ public class ProfileProvisioning extends Activity {
 
         String[] xmlFiles = getProvisioningFiles();
         final Spinner spinner = (Spinner) view.findViewById(R.id.XmlProvisioningFile);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, xmlFiles);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
@@ -442,6 +441,7 @@ public class ProfileProvisioning extends Activity {
             return text.toString();
 
         } finally {
+            //noinspection ThrowableResultOfMethodCallIgnored
             CloseableUtils.tryToClose(br);
         }
     }
@@ -527,6 +527,7 @@ public class ProfileProvisioning extends Activity {
         String[] files = null;
         File folder = new File(PROVISIONING_FOLDER_PATH);
         try {
+            //noinspection ResultOfMethodCallIgnored
             folder.mkdirs();
             if (folder.exists()) {
                 // filter
