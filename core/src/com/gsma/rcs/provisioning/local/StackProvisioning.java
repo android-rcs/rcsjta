@@ -127,7 +127,7 @@ public class StackProvisioning extends Activity {
     @Override
     public void onResume() {
         super.onResume();
-        if (isInFront == false) {
+        if (!isInFront) {
             isInFront = true;
             // Update UI (from DB)
             updateView(null);
@@ -221,7 +221,7 @@ public class StackProvisioning extends Activity {
             }
         } else {
             String path = CERTIFICATE_FOLDER_PATH + File.separator
-                    + (String) spinner.getSelectedItem();
+                    + spinner.getSelectedItem();
             if (bundle != null) {
                 bundle.putString(RcsSettingsData.TLS_CERTIFICATE_ROOT, path);
             } else {
@@ -238,7 +238,7 @@ public class StackProvisioning extends Activity {
             }
         } else {
             String path = CERTIFICATE_FOLDER_PATH + File.separator
-                    + (String) spinner.getSelectedItem();
+                    + spinner.getSelectedItem();
             if (bundle != null) {
                 bundle.putString(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE, path);
             } else {
@@ -343,13 +343,13 @@ public class StackProvisioning extends Activity {
     /**
      * Update UI (upon creation, rotation, tab switch...)
      * 
-     * @param bundle
+     * @param bundle The bundle to save settings
      */
     private void updateView(Bundle bundle) {
         ProvisioningHelper helper = new ProvisioningHelper(this, mRcsSettings, bundle);
         // Display stack parameters
         Spinner spinner = (Spinner) findViewById(R.id.Autoconfig);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, mConfigModes);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
@@ -372,7 +372,7 @@ public class StackProvisioning extends Activity {
         spinner.setSelection(0);
 
         spinner = (Spinner) findViewById(R.id.EnableRcsSwitch);
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,
                 mEnableRcseSwitch);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
@@ -397,7 +397,7 @@ public class StackProvisioning extends Activity {
                 RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS_ONLY, helper);
 
         spinner = (Spinner) findViewById(R.id.NetworkAccess);
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,
                 mNetworkAccesses);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
@@ -420,36 +420,36 @@ public class StackProvisioning extends Activity {
         }
 
         spinner = (Spinner) findViewById(R.id.SipDefaultProtocolForMobile);
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SIP_PROTOCOL);
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, SIP_PROTOCOL);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-        String sipMobile = null;
+        String sipMobile;
         if (bundle != null && bundle.containsKey(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_MOBILE)) {
             sipMobile = bundle.getString(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_MOBILE);
         } else {
             sipMobile = mRcsSettings.getSipDefaultProtocolForMobile();
         }
-        if (sipMobile.equalsIgnoreCase(SIP_PROTOCOL[0])) {
+        if (SIP_PROTOCOL[0].equalsIgnoreCase(sipMobile)) {
             spinner.setSelection(0);
-        } else if (sipMobile.equalsIgnoreCase(SIP_PROTOCOL[1])) {
+        } else if (SIP_PROTOCOL[1].equalsIgnoreCase(sipMobile)) {
             spinner.setSelection(1);
         } else {
             spinner.setSelection(2);
         }
 
         spinner = (Spinner) findViewById(R.id.SipDefaultProtocolForWifi);
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SIP_PROTOCOL);
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, SIP_PROTOCOL);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-        String sipWifi = null;
+        String sipWifi;
         if (bundle != null && bundle.containsKey(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI)) {
             sipWifi = bundle.getString(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI);
         } else {
             sipWifi = mRcsSettings.getSipDefaultProtocolForWifi();
         }
-        if (sipWifi.equalsIgnoreCase(SIP_PROTOCOL[0])) {
+        if (SIP_PROTOCOL[0].equalsIgnoreCase(sipWifi)) {
             spinner.setSelection(0);
-        } else if (sipWifi.equalsIgnoreCase(SIP_PROTOCOL[1])) {
+        } else if (SIP_PROTOCOL[1].equalsIgnoreCase(sipWifi)) {
             spinner.setSelection(1);
         } else {
             spinner.setSelection(2);
@@ -457,11 +457,11 @@ public class StackProvisioning extends Activity {
 
         String[] certificates = loadCertificatesList();
         spinner = (Spinner) findViewById(R.id.TlsCertificateRoot);
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, certificates);
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, certificates);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         boolean found = false;
-        String certRoot = null;
+        String certRoot;
         if (bundle != null && bundle.containsKey(RcsSettingsData.TLS_CERTIFICATE_ROOT)) {
             certRoot = bundle.getString(RcsSettingsData.TLS_CERTIFICATE_ROOT);
         } else {
@@ -479,12 +479,12 @@ public class StackProvisioning extends Activity {
         }
 
         spinner = (Spinner) findViewById(R.id.TlsCertificateIntermediate);
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, certificates);
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, certificates);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         spinner.setSelection(0);
         found = false;
-        String certInt = null;
+        String certInt;
         if (bundle != null && bundle.containsKey(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE)) {
             certInt = bundle.getString(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE);
         } else {
@@ -502,7 +502,7 @@ public class StackProvisioning extends Activity {
         }
 
         spinner = (Spinner) findViewById(R.id.FtProtocol);
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, FT_PROTOCOL);
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, FT_PROTOCOL);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         FileTransferProtocol ftProtocol;
@@ -596,6 +596,7 @@ public class StackProvisioning extends Activity {
         String[] files = null;
         File folder = new File(CERTIFICATE_FOLDER_PATH);
         try {
+            //noinspection ResultOfMethodCallIgnored
             folder.mkdirs();
             if (folder.exists()) {
                 // filter

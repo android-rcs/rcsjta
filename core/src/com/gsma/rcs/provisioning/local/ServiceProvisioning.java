@@ -48,6 +48,7 @@ import android.widget.Spinner;
  * Service parameters provisioning
  * 
  * @author jexa7410
+ * @author Philippe LEMORDANT
  */
 public class ServiceProvisioning extends Activity {
     /**
@@ -78,7 +79,7 @@ public class ServiceProvisioning extends Activity {
     @Override
     public void onResume() {
         super.onResume();
-        if (mInFront == false) {
+        if (!mInFront) {
             mInFront = true;
             // Update UI (from DB)
             updateView(null);
@@ -94,7 +95,7 @@ public class ServiceProvisioning extends Activity {
     /**
      * Update view
      * 
-     * @param bundle
+     * @param bundle The bundle to save provisioning settings
      */
     private void updateView(Bundle bundle) {
         ProvisioningHelper helper = new ProvisioningHelper(this, mRcsSettings, bundle);
@@ -141,7 +142,7 @@ public class ServiceProvisioning extends Activity {
                 helper);
 
         Spinner spinner = (Spinner) findViewById(R.id.ImSessionStart);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, IM_SESSION_START_MODES);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);

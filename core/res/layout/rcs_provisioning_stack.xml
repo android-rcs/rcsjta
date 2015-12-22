@@ -16,7 +16,7 @@
 
         <LinearLayout
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical" >
 
             <TextView
@@ -74,6 +74,8 @@
                 android:layout_marginLeft="5dip"
                 android:layout_marginRight="5dip"
                 android:lines="1"
+                android:singleLine="true"
+                android:inputType="text"
                 android:maxLength="100" />
 
             <CheckBox
@@ -112,6 +114,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
+                android:singleLine="true"
                 android:maxLength="13" />
 
             <TextView
@@ -198,6 +201,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
+                android:singleLine="true"
                 android:maxLength="5" />
 
             <TextView
@@ -214,6 +218,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
+                android:singleLine="true"
                 android:maxLength="5" />
 
             <TextView
@@ -230,6 +235,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
+                android:singleLine="true"
                 android:maxLength="5" />
 
             <TextView
@@ -246,6 +252,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
+                android:singleLine="true"
                 android:maxLength="5" />
 
             <TextView
@@ -262,6 +269,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
+                android:singleLine="true"
                 android:maxLength="8" />
 
             <TextView
@@ -278,6 +286,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
+                android:singleLine="true"
                 android:maxLength="6" />
 
             <TextView
@@ -294,6 +303,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
+                android:singleLine="true"
                 android:maxLength="5" />
 
             <TextView
@@ -310,6 +320,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
+                android:singleLine="true"
                 android:maxLength="5" />
 
             <TextView
@@ -326,6 +337,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
+                android:singleLine="true"
                 android:maxLength="8" />
 
             <TextView
@@ -342,6 +354,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
+                android:singleLine="true"
                 android:maxLength="13" />
 
             <TextView
@@ -358,6 +371,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
+                android:singleLine="true"
                 android:maxLength="13" />
 
             <TextView
@@ -374,6 +388,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
+                android:singleLine="true"
                 android:maxLength="13" />
 
             <TextView
@@ -390,6 +405,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
+                android:singleLine="true"
                 android:maxLength="13" />
 
             <TextView
@@ -406,6 +422,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
+                android:singleLine="true"
                 android:maxLength="13" />
 
             <TextView
@@ -422,6 +439,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
+                android:singleLine="true"
                 android:maxLength="10" />
 
             <TextView
@@ -438,6 +456,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
+                android:singleLine="true"
                 android:maxLength="13" />
 
             <TextView
@@ -454,6 +473,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
+                android:singleLine="true"
                 android:maxLength="5" />
 
             <TextView
@@ -470,6 +490,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
+                android:singleLine="true"
                 android:maxLength="13" />
 
             <TextView
@@ -486,6 +507,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="numberSigned"
                 android:lines="1"
+                android:singleLine="true"
                 android:maxLength="13" />
 
             <TextView
@@ -502,6 +524,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="numberSigned"
                 android:lines="1"
+                android:singleLine="true"
                 android:maxLength="13" />
 
             <TextView
@@ -518,6 +541,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="numberSigned"
                 android:lines="1"
+                android:singleLine="true"
                 android:maxLength="13" />
 
             <TextView
@@ -534,6 +558,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="numberSigned"
                 android:lines="1"
+                android:singleLine="true"
                 android:maxLength="6" />
 
             <TextView
@@ -550,6 +575,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="numberSigned"
                 android:lines="1"
+                android:singleLine="true"
                 android:maxLength="6" />
 
             <CheckBox
