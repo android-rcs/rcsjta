@@ -85,8 +85,8 @@ public class SipService extends ImsService {
 
     private MultimediaSessionServiceImpl mMmSessionService;
 
-    private final Handler mMultimediaMessagingOperationHandler;
-    private final Handler mMultimediaStreamingOperationHandler;
+    private Handler mMultimediaMessagingOperationHandler;
+    private Handler mMultimediaStreamingOperationHandler;
 
     /**
      * Constructor
@@ -99,8 +99,6 @@ public class SipService extends ImsService {
         super(parent, true);
         mContactManager = contactManager;
         mRcsSettings = rcsSettings;
-        mMultimediaMessagingOperationHandler = allocateBgHandler(MM_MESSAGING_OPERATION_THREAD_NAME);
-        mMultimediaStreamingOperationHandler = allocateBgHandler(MM_STREAMING_OPERATION_THREAD_NAME);
     }
 
     private Handler allocateBgHandler(String threadName) {
@@ -133,6 +131,9 @@ public class SipService extends ImsService {
             return;
         }
         setServiceStarted(true);
+
+        mMultimediaMessagingOperationHandler = allocateBgHandler(MM_MESSAGING_OPERATION_THREAD_NAME);
+        mMultimediaStreamingOperationHandler = allocateBgHandler(MM_STREAMING_OPERATION_THREAD_NAME);
     }
 
     /**
@@ -144,6 +145,12 @@ public class SipService extends ImsService {
             return;
         }
         setServiceStarted(false);
+
+        mMultimediaMessagingOperationHandler.getLooper().quit();
+        mMultimediaMessagingOperationHandler = null;
+
+        mMultimediaStreamingOperationHandler.getLooper().quit();
+        mMultimediaStreamingOperationHandler = null;
     }
 
     /**

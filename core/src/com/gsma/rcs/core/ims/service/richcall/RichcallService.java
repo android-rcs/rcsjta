@@ -148,17 +148,17 @@ public class RichcallService extends ImsService {
 
     private final LocalContentResolver mLocalContentResolver;
 
-    private final Handler mImageSharingOperationHandler;
+    private Handler mImageSharingOperationHandler;
 
-    private final Handler mImageSharingDeleteOperationHandler;
+    private Handler mImageSharingDeleteOperationHandler;
 
-    private final Handler mVideoSharingOperationHandler;
+    private Handler mVideoSharingOperationHandler;
 
-    private final Handler mVideoSharingDeleteOperationHandler;
+    private Handler mVideoSharingDeleteOperationHandler;
 
-    private final Handler mGeolocSharingOperationHandler;
+    private Handler mGeolocSharingOperationHandler;
 
-    private final Handler mGeolocSharingDeleteOperationHandler;
+    private Handler mGeolocSharingDeleteOperationHandler;
 
     private ImageSharingServiceImpl mImageSharingService;
 
@@ -189,13 +189,6 @@ public class RichcallService extends ImsService {
         mRichCallHistory = richCallHistory;
         mLocalContentResolver = localContentResolver;
         mCapabilityService = capabilityService;
-
-        mImageSharingOperationHandler = allocateBgHandler(ISH_OPERATION_THREAD_NAME);
-        mImageSharingDeleteOperationHandler = allocateBgHandler(ISH_DELETE_OPERATION_THREAD_NAME);
-        mVideoSharingOperationHandler = allocateBgHandler(VSH_OPERATION_THREAD_NAME);
-        mVideoSharingDeleteOperationHandler = allocateBgHandler(VSH_DELETE_OPERATION_THREAD_NAME);
-        mGeolocSharingOperationHandler = allocateBgHandler(GSH_OPERATION_THREAD_NAME);
-        mGeolocSharingDeleteOperationHandler = allocateBgHandler(GSH_DELETE_OPERATION_THREAD_NAME);
     }
 
     private Handler allocateBgHandler(String threadName) {
@@ -229,6 +222,12 @@ public class RichcallService extends ImsService {
      * Initializes richcall service
      */
     public void initialize() {
+        mImageSharingOperationHandler = allocateBgHandler(ISH_OPERATION_THREAD_NAME);
+        mImageSharingDeleteOperationHandler = allocateBgHandler(ISH_DELETE_OPERATION_THREAD_NAME);
+        mVideoSharingOperationHandler = allocateBgHandler(VSH_OPERATION_THREAD_NAME);
+        mVideoSharingDeleteOperationHandler = allocateBgHandler(VSH_DELETE_OPERATION_THREAD_NAME);
+        mGeolocSharingOperationHandler = allocateBgHandler(GSH_OPERATION_THREAD_NAME);
+        mGeolocSharingDeleteOperationHandler = allocateBgHandler(GSH_DELETE_OPERATION_THREAD_NAME);
     }
 
     public void scheduleImageShareOperation(Runnable runnable) {
@@ -259,6 +258,24 @@ public class RichcallService extends ImsService {
             return;
         }
         setServiceStarted(true);
+        if (mImageSharingOperationHandler == null) {
+            mImageSharingOperationHandler = allocateBgHandler(ISH_OPERATION_THREAD_NAME);
+        }
+        if (mImageSharingDeleteOperationHandler == null) {
+            mImageSharingDeleteOperationHandler = allocateBgHandler(ISH_DELETE_OPERATION_THREAD_NAME);
+        }
+        if (mVideoSharingOperationHandler == null) {
+            mVideoSharingOperationHandler = allocateBgHandler(VSH_OPERATION_THREAD_NAME);
+        }
+        if (mVideoSharingDeleteOperationHandler == null) {
+            mVideoSharingDeleteOperationHandler = allocateBgHandler(VSH_DELETE_OPERATION_THREAD_NAME);
+        }
+        if (mGeolocSharingOperationHandler == null) {
+            mGeolocSharingOperationHandler = allocateBgHandler(GSH_OPERATION_THREAD_NAME);
+        }
+        if (mGeolocSharingDeleteOperationHandler == null) {
+            mGeolocSharingDeleteOperationHandler = allocateBgHandler(GSH_DELETE_OPERATION_THREAD_NAME);
+        }
     }
 
     @Override
@@ -268,6 +285,24 @@ public class RichcallService extends ImsService {
             return;
         }
         setServiceStarted(false);
+
+        mImageSharingOperationHandler.getLooper().quit();
+        mImageSharingOperationHandler = null;
+
+        mImageSharingDeleteOperationHandler.getLooper().quitSafely();
+        mImageSharingDeleteOperationHandler = null;
+
+        mVideoSharingOperationHandler.getLooper().quit();
+        mVideoSharingOperationHandler = null;
+
+        mVideoSharingDeleteOperationHandler.getLooper().quitSafely();
+        mVideoSharingDeleteOperationHandler = null;
+
+        mGeolocSharingOperationHandler.getLooper().quit();
+        mGeolocSharingOperationHandler = null;
+
+        mGeolocSharingDeleteOperationHandler.getLooper().quitSafely();
+        mGeolocSharingDeleteOperationHandler = null;
     }
 
     @Override
