@@ -221,9 +221,9 @@ public class InstantMessagingService extends ImsService {
 
     private static final String sSizeExceededMsg = "133 Size exceeded";
 
-    private final Handler mImOperationHandler;
+    private Handler mImOperationHandler;
 
-    private final Handler mImDeleteOperationHandler;
+    private Handler mImDeleteOperationHandler;
 
     private ChatServiceImpl mChatService;
 
@@ -251,9 +251,6 @@ public class InstantMessagingService extends ImsService {
         mMessagingLog = messagingLog;
         mHistoryLog = historyLog;
         mLocalContentResolver = localContentResolver;
-
-        mImOperationHandler = allocateBgHandler(IM_OPERATION_THREAD_NAME);
-        mImDeleteOperationHandler = allocateBgHandler(IM_DELETE_OPERATION_THREAD_NAME);
 
         mStoreAndFwdMgr = new StoreAndForwardManager(this, mRcsSettings, mContactManager,
                 mMessagingLog);
@@ -285,6 +282,8 @@ public class InstantMessagingService extends ImsService {
      * Initializes instant messaging service
      */
     public void initialize() {
+        mImOperationHandler = allocateBgHandler(IM_OPERATION_THREAD_NAME);
+        mImDeleteOperationHandler = allocateBgHandler(IM_DELETE_OPERATION_THREAD_NAME);
         mImdnManager.start();
     }
 
@@ -319,7 +318,12 @@ public class InstantMessagingService extends ImsService {
             return;
         }
         setServiceStarted(true);
-
+        if (mImOperationHandler == null) {
+            mImOperationHandler = allocateBgHandler(IM_OPERATION_THREAD_NAME);
+        }
+        if (mImDeleteOperationHandler == null) {
+            mImDeleteOperationHandler = allocateBgHandler(IM_DELETE_OPERATION_THREAD_NAME);
+        }
         /* Try to auto-rejoin group chats that are still marked as active. */
         mImOperationHandler.post(new GroupChatAutoRejoinTask(this, mMessagingLog));
         /* Try to start auto resuming of HTTP file transfers marked as PAUSED_BY_SYSTEM */
@@ -350,6 +354,13 @@ public class InstantMessagingService extends ImsService {
 
         mImdnManager.terminate();
         mImdnManager.interrupt();
+
+        mImOperationHandler.getLooper().quit();
+        mImOperationHandler = null;
+
+        mImDeleteOperationHandler.getLooper().quitSafely();
+        mImDeleteOperationHandler = null;
+
     }
 
     @Override
@@ -1626,7 +1637,8 @@ public class InstantMessagingService extends ImsService {
                         }
                         sendErrorResponse(invite, Response.DECLINE);
                         if (fileResent) {
-                            setResendFileTransferInvitationRejected(fileTransferId,                                     FileTransfer.ReasonCode.REJECTED_SPAM, timestamp, timestampSent);
+                            setResendFileTransferInvitationRejected(fileTransferId,
+                                    FileTransfer.ReasonCode.REJECTED_SPAM, timestamp, timestampSent);
                             return;
                         }
                         MmContent fileContent = ftinfo.getLocalMmContent();
@@ -2460,10 +2472,9 @@ public class InstantMessagingService extends ImsService {
      * @param timestampSent Remote timestamp sent in payload for the file transfer
      */
     public void setResendFileTransferInvitationRejected(String fileTransferId,
-            FileTransfer.ReasonCode reasonCode, long timestamp,
-            long timestampSent) {
-        mFileTransferService.setResendFileTransferInvitationRejected(fileTransferId,
-                reasonCode, timestamp, timestampSent);
+            FileTransfer.ReasonCode reasonCode, long timestamp, long timestampSent) {
+        mFileTransferService.setResendFileTransferInvitationRejected(fileTransferId, reasonCode,
+                timestamp, timestampSent);
     }
 
     /**

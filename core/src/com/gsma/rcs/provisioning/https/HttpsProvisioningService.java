@@ -302,22 +302,16 @@ public class HttpsProvisioningService extends Service {
     @Override
     public void onDestroy() {
         if (mHttpsProvisioningMng != null) {
-            // Unregister network state listener
             mHttpsProvisioningMng.unregisterNetworkStateListener();
-
-            // Unregister wifi disabling listener
             mHttpsProvisioningMng.unregisterWifiDisablingListener();
-
-            // Unregister SMS provisioning receiver
             mHttpsProvisioningMng.unregisterSmsProvisioningReceiver();
+            mHttpsProvisioningMng.quitProvisioningOperation();
         }
-
         cancelRetryAlarm(this, mRetryIntent);
-        // Unregister retry receiver
         try {
             unregisterReceiver(retryReceiver);
         } catch (IllegalArgumentException e) {
-            // Nothing to do
+            /* Nothing to be handled here */
         }
     }
 

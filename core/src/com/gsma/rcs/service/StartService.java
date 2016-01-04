@@ -131,7 +131,6 @@ public class StartService extends Service {
 
     @Override
     public void onCreate() {
-        mStartServiceHandler = allocateBgHandler(STARTSERVICE_OPERATIONS_THREAD_NAME);
         mCtx = getApplicationContext();
         ContentResolver contentResolver = mCtx.getContentResolver();
         mLocalContentResolver = new LocalContentResolver(mCtx);
@@ -144,17 +143,6 @@ public class StartService extends Service {
 
         mRcsAccountUsername = getString(R.string.rcs_core_account_username);
 
-        ConfigurationMode mode = mRcsSettings.getConfigurationMode();
-        if (sLogger.isActivated()) {
-            sLogger.debug("onCreate ConfigurationMode=".concat(mode.toString()));
-        }
-        /*
-         * In manual configuration, use a network listener to start RCS core when the data will be
-         * ON
-         */
-        if (ConfigurationMode.MANUAL == mode) {
-            registerNetworkStateListener();
-        }
         mPoolTelephonyManagerIntent = PendingIntent.getBroadcast(mCtx, 0, new Intent(
                 ACTION_POOL_TELEPHONY_MANAGER), 0);
     }
@@ -175,6 +163,10 @@ public class StartService extends Service {
             unregisterReceiver(mNetworkStateListener);
             mNetworkStateListener = null;
         }
+        if (mStartServiceHandler != null) {
+            mStartServiceHandler.getLooper().quit();
+            mStartServiceHandler = null;
+        }
     }
 
     @Override
@@ -187,6 +179,18 @@ public class StartService extends Service {
         final boolean logActivated = sLogger.isActivated();
         if (logActivated) {
             sLogger.debug("Start RCS service");
+        }
+        mStartServiceHandler = allocateBgHandler(STARTSERVICE_OPERATIONS_THREAD_NAME);
+        ConfigurationMode mode = mRcsSettings.getConfigurationMode();
+        if (sLogger.isActivated()) {
+            sLogger.debug("onCreate ConfigurationMode=".concat(mode.toString()));
+        }
+        /*
+         * In manual configuration, use a network listener to start RCS core when the data will be
+         * ON
+         */
+        if (ConfigurationMode.MANUAL == mode) {
+            registerNetworkStateListener();
         }
         mStartServiceHandler.post(new Runnable() {
             @Override

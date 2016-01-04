@@ -1042,6 +1042,14 @@ public class HttpsProvisioningManager {
     }
 
     /**
+     * Causes the provisioning handler to quit without processing any more messages in the message
+     * queue
+     */
+    /* package private */void quitProvisioningOperation() {
+        mProvisioningOperationHandler.getLooper().quit();
+    }
+
+    /**
      * Checks if first provisioning after (re)boot.
      * 
      * @return true if first provisioning after (re)boot.

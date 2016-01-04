@@ -80,7 +80,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      * This purpose of this handler is to make the request asynchronous with the mechanisms provider
      * by android by placing the request in the main thread message queue.
      */
-    private final Handler mCapabilityOperationsHandler;
+    private Handler mCapabilityOperationsHandler;
 
     private CapabilityServiceImpl mCapabilityService;
 
@@ -99,8 +99,6 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
         mRcsSettings = rcsSettings;
         mContactManager = contactsManager;
         mAddressBookManager = addressBookManager;
-
-        mCapabilityOperationsHandler = allocateBgHandler(CAPABILITIES_OPERATION_THREAD_NAME);
 
         mISyncContactTaskListener = new ISyncContactTaskListener() {
             @Override
@@ -148,6 +146,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
             return;
         }
         setServiceStarted(true);
+        mCapabilityOperationsHandler = allocateBgHandler(CAPABILITIES_OPERATION_THREAD_NAME);
         mOptionsManager.start();
 
         /* Force a first capability check */
@@ -175,6 +174,10 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
         /* Stop listening to address book changes */
         mAddressBookManager.removeAddressBookListener(this);
         mOptionsManager.stop();
+
+        mCapabilityOperationsHandler.getLooper().quit();
+        mCapabilityOperationsHandler = null;
+
         if (sLogger.isActivated()) {
             sLogger.debug("Capability service stop");
         }
