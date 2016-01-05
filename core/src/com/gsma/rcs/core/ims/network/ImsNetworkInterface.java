@@ -321,7 +321,7 @@ public abstract class ImsNetworkInterface {
     /**
      * Sets the Retry header time
      * 
-     * @param retryHeader Retry-After duration value
+     * @param retryValue Retry-After duration value
      */
     public void setRetryAfterHeaderDuration(long retryValue) {
         mRetryDuration = retryValue;
@@ -693,7 +693,10 @@ public abstract class ImsNetworkInterface {
                 sLogger.debug("IMS registered: ".concat(Boolean.toString(mRegistration
                         .isRegistered())));
             }
-
+            //If registration is not successful skip starting keepalive
+            if (!mRegistration.isRegistered()) {
+                return;
+            }
             /**
              * Even if DUT is not behind NAT (Network Address Translation) and PROTOCOL !=
              * ListeningPoint.UDP, it should still send the keep-Alive (double CRLF).
