@@ -664,6 +664,10 @@ public abstract class ImsNetworkInterface {
                 sLogger.debug("IMS registered: ".concat(Boolean.toString(mRegistration
                         .isRegistered())));
             }
+            // If registration is not successful skip starting keepalive
+            if (!mRegistration.isRegistered()) {
+                return;
+            }
             /**
              * Even if DUT is not behind NAT (Network Address Translation) and PROTOCOL !=
              * ListeningPoint.UDP, it should still send the keep-Alive (double CRLF).
