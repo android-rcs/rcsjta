@@ -97,16 +97,8 @@ public class OptionsRequestTask implements Runnable {
     public void run() {
         try {
             sendOptions();
-        } catch (ContactManagerException e) {
-            sLogger.error(
-                    new StringBuilder("Options request failed for contact : ").append(mContact)
-                            .toString(), e);
-            handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, e));
-
-        } catch (PayloadException e) {
-            sLogger.error(
-                    new StringBuilder("Options request failed for contact : ").append(mContact)
-                            .toString(), e);
+        } catch (ContactManagerException | PayloadException e) {
+            sLogger.error("Options request failed for contact : " + mContact, e);
             handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, e));
 
         } catch (NetworkException e) {
@@ -119,9 +111,7 @@ public class OptionsRequestTask implements Runnable {
              * executing operations on a thread unhandling such exceptions will eventually lead to
              * exit the system and thus can bring the whole system down, which is not intended.
              */
-            sLogger.error(
-                    new StringBuilder("Options request failed for contact : ").append(mContact)
-                            .toString(), e);
+            sLogger.error("Options request failed for contact : " + mContact, e);
         } finally {
             if (mCallback != null) {
                 try {
@@ -134,10 +124,8 @@ public class OptionsRequestTask implements Runnable {
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error(
-                            new StringBuilder(
-                                    "Failed to notify end of options request for contact : ")
-                                    .append(mContact).toString(), e);
+                    sLogger.error("Failed to notify end of options request for contact : "
+                            + mContact, e);
                 }
             }
         }
@@ -202,15 +190,14 @@ public class OptionsRequestTask implements Runnable {
                     case Response.REQUEST_TIMEOUT:
                         /* Intentional fall through */
                     case Response.TEMPORARILY_UNAVAILABLE:
-                        handleUserNotRegistered(ctx);
+                        handleUserNotRegistered();
                         break;
                     case Response.NOT_FOUND:
-                        handleUserNotFound(ctx);
+                        handleUserNotFound();
                         break;
                     default:
                         handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED,
-                                new StringBuilder(String.valueOf(statusCode)).append(' ')
-                                        .append(ctx.getReasonPhrase()).toString()));
+                                String.valueOf(statusCode) + ' ' + ctx.getReasonPhrase()));
                         break;
                 }
             } else {
@@ -218,9 +205,8 @@ public class OptionsRequestTask implements Runnable {
                     sLogger.debug("No response received for OPTIONS");
                 }
                 /* No response received: timeout */
-                handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED, new StringBuilder(
-                        String.valueOf(statusCode)).append(' ').append(ctx.getReasonPhrase())
-                        .toString()));
+                handleError(new CapabilityError(CapabilityError.OPTIONS_FAILED,
+                        String.valueOf(statusCode) + ' ' + ctx.getReasonPhrase()));
             }
         } catch (FileAccessException e) {
             throw new PayloadException("Failed to send OPTIONS!", e);
@@ -230,12 +216,10 @@ public class OptionsRequestTask implements Runnable {
     /**
      * Handle user not registered
      * 
-     * @param ctx SIP transaction context
      * @throws ContactManagerException
      * @throws FileAccessException
      */
-    private void handleUserNotRegistered(SipTransactionContext ctx) throws ContactManagerException,
-            FileAccessException {
+    private void handleUserNotRegistered() throws ContactManagerException, FileAccessException {
         /* 408 or 480 response received */
         if (sLogger.isActivated()) {
             sLogger.info("User " + mContact + " is not registered");
@@ -263,12 +247,10 @@ public class OptionsRequestTask implements Runnable {
     /**
      * Handle user not found
      * 
-     * @param ctx SIP transaction context
      * @throws ContactManagerException
      * @throws FileAccessException
      */
-    private void handleUserNotFound(SipTransactionContext ctx) throws ContactManagerException,
-            FileAccessException {
+    private void handleUserNotFound() throws ContactManagerException, FileAccessException {
         /* 404 response received */
         if (sLogger.isActivated()) {
             sLogger.info("User " + mContact + " is not found");
@@ -296,9 +278,6 @@ public class OptionsRequestTask implements Runnable {
         /* Read capabilities */
         SipResponse resp = ctx.getSipResponse();
         Capabilities capabilities = CapabilityUtils.extractCapabilities(resp);
-
-        /* Update capability time of last response */
-        mContactManager.updateCapabilitiesTimeLastResponse(mContact);
 
         /* Update the database capabilities */
         if (capabilities.isImSessionSupported()) {
@@ -353,11 +332,9 @@ public class OptionsRequestTask implements Runnable {
             mAuthenticationAgent.setProxyAuthorizationHeader(options);
 
             sendAndWaitOptions(options);
-        } catch (InvalidArgumentException e) {
+        } catch (InvalidArgumentException | ParseException e) {
             throw new PayloadException("Failed to handle 407 authentication response!", e);
 
-        } catch (ParseException e) {
-            throw new PayloadException("Failed to handle 407 authentication response!", e);
         }
     }
 
@@ -369,9 +346,8 @@ public class OptionsRequestTask implements Runnable {
     private void handleError(CapabilityError error) {
         try {
             if (sLogger.isActivated()) {
-                sLogger.info(new StringBuilder("Options has failed for contact ").append(mContact)
-                        .append(": ").append(error.getErrorCode()).append(", reason=")
-                        .append(error.getMessage()).toString());
+                sLogger.info("Options has failed for contact " + mContact + ": "
+                        + error.getErrorCode() + ", reason=" + error.getMessage());
             }
             ContactInfo info = mContactManager.getContactInfo(mContact);
             if (RcsStatus.NO_INFO.equals(info.getRcsStatus())) {
@@ -388,16 +364,10 @@ public class OptionsRequestTask implements Runnable {
                  */
                 mContactManager.updateCapabilitiesTimeLastRequest(mContact);
             }
-        } catch (ContactManagerException e) {
+        } catch (ContactManagerException | FileAccessException e) {
             sLogger.error(
-                    new StringBuilder("Failed to handle Options error for contact ")
-                            .append(mContact).append(": ").append(error.getErrorCode())
-                            .append(", reason=").append(error.getMessage()).toString(), e);
-        } catch (FileAccessException e) {
-            sLogger.error(
-                    new StringBuilder("Failed to handle Options error for contact ")
-                            .append(mContact).append(": ").append(error.getErrorCode())
-                            .append(", reason=").append(error.getMessage()).toString(), e);
+                    "Failed to handle Options error for contact " + mContact + ": "
+                            + error.getErrorCode() + ", reason=" + error.getMessage(), e);
         }
     }
 
@@ -410,6 +380,6 @@ public class OptionsRequestTask implements Runnable {
          * 
          * @param contact ID
          */
-        public void endOfOptionsRequestTask(ContactId contact);
+        void endOfOptionsRequestTask(ContactId contact);
     }
 }

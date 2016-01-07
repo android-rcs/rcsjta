@@ -25,7 +25,7 @@ import java.util.Set;
  * Capabilities
  * 
  * @author jexa7410
- * @author YPLO6403
+ * @author Philippe LEMORDANT
  */
 public class Capabilities {
 
@@ -92,7 +92,7 @@ public class Capabilities {
         mSipAutomata = builder.mSipAutomata;
         mTimestampOfLastRequest = builder.mTimestampOfLastRequest;
         mTimestampOfLastResponse = builder.mTimestampOfLastResponse;
-        mExtensions = new HashSet<String>(builder.mExtensions);
+        mExtensions = new HashSet<>(builder.mExtensions);
     }
 
     /**
@@ -248,14 +248,26 @@ public class Capabilities {
         return mTimestampOfLastRequest;
     }
 
+    // @formatter:off
     @Override
     public String toString() {
-        return "Caps [ImageShare=" + mImageSharing + ", VideoShare=" + mVideoSharing + ", Im="
-                + mImSession + ", FtMsrp=" + mFileTransferMsrp + ", FtHttp=" + mFileTransferHttp
-                + ", GeoPush=" + mGeolocationPush + ", FtThumbnail=" + mFileTransferThumbnail
-                + ", FtSF=" + mFileTransferStoreForward + ", GcSF=" + mGroupChatStoreForward
-                + ", SipAutomata=" + mSipAutomata + ", Exts=" + mExtensions + "]";
+        return "Caps{" +
+                "ImageShare=" + mImageSharing +
+                ", VideoSharing=" + mVideoSharing +
+                ", IM=" + mImSession +
+                ", FtMsrp=" + mFileTransferMsrp +
+                ", FtHttp=" + mFileTransferHttp +
+                ", GeoPush=" + mGeolocationPush +
+                ", FtThumbnail=" + mFileTransferThumbnail +
+                ", FtSF=" + mFileTransferStoreForward +
+                ", GcSF=" + mGroupChatStoreForward +
+                ", SipAutomata=" + mSipAutomata +
+                ", Exts=" + mExtensions +
+                ", TimeOfLastRequest=" + mTimestampOfLastRequest +
+                ", TimeOfLastResponse=" + mTimestampOfLastResponse +
+                '}';
     }
+    // @formatter:on
 
     /*
      * The equals method does not consider the 2 timestamps.
@@ -271,10 +283,7 @@ public class Capabilities {
         Capabilities other = (Capabilities) obj;
         if (mCsVideo != other.mCsVideo)
             return false;
-        if (mExtensions == null) {
-            if (other.mExtensions != null)
-                return false;
-        } else if (!mExtensions.equals(other.mExtensions))
+        if (!mExtensions.equals(other.mExtensions))
             return false;
         if (mFileTransferMsrp != other.mFileTransferMsrp)
             return false;
@@ -302,9 +311,7 @@ public class Capabilities {
             return false;
         if (mSocialPresence != other.mSocialPresence)
             return false;
-        if (mVideoSharing != other.mVideoSharing)
-            return false;
-        return true;
+        return mVideoSharing == other.mVideoSharing;
     }
 
     @Override
@@ -312,7 +319,7 @@ public class Capabilities {
         final int prime = 31;
         int result = 1;
         result = prime * result + (mCsVideo ? 1231 : 1237);
-        result = prime * result + ((mExtensions == null) ? 0 : mExtensions.hashCode());
+        result = prime * result + (mExtensions.hashCode());
         result = prime * result + (mFileTransferHttp ? 1231 : 1237);
         result = prime * result + (mFileTransferMsrp ? 1231 : 1237);
         result = prime * result + (mFileTransferStoreForward ? 1231 : 1237);
@@ -358,7 +365,7 @@ public class Capabilities {
         private boolean mFileTransferStoreForward = false;
         private boolean mGroupChatStoreForward = false;
         private boolean mSipAutomata = false;
-        private Set<String> mExtensions = new HashSet<String>();
+        private Set<String> mExtensions = new HashSet<>();
         private long mTimestampOfLastRequest = INVALID_TIMESTAMP;
         private long mTimestampOfLastResponse = INVALID_TIMESTAMP;
 
@@ -391,7 +398,7 @@ public class Capabilities {
             mSipAutomata = capabilities.isSipAutomata();
             mTimestampOfLastRequest = capabilities.getTimestampOfLastRequest();
             mTimestampOfLastResponse = capabilities.getTimestampOfLastResponse();
-            mExtensions = new HashSet<String>(capabilities.getSupportedExtensions());
+            mExtensions = new HashSet<>(capabilities.getSupportedExtensions());
         }
 
         /**

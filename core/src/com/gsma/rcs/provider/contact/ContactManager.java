@@ -136,7 +136,7 @@ import java.util.Set;
  * 
  * @author Jean-Marc AUFFRET
  * @author Deutsche Telekom AG
- * @author yplo6403
+ * @author Philippe LEMORDANT
  */
 public final class ContactManager {
 
@@ -232,11 +232,11 @@ public final class ContactManager {
 
         private String mValue;
 
-        private MimeType(String value) {
+        MimeType(String value) {
             mValue = value;
         }
 
-        private static Map<String, MimeType> mValueToEnum = new HashMap<String, MimeType>();
+        private static Map<String, MimeType> mValueToEnum = new HashMap<>();
         static {
             for (MimeType entry : MimeType.values()) {
                 mValueToEnum.put(entry.getMimeType(), entry);
@@ -258,13 +258,13 @@ public final class ContactManager {
          * @param value the string representation
          * @return MimeType
          */
-        public final static MimeType getMimeType(String value) {
+        public static MimeType getMimeType(String value) {
             MimeType entry = mValueToEnum.get(value);
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(MimeType.class.getName()).append(".").append(value).toString());
+            throw new IllegalArgumentException("No enum const class " + MimeType.class.getName()
+                    + "." + value);
         }
     }
 
@@ -287,39 +287,35 @@ public final class ContactManager {
      * For account persisted on SIM card, type may be "vnd.sec.contact.sim" (Samsung) or
      * "com.android.contacts.sim" (normal case)
      */
-    private final static String SIM_ACCOUNT_SELECTION = new StringBuilder(RawContacts.ACCOUNT_TYPE)
-            .append(" LIKE '%.sim' AND ").append(RawContacts._ID).append("=?").toString();
+    private final static String SIM_ACCOUNT_SELECTION = RawContacts.ACCOUNT_TYPE
+            + " LIKE '%.sim' AND " + RawContacts._ID + "=?";
 
     /**
      * Contact for "Me"
      */
     private static final String MYSELF = "myself";
 
-    private static final String SEL_RAW_CONTACT_MIMETYPE_DATA1 = new StringBuilder(
-            Data.RAW_CONTACT_ID).append("=? AND ").append(Data.MIMETYPE).append("=? AND ")
-            .append(Data.DATA1).append("=?").toString();
+    private static final String SEL_RAW_CONTACT_MIMETYPE_DATA1 = Data.RAW_CONTACT_ID + "=? AND "
+            + Data.MIMETYPE + "=? AND " + Data.DATA1 + "=?";
 
-    private static final String WHERE_RCS_RAW_CONTACT_ID = new StringBuilder(
-            AggregationData.KEY_RCS_RAW_CONTACT_ID).append("=?").toString();
+    private static final String WHERE_RCS_RAW_CONTACT_ID = AggregationData.KEY_RCS_RAW_CONTACT_ID
+            + "=?";
 
     private static final String[] PROJ_RCS_RAW_CONTACT_ID = new String[] {
         AggregationData.KEY_RCS_RAW_CONTACT_ID
     };
 
-    private static final String WHERE_RCS_STATUS_RCS = new StringBuilder(KEY_RCS_STATUS)
-            .append("<>'").append(RcsStatus.NO_INFO.toInt()).append("' AND ")
-            .append(KEY_RCS_STATUS).append("<>'").append(RcsStatus.NOT_RCS.toInt()).append("'")
-            .toString();
+    private static final String WHERE_RCS_STATUS_RCS = KEY_RCS_STATUS + "<>'"
+            + RcsStatus.NO_INFO.toInt() + "' AND " + KEY_RCS_STATUS + "<>'"
+            + RcsStatus.NOT_RCS.toInt() + "'";
 
-    private static final String WHERE_RCS_STATUS_WITH_SOCIAL_PRESENCE = new StringBuilder(
-            KEY_RCS_STATUS).append("<>'").append(RcsStatus.NO_INFO.toInt()).append("' AND ")
-            .append(KEY_RCS_STATUS).append("<>'").append(RcsStatus.NOT_RCS.toInt())
-            .append("' AND ").append(KEY_RCS_STATUS).append("<>'")
-            .append(RcsStatus.RCS_CAPABLE.toInt()).append("'").toString();
+    private static final String WHERE_RCS_STATUS_WITH_SOCIAL_PRESENCE = KEY_RCS_STATUS + "<>'"
+            + RcsStatus.NO_INFO.toInt() + "' AND " + KEY_RCS_STATUS + "<>'"
+            + RcsStatus.NOT_RCS.toInt() + "' AND " + KEY_RCS_STATUS + "<>'"
+            + RcsStatus.RCS_CAPABLE.toInt() + "'";
 
-    private static final String WHERE_RCS_RAW_CONTACT_ID_AND_RCS_NUMBER = new StringBuilder(
-            AggregationData.KEY_RCS_NUMBER).append("=? AND ")
-            .append(AggregationData.KEY_RAW_CONTACT_ID).append("=?").toString();
+    private static final String WHERE_RCS_RAW_CONTACT_ID_AND_RCS_NUMBER = AggregationData.KEY_RCS_NUMBER
+            + "=? AND " + AggregationData.KEY_RAW_CONTACT_ID + "=?";
 
     /**
      * Projection to get CONTACT from RCS contact Provider
@@ -328,67 +324,58 @@ public final class ContactManager {
         KEY_CONTACT
     };
 
-    private static final String SEL_RAW_CONTACT_FROM_NUMBER = new StringBuilder(Data.MIMETYPE)
-            .append("=? AND PHONE_NUMBERS_EQUAL(").append(Phone.NUMBER).append(", ?)").toString();
+    private static final String SEL_RAW_CONTACT_FROM_NUMBER = Data.MIMETYPE
+            + "=? AND PHONE_NUMBERS_EQUAL(" + Phone.NUMBER + ", ?)";
 
-    private static final String STRICT_SELECTION_RAW_CONTACT_FROM_NUMBER = new StringBuilder(
-            Data.MIMETYPE).append("=? AND (NOT PHONE_NUMBERS_EQUAL(").append(Phone.NUMBER)
-            .append(", ?) AND PHONE_NUMBERS_EQUAL(").append(Phone.NUMBER).append(", ?, 1))")
-            .toString();
+    private static final String STRICT_SELECTION_RAW_CONTACT_FROM_NUMBER = Data.MIMETYPE
+            + "=? AND (NOT PHONE_NUMBERS_EQUAL(" + Phone.NUMBER + ", ?) AND PHONE_NUMBERS_EQUAL("
+            + Phone.NUMBER + ", ?, 1))";
 
     private static final String[] PROJ_RAW_CONTACT_ID = {
         RawContacts._ID
     };
 
-    private static final String SEL_RAW_CONTACT = new StringBuilder(RawContacts._ID).append("=?")
-            .toString();
+    private static final String SEL_RAW_CONTACT = RawContacts._ID + "=?";
 
-    private static final String SEL_RAW_CONTACT_WITH_WEBLINK = new StringBuilder(
-            Data.RAW_CONTACT_ID).append("=? AND ").append(Website.TYPE).append("=?").toString();
+    private static final String SEL_RAW_CONTACT_WITH_WEBLINK = Data.RAW_CONTACT_ID + "=? AND "
+            + Website.TYPE + "=?";
 
     private static final String[] PROJ_DATA_ID = new String[] {
         Data._ID
     };
 
-    private static final String SEL_DATA_ID = new StringBuilder(Data._ID).append("=?").toString();
+    private static final String SEL_DATA_ID = Data._ID + "=?";
 
-    private static final String SEL_RAW_CONTACT_WITH_MIMETYPE = new StringBuilder(
-            Data.RAW_CONTACT_ID).append("=? AND ").append(Data.MIMETYPE).append("=?").toString();
+    private static final String SEL_RAW_CONTACT_WITH_MIMETYPE = Data.RAW_CONTACT_ID + "=? AND "
+            + Data.MIMETYPE + "=?";
 
-    private static final String SEL_RAW_CONTACT_ME = new StringBuilder(RawContacts.ACCOUNT_TYPE)
-            .append("='").append(RcsAccountManager.ACCOUNT_MANAGER_TYPE).append("' AND ")
-            .append(RawContacts.SOURCE_ID).append("='").append(MYSELF).append("'").toString();
+    private static final String SEL_RAW_CONTACT_ME = RawContacts.ACCOUNT_TYPE + "='"
+            + RcsAccountManager.ACCOUNT_MANAGER_TYPE + "' AND " + RawContacts.SOURCE_ID + "='"
+            + MYSELF + "'";
 
-    private static final String SEL_DATA_MIMETYPE_CAPABILITY_FILE_TRANSFER = new StringBuilder(
-            Data.MIMETYPE).append("='").append(MIMETYPE_CAPABILITY_FILE_TRANSFER).append("'")
-            .toString();
+    private static final String SEL_DATA_MIMETYPE_CAPABILITY_FILE_TRANSFER = Data.MIMETYPE + "='"
+            + MIMETYPE_CAPABILITY_FILE_TRANSFER + "'";
 
-    private static final String SEL_DATA_MIMETYPE_CAPABILITY_IM_SESSION = new StringBuilder(
-            Data.MIMETYPE).append("='").append(MIMETYPE_CAPABILITY_IM_SESSION).append("'")
-            .toString();
+    private static final String SEL_DATA_MIMETYPE_CAPABILITY_IM_SESSION = Data.MIMETYPE + "='"
+            + MIMETYPE_CAPABILITY_IM_SESSION + "'";
 
-    private static final String SEL_DATA_MIMETYPE_CAPABILITY_IMAGE_SHARING = new StringBuilder(
-            Data.MIMETYPE).append("='").append(MIMETYPE_CAPABILITY_IMAGE_SHARE).append("'")
-            .toString();
+    private static final String SEL_DATA_MIMETYPE_CAPABILITY_IMAGE_SHARING = Data.MIMETYPE + "='"
+            + MIMETYPE_CAPABILITY_IMAGE_SHARE + "'";
 
-    private static final String SEL_DATA_MIMETYPE_CAPABILITY_VIDEO_SHARING = new StringBuilder(
-            Data.MIMETYPE).append("='").append(MIMETYPE_CAPABILITY_VIDEO_SHARE).append("'")
-            .toString();
+    private static final String SEL_DATA_MIMETYPE_CAPABILITY_VIDEO_SHARING = Data.MIMETYPE + "='"
+            + MIMETYPE_CAPABILITY_VIDEO_SHARE + "'";
 
-    private static final String SEL_DATA_MIMETYPE_CAPABILITY_IP_VOICE_CALL = new StringBuilder(
-            Data.MIMETYPE).append("='").append(MIMETYPE_CAPABILITY_IP_VOICE_CALL).append("'")
-            .toString();
+    private static final String SEL_DATA_MIMETYPE_CAPABILITY_IP_VOICE_CALL = Data.MIMETYPE + "='"
+            + MIMETYPE_CAPABILITY_IP_VOICE_CALL + "'";
 
-    private static final String SEL_DATA_MIMETYPE_CAPABILITY_IP_VIDEO_CALL = new StringBuilder(
-            Data.MIMETYPE).append("='").append(MIMETYPE_CAPABILITY_IP_VIDEO_CALL).append("'")
-            .toString();
+    private static final String SEL_DATA_MIMETYPE_CAPABILITY_IP_VIDEO_CALL = Data.MIMETYPE + "='"
+            + MIMETYPE_CAPABILITY_IP_VIDEO_CALL + "'";
 
-    private static final String SEL_DATA_MIMETYPE_CAPABILITY_EXTENSIONS = new StringBuilder(
-            Data.MIMETYPE).append("='").append(MIMETYPE_CAPABILITY_EXTENSIONS).append("'")
-            .toString();
+    private static final String SEL_DATA_MIMETYPE_CAPABILITY_EXTENSIONS = Data.MIMETYPE + "='"
+            + MIMETYPE_CAPABILITY_EXTENSIONS + "'";
 
-    private static final String SEL_DATA_MIMETYPE_NUMBER = new StringBuilder(Data.MIMETYPE)
-            .append("='").append(MIMETYPE_NUMBER).append("'").toString();
+    private static final String SEL_DATA_MIMETYPE_NUMBER = Data.MIMETYPE + "='" + MIMETYPE_NUMBER
+            + "'";
 
     private static final String[] PROJ_RAW_CONTACT_DATA1 = {
             Data.RAW_CONTACT_ID, Data.DATA1
@@ -402,25 +389,20 @@ public final class ContactManager {
             Phone.NUMBER, Phone.RAW_CONTACT_ID
     };
 
-    private static final String SEL_RAW_CONTACT_ID = new StringBuilder(Data.RAW_CONTACT_ID).append(
-            "=?").toString();
+    private static final String SEL_RAW_CONTACT_ID = Data.RAW_CONTACT_ID + "=?";
 
     private static final String[] PROJ_RAW_CONTACT_DATA_ALL = {
             Data._ID, Data.MIMETYPE, Data.DATA1, Data.DATA2, Website.URL, Photo.PHOTO
     };
 
-    private static final String SEL_RAW_CONTACT_MIME_TYPES = new StringBuilder(Data.RAW_CONTACT_ID)
-            .append("=? AND ").append(Data.MIMETYPE).append(" IN ('")
-            .append(MIMETYPE_REGISTRATION_STATE).append("','").append(MIMETYPE_BLOCKING_STATE)
-            .append("','").append(MIMETYPE_BLOCKING_TIMESTAMP).append("','")
-            .append(MIMETYPE_NUMBER).append("','").append(MIMETYPE_CAPABILITY_IMAGE_SHARE)
-            .append("','").append(MIMETYPE_CAPABILITY_VIDEO_SHARE).append("','")
-            .append(MIMETYPE_CAPABILITY_IP_VOICE_CALL).append("','")
-            .append(MIMETYPE_CAPABILITY_IP_VIDEO_CALL).append("','")
-            .append(MIMETYPE_CAPABILITY_IM_SESSION).append("','")
-            .append(MIMETYPE_CAPABILITY_FILE_TRANSFER).append("','")
-            .append(MIMETYPE_CAPABILITY_GEOLOCATION_PUSH).append("','")
-            .append(MIMETYPE_CAPABILITY_EXTENSIONS).append("')").toString();
+    private static final String SEL_RAW_CONTACT_MIME_TYPES = Data.RAW_CONTACT_ID + "=? AND "
+            + Data.MIMETYPE + " IN ('" + MIMETYPE_REGISTRATION_STATE + "','"
+            + MIMETYPE_BLOCKING_STATE + "','" + MIMETYPE_BLOCKING_TIMESTAMP + "','"
+            + MIMETYPE_NUMBER + "','" + MIMETYPE_CAPABILITY_IMAGE_SHARE + "','"
+            + MIMETYPE_CAPABILITY_VIDEO_SHARE + "','" + MIMETYPE_CAPABILITY_IP_VOICE_CALL + "','"
+            + MIMETYPE_CAPABILITY_IP_VIDEO_CALL + "','" + MIMETYPE_CAPABILITY_IM_SESSION + "','"
+            + MIMETYPE_CAPABILITY_FILE_TRANSFER + "','" + MIMETYPE_CAPABILITY_GEOLOCATION_PUSH
+            + "','" + MIMETYPE_CAPABILITY_EXTENSIONS + "')";
 
     private static final String RCS_CONTACT_GROUP_NAME = RcsAccountManager.ACCOUNT_MANAGER_TYPE;
 
@@ -428,8 +410,8 @@ public final class ContactManager {
         Groups._ID
     };
 
-    private static final String SEL_RCS_CONTACT_GROUP_ACCOUNT_TYPE = new StringBuilder(
-            Groups.ACCOUNT_TYPE).append("='").append(RCS_CONTACT_GROUP_NAME).append("'").toString();
+    private static final String SEL_RCS_CONTACT_GROUP_ACCOUNT_TYPE = Groups.ACCOUNT_TYPE + "='"
+            + RCS_CONTACT_GROUP_NAME + "'";
 
     /**
      * Current instance
@@ -477,14 +459,14 @@ public final class ContactManager {
      * @param context Application context
      * @param contentResolver Content resolver
      * @param localContentResolver Local content resolver
-     * @param rcsSettings
+     * @param rcsSettings RCS settings accessor
      */
     private ContactManager(Context context, ContentResolver contentResolver,
             LocalContentResolver localContentResolver, RcsSettings rcsSettings) {
         mContext = context;
         mContentResolver = contentResolver;
         mLocalContentResolver = localContentResolver;
-        mContactInfoCache = new HashMap<ContactId, ContactInfo>();
+        mContactInfoCache = new HashMap<>();
         mRcsSettings = rcsSettings;
     }
 
@@ -645,7 +627,7 @@ public final class ContactManager {
         }
         boolean isRcsContact = newInfo.isRcsContact();
         /* For each entries in the native address book, prepare the modifications */
-        ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
         for (Long rawContactId : rawContactIds) {
             /* Get the associated RCS raw contact ID */
             long rcsRawContactId = getAssociatedRcsRawContact(rawContactId, contact);
@@ -671,7 +653,7 @@ public final class ContactManager {
                      * If no RCS raw contact ID is associated to the raw contact, create one with
                      * the right information.
                      */
-                    rcsRawContactId = createRcsRawContact(newInfo, rawContactId);
+                    createRcsRawContact(newInfo, rawContactId);
                     /* Nothing to modify, as the new contact will have taken the new information. */
                     continue;
                 }
@@ -788,14 +770,9 @@ public final class ContactManager {
             try {
                 mContentResolver.applyBatch(ContactsContract.AUTHORITY, ops);
 
-            } catch (RemoteException e) {
-                throw new ContactManagerException(new StringBuilder(
-                        "Unable to apply batch updates for contact :").append(newInfo.getContact())
-                        .toString(), e);
-            } catch (OperationApplicationException e) {
-                throw new ContactManagerException(new StringBuilder(
-                        "Unable to apply batch updates for contact :").append(newInfo.getContact())
-                        .toString(), e);
+            } catch (RemoteException | OperationApplicationException e) {
+                throw new ContactManagerException("Unable to apply batch updates for contact :"
+                        + newInfo.getContact(), e);
             }
         }
     }
@@ -937,7 +914,7 @@ public final class ContactManager {
      * Get contact info . This method is by choice not synchronized here since the methods invoking
      * this will handle the synchronization and we would like to avoid double locks.
      * 
-     * @param contact
+     * @param contact the contact ID
      * @return ContactInfo
      */
     private ContactInfo getContactInfoInternal(ContactId contact) {
@@ -952,8 +929,8 @@ public final class ContactManager {
     /**
      * Save photo icon
      * 
-     * @param photoIcon
-     * @param contact
+     * @param photoIcon the photo icon
+     * @param contact the contact ID
      * @throws FileAccessException
      */
     private void savePhotoIcon(PhotoIcon photoIcon, ContactId contact) throws FileAccessException {
@@ -968,10 +945,10 @@ public final class ContactManager {
             outstream.write(photoContent);
             outstream.flush();
         } catch (IOException e) {
-            throw new FileAccessException(new StringBuilder(
-                    "Failed to save photo icon for contact : ").append(contact).toString(), e);
+            throw new FileAccessException("Failed to save photo icon for contact : " + contact, e);
 
         } finally {
+            // noinspection ThrowableResultOfMethodCallIgnored
             CloseableUtils.tryToClose(outstream);
         }
     }
@@ -979,8 +956,8 @@ public final class ContactManager {
     /**
      * Get photo icon from RCS contact provider
      * 
-     * @param cursor
-     * @param contact
+     * @param cursor The cursor
+     * @param contact The contact ID
      * @return PhotoIcon or null
      * @throws IOException
      */
@@ -992,8 +969,7 @@ public final class ContactManager {
         stream.read(content, 0, content.length);
         Bitmap bmp = BitmapFactory.decodeByteArray(content, 0, content.length);
         if (bmp == null) {
-            throw new IOException(new StringBuilder("unable to create icon for contact :").append(
-                    contact).toString());
+            throw new IOException("unable to create icon for contact :" + contact);
         }
         return new PhotoIcon(content, bmp.getWidth(), bmp.getHeight(), etag);
     }
@@ -1096,7 +1072,7 @@ public final class ContactManager {
      * @return set containing all RCS contacts, "Me" item excluded
      */
     public Set<ContactId> getRcsContactsWithSocialPresence() {
-        Set<ContactId> rcsNumbers = new HashSet<ContactId>();
+        Set<ContactId> rcsNumbers = new HashSet<>();
         Cursor cursor = null;
         try {
             cursor = mLocalContentResolver.query(CONTENT_URI, PROJ_RCSCONTACT_CONTACT,
@@ -1124,7 +1100,7 @@ public final class ContactManager {
      * @return set containing all RCS contacts
      */
     public Set<ContactId> getRcsContactsFromRcsContactProvider() {
-        Set<ContactId> rcsNumbers = new HashSet<ContactId>();
+        Set<ContactId> rcsNumbers = new HashSet<>();
         Cursor cursor = null;
         try {
             cursor = mLocalContentResolver.query(CONTENT_URI, PROJ_RCSCONTACT_CONTACT,
@@ -1152,7 +1128,7 @@ public final class ContactManager {
      * @return set containing all contacts that have been at least queried once for capabilities
      */
     public Set<ContactId> getAllContactsFromRcsContactProvider() {
-        Set<ContactId> numbers = new HashSet<ContactId>();
+        Set<ContactId> numbers = new HashSet<>();
         Cursor cursor = null;
         try {
             cursor = mLocalContentResolver.query(CONTENT_URI, PROJ_RCSCONTACT_CONTACT, null, null,
@@ -1226,9 +1202,9 @@ public final class ContactManager {
 
     /**
      * Modify the corresponding mimetype row for the contact
-     * 
+     *
      * @param rawContactId Raw contact id of the RCS contact
-     * @param number RCS number of the contact
+     * @param rcsNumber RCS number of the contact
      * @param mimeType Mime type associated to the capability
      * @param newState True if the capability must be enabled, else false
      * @param oldState True if the capability was enabled, else false
@@ -1240,7 +1216,7 @@ public final class ContactManager {
             /* Nothing to do */
             return null;
         }
-        if (newState == true) {
+        if (newState) {
             /* We have to insert a new data in the raw contact */
             return insertMimeTypeForContact(rawContactId, rcsNumber, mimeType);
         }
@@ -1248,14 +1224,6 @@ public final class ContactManager {
         return deleteMimeTypeForContact(rawContactId, rcsNumber, mimeType);
     }
 
-    /**
-     * Create (first time) the corresponding mimetype row for the contact
-     * 
-     * @param rawContactId
-     * @param rcsNumber
-     * @param mimeType
-     * @return ContentProviderOperation to be done
-     */
     private ContentProviderOperation createMimeTypeForContact(int rawContactId,
             ContactId rcsNumber, String mimeType) {
         String mimeTypeDescriptionSummary = getMimeTypeDescriptionSummary(mimeType);
@@ -1274,14 +1242,6 @@ public final class ContactManager {
                 .build();
     }
 
-    /**
-     * Insert the corresponding mimetype row for the contact
-     * 
-     * @param rawContactId
-     * @param rcsNumber
-     * @param mimeType
-     * @return ContentProviderOperation to be done
-     */
     private ContentProviderOperation insertMimeTypeForContact(long rawContactId,
             ContactId rcsNumber, String mimeType) {
         /* Check if there is a mime-type description to be added */
@@ -1299,14 +1259,6 @@ public final class ContactManager {
                 .withValue(Data.DATA1, rcsNumber.toString()).build();
     }
 
-    /**
-     * Remove the corresponding mimetype row for the contact
-     * 
-     * @param rawContactId
-     * @param rcsNumber
-     * @param mimeType
-     * @return ContentProviderOperation to be done
-     */
     private ContentProviderOperation deleteMimeTypeForContact(long rawContactId,
             ContactId rcsNumber, String mimeType) {
         // We have to remove a data from the raw contact
@@ -1316,22 +1268,11 @@ public final class ContactManager {
                 }).build();
     }
 
-    /**
-     * Modify the registration state for the contact
-     * 
-     * @param rawContactId Raw contact id of the RCS contact
-     * @param number RCS number of the contact
-     * @param newRegistrationState
-     * @param oldRegistrationState
-     * @param newFreeText
-     * @param oldFreeText
-     * @return list of ContentProviderOperations to be done
-     */
     private List<ContentProviderOperation> modifyContactRegistrationState(long rawContactId,
             ContactId rcsNumber, RegistrationState newRegistrationState,
             RegistrationState oldRegistrationState, String newFreeText, String oldFreeText) {
 
-        List<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+        List<ContentProviderOperation> ops = new ArrayList<>();
         boolean registrationChanged = true;
         if ((newRegistrationState == oldRegistrationState || RegistrationState.UNKNOWN == newRegistrationState)) {
             registrationChanged = false;
@@ -1392,20 +1333,10 @@ public final class ContactManager {
         }
     }
 
-    /**
-     * Modify the registration state for the contact
-     * 
-     * @param rawContactId Raw contact id of the RCS contact
-     * @param newRegistrationState
-     * @param oldRegistrationState
-     * @param newFreeText
-     * @param oldFreeText
-     * @return list of ContentProviderOperations to be done
-     */
     private List<ContentProviderOperation> modifyContactRegistrationStateForMyself(
             long rawContactId, RegistrationState newRegistrationState,
             RegistrationState oldRegistrationState, String newFreeText, String oldFreeText) {
-        List<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+        List<ContentProviderOperation> ops = new ArrayList<>();
         boolean registrationChanged = true;
         if (newRegistrationState == oldRegistrationState
                 || RegistrationState.UNKNOWN.equals(newRegistrationState)) {
@@ -1481,7 +1412,7 @@ public final class ContactManager {
     /**
      * Modify blocking state for contact
      * 
-     * @param rawContactIdRaw contact id of the RCS contact
+     * @param rawContactId contact id of the RCS contact
      * @param contact RCS number of the contact
      * @param newBlockingState new blocking state
      * @param oldBlockingState old blocking state
@@ -1501,10 +1432,10 @@ public final class ContactManager {
     /**
      * Modify blocking timestamp for contact
      * 
-     * @param rawContactIdRaw contact id of the RCS contact
+     * @param rawContactId contact id of the RCS contact
      * @param contact RCS number of the contact
-     * @param newBlockingState new blocking timestamp
-     * @param oldBlockingState old blocking timestamp
+     * @param newBlockingTimestamp new blocking timestamp
+     * @param oldBlockingTimestamp old blocking timestamp
      * @return contentProviderOperation to be done of null if no update is required
      */
     private ContentProviderOperation modifyBlockingTimestampForContact(long rawContactId,
@@ -1522,18 +1453,9 @@ public final class ContactManager {
                         }).withValue(Data.DATA2, newBlockingTimestamp).build();
     }
 
-    /**
-     * Modify the presence info for a contact
-     * 
-     * @param rawContactId Raw contact id of the RCS contact
-     * @param contact RCS number of the contact
-     * @param newPresenceInfo
-     * @param oldPresenceInfo
-     * @return list of ContentProviderOperation to be done
-     */
     private List<ContentProviderOperation> modifyPresenceForContact(long rawContactId,
             ContactId contact, PresenceInfo newPresenceInfo, PresenceInfo oldPresenceInfo) {
-        List<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+        List<ContentProviderOperation> ops = new ArrayList<>();
         if (newPresenceInfo != null && oldPresenceInfo != null) {
             if (!StringUtils.equals(newPresenceInfo.getFavoriteLinkUrl(),
                     oldPresenceInfo.getFavoriteLinkUrl())) {
@@ -1625,11 +1547,7 @@ public final class ContactManager {
             // Get the id of the current weblink mimetype
             long currentNativeWebLinkDataId = getCurrentNativeWebLinkDataId(rawContactId);
 
-            if (oldPresenceInfo.getFavoriteLinkUrl() == null) {
-                // There was no weblink, insert
-                ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI).withValues(values)
-                        .build());
-            } else if (newPresenceInfo.getFavoriteLinkUrl() != null) {
+            if (newPresenceInfo.getFavoriteLinkUrl() != null) {
                 // Update the existing weblink
                 ops.add(ContentProviderOperation.newUpdate(Data.CONTENT_URI)
                         .withSelection(SEL_DATA_ID, new String[] {
@@ -1690,7 +1608,7 @@ public final class ContactManager {
     /**
      * Get the id of the current weblink mimetype
      * 
-     * @param rawContactId
+     * @param rawContactId The raw contact ID
      * @return id
      */
     private long getCurrentNativeWebLinkDataId(long rawContactId) {
@@ -1863,6 +1781,9 @@ public final class ContactManager {
             if (newInfo.getCapabilities().equals(oldInfo.getCapabilities())
                     && newInfo.getRcsStatus() == oldInfo.getRcsStatus()
                     && newInfo.getRegistrationState() == oldInfo.getRegistrationState()) {
+                /* Only update time of last response if capabilities are unchanged */
+                updateCapabilitiesTimeLastResponse(contact,
+                        capabilities.getTimestampOfLastResponse());
                 return;
             }
             /* Save the modifications */
@@ -1873,11 +1794,11 @@ public final class ContactManager {
     /**
      * Merge capabilities with existing capabilities in the cache
      * 
-     * @param contact
-     * @param capabilities
-     * @param contactType
-     * @param registrationState
-     * @param displayName
+     * @param contact The contact
+     * @param capabilities The capabilities
+     * @param contactType The contact type
+     * @param registrationState The registration state
+     * @param displayName The display name
      * @throws ContactManagerException
      * @throws FileAccessException
      */
@@ -1971,22 +1892,10 @@ public final class ContactManager {
         }
     }
 
-    /**
-     * Get the RCS status for contact
-     * 
-     * @param contact
-     * @return status
-     */
     private RcsStatus getContactStatus(ContactId contact) {
         return getContactInfo(contact).getRcsStatus();
     }
 
-    /**
-     * Get the registration state for contact
-     * 
-     * @param contact
-     * @return registration state
-     */
     private RegistrationState getRegistrationState(ContactId contact) {
         return getContactInfo(contact).getRegistrationState();
     }
@@ -2047,7 +1956,7 @@ public final class ContactManager {
                 sLogger.debug("Create RCS rawcontact for '" + contactNumber
                         + "' associated to rawContactId " + rawContactId);
             }
-            ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+            ArrayList<ContentProviderOperation> ops = new ArrayList<>();
             /* Create raw contact for RCS */
             int rawContactRefIms = ops.size();
             ops.add(ContentProviderOperation
@@ -2153,13 +2062,9 @@ public final class ContactManager {
             mLocalContentResolver.insert(AggregationData.CONTENT_URI, values);
             return rcsRawContactId;
 
-        } catch (RemoteException e) {
-            throw new ContactManagerException(new StringBuilder(
-                    "Unable to apply batch updates for contact :").append(contact).toString(), e);
-
-        } catch (OperationApplicationException e) {
-            throw new ContactManagerException(new StringBuilder(
-                    "Unable to apply batch updates for contact :").append(contact).toString(), e);
+        } catch (RemoteException | OperationApplicationException e) {
+            throw new ContactManagerException("Unable to apply batch updates for contact :"
+                    + contact, e);
         }
     }
 
@@ -2182,6 +2087,7 @@ public final class ContactManager {
             return null;
 
         } finally {
+            // noinspection ThrowableResultOfMethodCallIgnored
             CloseableUtils.tryToClose(out);
         }
     }
@@ -2210,7 +2116,7 @@ public final class ContactManager {
             if (sLogger.isActivated()) {
                 sLogger.error("\"Me\" contact does not already exists, creating it");
             }
-            ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+            ArrayList<ContentProviderOperation> ops = new ArrayList<>();
             /* Create raw contact for RCS */
             int rawContactRefIms = ops.size();
             ops.add(ContentProviderOperation
@@ -2252,10 +2158,7 @@ public final class ContactManager {
             mContentResolver.applyBatch(ContactsContract.AUTHORITY, ops);
             return imsRawContactId;
 
-        } catch (RemoteException e) {
-            throw new ContactManagerException("Unable to apply batch updates!", e);
-
-        } catch (OperationApplicationException e) {
+        } catch (RemoteException | OperationApplicationException e) {
             throw new ContactManagerException("Unable to apply batch updates!", e);
         }
     }
@@ -2267,7 +2170,7 @@ public final class ContactManager {
      * @return set of contact Ids
      */
     private Set<Long> getRawContactIdsFromPhoneNumber(ContactId contact) {
-        Set<Long> rawContactsIds = new HashSet<Long>();
+        Set<Long> rawContactsIds = new HashSet<>();
         String[] selectionArgs = {
                 Phone.CONTENT_ITEM_TYPE, contact.toString()
         };
@@ -2402,16 +2305,16 @@ public final class ContactManager {
      * @param rawContactId RCS raw contact
      * @param photoIcon The photoIcon
      * @param makeSuperPrimary whether or not to set the super primary flag
-     * @return
+     * @return list of contentProviderOperation to be done
      */
     private List<ContentProviderOperation> setContactPhoto(Long rawContactId, PhotoIcon photoIcon,
             boolean makeSuperPrimary) {
-        List<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+        List<ContentProviderOperation> ops = new ArrayList<>();
         /* Get the photo data id */
         String[] selectionArgs = {
                 Long.toString(rawContactId), Photo.CONTENT_ITEM_TYPE
         };
-        String sortOrder = new StringBuilder(Data._ID).append(" DESC").toString();
+        String sortOrder = Data._ID + " DESC";
 
         Cursor cursor = mContentResolver.query(Data.CONTENT_URI, PROJ_DATA_ID,
                 SEL_RAW_CONTACT_WITH_MIMETYPE, selectionArgs, sortOrder);
@@ -2428,7 +2331,7 @@ public final class ContactManager {
                     R.drawable.rcs_core_default_portrait_icon);
             iconData = convertBitmapToBytes(rcsAvatar);
         }
-        long dataId = INVALID_ID;
+        long dataId;
         try {
             if (iconData == null) {
                 /*
@@ -2481,11 +2384,10 @@ public final class ContactManager {
                 try {
                     cur2 = mContentResolver.query(Data.CONTENT_URI, projection2,
                             SEL_RAW_CONTACT_ID, selectionArgs2, null);
-                    CursorUtil.assertCursorIsNotNull(cursor, Data.CONTENT_URI);
+                    CursorUtil.assertCursorIsNotNull(cur2, Data.CONTENT_URI);
                     if (cur2.moveToNext()) {
                         dataId = cur2.getLong(cur2.getColumnIndexOrThrow(Data._ID));
                         /* We already have an etag, update it */
-                        dataId = cursor.getLong(cursor.getColumnIndexOrThrow(Data._ID));
                         ops.add(ContentProviderOperation.newUpdate(Data.CONTENT_URI)
                                 .withSelection(SEL_DATA_ID, new String[] {
                                     String.valueOf(dataId)
@@ -2540,7 +2442,7 @@ public final class ContactManager {
     /**
      * Utility to create a ContactInfo object from a cursor containing data
      * 
-     * @param cursor
+     * @param cursor The cursor
      * @return contactInfo
      */
     private ContactInfo getContactInfoFromCursor(Cursor cursor) {
@@ -2657,9 +2559,8 @@ public final class ContactManager {
         String[] selectionArgs = {
             Long.toString(rawContactId)
         };
-        Cursor cur = mContentResolver.query(Data.CONTENT_URI, PROJ_RAW_CONTACT_DATA_ALL,
+        return mContentResolver.query(Data.CONTENT_URI, PROJ_RAW_CONTACT_DATA_ALL,
                 SEL_RAW_CONTACT_MIME_TYPES, selectionArgs, null);
-        return cur;
     }
 
     /**
@@ -2668,7 +2569,7 @@ public final class ContactManager {
      * @throws ContactManagerException
      */
     public void updateStrings() throws ContactManagerException {
-        ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
         /* Update My profile display name */
         ContentValues values = new ContentValues();
         values.put(StructuredName.DISPLAY_NAME, mContext.getString(R.string.rcs_core_my_profile));
@@ -2739,11 +2640,9 @@ public final class ContactManager {
             /* Do the actual database modifications */
             try {
                 mContentResolver.applyBatch(ContactsContract.AUTHORITY, ops);
-            } catch (RemoteException e) {
+            } catch (RemoteException | OperationApplicationException e) {
                 throw new ContactManagerException("Unable to apply batch updates !", e);
 
-            } catch (OperationApplicationException e) {
-                throw new ContactManagerException("Unable to apply batch updates !", e);
             }
         }
     }
@@ -2785,7 +2684,7 @@ public final class ContactManager {
              * Get all RCS raw contacts id Delete RCS Entry where number is not in the address book
              * anymore.
              */
-            ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+            ArrayList<ContentProviderOperation> ops = new ArrayList<>();
             do {
                 String phoneNumber = cursor.getString(data1ColumnIdx);
                 PhoneNumber number = ContactUtil.getValidPhoneNumberFromAndroid(phoneNumber);
@@ -2813,10 +2712,7 @@ public final class ContactManager {
                 /* Do the actual database modifications */
                 mContentResolver.applyBatch(ContactsContract.AUTHORITY, ops);
             }
-        } catch (RemoteException e) {
-            throw new ContactManagerException("Unable to apply batch updates !", e);
-
-        } catch (OperationApplicationException e) {
+        } catch (RemoteException | OperationApplicationException e) {
             throw new ContactManagerException("Unable to apply batch updates !", e);
 
         } finally {
@@ -2926,10 +2822,11 @@ public final class ContactManager {
 
     /**
      * Update the time of last capabilities refresh
-     * 
+     *
      * @param contact ID
+     * @param timestampOfLastResponse the time when capabilities are refreshed
      */
-    public void updateCapabilitiesTimeLastResponse(ContactId contact) {
+    public void updateCapabilitiesTimeLastResponse(ContactId contact, long timestampOfLastResponse) {
         String contactNumber = contact.toString();
         if (sLogger.isActivated()) {
             sLogger.debug("Update the time of last capabilities response for "
@@ -2938,13 +2835,12 @@ public final class ContactManager {
         synchronized (mContactInfoCache) {
             ContactInfo contactInfo = getContactInfoInternal(contact);
             Capabilities capabilities = contactInfo.getCapabilities();
-            long now = System.currentTimeMillis();
             /* Update the cache */
             CapabilitiesBuilder capaBuilder = new CapabilitiesBuilder(capabilities);
-            capaBuilder.setTimestampOfLastResponse(now);
+            capaBuilder.setTimestampOfLastResponse(timestampOfLastResponse);
             contactInfo.setCapabilities(capaBuilder.build());
             ContentValues values = new ContentValues();
-            values.put(KEY_CAPABILITY_TIMESTAMP_LAST_RESPONSE, now);
+            values.put(KEY_CAPABILITY_TIMESTAMP_LAST_RESPONSE, timestampOfLastResponse);
             Uri uri = Uri.withAppendedPath(CONTENT_URI, contactNumber);
             mLocalContentResolver.update(uri, values, null, null);
         }
@@ -2978,7 +2874,7 @@ public final class ContactManager {
      * @return map of contact IDs associated with their raw contact IDs
      */
     public Map<ContactId, Set<Long>> getAllRawIdsInPhoneAddressBook() {
-        Map<ContactId, Set<Long>> result = new HashMap<ContactId, Set<Long>>();
+        Map<ContactId, Set<Long>> result = new HashMap<>();
         Cursor cursor = null;
         try {
             /* Query all phone numbers of the native address book */
@@ -3013,7 +2909,7 @@ public final class ContactManager {
                     rawIds.add(rawContactId);
                     result.put(contact, rawIds);
                 } else {
-                    Set<Long> rawIds = new HashSet<Long>();
+                    Set<Long> rawIds = new HashSet<>();
                     rawIds.add(rawContactId);
                     result.put(contact, rawIds);
                 }
@@ -3098,7 +2994,7 @@ public final class ContactManager {
      * @return the set of contacts only SIM associated
      */
     public Set<ContactId> getContactsOnlySimAssociated(Map<ContactId, Set<Long>> contacts) {
-        Set<ContactId> result = new HashSet<ContactId>();
+        Set<ContactId> result = new HashSet<>();
         for (Entry<ContactId, Set<Long>> contactEntry : contacts.entrySet()) {
             Set<Long> nativeRawContactIds = contactEntry.getValue();
             if (isOnlySimAssociated(nativeRawContactIds)) {
