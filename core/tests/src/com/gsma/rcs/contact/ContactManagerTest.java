@@ -47,23 +47,19 @@ public class ContactManagerTest extends AndroidTestCase {
 
     private static final Logger sLogger = Logger.getLogger(ContactManagerTest.class.getName());
     private ContactManager mContactManager;
-    private ContactUtil contactUtils;
     private ContactId mContact;
     private Random mRandom;
-    private Context mContext;
-    private ContentResolver mContentResolver;
-    private LocalContentResolver mLocalContentResolver;
     private RcsSettings mRcsSettings;
 
     protected void setUp() throws Exception {
         super.setUp();
-        mContext = getContext();
-        mContentResolver = mContext.getContentResolver();
-        mLocalContentResolver = new LocalContentResolver(mContentResolver);
-        mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
-        mContactManager = ContactManager.createInstance(mContext, mContentResolver,
-                mLocalContentResolver, mRcsSettings);
-        contactUtils = ContactUtil.getInstance(new ContactUtilMockContext(mContext));
+        Context context = getContext();
+        ContentResolver contentResolver = context.getContentResolver();
+        LocalContentResolver localContentResolver = new LocalContentResolver(contentResolver);
+        mRcsSettings = RcsSettings.createInstance(localContentResolver);
+        mContactManager = ContactManager.createInstance(context, contentResolver,
+                localContentResolver, mRcsSettings);
+        ContactUtil contactUtils = ContactUtil.getInstance(new ContactUtilMockContext(context));
         mContact = contactUtils.formatContact("+33633139785");
         mRandom = new Random();
     }
@@ -88,7 +84,6 @@ public class ContactManagerTest extends AndroidTestCase {
         ContactInfo getInfo = mContactManager.getContactInfo(mContact);
         assertNotNull(getInfo);
         /* Compare getContactInfo informations and initial informations */
-        assertTrue("Failed to get info for contact:".concat(mContact.toString()), getInfo != null);
         Capabilities getCapa = getInfo.getCapabilities();
         assertNotNull(getCapa);
         assertEquals(expectedCapa.isCsVideoSupported(), getCapa.isCsVideoSupported());
@@ -153,6 +148,8 @@ public class ContactManagerTest extends AndroidTestCase {
         Thread.sleep(1010);
         mContactManager.updateCapabilitiesTimeLastRequest(mContact);
         Capabilities newCapa = mContactManager.getContactCapabilities(mContact);
+        assertNotNull(newCapa);
+        assertNotNull(oldCapa);
         assertTrue(newCapa.getTimestampOfLastRequest() > oldCapa.getTimestampOfLastRequest());
     }
 
@@ -165,8 +162,10 @@ public class ContactManagerTest extends AndroidTestCase {
          * second.
          */
         Thread.sleep(1010);
-        mContactManager.updateCapabilitiesTimeLastResponse(mContact);
+        mContactManager.updateCapabilitiesTimeLastResponse(mContact, System.currentTimeMillis());
         Capabilities newCapa = mContactManager.getContactCapabilities(mContact);
+        assertNotNull(newCapa);
+        assertNotNull(oldCapa);
         assertTrue(newCapa.getTimestampOfLastResponse() > oldCapa.getTimestampOfLastResponse());
     }
 
