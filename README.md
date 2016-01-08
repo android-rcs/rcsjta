@@ -48,7 +48,7 @@ Note: the cryptography API comes from Legion of the [Bouncy Castle Inc] (https:/
 ##Standardisation:
 
 TAPI 1.6
-- to review [CR Audio Message](https://github.com/android-rcs/rcsjta/raw/master/docs/tapi/CR_1.6/RCSJTA_T-API1.6_CR001_AudioMessage-R1.doc).
-- to review [CR Enrich Calling](https://github.com/android-rcs/rcsjta/raw/master/docs/tapi/CR_1.6/RCSJTA_TT_BB_CR001_EnrichCalling_R5.doc).
+- to review [CR Audio Message](https://github.com/android-rcs/rcsjta/raw/master/docs/tapi/CR_1.6/RCSJTA_T-API1.6_CR001_AudioMessage-R2).
+- to review [CR Enrich Calling](https://github.com/android-rcs/rcsjta/raw/master/docs/tapi/CR_1.6/RCSJTA_TT_BB_CR001_EnrichCalling_R6.doc).
 - to review [CR Capability](https://github.com/android-rcs/rcsjta/raw/master/docs/tapi/CR_1.6/RCSJTA_T-API1.6_CR003_Capability_Discovery-R1.doc).
-- to review [CR Crane priority release](https://github.com/android-rcs/rcsjta/raw/master/docs/tapi/CR_1.6/RCSJTA_T-API1.6_CR002_ReferenceToCranePriorityRelease-R1.doc).
+- to review [CR Crane priority release](https://github.com/android-rcs/rcsjta/raw/master/docs/tapi/CR_1.6/RCSJTA_T-API1.6_CR002_ReferenceToCranePriorityRelease-R2.doc).
