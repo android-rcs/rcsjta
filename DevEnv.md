@@ -6,7 +6,7 @@ Also add the ANDROID_HOME/tools and ANDROID_HOME/platform-tools to your PATH.
 #Build the whole SDK
 
 Clone a GIT branch of the project:
-> _git clone https://github.com/android-rcs/rcsjta.git -b <a branch>_
+> _git clone https://github.com/android-rcs/rcsjta.git -b 'a branch'_
 
 From a console, list of tasks of the RCSJTA project via the command line:
 > _gradlew tasks_
