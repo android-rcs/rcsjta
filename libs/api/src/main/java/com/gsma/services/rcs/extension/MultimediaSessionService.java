@@ -208,6 +208,49 @@ public final class MultimediaSessionService extends RcsService {
     }
 
     /**
+     * Initiates a new session for real time messaging with a remote contact and for a given service
+     * extension. The messages are exchanged in real time during the session are specified by the
+     * parameter accept-types and accept-wrapped-types.
+     * The parameter contact supports the following formats: MSISDN in national or international
+     * format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not supported an
+     * exception is thrown.
+     *
+     * @param serviceId Service ID
+     * @param contact Contact identifier
+     * @param acceptType Accept-types related to exchanged messages
+     * @param acceptWrappedType Accept-wrapped-types related to exchanged messages
+     * @return MultimediaMessagingSession
+     * @throws RcsServiceNotRegisteredException
+     * @throws RcsPermissionDeniedException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
+     */
+    public MultimediaMessagingSession initiateMessagingSession(String serviceId, ContactId contact,
+                                                               String[] acceptType,
+                                                               String[] acceptWrappedType)
+            throws RcsServiceNotRegisteredException, RcsPermissionDeniedException,
+            RcsServiceNotAvailableException, RcsGenericException {
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            IMultimediaMessagingSession sessionIntf = mApi.initiateMessagingSession2(serviceId,
+                    contact, acceptType, acceptWrappedType);
+            if (sessionIntf != null) {
+                return new MultimediaMessagingSession(sessionIntf);
+
+            }
+            return null;
+
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            RcsServiceNotRegisteredException.assertException(e);
+            RcsPermissionDeniedException.assertException(e);
+            throw new RcsGenericException(e);
+        }
+    }
+
+    /**
      * Returns the list of messaging sessions associated to a given service ID
      * 
      * @param serviceId Service ID
@@ -465,6 +508,41 @@ public final class MultimediaSessionService extends RcsService {
             }
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
+            throw new RcsGenericException(e);
+        }
+    }
+
+    /**
+     * Sends an instant multimedia message to a remote contact and for a given service
+     * extension. The content takes part of the message, so any multimedia session is
+     * needed to exchange content here.
+     * The parameter contact supports the following formats: MSISDN in national or international
+     * format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not supported an
+     * exception is thrown.
+     *
+     * @param serviceId Service ID
+     * @param contact Contact identifier
+     * @param content Content of the message
+     * @param contentType Content type of the the message
+     * @throws RcsServiceNotRegisteredException
+     * @throws RcsPermissionDeniedException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
+     */
+    public void sendInstantMultimediaMessage(String serviceId, ContactId contact, byte[] content,
+                                             String contentType)
+            throws RcsServiceNotRegisteredException, RcsPermissionDeniedException,
+            RcsServiceNotAvailableException, RcsGenericException {
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            mApi.sendInstantMultimediaMessage(serviceId,
+                    contact, content, contentType);
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            RcsServiceNotRegisteredException.assertException(e);
+            RcsPermissionDeniedException.assertException(e);
             throw new RcsGenericException(e);
         }
     }

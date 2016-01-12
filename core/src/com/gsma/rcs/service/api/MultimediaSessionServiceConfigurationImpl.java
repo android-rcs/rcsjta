@@ -66,4 +66,15 @@ public class MultimediaSessionServiceConfigurationImpl extends
         }
     }
 
+    @Override
+    public long getInactivityTimeout() throws RemoteException {
+        // TODO 1.6: implement the feature
+        return 0L;
+    }
+
+    @Override
+    public boolean isServiceActivated(String serviceId) throws RemoteException {
+        // TODO 1.6: implement the feature
+        return true;
+    }
 }

@@ -403,8 +403,22 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
      * @throws RemoteException
      */
     public void sendMessage(final byte[] content) throws RemoteException {
+        sendMessage2(content, SipService.MIME_TYPE);
+    }
+
+    /**
+     * Sends a message in real time
+     *
+     * @param content Message content
+     * @param contentType Message content type
+     * @throws RemoteException
+     */
+    public void sendMessage2(final byte[] content, final String contentType) throws RemoteException {
         if (content == null || content.length == 0) {
             throw new ServerApiIllegalArgumentException("content must not be null or empty!");
+        }
+        if (contentType == null || contentType.length() == 0) {
+            throw new ServerApiIllegalArgumentException("content type must not be null or empty!");
         }
         mSipService.scheduleMultimediaMessagingOperation(new Runnable() {
             public void run() {
@@ -426,6 +440,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                         sLogger.error("Failed to send message: max length exceeded!");
                         return;
                     }
+                    // TODO 1.6: add content type
                     session.sendMessage(content);
 
                 } catch (NetworkException e) {
@@ -447,6 +462,15 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                 }
             }
         });
+    }
+
+    /**
+     * Flush all messages of the session
+     *
+     * @throws RemoteException
+     */
+    public void flushMessages() throws RemoteException {
+        // TODO 1.6: implement the feature
     }
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/
@@ -519,6 +543,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
     @Override
     public void onDataReceived(ContactId contact, byte[] data) {
+        // TODO 1.6: add a content type
         synchronized (mLock) {
             mBroadcaster.broadcastMessageReceived(contact, mSessionId, data);
         }

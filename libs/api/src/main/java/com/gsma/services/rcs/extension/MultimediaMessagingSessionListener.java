@@ -36,7 +36,7 @@ public abstract class MultimediaMessagingSessionListener {
      * Callback called when the multimedia messaging session state/reasonCode is changed.
      * 
      * @param contact Contact ID
-     * @param sessionId Session Id
+     * @param sessionId Session ID
      * @param state State
      * @param reasonCode Reason code
      */
@@ -47,8 +47,18 @@ public abstract class MultimediaMessagingSessionListener {
      * Callback called when a multimedia message or data is received.
      * 
      * @param contact Contact ID
-     * @param sessionId
+     * @param sessionId Session ID
      * @param content Message content
      */
     public abstract void onMessageReceived(ContactId contact, String sessionId, byte[] content);
+
+    /**
+     * Callback called when a multimedia message or data is received.
+     *
+     * @param contact Contact ID
+     * @param sessionId Session ID
+     * @param content Message content
+     * @param contentType Message content type
+     */
+    public abstract void onMessageReceived(ContactId contact, String sessionId, byte[] content, String contentType);
 }

@@ -479,6 +479,21 @@ public class StreamingSessionView extends RcsActivity {
                 });
             }
 
+            @Override
+            public void onPayloadReceived(ContactId contact, String sessionId, final byte[] content, String contentType) {
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "onNewMessage contact=" + contact + " sessionId=" + sessionId);
+                }
+                if (mSessionId == null || !mSessionId.equals(sessionId)) {
+                    return;
+                }
+                handler.post(new Runnable() {
+                    public void run() {
+                        /* Display received data */
+                        mRxDataView.setText(new String(content));
+                    }
+                });
+            }
         };
     }
 

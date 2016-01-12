@@ -59,9 +59,13 @@ public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
+     * @param acceptType Accept-types related to exchanged messages
+     * @param acceptWrappedType Accept-wrapped-types related to exchanged messages
      */
     public OriginatingSipMsrpSession(SipService parent, ContactId contact, String featureTag,
-            RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
+                                     RcsSettings rcsSettings, long timestamp,
+                                     ContactManager contactManager,
+                                     String[] acceptType, String[] acceptWrappedType) {
         super(parent, contact, featureTag, rcsSettings, timestamp, contactManager);
         createOriginatingDialogPath();
     }
@@ -89,6 +93,8 @@ public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
                 sLogger.info("Send INVITE");
             }
             SipRequest invite = createInvite();
+
+            // TODO 1.6: add accept-types and wrapped-types
 
             getAuthenticationAgent().setAuthorizationHeader(invite);
 

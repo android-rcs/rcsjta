@@ -58,4 +58,33 @@ public class MultimediaSessionServiceConfiguration {
             throw new RcsGenericException(e);
         }
     }
+
+    /**
+     * Returns the inactivity timeout of a multimedia session.
+     *
+     * @return long Timeout in milliseconds
+     * @throws RcsGenericException
+     */
+    public long getInactivityTimeout() throws RcsGenericException {
+        try {
+            return mIConfig.getInactivityTimeout();
+        } catch (Exception e) {
+            throw new RcsGenericException(e);
+        }
+    }
+
+    /**
+     * Returns True if the given service ID is activated, else returns False.
+     *
+     * @param serviceId Service ID
+     * @return boolean
+     * @throws RcsGenericException
+     */
+    public boolean isServiceActivated(String serviceId) throws RcsGenericException {
+        try {
+            return mIConfig.isServiceActivated(serviceId);
+        } catch (Exception e) {
+            throw new RcsGenericException(e);
+        }
+    }
 }

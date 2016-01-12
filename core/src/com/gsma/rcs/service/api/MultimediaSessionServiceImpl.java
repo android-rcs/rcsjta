@@ -297,6 +297,28 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      */
     public IMultimediaMessagingSession initiateMessagingSession(String serviceId, ContactId contact)
             throws RemoteException {
+        return initiateMessagingSession2(serviceId, contact, null, null);
+    }
+
+    /**
+     * Initiates a new session for real time messaging with a remote contact and for a given service
+     * extension. The messages are exchanged in real time during the session are specified by the
+     * parameter accept-types and accept-wrapped-types.
+     * The parameter contact supports the following formats: MSISDN in national or international
+     * format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not supported an
+     * exception is thrown.
+     *
+     * @param serviceId Service ID
+     * @param contact Contact ID
+     * @param acceptType Accept-types related to exchanged messages
+     * @param acceptWrappedType Accept-wrapped-types related to exchanged messages
+     * @return Multimedia messaging session
+     * @throws RemoteException
+     */
+    public IMultimediaMessagingSession initiateMessagingSession2(String serviceId, ContactId contact,
+                                                                 String[] acceptType,
+                                                                 String[] acceptWrappedType)
+            throws RemoteException {
         if (TextUtils.isEmpty(serviceId)) {
             throw new ServerApiIllegalArgumentException("serviceId must not be null or empty!");
         }
@@ -312,7 +334,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
             String featureTag = FeatureTags.FEATURE_RCSE + "=\""
                     + FeatureTags.FEATURE_RCSE_EXTENSION + "." + serviceId + "\"";
             final GenericSipMsrpSession session = mSipService
-                    .createMsrpSession(contact, featureTag);
+                    .createMsrpSession(contact, featureTag, acceptType, acceptWrappedType);
             MultimediaMessagingSessionImpl multiMediaMessaging = new MultimediaMessagingSessionImpl(
                     session.getSessionID(), mMultimediaMessagingSessionEventBroadcaster,
                     mSipService, this, Direction.OUTGOING, contact, serviceId, State.INITIATING);
@@ -657,5 +679,24 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      */
     public ICommonServiceConfiguration getCommonConfiguration() {
         return new CommonServiceConfigurationImpl(mRcsSettings);
+    }
+
+    /**
+     * Sends an instant multimedia message to a remote contact and for a given service
+     * extension. The content takes part of the message, so any multimedia session is
+     * needed to exchange content here.
+     * The parameter contact supports the following formats: MSISDN in national or international
+     * format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not supported an
+     * exception is thrown.
+     *
+     * @param serviceId Service ID
+     * @param contact Contact identifier
+     * @param content Content of the message
+     * @param contentType Content type of the the message
+     * @throws RemoteException
+     */
+    public void sendInstantMultimediaMessage(String serviceId, ContactId contact, byte[] content, String contentType)
+            throws RemoteException {
+        // TODO 1.6 : implement the callflow
     }
 }

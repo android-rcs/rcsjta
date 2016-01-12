@@ -164,14 +164,17 @@ public class SipService extends ImsService {
      * 
      * @param contact Remote contact Id
      * @param featureTag Feature tag of the service
+     * @param acceptType Accept-types related to exchanged messages
+     * @param acceptWrappedType Accept-wrapped-types related to exchanged messages
      * @return SIP session
      */
-    public GenericSipMsrpSession createMsrpSession(ContactId contact, String featureTag) {
+    public GenericSipMsrpSession createMsrpSession(ContactId contact, String featureTag,
+                                                   String[] acceptType, String[] acceptWrappedType) {
         if (sLogger.isActivated()) {
             sLogger.info("Initiate a MSRP session with contact " + contact);
         }
         return new OriginatingSipMsrpSession(this, contact, featureTag, mRcsSettings,
-                System.currentTimeMillis(), mContactManager);
+                System.currentTimeMillis(), mContactManager, acceptType, acceptWrappedType);
     }
 
     /**

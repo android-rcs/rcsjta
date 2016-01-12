@@ -6,4 +6,8 @@ package com.gsma.services.rcs.extension;
 interface IMultimediaSessionServiceConfiguration {
 
 	int getMessageMaxLength();
+
+	long getInactivityTimeout();
+
+	boolean isServiceActivated(in String serviceId);
 }

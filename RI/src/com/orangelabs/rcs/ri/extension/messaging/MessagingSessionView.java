@@ -422,6 +422,28 @@ public class MessagingSessionView extends RcsActivity {
                     }
                 });
             }
+
+            @Override
+            public void onMessageReceived(ContactId contact, String sessionId, byte[] content, String contentType) {
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "onMessageReceived contact=" + contact + " sessionId="
+                            + sessionId);
+                }
+                /* Discard event if not for current sessionId */
+                if (mSessionId == null || !mSessionId.equals(sessionId)) {
+                    return;
+                }
+                final String data = new String(content);
+
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        /* Display received data */
+                        TextView txt = (TextView) MessagingSessionView.this
+                                .findViewById(R.id.recv_data);
+                        txt.setText(data);
+                    }
+                });
+            }
         };
 
         mAcceptBtnListener = new OnClickListener() {

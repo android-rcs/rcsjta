@@ -43,7 +43,7 @@ public class MultimediaMessagingSession extends MultimediaSession {
     /**
      * Constructor
      * 
-     * @param sessionInf Multimedia session interface
+     * @param sessionIntf Multimedia session interface
      */
     MultimediaMessagingSession(IMultimediaMessagingSession sessionIntf) {
         super();
@@ -200,6 +200,41 @@ public class MultimediaMessagingSession extends MultimediaSession {
             RcsGenericException {
         try {
             sessionIntf.sendMessage(content);
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            RcsPermissionDeniedException.assertException(e);
+            throw new RcsGenericException(e);
+        }
+    }
+
+    /**
+     * Sends a message in real time
+     *
+     * @param content Message content
+     * @param contentType Message content type
+     * @throws RcsPermissionDeniedException
+     * @throws RcsGenericException
+     */
+    public void sendMessage(byte[] content, String contentType) throws RcsPermissionDeniedException,
+            RcsGenericException {
+        try {
+            sessionIntf.sendMessage2(content, contentType);
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            RcsPermissionDeniedException.assertException(e);
+            throw new RcsGenericException(e);
+        }
+    }
+
+    /**
+     * Flush all messages of the session
+     *
+     * @throws RcsPermissionDeniedException
+     * @throws RcsGenericException
+     */
+    public void flushMessages() throws RcsPermissionDeniedException, RcsGenericException {
+        try {
+            sessionIntf.flushMessages();
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             RcsPermissionDeniedException.assertException(e);

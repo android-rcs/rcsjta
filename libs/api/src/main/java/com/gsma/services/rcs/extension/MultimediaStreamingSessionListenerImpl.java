@@ -59,4 +59,8 @@ public class MultimediaStreamingSessionListenerImpl extends
     public void onPayloadReceived(ContactId contact, String sessionId, byte[] content) {
         mListener.onPayloadReceived(contact, sessionId, content);
     }
+
+    public void onPayloadReceived2(ContactId contact, String sessionId, byte[] content, String contentType) {
+        mListener.onPayloadReceived(contact, sessionId, content, contentType);
+    }
 }

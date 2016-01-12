@@ -191,12 +191,14 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
      * Sends a payload in real time
      * 
      * @param content Payload content
+     * @param contentType Payload content type
      * @throws SessionNotEstablishedException
      */
-    public void sendPlayload(byte[] content) throws SessionNotEstablishedException {
+    public void sendPlayload(byte[] content, String contentType) throws SessionNotEstablishedException {
         if (!mMediaSessionStarted) {
             throw new SessionNotEstablishedException("Unable to send payload!");
         }
+        // TODO 1.6: use content type in the payload
         mDataSender.addFrame(content, System.currentTimeMillis());
     }
 

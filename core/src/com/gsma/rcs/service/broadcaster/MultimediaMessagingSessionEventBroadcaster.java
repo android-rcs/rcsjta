@@ -67,6 +67,21 @@ public class MultimediaMessagingSessionEventBroadcaster implements
         mMultimediaMessagingListeners.finishBroadcast();
     }
 
+    public void broadcastMessageReceived(ContactId contact, String sessionId, byte[] message, String contentType) {
+        final int N = mMultimediaMessagingListeners.beginBroadcast();
+        for (int i = 0; i < N; i++) {
+            try {
+                mMultimediaMessagingListeners.getBroadcastItem(i).onMessageReceived2(contact,
+                        sessionId, message, contentType);
+            } catch (RemoteException e) {
+                if (logger.isActivated()) {
+                    logger.error("Can't notify listener", e);
+                }
+            }
+        }
+        mMultimediaMessagingListeners.finishBroadcast();
+    }
+
     public void broadcastStateChanged(ContactId contact, String sessionId, State state,
             ReasonCode reasonCode) {
         int rcsState = state.toInt();
