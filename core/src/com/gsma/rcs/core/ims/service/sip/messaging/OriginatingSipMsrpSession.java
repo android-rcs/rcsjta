@@ -50,6 +50,10 @@ public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
     private static final Logger sLogger = Logger.getLogger(OriginatingSipMsrpSession.class
             .getSimpleName());
 
+    private String[] mAcceptType = new String[0];
+
+    private String[] mAcceptWrappedType = new String[0];
+
     /**
      * Constructor
      * 
@@ -67,6 +71,10 @@ public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
                                      ContactManager contactManager,
                                      String[] acceptType, String[] acceptWrappedType) {
         super(parent, contact, featureTag, rcsSettings, timestamp, contactManager);
+
+        mAcceptType = acceptType;
+        mAcceptWrappedType = acceptWrappedType;
+
         createOriginatingDialogPath();
     }
 
@@ -84,7 +92,7 @@ public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
             }
 
             /* Build SDP offer */
-            String sdp = generateSdp(localSetup);
+            String sdp = generateSdp(localSetup, mAcceptType, mAcceptWrappedType);
 
             /* Set the local SDP part in the dialog path */
             getDialogPath().setLocalContent(sdp);
@@ -93,8 +101,6 @@ public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
                 sLogger.info("Send INVITE");
             }
             SipRequest invite = createInvite();
-
-            // TODO 1.6: add accept-types and wrapped-types
 
             getAuthenticationAgent().setAuthorizationHeader(invite);
 

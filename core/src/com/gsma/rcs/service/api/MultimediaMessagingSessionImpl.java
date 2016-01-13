@@ -403,7 +403,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
      * @throws RemoteException
      */
     public void sendMessage(final byte[] content) throws RemoteException {
-        sendMessage2(content, SipService.MIME_TYPE);
+        sendMessage2(content, SipService.DEFAULT_MIME_TYPE);
     }
 
     /**
@@ -440,8 +440,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                         sLogger.error("Failed to send message: max length exceeded!");
                         return;
                     }
-                    // TODO 1.6: add content type
-                    session.sendMessage(content);
+                    session.sendMessage(content, contentType);
 
                 } catch (NetworkException e) {
                     if (sLogger.isActivated()) {

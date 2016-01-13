@@ -398,7 +398,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
      * @throws RemoteException
      */
     public void sendPayload(final byte[] content) throws RemoteException {
-        sendPayload2(content, SipService.MIME_TYPE);
+        sendPayload2(content, SipService.DEFAULT_MIME_TYPE);
     }
 
     /**

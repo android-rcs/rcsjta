@@ -154,7 +154,7 @@ public abstract class ImsServiceSession extends Thread {
      * 
      * @param imsService IMS service
      * @param contact Remote contact Identifier
-     * @param remoteContact Remote contact URI
+     * @param remoteId Remote contact URI
      * @param rcsSettings RCS settings accessor
      * @param timestamp Local timestamp for the session
      * @param contactManager Contact manager accessor

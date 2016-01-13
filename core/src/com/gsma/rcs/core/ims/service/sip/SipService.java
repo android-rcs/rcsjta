@@ -65,9 +65,9 @@ public class SipService extends ImsService {
     private final static Logger sLogger = Logger.getLogger(SipService.class.getSimpleName());
 
     /**
-     * MIME-type for multimedia services
+     * Default MIME-type for multimedia services
      */
-    public final static String MIME_TYPE = "application/*";
+    public final static String DEFAULT_MIME_TYPE = "application/*";
 
     /**
      * GenericSipMsrpSessionCache with SessionId as key
@@ -83,6 +83,8 @@ public class SipService extends ImsService {
 
     private final RcsSettings mRcsSettings;
 
+    private final ImmManager mImmManager;
+
     private MultimediaSessionServiceImpl mMmSessionService;
 
     private Handler mMultimediaMessagingOperationHandler;
@@ -90,15 +92,16 @@ public class SipService extends ImsService {
 
     /**
      * Constructor
-     * 
+     *
      * @param parent IMS module
      * @param contactManager ContactManager
-     * @param rcsSettings
+     * @param rcsSettings RCS settings
      */
     public SipService(ImsModule parent, ContactManager contactManager, RcsSettings rcsSettings) {
         super(parent, true);
         mContactManager = contactManager;
         mRcsSettings = rcsSettings;
+        mImmManager = new ImmManager(this, mRcsSettings);
     }
 
     private Handler allocateBgHandler(String threadName) {
@@ -131,6 +134,7 @@ public class SipService extends ImsService {
             return;
         }
         setServiceStarted(true);
+        mImmManager.start();
 
         mMultimediaMessagingOperationHandler = allocateBgHandler(MM_MESSAGING_OPERATION_THREAD_NAME);
         mMultimediaStreamingOperationHandler = allocateBgHandler(MM_STREAMING_OPERATION_THREAD_NAME);
@@ -145,6 +149,8 @@ public class SipService extends ImsService {
             return;
         }
         setServiceStarted(false);
+
+        mImmManager.terminate();
 
         mMultimediaMessagingOperationHandler.getLooper().quit();
         mMultimediaMessagingOperationHandler = null;
@@ -161,10 +167,10 @@ public class SipService extends ImsService {
 
     /**
      * Initiate a MSRP session
-     * 
-     * @param contact Remote contact Id
-     * @param featureTag Feature tag of the service
-     * @param acceptType Accept-types related to exchanged messages
+     *
+     * @param contact           Remote contact Id
+     * @param featureTag        Feature tag of the service
+     * @param acceptType        Accept-types related to exchanged messages
      * @param acceptWrappedType Accept-wrapped-types related to exchanged messages
      * @return SIP session
      */
@@ -179,13 +185,13 @@ public class SipService extends ImsService {
 
     /**
      * Receive a session invitation with MSRP media
-     * 
+     *
      * @param sessionInvite Resolved intent
-     * @param invite Initial invite
-     * @param timestamp Local timestamp when got SipRequest
+     * @param invite        Initial invite
+     * @param timestamp     Local timestamp when got SipRequest
      */
     public void onMsrpSessionInvitationReceived(final Intent sessionInvite, SipRequest invite,
-            long timestamp) {
+                                                long timestamp) {
         try {
             PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(SipUtils
                     .getAssertedIdentity(invite));
@@ -256,8 +262,8 @@ public class SipService extends ImsService {
 
     /**
      * Initiate a RTP session
-     * 
-     * @param contact Remote contact
+     *
+     * @param contact    Remote contact
      * @param featureTag Feature tag of the service
      * @return SIP session
      */
@@ -271,13 +277,13 @@ public class SipService extends ImsService {
 
     /**
      * Receive a session invitation with RTP media
-     * 
+     *
      * @param sessionInvite Resolved intent
-     * @param invite Initial invite
-     * @param timestamp Local timestamp when got SipRequest
+     * @param invite        Initial invite
+     * @param timestamp     Local timestamp when got SipRequest
      */
     public void onRtpSessionInvitationReceived(final Intent sessionInvite, SipRequest invite,
-            long timestamp) {
+                                               long timestamp) {
         try {
             PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(SipUtils
                     .getAssertedIdentity(invite));
@@ -414,4 +420,12 @@ public class SipService extends ImsService {
         }
     }
 
+    public void sendInstantMultimediaMessage(ContactId contact, String featureTag,
+                                             byte[] content, String contentType) {
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("Send instant multimedia message to contact ")
+                    .append(contact).toString());
+        }
+        mImmManager.sendMessage(contact, featureTag, content, contentType);
+    }
 }

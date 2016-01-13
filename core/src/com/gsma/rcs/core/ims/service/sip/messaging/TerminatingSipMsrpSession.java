@@ -52,6 +52,7 @@ import com.gsma.services.rcs.contact.ContactId;
 import android.content.Intent;
 
 import java.util.Collection;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 /**
@@ -199,8 +200,34 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
                 sLogger.debug("Local setup attribute is ".concat(localSetup));
             }
 
+            /* Extract "accept-type" */
+            String[] acceptType = new String[0];
+            MediaAttribute attr3 = mediaDesc.getMediaAttribute("accept-type");
+            if (attr3 != null) {
+                StringTokenizer st = new StringTokenizer(attr3.getValue(), " ");
+                acceptType = new String[st.countTokens()];
+                int i=0;
+                while (st.hasMoreTokens()) {
+                    acceptType[i] = st.nextToken();
+                    i++;
+                }
+            }
+
+            /* Extract "accept-wrapped-type" */
+            String[] acceptWrappedType = new String[0];
+            MediaAttribute attr4 = mediaDesc.getMediaAttribute("accept-wrapped-type");
+            if (attr4 != null) {
+                StringTokenizer st = new StringTokenizer(attr4.getValue(), " ");
+                acceptWrappedType = new String[st.countTokens()];
+                int i=0;
+                while (st.hasMoreTokens()) {
+                    acceptWrappedType[i] = st.nextToken();
+                    i++;
+                }
+            }
+
             /* Build SDP answer */
-            String sdp = generateSdp(localSetup);
+            String sdp = generateSdp(localSetup, acceptType, acceptWrappedType);
 
             /* Set the local SDP part in the dialog path */
             dialogPath.setLocalContent(sdp);

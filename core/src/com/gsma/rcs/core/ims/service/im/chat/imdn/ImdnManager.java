@@ -65,7 +65,7 @@ public class ImdnManager extends Thread {
     /**
      * Constructor
      * 
-     * @param imsService IMS service
+     * @param imService IM service
      * @param rcsSettings
      */
     public ImdnManager(InstantMessagingService imService, RcsSettings rcsSettings) {

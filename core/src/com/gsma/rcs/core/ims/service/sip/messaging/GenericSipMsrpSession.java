@@ -126,9 +126,11 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
      * Generate SDP
      * 
      * @param setup Setup mode
+     * @param acceptType Accept-types related to exchanged messages
+     * @param acceptWrappedType Accept-wrapped-types related to exchanged messages
      * @return SDP built
      */
-    public String generateSdp(String setup) {
+    public String generateSdp(String setup, String[] acceptType, String[] acceptWrappedType) {
         int msrpPort;
         if ("active".equals(setup)) {
             msrpPort = 9; /* See RFC4145, Page 4 */
@@ -139,14 +141,40 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
         String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
         String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
 
-        return "v=0" + SipUtils.CRLF + "o=- " + ntpTime + " " + ntpTime + " "
-                + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF + "s=-" + SipUtils.CRLF
-                + "c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF + "t=0 0"
-                + SipUtils.CRLF + "m=message " + msrpPort + " "
-                + getMsrpMgr().getLocalSocketProtocol() + " *" + SipUtils.CRLF + "a=setup:" + setup
-                + SipUtils.CRLF + "a=path:" + getMsrpMgr().getLocalMsrpPath() + SipUtils.CRLF
-                + "a=max-size:" + getMaxMessageSize() + SipUtils.CRLF + "a=accept-types:"
-                + GenericSipMsrpSession.MIME_TYPE + SipUtils.CRLF + "a=sendrecv" + SipUtils.CRLF;
+        String addr = SdpUtils.formatAddressType(ipAddress);
+        StringBuilder sdp = new StringBuilder("v=0").append(SipUtils.CRLF)
+            .append("o=- ").append(ntpTime).append(" ").append(ntpTime).append(" ").append(addr).append(SipUtils.CRLF)
+            .append("s=-").append(SipUtils.CRLF)
+            .append("c=").append(addr).append(SipUtils.CRLF)
+            .append("t=0 0").append(SipUtils.CRLF)
+            .append("m=message ").append(msrpPort).append(" ").append(getMsrpMgr().getLocalSocketProtocol()).append(" *").append(SipUtils.CRLF)
+            .append("a=setup:").append(setup).append(SipUtils.CRLF)
+            .append("a=path:").append(getMsrpMgr().getLocalMsrpPath()).append(SipUtils.CRLF)
+            .append("a=max-size:").append(getMaxMessageSize()).append(SipUtils.CRLF);
+
+        if (acceptType.length > 0) {
+            StringBuffer types = new StringBuffer();
+            types.append(acceptType[0]);
+            for(int i=1; i < acceptType.length; i++) {
+                types.append(" ").append(acceptType[i]);
+            }
+            sdp.append("a=accept-types:").append(types).append(SipUtils.CRLF);
+        } else {
+            sdp.append("a=accept-types:").append(GenericSipMsrpSession.MIME_TYPE).append(SipUtils.CRLF);
+        }
+
+        if (acceptWrappedType.length > 0) {
+            StringBuffer types = new StringBuffer();
+            types.append(acceptWrappedType[0]);
+            for(int i=1; i < acceptWrappedType.length; i++) {
+                types.append(" ").append(acceptWrappedType[i]);
+            }
+            sdp.append("a=accept-wrapped-types:").append(types).append(SipUtils.CRLF);
+        }
+
+        sdp.append("a=sendrecv").append(SipUtils.CRLF);
+
+        return sdp.toString();
     }
 
     @Override
@@ -207,12 +235,13 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
      * Sends a message in real time
      * 
      * @param content Message content
+     * @param contentType Message content type
      * @throws NetworkException
      */
-    public void sendMessage(byte[] content) throws NetworkException {
+    public void sendMessage(byte[] content, String contentType) throws NetworkException {
         ByteArrayInputStream stream = new ByteArrayInputStream(content);
         String msgId = IdGenerator.getIdentifier().replace('_', '-');
-        mMsrpMgr.sendChunks(stream, msgId, SipService.MIME_TYPE, content.length,
+        mMsrpMgr.sendChunks(stream, msgId, contentType, content.length,
                 TypeMsrpChunk.Unknown);
     }
 

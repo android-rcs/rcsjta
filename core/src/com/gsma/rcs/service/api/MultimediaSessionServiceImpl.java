@@ -697,6 +697,36 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      */
     public void sendInstantMultimediaMessage(String serviceId, ContactId contact, byte[] content, String contentType)
             throws RemoteException {
-        // TODO 1.6 : implement the callflow
+        if (TextUtils.isEmpty(serviceId)) {
+            throw new ServerApiIllegalArgumentException("serviceId must not be null or empty!");
+        }
+        if (contact == null) {
+            throw new ServerApiIllegalArgumentException("contact must not be null!");
+        }
+        if (content == null) {
+            throw new ServerApiIllegalArgumentException("content must not be null!");
+        }
+        if (contentType == null) {
+            throw new ServerApiIllegalArgumentException("content type must not be null!");
+        }
+        if (sLogger.isActivated()) {
+            sLogger.info("Send an instant multimedia message to " + contact);
+        }
+        ServerApiUtils.testIms();
+        ServerApiUtils.testApiExtensionPermission(serviceId);
+        try {
+            String featureTag = FeatureTags.FEATURE_RCSE + "=\""
+                    + FeatureTags.FEATURE_RCSE_EXTENSION + "." + serviceId + "\"";
+            mSipService.sendInstantMultimediaMessage(contact, featureTag, content, contentType);
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 }
