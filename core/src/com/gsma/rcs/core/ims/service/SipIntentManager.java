@@ -30,8 +30,11 @@ import com.gsma.rcs.core.ims.service.capability.CapabilityUtils;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.capability.CapabilityService;
+import com.gsma.services.rcs.extension.InstantMultimediaMessageIntent;
 import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
 import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
+
+import javax2.sip.message.Request;
 
 /**
  * SIP intent manager
@@ -84,10 +87,16 @@ public class SipIntentManager {
         }
 
         Intent intent = null;
-        if (content.toLowerCase().contains("msrp")) {
-            intent = new Intent(MultimediaMessagingSessionIntent.ACTION_NEW_INVITATION);
-        } else if (content.toLowerCase().contains("rtp")) {
-            intent = new Intent(MultimediaStreamingSessionIntent.ACTION_NEW_INVITATION);
+        if (request.getMethod().equals(Request.INVITE)) {
+            if (content.toLowerCase().contains("msrp")) {
+                intent = new Intent(MultimediaMessagingSessionIntent.ACTION_NEW_INVITATION);
+            } else if (content.toLowerCase().contains("rtp")) {
+                intent = new Intent(MultimediaStreamingSessionIntent.ACTION_NEW_INVITATION);
+            }
+        } else if (request.getMethod().equals(Request.MESSAGE)) {
+            intent = new Intent(InstantMultimediaMessageIntent.ACTION_NEW_INSTANT_MESSAGE);
+        } else {
+            return null;
         }
 
         if (intent != null) {

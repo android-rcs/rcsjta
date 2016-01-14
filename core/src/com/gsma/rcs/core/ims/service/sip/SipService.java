@@ -62,6 +62,8 @@ public class SipService extends ImsService {
 
     private static final String MM_STREAMING_OPERATION_THREAD_NAME = "MmsOperations";
 
+    private static final String MM_MESSAGE_OPERATION_THREAD_NAME = "MmmOperations";
+
     private final static Logger sLogger = Logger.getLogger(SipService.class.getSimpleName());
 
     /**
@@ -89,6 +91,7 @@ public class SipService extends ImsService {
 
     private Handler mMultimediaMessagingOperationHandler;
     private Handler mMultimediaStreamingOperationHandler;
+    private Handler mMultimediaMessageOperationHandler;
 
     /**
      * Constructor
@@ -125,6 +128,10 @@ public class SipService extends ImsService {
         mMultimediaStreamingOperationHandler.post(runnable);
     }
 
+    public void scheduleMultimediaMessageOperation(Runnable runnable) {
+        mMultimediaMessageOperationHandler.post(runnable);
+    }
+
     /**
      * /** Start the IMS service
      */
@@ -138,6 +145,7 @@ public class SipService extends ImsService {
 
         mMultimediaMessagingOperationHandler = allocateBgHandler(MM_MESSAGING_OPERATION_THREAD_NAME);
         mMultimediaStreamingOperationHandler = allocateBgHandler(MM_STREAMING_OPERATION_THREAD_NAME);
+        mMultimediaMessageOperationHandler = allocateBgHandler(MM_MESSAGE_OPERATION_THREAD_NAME);
     }
 
     /**
@@ -157,6 +165,9 @@ public class SipService extends ImsService {
 
         mMultimediaStreamingOperationHandler.getLooper().quit();
         mMultimediaStreamingOperationHandler = null;
+
+        mMultimediaMessageOperationHandler.getLooper().quit();
+        mMultimediaMessageOperationHandler = null;
     }
 
     /**
@@ -427,5 +438,77 @@ public class SipService extends ImsService {
                     .append(contact).toString());
         }
         mImmManager.sendMessage(contact, featureTag, content, contentType);
+    }
+
+    /**
+     * Receive a multimedia instant messsage
+     *
+     * @param intent Resolved intent
+     * @param message Instant message
+     */
+    public void onInstantMessageReceived(final Intent intent, final SipRequest message) {
+        try {
+            PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(SipUtils
+                    .getAssertedIdentity(message));
+            if (number == null) {
+                if (sLogger.isActivated()) {
+                    sLogger.warn("Cannot process instant message: invalid SIP header");
+                }
+                // TODO 1.6: check error response
+                sendErrorResponse(message, Response.SESSION_NOT_ACCEPTABLE);
+                return;
+            }
+            // Test if the contact is blocked
+            final ContactId remote = ContactUtil.createContactIdFromValidatedData(number);
+            mContactManager.setContactDisplayName(remote,
+                    SipUtils.getDisplayNameFromUri(message.getFrom()));
+
+            if (mContactManager.isBlockedForContact(remote)) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Contact " + remote
+                            + " is blocked: automatically reject the message");
+                }
+                // TODO 1.6: check error response
+                sendErrorResponse(message, Response.DECLINE);
+                return;
+            }
+
+            mMultimediaMessageOperationHandler.post(new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        mMmSessionService.receiveSipInstantMessage(intent, remote,
+                                message.getRawContent(), message.getContentType());
+                    } catch (RuntimeException e) {
+                        /*
+                         * Normally we are not allowed to catch runtime exceptions as these are
+                         * genuine bugs which should be handled/fixed within the code. However the
+                         * cases when we are executing operations on a thread unhandling such
+                         * exceptions will eventually lead to exit the system and thus can bring the
+                         * whole system down, which is not intended.
+                         */
+                        sLogger.error("Failed to receive generic instant message!", e);
+                    }
+                }
+            });
+        } catch (NetworkException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Failed to receive generic instant message! ("
+                        + e.getMessage() + ")");
+            }
+
+        } catch (PayloadException e) {
+            sLogger.error("Failed to receive instant message!", e);
+
+        } catch (RuntimeException e) {
+            /*
+             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
+             * which should be handled/fixed within the code. However the cases when we are
+             * executing operations on a thread unhandling such exceptions will eventually lead to
+             * exit the system and thus can bring the whole system down, which is not intended.
+             */
+            sLogger.error("Failed to receive instant message!", e);
+        }
     }
 }

@@ -262,33 +262,33 @@ public abstract class ImsService {
     }
 
     /**
-     * Send an error response to an invitation before to create a service session
+     * Send an error response to a request
      * 
-     * @param invite Invite request
+     * @param request Request
      * @param error Error code
      * @throws PayloadException
      * @throws NetworkException
      */
-    public void sendErrorResponse(SipRequest invite, int error) throws PayloadException,
+    public void sendErrorResponse(SipRequest request, int error) throws PayloadException,
             NetworkException {
         if (sLogger.isActivated()) {
             sLogger.info("Send error ".concat(String.valueOf(error)));
         }
-        SipResponse resp = SipMessageFactory.createResponse(invite, IdGenerator.getIdentifier(),
+        SipResponse resp = SipMessageFactory.createResponse(request, IdGenerator.getIdentifier(),
                 error);
         getImsModule().getSipManager().sendSipResponse(resp);
     }
 
     /**
-     * Try to send an error response to an invitation before to create a service session. If failing
-     * then just log the failure but throw now exception.
+     * Try to send an error response to a request. If failing then just log the failure but throw
+     * now exception.
      * 
-     * @param invite Invite request
+     * @param request Request
      * @param error Error code
      */
-    public void tryToSendErrorResponse(SipRequest invite, int error) {
+    public void tryToSendErrorResponse(SipRequest request, int error) {
         try {
-            sendErrorResponse(invite, error);
+            sendErrorResponse(request, error);
         } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug("Unable to send error response! (" + e.getMessage() + ")");
@@ -297,5 +297,4 @@ public abstract class ImsService {
             sLogger.error("Unable to send error response!", e);
         }
     }
-
 }

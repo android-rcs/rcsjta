@@ -26,10 +26,12 @@ import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
 import com.gsma.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
+import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.broadcaster.MultimediaMessagingSessionEventBroadcaster;
 import com.gsma.rcs.service.broadcaster.MultimediaStreamingSessionEventBroadcaster;
 import com.gsma.rcs.service.broadcaster.RcsServiceRegistrationEventBroadcaster;
+import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
@@ -46,6 +48,7 @@ import com.gsma.services.rcs.extension.IMultimediaStreamingSession;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSessionListener;
 import com.gsma.services.rcs.extension.MultimediaSession.State;
 
+import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
@@ -728,5 +731,19 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
             sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
+    }
+
+    /**
+     * Receive a new SIP instant message
+     *
+     * @param intent Received intent
+     * @param contact Remote contact
+     * @param content Message content
+     * @param contentType Message content type
+     */
+    public void receiveSipInstantMessage(Intent intent, ContactId contact, byte[] content, String contentType) {
+        intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
+        IntentUtils.tryToSetReceiverForegroundFlag(intent);
+        AndroidFactory.getApplicationContext().sendBroadcast(intent);
     }
 }
