@@ -50,7 +50,9 @@ public class TestMultimediaSessionApi extends ListActivity {
                 getString(R.string.menu_initiate_messaging_session),
                 getString(R.string.menu_messaging_sessions_list),
                 getString(R.string.menu_initiate_streaming_session),
-                getString(R.string.menu_streaming_sessions_list)
+                getString(R.string.menu_streaming_sessions_list),
+                getString(R.string.menu_instant_message)
+
         };
         setListAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items));
     }
@@ -72,6 +74,10 @@ public class TestMultimediaSessionApi extends ListActivity {
 
             case 3:
                 startActivity(new Intent(this, StreamingSessionList.class));
+                break;
+
+            case 4:
+                startActivity(new Intent(this, SendInstantMessage.class));
                 break;
         }
     }

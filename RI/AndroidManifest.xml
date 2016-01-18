@@ -464,6 +464,9 @@
         <activity
             android:name="com.orangelabs.rcs.ri.extension.streaming.StreamingSessionList"
             android:label="@string/menu_streaming_sessions_list" />
+        <activity
+            android:name="com.orangelabs.rcs.ri.extension.SendInstantMessage"
+            android:label="@string/menu_instant_message" />
 
         <receiver
             android:name="com.orangelabs.rcs.ri.extension.SessionInvitationReceiver"
@@ -489,6 +492,20 @@
         <service
             android:name=".extension.MultiMediaSessionIntentService"
             android:exported="false" />
+
+
+        <receiver
+            android:name="com.orangelabs.rcs.ri.extension.InstantMessageReceiver"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="com.gsma.services.rcs.extension.action.NEW_INSTANT_MESSAGE" />
+
+                <data android:mimeType="com.gsma.services.rcs/ext.messaging" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
 
         <!-- File Upload API -->
 

@@ -266,6 +266,7 @@
     <string name="menu_messaging_sessions_list">Current messaging sessions</string>
     <string name="menu_initiate_streaming_session">Initiate streaming session</string>
     <string name="menu_streaming_sessions_list">Current streaming sessions</string>
+    <string name="menu_instant_message">Send instant message</string>
     <string name="label_initiate_session">Initiate session</string>
     <string name="label_no_session">No session</string>
     <string name="label_service_id">Service ID:</string>
@@ -288,6 +289,9 @@
     <string name="label_mm_from_id">From: %1$s\nService ID: %2$s</string>
     <string name="label_rx_count">RX :</string>
     <string name="label_tx_count">TX :</string>
+    <string name="label_send_message">Send message</string>
+    <string name="label_recv_instant_messsage">Instant multimedia message:</string>
+    <string name="label_instant_message_sent">Message has been sent!</string>
 
     <!-- Geolocation push -->
     <string name="label_select_geoloc">Select from google map\n(Internet connectivity required)</string>

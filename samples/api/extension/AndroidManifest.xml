@@ -9,7 +9,7 @@
 	
     <application android:icon="@drawable/app_icon" android:label="@string/label_app_name">
         <meta-data android:name="com.gsma.services.rcs.capability.EXTENSION"
-             android:value="ext.game1;ext.game2" />
+             android:value="ext.demo1;mnc01.mcc208.demo2;gsma.demo3" />
         
         <activity android:name=".Main">
             <intent-filter>
