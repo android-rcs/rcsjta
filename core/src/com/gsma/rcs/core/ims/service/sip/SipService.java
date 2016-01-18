@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.sip;
 
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
@@ -39,6 +40,7 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.api.MultimediaSessionServiceImpl;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
+import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -454,7 +456,6 @@ public class SipService extends ImsService {
                 if (sLogger.isActivated()) {
                     sLogger.warn("Cannot process instant message: invalid SIP header");
                 }
-                // TODO 1.6: check error response
                 sendErrorResponse(message, Response.SESSION_NOT_ACCEPTABLE);
                 return;
             }
@@ -468,10 +469,14 @@ public class SipService extends ImsService {
                     sLogger.debug("Contact " + remote
                             + " is blocked: automatically reject the message");
                 }
-                // TODO 1.6: check error response
                 sendErrorResponse(message, Response.DECLINE);
                 return;
             }
+
+            /* Send automatically a 200 Ok */
+            getImsModule().getSipManager().sendSipResponse(
+                    SipMessageFactory.createResponse(message, IdGenerator.getIdentifier(),
+                            Response.OK));
 
             mMultimediaMessageOperationHandler.post(new Runnable() {
 

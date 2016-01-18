@@ -335,7 +335,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
         ServerApiUtils.testApiExtensionPermission(serviceId);
         try {
             String featureTag = FeatureTags.FEATURE_RCSE + "=\""
-                    + FeatureTags.FEATURE_RCSE_EXTENSION + "." + serviceId + "\"";
+                    + FeatureTags.FEATURE_RCSE_IARI_EXTENSION + "." + serviceId + "\"";
             final GenericSipMsrpSession session = mSipService
                     .createMsrpSession(contact, featureTag, acceptType, acceptWrappedType);
             MultimediaMessagingSessionImpl multiMediaMessaging = new MultimediaMessagingSessionImpl(
@@ -451,7 +451,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
         ServerApiUtils.testApiExtensionPermission(serviceId);
         try {
             String featureTag = FeatureTags.FEATURE_RCSE + "=\""
-                    + FeatureTags.FEATURE_RCSE_EXTENSION + "." + serviceId + "\"";
+                    + FeatureTags.FEATURE_RCSE_IARI_EXTENSION + "." + serviceId + "\"";
             final GenericSipRtpSession session = mSipService.createRtpSession(contact, featureTag);
 
             MultimediaStreamingSessionImpl multimediaStreaming = new MultimediaStreamingSessionImpl(
@@ -719,7 +719,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
         ServerApiUtils.testApiExtensionPermission(serviceId);
         try {
             String featureTag = FeatureTags.FEATURE_RCSE + "=\""
-                    + FeatureTags.FEATURE_RCSE_EXTENSION + "." + serviceId + "\"";
+                    + FeatureTags.FEATURE_RCSE_IARI_EXTENSION + "." + serviceId + "\"";
             mSipService.sendInstantMultimediaMessage(contact, featureTag, content, contentType);
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {

@@ -60,7 +60,6 @@ public class SupportedExtensionUpdater implements Runnable {
      * @param imsModule
      * @param rcsSettings
      * @param extensionManager
-     * @param capabilityMonitoring
      */
     public SupportedExtensionUpdater(Context ctx, ImsModule imsModule, RcsSettings rcsSettings,
             ServiceExtensionManager extensionManager) {

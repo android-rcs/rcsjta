@@ -140,9 +140,15 @@ public class CapabilityUtils {
         // Extensions
         if (rcsSettings.isExtensionsAllowed()) {
             for (String extension : rcsSettings.getSupportedRcsExtensions()) {
-                StringBuilder sb = new StringBuilder(FeatureTags.FEATURE_RCSE_EXTENSION)
-                        .append(".").append(extension);
-                iariTags.add(sb.toString());
+                if (extension.startsWith("gsma.")) {
+                    StringBuilder sb = new StringBuilder(FeatureTags.FEATURE_RCSE_ICSI_EXTENSION)
+                            .append(".").append(extension);
+                    icsiTags.add(sb.toString());
+                } else {
+                    StringBuilder sb = new StringBuilder(FeatureTags.FEATURE_RCSE_IARI_EXTENSION)
+                            .append(".").append(extension);
+                    iariTags.add(sb.toString());
+                }
             }
             icsiTags.add(FeatureTags.FEATURE_3GPP_EXTENSION);
         }
@@ -228,9 +234,9 @@ public class CapabilityUtils {
                 capaBuilder.setGroupChatStoreForward(true);
 
             } else
-            // TODO if (tag.contains(FeatureTags.FEATURE_RCSE_EXTENSION + ".ext") ||
-            // TODO tag.contains(FeatureTags.FEATURE_RCSE_EXTENSION + ".mnc")) {
-            if (tag.contains(FeatureTags.FEATURE_RCSE_EXTENSION)) {
+            if (tag.contains(FeatureTags.FEATURE_RCSE_IARI_EXTENSION + ".ext") ||
+                    tag.contains(FeatureTags.FEATURE_RCSE_IARI_EXTENSION + ".mnc") ||
+                        tag.contains(FeatureTags.FEATURE_RCSE_ICSI_EXTENSION + ".gsma")) {
                 // Support an RCS extension
                 capaBuilder.addExtension(extractServiceId(tag));
 
@@ -376,6 +382,10 @@ public class CapabilityUtils {
     public static String extractServiceId(String featureTag) {
         String[] values = featureTag.split("=");
         String value = StringUtils.removeQuotes(values[1]);
-        return value.substring(FeatureTags.FEATURE_RCSE_EXTENSION.length() + 1, value.length());
+        if (featureTag.contains(FeatureTags.FEATURE_RCSE_IARI_EXTENSION)) {
+            return value.substring(FeatureTags.FEATURE_RCSE_IARI_EXTENSION.length() + 1, value.length());
+        } else {
+            return value.substring(FeatureTags.FEATURE_RCSE_ICSI_EXTENSION.length() + 1, value.length());
+        }
     }
 }

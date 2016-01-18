@@ -87,7 +87,7 @@ public class RegistrationUtils {
         // Extensions
         if (rcsSettings.isExtensionsAllowed()) {
             for (String extension : rcsSettings.getSupportedRcsExtensions()) {
-                StringBuilder sb = new StringBuilder(FeatureTags.FEATURE_RCSE_EXTENSION)
+                StringBuilder sb = new StringBuilder(FeatureTags.FEATURE_RCSE_IARI_EXTENSION)
                         .append('.').append(extension);
                 iariTags.add(sb.toString());
             }
