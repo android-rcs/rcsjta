@@ -281,6 +281,10 @@ public class HttpsProvisioningManager {
                     HttpsProvisioningUtils.getRcsVersion());
             sHttpsReqUriBuilder.appendQueryParameter(PARAM_RCS_PROFILE,
                     HttpsProvisioningUtils.getRcsProfile());
+            if (mRcsSettings.isEnrichCallingServiceSupported()) {
+                sHttpsReqUriBuilder.appendQueryParameter(PARAM_RCS_PROFILE,
+                    HttpsProvisioningUtils.getEnrichCallingProfile());
+            }
             sHttpsReqUriBuilder.appendQueryParameter(PARAM_CLIENT_VENDOR,
                     TerminalInfo.getClientVendor());
             sHttpsReqUriBuilder.appendQueryParameter(PARAM_CLIENT_VERSION,
@@ -316,15 +320,19 @@ public class HttpsProvisioningManager {
          * According to the standard the token-parameter name should be part of the Uri even if the
          * token is null here.
          */
-        uriBuilder.appendQueryParameter(PARAM_TOKEN, token == null ? "" : token);
-
+        // TODO: to be check by Orange Expert
+        if (token != null) {
+            uriBuilder.appendQueryParameter(PARAM_TOKEN, token);
+        }
         return uriBuilder.toString();
     }
 
     /**
      * Send the first HTTPS request to require the one time password (OTP)
-     * 
-     * @param requestUri Request URI
+     *
+     * @param msisdn MSISDN
+     * @param primaryUri Primary choice request URI
+     * @param secondaryUri Secondary choice request URI
      * @return Instance of {@link HttpsProvisioningResult} or null in case of internal exception
      * @throws IOException
      */

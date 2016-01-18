@@ -430,6 +430,14 @@
                 android:layout_marginLeft="5dip"
                 android:layout_marginRight="5dip"
                 android:text="@string/Auto_accept_group_chat_invitation" />
+
+            <CheckBox
+                android:id="@+id/EnrichCalling"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:text="@string/EnrichCalling_support" />
         </LinearLayout>
     </ScrollView>
 

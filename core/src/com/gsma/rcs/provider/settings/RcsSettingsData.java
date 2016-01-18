@@ -623,16 +623,22 @@ public class RcsSettingsData {
     /**
      * Convergent messaging UX option
      */
-    public static final String KEY_MESSAGING_MODE = "MessagingMode";
+    public static final String MESSAGING_MODE = "MessagingMode";
     /* package private */static final Integer DEFAULT_KEY_MESSAGING_MODE = MessagingMode.NONE
             .toInt();
 
     /**
      * Default messaging method
      */
-    public static final String KEY_DEFAULT_MESSAGING_METHOD = "DefaultMessagingMethod";
+    public static final String DEFAULT_MESSAGING_METHOD = "DefaultMessagingMethod";
     /* package private */static final Integer DEFAULT_KEY_DEFAULT_MESSAGING_METHOD = MessagingMethod.AUTOMATIC
             .toInt();
+
+    /**
+     * Enrich calling service support
+     */
+    public static final String ENRICH_CALLING_SERVICE = "EnrichCallingSupport";
+    /* package private */static final Boolean DEFAULT_ENRICH_CALLING_SERVICE = true;
 
     // ---------------------------------------------------------------------------
     // User profile settings

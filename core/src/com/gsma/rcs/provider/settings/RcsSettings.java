@@ -2093,7 +2093,7 @@ public class RcsSettings {
      * @param mode the client messaging mode (0: CONVERGED, 1: INTEGRATED, 2: SEAMLESS, 3: NONE)
      */
     public void setMessagingMode(MessagingMode mode) {
-        writeInteger(RcsSettingsData.KEY_MESSAGING_MODE, mode.toInt());
+        writeInteger(RcsSettingsData.MESSAGING_MODE, mode.toInt());
     }
 
     /**
@@ -2102,7 +2102,7 @@ public class RcsSettings {
      * @return the client messaging mode (0: CONVERGED, 1: INTEGRATED, 2: SEAMLESS, 3: NONE)
      */
     public MessagingMode getMessagingMode() {
-        return MessagingMode.valueOf(readInteger(RcsSettingsData.KEY_MESSAGING_MODE));
+        return MessagingMode.valueOf(readInteger(RcsSettingsData.MESSAGING_MODE));
     }
 
     /**
@@ -2175,7 +2175,7 @@ public class RcsSettings {
      * @return the default messaging method (0: AUTOMATIC, 1: RCS, 2: NON_RCS)
      */
     public MessagingMethod getDefaultMessagingMethod() {
-        return MessagingMethod.valueOf(readInteger(RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD));
+        return MessagingMethod.valueOf(readInteger(RcsSettingsData.DEFAULT_MESSAGING_METHOD));
     }
 
     /**
@@ -2184,7 +2184,7 @@ public class RcsSettings {
      * @param method the default messaging method (0: AUTOMATIC, 1: RCS, 2: NON_RCS)
      */
     public void setDefaultMessagingMethod(MessagingMethod method) {
-        writeInteger(RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD, method.toInt());
+        writeInteger(RcsSettingsData.DEFAULT_MESSAGING_METHOD, method.toInt());
     }
 
     /**
@@ -2395,5 +2395,23 @@ public class RcsSettings {
      */
     public String getDisplayLanguage() {
         return readString(RcsSettingsData.LOCAL_DISPLAY_LANGUAGE);
+    }
+
+    /**
+     * Sets whether enrich calling service is supported or not
+     *
+     * @param support True if service supported
+     */
+    public void setEnrichCallingServiceSupport(boolean support) {
+        writeBoolean(RcsSettingsData.ENRICH_CALLING_SERVICE, support);
+    }
+
+    /**
+     * Is enrich calling service supported
+     *
+     * @return Boolean True if supported
+     */
+    public boolean isEnrichCallingServiceSupported() {
+        return readBoolean(RcsSettingsData.ENRICH_CALLING_SERVICE);
     }
 }

@@ -159,6 +159,7 @@ public class ServiceProvisioning extends Activity {
                 RcsSettingsData.AUTO_ACCEPT_FT_CHANGEABLE, helper);
         setCheckBoxParam(R.id.AutoAcceptChat, RcsSettingsData.AUTO_ACCEPT_CHAT, helper);
         setCheckBoxParam(R.id.AutoAcceptGroupChat, RcsSettingsData.AUTO_ACCEPT_GROUP_CHAT, helper);
+        setCheckBoxParam(R.id.EnrichCalling, RcsSettingsData.ENRICH_CALLING_SERVICE, helper);
     }
 
     @Override
@@ -231,6 +232,7 @@ public class ServiceProvisioning extends Activity {
                 RcsSettingsData.AUTO_ACCEPT_FT_CHANGEABLE, helper);
         saveCheckBoxParam(R.id.AutoAcceptChat, RcsSettingsData.AUTO_ACCEPT_CHAT, helper);
         saveCheckBoxParam(R.id.AutoAcceptGroupChat, RcsSettingsData.AUTO_ACCEPT_GROUP_CHAT, helper);
+        saveCheckBoxParam(R.id.EnrichCalling, RcsSettingsData.ENRICH_CALLING_SERVICE, helper);
     }
 
     /**

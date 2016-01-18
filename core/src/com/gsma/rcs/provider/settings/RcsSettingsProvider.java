@@ -78,7 +78,7 @@ public class RcsSettingsProvider extends ContentProvider {
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 115;
+        private static final int DATABASE_VERSION = 116;
 
         /**
          * Add a parameter in the db
@@ -351,7 +351,7 @@ public class RcsSettingsProvider extends ContentProvider {
                     RcsSettingsData.DEFAULT_SECURE_MSRP_OVER_WIFI);
             addParameter(db, RcsSettingsData.SECURE_RTP_OVER_WIFI,
                     RcsSettingsData.DEFAULT_SECURE_RTP_OVER_WIFI);
-            addParameter(db, RcsSettingsData.KEY_MESSAGING_MODE,
+            addParameter(db, RcsSettingsData.MESSAGING_MODE,
                     RcsSettingsData.DEFAULT_KEY_MESSAGING_MODE);
             addParameter(db, RcsSettingsData.CAPABILITY_SIP_AUTOMATA,
                     RcsSettingsData.DEFAULT_CAPABILITY_SIP_AUTOMATA);
@@ -380,7 +380,7 @@ public class RcsSettingsProvider extends ContentProvider {
                     RcsSettingsData.DEFAULT_AUTO_ACCEPT_FT_IN_ROAMING);
             addParameter(db, RcsSettingsData.AUTO_ACCEPT_FT_CHANGEABLE,
                     RcsSettingsData.DEFAULT_AUTO_ACCEPT_FT_CHANGEABLE);
-            addParameter(db, RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD,
+            addParameter(db, RcsSettingsData.DEFAULT_MESSAGING_METHOD,
                     RcsSettingsData.DEFAULT_KEY_DEFAULT_MESSAGING_METHOD);
             addParameter(db, RcsSettingsData.KEY_IMAGE_RESIZE_OPTION,
                     RcsSettingsData.DEFAULT_KEY_IMAGE_RESIZE_OPTION);
@@ -407,6 +407,8 @@ public class RcsSettingsProvider extends ContentProvider {
                     RcsSettingsData.DEFAULT_PROV_REJECT_BUTTON);
             addParameter(db, RcsSettingsData.LOCAL_DISPLAY_LANGUAGE,
                     RcsSettingsData.DEFAULT_LOCAL_DISPLAY_LANGUAGE);
+            addParameter(db, RcsSettingsData.ENRICH_CALLING_SERVICE,
+                    RcsSettingsData.DEFAULT_ENRICH_CALLING_SERVICE);
         }
 
         @Override
