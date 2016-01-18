@@ -16,7 +16,7 @@ The RCS specifications (product, technical, API, Guidelines) are available at [h
 Note: the [supported standards](https://rawgit.com/android-rcs/rcsjta/master/docs/SUPPORTED-STANDARDS.txt).
 
 ##Licensing:
-The RCS core stack is under Apache 2 [license](https://rawgit.com/android-rcs/rcsjta/master/core/LICENSE-2.0.txt) and uses the following open source libraries:
+The RCS core stack is under [Apache 2 license](https://rawgit.com/android-rcs/rcsjta/master/core/LICENSE-2.0.txt) and uses the following open source libraries:
 
 - the SIP stack comes from [NIST-SIP project] (http://jsip.java.net/'>http://jsip.java.net/), see [License](https://rawgit.com/android-rcs/rcsjta/master/core/LICENSE-NIST.txt).
 
