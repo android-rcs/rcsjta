@@ -246,7 +246,9 @@ public class MessagingSessionView extends RcsActivity {
 
     private void startSession() {
         try {
-            mSession = getMultimediaSessionApi().initiateMessagingSession(mServiceId, mContact);
+            mSession = getMultimediaSessionApi().initiateMessagingSession(mServiceId, mContact,
+                    MessagingSessionUtils.SERVICE_ACCEPT_TYPE,
+                    MessagingSessionUtils.SERVICE_WRAPPED_ACCEPT_TYPE);
             mSessionId = mSession.getSessionId();
             showProgressDialog();
 

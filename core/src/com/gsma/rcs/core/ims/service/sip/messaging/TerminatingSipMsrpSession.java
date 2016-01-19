@@ -202,7 +202,7 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
 
             /* Extract "accept-type" */
             String[] acceptType = new String[0];
-            MediaAttribute attr3 = mediaDesc.getMediaAttribute("accept-type");
+            MediaAttribute attr3 = mediaDesc.getMediaAttribute("accept-types");
             if (attr3 != null) {
                 StringTokenizer st = new StringTokenizer(attr3.getValue(), " ");
                 acceptType = new String[st.countTokens()];
@@ -215,7 +215,7 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
 
             /* Extract "accept-wrapped-type" */
             String[] acceptWrappedType = new String[0];
-            MediaAttribute attr4 = mediaDesc.getMediaAttribute("accept-wrapped-type");
+            MediaAttribute attr4 = mediaDesc.getMediaAttribute("accept-wrapped-types");
             if (attr4 != null) {
                 StringTokenizer st = new StringTokenizer(attr4.getValue(), " ");
                 acceptWrappedType = new String[st.countTokens()];

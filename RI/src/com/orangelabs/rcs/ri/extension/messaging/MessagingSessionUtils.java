@@ -33,4 +33,18 @@ public class MessagingSessionUtils {
      * Service content type
      */
     public final static String SERVICE_CONTENT_TYPE = "plain/text";
+
+    /**
+     * Service accept-type
+     */
+    public final static String[] SERVICE_ACCEPT_TYPE = {
+        "plain/text"
+    };
+
+    /**
+     * Service accept-wrapped-type
+     */
+    public final static String[] SERVICE_WRAPPED_ACCEPT_TYPE = {
+        // no wrapped here
+    };
 }
